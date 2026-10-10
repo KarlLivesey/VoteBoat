@@ -949,6 +949,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
         out: &mut PeerDriverProgress,
     ) -> Result<(), PeerDriverError> {
         // Complete transport-owned output before admitting more outbound work.
+        let mut next_receive = None;
         for _ in 0..visits.min(self.peers.len()) {
             let peer = self.peers[self.cursor];
             self.cursor = (self.cursor + 1) % self.peers.len();
@@ -980,7 +981,10 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             }
             if !self.closed {
                 match self.parts.ingress.receive(&mut self.parts.roster, peer) {
-                    Ok(Some(_)) => out.received += 1,
+                    Ok(Some(_)) => {
+                        out.received += 1;
+                        next_receive = Some(self.cursor);
+                    }
                     Ok(None) => (),
                     Err(rejected)
                         if rejected.reason == IngressError::Overloaded
@@ -994,6 +998,11 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                     }
                 }
             }
+        }
+        // Dispatch may free the same shared credit before the next poll. Resume
+        // after its last recipient, not after peers denied by that full budget.
+        if let Some(cursor) = next_receive {
+            self.cursor = cursor;
         }
         Ok(())
     }

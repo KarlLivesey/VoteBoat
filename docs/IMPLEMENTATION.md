@@ -115,13 +115,17 @@ original rollout-ID recovery, stale-file refusal, authenticated commands and
 replicated data/retry continuity through rotation and restart. This advances
 the secure networked service milestone;207a alone is not operational rollout.
 Completed208a fixes the selected TCP connection-phase starvation cases under
-one-call budgets, including interleaved zero-I/O polls. Current208b audits shared
-receive and control/recovery progress under competing peer/group traffic using
-the existing hard limits. Its purpose is useful progress under overload;
-dependencies are the connector fix and existing ingress/frame leases.
-Completion requires a bounded overload history with independent useful progress,
-advancing P2/P7 resource isolation. Do not add another scheduler without a
-reproduced failure in the existing ownership path.
+one-call budgets, including interleaved zero-I/O polls. Completed208b1 fixes
+recurring shared receive-credit starvation and exercises held recovery input
+with independent control admission and outbound completion. Current208b2
+composes native control/recovery progress under competing peer/group traffic.
+Its purpose is to validate useful replicated progress under overload, beyond
+host admission alone; dependencies are the existing native pressure/recovery
+harness, hard limits and the two fairness fixes. Completion requires original
+foreground writes/reads, bounded resource use and lagging-replica recovery over
+TCP/QUIC under the declared pressure schedule, advancing P2/P7 isolation.
+Reuse the existing Node and pressure controls; add a helper only if needed to
+expose a specific missing observation, not another scheduler.
 Following that, integrate persistent discovery refresh against the existing
 authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; completion requires refreshed hints, stale
@@ -132,6 +136,54 @@ contract ledger. Reuse host/native implementations and their injected failures;
 completion requires executable shared assertions for ownership, rejection and
 shutdown, not just metadata entries. This advances composable Rust embedding
 under P0/P2 without making a particular external backend a prerequisite.
+
+### Slice208b1 implemented — shared receive-credit fairness
+
+Two host-provider regressions reproduce recurring starvation with the actual
+PeerDriver/IngressRouter/EffectOwner: for both a single background frame slot
+and a constrained data-message allowance, one peer receives all eight admissions
+and the other none. After the fix, both receive four, with interleaved zero-visit
+polls, original transport ownership until admission and bounded ingress usage.
+The next receive scan starts after the last successful recipient of shared
+credit; a later capacity denial no longer restores that recipient's priority.
+No API, queue, reserve, provider, wire or durable-state changes are introduced.
+
+A third host history retains recovery input, denies the next background frame,
+admits another peer's control traffic and completes its original outbound send.
+It then dispatches held frames, admits the previously denied recovery frame and
+closes/drains. This establishes bounded admission and local ownership progress,
+not application or snapshot installation; the core commit index remains zero.
+
+All208 core-only tests pass across effect_owner/peers/runtime. All249 all-feature
+tests pass across effect_owner/peers/runtime/transport, including existing native
+hundred-group, real-file recovery, shared-buffer and reconnect histories.
+Formatting and all four strict Clippy profiles pass with zero diagnostics;
+106 inventory paths and13 obligation metadata checks pass. Before/after/final
+logs are in validation/baseline/slice208b. The broader native combined-load
+acceptance is208b2; persistent discovery and provider obligations follow.
+The full P0–P7 objective remains active.
+
+### Slice208b1 schema plan — fair shared receive admission
+
+PeerDriver scans at most peer_visits transports, reserving IngressRouter credits
+before extracting a frame. Ingress dispatch occurs after that scan. Scanning a
+whole peer set returns its cursor to the same first peer. If only one frame fits,
+a continually ready first peer may reacquire released credits every poll while
+another frame remains transport-owned. Test repeated competition through the
+public host connector/transport and real EffectOwner, separately for snapshot
+background slots and data-message capacity, with fixed time and a full peer scan.
+
+Retain each denied frame in its original transport; do not create per-peer queues
+or change hard/control/background limits. If the failure reproduces, let the next
+scan start after the last successfully admitted peer rather than a later denied
+peer. When no receive succeeds, retain the existing bounded scan progression;
+zero visits must preserve the cursor. Completion/revocation checks and dispatch
+continue unchanged. Exercise original frames, bounded usage, both peers making
+progress over repeated polls and explicit close/drain. This is ephemeral state;
+restart creates a fresh cursor, while exact session/ownership checks remain the
+same. Broader control/recovery overload and native regression checks follow.
+This advances P2/P7, enables the next persistent-discovery integration to use a
+fair reactor, and introduces no consensus or durability semantics.
 
 ### Slice208a implemented — fair bounded TCP connection work
 

@@ -30,6 +30,11 @@ collects connector outcomes, validates live authenticated scopes before factory
 attachment, and starts bounded eligible attempts. It consumes exact local send
 terminals through OutboundQueue completion, reserves ingress before extraction,
 rotates rejected outbound batches, and dispatches bounded ingress into the owner.
+After receiving frames, the next peer scan starts after the last successful
+recipient of shared ingress credit. Later capacity-denied peers do not reset the
+cursor to the same first recipient. A zero-visit poll preserves the cursor;
+scans with no receive retain their ordinary bounded rotation. This preserves
+receive opportunities when dispatch repeatedly frees only one frame's capacity.
 Use ReplicaDriver separately to advance owner inputs, deliver WAL/snapshot
 completions, apply commands and execute original reads. Poll both fairly; socket
 readiness/wakeups and supplied monotonic time remain the host's responsibility.
@@ -107,6 +112,15 @@ The real-file three-node/100-group native TLS histories use PeerDriver and
 ReplicaDriver through elections, quorum loss, replacement, healing, snapshot/
 checkpoint catch-up, fresh connections and recovery. Partition faults live only
 in a test transport wrapper. These finite Linux histories do not prove arbitrary
-schedules, macOS execution or performance. Full native facade/lifecycle assembly,
-physical WAL cleaning, membership transitions, responsibilities and split/merge
-remain unfinished.
+schedules, macOS execution or performance. Native node assembly, physical WAL
+reclamation, membership transitions, responsibilities and selected split/merge
+paths now exist. Broader fault and platform acceptance remains open.
+
+The shared downstream tests in `tests/support/peer_receive_fairness.rs` cover
+recurring contention for one background-frame slot or one data-message allowance.
+Both peers retain their original frames until admission and make equal progress
+through eight full scans with interleaved zero-visit polls. Another case holds
+recovery input, retains its next frame in the transport, admits a different
+peer's control messages and drains an exact outbound completion. These tests
+exercise admission/ownership; they do not claim applied snapshot recovery,
+commitment or bounded latency under native network load.

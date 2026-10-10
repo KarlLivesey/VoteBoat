@@ -1,5 +1,13 @@
 # Validation report — slice 35
 
+Shared receive fairness: [slice208b1](baseline/slice208b/README.md). Two
+host-provider regressions fail before the cursor fix and pass afterward; a third
+checks held recovery input, reserved control admission and exact outbound
+completion. All208 core-only and249 all-feature selected regressions pass,
+including existing native recovery/pressure histories. Formatting and all four
+strict lint profiles pass. Admission progress is distinct from applied recovery;
+broader native combined-load acceptance remains open.
+
 TCP connection fairness: [slice208a](baseline/slice208a/README.md). Three
 stalled-stream regressions fail before the phase/cursor fix; a fourth exposes
 zero-budget turn consumption and passes after the positive-credit guard.

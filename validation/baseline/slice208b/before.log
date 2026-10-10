@@ -1,0 +1,33 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.43s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 2 tests
+test peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers ... FAILED
+test peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers ... FAILED
+
+failures:
+
+---- peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers stdout ----
+
+thread 'peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers' (586) panicked at tests/support/peer_receive_fairness.rs:106:5:
+assertion `left == right` failed: one ready peer monopolized receive credit
+  left: [8, 0]
+ right: [4, 4]
+
+---- peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers stdout ----
+
+thread 'peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers' (587) panicked at tests/support/peer_receive_fairness.rs:106:5:
+assertion `left == right` failed: one ready peer monopolized receive credit
+  left: [8, 0]
+ right: [4, 4]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers
+    peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

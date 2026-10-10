@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.42s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 2 tests
+test peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers ... ok
+test peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.00s
+

@@ -1,5 +1,13 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice208b1 fixes recurring shared receive-credit starvation in PeerDriver.
+Background-slot and data-message contention regressions fail with eight
+admissions for one peer and none for the other, then pass with four each.
+A held-recovery host history preserves independent control admission and local
+send completion. All208 core-only and249 all-feature selected regressions pass,
+with all strict checks clean. These establish admission/ownership progress;
+broader native combined-load control/recovery acceptance remains208b2.
+
 Slice208a fixes selected TCP connection-phase starvation under one-call
 budgets and preserves scheduling turns through zero-I/O polls. Four fixed-time
 regressions exercise live stalled anonymous streams and exact authenticated

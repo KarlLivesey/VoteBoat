@@ -413,6 +413,8 @@ impl PeerTransportFactory<Session> for Factory {
 type Driver = PeerDriver<Connector, Factory>;
 #[path = "peer_driver_closed.rs"]
 mod closed;
+#[path = "peer_receive_fairness.rs"]
+mod receive_fairness;
 struct Fixture {
     owner: Owner,
     outbound: HostOutbound,
@@ -503,6 +505,9 @@ impl Fixture {
         Self::with_peer_capacity(2)
     }
     fn with_peer_capacity(peer_capacity: usize) -> Self {
+        Self::with_ingress_limits(peer_capacity, IngressLimits::default())
+    }
+    fn with_ingress_limits(peer_capacity: usize, ingress_limits: IngressLimits) -> Self {
         let (owner, _) = single(1);
         let mut limits = OutboundLimits::default();
         limits.node.max.batches = 8;
@@ -528,6 +533,7 @@ impl Fixture {
             transports: Default::default(),
         };
         let mut parts = f.parts();
+        parts.ingress = IngressRouter::new(parts.ingress.binding(), ingress_limits).unwrap();
         let mut roster_limits = parts.roster.limits();
         roster_limits.peers = peer_capacity;
         parts.roster = PeerRoster::new(
