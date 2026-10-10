@@ -5,6 +5,8 @@ Latest focused implementation evidence: [slice200 source retirement](baseline/sl
 Platform investigation and focused workflow: [slice199a](baseline/slice199a/README.md).
 The Ubuntu operator failure and locally verified routing repair are recorded in
 [slice199b](baseline/slice199b/README.md); current macOS/platform acceptance remains open.
+The completed older macOS job has eight QUIC history failures, preserved in
+[slice199c](baseline/slice199c/README.md) for focused diagnosis.
 Entries below are historical and retain their original source/coverage limits.
 
 The independent Rust model in `tests/ballot_model.rs` explores the complete
