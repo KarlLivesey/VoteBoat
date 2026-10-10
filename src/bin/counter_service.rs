@@ -27,6 +27,8 @@ mod counter_application;
 mod credential_reload;
 #[path = "support/diagnostics.rs"]
 mod diagnostics;
+#[path = "support/drain_commands.rs"]
+mod drain_commands;
 #[path = "support/leadership_commands.rs"]
 mod leadership_commands;
 #[path = "support/local_client.rs"]
@@ -84,6 +86,8 @@ Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECT
 Use the same operation ID and delta when retrying an unknown write.\n\
 Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
 Commands: move-leader OP CONFIG TARGET STORE INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
+Retained-replica drain: --node-drain enabled requires the maintenance profile.\n\
+Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -91,6 +95,7 @@ enum Pending {
     Read(ReadInvocationTicket),
     Configure(OperationId),
     CancelLeadership(voteboat::maintenance::LeadershipRecord),
+    Drain(u64, OperationId),
 }
 enum Phase {
     Input {
@@ -267,12 +272,16 @@ fn outputs(
     service: &mut Service,
     connection: &mut Option<Connection>,
     leadership: &mut leadership_commands::Driver,
+    drain: &mut Option<drain_commands::Driver>,
 ) -> Result<(), Failure> {
     while let Some(output) = service.poll_client() {
         let original_ticket = output.ticket();
         let ticket = Pending::Write(original_ticket);
         let result = checked(service.complete_client(output).map_err(|r| r.reason))?;
         leadership.complete(original_ticket, &result);
+        if let Some(drain) = drain {
+            drain.complete(original_ticket, &result);
+        }
         if let Some(c) = connection
             .as_mut()
             .filter(|c| matches!(c.phase, Phase::Pending(p) if p == ticket))
@@ -312,6 +321,7 @@ struct PreparedService {
     listener: TcpListener,
     peer_address: std::net::SocketAddr,
     discovery: Option<command_discovery::Source>,
+    drain: Option<drain_commands::Driver>,
 }
 fn prepare_service(
     mode: &str,
@@ -341,6 +351,15 @@ fn prepare_service(
     if options.leadership_maintenance && (access_path.is_none() || plan_path.is_some()) {
         return Err("leadership maintenance requires --service-access and a separate profile without an administration plan".into());
     }
+    if options.node_drain && !options.leadership_maintenance {
+        return Err("--node-drain requires --leadership-maintenance enabled".into());
+    }
+    if !options.node_drain && root.join("drain.record").try_exists()? {
+        return Err(
+            "existing drain journal requires --node-drain enabled; preserve the recovery profile"
+                .into(),
+        );
+    }
     let config = setup::configuration(root, id, base, tls, create, input)?;
     let credentials = credential_reload::Credentials::load(
         root,
@@ -367,6 +386,10 @@ fn prepare_service(
         options.leadership_maintenance,
     )?;
     options.configure_maintenance(&mut service)?;
+    let drain = options
+        .node_drain
+        .then(|| drain_commands::Driver::open(&mut service, root, create))
+        .transpose()?;
     if let Some(source) = discovery.as_mut() {
         source.bind_session(service.local().owner.identity().store.session.get());
     }
@@ -377,6 +400,7 @@ fn prepare_service(
         listener,
         peer_address,
         discovery,
+        drain,
     })
 }
 fn serve(
@@ -393,6 +417,7 @@ fn serve(
     // Declare after service: error exits join the credential worker before
     // releasing the service's exclusive data-directory ownership.
     let mut credentials = prepared.credentials;
+    let mut drain = prepared.drain;
     let mut administration = prepared.administration;
     let listener = prepared.listener;
     let peer_address = prepared.peer_address;
@@ -434,9 +459,10 @@ fn serve(
                 SecureSessionGeneration::new(command_generation).unwrap(),
                 time,
                 |s| {
-                    if leadership_commands::is_command(s.split_whitespace().next()) {
-                        return leadership
-                            .command(&mut service, &s.split_whitespace().collect::<Vec<_>>());
+                    if let Some(result) =
+                        maintenance_command(&mut service, &mut leadership, &mut drain, s, &mut quit)
+                    {
+                        return result;
                     }
                     command(
                         &mut service,
@@ -472,26 +498,69 @@ fn serve(
             time,
             owner,
         )?;
-        outputs(&mut service, &mut connection, &mut leadership)?;
-        leadership.advance_cancel(&mut service, &mut connection);
-        leadership.tick(&mut service, quit)?;
+        advance_leadership(
+            &mut service,
+            &mut connection,
+            &mut leadership,
+            &mut drain,
+            quit,
+        )?;
         advance_administration(&mut service, &mut administration, &mut connection, quit)?;
-        if quit && connection.is_none() && shutdown_started.is_none() {
-            service.begin_shutdown();
-            shutdown_started = Some(Instant::now());
-        }
+        advance_shutdown(
+            &mut service,
+            quit && connection.is_none(),
+            &mut shutdown_started,
+        )?;
         if service.is_drained() {
             break;
         }
-        if shutdown_started.is_some_and(|t| t.elapsed() > Duration::from_secs(10)) {
-            return Err("shutdown timed out; recover durable state on restart".into());
-        }
         std::thread::park_timeout(Duration::from_millis(1));
+    }
+    finish_service(service, drain, credentials, observer, id)
+}
+fn finish_service(
+    service: Service,
+    mut drain: Option<drain_commands::Driver>,
+    mut credentials: credential_reload::Credentials,
+    mut observer: Diagnostics,
+    id: u64,
+) -> Result<(), Failure> {
+    // The directory owner must outlive both possible publication workers.
+    if let Some(drain) = &mut drain {
+        drain.finish()?;
     }
     credentials.finish()?;
     observer.close();
     setup::join(service)?;
     println!("stopped node={id} workers_joined=true");
+    Ok(())
+}
+fn advance_leadership(
+    service: &mut Service,
+    connection: &mut Option<Connection>,
+    leadership: &mut leadership_commands::Driver,
+    drain: &mut Option<drain_commands::Driver>,
+    quit: bool,
+) -> Result<(), Failure> {
+    outputs(service, connection, leadership, drain)?;
+    if let Some(drain) = drain {
+        drain.tick(service, leadership, connection)?;
+    }
+    leadership.advance_cancel(service, connection);
+    leadership.tick(service, quit)
+}
+fn advance_shutdown(
+    service: &mut Service,
+    requested: bool,
+    started: &mut Option<Instant>,
+) -> Result<(), Failure> {
+    if requested && started.is_none() {
+        service.begin_shutdown();
+        *started = Some(Instant::now());
+    }
+    if !service.is_drained() && started.is_some_and(|t| t.elapsed() > Duration::from_secs(10)) {
+        return Err("shutdown timed out; recover durable state on restart".into());
+    }
     Ok(())
 }
 fn advance_administration(
@@ -513,6 +582,30 @@ fn advance_administration(
     }
 
     Ok(())
+}
+fn maintenance_command(
+    service: &mut Service,
+    leadership: &mut leadership_commands::Driver,
+    drain: &mut Option<drain_commands::Driver>,
+    input: &str,
+    quit: &mut bool,
+) -> Option<Result<Phase, String>> {
+    let words = input.split_whitespace().collect::<Vec<_>>();
+    if drain_commands::is_command(words.first().copied()) {
+        return Some(
+            drain
+                .as_mut()
+                .ok_or_else(|| "drain requires --node-drain enabled".into())
+                .and_then(|d| d.command(service, leadership, &words, quit)),
+        );
+    }
+    if !leadership_commands::is_command(words.first().copied()) {
+        return None;
+    }
+    if drain.as_ref().is_some_and(drain_commands::Driver::busy) {
+        return Some(Err("drain publication in progress".into()));
+    }
+    Some(leadership.command(service, &words))
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
@@ -697,7 +790,7 @@ fn finish_connection(
             Pending::Read(t) => {
                 checked(service.cancel_read(t))?;
             }
-            Pending::CancelLeadership(_) => (),
+            Pending::CancelLeadership(_) | Pending::Drain(_, _) => (),
             Pending::Configure(_) => {
                 if let Some(admin) = administration.as_mut() {
                     admin.cancel_remote(service, remove_reason)?;
@@ -718,6 +811,7 @@ struct StartupOptions {
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
     leadership_maintenance: bool,
+    node_drain: bool,
 }
 impl StartupOptions {
     fn configure_maintenance(&self, service: &mut Service) -> Result<(), Failure> {
@@ -752,6 +846,13 @@ fn positive_option(value: &str, name: &str) -> Result<u64, Failure> {
     }
     Ok(n)
 }
+fn enabled_option(value: &str, name: &str) -> Result<bool, Failure> {
+    if value == "enabled" {
+        Ok(true)
+    } else {
+        Err(format!("expected {name} enabled").into())
+    }
+}
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut protocol = NativePeerProtocol::TcpTls;
     let mut transport_selected = false;
@@ -764,6 +865,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut wal_reclaim_ms = None;
     let mut checkpoint_entries = None;
     let mut leadership_maintenance = None;
+    let mut node_drain = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !matches!(
@@ -779,6 +881,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 | "--wal-reclaim-ms"
                 | "--checkpoint-entries"
                 | "--leadership-maintenance"
+                | "--node-drain"
         ) {
             break;
         }
@@ -825,10 +928,10 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--leadership-maintenance"
                 if leadership_maintenance.is_none() && args[0] == "serve" =>
             {
-                if value != "enabled" {
-                    return Err("expected --leadership-maintenance enabled".into());
-                }
-                leadership_maintenance = Some(true);
+                leadership_maintenance = Some(enabled_option(&value, "--leadership-maintenance")?);
+            }
+            "--node-drain" if node_drain.is_none() && args[0] == "serve" => {
+                node_drain = Some(enabled_option(&value, "--node-drain")?);
             }
             "--checkpoint-entries" if checkpoint_entries.is_none() && args[0] == "serve" => {
                 checkpoint_entries = Some(positive_option(&value, "checkpoint entry threshold")?);
@@ -847,6 +950,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         wal_reclaim_ms,
         checkpoint_entries,
         leadership_maintenance: leadership_maintenance.unwrap_or(false),
+        node_drain: node_drain.unwrap_or(false),
     })
 }
 

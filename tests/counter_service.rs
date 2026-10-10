@@ -39,6 +39,8 @@ mod command_discovery;
 mod command_endpoints;
 #[path = "counter_service/credential_reload.rs"]
 mod credential_reload;
+#[path = "counter_service/drain.rs"]
+mod drain;
 #[path = "counter_service/events.rs"]
 mod events;
 #[path = "counter_service/history.rs"]
@@ -97,6 +99,7 @@ struct Cluster {
     wal_reclaim_ms: Option<u64>,
     checkpoint_entries: Option<u64>,
     leadership_maintenance: bool,
+    node_drain: bool,
 }
 impl Cluster {
     fn new() -> Self {
@@ -165,6 +168,7 @@ impl Cluster {
             wal_reclaim_ms: None,
             checkpoint_entries: None,
             leadership_maintenance: false,
+            node_drain: false,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -206,6 +210,9 @@ impl Cluster {
         }
         if self.leadership_maintenance {
             command.args(["--leadership-maintenance", "enabled"]);
+        }
+        if self.node_drain {
+            command.args(["--node-drain", "enabled"]);
         }
         if let Some(entries) = self.checkpoint_entries {
             command.arg("--checkpoint-entries").arg(entries.to_string());

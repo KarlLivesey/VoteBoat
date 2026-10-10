@@ -23,7 +23,9 @@ fn operation(text: &str) -> Result<OperationId, String> {
         .and_then(OperationId::new)
         .ok_or_else(|| "invalid operation ID".into())
 }
-fn application(service: &Service) -> Result<&Maintenance<voteboat::application::Counter>, String> {
+pub(super) fn application(
+    service: &Service,
+) -> Result<&Maintenance<voteboat::application::Counter>, String> {
     service
         .local()
         .applications
@@ -48,9 +50,12 @@ fn submit(service: &mut Service, command: LeadershipCommand) -> Result<Phase, St
     let ticket = propose(service, command)?;
     Ok(Phase::Pending(Pending::Write(ticket)))
 }
-fn propose(service: &mut Service, command: LeadershipCommand) -> Result<ClientTicket, String> {
+pub(super) fn propose(
+    service: &mut Service,
+    command: LeadershipCommand,
+) -> Result<ClientTicket, String> {
     service
-        .propose(ClientRequest {
+        .propose_maintenance(ClientRequest {
             group: group(),
             operation: command.intent().request.operation,
             bytes: command.encode().map_err(|e| format!("{e:?}"))?,
@@ -117,7 +122,7 @@ impl Driver {
                     self.resume(record);
                 }
                 let ticket = service
-                    .read(group(), MaintenanceQuery::Leadership(op))
+                    .read_maintenance(group(), MaintenanceQuery::Leadership(op))
                     .map_err(|r| match r.reason {
                         ReadInvocationError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
                         e => format!("{e:?}"),
@@ -129,7 +134,7 @@ impl Driver {
                 let record = lookup(service, operation(op)?)?;
                 if record.phase != LeadershipPhase::Pending {
                     let ticket = service
-                        .read(
+                        .read_maintenance(
                             group(),
                             MaintenanceQuery::Leadership(record.intent.request.operation),
                         )

@@ -14,6 +14,19 @@ pub struct Driver {
     suspended: Option<OperationId>,
 }
 impl Driver {
+    pub(crate) fn hold(&mut self, operation: OperationId) {
+        self.suspended = Some(operation);
+    }
+    pub(crate) fn release(&mut self, operation: OperationId) {
+        if self.suspended == Some(operation) {
+            self.suspended = None;
+            self.seen = None;
+            self.deadline = None;
+        }
+    }
+    pub(crate) fn retry(&mut self, record: LeadershipRecord) {
+        self.resume(record);
+    }
     pub(super) fn resume(&mut self, record: LeadershipRecord) {
         if record.phase == LeadershipPhase::Pending && self.pending.is_none() {
             self.seen = None;

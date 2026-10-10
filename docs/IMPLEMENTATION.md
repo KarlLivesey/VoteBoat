@@ -127,9 +127,86 @@ strict profiles clean while advancing the remaining capability work.
 | Completed196b2: authenticated move-leader commands | Expose the durable Rust workflow to operators; advances P4 and chapter09 maintenance. |196b1, existing bounded authenticated command sessions, explicit application schema and wire8 selection. | Start/status/resume/cancel retain original IDs and return applied or explicit unknown outcomes; unauthorized commands fail, disconnected waits release resources, and actual executable TCP/QUIC recovery histories preserve data. Coordinated drain then composes this completed196 workflow with membership. |
 | Completed197a: local drain admission and campaign gate | Keep a replica from immediately campaigning after handing off; advances coordinated drain197, P4/P2 and chapter09. |196 leadership transfer, exact bounded assignment inventory and existing Node ownership. | Reject ordinary new work while preserving maintenance/replication; disable automatic, explicit and transfer-triggered campaigns; retain leader heartbeat until handoff. Report unresolved/stale groups and outstanding results. Local readiness is not remote quorum or durable completion. |
 | Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
-| Current197b2: durable coordinated drain | Expose recoverable operator drain through existing maintenance, membership and shutdown paths; advances P4/P2 and chapter09. |197a gates,196 durable operations, authenticated administration and placement/membership authorization. | Persist original identity and expected assignments before executing; recover interrupted plans, transfer eligible leaders and change membership as required; never call unavailable or stale groups safely drained. Join selected workers after verified conditions. |
+| Completed197b2a: executable retained-replica drain | Connect durable gates and handoff to authenticated maintenance and shutdown; advances P4/P2 and chapter09. |197a/197b1 gates and journal,196 durable handoff, authenticated command sessions. | Original identities survive restart; missing journals fail closed; local admission stays closed until durable cancellation; stop requires completed recorded handoff, unchanged stable configuration and local quiescence. Remaining configured voters must satisfy the recursive policy. |
+| Current197b2b: membership-aware coordinated drain | Complete drain for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a operator path, existing placement authorization and joint/final membership executor. | Recover original placement/membership steps, preserve quorum throughout and refuse stale or unavailable assignments. Retained-replica maintenance alone does not complete this item. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b2a implementation evidence
+
+The authenticated counter maintenance profile now accepts drain-node,
+drain-status, resume-drain, cancel-drain and drain-stop with original local
+sequence/operation identities. Start records the handoff in the existing Raft
+application, holds its local driver during journal publication, restores the
+admission/campaign gate, then releases handoff. One owned publication worker is
+joined before releasing the service directory. Unknown/disconnected waits do
+not erase accepted work. Publication errors stop the process for recovery.
+
+Creation writes a checked owner-bound empty journal; recovery refuses missing,
+corrupt or wrong-owner records. Existing drain files prevent omission of the
+profile. Active restart suppresses ordinary admission before polling; durable
+local cancellation reopens only through tracked campaign-enable completions.
+The separate replicated handoff is not cancelled by local gate cancellation.
+Explicit stop checks historical handoff completion, unchanged committed stable
+configuration, actual recursive remaining-voter capacity and local quiescence.
+Status is local evidence, not current remote availability or safe decommission.
+
+Seven new actual-process tests pass: TCP/WAL and QUIC/checkpoint handoff,
+explicit stop/join, active and cancelled restart, original write retries,
+authorization refusal, incomplete handoff refusal, lost reply, wrong operation
+identity, missing journal, omitted profile and failed publication/recovery.
+Three new journal tests cover initialized-empty recovery, corruption/owner
+refusal and rejected/uncertain initialization. A command-unit test distinguishes
+ordinary, nested and weighted quorum capacity for the same voter count.
+The full counter suite passes83 tests; journal10 and command-unit7 pass. Existing
+owning-Node169 and native startup18 pass. Evidence and final checks are in
+validation/baseline/slice197b2a; macOS and power-loss coverage are not claimed.
+
+The initial process tests queried restarted listeners before readiness; bounded
+observation fixed the harness. A later manual-checkpoint test incorrectly reused
+an automatic-checkpoint assertion; its log shows a published checkpoint, and the
+corrected manual observation passes. No production guarantee or lint threshold
+was relaxed. Macro review: this closes the retained-replica operator path;
+membership-aware and multi-group coordination remain197b2b, followed by
+assignment198 and broader platform199. The full P0–P7 goal remains active.
+
+### Slice197b2a schema plan — executable retained-replica maintenance
+
+This connects existing durable contracts to a usable operator path. It does not
+substitute retained static membership for the remaining general drain protocol.
+The next deliverables are membership-aware drain197b2b and assignment listing198;
+the macro online-membership milestone remains open.
+
+An opt-in authenticated counter profile exposes drain-node SEQUENCE OP CONFIG
+TARGET STORE INC, drain-status SEQUENCE OP, resume-drain SEQUENCE OP,
+cancel-drain SEQUENCE OP and drain-stop SEQUENCE OP. One operation is in flight.
+The replicated Maintenance record retains the exact handoff target; the local
+DrainRecord retains sequence, operation, owner and expected assignments. Commit
+Begin before publishing Active; suspend automatic handoff until Active is
+published and restored. A lost reply cannot erase either intent. Local status
+is explicitly durable local evidence, not a remote availability certificate.
+
+Create writes an owner-bound empty journal envelope; recovery requires that
+file, even before the first operation. This initialization is necessary to
+distinguish an unused profile from lost drain intent. The existing full record
+encoding remains readable. One owned worker publishes journal transitions off
+the poll thread; shutdown/error cleanup joins it before directory ownership
+ends. Uncertain publication stops the service for recovery. Durable Cancelled
+reopens through the existing tracked enable events; it cannot retract an already
+delivered handoff signal and is explicitly a local gate cancellation.
+
+Start/stop check stable exact membership and evaluate its actual recursive
+policy against configured voters excluding this node. This is capacity, not
+liveness evidence. Stop additionally requires the original handoff's locally
+applied Completed record, exact source/target, no pending journal write and local
+quiescence. Restart never automatically exits. Unsupported membership changes
+are refused, not silently treated as safe decommissioning.
+
+Acceptance: initialized-empty recovery, owner/corruption/missing-file and
+publication-failure histories; real authenticated TCP/QUIC start/handoff/stop,
+restart and cancellation; reader/writer authorization refusal; exact retry and
+conflicting identity refusal; ordinary requests blocked during drain; full
+formatting and all three strict Clippy profiles with zero diagnostics.
 
 ### Slice197b1 implementation evidence
 

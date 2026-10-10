@@ -1,0 +1,19 @@
+# Executed from repository root. Socket/process tests use authorized native loopback access.
+cargo +stable check --locked --offline --all-targets --all-features
+cargo +stable test --locked --offline --all-features --test drain_journal
+cargo +stable test --locked --offline --all-features --test counter_service drain:: -- --nocapture
+# Initial process run failed on restart observation; rerun passed after harness correction.
+cargo +stable test --locked --offline --all-features --test counter_service --test drain_journal --bin voteboat-counter -- --nocapture
+# QUIC checkpoint coverage added. This run stopped on the incorrect automatic-checkpoint assertion:
+cargo +stable test --locked --offline --all-features --test counter_service drain:: --test startup --test effect_owner
+# Unfiltered owner/startup regression and corrected manual-checkpoint process run:
+cargo +stable test --locked --offline --all-features --test startup --test effect_owner
+cargo +stable test --locked --offline --all-features --test counter_service drain::
+cargo +stable test --locked --offline --no-default-features --test effect_owner
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# Formatting/Clippy also ran during development; above final logs replace those intermediate diagnostics.
+# Git push runs the tracked formatting and all three strict Clippy profiles again.

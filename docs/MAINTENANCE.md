@@ -99,3 +99,51 @@ Slice196b2 tests use actual authenticated TCP/QUIC service processes, pending an
 terminal restart, a killed target, lost replies, denied mutations, disconnected
 and expired status waits, and incompatible plain data. See
 [executable evidence](../validation/baseline/slice196b2/README.md).
+
+## Retained-replica node drain
+
+For a new maintenance-profile service, also pass `--node-drain enabled`.
+Keep this option on recovery. Creation durably initializes `drain.record`;
+recovery requires the file and rejects corruption or a changed owner. Do not
+delete it or omit the profile to bypass an active drain. Existing services
+without an initialized journal need an explicit migration before using this
+profile; recovery does not silently create one.
+
+Use authenticated commands against the node being drained:
+
+```text
+drain-node SEQUENCE OP CONFIG TARGET STORE INC
+drain-status SEQUENCE OP
+resume-drain SEQUENCE OP
+cancel-drain SEQUENCE OP
+drain-stop SEQUENCE OP
+```
+
+`SEQUENCE` is a positive local u64; `OP` is a nonzero u128. Preserve all fields
+when retrying. A later sequence needs a cancelled predecessor and a new operation
+ID. Start commits the original handoff, publishes the local drain journal and
+closes ordinary data admission before releasing the local handoff driver. A
+lost reply is unknown; retry the original request. Disconnecting a wait does not
+cancel the operation. A journal-publication failure stops the process and
+requires recovery. Journal I/O runs on one bounded, joined worker.
+
+Status works on the source after it becomes a follower. `evidence=local_durable`
+reports the local journal and locally applied handoff history; it does not claim
+current remote availability. `ready=true` requires completed handoff, unchanged
+committed stable configuration, sufficient remaining configured voter capacity
+under the actual recursive policy, and local quiescence. `drain-stop` checks
+these conditions again, then drains and joins workers. Restart restores the gate
+before accepting data and never automatically exits.
+
+`cancel-drain` durably cancels the **local gate**. Admission reopens only after
+the queued campaign-enable operations complete. It does not undo an already
+delivered handoff or cancel its separate replicated intent; use
+`cancel-leadership OP` on the current leader for that operation. Status explicitly
+reports `cancellation_scope=local_gate`. Inspect permission permits status;
+administration permits start/resume/cancel; shutdown permission permits stop.
+
+This profile retains the original replicas. It supports maintenance/reboot when
+the remaining configured voters can satisfy the policy. It rejects a required
+membership change. Replica replacement/removal and multi-group drain remain
+the next coordinated-drain work; these commands are not a decommissioning
+certificate. See [slice197b2a evidence](../validation/baseline/slice197b2a/README.md).

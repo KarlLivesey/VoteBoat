@@ -6,6 +6,38 @@ use crate::{
     runtime::{DrainGroup, LocalDrainRequest},
 };
 use ring::digest::{digest, SHA256};
+pub(super) fn empty(owner: PeerIdentity) -> Vec<u8> {
+    let mut bytes = Vec::with_capacity(72);
+    bytes.extend_from_slice(b"VBDREM01");
+    bytes.extend_from_slice(&owner.node.get().to_be_bytes());
+    bytes.extend_from_slice(&owner.store.id.get().to_be_bytes());
+    bytes.extend_from_slice(&owner.store.incarnation.get().to_be_bytes());
+    bytes.extend_from_slice(digest(&SHA256, &bytes).as_ref());
+    bytes
+}
+pub(super) fn envelope(
+    bytes: &[u8],
+) -> Result<(PeerIdentity, Option<DrainRecord>), DrainJournalError> {
+    if !bytes.starts_with(b"VBDREM01") {
+        return decode(bytes).map(|record| (record.owner, Some(record)));
+    }
+    let invalid = DrainJournalError::InvalidRecord;
+    if bytes.len() != 72 || digest(&SHA256, &bytes[..40]).as_ref() != &bytes[40..] {
+        return Err(invalid);
+    }
+    let owner = PeerIdentity {
+        node: NodeId::new(u64::from_be_bytes(bytes[8..16].try_into().unwrap())).ok_or(invalid)?,
+        store: StoreIdentity {
+            id: StoreId::new(u128::from_be_bytes(bytes[16..32].try_into().unwrap()))
+                .ok_or(invalid)?,
+            incarnation: StoreIncarnation::new(u64::from_be_bytes(
+                bytes[32..40].try_into().unwrap(),
+            ))
+            .ok_or(invalid)?,
+        },
+    };
+    Ok((owner, None))
+}
 pub(super) fn encode(record: &DrainRecord) -> Vec<u8> {
     let mut b = Vec::with_capacity(112 + record.request.groups.len() * 32);
     b.extend_from_slice(b"VBDR0001");

@@ -416,17 +416,19 @@ impl Channel {
                 | "maintenance"
                 | "configuration-status"
                 | "leadership-status"
+                | "drain-status"
                 | "credential-status"
                 | "discover",
             ) => ServiceAction::Inspect,
             Some("read" | "manifest-session" | "transfer-read") => ServiceAction::Read,
             Some("add") => ServiceAction::Write,
             Some("checkpoint") => ServiceAction::Checkpoint,
-            Some("quit") => ServiceAction::Shutdown,
+            Some("quit" | "drain-stop") => ServiceAction::Shutdown,
             Some(
                 "configure" | "configure-record" | "reload-access" | "initialize" | "publish"
                 | "grant" | "transfer-step" | "transfer-export" | "move-leader"
-                | "resume-leadership" | "cancel-leadership",
+                | "resume-leadership" | "cancel-leadership" | "drain-node" | "resume-drain"
+                | "cancel-drain",
             ) => ServiceAction::Configure,
             _ => return Err("unknown authorized command".into()),
         };

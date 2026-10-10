@@ -261,3 +261,72 @@ fn required_recovery_refuses_a_missing_record_with_returned_io() {
         .unwrap();
     assert_eq!(recovered.latest().unwrap(), Some(record()));
 }
+
+#[test]
+fn initialized_empty_journal_recovers_without_inventing_an_operation() {
+    let io = HostIo::default();
+    let journal = NativeDrainJournal::initialize(io.clone(), owner())
+        .ok()
+        .unwrap();
+    assert_eq!(journal.latest().unwrap(), None);
+    assert_eq!(io.0.borrow().writes, 1);
+    let mut journal = NativeDrainJournal::recover(journal.into_io(), owner())
+        .ok()
+        .unwrap();
+    assert_eq!(journal.latest().unwrap(), None);
+    journal.publish(record()).unwrap();
+    let initialized = NativeDrainJournal::initialize(journal.into_io(), owner())
+        .ok()
+        .unwrap();
+    assert_eq!(initialized.latest().unwrap(), Some(record()));
+    assert_eq!(io.0.borrow().writes, 2);
+}
+
+#[test]
+fn empty_envelope_refuses_wrong_owner_and_every_truncation_or_corruption() {
+    let io = HostIo::default();
+    NativeDrainJournal::initialize(io.clone(), owner())
+        .ok()
+        .unwrap();
+    let bytes = io.0.borrow().bytes.clone().unwrap();
+    let mut other = owner();
+    other.node = NodeId::new(2).unwrap();
+    assert!(matches!(
+        NativeDrainJournal::recover(io.clone(), other),
+        Err((DrainJournalError::WrongOwner, _))
+    ));
+    for cut in 0..bytes.len() {
+        io.0.borrow_mut().bytes = Some(bytes[..cut].to_vec());
+        assert!(NativeDrainJournal::recover(io.clone(), owner()).is_err());
+    }
+    for at in 0..bytes.len() {
+        let mut corrupt = bytes.clone();
+        corrupt[at] ^= 1;
+        io.0.borrow_mut().bytes = Some(corrupt);
+        assert!(NativeDrainJournal::recover(io.clone(), owner()).is_err());
+    }
+}
+
+#[test]
+fn failed_initialization_preserves_old_or_complete_recovery() {
+    for fail in 1..=3 {
+        let io = HostIo::default();
+        io.0.borrow_mut().fail = fail;
+        assert!(NativeDrainJournal::initialize(io.clone(), owner()).is_err());
+        if fail == 3 {
+            assert_eq!(
+                NativeDrainJournal::recover(io.clone(), owner())
+                    .ok()
+                    .unwrap()
+                    .latest()
+                    .unwrap(),
+                None
+            );
+        } else {
+            assert!(matches!(
+                NativeDrainJournal::recover(io.clone(), owner()),
+                Err((DrainJournalError::MissingRecord, _))
+            ));
+        }
+    }
+}

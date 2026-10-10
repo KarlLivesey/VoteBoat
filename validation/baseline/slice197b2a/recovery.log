@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.14s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 7 tests
+test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... FAILED
+test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+
+failures:
+
+---- drain::retained_drain_handoff_stop_recover_and_cancel_quic stdout ----
+
+thread 'drain::retained_drain_handoff_stop_recover_and_cancel_quic' (3993899) panicked at tests/counter_service/maintenance.rs:151:13:
+OK enabled=false pending=false next_ms=None last_sequence=0 before_bytes=0 after_bytes=0 admission_error=None completion_error=None checkpoint_enabled=false checkpoint_pending=0 checkpoint_base=6
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    drain::retained_drain_handoff_stop_recover_and_cancel_quic
+
+test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 76 filtered out; finished in 1.75s
+
+error: test failed, to rerun pass `--test counter_service`
