@@ -189,6 +189,13 @@ Selected native TCP/TLS and QUIC histories move A->B->C, refresh a foreign paren
 locator and adopt both moves in an original full data owner. Every selected phase
 survives an unread completion, joined worker abort, WAL/checkpoint reopen and
 exact retry. The owner serves and recovers with all metadata stopped; stopped
-metadata files and recovered logs remain unchanged. Retained/imported owner
-families still need this network composition; wider faults and macOS validation
-remain separate work.
+metadata files and recovered logs remain unchanged.
+
+Selected retained/imported histories also cover an initial retained split,
+followed by a root/child metadata move from A to B. TCP/TLS and QUIC, WAL and
+checkpoint recovery, and ordinary/partial-delegation-capable imported profiles
+preserve initial activation, transfer publication provenance, frozen exports,
+data retries and outbox counts. Both data owners recover and write with A and B
+offline; their metadata files and logs remain unchanged. Later native handoffs
+and retirement from these moved profiles, repeated moves for these families,
+wider faults and macOS validation remain separate work.

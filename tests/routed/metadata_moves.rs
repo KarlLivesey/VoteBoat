@@ -908,3 +908,6 @@ fn quic_metadata_moves_recover_wal_and_serve_without_ancestors() {
 fn quic_metadata_moves_recover_checkpoints_and_original_observations() {
     run(NativePeerProtocol::Quic, true)
 }
+
+#[path = "metadata_families.rs"]
+mod families;

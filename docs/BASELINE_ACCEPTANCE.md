@@ -312,3 +312,12 @@ with all metadata stopped; metadata files and recovered logs remain unchanged.
 Retained/imported owner-family native composition, broader failures and the other
 roadmap exits remain open. Background Linux/macOS CI is now activated; a running
 job is not platform validation.
+
+Slice156c5 adds four native tests/eight histories for retained and imported owner
+continuity across a root/child metadata move. TCP/TLS/QUIC and WAL/checkpoint
+profiles recover lost completions, preserve original frozen images, imported
+activation, publication provenance and retries, and keep exact outbox counts.
+Both owners write/recover while all metadata services are stopped; metadata
+files and recovered logs remain unchanged. Ordinary and partial-delegation-capable
+imported profiles are covered, but later native partial handoff/retirement and
+repeated moves for these families remain open, alongside broader roadmap exits.

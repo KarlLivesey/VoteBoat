@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; original full-owner/cache adoption156c1, retained-owner adoption156c2a and full/partial imported-owner adoption/retirement156c2b implemented; foreign directory/cache locator updates156c2c implemented; owner locator adoption156c2d and selected repeated moves156c3 implemented; selected original full-owner TCP/QUIC composition156c4 implemented; retained/imported native composition156c remains; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; original full-owner/cache adoption156c1, retained-owner adoption156c2a and full/partial imported-owner adoption/retirement156c2b implemented; foreign directory/cache locator updates156c2c implemented; owner locator adoption156c2d and selected repeated moves156c3 implemented; selected original full-owner TCP/QUIC composition156c4 implemented; selected retained/imported native metadata continuity156c5 implemented; later native lifecycle156c6 remains; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -88,13 +88,14 @@ the count of remaining milestones.
 
 ### Mini plan: current deliverable and next two
 
-Current priority is restoring and maintaining zero repository-wide lint diagnostics.
+The zero-diagnostic baseline and pre-push enforcement are complete. Keep both
+strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Completed: strict lint cleanup | Keep all implemented milestones maintainable; separate oversized test histories into explicit phases without changing behavior. | Existing fixtures, fault schedules and assertions. | Formatting plus all-target Clippy with all features and no default features both report zero; affected tests pass. |
-| Completed: enforced local pre-push checks | Preserve that baseline during normal development across all milestones. | Both strict profiles clean. | Tracked hook runs formatting and both profiles, blocks a failing check, and is installed for this checkout. |
-| Next implementation: resume metadata authority movement156 | Advance recursive responsibilities and split/merge while preserving the usable static service. | Clean baseline and existing154/155 contracts. | Bounded schema plan, real data/retry/restart evidence and strict local checks for each slice. |
+| Current: lifecycle after moved metadata156c6 | Demonstrate subsequent ownership changes from retained/imported families; advances split/merge. | Completed156c5 native fixture and existing embedding transfer/retirement contracts. | Native later fence/import/publication/activation and applicable retirement recover without dual ownership or lost retry lineage. |
+| Next: public administration/API coverage | Make existing trusted membership administration usable through bounded public ingress; advances online membership. | Existing authorization, durable operation status/resumption and named P4 fault histories. | Refusal and operation recovery across leader changes/restart, using existing consensus and host-provider seams. |
+| Following: retained QUIC follower catch-up failure | Restore the measured paused-follower recovery path; advances broader validation and tuning. | Existing failing P7 workload and transport/checkpoint evidence. | Identify the cause, resume the follower and pass catch-up with bounded queues and unchanged durability semantics. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -169,21 +170,13 @@ Evidence and limits are recorded in the slice154f section below.
 two partial delegations, remaining ownership transfer, and retirement/reclamation.
 The full macro roadmap remains active; broader fault/platform cases are not implied.
 
-1. **Enforce and repair maintainability lints (current; all macro milestones).**
-   Enable the promised size/complexity limits in the ordinary strict local/CI
-   commands, then reduce the reported violations with bounded refactors. Depends
-   on the existing parser, ownership, recovery and provider contracts. Check
-   unchanged formats/refusal/atomicity using each affected subsystem's tests;
-   completion requires strict all-target all-feature/core-only Clippy with no
-   warnings. No suppressed baseline or increased thresholds. Production Clippy now passes in all-feature and core-only profiles after the
-   directory, routed/log, native, consensus, runtime and transfer refactors.
-   Examples now pass in all-feature/TLS profiles. Integration-test violations
-   remain explicit work; all-target Clippy still fails. Keep both strict checks
-   at zero after cleanup, and fix any new diagnostics in the same change.
-   Once both baselines reach zero, install a repository pre-push hook that runs
-   formatting plus strict all-target/all-feature Clippy and rejects failures.
-   Preserve any existing hook configuration; CI remains a second check.
-2. **156c, remaining native authority-move composition (next; P5/P6).**
+**Completed quality baseline (all macro milestones).** Formatting and strict
+all-target Clippy with all features and no default features are clean. The
+installed pre-push hook enforces all three checks. Keep them at zero in every
+change; no suppressed baseline or increased thresholds. CI remains a second
+check. Detailed cleanup and hook validation appear at the end of this record.
+
+1. **156c, remaining native authority-move composition (current; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
    locator updates156c2c and all four selected owner profiles156c2d are implemented,
@@ -191,14 +184,16 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    retain the complete migrated history, with three-move embedding evidence.
    Slice156c4 now composes A->B->C with an original full data owner and foreign
    parent through TCP/QUIC, including WAL/checkpoint phase recovery and service
-   with all metadata offline. Next extend that native history to retained and
-   imported owner families. Depends on156b2/156c3 publication, activation and
+   with all metadata offline.156c5 adds retained/imported continuity through a
+   single native metadata move; later lifecycle composition remains. Depends
+   on156b2/156c3 publication, activation and
    existing owner/locator adoption contracts; reuse current Node/journal providers.
    Check stale routes, unchanged data-owner groups/epochs, original retries, no concurrent
    authority, repeated changes and TCP/QUIC restart with old metadata unavailable.
-   This completes the selected user-visible authority move; data writes retain
-   their direct owner path.
-3. **Remaining public administration/API coverage (following; P4).** Make the
+   Later native retained/imported handoff and retirement also need composition;
+   a successful metadata move alone does not close those lifecycle checks.
+   Data writes retain their direct owner path.
+2. **Remaining public administration/API coverage (following; P4).** Make the
    existing trusted Node/executable membership operations usable through bounded
    public ingress. Depends on authorization, durable operation status/resumption
    and named P4 failure evidence. Check refusal, original operation recovery
@@ -14475,3 +14470,69 @@ for another clone, and AGENTS.md requires keeping the hook enabled.
 The immediate quality milestone is complete. The macro feature scope is
 unchanged; metadata authority movement156 remains the next implementation
 deliverable. No feature-completion claim is inferred from this lint cleanup.
+
+### 156c5 retained/imported native metadata movement — schema plan
+
+Data/API shape: compose the existing metadata publishing source and serving
+target with an original ScopedTransferSource and a TransferTarget. Select
+metadata-adoption profiles before bootstrap; cover both ordinary and
+partial-delegation-capable imported targets. First commit a retained insertion
+and real data import, then move the closed root/child directory from group1 to9.
+No new production wire format, persistence owner or public seam is required.
+
+State transitions: reserve child -> intent -> scoped fence/export -> import ->
+publication -> retained-grant adoption and target activation -> metadata freeze
+and import -> metadata publication/activation -> both owner adoptions. Read
+observations through native quorums before constructing the next command. The
+serving directory remains unavailable until activation; the old directory stays
+fenced. Data-owner groups and ownership epochs remain unchanged by metadata
+movement. Original data imports, frozen images and activation provenance remain
+immutable.
+
+Ownership/failure paths: the test owns every native node and joins it before
+reopening its WAL or checkpoint. Lose each selected command result, reopen and
+retry, requiring identical query observations. Stop both metadata services,
+then commit/retry writes and recover each data owner independently. Compare
+all stopped metadata files and recovered logs to prove no ancestor writes.
+Creation reservation is exercised, but additional namespace provisioning fault
+coverage is not claimed by this slice.
+
+Acceptance: TCP and QUIC, WAL and checkpoint, and both imported profiles; old
+routing refusal where applicable, current route resolution, original retry and
+export preservation, unchanged initial target activation, fresh data writes
+without metadata, strict formatting and both complete Clippy profiles. This
+covers metadata movement after the initial retained split; a later partial
+handoff/retirement remains the next native lifecycle deliverable156c6.
+
+The initial fixture run rejected target activation because its command was built
+from the pristine replay template. The activation contract requires the applied
+import. Both data and metadata activation builders now borrow the live imported
+application after its quorum-backed status read; pristine templates remain only
+for startup/replay. This is a fixture correction, with no production change.
+
+### 156c5 implemented — retained/imported native metadata continuity
+
+Four native tests cover eight histories: TCP/TLS and QUIC, WAL and checkpoint,
+with ordinary and partial-delegation-capable imported target profiles. All four
+passed in the final run (48.92s). Each selected control/data phase loses its
+completion, joins the old workers, reopens storage and retries. New fixtures reuse
+the existing retained manifests/profiles and native phase helper; production
+contracts and component seams are unchanged.
+
+The histories commit an initial retained split, transfer real counter/retry/outbox
+state, move its closed root/child metadata from1 to9, and adopt the new authority
+in both data owners. Native directory reads match the adopted manifests. The
+migrated initial transfer publication retains its original authority/index domain.
+Original target import/activation and retained-source exports survive later
+writes and recovery. Original retries retain values11 and7; fresh writes reach16
+and10 with exact outbox counts3 and2. Owner adoption observations also remain
+identical after those writes and restarts. Both metadata services are offline
+through these data writes, and their files and recovered logs remain unchanged.
+
+Validation: the final targeted routed suite passed4 tests/8 histories; formatting,
+strict all-target/all-feature Clippy and strict all-target/no-default-feature
+Clippy passed with zero diagnostics. No allowances or thresholds changed. These
+histories do not exercise a later partial delegation merely by selecting that
+profile. Later native handoff/retirement and repeated movement for these owner
+families remain156c6 work. The macro roadmap remains open; this evidence does
+not establish macOS, separate-host or broad fault completion.

@@ -44,7 +44,7 @@ fn retained_parent_profile(moves: bool) -> LifecycleDirectory {
         base
     })
 }
-fn metadata_profile(foreign: bool, moves: bool) -> LifecycleDirectory {
+pub(super) fn metadata_profile(foreign: bool, moves: bool) -> LifecycleDirectory {
     let base = Directory::new(
         DirectoryPlan::new(group(1), vec![before(foreign)]).unwrap(),
         DirectoryLimits {
@@ -99,7 +99,7 @@ fn source_profile(foreign: bool, moves: bool) -> Source {
         base
     }
 }
-fn target(intent: &TransferIntent) -> target_fixture::Target {
+pub(super) fn target(intent: &TransferIntent) -> target_fixture::Target {
     target_profile(intent, false)
 }
 fn target_profile(intent: &TransferIntent, moves: bool) -> target_fixture::Target {
@@ -231,7 +231,7 @@ fn reserve_target(
         .unwrap();
     (request, creation)
 }
-fn retained_shape(
+pub(super) fn retained_shape(
     foreign: bool,
     creation: &GroupCreationStatus,
 ) -> (ResponsibilityManifest, InsertionChild) {
