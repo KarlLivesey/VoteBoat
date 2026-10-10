@@ -105,9 +105,46 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: service authority-race validation179 | Resolve the concrete Ubuntu177 failures; advances usable service/P4/platform evidence. | Saved failed job log, exact request identities and documented transient read/configuration results. | Deterministic read regression fails before the fix; all54 service histories and10 read-contract checks pass after it. Exact IDs/records are retained; unrelated errors remain terminal. |
 | Completed: placement replacement/removal plans180 | Close the learner-only C18 planning gap; advances P4/P5 composition and selective assignment. | Validated recursive policies, existing planner/authorizer, learner admission and joint/final records. | Host/native plans preserve tree structure, reject stale/unprepared/unauthorized targets and replay with correct joint/final timing; all54 service tests pass, including planner-produced TCP/QUIC demotion histories. No automatic activation. |
 | Completed: publication-step attribution181 | Identify the observed native storage cost before another optimization; advances P7. | Optional native timings, original reference workload and unchanged publication boundaries. | Native interruption/error/recovery tests pass; complete256-operation reference and instrumented runs pass raw/recovery checks. File and directory synchronization dominate publication means. Reference p99 remains above250ms; no improvement claimed. |
+| Completed: reject unproven write-overlap experiment183 | Evaluate ordinary leader replication during local synchronization; advances P7 evidence. | Original workload, unchanged local/quorum durability and bounded ownership tests. | Candidate passed affected safety suites but failed one run and showed no performance benefit; patch and raw results retained, original production path restored. |
 | Current: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Next: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
 | Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
+
+### Slice183 experimental schema plan — rejected after measurement
+
+This was implemented and tested as an experiment, then removed from the default
+source after it failed to demonstrate a benefit. The patch remains reproducible
+in validation/performance/slice183/candidate.patch.
+
+The measured path performs leader synchronization before starting follower disk
+work. Chapter04 permits overlapping those independent writes, while local
+durability and the validated quorum remain mandatory before commitment. Keep all
+existing synchronization calls; optimize their schedule, not their guarantees.
+
+Add an explicit written-stage core operation over the original validated ticket.
+Only a leader's ordinary append with unchanged durable term/vote, unchanged
+stable membership/commit prefix and a strictly appended bounded suffix can emit
+early Append requests. Only already caught-up peers without an outstanding
+request qualify. Every message names the old committed prefix and the original
+request/session context. No self progress, commit, application delivery, read
+authority, vote reply or follower acknowledgement escapes. Other persistence
+kinds retain their existing durable-first path.
+
+The serialized owner stays suspended until the exact durable completion. Peer
+replies may queue but cannot change core state meanwhile. Durable completion
+validates the same ticket before marking local progress; existing requests may
+be retransmitted afterward. Failure fences the leader; followers may retain an
+uncommitted suffix, which ordinary election/repair rules must handle. No new
+persistent format, generation, quorum predicate or provider is introduced.
+
+Written sends may still be queued or leased when Durable arrives. Track their
+retained charge and append the durable continuation only within the existing
+reservation; retain original send ownership through acceptance/rejection. Do
+not process another group event or release its visit early. Test held sends,
+queued replies, stale tickets, failure/restart, exact quorum timing and bounded
+ownership, including the synchronous-provider path that retains durable-first
+behavior. Then run native TCP/QUIC histories and the unchanged reference gate.
+This advances P1/P7; broader membership/lifecycle and deployment gates remain.
 
 ### Slice182 schema plan — let background platform runs finish
 
@@ -16675,3 +16712,50 @@ remain unchanged. CI stays background feedback and no merge gate was added.
 The exact one-line workflow diff was inspected. This is a scheduling correction,
 not evidence that the still-running platform tests have passed. It advances the
 cross-cutting baseline validation work while P7 and remaining P0–P7 gaps stay open.
+
+### Slice183 experimental evidence — do not adopt unproven write overlap
+
+Implemented and tested the schema above, then restored the original production
+path. The candidate patch is preserved over sourcebase8065503 in
+validation/performance/slice183/candidate.patch, with source/binary hashes,
+complete raw results, partial failure history and exact commands. It is not an
+installed capability. No provider contract or default scheduling changed.
+
+The candidate passed157 ownership,26 Raft,9 worker,54 service and28 native
+benchmark tests. Core-only checks passed151 ownership,12 Raft and3 worker tests;
+all32 membership,24 learner and4 activation-model checks passed. New tests
+covered exact/stale tickets, busy replies, local durability before quorum
+processing, held sends, unchanged reservations, suffix loss and all three
+sync/publication failure points. A worker harness assumption was updated only
+in the experiment to retain/retry an overloaded heartbeat when early replies
+filled a suspended group's control queue. Original failures are retained. Two
+initial learner socket failures came from the sandbox; the socket-enabled run
+passed. Formatting, both strict Clippy profiles, docs and95-contract inventory
+checks passed for the experimental tree.
+
+The unchanged uninstrumented disk reference completed256 operations with
+42.923931s,5.964ops/s and873.492994ms p99. The first candidate failed at operation202
+with Unknown(LeadershipChanged), after137 measured completions. The preceding
+operation took1986.912547ms; replica3 was campaigning in term2. All workers joined.
+This is not a valid latency result or successful recovery gate. The diagnostic
+candidate then completed with46.372587s,5.521ops/s and686.149676ms p99; one directory
+sync reached984.101ms. That is consistent with storage-related timing pressure,
+not proof of the exact failed run's cause. The uninstrumented repeat completed
+with49.011993s,5.223ops/s and1107.213750ms p99. Every successful run recovered320,
+verified original retries and joined all workers. Both valid reference gates
+fail the original250ms budget. Instrumented output is not substituted for it.
+
+These finite shared-host results do not demonstrate a speedup or establish a
+statistical regression. They provide no basis for changing the default path, so
+the experiment was removed. The preserved patch passes git apply --check against
+the restored source; source-tree checks are recorded separately from candidate
+checks. No synchronization was weakened and no election timeout was enlarged.
+
+Macro review: P7 measurement and failure evidence advance; the original latency,
+sustainability and broader attribution requirements remain open. Before another
+scheduling change, verify how often eligible appends actually overlap and trace
+long-barrier/heartbeat interleavings; this dependency follows from the failed
+run and uncertain benefit. Do not repeat the same tuning without new evidence.
+The next linked deliverables remain combined P4/P6 faults and the deployment/
+full-scope audit. The original baseline175 process remains live at observation,
+and CI stays background feedback. Full P0–P7 remains active.

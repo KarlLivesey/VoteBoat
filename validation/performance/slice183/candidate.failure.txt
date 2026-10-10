@@ -1,0 +1,2 @@
+valid_measurement=false phase=measurement completed=137 unresolved=0 poll_rounds=139393 host_poll_ns=2270532254 max_host_poll_ns=666223 persistence_batches=825 worker_events=1647 application_deliveries=410
+original_error=operation 202: non-applied outcome invalidates measurement: Unknown(LeadershipChanged)

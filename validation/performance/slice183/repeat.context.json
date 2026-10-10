@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice183-repeat",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "8065503efe948b6fb023197999a90adbe0997433",
+  "executable_sha256": "aa2ebef83d9902f21bc3c6f0fcf1166d10e35c3456b995b61bd22e3b5d98dce3",
+  "summary_sha256": "fb9f4d09826d91b12db7ee751518fcaefb528c5437ed1e6d63c81c2b7be00cd0",
+  "samples_sha256": "71706ee89175702e33c4284bf5c5eeb57334d0dbf03671d09be11b9cada60f86",
+  "source_changes": "Experimental candidate.patch over source_revision; source and binary hashes in source-binary.sha256. Candidate is rejected for default-path adoption."
+}

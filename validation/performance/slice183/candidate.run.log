@@ -1,0 +1,3 @@
+phase=warmup protocol=TcpTls window=1
+phase=measurement operations=256 groups=1 leaders=1:1
+Error: "operation 202: non-applied outcome invalidates measurement: Unknown(LeadershipChanged)"

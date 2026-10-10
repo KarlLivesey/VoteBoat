@@ -1,0 +1,110 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.16s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 54 tests
+test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+test automatic_read_retries_only_exact_quorum_transition_replies ... ok
+test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+test invalid_administration_is_rejected_before_store_open ... ok
+test invalid_deployment_is_rejected_before_store_creation ... ok
+test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test history::tcp_faulted_client_histories_are_linearizable ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+test history::quic_faulted_client_histories_are_linearizable ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+test trusted_startup_plan_promotes_and_restarts_quic ... ok
+test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 42.98s
+
+     Running tests/worker.rs (target/debug/deps/worker-4cbbf369dde8fba7)
+
+running 9 tests
+test host_worker_stages_exact_effects_and_durable_owner_delivery_without_native_features ... ok
+test native::automatic_timers_submit_and_receive_through_the_timed_worker_helpers ... ok
+test native::admission_reserves_control_and_keeps_credits_until_terminal_delivery ... ok
+test stopped_visit_does_not_discard_other_groups_in_a_shared_completion ... ok
+test native::fatal_barrier_and_panicked_worker_fail_every_accepted_request_without_durable_evidence ... ok
+test native::native_written_stage_never_releases_vote_and_another_group_runs_while_sync_blocks ... ok
+test native::hundred_groups_share_one_native_worker_and_recover_exact_votes ... ok
+test public_host_workers_replicate_read_retry_replace_leader_and_close_independently ... ok
+test native::three_native_wal_workers_replicate_and_recover_acknowledged_operations ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.92s
+
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 28 tests
+test failure::tests::drive_failure_keeps_poll_totals_and_original_error ... ok
+test offered::maintenance::tests::invalid_or_missed_pause_never_silently_becomes_a_shorter_outage ... ok
+test offered::tests::missed_schedule_does_not_shift_intended_start_or_drop_due_ids ... ok
+test offered::maintenance::tests::late_start_still_retains_the_full_requested_pause_duration ... ok
+test offered::maintenance::tests::checkpoint_rejects_leader_term_store_session_and_reference_scope_changes ... ok
+test offered::maintenance::tests::reclaim_requires_the_original_full_ticket_and_never_reports_failure_as_freed_bytes ... ok
+test offered::maintenance::tests::missed_opportunities_are_bounded_skips_and_must_all_be_reported_before_finish ... ok
+test lanes::tests::assignments_preserve_totals_and_never_overlap ... ok
+test offered::maintenance::tests::checkpoint_admission_or_unfinished_snapshot_never_counts_as_completion ... ok
+test offered::tests::group_window_can_refuse_before_global_window_is_full ... ok
+test offered::tests::windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot ... ok
+test offered::tests::no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known ... ok
+test offered::tests::refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts ... ok
+test failure::tests::partial_history_preserves_receipts_and_uncertainty_without_success_summary ... ok
+test offered::tests::stage_failure_retains_both_work_and_cleanup_errors ... ok
+test observe::tests::observer_preserves_real_store_rejection_and_durable_ticket_scope ... ok
+test lanes::tests::partial_replica_startup_joins_previously_opened_nodes ... ok
+test failure::tests::native_capacity_failure_retains_applied_prefix_and_joins_workers ... ok
+test lanes::tests::failed_lane_aborts_prepared_lanes_and_joins_hosts ... ok
+test lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts ... ok
+test lanes::tests::tcp_two_lanes_share_groups_and_recover ... ok
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+test shared::recovery::tcp_recovery_quota_drains_eight_groups_with_foreground_writes ... ok
+test shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart ... ok
+test lanes::tests::quic_two_lanes_share_groups_and_recover ... ok
+test shared::recovery::quic_each_stale_group_requires_snapshot_after_transport_restart ... ok
+test shared::recovery::quic_recovery_quota_drains_eight_groups_with_foreground_writes ... ok
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.20s

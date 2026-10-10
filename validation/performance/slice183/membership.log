@@ -1,0 +1,78 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/activation_model.rs (target/debug/deps/activation_model-7810e5c977a70e2e)
+
+running 4 tests
+test available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner ... ok
+test election_receipts_need_exact_durable_promises_across_restart ... ok
+test final_partial_delivery_requires_request_scope_independent_ballots ... ok
+test distributed_accepted_activation_preserves_election_certificate_intersection ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/learners.rs (target/debug/deps/learners-a70ecf0da9548cb4)
+
+running 24 tests
+test joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting ... ok
+test enrollment_requires_committed_and_accepted_exact_store_assignment ... ok
+test host_learner_enrollment_replication_and_checkpoint_recovery ... ok
+test local_configuration_promotion_checks_all_proofs_before_mutating_journal ... ok
+test local_policy_change_commits_only_with_old_and_new_recursive_predicates ... ok
+test host_configuration_proposal_requires_joint_commit_before_final_and_recovery_replays_it ... ok
+test readiness_refuses_a_current_checkpoint_that_understates_configured_lifetime_capacity ... ok
+test readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_capability ... ok
+test readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes ... ok
+test readiness_expires_when_commit_advances_or_leader_changes_term ... ok
+test missing_pinned_learner_data_prevents_recovery_and_application_exposure ... ok
+test native::failed_assignment_barriers_never_create_a_partially_enrolled_replica ... ok
+test native::native_files_restart_compacted_learner_with_verified_application_and_exact_assignment ... ok
+test failed_native_joint_barrier_fences_and_power_loss_recovers_prior_configuration ... ok
+test queued_promotion_rechecks_live_bindings_and_defaults_to_rejection ... ok
+test native_readiness_reopens_compacted_files_and_requires_fresh_peer_session ... ok
+test native::native_log_and_host_snapshot_use_the_same_learner_contract ... ok
+test readiness_storage_failure_fences_without_reply_and_recovery_discards_pending_exchange ... ok
+test native_configuration_proposals_reopen_committed_joint_and_final_journal ... ok
+test readiness_requires_pinned_compacted_data_and_rechecks_configuration_and_commit ... ok
+test readiness_uses_fresh_context_exact_sessions_and_applied_durable_prefix ... ok
+test native::learner_assignment_written_is_not_enrollment_and_every_torn_frame_recovers_whole_state ... ok
+test native_exchange::quic_readiness_checks_compacted_learner_through_worker_and_original_owner ... ok
+test native_exchange::tcp_readiness_checks_compacted_learner_through_worker_and_original_owner ... ok
+
+test result: ok. 24 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+     Running tests/membership.rs (target/debug/deps/membership-ea2037a743d2381a)
+
+running 32 tests
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test crash::configuration_range_and_admission_charge_owned_metadata ... ok
+test host_store_configuration_journal_conformance ... ok
+test native_store_configuration_journal_conformance ... ok
+test native_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test configuration_snapshots::native::legacy_codec_capability_cannot_drop_membership_metadata ... ok
+test wire_capability_does_not_bypass_live_core_configuration_refusal ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test crash::final_commit_status_requires_recovered_barrier_not_written_or_uncertain_reply ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test crash::actual_files_reopen_resumable_joint_then_committed_final_status ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test crash::physical_reclamation_preserves_joint_final_and_operation_reuse_guards ... ok
+test configuration_snapshots::native::native_configuration_snapshot_recovery_and_physical_reclaim_conformance ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test crash::failed_configuration_barriers_fence_and_recover_without_fabricated_receipts ... ok
+test configuration_snapshots::native::actual_files_preserve_joint_and_final_configuration_bases ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+test crash::every_torn_configuration_and_replacement_frame_recovers_one_complete_state ... ok
+test configuration_snapshots::native::interrupted_snapshot_publication_never_exposes_a_partial_membership_base ... ok
+test configuration_snapshots::native::every_torn_wal_snapshot_switch_retains_the_selected_pinned_membership ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s

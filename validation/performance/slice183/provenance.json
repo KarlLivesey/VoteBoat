@@ -1,0 +1,33 @@
+{
+  "source_base": "8065503efe948b6fb023197999a90adbe0997433",
+  "source_changes": "Candidate source and both binary hashes are in source-binary.sha256. Only the ordinary append scheduling and retained effect ownership change; synchronization primitives are unchanged.",
+  "kernel": "Linux 7.2.9-2-cachyos x86_64",
+  "cpu": "AMD Ryzen 7 9800X3D, 16 threads",
+  "device": "Sabrent SB-ROCKET-NVMe4-2TB",
+  "firmware": "RKT4B5.1",
+  "filesystem": "btrfs",
+  "mount_options": "rw,nosuid,nodev,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2",
+  "physical_hosts": 1,
+  "physical_devices": 1,
+  "replicas": 3,
+  "operations": 256,
+  "warmup": 64,
+  "window": 1,
+  "payload_bytes": 8,
+  "protocol": "TcpTls",
+  "heartbeat_ms": 50,
+  "election_min_ms": 1000,
+  "election_spread_ms": 1000,
+  "background": "Earlier full-suite routed PID1580417 remained running on tmpfs. Shared host; no CPU/device isolation. No builds or other new native test runs during measurements.",
+  "durability": "Unchanged File::sync_all plus atomic manifest rename and directory sync.",
+  "order": [
+    "control",
+    "candidate (failed)",
+    "diagnostic",
+    "repeat"
+  ],
+  "failed_candidate": "Unknown(LeadershipChanged) at operation202 after137 measured completions; workers joined. Partial evidence retained. No valid p99.",
+  "limitations": "Finite local measurements only; no sustainable-capacity, macOS, separate-host or hardware power-loss certification.",
+  "adopted": false,
+  "restoration": "Production src/ and tests/ exactly match source_base after rejecting the candidate. Candidate source is retained only as candidate.patch; separate restored checks are recorded."
+}

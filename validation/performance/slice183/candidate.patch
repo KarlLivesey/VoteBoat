@@ -1,0 +1,709 @@
+diff --git a/src/raft.rs b/src/raft.rs
+index d03563c..26350d4 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -711,8 +711,9 @@ impl Raft {
+         if let Some(base) = &self.durable.snapshot_membership {
+             log = log.checked_add(base.retained_bytes())?;
+         }
+-        // A heartbeat can produce append and read probes for every peer. Each
+-        // append contains at most 64 entries and max_batch_bytes payload/framing.
++        // A heartbeat can produce append and read probes for every peer;
++        // a written append and its durable retry can also coexist. Each append
++        // contains at most 64 entries and max_batch_bytes payload/framing.
+         // Other paths add bounded persist/commit/snapshot-reference metadata.
+         let message = self
+             .limits
+@@ -1844,3 +1845,4 @@ mod batched_repair;
+ mod connections;
+ mod joint_repair;
+ mod snapshot_repair;
++mod written;
+diff --git a/src/runtime/effects.rs b/src/runtime/effects.rs
+index 9118b0f..3732b92 100644
+--- a/src/runtime/effects.rs
++++ b/src/runtime/effects.rs
+@@ -92,6 +92,7 @@ struct Active {
+     continuation_bytes: usize,
+     effects: VecDeque<Effect>,
+     leased: Option<EffectTicket>,
++    leased_bytes: usize,
+     kind: Option<LeaseKind>,
+     waiting: bool,
+     ready: bool,
+@@ -418,6 +419,33 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+         a.effects = effects.into();
+         self.refresh(visit.group)
+     }
++    fn install_worker(
++        &mut self,
++        visit: VisitTicket,
++        effects: Vec<Effect>,
++    ) -> Result<(), EffectOwnerError> {
++        let a = self
++            .active
++            .get_mut(&visit.group)
++            .ok_or(EffectOwnerError::StaleEffect)?;
++        // Written may have released replication while this same visit was
++        // waiting for Durable. Those sends retain their original ownership.
++        if a.visit != visit
++            || a.effects.iter().any(|e| !matches!(e, Effect::Send(_)))
++            || a.kind.is_some_and(|k| !matches!(k, LeaseKind::Send(_)))
++        {
++            return self.fail(EffectOwnerError::ProviderContract);
++        }
++        let capacity = a.effects.capacity();
++        let retained = effect_bytes(a.effects.make_contiguous(), capacity)
++            .and_then(|n| n.checked_add(effect_bytes(&effects, effects.capacity())?))
++            .and_then(|n| n.checked_add(a.leased_bytes));
++        if retained.is_none_or(|n| n > a.reserved) {
++            return self.fail(EffectOwnerError::ReservationTooLarge);
++        }
++        a.effects.extend(effects);
++        self.refresh(visit.group)
++    }
+     /// Bounded ready visits. Returned invocation errors are not client success;
+     /// the host separately budgets result retention and routes original IDs.
+     pub fn advance(
+@@ -549,6 +577,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+                     continuation_bytes: reserved,
+                     effects: VecDeque::new(),
+                     leased: None,
++                    leased_bytes: 0,
+                     kind: None,
+                     waiting: false,
+                     ready: false,
+@@ -602,6 +631,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+                 a.effects = VecDeque::new();
+             }
+             a.leased = Some(ticket);
++            a.leased_bytes = effect_bytes(std::slice::from_ref(&effect), 1)
++                .ok_or(EffectOwnerError::ReservationTooLarge)?;
+             a.kind = Some(kind(&effect));
+             return Ok(Some(EffectLease { ticket, effect }));
+         }
+@@ -772,6 +803,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             }
+             a.effects.extend(effects);
+             a.leased = None;
++            a.leased_bytes = 0;
+             a.kind = None;
+             self.refresh(lease.ticket.visit.group)?;
+             Ok(result)
+@@ -804,6 +836,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+             return Err(EffectOwnerError::StaleEffect);
+         }
+         a.leased = None;
++        a.leased_bytes = 0;
+         a.kind = None;
+         self.refresh(ticket.visit.group)
+     }
+@@ -875,6 +908,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+                     for ticket in &tickets {
+                         let a = self.active.get_mut(&ticket.visit.group).unwrap();
+                         a.leased = None;
++                        a.leased_bytes = 0;
+                         a.kind = None;
+                     }
+                     let _ = self.fail::<()>(EffectOwnerError::ProviderContract);
+@@ -894,6 +928,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+                 for ticket in tickets {
+                     let a = self.active.get_mut(&ticket.visit.group).unwrap();
+                     a.leased = None;
++                    a.leased_bytes = 0;
+                     a.kind = None;
+                     a.waiting = true;
+                 }
+@@ -955,7 +990,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
+                 Ok(e) => e,
+                 Err(e) => return self.fail(EffectOwnerError::Worker(e)),
+             };
+-            self.install(delivery.visit, effects)?;
++            self.install_worker(delivery.visit, effects)?;
+         }
+         Ok(())
+     }
+diff --git a/src/worker.rs b/src/worker.rs
+index a3fc62a..a32e792 100644
+--- a/src/worker.rs
++++ b/src/worker.rs
+@@ -330,10 +330,7 @@ enum Task<'a> {
+ impl Task<'_> {
+     fn apply(self, raft: &mut Raft) -> Result<Vec<Effect>, RaftError> {
+         match self {
+-            Self::Written(ticket) => {
+-                raft.admitted(ticket)?;
+-                Ok(vec![])
+-            }
++            Self::Written(ticket) => raft.written(ticket),
+             Self::Durable(completion) => raft.complete(completion),
+             Self::Failed(error) => {
+                 raft.storage_failed();
+diff --git a/tests/effect_owner.rs b/tests/effect_owner.rs
+index 1ad03d8..71047ae 100644
+--- a/tests/effect_owner.rs
++++ b/tests/effect_owner.rs
+@@ -12,6 +12,8 @@
+ // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+ // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+ // rights and limitations under the RPL.
++#[path = "overlap/owner.rs"]
++mod written;
+ mod application_results {
+     use super::*;
+     fn router<R: ApplicationReceipt>(
+diff --git a/tests/raft.rs b/tests/raft.rs
+index 6028246..a83efa4 100644
+--- a/tests/raft.rs
++++ b/tests/raft.rs
+@@ -13,6 +13,8 @@
+ // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+ // rights and limitations under the RPL.
+ mod support;
++#[path = "overlap/core.rs"]
++mod written;
+ use std::collections::{BTreeMap, BTreeSet, VecDeque};
+ use support::*;
+ #[cfg(feature = "native")]
+diff --git a/tests/worker.rs b/tests/worker.rs
+index 8b22e2a..e7db378 100644
+--- a/tests/worker.rs
++++ b/tests/worker.rs
+@@ -1450,7 +1450,16 @@ fn hold_one_worker_group<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
+         assert!(admitted < 6);
+     }
+     assert!(admitted > 0);
+-    nodes[0].shard.admit(group(1), Event::Heartbeat).unwrap();
++    // Written replication can fill the held group's control queue with peer
++    // replies. Preserve the bounded admission and retry the original event.
++    let heartbeat = nodes[0]
++        .shard
++        .admit(group(1), Event::Heartbeat)
++        .err()
++        .map(|rejected| {
++            assert_eq!(rejected.reason, RuntimeError::Overloaded);
++            *rejected.event
++        });
+     nodes[0]
+         .shard
+         .admit(
+@@ -1466,4 +1475,8 @@ fn hold_one_worker_group<W: PersistenceWorker>(nodes: &mut [WorkerNode<W>]) {
+     let event = nodes[0].held.take().unwrap();
+     nodes[0].deliver(event);
+     worker_pump(nodes, None);
++    if let Some(heartbeat) = heartbeat {
++        nodes[0].shard.admit(group(1), heartbeat).unwrap();
++        worker_pump(nodes, None);
++    }
+ }
+diff --git a/src/raft/written.rs b/src/raft/written.rs
+new file mode 100644
+index 0000000..8bf3b18
+--- /dev/null
++++ b/src/raft/written.rs
+@@ -0,0 +1,96 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Unless explicitly acquired and licensed from Licensor under another license,
++// the contents of this file are subject to the Reciprocal Public License
++// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
++// not copy or use this file in either source code or executable form, except
++// in compliance with the terms and conditions of the RPL.
++//
++// All software distributed under the RPL is provided strictly on an "AS IS"
++// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
++// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
++// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
++// rights and limitations under the RPL.
++//! Ordinary leader replication can overlap its local durability barrier.
++use super::*;
++
++impl Raft {
++    /// Admit an exact written ticket and optionally start follower replication.
++    /// Written bytes confer no durable progress, commitment, application or
++    /// read authority. The core remains busy until exact durable completion.
++    /// `admitted` remains available to hosts choosing durable-first scheduling.
++    pub fn written(&mut self, ticket: LogTicket) -> Result<Vec<Effect>, RaftError> {
++        self.admitted(ticket)?;
++        let Some(entries) = self.overlap_entries() else {
++            return Ok(Vec::new());
++        };
++        let start = self.durable.last_index() + 1;
++        let end = entries.last().unwrap().index;
++        let peers: Vec<_> = self
++            .peers()
++            .into_iter()
++            .filter(|peer| {
++                !self.requests.contains_key(peer) && self.next_index.get(peer) == Some(&start)
++            })
++            .collect();
++        self.request_sequence
++            .checked_add(peers.len() as u64)
++            .ok_or(RaftError::Exhausted)?;
++        let mut effects = Vec::with_capacity(peers.len());
++        for peer in peers {
++            let context = self.context()?;
++            self.requests.insert(
++                peer,
++                Replication {
++                    context,
++                    configuration: self.membership.id(),
++                    start,
++                    end,
++                    snapshot: None,
++                },
++            );
++            effects.push(Effect::Send(self.message(
++                peer,
++                context,
++                Rpc::Append {
++                    previous_index: start - 1,
++                    previous_term: self.durable.last_term(),
++                    entries: entries.clone(),
++                    leader_commit: self.durable.commit_index,
++                },
++            )));
++        }
++        Ok(effects)
++    }
++
++    fn overlap_entries(&self) -> Option<Vec<LogEntry>> {
++        let pending = self.pending.as_ref()?;
++        if self.role != Role::Leader
++            || !self.local_voter()
++            || !matches!(pending.after, After::LeaderAppend)
++            || pending.membership != self.membership
++            || self.membership.joint().is_some()
++            || pending.next.hard_state != self.durable.hard_state
++            || pending.next.commit_index != self.durable.commit_index
++            || pending.next.generation != self.durable.generation
++        {
++            return None;
++        }
++        let suffix = pending.update.suffix.as_ref()?;
++        if suffix.from != self.durable.last_index().checked_add(1)?
++            || suffix.entries.is_empty()
++            || suffix.entries.len() > 64
++            || suffix
++                .entries
++                .iter()
++                .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
++        {
++            return None;
++        }
++        let bytes = suffix.entries.iter().try_fold(256usize, |sum, entry| {
++            sum.checked_add(37)?.checked_add(entry.payload_bytes())
++        })?;
++        (bytes <= self.limits.max_batch_bytes).then(|| suffix.entries.clone())
++    }
++}
+diff --git a/tests/overlap/core.rs b/tests/overlap/core.rs
+new file mode 100644
+index 0000000..6a4d394
+--- /dev/null
++++ b/tests/overlap/core.rs
+@@ -0,0 +1,245 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Unless explicitly acquired and licensed from Licensor under another license,
++// the contents of this file are subject to the Reciprocal Public License
++// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
++// not copy or use this file in either source code or executable form, except
++// in compliance with the terms and conditions of the RPL.
++//
++// All software distributed under the RPL is provided strictly on an "AS IS"
++// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
++// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
++// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
++// rights and limitations under the RPL.
++use super::*;
++
++fn proposed<S: LogStore>(cluster: &mut Cluster<S>) -> LogTicket {
++    let replica = cluster.replicas.get_mut(&1).unwrap();
++    let effects = replica
++        .core
++        .step(Event::Propose {
++            operation: OperationId::new(99).unwrap(),
++            bytes: vec![99],
++        })
++        .unwrap();
++    let [Effect::Persist(update)] = effects.as_slice() else {
++        panic!("expected persistence")
++    };
++    replica
++        .store
++        .append_batch(vec![LogMutation::Update(update.clone())])
++        .unwrap()[0]
++}
++fn leader<S: LogStore>(factory: impl FnMut(u64) -> S) -> Cluster<S> {
++    let mut cluster = Cluster::new(bootstrap(1, 3), factory);
++    cluster.act(1, Event::Campaign);
++    cluster.pump();
++    assert_eq!(cluster.replicas[&1].core.state().commit_index, 1);
++    cluster
++}
++fn messages(effects: Vec<Effect>) -> Vec<Message> {
++    effects
++        .into_iter()
++        .map(|e| match e {
++            Effect::Send(m) => m,
++            _ => panic!("written released a non-send effect"),
++        })
++        .collect()
++}
++#[test]
++fn written_replication_requires_exact_local_durability_before_quorum_progress() {
++    let mut cluster = leader(|id| HostLogStore::new(id.into()));
++    let ticket = proposed(&mut cluster);
++    let before = cluster.replicas[&1].core.state().clone();
++    let mut wrong = ticket;
++    wrong.binding.session = StoreSession::new(99).unwrap();
++    assert_eq!(
++        cluster.replicas.get_mut(&1).unwrap().core.written(wrong),
++        Err(RaftError::WrongCompletion)
++    );
++    let early = messages(
++        cluster
++            .replicas
++            .get_mut(&1)
++            .unwrap()
++            .core
++            .written(ticket)
++            .unwrap(),
++    );
++    assert_eq!(early.len(), 2);
++    assert_eq!(cluster.replicas[&1].core.state(), &before);
++    assert_eq!(
++        cluster.replicas.get_mut(&1).unwrap().core.written(ticket),
++        Err(RaftError::WrongCompletion)
++    );
++    for message in early {
++        assert!(
++            matches!(&message.rpc, Rpc::Append { entries, leader_commit: 1, .. } if entries.len() == 1 && entries[0].index == 2)
++        );
++        cluster.deliver(message);
++    }
++    let replies: Vec<_> = cluster.messages.drain(..).collect();
++    assert_eq!(replies.len(), 2);
++    for reply in &replies {
++        assert_eq!(
++            cluster
++                .replicas
++                .get_mut(&1)
++                .unwrap()
++                .core
++                .step(Event::Receive(reply.clone())),
++            Err(RaftError::Busy)
++        );
++    }
++    assert!(cluster.commands(1).is_empty());
++    assert_eq!(cluster.replicas[&2].core.state().commit_index, 1);
++    let replica = cluster.replicas.get_mut(&1).unwrap();
++    let durable = replica.store.barrier(&[ticket]).unwrap();
++    let after = replica.core.complete(&durable).unwrap();
++    assert!(after.iter().all(|e| matches!(e, Effect::Send(_))));
++    let retry = messages(after);
++    assert_eq!(retry.len(), 2);
++    for message in &retry {
++        assert!(replies
++            .iter()
++            .any(|reply| reply.from == message.to && reply.context == message.context));
++    }
++    for reply in replies {
++        cluster.deliver(reply);
++    }
++    cluster.messages.extend(retry);
++    cluster.pump();
++    for id in 1..=3 {
++        assert_eq!(cluster.commands(id), vec![vec![99]]);
++    }
++}
++
++#[test]
++#[cfg(feature = "native")]
++fn written_leader_power_loss_can_discard_uncommitted_suffix_and_repair() {
++    let devices: Vec<ModelIo> = (0..3).map(|_| ModelIo::default()).collect();
++    let mut cluster = leader(|id| {
++        NativeLogStore::create(
++            devices[id as usize - 1].clone(),
++            identity(id.into()),
++            LogLimits::default(),
++        )
++        .unwrap()
++    });
++    let ticket = proposed(&mut cluster);
++    let early = messages(
++        cluster
++            .replicas
++            .get_mut(&1)
++            .unwrap()
++            .core
++            .written(ticket)
++            .unwrap(),
++    );
++    cluster.deliver(early.into_iter().find(|m| m.to == node(2)).unwrap());
++    assert_eq!(cluster.replicas[&2].core.state().last_index(), 2);
++    cluster.messages.clear();
++    cluster.replicas.get_mut(&1).unwrap().core.storage_failed();
++    devices[0].0.borrow_mut().power_loss();
++    let store =
++        NativeLogStore::recover(devices[0].clone(), identity(1), LogLimits::default()).unwrap();
++    assert_eq!(store.state(group(1)).unwrap().last_index(), 1);
++    let core = Raft::recover(
++        node(1),
++        store.binding(),
++        store.state(group(1)).unwrap(),
++        store.limits(),
++    )
++    .unwrap();
++    cluster.replicas.insert(1, Replica { core, store });
++    cluster.partition(&[2]);
++    cluster.act(3, Event::Campaign);
++    cluster.pump();
++    assert_eq!(cluster.replicas[&3].core.role(), Role::Leader);
++    cluster.propose(3, 100, 100);
++    cluster.heal();
++    cluster.act(3, Event::Heartbeat);
++    cluster.pump();
++    for id in 1..=3 {
++        assert_eq!(cluster.commands(id), vec![vec![100]]);
++    }
++}
++
++#[test]
++#[cfg(feature = "native")]
++fn written_barrier_failures_never_commit_but_a_new_leader_can_preserve_replicated_data() {
++    for fault in [Fault::Sync, Fault::PublishBefore, Fault::PublishAfter] {
++        let devices: Vec<ModelIo> = (0..3).map(|_| ModelIo::default()).collect();
++        let mut cluster = leader(|id| {
++            NativeLogStore::create(
++                devices[id as usize - 1].clone(),
++                identity(id.into()),
++                LogLimits::default(),
++            )
++            .unwrap()
++        });
++        let ticket = proposed(&mut cluster);
++        let early = messages(
++            cluster
++                .replicas
++                .get_mut(&1)
++                .unwrap()
++                .core
++                .written(ticket)
++                .unwrap(),
++        );
++        for message in early {
++            cluster.deliver(message);
++        }
++        cluster.messages.clear();
++        devices[0].0.borrow_mut().fault = fault;
++        let replica = cluster.replicas.get_mut(&1).unwrap();
++        assert!(replica.store.barrier(&[ticket]).is_err());
++        replica.core.storage_failed();
++        assert_eq!(replica.core.state().commit_index, 1);
++        assert!(cluster.commands(1).is_empty());
++        devices[0].0.borrow_mut().power_loss();
++        let store =
++            NativeLogStore::recover(devices[0].clone(), identity(1), LogLimits::default()).unwrap();
++        let core = Raft::recover(
++            node(1),
++            store.binding(),
++            store.state(group(1)).unwrap(),
++            store.limits(),
++        )
++        .unwrap();
++        cluster.replicas.insert(1, Replica { core, store });
++        cluster.act(2, Event::Campaign);
++        cluster.pump();
++        assert_eq!(cluster.replicas[&2].core.role(), Role::Leader);
++        for id in 1..=3 {
++            assert_eq!(cluster.commands(id), vec![vec![99]]);
++        }
++    }
++}
++
++#[test]
++fn written_does_not_replace_an_outstanding_peer_request() {
++    let mut cluster = leader(|id| HostLogStore::new(id.into()));
++    cluster.act(1, Event::Heartbeat);
++    let outstanding: Vec<_> = cluster.messages.drain(..).collect();
++    assert_eq!(outstanding.len(), 2);
++    let ticket = proposed(&mut cluster);
++    assert!(cluster
++        .replicas
++        .get_mut(&1)
++        .unwrap()
++        .core
++        .written(ticket)
++        .unwrap()
++        .is_empty());
++    let replica = cluster.replicas.get_mut(&1).unwrap();
++    let durable = replica.store.barrier(&[ticket]).unwrap();
++    let retry = messages(replica.core.complete(&durable).unwrap());
++    for message in retry {
++        assert!(outstanding
++            .iter()
++            .any(|old| old.to == message.to && old.context == message.context));
++    }
++}
+diff --git a/tests/overlap/owner.rs b/tests/overlap/owner.rs
+new file mode 100644
+index 0000000..024d883
+--- /dev/null
++++ b/tests/overlap/owner.rs
+@@ -0,0 +1,152 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Unless explicitly acquired and licensed from Licensor under another license,
++// the contents of this file are subject to the Reciprocal Public License
++// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
++// not copy or use this file in either source code or executable form, except
++// in compliance with the terms and conditions of the RPL.
++//
++// All software distributed under the RPL is provided strictly on an "AS IS"
++// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
++// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
++// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
++// rights and limitations under the RPL.
++use super::*;
++type Peers = Vec<(Owner, HostWorker)>;
++fn peers() -> Peers {
++    let mut peers: Peers = (1..=3)
++        .map(|id| {
++            let mut store = HostLogStore::new(id.into());
++            let runtime = timed(id, &mut store, 1, 3);
++            let worker = HostWorker::new(store);
++            (
++                EffectOwner::new(runtime, worker.binding(), EffectOwnerLimits::default()).unwrap(),
++                worker,
++            )
++        })
++        .collect();
++    peers[0].0.admit(group(1), Event::Campaign).unwrap();
++    drain(&mut peers);
++    assert_eq!(peers[0].0.core(group(1)).unwrap().role(), Role::Leader);
++    peers
++}
++fn drain(peers: &mut Peers) {
++    for _ in 0..1000 {
++        let mut messages = Vec::new();
++        for (owner, worker) in peers.iter_mut() {
++            for event in worker.poll(1) {
++                owner.deliver_worker(event, MonoTime(0)).unwrap();
++            }
++            for step in owner.advance(MonoTime(0), 10).unwrap() {
++                assert!(step.error.is_none());
++            }
++            while let Some(lease) = owner.take_effect().unwrap() {
++                match &lease.effect {
++                    Effect::Persist(_) => {
++                        owner
++                            .submit_persists(worker, vec![lease], MonoTime(0))
++                            .unwrap();
++                    }
++                    Effect::Send(message) => {
++                        messages.push(message.clone());
++                        owner.release(lease, 0, MonoTime(0)).unwrap();
++                    }
++                    Effect::Committed(entries) => {
++                        let through = entries.last().unwrap().index;
++                        owner.release(lease, through, MonoTime(0)).unwrap();
++                    }
++                    _ => panic!("unexpected output"),
++                }
++            }
++        }
++        for message in messages {
++            peers[message.to.get() as usize - 1]
++                .0
++                .admit(group(1), Event::Receive(message))
++                .unwrap();
++        }
++        if peers
++            .iter()
++            .all(|(owner, worker)| owner.is_drained() && worker.is_drained())
++        {
++            return;
++        }
++    }
++    panic!("cluster failed to drain")
++}
++fn begin(owner: &mut Owner, worker: &mut HostWorker) -> WorkerEvent {
++    owner
++        .admit(
++            group(1),
++            Event::Propose {
++                operation: OperationId::new(99).unwrap(),
++                bytes: vec![99],
++            },
++        )
++        .unwrap();
++    owner.advance(MonoTime(0), 1).unwrap();
++    let lease = owner.take_effect().unwrap().unwrap();
++    owner
++        .submit_persists(worker, vec![lease], MonoTime(0))
++        .unwrap();
++    let written = worker.poll(1).pop().unwrap();
++    assert!(matches!(written, WorkerEvent::Written { .. }));
++    written
++}
++#[test]
++fn durable_continuation_preserves_queued_and_held_written_sends() {
++    for hold in [false, true] {
++        let mut peers = peers();
++        let (owner, worker) = &mut peers[0];
++        let written = begin(owner, worker);
++        let reserved = owner.usage().reserved_bytes;
++        owner.deliver_worker(written, MonoTime(0)).unwrap();
++        let lease = hold.then(|| owner.take_effect().unwrap().unwrap());
++        assert_eq!(owner.core(group(1)).unwrap().state().last_index(), 1);
++        let durable = worker.poll(1).pop().unwrap();
++        owner.deliver_worker(durable, MonoTime(0)).unwrap();
++        assert_eq!(owner.usage().reserved_bytes, reserved);
++        assert_eq!(owner.core(group(1)).unwrap().state().commit_index, 1);
++        assert!(!owner.is_drained());
++        if let Some(lease) = lease {
++            assert!(owner.take_effect().unwrap().is_none());
++            let Effect::Send(ref message) = lease.effect else {
++                panic!("expected send")
++            };
++            let mut wrong = EffectLease {
++                ticket: lease.ticket,
++                effect: lease.effect.clone(),
++            };
++            if let Effect::Send(message) = &mut wrong.effect {
++                message.to = node(99);
++            }
++            let rejected = owner.release(wrong, 0, MonoTime(0)).unwrap_err();
++            assert_eq!(rejected.reason, EffectOwnerError::StaleEffect);
++            assert_eq!(owner.usage().reserved_bytes, reserved);
++            let peer = message.to.get() as usize - 1;
++            let event = Event::Receive(message.clone());
++            owner.release(lease, 0, MonoTime(0)).unwrap();
++            peers[peer].0.admit(group(1), event).unwrap();
++        }
++        drain(&mut peers);
++        assert_eq!(peers[0].0.core(group(1)).unwrap().state().commit_index, 2);
++    }
++}
++#[test]
++fn failed_sync_fences_owner_and_retains_only_the_held_send_charge() {
++    let mut peers = peers();
++    let (owner, worker) = &mut peers[0];
++    let written = begin(owner, worker);
++    owner.deliver_worker(written, MonoTime(0)).unwrap();
++    let lease = owner.take_effect().unwrap().unwrap();
++    let reserved = owner.usage().reserved_bytes;
++    worker.fail = true;
++    let failed = worker.poll(1).pop().unwrap();
++    assert!(owner.deliver_worker(failed, MonoTime(0)).is_err());
++    assert!(owner.is_failed());
++    assert_eq!(owner.usage().reserved_bytes, reserved);
++    assert_eq!(owner.core(group(1)).unwrap().state().commit_index, 1);
++    owner.discard_failed(lease).unwrap();
++    assert_eq!(owner.usage().reserved_bytes, 0);
++}

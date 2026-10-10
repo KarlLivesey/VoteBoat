@@ -1,0 +1,9 @@
+{
+  "gate": "tcp-startup-serial-p99",
+  "budget_us": 250000,
+  "observed_p99_us": 873492.994,
+  "applied_ops_s": 5.964,
+  "operations": 256,
+  "passed": false,
+  "evidence_scope": "finite reference run; raw checker and native recovery gates required"
+}

@@ -1,0 +1,61 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.32s
+     Running tests/activation_model.rs (target/debug/deps/activation_model-7810e5c977a70e2e)
+
+running 4 tests
+test available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner ... ok
+test election_receipts_need_exact_durable_promises_across_restart ... ok
+test final_partial_delivery_requires_request_scope_independent_ballots ... ok
+test distributed_accepted_activation_preserves_election_certificate_intersection ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/learners.rs (target/debug/deps/learners-a70ecf0da9548cb4)
+
+running 24 tests
+test host_configuration_proposal_requires_joint_commit_before_final_and_recovery_replays_it ... ok
+test joint_or_policy_transition_cannot_use_learner_recovery_to_open_dynamic_voting ... ok
+test enrollment_requires_committed_and_accepted_exact_store_assignment ... ok
+test local_configuration_promotion_checks_all_proofs_before_mutating_journal ... ok
+test failed_native_joint_barrier_fences_and_power_loss_recovers_prior_configuration ... ok
+test native_configuration_proposals_reopen_committed_joint_and_final_journal ... ok
+test host_learner_enrollment_replication_and_checkpoint_recovery ... ok
+test missing_pinned_learner_data_prevents_recovery_and_application_exposure ... ok
+test native_exchange::tcp_readiness_checks_compacted_learner_through_worker_and_original_owner ... FAILED
+test local_policy_change_commits_only_with_old_and_new_recursive_predicates ... ok
+test native::failed_assignment_barriers_never_create_a_partially_enrolled_replica ... ok
+test native::native_log_and_host_snapshot_use_the_same_learner_contract ... ok
+test readiness_refuses_a_current_checkpoint_that_understates_configured_lifetime_capacity ... ok
+test readiness_storage_failure_fences_without_reply_and_recovery_discards_pending_exchange ... ok
+test readiness_rejects_changed_capabilities_provider_bindings_and_pending_writes ... ok
+test native_readiness_reopens_compacted_files_and_requires_fresh_peer_session ... ok
+test readiness_expires_when_commit_advances_or_leader_changes_term ... ok
+test native_exchange::quic_readiness_checks_compacted_learner_through_worker_and_original_owner ... FAILED
+test queued_promotion_rechecks_live_bindings_and_defaults_to_rejection ... ok
+test readiness_uses_fresh_context_exact_sessions_and_applied_durable_prefix ... ok
+test readiness_exchange_suspends_verification_rejects_stale_completion_and_denies_capability ... ok
+test readiness_requires_pinned_compacted_data_and_rechecks_configuration_and_commit ... ok
+test native::native_files_restart_compacted_learner_with_verified_application_and_exact_assignment ... ok
+test native::learner_assignment_written_is_not_enrollment_and_every_torn_frame_recovers_whole_state ... ok
+
+failures:
+
+---- native_exchange::tcp_readiness_checks_compacted_learner_through_worker_and_original_owner stdout ----
+
+thread 'native_exchange::tcp_readiness_checks_compacted_learner_through_worker_and_original_owner' (491) panicked at tests/learners.rs:868:61:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native_exchange::quic_readiness_checks_compacted_learner_through_worker_and_original_owner stdout ----
+
+thread 'native_exchange::quic_readiness_checks_compacted_learner_through_worker_and_original_owner' (490) panicked at tests/learners.rs:826:67:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+
+failures:
+    native_exchange::quic_readiness_checks_compacted_learner_through_worker_and_original_owner
+    native_exchange::tcp_readiness_checks_compacted_learner_through_worker_and_original_owner
+
+test result: FAILED. 22 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test learners`

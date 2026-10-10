@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice183-control",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "1b460ef2b05110bd0dd38d18e8990c0f2b70c485",
+  "executable_sha256": "397f5951599e20d74ccb21812c430ae545654216e307b97995d59a8bd40b4bd6",
+  "summary_sha256": "5ab2e60f2ddd724a16da0144ee540ce8587cbf1e04fbb9249f50fad0e8413a99",
+  "samples_sha256": "99ad79437d36fa634654f393dc40245a828ba7235a34cb29abb359bec3ec754f",
+  "source_changes": "Preserved slice181 control binary; see its original source-binary.sha256. No production changes in intervening slice182."
+}

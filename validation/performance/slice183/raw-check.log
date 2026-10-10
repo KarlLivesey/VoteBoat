@@ -1,0 +1,3 @@
+target/bench-slice183-control: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+target/bench-slice183-diagnostic: 256 receipts, group routing/history, windows and latency/rate arithmetic pass
+target/bench-slice183-repeat: 256 receipts, group routing/history, windows and latency/rate arithmetic pass

@@ -5411,3 +5411,16 @@ means are dominated by file and directory synchronization, rather than staging
 open/write or rename. Parallel sums and live partial snapshots are not client
 critical-path measurements. P7 sustainable performance and other P0–P7 acceptance
 remain incomplete.
+
+## Slice183 — measured replication-overlap experiment rejected
+
+A tested Written-stage leader replication candidate was evaluated against the
+unchanged native disk reference. Control p99 was873.493ms; the first candidate
+failed after a leadership change; its uninstrumented repeat had1107.214ms p99.
+The diagnostic completed but cannot replace the reference gate. Successful runs
+passed full native reopen/retry/join checks. The original250ms budget remains
+unmet. No performance improvement is claimed and the production source was
+restored. Candidate code, focused safety/ownership tests, failures, raw samples,
+binary hashes and scope remain in [slice183](performance/slice183/README.md).
+Both the removed experimental tree and restored default receive separate local
+formatting/strict-Clippy verification. Full P0–P7 and platform evidence remain open.

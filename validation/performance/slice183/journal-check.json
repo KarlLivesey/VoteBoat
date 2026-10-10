@@ -1,0 +1,32 @@
+{
+  "scope": "finite completed native startup diagnostic; parallel durations overlap; not critical-path proof",
+  "measurement_deltas": [
+    {
+      "replica": "1",
+      "io_append_calls": "512",
+      "io_append_ns": "2812323",
+      "sync_calls": "512",
+      "sync_ns": "10752084088",
+      "publish_calls": "512",
+      "publish_ns": "18683907165"
+    },
+    {
+      "replica": "2",
+      "io_append_calls": "511",
+      "io_append_ns": "2387478",
+      "sync_calls": "511",
+      "sync_ns": "10394752395",
+      "publish_calls": "511",
+      "publish_ns": "22375130881"
+    },
+    {
+      "replica": "3",
+      "io_append_calls": "511",
+      "io_append_ns": "2385446",
+      "sync_calls": "511",
+      "sync_ns": "10437279637",
+      "publish_calls": "511",
+      "publish_ns": "21573827040"
+    }
+  ]
+}
