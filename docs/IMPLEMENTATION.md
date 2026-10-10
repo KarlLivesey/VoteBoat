@@ -12681,3 +12681,13 @@ suite also passes. Final lint/format/inventory results are recorded in REPORT.md
 Current155b3 remains actual TCP/QUIC service composition with restart/retirement;
 next156 remains metadata authority movement. Broader fault/platform/public API/P7
 requirements and the original full goal remain open.
+
+## README simplification
+
+Reduced the README to a short project description, development/platform/license
+status, one existing demo command and links to the service guide, contracts,
+roadmap and validation. Removed duplicated subsystem detail and stale progress
+claims; detailed documentation remains in its existing files. This documentation
+edit changes no runtime behavior or milestone scope. Checked local link targets,
+the example declaration and command against the existing guide, and diff whitespace;
+no runtime tests were needed or run for this edit.
