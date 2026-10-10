@@ -23,8 +23,15 @@ macro_rules! delegate {
 }
 impl Application {
     pub fn new(counter: Counter, enabled: bool) -> Result<Self, Failure> {
+        Self::for_group(group(), counter, enabled)
+    }
+    pub fn for_group(
+        group: GroupIdentity,
+        counter: Counter,
+        enabled: bool,
+    ) -> Result<Self, Failure> {
         Ok(if enabled {
-            Self::Maintenance(checked(Maintenance::new(group(), 2, 64, counter))?)
+            Self::Maintenance(checked(Maintenance::new(group, 2, 64, counter))?)
         } else {
             Self::Counter(counter)
         })

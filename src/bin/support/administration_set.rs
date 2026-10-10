@@ -16,7 +16,11 @@ impl Administrations {
             groups: [(plan.group(), plan)].into(),
         }
     }
-    pub fn load(path: &Path, stores: &BTreeMap<NodeId, StoreIdentity>) -> Result<Self, Failure> {
+    pub fn load(
+        path: &Path,
+        stores: &BTreeMap<NodeId, StoreIdentity>,
+        maintenance: bool,
+    ) -> Result<Self, Failure> {
         let data = super::service_setup::material(path, 65536)?;
         let mut lines = std::str::from_utf8(&data)?.lines();
         if lines.next() != Some("voteboat-counter-group-admin-v1") {
@@ -50,7 +54,8 @@ impl Administrations {
                 .checked_add(bytes.len())
                 .filter(|n| *n <= 1024 * 1024)
                 .ok_or("aggregate plan file byte limit")?;
-            let plan = Administration::from_data(group, &bytes, stores, Mode::Provisioned, false)?;
+            let plan =
+                Administration::from_data(group, &bytes, stores, Mode::Provisioned, maintenance)?;
             retained = retained
                 .checked_add(plan.retained_bytes())
                 .filter(|n| *n <= 4 * 1024 * 1024)

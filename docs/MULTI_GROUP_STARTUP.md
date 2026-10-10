@@ -93,7 +93,7 @@ across explicit leader rejections. An interrupted write remains unknown: retry
 the same complete command. Different groups may reuse an operation ID.
 
 Unprefixed existing commands retain their original group1 scope. Node controls
-such as `quit` do not accept a group prefix. Multi-group leadership/drain
+such as `quit` do not accept a group prefix. Multi-group drain
 execution and endpoint-discovery profiles are not yet connected to this
 executable mode; incompatible options are rejected before startup.
 WAL maintenance and automatic checkpoints operate through the existing shared
@@ -132,3 +132,31 @@ sharing pending requests, completion replies or durable configuration history.
 Groups without a selected plan remain readable but cannot be configured through
 this interface. Permissions are checked against the exact group/incarnation both
 when admitting a command and when executing its configuration proposal.
+
+## Group leadership maintenance
+
+Add `--leadership-maintenance enabled` consistently on every peer to use
+the existing schema2 maintenance application for each declared group. Create
+fresh stores with that profile and retain it on recovery. Existing plain-counter
+stores require migration; changing the flag does not convert their records or
+checkpoints. The profile uses the existing wire8 transport.
+
+The [leadership commands](MAINTENANCE.md) accept an exact group prefix:
+
+```sh
+voteboat-counter client 40000 1 group 7 3 move-leader 40001 9 2 2 1 --service-tls ./tls --principal 3
+voteboat-counter client 40000 2 group 7 3 leadership-status 40001 --service-tls ./tls --principal 3
+```
+
+The move arguments retain their existing meaning: operation ID, expected stable
+configuration, target node, exact store and store incarnation. `resume-leadership`
+and `cancel-leadership` take the same group prefix and original operation ID.
+Address the current group leader explicitly. Status is a quorum-backed read of
+the durable historical record, not proof that the target is still leader now.
+
+Each group has its own attempt, deadline, cancellation and completed record.
+Different groups may reuse an operation ID. A cancellation in one group cannot
+cancel another group's same-ID handoff. Restart resumes durable pending work;
+completed records remain idempotent. The existing group administration plans
+also use schema2 readiness requirements in this profile. This enables individual
+group handoffs; coordinated node drain remains separate work.

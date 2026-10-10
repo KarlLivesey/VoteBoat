@@ -19,6 +19,9 @@ pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
     let end = Instant::now() + Duration::from_secs(20);
     loop {
         for id in 1..=3 {
+            if c.children[id - 1].is_none() {
+                continue;
+            }
             let output = c.request(id, &["group", group, incarnation, "status"]);
             if output.status.success()
                 && String::from_utf8_lossy(&output.stdout).contains("role=Leader")
@@ -177,7 +180,7 @@ fn malformed_group_manifests_and_incompatible_profiles_create_no_store() {
         assert!(!c.root.join("1").exists());
     }
     fs::write(c.groups.as_ref().unwrap(), GROUPS).unwrap();
-    c.leadership_maintenance = true;
+    c.node_drain = true;
     refused(&mut c, "multi-group administration");
     assert!(!c.root.join("1").exists());
 }

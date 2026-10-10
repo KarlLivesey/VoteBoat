@@ -39,6 +39,8 @@ mod group_command;
 mod group_setup;
 #[path = "support/leadership_commands.rs"]
 mod leadership_commands;
+#[path = "support/leadership_set.rs"]
+mod leadership_set;
 #[path = "support/local_client.rs"]
 mod local_client;
 #[path = "support/placement_format.rs"]
@@ -101,13 +103,14 @@ Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; cred
 Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
 Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
 Multi-group membership: --group-admin-plans FILE selects per-group trusted plans; requires --groups and --service-access.\n\
-Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.";
+Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.\n\
+Multi-group leadership: --groups FILE --leadership-maintenance enabled; use the same group prefix for move-leader, leadership-status, resume-leadership and cancel-leadership.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
     Write(ClientTicket),
     Read(ReadInvocationTicket),
     Configure(GroupIdentity, OperationId),
-    CancelLeadership(voteboat::maintenance::LeadershipRecord),
+    CancelLeadership(GroupIdentity, voteboat::maintenance::LeadershipRecord),
     Drain(u64, OperationId),
 }
 enum Phase {
@@ -265,7 +268,7 @@ fn command(
 fn outputs(
     service: &mut Service,
     connection: &mut Option<Connection>,
-    leadership: &mut leadership_commands::Driver,
+    leadership: &mut leadership_set::Leaders,
     drain: &mut Option<drain_commands::Driver>,
 ) -> Result<(), Failure> {
     while let Some(output) = service.poll_client() {
@@ -354,24 +357,7 @@ fn prepare_service(
             store: config.startup.store,
         },
     )?;
-    let administration = if let Some(path) = &options.group_admin_plans {
-        Some(administration_set::Administrations::load(
-            path,
-            &config.provisioned_stores,
-        )?)
-    } else {
-        plan_path
-            .map(|path| {
-                administration::Administration::load(
-                    path,
-                    &config.provisioned_stores,
-                    admin_mode,
-                    options.leadership_maintenance,
-                )
-                .map(administration_set::Administrations::single)
-            })
-            .transpose()?
-    };
+    let administration = options.administration(&config.provisioned_stores)?;
     let drain_plan = options
         .membership_drain
         .as_deref()
@@ -393,7 +379,11 @@ fn prepare_service(
         }
     }
     let peer_address = config.startup.listen;
-    let prepared = group_setup::prepare(config, options.groups.as_deref())?;
+    let prepared = group_setup::prepare(
+        config,
+        options.groups.as_deref(),
+        options.leadership_maintenance,
+    )?;
     if administration
         .as_ref()
         .is_some_and(|a| a.groups().any(|g| !prepared.contains(g)))
@@ -457,7 +447,7 @@ fn serve(
     let mut connection: Option<Connection> = None;
     let mut quit = false;
     let mut shutdown_started = None;
-    let mut leadership = leadership_commands::Driver::default();
+    let mut leadership = leadership_set::Leaders::new(&service);
     loop {
         let time = now(start);
         if credentials.poll() {
@@ -560,13 +550,13 @@ fn finish_service(
 fn advance_leadership(
     service: &mut Service,
     connection: &mut Option<Connection>,
-    leadership: &mut leadership_commands::Driver,
+    leadership: &mut leadership_set::Leaders,
     drain: &mut Option<drain_commands::Driver>,
     quit: bool,
 ) -> Result<(), Failure> {
     outputs(service, connection, leadership, drain)?;
     if let Some(drain) = drain {
-        drain.tick(service, leadership, connection)?;
+        drain.tick(service, leadership.get_mut(group())?, connection)?;
     }
     leadership.advance_cancel(service, connection);
     leadership.tick(service, quit)
@@ -607,18 +597,24 @@ fn advance_administration(
 }
 fn maintenance_command(
     service: &mut Service,
-    leadership: &mut leadership_commands::Driver,
+    leadership: &mut leadership_set::Leaders,
     drain: &mut Option<drain_commands::Driver>,
     input: &str,
     quit: &mut bool,
 ) -> Option<Result<Phase, String>> {
-    let words = input.split_whitespace().collect::<Vec<_>>();
+    let selected = match group_command::resolve(service, input) {
+        Ok(selected) => selected,
+        Err(error) => return Some(Err(error)),
+    };
+    let words = selected.text.split_whitespace().collect::<Vec<_>>();
     if drain_commands::is_command(words.first().copied()) {
         return Some(
             drain
                 .as_mut()
                 .ok_or_else(|| "drain requires --node-drain enabled".into())
-                .and_then(|d| d.command(service, leadership, &words, quit)),
+                .and_then(|d| {
+                    d.command(service, leadership.get_mut(selected.group)?, &words, quit)
+                }),
         );
     }
     if !leadership_commands::is_command(words.first().copied()) {
@@ -627,7 +623,11 @@ fn maintenance_command(
     if drain.as_ref().is_some_and(drain_commands::Driver::busy) {
         return Some(Err("drain publication in progress".into()));
     }
-    Some(leadership.command(service, &words))
+    Some(
+        leadership
+            .get_mut(selected.group)
+            .and_then(|driver| driver.command(service, &words)),
+    )
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
@@ -827,7 +827,7 @@ fn finish_connection(
             Pending::Read(t) => {
                 checked(service.cancel_read(t))?;
             }
-            Pending::CancelLeadership(_) | Pending::Drain(_, _) => (),
+            Pending::CancelLeadership(_, _) | Pending::Drain(_, _) => (),
             Pending::Configure(group, _) => {
                 if let Some(admin) = administration.as_mut() {
                     admin
@@ -856,6 +856,30 @@ struct StartupOptions {
     group_admin_plans: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
+    fn administration(
+        &self,
+        stores: &std::collections::BTreeMap<NodeId, StoreIdentity>,
+    ) -> Result<Option<administration_set::Administrations>, Failure> {
+        if let Some(path) = &self.group_admin_plans {
+            return Ok(Some(administration_set::Administrations::load(
+                path,
+                stores,
+                self.leadership_maintenance,
+            )?));
+        }
+        self.admin_plan
+            .as_deref()
+            .map(|path| {
+                administration::Administration::load(
+                    path,
+                    stores,
+                    self.remote_admin,
+                    self.leadership_maintenance,
+                )
+                .map(administration_set::Administrations::single)
+            })
+            .transpose()
+    }
     fn validate_profiles(&self, root: &Path) -> Result<(), Failure> {
         if self.group_admin_plans.is_some()
             && (self.groups.is_none() || self.service_access.is_none())
@@ -865,11 +889,10 @@ impl StartupOptions {
         if self.groups.is_some()
             && (self.service_access.is_none()
                 || self.admin_plan.is_some()
-                || self.leadership_maintenance
                 || self.node_drain
                 || self.discovery_peers.is_some())
         {
-            return Err("--groups requires --service-access; multi-group administration uses --group-admin-plans; leadership, drain and discovery profiles are not yet supported".into());
+            return Err("--groups requires --service-access; multi-group administration uses --group-admin-plans; drain and discovery profiles are not yet supported".into());
         }
         if self.leadership_maintenance
             && (self.service_access.is_none()

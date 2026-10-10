@@ -51,6 +51,8 @@ mod drain_runner;
 mod events;
 #[path = "counter_service/group_admin.rs"]
 mod group_admin;
+#[path = "counter_service/group_leadership.rs"]
+mod group_leadership;
 #[path = "counter_service/groups.rs"]
 mod groups;
 #[path = "counter_service/history.rs"]

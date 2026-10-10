@@ -52,6 +52,11 @@ See [evidence](../validation/baseline/slice196b1/README.md).
 
 ## Authenticated counter executable
 
+Shared nodes can apply the same commands to individual groups using the
+[multi-group maintenance profile](MULTI_GROUP_STARTUP.md#group-leadership-maintenance).
+Each command and its attempt state retain the selected group identity.
+Coordinated multi-group drain remains a separate workflow.
+
 On a new three-node cluster, append these options to **every** serve command:
 
 ```text

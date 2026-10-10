@@ -5,7 +5,7 @@ const OP: &str = "7001";
 fn plan(config: u64) -> String {
     format!("voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1\nreplica 2 2\nreplica 3 3\njoint {OP} {config} {} {} 3 m:2 v:1 v:2\nfinal {OP} {} {}\n", config + 1, config + 2, config + 1, config + 2)
 }
-fn setup(quic: bool) -> Cluster {
+pub(super) fn setup(quic: bool) -> Cluster {
     let mut c = groups::setup(quic);
     fs::write(c.root.join("seven.plan"), plan(9)).unwrap();
     fs::write(c.root.join("eight.plan"), plan(11)).unwrap();
@@ -73,7 +73,7 @@ fn status(c: &Cluster, id: usize, group: &str, incarnation: &str, expected: &str
         std::thread::sleep(Duration::from_millis(10));
     }
 }
-fn configure(c: &mut Cluster, group: &str, incarnation: &str) {
+pub(super) fn configure(c: &mut Cluster, group: &str, incarnation: &str) {
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         let leader = groups::leader(c, group, incarnation);

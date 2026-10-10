@@ -26,37 +26,58 @@ fn operation(text: &str) -> Result<OperationId, String> {
 pub(super) fn application(
     service: &Service,
 ) -> Result<&Maintenance<voteboat::application::Counter>, String> {
+    application_for(service, group())
+}
+fn application_for(
+    service: &Service,
+    group: GroupIdentity,
+) -> Result<&Maintenance<voteboat::application::Counter>, String> {
     service
         .local()
         .applications
-        .get(&group())
+        .get(&group)
         .ok_or("missing group")?
         .maintenance()
 }
-fn core(service: &Service) -> Result<&Raft, String> {
-    let core = service.local().owner.core(group()).ok_or("missing group")?;
+fn core(service: &Service, group: GroupIdentity) -> Result<&Raft, String> {
+    let core = service.local().owner.core(group).ok_or("missing group")?;
     if core.role() != Role::Leader {
         return Err("NOT_LEADER".into());
     }
     Ok(core)
 }
-fn lookup(service: &Service, operation: OperationId) -> Result<LeadershipRecord, String> {
-    core(service)?;
-    application(service)?
+fn lookup(
+    service: &Service,
+    group: GroupIdentity,
+    operation: OperationId,
+) -> Result<LeadershipRecord, String> {
+    core(service, group)?;
+    application_for(service, group)?
         .record(operation)
         .ok_or_else(|| "inconclusive local absence; query leadership-status".into())
 }
-fn submit(service: &mut Service, command: LeadershipCommand) -> Result<Phase, String> {
-    let ticket = propose(service, command)?;
+fn submit(
+    service: &mut Service,
+    group: GroupIdentity,
+    command: LeadershipCommand,
+) -> Result<Phase, String> {
+    let ticket = propose_for(service, group, command)?;
     Ok(Phase::Pending(Pending::Write(ticket)))
 }
 pub(super) fn propose(
     service: &mut Service,
     command: LeadershipCommand,
 ) -> Result<ClientTicket, String> {
+    propose_for(service, group(), command)
+}
+fn propose_for(
+    service: &mut Service,
+    group: GroupIdentity,
+    command: LeadershipCommand,
+) -> Result<ClientTicket, String> {
     service
         .propose_maintenance(ClientRequest {
-            group: group(),
+            group,
             operation: command.intent().request.operation,
             bytes: command.encode().map_err(|e| format!("{e:?}"))?,
         })
@@ -65,13 +86,13 @@ pub(super) fn propose(
             e => format!("{e:?}"),
         })
 }
-fn begin(service: &mut Service, words: &[&str]) -> Result<Phase, String> {
+fn begin(service: &mut Service, group: GroupIdentity, words: &[&str]) -> Result<Phase, String> {
     let ["move-leader", op, config, target, store, incarnation] = words else {
         return Err("expected move-leader OP CONFIG TARGET STORE INC".into());
     };
     let op = operation(op)?;
-    let core = core(service)?;
-    let source = application(service)?.record(op).map_or(
+    let core = core(service, group)?;
+    let source = application_for(service, group)?.record(op).map_or(
         PeerIdentity {
             node: core.local_node(),
             store: core.storage_binding().identity,
@@ -108,21 +129,21 @@ fn begin(service: &mut Service, words: &[&str]) -> Result<Phase, String> {
             },
         },
     };
-    submit(service, LeadershipCommand::Begin(intent))
+    submit(service, group, LeadershipCommand::Begin(intent))
 }
 impl Driver {
     pub fn command(&mut self, service: &mut Service, words: &[&str]) -> Result<Phase, String> {
-        application(service)?;
+        application_for(service, self.group)?;
         match words {
-            ["move-leader", ..] => begin(service, words),
+            ["move-leader", ..] => begin(service, self.group, words),
             ["leadership-status", op] | ["resume-leadership", op] => {
                 let op = operation(op)?;
                 if words[0] == "resume-leadership" {
-                    let record = lookup(service, op)?;
+                    let record = lookup(service, self.group, op)?;
                     self.resume(record);
                 }
                 let ticket = service
-                    .read_maintenance(group(), MaintenanceQuery::Leadership(op))
+                    .read_maintenance(self.group, MaintenanceQuery::Leadership(op))
                     .map_err(|r| match r.reason {
                         ReadInvocationError::Consensus(RaftError::NotLeader) => "NOT_LEADER".into(),
                         e => format!("{e:?}"),
@@ -131,18 +152,20 @@ impl Driver {
                 Ok(Phase::Pending(Pending::Read(ticket)))
             }
             ["cancel-leadership", op] => {
-                let record = lookup(service, operation(op)?)?;
+                let record = lookup(service, self.group, operation(op)?)?;
                 if record.phase != LeadershipPhase::Pending {
                     let ticket = service
                         .read_maintenance(
-                            group(),
+                            self.group,
                             MaintenanceQuery::Leadership(record.intent.request.operation),
                         )
                         .map_err(|r| format!("{:?}", r.reason))?;
                     return Ok(Phase::Pending(Pending::Read(ticket)));
                 }
                 self.suspend(service, record)?;
-                Ok(Phase::Pending(Pending::CancelLeadership(record)))
+                Ok(Phase::Pending(Pending::CancelLeadership(
+                    self.group, record,
+                )))
             }
             _ => Err("invalid leadership command".into()),
         }
@@ -151,19 +174,23 @@ impl Driver {
         let Some(c) = connection else {
             return;
         };
-        let Phase::Pending(Pending::CancelLeadership(record)) = c.phase else {
+        let Phase::Pending(Pending::CancelLeadership(group, record)) = c.phase else {
             return;
         };
+        if group != self.group {
+            return;
+        }
         if service
             .local()
             .owner
-            .core(group())
+            .core(self.group)
             .is_some_and(|c| c.leadership_transfer().is_some())
         {
             return;
         }
         match submit(
             service,
+            self.group,
             LeadershipCommand::Cancel {
                 intent: record.intent,
                 index: record.index,

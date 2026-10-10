@@ -25,7 +25,11 @@ pub enum Prepared {
         BTreeMap<GroupIdentity, Application>,
     ),
 }
-pub fn prepare(mut config: NativeMemberStartup, path: Option<&Path>) -> Result<Prepared, Failure> {
+pub fn prepare(
+    mut config: NativeMemberStartup,
+    path: Option<&Path>,
+    maintenance: bool,
+) -> Result<Prepared, Failure> {
     let Some(path) = path else {
         return Ok(Prepared::Single(Box::new(config)));
     };
@@ -46,7 +50,12 @@ pub fn prepare(mut config: NativeMemberStartup, path: Option<&Path>) -> Result<P
     }
     let applications = groups
         .iter()
-        .map(|b| Ok((b.group, Application::new(setup::application()?, false)?)))
+        .map(|b| {
+            Ok((
+                b.group,
+                Application::for_group(b.group, setup::application()?, maintenance)?,
+            ))
+        })
         .collect::<Result<BTreeMap<_, _>, Failure>>()?;
     config.startup.bootstrap = groups.remove(0);
     config.startup.tls = checked(config.startup.tls.with_wire_version(8))?;

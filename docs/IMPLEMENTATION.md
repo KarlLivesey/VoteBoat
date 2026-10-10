@@ -134,9 +134,71 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4a: mixed-role Rust drain | Cover the actual complete source assignment set; advances P4/P2 and chapter09. |197b3 dispatcher, original journal and local source readiness contracts. | Combined bounded voter/learner plans, exact identity/configuration binding, no spurious learner actions, TCP/QUIC four-group shared-WAL partial progress and restart with preserved data receipts. |
 | Completed197b4b1: native multi-group startup | Open the complete production assignment set in one native node; advances P2 and enables197b4b. | Existing generic NodeParts, native provider/recovery contracts and197b4a assignment checks. | Public bounded startup with exact applications and original bootstraps; shared WAL/endpoint; TCP/QUIC checkpoint/reopen/retry, incomplete-inventory refusal and joined failure cleanup. |
 | Completed197b4b2a: executable group data commands | Make the shared node usable from actual service processes; advances P2 and enables197b4b2b. |197b4b1 native startup, existing scoped command authorization and recursive policy grammar. | Explicit bounded original group file, group-addressed status/read/add/checkpoint and exact-scope authentication; TCP/QUIC independent operation histories survive checkpoint/reopen. |
-| Current197b4b2b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2a executable group selection,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Group-bound membership commands are implemented in197b4b2b1, with validation recorded below. Next extend group-bound leadership execution, then bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. Complete multi-group drain remains planned work. |
+| Current197b4b2b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2a executable group selection,197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Group-bound membership and leadership commands are implemented in197b4b2b1/2, with validation recorded below. Next compose bounded operator start/status/resume/stop preserving the original complete plan and refusing premature source stop. Complete multi-group drain remains planned work. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b4b2b2 schema plan — group-bound leadership execution
+
+The executable leadership driver and maintenance application currently bind
+group1. Add explicit group construction for both while retaining existing
+single-group wrappers. The complete bounded startup group set owns one small
+leadership driver per group; each driver retains only its own attempt, deadline,
+suspension and exact client ticket. A driver set routes completion by ticket
+group and polls those attempts without consuming another group's ownership.
+This owner is required to reuse the existing durable handoff protocol across
+the shared node; it creates no new consensus command or persistence format.
+
+Permit `--groups` with the explicit `--leadership-maintenance enabled` profile.
+Every group then uses the existing schema2 maintenance envelope and wire8;
+administration readiness must use that same application envelope. Existing
+plain-counter data cannot be hot-wrapped; recovery with the wrong profile must
+fail. Allow group-prefixed move/status/resume/cancel commands, resolving and
+authorizing the exact scope before dispatch. Cancellation waits bind group plus
+original record. Completion and retry continue to use existing durable records,
+target identities, committed-current-term checks and bounded local attempts.
+
+Acceptance: actual three-process TCP and QUIC services exercise independent
+groups reusing an operation ID, exact-scope permission and target refusal,
+pending and completed recovery, data retry preservation, and cancellation that
+cannot cancel another group's same-ID intent. Inspect durable checkpoint/WAL
+state and retain single-group leadership, drain and membership regressions.
+This advances P4/P2 and197b4b2b. Next is complete bounded multi-group drain
+start/status/resume/stop; then198 assignment listing and199 Linux/macOS operator
+recovery remain in the full plan. Complete P0–P7 remains the objective.
+
+### Slice197b4b2b2 implementation and validation
+
+Implemented group-prefixed move-leader, leadership-status, resume-leadership
+and cancel-leadership. The startup's bounded application map owns one driver
+per exact group; local attempts, deadlines, suspension and completion tickets
+are independent. Cancellation waits include the group identity. The existing
+single-group drain uses the same original-group driver. Maintenance applications
+are now explicitly constructed for each group, and group administration plans
+use their actual schema2 readiness envelope. The opt-in profile uses existing
+wire8 and maintenance records; no new public provider or storage format is added.
+
+Three new process tests pass: TCP/WAL and QUIC/checkpoint histories recover
+independent pending intents, preserve cancellation of a same-ID intent in a
+different group, complete both handoffs, retry completed records and reopen
+their historical results. They inspect native durable application recovery
+before restarting; the QUIC case verifies checkpoint bases include the pending
+records. Group-scoped permissions, wrong target-store rejection, unaffected
+group1 state, data deduplication and subsequent membership changes are covered.
+The third test refuses both directions of plain/maintenance profile changes
+and recovers the original data with its original profile.
+
+The complete counter suite passes108 service tests plus nine command unit tests.
+Formatting, all four strict Clippy profiles, warnings-denied API documentation,
+and105-contract inventory metadata pass. Initial checks found a103-line startup
+function, a fixture integer-type mismatch, stopped-node lookup and a missing
+follower-commit wait before all-replica file assertions. Plan loading moved to
+the existing options owner; fixture fixes preserve the actual process crashes
+and original durability assertions. No lint thresholds or protocol checks were
+relaxed. [Commands, failures and final logs](../validation/baseline/slice197b4b2b2/README.md)
+retain those limits. These are local Linux finite histories; coordinated
+multi-group drain, assignment listing, macOS execution and the full remaining
+P0–P7 acceptance ledger remain active.
 
 ### Slice197b4b2b1 schema plan — group-bound membership execution
 

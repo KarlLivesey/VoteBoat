@@ -1,0 +1,25 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... FAILED
+test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... ok
+
+failures:
+
+---- group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents stdout ----
+
+thread 'group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents' (717710) panicked at tests/counter_service/group_leadership.rs:106:18:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 105 filtered out; finished in 7.62s
+
+error: test failed, to rerun pass `--test counter_service`

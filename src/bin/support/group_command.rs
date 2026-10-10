@@ -41,7 +41,16 @@ pub fn parse(input: &str) -> Result<Command<'_>, String> {
     };
     if !matches!(
         word(text)?.0,
-        "status" | "read" | "add" | "checkpoint" | "configure" | "configuration-status"
+        "status"
+            | "read"
+            | "add"
+            | "checkpoint"
+            | "configure"
+            | "configuration-status"
+            | "move-leader"
+            | "leadership-status"
+            | "resume-leadership"
+            | "cancel-leadership"
     ) {
         return Err("unsupported group command".into());
     }

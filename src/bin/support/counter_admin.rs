@@ -245,7 +245,7 @@ impl Administration {
             .map_err(|(e, _)| format!("{e:?}"))?;
         use voteboat::application::StateMachine;
         let requirements =
-            super::counter_application::Application::new(application()?, maintenance)?
+            super::counter_application::Application::for_group(group, application()?, maintenance)?
                 .deployment_requirements()
                 .ok_or("application has no deployment requirements")?;
         let (plan, dynamic) = if mode == Mode::Targets {
