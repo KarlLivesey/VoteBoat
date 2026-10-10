@@ -116,9 +116,9 @@ Current evidence includes actual same-authority nested creation/reservation,
 source fence, child import, metadata publication/parent completion and activation,
 twice; mixed parent history, full data-history control reserve, corrupt checkpoint
 refusal and native journal interruption are also covered. Parent observations
-in that mixed-history owner test are supplied by the host fixture. New-profile
-TCP/QUIC service composition, later full-transfer retirement/reclamation and
-broader provider/failure/platform evidence remain155b and subsequent work.
+in that mixed-history owner test are supplied by the host fixture. Selected new-profile TCP/QUIC service composition and later full-transfer
+retirement/reclamation are covered by155b1–b3; broader provider/failure/platform
+evidence remains open.
 Slice155b2 now supports partial-profile retirement lineage after complete
 remaining-data transfer and explicit retention release; see RETIREMENT.md.
 
@@ -147,4 +147,8 @@ or split -> successor activation/new writes/retries and checkpoint recovery.
 Native journal cuts cover the final source fence. Slice155b2 now retires the
 original partial owner after successor activation and explicit retention release,
 with selected native-file reclamation evidence.
-TCP/QUIC composition remains155b3.
+Slice155b3 adds four native TCP/TLS/QUIC × WAL/checkpoint relocation histories
+with two prior partial delegations, lost-phase results, explicit retirement,
+checkpoint-selected physical reclamation and ancestor-offline successor service.
+Both delegated children preserve imported data and retries. The native remaining
+move uses one successor; multi-target behavior has the separate embedding tests.

@@ -62,7 +62,7 @@ fn metadata_profile(foreign: bool, moves: bool) -> LifecycleDirectory {
         base
     })
 }
-fn source(foreign: bool) -> Source {
+pub(super) fn source(foreign: bool) -> Source {
     source_profile(foreign, false)
 }
 fn source_profile(foreign: bool, moves: bool) -> Source {

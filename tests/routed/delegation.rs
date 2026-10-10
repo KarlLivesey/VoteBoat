@@ -988,6 +988,9 @@ mod cross_authority;
 #[path = "retained.rs"]
 mod retained;
 
+#[path = "imported_partial.rs"]
+mod imported_partial;
+
 #[path = "deletion.rs"]
 mod deletion;
 

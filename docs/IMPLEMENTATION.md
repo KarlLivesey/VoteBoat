@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; native composition155b3 and metadata authority movement156 remain; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 implemented; metadata authority movement156 remains; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -159,29 +159,31 @@ old-parent refresh survives lost results, restart and metadata outage. It closes
 this selected reparenting path; broader lifecycle/provider/fault coverage remains.
 Evidence and limits are recorded in the slice154f section below.
 
-1. **155, activated partial sources (current; P5/P6).** Let an imported child
-   delegate part of its scope and retain the remainder. Depends on original
-   activation/import lineage, retained source contracts and completed parent
-   grant continuity154. Check imported data/retries/outbox, exact activation
-   lineage, both service paths, repeated moves, refusal before activation and
-   restart. The embedding path155a is implemented with actual nested transfers
-   and journal recovery.155b1 now adds an explicit remaining-data move after
-   partial delegation.155b2 now completes retirement lineage and selected
-   native-file reclamation; current155b3 composes native network recovery. Advances the
-   recursive-routing and split/merge milestones.
-2. **156, metadata authority movement (next; P5).** Move metadata authority
+155 is now implemented for the selected embedding and native compositions:
+two partial delegations, remaining ownership transfer, and retirement/reclamation.
+The full macro roadmap remains active; broader fault/platform cases are not implied.
+
+1. **156, metadata authority movement (current; P5).** Move metadata authority
    while retaining responsibility identity and original lifecycle facts. Depends
    on the completed lifecycle contracts and explicit source/target authority
-   fencing, transfer and publication. Check stale routing, original operation
-   recovery, no concurrent authority and native restart/outage service. Advances
-   recursive responsibilities without adding an ancestor to ordinary writes.
-3. **Remaining public administration/API coverage (following; P4).** Make
-   the already implemented trusted Node/executable membership operations usable
-   through bounded public service ingress. Depends on existing authorization,
-   durable operation status/resumption and named P4 failure evidence. Check
-   admission/authorization refusal, original operation recovery across leader
-   changes/restart and transport integration. Reuse the existing consensus and
-   host provider seams; this does not block155/156 or the static service.
+   fencing, transfer and publication. Before implementation inspect the directory
+   payload/export contract and sketch how original operation history and authority
+   lineage survive the move. Check stale routing, original operation recovery,
+   no concurrent authority and native restart/outage service. Advances recursive
+   responsibilities without adding an ancestor to ordinary writes.
+2. **Remaining public administration/API coverage (next; P4).** Make the existing
+   trusted Node/executable membership operations usable through bounded public
+   service ingress. Depends on authorization, durable operation status/resumption
+   and named P4 failure evidence. Check admission/authorization refusal, original
+   operation recovery across leader changes/restart and transport integration.
+   Reuse the existing consensus and host-provider seams; no separate engine.
+3. **Resolve the retained QUIC catch-up failure (following; P7).** Reproduce the
+   archived paused-follower failure, identify its cause and fix the relevant
+   transport/recovery contract before tuning throughput. Depends on the existing
+   workload, limits, raw evidence and unchanged committed/applied acceptance gate.
+   Check resumed follower catch-up, bounded retained work, exact retries and
+   recovery alongside the passing TCP case. Advances reliable transport and the
+   measured performance milestone; it does not replace wider P7 work.
 
 Metadata authority movement156 stays in the macro plan below. Completed slices
 are evidence, not extra release prerequisites.
@@ -12691,3 +12693,61 @@ claims; detailed documentation remains in its existing files. This documentation
 edit changes no runtime behavior or milestone scope. Checked local link targets,
 the example declaration and command against the existing guide, and diff whitespace;
 no runtime tests were needed or run for this edit.
+
+## Slice155b3 schema plan — partial imported owners over native transport
+
+Use the existing native Node fixture, a schema14 lifecycle directory, the scoped
+source, and a retirement guard selected around the partial target before its
+first bootstrap. Keep the imported owner, two delegated children and remaining
+successor as separate three-replica groups with explicit native file ownership.
+No new production contract or schema is planned. Group creation remains committed
+metadata followed by verified local provisioning, never an unbound replacement.
+
+Run original import/activation, two scoped delegations and grant adoptions, then
+remaining ownership transfer and retirement. Derive each next command from actual
+committed native observations. At selected phase boundaries lose the client reply,
+join workers, reopen the original profile and verify exact retry plus identical
+facts. WAL and checkpoint recovery use the same flow over TCP and QUIC. Check
+non-service before activation and after fencing, retained-range service between
+delegations, unchanged earlier children, and preserved original operation results.
+Retirement needs all activated successors and explicit retention release; verify
+its lineage and exact retry after recovery, then checkpoint/reclaim/reopen.
+Close all native owners before removing test files. These selected socket/file
+histories supplement155a/b1/b2; they do not establish arbitrary fault coverage or
+macOS execution. This advances P5/P6;156 remains the next deliverable.
+
+## Slice155b3 implemented — native partial import, remaining move and retirement
+
+The new native history selects Directory14 and the partial target retirement
+profile before bootstrap. It commits actual Staging creation records and uses
+verified native provisioning for imported21 and children30/31. All six groups
+(metadata1, original source20, imported21, children30/31 and successor40) have
+independent three-replica WAL/snapshot owners. The existing native fixture and
+public contracts are reused; no production contract or encoding changed.
+
+Actual quorum observations drive original import, two partial delegations,
+parent completion, grant adoption, the remaining96..128 move and successor
+activation. Each control phase loses its client observation, optionally
+checkpoints, aborts/joins its selected workers, reopens the original profile,
+compares restored application checkpoints and retries the exact command.
+Non-serving staged imports, scoped/full fences, retained100 service between
+moves and unchanged previous child manifests are checked.
+
+Retirement follows successor activation and an explicit release. Its unread
+result first recovers from the old live snapshot/WAL tail; exact freeze, compact
+lineage and result remain, while owner service/export refuse. Checkpoint cases
+publish the retired image, reclaim through exact Node completion tickets, verify
+smaller WALs with no retained application commands and reopen retired state.
+Original creation bindings remain byte-identical. Both delegated children and
+successor serve imported data and original operation retries with metadata and
+old owners stopped; successor new writes survive restart. Stopped durable files
+remain byte-identical. All workers are joined before temporary files are removed.
+
+The four Linux TCP/TLS/QUIC × WAL/checkpoint cases pass. The27 related core-only
+retained-insertion/retirement cases pass; Clippy, formatting and inventory checks
+are recorded in REPORT.md. Initial fixture compile issues (private helper scope,
+query variant and borrow shape) were fixed locally without changing production
+contracts. This closes the selected155 native composition, not arbitrary faults,
+macOS, remaining-range multi-target network coverage or the full P5/P6 exits.
+The macro review keeps156 current, public administration next and the known QUIC
+paused-follower failure following; the complete P0–P7 goal remains active.

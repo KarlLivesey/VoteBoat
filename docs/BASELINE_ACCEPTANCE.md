@@ -240,3 +240,12 @@ truncation and rehashed-history refusal are checked. Native-file interrupted
 publication/tail recovery, verified retired checkpoint and physical WAL reclaim
 pass. This closes the selected embedding cleanup path, not native TCP/QUIC155b3,
 metadata-authority movement156 or the broader P5/P6/full-goal requirements.
+
+Slice155b3 adds four selected native TCP/TLS/QUIC × WAL/checkpoint histories:
+actual imported-owner partial delegation twice, remaining relocation, explicit
+retirement and checkpoint-selected WAL reclamation. Lost control results survive
+worker join/reopen/exact retry. Creation bindings, old-child manifests, imported
+data/retries and final successor writes are checked, including service with all
+metadata/old owners stopped and their durable files unchanged. Multi-target
+remaining-transfer network coverage, wider faults, macOS, authority movement156
+and the other P0–P7 exits remain open.

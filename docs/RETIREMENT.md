@@ -138,3 +138,13 @@ retry, rejected altered histories and native-file interrupted snapshot publicati
 retirement-tail replay, WAL reclamation and final retired reopen. Parent/slot
 lineage replay uses supplied observations. TCP/QUIC composition of this new partial
 retirement path remains155b3; wider fault/platform/retention coverage remains open.
+
+Slice155b3 runs the partial-import retirement path over native TCP/TLS and QUIC,
+with WAL and checkpoint recovery. Imported21 delegates to30/31, transfers its
+remaining range to40, then retires from the actual final publication and target
+activation observations with an explicit release. An unread retirement first
+recovers through the previous live image and WAL tail. Checkpoint cases then
+reclaim the retired WAL and reopen without application commands. Exact lineage,
+freeze, refusal and retirement retry remain. Both children and40 serve their
+imported data/retries after metadata and old owners stop. These are selected
+Linux relocation histories, not arbitrary fault, platform or retention coverage.

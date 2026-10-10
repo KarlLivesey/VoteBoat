@@ -4597,3 +4597,34 @@ stays active, with native service composition155b3 and metadata movement156 next
 Final validation: all53 matching core-only cases pass. All-target/all-feature
 Clippy with warnings denied, formatting, whitespace and the81-contract inventory
 check pass. All test/check sessions are terminal; no remote CI result is required.
+
+## Slice155b3 — native partial-import lifecycle
+
+`cargo +stable test --all-features --locked --offline --test routed partial_import`
+passes all four new cases: TCP/TLS and QUIC, each with WAL and checkpoint recovery.
+The final run includes nonempty data in both delegated ranges and the remaining
+range. Each lifecycle command is committed by an actual three-replica group,
+loses its original client observation, reopens its selected native provider and
+retries after checkpoint/state equality checks. Original import, two subsequent
+scoped handoffs, parent completion, remaining relocation and final activation
+all use native committed observations. Staged targets do not serve; frozen ranges
+refuse, while the retained range remains usable before the full fence.
+
+Retirement first recovers from an older live checkpoint/WAL tail, preserves the
+exact compact lineage/freeze/result and releases live owner service. The two
+checkpoint cases then publish a retired snapshot, physically reclaim through
+exact Node request completions, and reopen with no application commands in the
+retained WAL. Original Staging creation bindings survive. Both children retain
+nonempty imported data and original operation results; the successor also accepts
+a new write and recovers it. These operations run with metadata and old owners
+stopped, and their files remain unchanged. All owners are joined before cleanup.
+
+`cargo +stable test --no-default-features --locked --offline --test retained_insertion --test retirement`
+passes27 cases (22 retained insertion,5 retirement). All-target/all-feature Clippy
+with warnings denied, `cargo +stable fmt --all -- --check`, `git diff --check` and
+the81-contract inventory check pass. No new production schema/provider is added.
+
+These are selected Linux loopback/native-file histories with one destination for
+the remaining range. They supplement the embedding split-destination and byte-
+cut fault tests; they do not establish arbitrary faults, hardware power loss,
+macOS, separate hosts or metadata-authority movement. The full goal remains active.
