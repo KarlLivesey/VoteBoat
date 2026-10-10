@@ -774,3 +774,31 @@ Wire7 adds committed stable checkpoint learner recovery under the documented
 old-view-voter trust checks; disk formats are unchanged. Existing interruption
 histories were rerun with TCP and QUIC wire7 peers. Forced network execution of
 the new final-checkpoint path remains a separate acceptance history.
+
+## Optional automatic WAL reclamation
+
+Append `--wal-reclaim-ms 60000` to a serve/recover command to request periodic
+physical reclamation every minute. Omit it to retain manual operation. A positive
+interval is required; each node schedules its own selected worker. Inspect the
+local, volatile result with:
+
+```sh
+target/debug/voteboat-counter client 43000 1 maintenance
+```
+
+The latest completion reports the worker sequence and before/after byte counts;
+it is not a quorum receipt. One job runs at a time, overload retries after the
+interval, and shutdown drains admitted work. The native worker bounds each
+replacement image by its configured WAL ceiling. This rewrites the live image
+and can delay foreground work on that worker; it is not incremental cleaning.
+Checkpoints remain explicit (`client ... checkpoint`): reclamation cannot remove
+the live log suffix or advance the durable application boundary by itself.
+
+Rust hosts use `Node::configure_wal_maintenance(Some(WalMaintenancePolicy {
+interval_ms, retry_ms, max_bytes }))` and inspect `Node::wal_maintenance()`.
+`PersistenceWorker::reclaim_limit()` advertises support; default host providers
+decline it. Poll with monotonic host time as usual; no extra thread or clock is
+created. Manual `reclaim` results stay in `poll_reclaim`, while scheduled results
+replace only the latest maintenance diagnostic. Disabling/changing the policy
+requires its admitted job to finish. On restart, configure a new schedule after
+normal durable recovery.

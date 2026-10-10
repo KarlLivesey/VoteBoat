@@ -93,12 +93,40 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: baseline evidence review and next gap | Advance full P0–P7 feature completion without repeating satisfied checks. | Current acceptance ledger and actual local/CI results, including Counter histories164. | Identify a concrete unresolved requirement and its smallest complete usable path; record API, state, ownership, failure/restart and acceptance plan. |
-| Next: implement the selected unresolved capability | Close the next demonstrated baseline gap using existing composition points. | The evidence review identifies its contract and dependencies. | Complete a usable vertical slice with relevant conformance/recovery coverage, strict lint and accurate scope evidence. |
-| Following: compose the new capability with its next dependency | Advance the same user-visible macro milestone without isolated scaffolding. | Selected capability and its actual restart/ownership contracts. | Exercise the combined path and failures; update the full-roadmap acceptance map without claiming untested scope. |
+| Completed: automatic physical WAL maintenance165 | Let Rust hosts and the service schedule bounded reclamation without manual requests; advances measured tuning and the usable service. | Existing crash-tested LogStore reclaim, worker admission and Node result ownership. | Explicit opt-in policy, monotonic deadlines, one accepted job, bounded diagnostics, manual-result isolation, rejection/backoff and drain/failure tests; native reclaim/reopen evidence and both strict lint profiles. |
+| Current: automatic checkpoint progression | Keep long-running service replay/log retention bounded; advances the same service/tuning milestones. | Current reclaim scheduling plus existing verified checkpoint/apply boundaries. | Bounded fair group selection, explicit checkpoint threshold, no repeated pending checkpoints, real service writes/checkpoint/reclaim/reopen with original retries intact. |
+| Next: maintenance under recovery pressure | Validate maintenance alongside recovering replicas and shared-group work; advances broader P1/P2/P7 validation. | Both automatic policies, recovery quotas162 and existing snapshot catch-up. | Selected TCP/QUIC lag/restart and pressure histories preserve known operations, source/checkpoint dependencies and bounded admission; no unsupported latency guarantee. |
+| Following: bounded operational event reporting | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded event cardinality/retention, overflow reporting and failing-sink isolation with no consensus dependency. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
+
+#### 165 schema sketch (planned, before implementation)
+
+Add an opt-in Node WAL policy with interval, retry delay and maximum replacement
+image bytes. The selected PersistenceWorker advertises an optional immutable
+reclaim byte ceiling; the default is unsupported. NativeLogWorker exposes its
+existing store capability. No second worker, timer thread, store or durability
+token is introduced. Host-supplied MonoTime drives one deadline and one accepted
+ticket; late polling coalesces elapsed periods, rather than queuing catch-up jobs.
+
+Waiting -> accepted -> matched completion -> next interval. Busy admission backs
+off; other pre-admission errors stop scheduling. Bounded storage refusal backs
+off; uncertain/corrupt/fenced completion follows the existing Node recovery path.
+Keep only the latest automatic completion and admission error as diagnostics.
+Manual receipts remain in the original queue and block automatic admission until
+consumed. Policy changes reject while automatic work is accepted. Shutdown stops
+new work and consumes the automatic completion while draining; abort/recovery
+preserves pending ticket and diagnostics with the original providers. Restart
+reconstructs a new local schedule after ordinary durable recovery; no wall-clock
+deadline, generation or ticket is persisted. Deadline overflow stops scheduling.
+
+This slice schedules physical reclamation only: it cannot advance a checkpoint,
+erase live suffixes/fences, or promise incremental I/O or foreground latency.
+The explicit service option uses the same Node policy and surfaces diagnostics.
+Acceptance covers disabled/default capability, validation before work, exact
+deadline/backoff behavior, manual isolation, held completion and shutdown,
+failure ownership, native byte reduction/reopen and service restart/retry.
 
 #### 154d3 schema sketch (planned, before implementation)
 
@@ -15308,3 +15336,39 @@ full P0–P7 objective and platform/fault obligations active.
 histories retained with full output. Both strict Clippy profiles, formatting
 and89-record inventory checks pass. Previous unsuccessful service runs remain
 in the evidence directory rather than being reported as passes.
+
+### Slice165 — opt-in automatic physical WAL reclamation
+
+Implemented the schema above through `WalMaintenancePolicy`,
+`WalMaintenanceStatus`, `Node::configure_wal_maintenance` and the existing
+PersistenceWorker/ReplicaDriver. Native workers advertise the immutable
+replacement-image ceiling through `reclaim_limit`; host workers default to
+unsupported. No consensus effect, durability token, new resource owner or wire/
+disk format was added. Scheduling is disabled by default. Late polls coalesce,
+only one job can be outstanding, manual receipts retain their original consumer,
+and overload/safe refusal retries use an explicit deadline. Nonretryable errors
+stop scheduling; uncertain/corrupt/fenced storage results retain Node recovery.
+Automatic pending/completed state accompanies the original providers on abort.
+
+The executable opts in with `--wal-reclaim-ms MS` and reports the latest local
+result through `client ... maintenance`, classified as an Inspect action for
+service authorization. The CLI policy uses the native store's configured byte
+ceiling and the selected interval as its retry delay. The small option helper
+keeps this policy assembly out of the already bounded service loop.
+
+Validation:41 Node tests pass in each of the all-feature and core-only builds,
+including6 new scheduling/ownership/failure tests. A core-only deadline exhaustion
+test passes. The existing native100-group history now also performs scheduled
+physical reclamation, requires positive byte reduction, closes/joins/reopens,
+and rechecks original retries and new writes; it passes in21.82s. All8 log-reclaim
+and5 worker-maintenance conformance/crash tests pass. All42 executable tests pass
+in42.07s, including new TCP/QUIC automatic reclaim/restart/retry histories and
+invalid-option rejection before files/listeners. Formatting and both strict
+Clippy profiles pass; inventory metadata validates90 contracts. Exact commands,
+outputs and initial fixture/lint corrections: `validation/baseline/slice165`.
+
+This is full-live-image physical replacement, not automatic logical compaction,
+incremental cleaning, disk admission, bandwidth shaping or a foreground latency
+guarantee. Checkpoints remain explicit; automatic checkpoint progression is the
+next mini-plan item. The macro milestone remains open. The inspected CI run for
+previous commit f8e903d was still active, so no new macOS execution claim follows.

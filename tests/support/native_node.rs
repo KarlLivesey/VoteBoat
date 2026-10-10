@@ -270,11 +270,12 @@ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
         reclaimed += report.before_bytes - report.after_bytes;
     }
     assert!(reclaimed > 0);
+    facade_scheduled_reclaim(&mut nodes);
     let bindings = nodes
         .iter()
         .map(|n| n.local().owner.identity().store)
         .collect::<Vec<_>>();
-    facade_close(nodes);
+    facade_close_at(nodes, MonoTime(1));
     let mut nodes = facade_make(&root, true);
     for (n, old) in nodes.iter().zip(bindings) {
         assert_ne!(n.local().owner.identity().store, old);
@@ -290,4 +291,24 @@ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
     facade_proposals(&mut nodes, 4, 1, 15);
     facade_close(nodes);
     std::fs::remove_dir_all(root).unwrap();
+}
+
+fn facade_scheduled_reclaim(nodes: &mut [Facade]) {
+    for n in nodes.iter_mut() {
+        n.configure_wal_maintenance(Some(WalMaintenancePolicy {
+            interval_ms: 1, retry_ms: 1, max_bytes: LogLimits::default().max_wal_bytes,
+        })).unwrap();
+    }
+    facade_drive_at(nodes, MonoTime(1), |nodes| nodes.iter().all(|n| n.wal_maintenance().last_completion.is_some()));
+    let mut reclaimed = 0;
+    for n in nodes {
+        let state = n.wal_maintenance();
+        let report = state.last_completion.as_ref().unwrap().result.as_ref().unwrap();
+        reclaimed += report.before_bytes - report.after_bytes;
+        assert!(state.pending.is_none());
+        assert_eq!(state.next_deadline, Some(MonoTime(2)));
+        assert_eq!(n.replica_usage().reclaims, 0);
+        assert!(n.poll_reclaim().is_none());
+    }
+    assert!(reclaimed > 0);
 }

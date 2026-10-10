@@ -328,7 +328,9 @@ impl Channel {
             return Ok(());
         };
         let action = match text.split_whitespace().next() {
-            Some("status" | "metrics" | "configuration-status") => ServiceAction::Inspect,
+            Some("status" | "metrics" | "maintenance" | "configuration-status") => {
+                ServiceAction::Inspect
+            }
             Some("read") => ServiceAction::Read,
             Some("add") => ServiceAction::Write,
             Some("checkpoint") => ServiceAction::Checkpoint,

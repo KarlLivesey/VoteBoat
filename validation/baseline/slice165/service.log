@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.84s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 3 tests
+test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 0.92s
+

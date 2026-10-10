@@ -29,13 +29,14 @@ use std::{
     time::{Duration, Instant},
 };
 use voteboat::membership::ConfigurationResumeAction;
+use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--wal-reclaim-ms MS]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
-voteboat-counter client BASE_PORT NODE status|metrics|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+voteboat-counter client BASE_PORT NODE status|metrics|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
@@ -47,6 +48,7 @@ PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
+--wal-reclaim-ms enables periodic physical WAL replacement; checkpoints remain explicit.\n\
 Use the same operation ID and delta when retrying an unknown write.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -86,6 +88,16 @@ fn ports(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     }
     Ok((base, id))
 }
+fn maintenance_status(service: &Service) -> String {
+    let status = service.wal_maintenance();
+    let event = status.last_completion.as_ref();
+    let reclaimed = event.and_then(|e| e.result.as_ref().ok());
+    format!("OK enabled={} pending={} next_ms={:?} last_sequence={} before_bytes={} after_bytes={} admission_error={:?} completion_error={:?}",
+        status.policy.is_some(), status.pending.is_some(), status.next_deadline.map(|d| d.0),
+        event.map_or(0, |e| e.request.sequence), reclaimed.map_or(0, |r| r.before_bytes),
+        reclaimed.map_or(0, |r| r.after_bytes), status.last_admission_error,
+        event.and_then(|e| e.result.as_ref().err()))
+}
 fn command(
     service: &mut Service,
     observer: &impl Observer,
@@ -95,6 +107,7 @@ fn command(
 ) -> Result<Phase, String> {
     let words = command.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
+        ["maintenance"] => maintenance_status(service),
         ["metrics"] => {
             let snapshot = observer.snapshot_counters();
             let c = snapshot.counters;
@@ -236,14 +249,12 @@ fn serve(
     base: u16,
     tls: &Path,
     input: setup::PeerInput<'_>,
-    options: (
-        NativePeerProtocol,
-        Option<&Path>,
-        Option<&Path>,
-        administration::Mode,
-    ),
+    options: &StartupOptions,
 ) -> Result<(), Failure> {
-    let (protocol, plan_path, access_path, admin_mode) = options;
+    let protocol = options.protocol;
+    let plan_path = options.admin_plan.as_deref();
+    let access_path = options.service_access.as_deref();
+    let admin_mode = options.remote_admin;
     let remote = admin_mode != administration::Mode::Automatic;
     let create = checked_service_mode(
         mode,
@@ -265,6 +276,7 @@ fn serve(
     listener.set_nonblocking(true)?;
     let peer_address = config.startup.listen;
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
+    options.configure_maintenance(&mut service)?;
     let owner = service.local().owner.identity();
     let mut observer = NativeCounterObserver::new(owner);
     let command_local = service_access::server_local(id, owner.store.session);
@@ -344,13 +356,7 @@ fn serve(
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
-    let StartupOptions {
-        protocol,
-        deployment,
-        admin_plan,
-        service_access,
-        remote_admin,
-    } = startup_options(&mut args)?;
+    let options = startup_options(&mut args)?;
     match args.as_slice() {
         [enroll_arg, mode, root, id, base, tls, source, source_id, rest @ ..]
             if enroll_arg == "enroll" && rest.len() <= 1 =>
@@ -361,7 +367,7 @@ fn main() -> Result<(), Failure> {
                 "recover" => false,
                 _ => return Err("expected enrollment create or recover".into()),
             };
-            let input = match (deployment.as_deref(), rest.first()) {
+            let input = match (options.deployment.as_deref(), rest.first()) {
                 (Some(path), None) => setup::PeerInput::Deployment(path),
                 (None, legacy) => setup::PeerInput::Legacy(legacy.map(Path::new)),
                 _ => return Err("select either PEERS_FILE or --deployment".into()),
@@ -380,7 +386,7 @@ fn main() -> Result<(), Failure> {
             if serve_arg == "serve" && rest.len() <= 1 =>
         {
             let (base, id) = ports(base, id)?;
-            let input = match (deployment.as_deref(), rest.first()) {
+            let input = match (options.deployment.as_deref(), rest.first()) {
                 (Some(path), None) => setup::PeerInput::Deployment(path),
                 (None, legacy) => setup::PeerInput::Legacy(legacy.map(Path::new)),
                 _ => return Err("select either PEERS_FILE or --deployment".into()),
@@ -392,12 +398,7 @@ fn main() -> Result<(), Failure> {
                 base,
                 Path::new(tls),
                 input,
-                (
-                    protocol,
-                    admin_plan.as_deref(),
-                    service_access.as_deref(),
-                    remote_admin,
-                ),
+                &options,
             )
         }
         [client_arg, base, id, rest @ ..] if client_arg == "client" && !rest.is_empty() => {
@@ -510,6 +511,25 @@ struct StartupOptions {
     admin_plan: Option<std::path::PathBuf>,
     service_access: Option<std::path::PathBuf>,
     remote_admin: administration::Mode,
+    wal_reclaim_ms: Option<u64>,
+}
+impl StartupOptions {
+    fn configure_maintenance(&self, service: &mut Service) -> Result<(), Failure> {
+        if let Some(interval_ms) = self.wal_reclaim_ms {
+            checked(
+                service.configure_wal_maintenance(Some(WalMaintenancePolicy {
+                    interval_ms,
+                    retry_ms: interval_ms,
+                    max_bytes: service
+                        .local()
+                        .persistence
+                        .reclaim_limit()
+                        .ok_or("reclamation unavailable")?,
+                })),
+            )?;
+        }
+        Ok(())
+    }
 }
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut protocol = NativePeerProtocol::TcpTls;
@@ -518,6 +538,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut admin_plan = None;
     let mut service_access = None;
     let mut remote_admin = administration::Mode::Automatic;
+    let mut wal_reclaim_ms = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !matches!(
@@ -528,6 +549,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 | "--remote-admin-plan"
                 | "--remote-admin-policy"
                 | "--service-access"
+                | "--wal-reclaim-ms"
         ) {
             break;
         }
@@ -562,6 +584,13 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--service-access" if service_access.is_none() && args[0] == "serve" => {
                 service_access = Some(std::path::PathBuf::from(value));
             }
+            "--wal-reclaim-ms" if wal_reclaim_ms.is_none() && args[0] == "serve" => {
+                let interval: u64 = value.parse()?;
+                if interval == 0 {
+                    return Err("WAL reclaim interval must be positive".into());
+                }
+                wal_reclaim_ms = Some(interval);
+            }
             _ => return Err("duplicate or unsupported startup option".into()),
         }
     }
@@ -571,6 +600,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         admin_plan,
         service_access,
         remote_admin,
+        wal_reclaim_ms,
     })
 }
 

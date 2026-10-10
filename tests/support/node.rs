@@ -20,6 +20,8 @@ use super::{
 };
 use support::outbound::HostOutbound;
 use voteboat::outbound::*;
+#[path = "node_maintenance.rs"]
+mod automatic_maintenance;
 type Parts = NodeParts<
     Ready,
     Timers,

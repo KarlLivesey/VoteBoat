@@ -5052,3 +5052,21 @@ witnesses, full service validation and the limits of these selected schedules.
 The final corrected service target passes39/39 in41.36s. The five independent
 checker tests also pass. Earlier unsuccessful runs remain retained separately;
 Linux/macOS whole-tree CI is not inferred from these focused local results.
+
+### Slice165 — automatic physical WAL scheduling
+
+Opt-in Node scheduling and the executable `--wal-reclaim-ms` flag use the existing
+bounded worker and crash-tested native reclaim operation.41 Node conformance
+tests pass in both all-feature and core-only profiles;6 exercise new scheduling,
+manual-receipt isolation, refusal/backoff, shutdown and recovery ownership. One
+clock-exhaustion unit test passes. The native hundred-group test requires actual
+scheduled byte reduction and preserved retries after reopening.8 log-reclaim and
+5 worker-maintenance tests pass. All42 service tests pass, including new TCP/QUIC
+scheduled-maintenance/restart histories and invalid-option preflight.
+
+Both strict lint profiles and formatting pass; metadata validates90 contract
+records. [Slice165 evidence](baseline/slice165/README.md) records commands,
+initial corrections and exact scope. Scheduling physical replacement does not
+advance application checkpoints or prove sustainable throughput, incremental
+cleaning, physical power-loss safety or macOS execution. Automatic checkpoint
+progression remains planned.

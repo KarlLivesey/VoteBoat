@@ -164,6 +164,12 @@ pub trait PersistenceWorker {
     fn usage(&self) -> WorkerUsage;
     fn submit(&mut self, units: Vec<PersistUnit>) -> Result<WorkerTicket, WorkerRejected>;
     fn poll(&mut self, limit: usize) -> Vec<WorkerEvent>;
+    /// Immutable replacement-image ceiling for automatic maintenance, or None
+    /// when unsupported. This capability creates no work or durability evidence.
+    /// Admission can still refuse transient pressure within this ceiling.
+    fn reclaim_limit(&self) -> Option<usize> {
+        None
+    }
     /// Optional bounded background work; scoped close drains accepted cleanup.
     /// Terminal polling releases worker admission credits. Results cannot stand
     /// in for Written/Durable events. Rejected cleanup performs no work.

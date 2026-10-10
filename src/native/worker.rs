@@ -437,6 +437,9 @@ impl<L: LogStore + Send + 'static> PersistenceWorker for NativeLogWorker<L> {
     fn usage(&self) -> WorkerUsage {
         self.usage
     }
+    fn reclaim_limit(&self) -> Option<usize> {
+        self.reclaim_supported.then_some(self.max_reclaim_bytes)
+    }
     fn submit_reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
         if self.fenced {
             return Err(WorkerError::Fenced);

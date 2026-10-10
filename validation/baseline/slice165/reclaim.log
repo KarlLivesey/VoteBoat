@@ -1,0 +1,28 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.78s
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-1bd6d57bd065c56a)
+
+running 8 tests
+test unsupported_codec_and_host_store_decline_maintenance_before_mutation ... ok
+test rewrite_preserves_exact_live_state_and_never_reuses_tickets ... ok
+test host_checkpoint_decoder_cannot_bypass_mandatory_log_invariants ... ok
+test pending_transitions_and_encoding_budget_reject_before_replacement ... ok
+test live_image_can_exceed_one_batch_without_losing_cold_group_or_suffix ... ok
+test replacement_failure_fences_and_power_loss_recovers_whole_old_or_new_state ... ok
+test native_files_keep_exclusive_selection_and_reclaim_repeatedly ... ok
+test image_codec_rejects_every_truncation_bit_corruption_and_invalid_state ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/maintenance.rs (target/debug/deps/maintenance-6af4929bfbda930b)
+
+running 5 tests
+test cleanup_runs_between_complete_barriers_and_retains_credits_through_close ... ok
+test capability_and_byte_limits_reject_before_ownership_or_sequence_consumption ... ok
+test panic_reports_each_class_once_without_fabricating_write_durability ... ok
+test maintenance_uses_data_admission_and_preserves_control_reserve ... ok
+test rejected_cleanup_continues_but_uncertain_cleanup_fences_queued_writes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

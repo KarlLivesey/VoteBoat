@@ -39,6 +39,8 @@ mod history;
 mod history_checker;
 #[path = "counter_service/joint_retirement.rs"]
 mod joint_retirement;
+#[path = "counter_service/maintenance.rs"]
+mod maintenance;
 #[path = "counter_service/new_voter.rs"]
 mod new_voter;
 
@@ -71,6 +73,7 @@ struct Cluster {
     listeners: BTreeMap<u16, TcpListener>,
     udp_sockets: Vec<UdpSocket>,
     quic: bool,
+    wal_reclaim_ms: Option<u64>,
 }
 impl Cluster {
     fn new() -> Self {
@@ -131,6 +134,7 @@ impl Cluster {
             listeners,
             udp_sockets,
             quic: false,
+            wal_reclaim_ms: None,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -164,6 +168,9 @@ impl Cluster {
         }
         if self.quic {
             command.args(["--transport", "quic"]);
+        }
+        if let Some(interval) = self.wal_reclaim_ms {
+            command.arg("--wal-reclaim-ms").arg(interval.to_string());
         }
         if let Some(path) = &self.admin_plan {
             command

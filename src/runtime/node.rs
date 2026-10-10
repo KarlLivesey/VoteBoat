@@ -161,6 +161,7 @@ pub struct NodeRecovery<L, R, C: PeerConnector, F: PeerTransportFactory<C::Sessi
     pub peers: Option<PeerDriver<C, F>>,
     pub reason: NodeError,
     pub configuration: ConfigurationRequests,
+    pub maintenance: WalMaintenanceStatus,
 }
 /// One owner of selected component handles, not a process-wide service. Provider
 /// scoped close/drain contracts leave shared host executors and unrelated users
@@ -185,6 +186,7 @@ pub struct Node<
     now: MonoTime,
     failure: Option<NodeError>,
     configuration: ConfigurationRequests,
+    maintenance: WalMaintenanceStatus,
 }
 impl<
         S: ReadyScheduler,
@@ -300,6 +302,7 @@ where
             now,
             failure: None,
             configuration,
+            maintenance: WalMaintenanceStatus::default(),
         })
     }
     fn validate_group_parts(parts: &NodeParts<S, T, E, A, W, O, H, C, F>) -> Result<(), NodeError> {
@@ -373,8 +376,30 @@ where
         }
         result
     }
+    /// Take only manually requested results. Automatic results are retained
+    /// separately in wal_maintenance(), including fatal terminal results.
     pub fn poll_reclaim(&mut self) -> Option<ReclaimEvent> {
-        self.replica.poll_reclaim()
+        if self.maintenance.pending.is_some() {
+            None
+        } else {
+            self.replica.poll_reclaim()
+        }
+    }
+    /// Install/disable local physical maintenance. Accepted jobs must finish
+    /// first. Manual receipts are never consumed by this schedule. The first
+    /// deadline is relative to this Node's last validated host time.
+    pub fn configure_wal_maintenance(
+        &mut self,
+        policy: Option<WalMaintenancePolicy>,
+    ) -> Result<(), NodeError> {
+        if self.state != NodeState::Running {
+            return Err(NodeError::Closed);
+        }
+        self.maintenance
+            .configure(policy, self.now, self.local.persistence.reclaim_limit())
+    }
+    pub fn wal_maintenance(&self) -> &WalMaintenanceStatus {
+        &self.maintenance
     }
     pub fn propose(&mut self, request: ClientRequest) -> Result<ClientTicket, ClientRejected> {
         let Some(app) = self.local.applications.get(&request.group) else {
@@ -740,10 +765,39 @@ where
             });
         }
         let result = self.poll_inner(now, budget, &mut authorize);
+        // Observe even a fatal terminal result before transferring recovery
+        // ownership. The driver has already checked its exact request scope.
+        if self.maintenance.pending.is_some() {
+            if let Some(event) = self.replica.poll_reclaim() {
+                self.maintenance.completed(event, now);
+            }
+        }
         if let Err(reason) = &result {
             self.enter_recovery(reason.clone());
         }
+        if result.is_ok() && self.state == NodeState::Running {
+            if let Err(reason) = self.schedule_wal_maintenance(now) {
+                self.enter_recovery(reason.clone());
+                return Err(reason);
+            }
+        }
         result
+    }
+    fn schedule_wal_maintenance(&mut self, now: MonoTime) -> Result<(), NodeError> {
+        let Some(policy) = self.maintenance.due(now) else {
+            return Ok(());
+        };
+        match self.reclaim(policy.max_bytes) {
+            Ok(ticket) => self.maintenance.submitted(ticket),
+            Err(NodeError::Replica(ReplicaError::Worker(error))) => {
+                self.maintenance.rejected(error.clone(), now);
+                if self.state == NodeState::RecoveryRequired {
+                    return Err(NodeError::Replica(ReplicaError::Worker(error)));
+                }
+            }
+            Err(error) => return Err(error),
+        }
+        Ok(())
     }
     fn poll_inner(
         &mut self,
@@ -938,6 +992,7 @@ where
             peers: self.peers,
             reason: self.failure.unwrap(),
             configuration: self.configuration,
+            maintenance: self.maintenance,
         })
     }
 }

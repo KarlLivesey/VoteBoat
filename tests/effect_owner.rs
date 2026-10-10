@@ -1167,6 +1167,8 @@ struct HostWorker {
     reclaim: Option<(ReclaimTicket, usize)>,
     reclaim_error: Option<voteboat::contracts::StorageError>,
     reclaim_wrong: bool,
+    reclaim_hold: std::rc::Rc<std::cell::Cell<bool>>,
+    reclaim_reject: Option<WorkerError>,
 }
 impl HostWorker {
     fn new(store: HostLogStore) -> Self {
@@ -1187,10 +1189,15 @@ impl HostWorker {
             reclaim: None,
             reclaim_error: None,
             reclaim_wrong: false,
+            reclaim_hold: Default::default(),
+            reclaim_reject: None,
         }
     }
 }
 impl PersistenceWorker for HostWorker {
+    fn reclaim_limit(&self) -> Option<usize> {
+        self.reclaim_supported.then_some(4096)
+    }
     fn submit_reclaim(&mut self, max_bytes: usize) -> Result<ReclaimTicket, WorkerError> {
         if !self.reclaim_supported {
             return Err(WorkerError::Unsupported);
@@ -1201,6 +1208,9 @@ impl PersistenceWorker for HostWorker {
         if self.reclaim.is_some() {
             return Err(WorkerError::Overloaded);
         }
+        if let Some(error) = self.reclaim_reject.take() {
+            return Err(error);
+        }
         self.sequence += 1;
         let ticket = ReclaimTicket {
             binding: self.binding,
@@ -1210,7 +1220,7 @@ impl PersistenceWorker for HostWorker {
         Ok(ticket)
     }
     fn poll_reclaims(&mut self, limit: usize) -> Vec<ReclaimEvent> {
-        if limit == 0 {
+        if limit == 0 || self.reclaim_hold.get() {
             return vec![];
         }
         let Some((mut request, max_bytes)) = self.reclaim.take() else {

@@ -1,0 +1,50 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.00s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7607ec7dae1e576d)
+
+running 41 tests
+test node_facade::automatic_maintenance::overload_and_storage_refusal_back_off_without_a_poll_loop ... ok
+test node_facade::abort_after_written_returns_unknown_and_durable_worker_work_without_rollback_or_false_applied ... ok
+test node_facade::automatic_maintenance::held_job_drains_on_shutdown_and_abort_retains_recovery_ticket ... ok
+test node_facade::automatic_maintenance::permanent_admission_refusal_stops_schedule_but_service_stays_running ... ok
+test node_facade::automatic_maintenance::deadlines_coalesce_and_manual_results_remain_owned ... ok
+test node_facade::configuration_cannot_expand_a_local_only_node_without_peer_providers ... ok
+test node_facade::automatic_maintenance::policy_is_optional_validated_before_work_and_clock_does_not_wrap ... ok
+test node_facade::automatic_maintenance::fatal_completion_preserves_diagnostics_and_wrong_receipt_preserves_ownership ... ok
+test node_facade::all_poll_budgets_and_time_validate_before_either_driver_performs_work ... ok
+test node_facade::configuration_rejects_static_wire_before_persistence_even_with_host_authorization ... ok
+test node_facade::abort_preserves_earlier_success_and_network_remains_explicitly_drainable_without_core_access ... ok
+test node_facade::configuration_committed_output_survives_shutdown_and_request_count_stays_bounded ... ok
+test node_facade::configuration_checks_enforced_application_envelope_before_authorization_or_persistence ... ok
+test node_facade::configuration_cancellation_is_unknown_and_does_not_undo_queued_work ... ok
+test node_facade::configuration_limits_reject_with_original_request_and_no_core_mutation ... ok
+test node_facade::constructor_requires_connections_for_rollback_reachable_recovered_learners ... ok
+test node_facade::membership_routes_are_preflighted_and_rejections_return_owned_routes ... ok
+test node_facade::constructor_requires_voter_store_authorization_and_returns_original_parts_before_poll ... ok
+test node_facade::configuration_shutdown_and_abort_preserve_unknown_outputs_and_ownership ... ok
+test node_facade::member_receive_modes_require_selected_wire_before_node_service_or_persistence ... ok
+test node_facade::configuration_written_storage_failure_retains_unknown_receipt_for_recovery ... ok
+test node_facade::configuration_queued_behind_campaign_uses_its_actual_proposal_term ... ok
+test node_facade::configuration_receipts_wait_for_durability_and_joint_then_final_commit ... ok
+test node_facade::route_plan_constructor_failure_returns_hints_and_leaves_owner_policy_uninstalled ... ok
+test node_facade::node_retains_pin_checked_routes_across_live_poll_and_drain_and_rejects_withdrawal ... ok
+test node_facade::configuration_status_resumes_a_lost_joint_reply_through_fresh_authorization ... ok
+test node_facade::facade_exact_client_and_read_outputs_hold_shutdown_until_consumer_completion ... ok
+test node_facade::stalled_accepted_write_keeps_quiescing_until_abort_and_returns_retained_original_lease ... ok
+test node_facade::refusing_diagnostics_cannot_change_original_node_write_read_or_shutdown ... ok
+test node_facade::uncertain_maintenance_preserves_earlier_reply_and_failed_result ... ok
+test node_facade::queued_configuration_rechecks_authorization_and_default_poll_denies_it ... ok
+test node_facade::witness_controls_require_authority_wire_before_admission_and_close_with_node ... ok
+test node_facade::unsupported_and_rejected_maintenance_preserve_running_service ... ok
+test node_facade::unknown_and_closed_admission_return_original_command_allocation_and_instances_shutdown_independently ... ok
+test node_facade::unsupported_snapshot_and_invalid_driver_limits_reject_before_any_service_or_io ... ok
+test node_facade::maintenance_result_is_scoped_retained_and_part_of_shutdown ... ok
+test node_facade::wrong_maintenance_receipt_fences_without_losing_original_ticket ... ok
+test node_facade::provider_failure_fences_node_and_returns_unknown_with_original_selected_resources ... ok
+test node_facade::selected_host_placement_is_rechecked_at_execution_and_preserves_core_gates ... ok
+test node_facade::selected_transport_capacity_rechecks_version_and_roster_budgets_before_persistence ... ok
+test node_facade::delayed_readiness_and_restarted_peer_session_cannot_promote_through_owned_node ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 96 filtered out; finished in 0.01s
+
