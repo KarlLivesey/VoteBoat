@@ -1,0 +1,107 @@
+1 scenario quic=true checkpoint=true
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 0,
+        action: Read,
+        reply: Unknown,
+    },
+]

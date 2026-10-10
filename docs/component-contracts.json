@@ -321,9 +321,12 @@
         "tests/routed.rs",
         "tests/effect_owner.rs",
         "tests/learners.rs",
-        "tests/counter_service.rs"
+        "tests/counter_service.rs",
+        "tests/history.rs",
+        "tests/support/history.rs",
+        "tests/counter_service/history.rs"
       ],
-      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check. Slice114 adds optional enforced whole-lifetime deployment_requirements and common validation, defaulting to unavailable. Native bounded applications expose existing configured envelopes; ClientRouter checks configuration before authorization/persistence and learner readiness refuses understated lifetime capacity. Host capability assertions remain trusted. Direct low-level owners retain their documented application responsibilities; no general public mutation ingress claim."
+      "scope": "Deterministic bounded counter and exact operation retries; checkpoint capability is an explicit extension. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Default group validation accepts generic applications; Directory and RoutedApplication restrict their actual hosting group. Startup, assembly, execution, reads and snapshot/recovery paths enforce this check. Slice114 adds optional enforced whole-lifetime deployment_requirements and common validation, defaulting to unavailable. Native bounded applications expose existing configured envelopes; ClientRouter checks configuration before authorization/persistence and learner readiness refuses understated lifetime capacity. Host capability assertions remain trusted. Direct low-level owners retain their documented application responsibilities; no general public mutation ingress claim. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes."
     },
     {
       "design_id": "C05/C15",
@@ -360,9 +363,12 @@
       ],
       "native": "Fixed ownership guard over ProposalAdmission, EffectOwner and ApplicationRouter; native Counter histories select it directly",
       "conformance": [
-        "tests/effect_owner.rs"
+        "tests/effect_owner.rs",
+        "tests/history.rs",
+        "tests/support/history.rs",
+        "tests/counter_service/history.rs"
       ],
-      "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes."
     },
     {
       "design_id": "C05",
@@ -375,9 +381,12 @@
         "tests/raft.rs",
         "examples/replicated_counter.rs",
         "tests/directory.rs",
-        "tests/routed.rs"
+        "tests/routed.rs",
+        "tests/history.rs",
+        "tests/support/history.rs",
+        "tests/counter_service/history.rs"
       ],
-      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim."
+      "scope": "Immutable read after exact one-use quorum barrier and applied-prefix check. Host query/result types are supported; no clock leases. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes."
     },
     {
       "design_id": "C05/C15",

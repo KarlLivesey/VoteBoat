@@ -1,0 +1,269 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 39 tests
+test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+test invalid_administration_is_rejected_before_store_open ... ok
+test invalid_deployment_is_rejected_before_store_creation ... ok
+test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test history::tcp_faulted_client_histories_are_linearizable ... FAILED
+test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+test history::quic_faulted_client_histories_are_linearizable ... ok
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+test trusted_startup_plan_promotes_and_restarts_quic ... ok
+test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+
+failures:
+
+---- history::tcp_faulted_client_histories_are_linearizable stdout ----
+history "/tmp/voteboat-service-327149-1791599284414574035-13/history.txt"
+1 scenario quic=false checkpoint=false
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+20 complete call=8 raw="OK value=26\n"
+21 invoke Write { operation: 4, delta: 11 }
+22 complete call=9 raw="OK outcome=Value(26) duplicate=true\n"
+23 kill node=2
+24 kill node=3
+25 invoke Write { operation: 5, delta: 13 }
+26 complete call=10 client disconnected; no reply observed
+27 kill node=1
+28 invoke Read
+29 complete call=11 raw="OK value=26\n"
+30 invoke Write { operation: 5, delta: 13 }
+31 complete call=12 raw="OK outcome=Value(39) duplicate=false\n"
+32 invoke Read
+33 complete call=13 raw="OK value=39\n"
+34 stop all; reopen original files
+35 invoke Write { operation: 1, delta: 7 }
+36 complete call=14 raw="OK outcome=Value(7) duplicate=true\n"
+37 invoke Write { operation: 4, delta: 11 }
+38 complete call=15 raw="OK outcome=Value(26) duplicate=true\n"
+39 invoke Read
+40 complete call=16 raw="OK value=39\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 25,
+        completed: 26,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 28,
+        completed: 29,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 30,
+        completed: 31,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 32,
+        completed: 33,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 35,
+        completed: 36,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 37,
+        completed: 38,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 39,
+        completed: 40,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+]
+witness=Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 12, 13, 14, 15, 16])
+
+thread 'history::tcp_faulted_client_histories_are_linearizable' (327167) panicked at tests/counter_service/history.rs:160:5:
+unrecognized observed reply "ERR NotRead(ReadNotReady)\n"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    history::tcp_faulted_client_histories_are_linearizable
+
+test result: FAILED. 38 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 40.99s
+
+error: test failed, to rerun pass `--test counter_service`

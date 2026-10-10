@@ -33,6 +33,10 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // concurrent fork can briefly inherit an exclusive lock until exec closes it.
 // Child execution and waiting stay outside this gate and remain parallel.
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
+#[path = "counter_service/history.rs"]
+mod history;
+#[path = "support/history.rs"]
+mod history_checker;
 #[path = "counter_service/joint_retirement.rs"]
 mod joint_retirement;
 #[path = "counter_service/new_voter.rs"]
@@ -82,7 +86,7 @@ impl Cluster {
         fs::create_dir(&root).unwrap();
         // Never recycle a fixture's block within this test process: accepted
         // TCP sockets can still be closing after its listeners/children drop.
-        // The finite suite uses fewer than 40 of the available 157 blocks.
+        // The finite suite stays within the available 157 blocks.
         let (base, listeners, udp_sockets) = {
             let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
             let (base, listeners, udp_sockets) = (10000u16..30000)

@@ -1,0 +1,234 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.42s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+
+thread 'history::tcp_faulted_client_histories_are_linearizable' (324170) panicked at tests/counter_service/history.rs:160:5:
+unrecognized observed reply "ERR NotRead(ReadNotReady)\n"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test history::tcp_faulted_client_histories_are_linearizable ... FAILED
+history "/tmp/voteboat-service-324168-1791599274489862516-1/history.txt"
+1 scenario quic=true checkpoint=false
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+20 complete call=8 raw="OK value=26\n"
+21 invoke Write { operation: 4, delta: 11 }
+22 complete call=9 raw="OK outcome=Value(26) duplicate=true\n"
+23 kill node=2
+24 kill node=3
+25 invoke Write { operation: 5, delta: 13 }
+26 complete call=10 client disconnected; no reply observed
+27 kill node=1
+28 invoke Read
+29 complete call=11 raw="OK value=26\n"
+30 invoke Write { operation: 5, delta: 13 }
+31 complete call=12 raw="OK outcome=Value(39) duplicate=false\n"
+32 invoke Read
+33 complete call=13 raw="OK value=39\n"
+34 stop all; reopen original files
+35 invoke Write { operation: 1, delta: 7 }
+36 complete call=14 raw="OK outcome=Value(7) duplicate=true\n"
+37 invoke Write { operation: 4, delta: 11 }
+38 complete call=15 raw="OK outcome=Value(26) duplicate=true\n"
+39 invoke Read
+40 complete call=16 raw="OK value=39\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 25,
+        completed: 26,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 28,
+        completed: 29,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 30,
+        completed: 31,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 32,
+        completed: 33,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 35,
+        completed: 36,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 37,
+        completed: 38,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 39,
+        completed: 40,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+]
+witness=Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 12, 13, 14, 15, 16])
+
+thread 'history::quic_faulted_client_histories_are_linearizable' (324169) panicked at tests/counter_service/history.rs:160:5:
+unrecognized observed reply "ERR NotRead(ReadNotReady)\n"
+test history::quic_faulted_client_histories_are_linearizable ... FAILED
+
+failures:
+
+failures:
+    history::quic_faulted_client_histories_are_linearizable
+    history::tcp_faulted_client_histories_are_linearizable
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 37 filtered out; finished in 2.15s
+
+error: test failed, to rerun pass `--test counter_service`

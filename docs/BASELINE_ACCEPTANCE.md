@@ -1,11 +1,13 @@
-# Baseline acceptance map — review159, updated163
+# Baseline acceptance map — review159, updated164
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
 completion certificate**. Selected tests do not prove all schedules. Detailed
 historical results remain in IMPLEMENTATION.md, BASELINE_AUDIT.md and
 validation/REPORT.md; validation/baseline/slice159-160 retains fresh results and
-any failures. The old full all-feature sweeps have incomplete logs and their process handles are absent; they do not establish full completion. Slices162–163 add focused recovery-budget and combined provider-lifetime evidence.
+any failures. The old full all-feature sweeps have incomplete logs and their
+process handles are absent; they do not establish full completion. Slices162–164
+add recovery-budget, provider-lifetime and Counter client-history evidence.
 The full P0–P7 objective stays active. RPL-1.5; Linux and macOS targets.
 
 ## Roadmap exits
@@ -13,7 +15,7 @@ The full P0–P7 objective stays active. RPL-1.5; Linux and macOS targets.
 | Requirement | Current implementation and direct test paths | Remaining acceptance |
 | --- | --- | --- |
 | P0: reviewed ownership/ordering/cancellation contracts; downstream injection | Public contracts, scoped identities/tickets and explicit NodeParts; tests/{log_store,worker,runtime,effect_owner,lookup_discovery}.rs and tests/support implement public host providers. | Complete the catalogue gaps below; broader actual-core simulation, reusable provider conformance and generated/faulted-history checking remain. An inventory path is not evidence its assertions cover the full contract. |
-| P1: durable three-node service; crash/restart preserves acknowledged operations and single-group linearizability | Raft, native WAL/snapshots, owning Node, counter service; tests/{raft,snapshot,counter_service,native_member_startup}.rs. Local reads require quorum plus applied-prefix evidence; retries retain operation/payload identity. | Selected histories cover these paths; a general recorded-history linearizability checker including unknown outcomes, broader storage/network fault schedules, complete macOS execution and separate-host validation remain. No release-completion claim. |
+| P1: durable three-node service; crash/restart preserves acknowledged operations and single-group linearizability | Raft, native WAL/snapshots, owning Node, counter service; tests/{raft,snapshot,counter_service,native_member_startup}.rs. Local reads require quorum plus applied-prefix evidence; retries retain operation/payload identity. | Selected histories cover these paths; Slice164 adds a bounded independent Counter linearizability checker including unknown outcomes and four TCP/QUIC WAL/checkpoint client histories. Broader application/order scopes, generated storage/network fault schedules, complete macOS execution and separate-host validation remain. No release-completion claim. |
 | P2: shared groups/lane/transport, bounded fair scheduling and unrelated-group isolation | Shared Shard/TimedShard/Node, workers, multiplexed TCP/TLS and QUIC. tests/runtime.rs hundred-group host/native histories; tests/worker.rs and tests/support/{native_node,native_pressure}.rs. | Slice162 adds eight-group forced repair under a one-request recovery quota with concurrent writes;163 composes shared host/native admission and frame budgets under abort and replacement. Broader active fractions, multi-shard/lane deployment, receive/connection fairness and combined recovery/overload evidence remain. No per-group threads/sockets are introduced by these native assemblies. |
 | P3: fixed recursive/weighted policy at every quorum site; intersection/nine-voter/election/read/commit tests | src/quorum.rs; Membership::is_satisfied/frontier; Raft election, read and commitment sites. tests/{quorum,raft,snapshot,activation_model}.rs and src/raft/membership_tests.rs. Nine-voter exhaustive intersection and reference-frontier checks exist. | Finite independent activation model excludes arbitrary log forks/term traces and liveness. Preserve full transition/fault coverage under P4; never infer a runtime proof from intersection alone. Live policy hot reload remains forbidden. |
 | P4: learners, joint changes, exact activation through election/rollback/restart/partial delivery | NativeMemberStartup, readiness/witness contracts, configuration journal and authenticated counter commands. tests/{learners,member_recovery,native_member_startup,counter_service}.rs and src/raft/membership_tests.rs. Slice157 tests public joint receipt loss and serving-leader demotion;161 adds newly enrolled store promotion with interrupted readiness and committed-joint WAL/checkpoint recovery over TCP/QUIC. | Older mismatching checkpoint combinations, broader revocation and overlapping new-voter fault schedules remain. Service test readiness assumptions found by CI must be repaired, not counted as successful platform execution. |
@@ -100,7 +102,7 @@ tests/raft.rs also executes32 seeds of256 actual-core actions with native WAL
 model power loss, partitions, reordered/duplicated messages and committed-prefix
 checks. This is a bounded majority schedule family. It does not establish a
 general schedule generator/minimizer, known-Raft differential runner or
-end-to-end linearizability checker. Those
+general end-to-end linearizability checking across all applications. Slice164 now independently checks bounded Counter client histories including unknown outcomes and selected real service crashes/restarts. Those
 chapter11 validation obligations remain explicit rather than being replaced by
 a passing test count.
 
@@ -112,7 +114,7 @@ a passing test count.
    query envelopes, with native move/reopen, inactive/fenced refusal and original
    read ownership checks. Broader remote refresh and discovery faults remain.
 3. Slice161 exercises public new-store interruption, exact operation retry and
-   recovery through joint consensus. Slices162–163 close the selected recovery preparation budget and combined shared-provider lifetime gaps. Next implement bounded faulted-history verification; keep broader P0–P7 faults and acceptance work active.
+   recovery through joint consensus. Slices162–163 close the selected recovery preparation budget and combined shared-provider lifetime gaps. Slice164 adds bounded faulted Counter history verification. Next review the remaining concrete baseline requirements and implement the next unresolved capability; keep broader P0–P7 faults and acceptance work active.
 
 P8 and Windows are deferred. Automatic global split/merge orchestration,
 busy-polling, custom allocators and particular external adapters are explicitly

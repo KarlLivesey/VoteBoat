@@ -93,9 +93,9 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: faulted history verification | Improve P0/P1 evidence for successful and unknown write/read outcomes. | Existing actual-core fault harness and recorded operation identities/outcomes; reproducible seeds. | Check a bounded fault history against the declared single-group order; retain failures and distinguish unknown from success. |
-| Next: baseline evidence review and next gap | Advance full P0–P7 feature completion without repeating satisfied checks. | Current acceptance ledger plus source and actual local/CI results. | Identify a concrete unresolved requirement and its smallest complete path; record the API, state, ownership, failure/restart and acceptance plan. |
-| Following: implement the selected unresolved capability | Close the next demonstrated baseline gap rather than adding a parallel subsystem. | Evidence review identifies the required contract and existing composition points. | A complete usable vertical slice with meaningful conformance/recovery coverage, strict lint and updated scope evidence. |
+| Current: baseline evidence review and next gap | Advance full P0–P7 feature completion without repeating satisfied checks. | Current acceptance ledger and actual local/CI results, including Counter histories164. | Identify a concrete unresolved requirement and its smallest complete usable path; record API, state, ownership, failure/restart and acceptance plan. |
+| Next: implement the selected unresolved capability | Close the next demonstrated baseline gap using existing composition points. | The evidence review identifies its contract and dependencies. | Complete a usable vertical slice with relevant conformance/recovery coverage, strict lint and accurate scope evidence. |
+| Following: compose the new capability with its next dependency | Advance the same user-visible macro milestone without isolated scaffolding. | Selected capability and its actual restart/ownership contracts. | Exercise the combined path and failures; update the full-roadmap acceptance map without claiming untested scope. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -15231,3 +15231,80 @@ lint passed; those platform results are not counted as complete.
 Macro review: advances P0/P2 replacement-provider composition. The current mini
 plan moves to faulted history verification, then baseline evidence review and
 the capability selected by that review. Full P0–P7 remains active.
+
+### 164 faulted client-history verification — schema plan
+
+Previous goal turn was progress:163 is committed/pushed as6019b83 with combined
+provider lifetime conformance and zero strict lint. Existing seeded actual-core
+fault tests compare committed prefixes, but do not independently check client
+invocation/completion histories. Chapter11 explicitly requires that distinction.
+
+Add a bounded test-only checker for one Counter order scope, independent of
+Raft and the production StateMachine. Each call records invocation ordinal,
+observed completion ordinal, write operation ID/delta or read, and exact observed
+outcome. Known responses must linearize between invocation/completion; known
+non-admission is a no-op. Unknown writes may be omitted or take effect after
+the unknown response, up to the history cut. Retried IDs keep their original
+delta/result; conflicting IDs never mutate the counter. This is neither a
+global cross-group order nor an assumption that timeout means failure.
+
+Search bounded calls/states, return a concrete witness on success, distinguish
+invalid history from exhausted search, and reject malformed intervals. No
+resource/worker or production contract changes. Negative tests cover impossible
+reads, real-time inversion, double application, conflicting retry results,
+unknown omission/late effect and search bounds. Feed actual TCP/QUIC executable
+histories with overlapping writes, an unread committed reply, leader loss,
+quorum loss/unknown write, exact retry and WAL/checkpoint reopen. Record raw
+responses, fault order and the witness; retain failed histories for diagnosis.
+
+This advances P0/P1 chapter11 history validation. It does not close arbitrary
+schedules, hierarchical reconfiguration, power-loss or all P0–P7 acceptance.
+Next review the baseline evidence and choose its next concrete incomplete
+capability; do not replace missing implementation with a passing test count.
+
+164 observed check correction: the runner initially rejected the actual service
+reply ERR NotRead(ReadNotReady) as unknown syntax. A sampled Leader role can
+precede its current-term read barrier, so this is a legitimate failed read.
+Record this exact outcome as a no-op non-admission and retry explicitly; retain
+the invocation/result instead of hiding it or classifying it as a successful
+read. Production behavior is unchanged. The failed run and surviving history
+are retained in slice164 evidence. Do not broaden parsing to arbitrary ERRs.
+
+
+### 164 implemented — bounded Counter history verification
+
+The test-only checker models Counter arithmetic, exact-ID deduplication,
+conflicting payloads and overflow independently of the production application
+and Raft. Search preserves real-time ordering for known responses and permits
+unknown calls to be omitted or to take effect after uncertainty was reported.
+Successful search returns original call indices as a witness; malformed input,
+nonlinearizable histories and exhausted search are distinct. Calls and explored
+states are bounded. It never uses a final-state match as a substitute for checking
+intermediate responses and invocation order.
+
+Five checker tests cover overlapping versus ordered calls, impossible reads,
+double application, conflicting retries, overflow, failed admission, omitted
+and late unknown effects, malformed intervals and exhausted budgets. Four actual
+TCP/QUIC × WAL/checkpoint service histories record overlapping write invocations,
+raw responses, an unread reply observed committed through a quorum read, leader
+kill/replacement, no-quorum disconnect and complete restart/retry. Checkpoint
+variants inspect a nonzero durable base before reopening. All histories produce
+witnesses; changing their final read to an impossible negative value is rejected.
+No duplicate marker is used as a substitute for idempotent state/result checks.
+
+The final selected histories pass in3.19s; raw events, exact IDs and witnesses
+are retained under validation/baseline/slice164. The initial parser gap for
+ReadNotReady is recorded above, with failed run/history artifacts. This is one
+bounded Counter scope and selected process crashes, not arbitrary application
+linearizability, physical power loss, generated schedule minimization or a proof
+of complete P0–P7. No production API, behavior, dependency or format changes.
+
+Macro review: advances P0/P1 chapter11 client-history evidence. Next is the
+baseline requirement review and the unresolved capability it selects; keep the
+full P0–P7 objective and platform/fault obligations active.
+
+164 final validation: the corrected complete service target passes39/39 in
+41.36s, in addition to five independent checker tests and the four selected
+histories retained with full output. Both strict Clippy profiles, formatting
+and89-record inventory checks pass. Previous unsuccessful service runs remain
+in the evidence directory rather than being reported as passes.

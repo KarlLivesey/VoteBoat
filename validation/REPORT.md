@@ -5031,3 +5031,24 @@ metadata validates89 records. [Slice163 evidence](baseline/slice163/README.md)
 records exact commands and limits. The previous162 Linux/macOS CI run was still
 active when inspected and is not counted as platform success. Faulted-history
 verification is the next mini-plan item; full P0–P7 remains active.
+
+### Slice164 — recorded faulted Counter histories
+
+A bounded checker now independently validates one Counter order scope, including
+real-time precedence, idempotent retries, conflicts, overflow and unknown writes
+that may be omitted or take effect after uncertainty is reported. It returns a
+concrete ordering witness and distinguishes invalid input, invalid history and
+exhausted search. Five positive/negative checker tests pass.
+
+Four actual three-process TCP/TLS/QUIC × WAL/checkpoint histories record concurrent
+invocations, replies, unread committed write, leader loss, quorum loss, restarts
+and exact retries. All produce valid orderings; corrupting each final read is
+rejected. The initial recorder omission for ReadNotReady and its failed traces
+are retained, with the exact failed-read outcome now recorded and retried.
+No production code or semantics changed. Both strict lint profiles remain zero.
+[Slice164 evidence](baseline/slice164/README.md) contains commands, raw histories,
+witnesses, full service validation and the limits of these selected schedules.
+
+The final corrected service target passes39/39 in41.36s. The five independent
+checker tests also pass. Earlier unsuccessful runs remain retained separately;
+Linux/macOS whole-tree CI is not inferred from these focused local results.

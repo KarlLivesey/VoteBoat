@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.18s
+     Running tests/history.rs (target/debug/deps/history-d9c518444c5f4206)
+
+running 5 tests
+test malformed_or_exhausted_search_is_never_reported_linearizable ... ok
+test observes_real_time_but_explores_overlapping_completions ... ok
+test overflow_and_non_admission_have_no_application_effect ... ok
+test retries_are_idempotent_and_conflicting_payloads_cannot_mutate ... ok
+test unknown_can_be_omitted_applied_or_commit_after_uncertainty_was_reported ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
