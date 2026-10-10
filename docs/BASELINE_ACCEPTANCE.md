@@ -211,3 +211,12 @@ recovery, route refresh and metadata-independent owner service are checked.
 The old parent's remaining service survives an imported-child move, but its
 next transfer still needs checked parent-side grant refresh154f. Full
 reparenting, broader faults, macOS and the remaining roadmap stay open.
+
+Slice155a adds opt-in imported partial-source schema6. A real activated child
+delegates to a fresh grandchild, keeps its remaining data serving, and repeats
+the transfer while preserving original import/activation/data retries and exact
+older exports. The selected tests execute metadata creation, delegation,
+publication and parent completion, with child import/activation. Parent/slot
+history, bounded reserve, partial-state refusal, checkpoint and native journal
+cuts pass. New-profile network composition and partial-lineage full-transfer
+retirement remain155b; this is not full completion of155 or P6.

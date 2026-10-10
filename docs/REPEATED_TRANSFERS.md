@@ -89,3 +89,34 @@ and tombstones remain retained in unwrapped guards. The optional
 and explicit host retention release, retaining fences and lineage. Delegated-parent
 coordination and P7 measured tuning remain. macOS/separate-host
 execution remains unverified. Full P0–P7 stays active; P8 remains deferred.
+
+## Imported partial sources — slice155a
+
+Select `TransferTarget::with_partial_delegation(maximum, export_bytes)` before
+bootstrap, optionally after `with_parent_adoption`. This selects application
+schema6, immutable binding `VBTSOWN5` and checkpoint `VBTRGT07`. It keeps one
+application owner and one ordered log. Existing profiles retain their formats.
+
+An activated imported owner can accept a checked retained-insertion intent and
+freeze only the delegated range. `TargetOutcome::ScopeFenced`,
+`TargetQuery::ScopedFreeze` and `export_scoped` expose its original status and
+immutable image. The caller supplies original quorum provenance, imports that
+image into the new child, publishes the handoff and then submits
+`RetainedGrantAdoption`. `TargetQuery::RetainedGrant` returns that original result.
+Neither an image nor a constructed status authenticates another group.
+
+Remaining data continues through the existing routed target API. Frozen ranges
+refuse before publication; the updated grant refuses them after publication.
+Original import, activation, data retries and outbox survive successive partial
+transfers and checkpoint/replay. Parent and parent-slot observations share the
+ordered control history. One unpublished transfer is allowed at a time, with
+explicit lifetime transfer count and aggregate immutable export budget.
+
+Current evidence includes actual same-authority nested creation/reservation,
+source fence, child import, metadata publication/parent completion and activation,
+twice; mixed parent history, full data-history control reserve, corrupt checkpoint
+refusal and native journal interruption are also covered. Parent observations
+in that mixed-history owner test are supplied by the host fixture. New-profile
+TCP/QUIC service composition, later full-transfer retirement/reclamation and
+broader provider/failure/platform evidence remain155b and subsequent work.
+Partial-profile retirement lineage is not yet supported by RetirementGuard.

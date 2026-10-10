@@ -4514,3 +4514,33 @@ During development, the new profile exposed schema4 hard-coding in two shared
 test reopen factories; the factories now follow the selected profile. Production
 continued to reject the mismatched checkpoint. An initial native filter selected
 zero tests and is not counted among these results. No performance claim is made.
+
+## Slice155a — imported partial-source embedding
+
+Five new cases exercise an activated imported owner delegating a subrange while
+retaining service. Actual Directory creation/reservation, checked intent, source
+fence/image, target import, publication/parent completion and activation are run
+twice. Original import/activation and transferred data retry/outbox remain intact;
+older immutable exports survive subsequent operations and checkpoint/replay.
+Mixed local parent/slot history uses supplied original metadata observations.
+Bounded lifetime/export capacity, full application-history control reserve,
+pre-activation refusal, pending ordering, ID conflicts, atomic bad batches and
+truncated/corrupt checkpoint rejection are exercised.
+
+NativeLogStore tests cut every partial-freeze/adoption frame byte and inject
+sync/publication faults. Recovery has the original or complete state; remaining
+data still serves and retried fences/adoptions reproduce original images/status.
+These are native journal fault models, not TCP/QUIC or hardware power-loss tests.
+
+All58 selected all-feature cases pass: retained insertion24, imported parent4,
+retirement7, activation9, repeated transfer5, target9. Core-only regressions and
+partial-profile checks also pass. All-target/all-feature Clippy, formatting and
+inventory checks accompany the checkpoint. The initial test routing hint was
+stale after publication and was corrected to the actual route; capacity refusal
+now uses ReceiptBudget. One incorrectly named test-target invocation executed
+nothing and is not counted. No performance result is claimed.
+
+New-profile full-transfer retirement/reclamation and native network composition
+remain155b. The existing retirement-lineage validator has not been widened for
+partial delegation. The full goal and outstanding macOS/general-fault work remain
+active; this is selected embedding-path evidence only.

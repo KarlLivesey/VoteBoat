@@ -1687,6 +1687,8 @@ fn source_profile(i: &TransferIntent, moves: bool) -> Source {
         s
     }
 }
+#[path = "retained_insertion/imported_partial.rs"]
+mod imported_partial;
 #[path = "retained_insertion/parent_moves.rs"]
 mod parent_moves;
 #[path = "retained_insertion/parent_slots.rs"]

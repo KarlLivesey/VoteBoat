@@ -68,6 +68,7 @@ where
         if maximum == 0
             || maximum > MAX_PARENT_ADOPTIONS
             || self.parent_limit != 0
+            || self.partial.is_some()
             || self.applied != 0
             || self.staged.is_some()
             || self.binding.len() + 2 > MAX_INLINE_IMPORT_BYTES
@@ -110,6 +111,17 @@ where
             return Err(ApplicationError::UnsupportedSchema);
         }
         let command = ParentAdoptionCommand::decode(bytes, true)?;
+        self.apply_parent_command(op, index, command)
+    }
+    pub(super) fn apply_parent_command<R>(
+        &mut self,
+        op: OperationId,
+        index: u64,
+        command: ParentAdoptionCommand,
+    ) -> Result<TargetOutcome<R>, ApplicationError> {
+        if self.parent_limit == 0 {
+            return Err(ApplicationError::UnsupportedSchema);
+        }
         if let Some(old) = self.parents.iter().find(|p| p.status.operation == op) {
             return Ok(if old.command == command {
                 TargetOutcome::ParentAdopted(old.status)
