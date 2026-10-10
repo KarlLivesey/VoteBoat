@@ -96,7 +96,7 @@ not a complete operator workflow.
 | change-membership | Node configure/status/resume, joint/final records and executable administration. | Broader combined schedules; operator-supplied plans remain explicit. |
 | split-preview | Public preview_transfer193 and executable split-preview report bounded scope/placement/payload/pause/retention requirements. Native and host providers plus executable refusal tests pass. | CLI is an offline native template profile, not a live data import test or reservation. Operator lifecycle execution remains separate. |
 | begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts;194a public TransferOperation and194b authenticated native split commands join the existing stages. | Broader recursive/retained/merge executable profiles and phase-internal fault coverage. Native whole-responsibility counter split is exercised over TCP/QUIC. |
-| resume-operation | Node::resume_configuration plus lifecycle status/query, exact original receipts and194b authenticated split resumption from original stores/IDs after first-import process loss. | Broader lifecycle profiles and persistence cuts; membership resumption already exists. |
+| resume-operation | Node::resume_configuration plus lifecycle status/query, exact original receipts and194b authenticated split resumption. Slice195 checks every native split phase over TCP/WAL and QUIC/checkpoints plus admitted fence/publication reply loss. | Broader lifecycle profiles, phase-internal power loss and combined membership cuts; membership resumption already exists. |
 | retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
 
 Mutations must retain durable operation IDs and generation/authorization checks.
@@ -204,8 +204,9 @@ a passing test count.
 ## Next implementation decisions
 
 1. Slices193–194 implement read-only split preview, public restartable decisions
-   and authenticated native split start/status/resumption. Next195 broadens the
-   executable recovery cuts around fence/import/publication using those contracts.
+   and authenticated native split start/status/resumption. Slice195 checks native
+   phase-boundary restarts and lost fence/publication replies using those contracts.
+   Next196 addresses the missing targeted leadership-transfer operation.
    Broader lifecycle profiles remain open; do not create another ownership engine.
    Leadership transfer, coordinated node drain and the assignment-list command
    remain separate required operator work; public assignment iteration exists.

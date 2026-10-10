@@ -2410,6 +2410,8 @@
       "native": "voteboat-transfer composes LifecycleDirectory, TransferSource and TransferTarget through existing native startup/Node and authenticated command channels. Peer replication selects TCP/TLS or QUIC.",
       "conformance": [
         "tests/transfer_service.rs",
+        "tests/transfer_service/cuts.rs",
+        "tests/transfer_service/cuts_support.rs",
         "tests/transfer_service/interrupt.rs",
         "tests/transfer_service/profiles.rs"
       ],

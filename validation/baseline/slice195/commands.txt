@@ -1,0 +1,7 @@
+cargo +stable test --locked --offline --all-features --test transfer_service cuts:: -- --nocapture
+cargo +stable test --locked --offline --all-features --test transfer_service -- --skip cuts::
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs

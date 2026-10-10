@@ -87,6 +87,12 @@ The client stops after128 attempts or roughly120 seconds plus the current round'
 bounded request deadlines. A pending/unknown result remains unresolved; resume the same profile.
 There is no timeout unfreeze or rollback.
 
+The [recorded recovery tests](../validation/baseline/slice195/README.md) restart
+all role processes at each of ten split boundaries, using TCP/WAL and
+QUIC/checkpoints. They also interrupt admitted fence/publication commands before
+quorum acknowledgement. Original IDs, serving restrictions and child retries
+are checked. This is selected process-crash coverage, not arbitrary power loss.
+
 ## Contracts and limits
 
 Read replies originate from `Node::complete_read`. The transient observation

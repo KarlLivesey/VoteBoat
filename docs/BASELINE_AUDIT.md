@@ -1,9 +1,21 @@
 # Baseline audits
 
-Latest implementation: [slice194b](#slice194b--authenticated-native-split-commands).
+Latest implementation: [slice195](#slice195--executable-split-recovery-cuts).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice195 — executable split recovery cuts
+
+The native split executable passes twenty phase-boundary process restarts and
+four admitted-command/lost-reply cuts across TCP/WAL and QUIC/checkpoint histories.
+Every boundary checks the original next action and serving/refusal state; final
+children preserve retries and new writes with metadata/source stopped. The QUIC
+history waits for all replicas' durable checkpoint prefixes. Evidence is in
+[slice195](../validation/baseline/slice195/README.md). These are selected process
+termination histories, not power-loss coverage of every write/fsync, simultaneous
+membership changes, or completion of P0–P7. Leadership transfer and coordinated
+drain remain the next operator gaps.
 
 ## Slice194b — authenticated native split commands
 

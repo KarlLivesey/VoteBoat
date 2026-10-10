@@ -11,6 +11,8 @@ use std::{
     sync::atomic::{AtomicU16, Ordering},
     time::{Duration, Instant},
 };
+#[path = "transfer_service/cuts.rs"]
+mod cuts;
 #[path = "transfer_service/interrupt.rs"]
 mod interrupt;
 #[path = "transfer_service/profiles.rs"]
@@ -226,11 +228,7 @@ impl Drop for Cluster {
 }
 fn history(quic: bool) {
     let mut rig = Cluster::new(quic);
-    rig.ok(1, &["initialize"]);
-    rig.ok(1, &["grant"]);
-    rig.ok(20, &["initialize"]);
-    rig.ok(20, &["add", "1", "1", "7"]);
-    rig.ok(20, &["add", "2", "200", "11"]);
+    initialize(&rig);
     interrupt::read(&mut rig);
     assert!(rig.operate("status").contains("RecordIntent"));
     assert!(!rig
@@ -248,6 +246,16 @@ fn history(quic: bool) {
     } else {
         assert!(rig.operate("start").contains("OK complete"));
     }
+    finish(rig);
+}
+fn initialize(rig: &Cluster) {
+    rig.ok(1, &["initialize"]);
+    rig.ok(1, &["grant"]);
+    rig.ok(20, &["initialize"]);
+    rig.ok(20, &["add", "1", "1", "7"]);
+    rig.ok(20, &["add", "2", "200", "11"]);
+}
+fn finish(mut rig: Cluster) {
     assert!(rig.operate("status").contains("Complete"));
     let refused = rig.request(0, 3, 20, &["read", "1"]);
     assert!(!refused.status.success());

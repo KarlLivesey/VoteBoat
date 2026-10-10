@@ -160,7 +160,10 @@ impl Connection {
                     operation,
                     bytes,
                 }) {
-                    Ok(t) => self.phase = Phase::Client(t),
+                    Ok(t) => {
+                        eprintln!("transfer_proposal accepted sequence={}", t.sequence);
+                        self.phase = Phase::Client(t);
+                    }
                     Err(e) => self.reply(format!("ERR {:?}", e.reason)),
                 }
             }

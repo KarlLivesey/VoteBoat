@@ -121,9 +121,10 @@ strict profiles clean while advancing the remaining capability work.
 | Completed193: split preview contract | Expose the chapter09 read-only preflight for an explicit split; advances the P5/P6 operator surface. | Existing checked TransferIntent, ScopeStateMachine capabilities, target assignment and source export/retention limits; no new consensus protocol. | Report application support, affected scopes, placement, movement/retention bounds and invariants; distinguish measured facts from unavailable estimates; reject incompatible input and never freeze, reserve or activate from a preview. |
 | Completed194a: public transfer decisions | Reuse the existing recovery sequence in Rust hosts and the future command executor; advances P6 operator support. |193 preview, completed Node reads, source-fence/import/publication/activation contracts. | Six new decision tests and four native TCP/QUIC WAL/checkpoint phase histories pass; original IDs, ownership, data, retry/outbox and published configuration provenance remain checked. |
 | Completed194b: recoverable lifecycle administration | Make split execution/status/resumption usable through authenticated commands; advances P6 operator support. |194a decisions, existing guarded applications, TLS authorization and bounded service ownership. | Actual TCP/QUIC three-replica role services complete a split; QUIC resumes original IDs after all processes are killed following first import. Accepted-read disconnect cleanup, authorization, source refusal and independent child retries are checked. Whole-responsibility native counter profiles only. |
-| Current195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
-| Next196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
-| Following197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
+| Completed195: operator-driven split recovery cuts | Validate the new operator path at durability boundaries; advances P4/P6 fault acceptance. |194 execution, original operation IDs and guarded native applications. | Both TCP/WAL and QUIC/checkpoint histories pass all10 phase boundaries plus lost fence/publication replies; source refusal, staged-target refusal and independent active-child retries/new writes are checked. Phase-internal power loss, combined membership and broader profiles remain open. |
+| Current196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
+| Next197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
+| Following198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. |
 
 The192 audit changes the immediate order: chapter09 still has missing operator
 capabilities, so close a usable preview/execution path before another performance
@@ -162,6 +163,64 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice195 implemented evidence — executable split recovery cuts
+
+Both new twelve-process histories pass in69.54s. Each kills/reopens all role
+processes at ten observable split boundaries; TCP recovers from WAL and QUIC
+first verifies every replica's durable checkpoint reaches the captured commit
+prefix. The exact next-action response and original profile survive each cut.
+Before source fencing, the source serves and targets refuse writes. After
+fencing, the source refuses reads/writes; each target remains non-serving until
+its own activation. These are checks before and after each cut, not a proof of
+all possible execution schedules.
+
+Each history also removes quorum, submits fence and publication commands,
+observes actual Node admission, then kills the waiting client and all remaining
+role processes. Both runs recover the retained original commands and proceed
+without new operation IDs. They do not establish that the alternative discarded
+outcome occurs in these runs. Publication construction uses completed authenticated
+reads and the public TransferOperation. No production recovery logic changed;
+one payload-free admission log identifies the cut after ticket ownership.
+
+Both finish with metadata/source stopped while active children preserve original
+data, duplicate retries and new read-back-verified writes, then join workers.
+All three original executable tests also pass after fixture extraction (20.26s).
+Logs, exact commands, source hashes and limitations are in validation/baseline/slice195.
+Formatting and strict Clippy remain clean across all three configurations.
+
+Macro review: the native whole-responsibility split now has selected phase and
+lost-reply recovery evidence. Broader phase-internal persistence, membership,
+recursive/merge, retention, platform and P7 gates remain. The next user-visible
+operator gap is targeted leadership transfer196, followed by coordinated drain197
+and assignment listing198; no new engine or storage prerequisite is introduced.
+
+### Slice195 schema plan — executable split recovery cuts
+
+Previous goal turn was progress:97a26a7 exposed and validated authenticated split
+execution. Extend its actual twelve-process fixture, preserving the profile and
+operation IDs, rather than building a second recovery algorithm. Enumerate the
+ten observable states: before intent, intent, each stage, fence, each import,
+publication, and each activation. At every boundary kill all role processes,
+reopen original stores, and verify the same next decision and serving permissions.
+Run TCP from WAL and QUIC after explicit durable checkpoints on all replicas.
+
+Before fence and publication, remove the corresponding group's quorum, submit
+the authenticated phase command, observe its exact local proposal admission,
+then kill the waiting client and role processes without receiving a result.
+Recovery may retain or discard that uncommitted command; only the original
+operation may be resumed. A small payload-free admission log line is needed to
+place this cut after Node owns the ticket, not merely after client launch.
+No new durable state, authorization, storage or consensus transition is added.
+
+The fixture owns every child and closes it on error. Checkpoints must reach a
+captured committed prefix on every replica before claiming checkpoint evidence.
+At each reopened boundary, old source access is allowed only before fencing;
+targets refuse data writes until individually activated. Final reads, original
+retry results and new writes must succeed with metadata/source stopped. Preserve
+test failures and distinguish process termination from simulated power loss or
+cuts at every internal write/fsync. Broader combined membership, recursive/merge
+profiles and arbitrary persistence schedules remain explicit follow-on coverage.
 
 ### Slice194b implemented evidence — authenticated transfer commands
 

@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 3 tests
+test profiles::invalid_profiles_fail_before_opening_replica_files ... ok
+test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... ok
+test quic_authenticated_operator_resumes_original_split_after_process_crash ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 20.26s
