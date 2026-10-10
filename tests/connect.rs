@@ -923,6 +923,92 @@ mod native {
         }
     }
     #[test]
+    fn remote_discovery_drives_real_pinned_target_dial() {
+        use voteboat::{
+            discovery::*,
+            native::{discovery::NativePeerDiscovery, remote_discovery::*},
+        };
+        let a = make(1, &[2], 1);
+        let mut b = make(2, &[1], 1);
+        let target = b.listener_addr().unwrap().unwrap();
+        let (lookup, serve) = support::tls::pair(local(1), local(3), 1);
+        let config = RemoteDiscoveryConfig::default();
+        let mut source = NativePeerDiscovery::new(1, MonoTime(0)).unwrap();
+        source
+            .publish(
+                PeerEndpointHint {
+                    peer: ticket(1, 2, 1).peer,
+                    generation: HintGeneration::new(1).unwrap(),
+                    endpoint: target,
+                    expires_at: MonoTime(1000),
+                },
+                MonoTime(0),
+            )
+            .unwrap();
+        let mut server =
+            NativeDiscoveryResponder::new(serve, ticket(3, 1, 1).peer, source, config, MonoTime(0))
+                .ok()
+                .unwrap();
+        let remote =
+            NativeRemotePeerDiscovery::new(lookup, ticket(1, 3, 1).peer, config, MonoTime(0))
+                .ok()
+                .unwrap();
+        let mut a = DiscoveryConnector::new(a, remote, MonoTime(0))
+            .ok()
+            .unwrap();
+        let stale = "127.0.0.1:1".parse().unwrap();
+        let request = req(ticket(1, 2, 1), ConnectDirection::Dial(stale));
+        let refused = a.submit(request, MonoTime(0)).unwrap_err();
+        assert_eq!(
+            refused.reason,
+            ConnectError::Discovery(DiscoveryError::Unavailable)
+        );
+        assert!(matches!(refused.request.direction,ConnectDirection::Dial(v) if v==stale));
+        let deadline = Instant::now() + Duration::from_secs(5);
+        loop {
+            server
+                .poll(MonoTime(0), SessionPollBudget::default())
+                .unwrap();
+            if let Some(done) = a
+                .discovery_mut()
+                .poll(MonoTime(0), SessionPollBudget::default())
+                .unwrap()
+            {
+                assert_eq!(done.result.unwrap().endpoint, target);
+                break;
+            }
+            assert!(Instant::now() < deadline);
+            thread::yield_now();
+        }
+        a.submit(*refused.request, MonoTime(0)).unwrap();
+        b.submit(req(ticket(2, 1, 1), ConnectDirection::Accept), MonoTime(0))
+            .unwrap();
+        let mut sessions = Vec::new();
+        while sessions.len() < 2 {
+            for event in a
+                .poll(MonoTime(0), ConnectPollBudget::default())
+                .unwrap()
+                .into_iter()
+                .chain(step(&mut b, 0))
+            {
+                let session = event.result.unwrap();
+                let binding = require_authenticated(&session).unwrap();
+                assert_eq!(binding.peer.node, event.ticket.peer.node);
+                assert_eq!(binding.peer.store.identity, event.ticket.peer.store);
+                sessions.push(session);
+            }
+            assert!(Instant::now() < deadline);
+            thread::park_timeout(Duration::from_millis(1));
+        }
+        a.close();
+        let (a, remote) = a.into_parts().ok().unwrap();
+        finish(a, 0);
+        finish(b, 0);
+        let _lookup = remote.into_session().ok().unwrap();
+        server.close();
+        assert!(sessions.iter().all(|s| require_authenticated(s).is_ok()));
+    }
+    #[test]
     fn native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates() {
         use voteboat::{discovery::*, native::discovery::NativePeerDiscovery};
         let a = make(1, &[2], 1);

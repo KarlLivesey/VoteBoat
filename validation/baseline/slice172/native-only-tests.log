@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.96s
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-a63a353355012f6c)
+
+running 13 tests
+test host::close_completes_pending_once_and_returns_original_session ... ok
+test host::construction_refusal_returns_both_owners_without_closing_them ... ok
+test host::cancellation_retains_exact_slot_and_suppresses_late_positive ... ok
+test host::clock_skew_and_delayed_delivery_cannot_extend_remote_lifetime ... ok
+test host::ipv6_scope_and_flow_round_trip_without_address_substitution ... ok
+test host::cache_capacity_includes_invalidated_generation_floors ... ok
+test host::zero_budget_and_backwards_time_leave_accepted_request_unchanged ... ok
+test host::responder_rejects_replayed_request_before_calling_source_again ... ok
+test host::stale_generation_cannot_revive_an_invalidated_endpoint ... ok
+test short_io_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test host::remote_negative_backoff_and_server_source_lifetime_are_bounded ... ok
+test host::reconnect_retains_floors_and_rejects_old_session_generations ... ok
+test host::malformed_or_mismatched_reply_closes_without_publishing ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

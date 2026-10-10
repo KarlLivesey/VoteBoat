@@ -5199,3 +5199,26 @@ Its pre-activation read now uses the existing bounded explicit-refusal retry
 helper; the expected quorum read result and all durability assertions remain.
 Broader lifecycle interleavings and macOS execution remain open. Prior CI was
 cancelled; current base tests were still running at inspection.
+
+## Slice172 — authenticated remote endpoint hints
+
+Linux: `cargo +stable test --locked --offline --all-features --test remote_discovery
+--test connect --test quic_connect --test discovery` passes42 tests. Native-only
+`--no-default-features --features native --test remote_discovery` passes13.
+Evidence: `validation/baseline/slice172/{remote-native-tests,native-only-tests}.log`.
+
+New coverage: fixed-size bounded remote endpoint requests through independently
+injected host/native discovery and SecureSession providers; exact completion and
+cancellation, bounded cache/retry, expiry under clock skew/delay, source outage
+with cached-peer progress, generation floors across authenticated reconnection,
+IPv6, malformed/alien/replayed frames and construction/cleanup ownership. Actual
+TCP/TLS and QUIC fetch/expiry/source-failure histories pass. A real TCP/TLS
+connector uses the remotely fetched endpoint while retaining its target pin and
+original refused request despite stale caller input.
+
+Both strict Clippy configurations, formatting, warnings-denied documentation and
+inventory are separately logged. Initial lint and fixture/QUIC-idle failures are
+retained; the passing logs refer to their focused fixes, not suppressed checks.
+This is not macOS/separate-host evidence, external manifest verification,
+executable integration or exhaustive network-fault validation. Hints remain
+non-authoritative and cannot reactivate retired groups or alter membership.

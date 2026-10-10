@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-9511c07c62426b05)
+
+running 1 test
+test remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.01s
+

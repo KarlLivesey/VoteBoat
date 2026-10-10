@@ -1,0 +1,51 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running tests/connect.rs (target/debug/deps/connect-3101a2bfa358f0f4)
+
+running 15 tests
+test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... ok
+test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+test native::remote_discovery_drives_real_pinned_target_dial ... ok
+test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-9511c07c62426b05)
+
+running 9 tests
+test failed_construction_returns_socket_without_starting_protocol_work ... ok
+test cancellation_and_expiry_keep_exact_terminal_slots_and_reject_stale_or_wrong_requests ... ok
+test discovered::discovered_quic_dial_validates_endpoint_and_cannot_replace_peer_pin ... ok
+test discovered::downstream_hint_provider_selects_actual_authenticated_quic_endpoint ... ok
+test discovered::refreshed_quic_hint_selects_new_address_and_retained_peer_lease_bounds_reconnect ... ok
+test remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available ... FAILED
+test one_socket_per_node_establishes_multiple_peers_and_close_preserves_transferred_sessions ... ok
+test retired_leases_release_socket_routes_for_fresh_generations ... ok
+test shared_quic_connector_preserves_selected_versions_and_rejects_mismatches ... ok
+
+failures:
+
+---- remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available stdout ----
+
+thread 'remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available' (1274590) panicked at tests/support/tls.rs:34:14:
+unknown test node
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available
+
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+error: test failed, to rerun pass `--test quic_connect`

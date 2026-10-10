@@ -94,9 +94,55 @@ strict profiles clean while advancing the remaining capability work.
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
 | Completed: recorded cancellation/publication race schedules171 | Exercise competing creation decisions under owner loss; advances P0/P5/P6 validation. | Schema16 cancellation, native owner/file recovery and slice170 service fixes. | Sixteen recorded TCP/QUIC schedules preserve the winning decision, reject the loser, retain retry identity and keep canceled targets non-serving; broader lifecycle faults remain open. |
-| Current: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
-| Next: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, discovery refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
-| Following: bounded credential refresh and session revocation | Preserve authenticated service operation when credentials change; advances C09/C21 and usable deployment. | Existing SecureSession/ServiceAuthorizer contracts and the preceding audit of supported identity/trust transitions. | Explicit refresh ownership, bounded pending work, fail-closed old credential/session behavior, recovery and independent host-resource lifetime; never infer membership from credentials. |
+| Completed: bounded remote endpoint refresh172 | Fetch endpoint hints over authenticated TCP/TLS or QUIC; advances P5/C17. | Existing discovery/session contracts and owner-independent child routing. | Bounded single-flight refresh/retry, exact cancellation, stale refusal, explicit reconnect and cached-peer availability during source failure. External manifest fetching and executable integration remain open. |
+| Current: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, endpoint refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
+| Next: bounded credential refresh and session revocation | Preserve authenticated service operation when credentials change; advances C09/C21 and usable deployment. | Existing SecureSession/ServiceAuthorizer contracts and the preceding audit of supported identity/trust transitions. | Explicit refresh ownership, bounded pending work, fail-closed old credential/session behavior, recovery and independent host-resource lifetime; never infer membership from credentials. |
+| Following: remaining native deployment and fault gates | Close the audit's platform, network integration and combined-recovery gaps; advances usable service and P0–P7 validation. | Requirement-by-requirement audit, credential transition contracts and the existing native harness. | Direct evidence for each selected gap, with explicit Linux/macOS and separate-host boundaries; no broad completion claim from a narrow test. |
+
+### Slice172 schema plan — authenticated remote endpoint refresh
+
+Purpose: make the existing endpoint-discovery seam usable against a remote
+provider without adding a runtime or altering consensus. This advances the
+current P5/C17 deliverable; the next two remain the baseline evidence audit and
+credential/session refresh. External manifest reads and executable wiring remain
+separate work; endpoint data cannot substitute for quorum-backed manifests.
+
+Shape: `NativeRemotePeerDiscovery<S: SecureSession>` implements the existing
+`PeerDiscovery`, with an explicitly polled authenticated session, bounded cache,
+one pending request and one negative retry slot. A matching
+`NativeDiscoveryResponder<S, R: PeerDiscovery>` accepts an injected provider.
+Use a versioned fixed-size request/response with exact peer/store identity and
+session-local sequence; replies carry remaining lifetime, never remote monotonic
+timestamps. Start that lifetime at local request submission conservatively.
+
+Ownership/transitions: construction returns inputs on refusal and requires an
+already authenticated session. Miss -> queued -> partially written -> matching
+reply -> validated cache publication or negative retry. Cancellation retains the
+slot through response/deadline and suppresses publication. Deadline, malformed or
+alien reply closes this session; reconnect requires explicit replacement with a
+later authenticated session of the same local store and remote source. Keep live
+cached hints usable during source failure, and preserve their generation floors
+across replacement. A new local store session requires a new discovery view.
+Close returns any pending terminal outcome while suppressing cache publication;
+owned sessions/providers remain recoverable. Cache floors are volatile and remain
+monotonic within this view. No remote hint grants trust, ownership or membership.
+
+Checks: independent host provider and short-I/O session injection; fixed frame
+validation, identity/sequence mismatch, generation regression, expired replies,
+timeout, cancellation after partial send, negative backoff and construction/input
+recovery. Real TCP/TLS and QUIC refresh must cross the wire, replace an expired
+endpoint, and continue a cached unrelated peer during a source outage. Keep
+formatting and both strict Clippy configurations clean. Reuse existing session and
+discovery contracts; the bounded frame pump is needed to preserve partial writes
+and prevent unbounded input allocation, not a new consensus subsystem.
+
+Observed validation refinements: use a two-second hint lifetime for live QUIC
+expiry, below its existing five-second idle limit. A twenty-second unpolled jump
+correctly terminated that transport instead of exercising live hint refresh.
+Keep source-timeout coverage separate and assert cached-peer availability after
+the terminal timeout as well as while the request is pending. The QUIC fixture
+constructs hint identities independently of its three available TLS test
+certificates; an endpoint hint for a fourth peer does not provision a certificate.
 
 ### Slice171 schema plan — recorded cancellation/publication race cuts
 
@@ -15918,3 +15964,45 @@ then the baseline audit and bounded credential/session refresh. The prior CI
 run was cancelled; the base commit's lint passed while both platform test jobs
 were still running at inspection. No macOS completion is inferred. The full
 P0–P7 goal remains active; P8/Windows remain deferred.
+
+### Slice172 progress — bounded authenticated remote endpoint discovery
+
+Revalidated the clean worktree after the explanatory Clippy turn and advanced
+P5/C17 with `NativeRemotePeerDiscovery`/`NativeDiscoveryResponder`, both using the
+existing `PeerDiscovery` seam and host-supplied `SecureSession`. The new protocol
+carries only endpoint hints. It changes no log, read, ownership, membership or
+activation contract and requires no durability token; its generations and
+sequences are volatile, not commit watermarks.
+
+The client has a bounded cache, one pending request, one negative retry slot,
+fixed96-byte framing and exact session/sequence/peer matching. Expiry uses local
+request submission plus a bounded remote remaining lifetime, so clock skew or
+late delivery cannot extend a lease. Cancellation retains the accepted slot to
+its response/deadline. Timeout/protocol failure ends that source connection but
+leaves other unexpired cached peers usable. Explicit authenticated replacement
+preserves cache floors and rejects old session generations. The responder uses
+the same public local/native/host lookup contract; closing a connection does not
+close a shared host source. Both directions preserve partial plaintext progress.
+
+Actual Linux checks:42 tests pass across discovery4, connect15, QUIC connector9
+and remote-discovery14. They include real TCP/TLS and QUIC hint refresh/expiry,
+cached-peer availability after source timeout, and a fetched address driving an
+actual pinned TCP/TLS connection with stale caller input. Native-only (no default
+features plus native) runs13 remote-discovery tests. Host injection covers short
+I/O, rejection ownership, retry/capacity, stale floors, late cancellation, IPv6,
+clock skew, malformed/replayed frames and replacement sessions. Evidence lives in
+validation/baseline/slice172. Formatting, both strict Clippy profiles, docs and
+inventory checks are recorded there; no lint thresholds were weakened.
+
+Retained first failures identify a fixture trying to provision a fourth test TLS
+identity and a virtual-time jump beyond QUIC's existing idle timeout. The fixes
+construct non-authoritative hint identities separately and exercise live expiry
+within the transport lifetime. Source timeout remains independently tested. An
+initial extraction-return lint was fixed by returning the refused owner boxed;
+the test scenario was split at the source-outage phase, without removing checks.
+
+The full goal remains active. This is endpoint discovery for explicitly driven
+Rust hosts, not an external manifest proof, automatic executable integration,
+complete C17, macOS/separate-host validation or a full P0–P7 certificate. The
+linked plan advances to the remaining baseline audit, then credential refresh
+and the audit's outstanding native deployment/fault gates.

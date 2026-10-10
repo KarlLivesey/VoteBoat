@@ -35,6 +35,7 @@ pub mod quic;
 pub mod quic_connect;
 #[cfg(feature = "quic")]
 mod quic_socket;
+pub mod remote_discovery;
 pub mod routing;
 pub mod runtime;
 pub mod snapshot_store;

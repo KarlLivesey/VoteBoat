@@ -92,8 +92,8 @@ transient misses use backoff and wrong scope remains terminal. Full connector,
 owner and TCP/QUIC service regressions are recorded in validation/REPORT.md.
 
 This is peer-address discovery, not complete C17. External remote manifest fetching,
-dynamic executable endpoint refresh, external discovery protocols and refresh
-scheduling remain outstanding. Real selected discovery connections include
+dynamic executable endpoint refresh and broader refresh scheduling remain
+outstanding. Slice172 below adds a bounded external endpoint protocol. Real selected discovery connections include
 TCP/TLS and QUIC. No macOS/separate-host, arbitrary-fault or performance claim follows.
 
 ## Explicit QUIC dial refresh
@@ -123,7 +123,7 @@ collision bounds and generation cleanup.
 
 ## Automatic responsibility reads for Rust hosts
 
-`routing::ManifestReadSource` (contract version1) exposes original trusted
+`routing::ManifestReadSource` (contract version2) exposes original trusted
 Directory reads: immutable binding, pending count, bounded submit, exact terminal
 poll and best-effort cancel. Native `Node` implements it for Directory-shaped
 readable applications. Host replacements use the same public contract. A read
@@ -186,3 +186,91 @@ recovery: the original7 remains7 on retry, then a new3 reaches10. Metadata logs
 remain unchanged throughout offline child writes/reads and checkpoint recovery.
 This is Rust service composition; no new remote lookup endpoint or CLI command
 is advertised.
+
+## Remote endpoint provider (slice172)
+
+`native::remote_discovery::NativeRemotePeerDiscovery<S: SecureSession>` implements
+`PeerDiscovery` using a dedicated, already authenticated session. Construct it
+with the expected source `PeerIdentity`, bounded `RemoteDiscoveryConfig` and local
+monotonic time. Construction rejects the wrong source or an unready/insecure
+session and returns the original session unchanged. No sockets, threads or
+runtime are created. TCP/TLS and QUIC use the same implementation.
+
+A cache miss queues one fixed-size request and returns `Unavailable`. Another
+request for that peer shares the slot; a different uncached peer receives
+`Overloaded`. Call `poll(now, SessionPollBudget)` explicitly; it returns at most
+one `RefreshCompletion` with the original request's session binding, sequence,
+peer, start and deadline. Cache hits require no source call. One fixed negative
+result slot and retry delay bound retries. The existing cache bounds entries,
+including invalidated generation floors. Renewing an expired or invalidated
+advertisement requires a newer generation, even when its address is unchanged.
+
+`NativeDiscoveryResponder<S, R: PeerDiscovery>` uses the same authenticated
+session contract and accepts an independently supplied native or host provider.
+Poll it explicitly. `source_mut()` supports host publication. It retains only
+one fixed input/output frame and rejects replayed or malformed requests. Closing
+it closes that connection, not its source; `into_parts()` returns both owners.
+Extracting parts during a partial reply abandons that non-authoritative reply.
+
+The client can be selected inside `DiscoveryConnector` without core changes.
+While retaining the typed wrapper, drive
+`connector.discovery_mut().poll(now, budget)` alongside the responder and
+`connector.poll`. The remote client is the sole consumer of its dedicated
+session's plaintext. Hosts embedding a type-erased connector in Node must retain
+an explicit polling arrangement; the executable does not automatically create
+or drive this provider. There is no implicit background progress.
+
+Cancellation takes the exact `RefreshRequest`, suppresses publication and retains
+the slot until the reply or original deadline. It never extends the deadline.
+Malformed/alien replies, session errors or timeout fail that source connection;
+other live cached hints continue working until their own expiry. Misses return
+`Unavailable` while `source_failed()` is true. `replace_session` requires a later
+connection generation, the same local recovered-store binding and the same
+remote peer/store identity. It resets request sequencing while preserving cache
+floors and returns the previous session. Wrong replacements are returned intact.
+Explicit `close` closes the view/cache and yields any pending terminal completion
+on the next poll. `into_session` requires a closed/failed source and no pending
+completion; the returned session remains the host's cleanup responsibility.
+Neither cancellation nor local close undoes bytes already sent.
+
+### Endpoint wire format
+
+Version1 uses exactly96 bytes, all integers big-endian, with zero reserved bytes.
+The format is separate from Raft RPCs and carries no read proof or credentials.
+
+| Bytes | Value |
+| --- | --- |
+| 0..4 | `VBDH` magic |
+| 4 | Version1 |
+| 5 | Request1, hint2, missing3, unavailable4 |
+| 6..8 | Reserved zero |
+| 8..16 | Nonzero session-local request sequence |
+| 16..24, 24..40, 40..48 | Node, store, store incarnation |
+| 48..56, 56..58 | Hint generation and port |
+| 58..74, 74 | IPv4/IPv6 bytes and family4/6; unused IPv4 bytes zero |
+| 75..79, 79..83 | IPv6 scope ID and flow info; zero for IPv4 |
+| 83..91 | Remaining hint lifetime in milliseconds |
+| 91..96 | Reserved zero |
+
+Fields after byte48 are zero outside hint replies. Decoding requires canonical
+encoding; zero identities, unsupported versions, reserved data and invalid family
+codes fail. Addresses and lifetimes undergo ordinary cache validation. Each
+plaintext poll attempts at most one write prefix and one read prefix, each
+bounded by the supplied byte limits and the remaining96-byte frame, alongside
+one bounded SecureSession poll. No input length can request allocation.
+
+The server caps remaining lifetime by configuration. The client also checks its
+cap and computes expiry from **local request submission**, not response receipt.
+Transit and processing delay therefore consume lifetime; a delayed reply cannot
+renew an already expired hint. Server and client monotonic clocks need not share
+an epoch. Generations/cache floors are volatile endpoint metadata, not durable
+owner epochs. Restart requires explicit reconfiguration, as with the local cache.
+
+Tests cover independent host sources, partial plaintext I/O, original completion
+ownership, cancellation, negative retry, stale generations, capacity floors,
+clock skew, late expiry, malformed frames, replay, source replacement and IPv6.
+Real TCP/TLS and QUIC fetch/expiry histories retain unrelated cached peers through
+source timeout. A separate real TCP/TLS test fetches an endpoint and uses it in
+`DiscoveryConnector` to authenticate the pinned target despite stale caller
+input. External manifest-fetch protocols, executable wiring, live QUIC migration,
+macOS and separate-host validation remain outside this slice.

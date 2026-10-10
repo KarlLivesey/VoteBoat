@@ -15,6 +15,8 @@
 #![cfg(feature = "quic")]
 #[path = "quic_connect/discovery.rs"]
 mod discovered;
+#[path = "quic_connect/remote_discovery.rs"]
+mod remote_discovery;
 mod support;
 use std::{
     collections::BTreeMap,
