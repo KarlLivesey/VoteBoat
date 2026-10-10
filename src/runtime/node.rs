@@ -377,6 +377,31 @@ where
     pub fn peers(&self) -> Option<&PeerDriver<C, F>> {
         self.peers.as_ref()
     }
+    /// Replace prepared peer credentials through the selected provider. The
+    /// host must authorize and persist the rollout; this is not a Raft proposal.
+    pub fn replace_peer_credentials(
+        &mut self,
+        expected: crate::authorization::CredentialGeneration,
+        replacement: crate::authorization::CredentialGeneration,
+        material: <C as crate::connect::PeerCredentialControl>::Credentials,
+    ) -> Result<
+        <C as crate::connect::PeerCredentialControl>::Credentials,
+        (
+            crate::connect::ConnectError,
+            <C as crate::connect::PeerCredentialControl>::Credentials,
+        ),
+    >
+    where
+        C: crate::connect::PeerCredentialControl,
+    {
+        if self.state != NodeState::Running {
+            return Err((crate::connect::ConnectError::Closed, material));
+        }
+        let Some(peers) = self.peers.as_mut() else {
+            return Err((crate::connect::ConnectError::Closed, material));
+        };
+        peers.replace_peer_credentials(expected, replacement, material)
+    }
     pub fn replica_usage(&self) -> ReplicaDriverUsage {
         self.replica.usage()
     }

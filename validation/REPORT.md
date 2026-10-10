@@ -1,6 +1,11 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Prepared peer rotation: [slice207a](baseline/slice207a/README.md). Seven final
+TCP/QUIC/host tests pass, alongside215 connector/session/runtime regression tests,
+20 default TCP tests and one core-only Node forwarding check. Formatting/four
+strict Clippy profiles and metadata validation pass. This is the public prepared
+replacement mechanism; durable startup and executable peer rollout remain207b.
 Credential-provider evidence: [slice201d](baseline/slice201d/README.md), with
 shared core-only host/native/file cases and returned I/O ownership checks.
 20 all-feature,20 native-only and4 core-only tests pass, along with13 metadata

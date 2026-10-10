@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.50s
+     Running tests/peer_rotation.rs (target/debug/deps/peer_rotation-e526a3eef2e2826f)
+
+running 4 tests
+test host::rotation_retains_old_ticket_until_terminal_and_revokes_late_success ... ok
+test host::rejected_material_preserves_live_sessions_and_drop_revokes_them ... ok
+test quic_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+test tcp_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

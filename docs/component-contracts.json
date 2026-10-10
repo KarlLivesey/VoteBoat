@@ -2603,6 +2603,24 @@
         "examples/benchmark/shared_drain.rs"
       ],
       "scope": "Immutable bounded plan, explicit scan budget, rotating cursor and one outstanding request per group under a global in-flight ceiling. Missing views and per-group errors do not discard independent dispatches. Opaque instance-scoped tickets reject duplicate, foreign and stale completion. Finishing releases ownership only; fresh core observations establish committed progress. Host owns ordinary Node tickets, authorization, readiness, transfer deadlines, cancellation and shutdown. Restart loads the original plan and journal, restores source admission, and creates a new coordinator. Completed observations are scan-local, never an aggregate stop certificate. No I/O, hidden runtime, persistent format, new consensus path or authority to delete data. Native three-group tests exercise shared-WAL mixed progress and original-ID resumption. Slice197b4a scans the complete combined voter and learner-source inventory; unchanged committed learner groups emit no request and still participate in source readiness. Multi-group executable administration, broader faults and macOS remain open."
+    },
+    {
+      "design_id": "C06/C09",
+      "public_contract": "PeerCredentialControl / NativePeerMaterialProvider / RotatingPeerConnector",
+      "operations": [
+        "credential_generation",
+        "replace_peer_credentials",
+        "replace_material",
+        "new",
+        "into_inner"
+      ],
+      "native": "Opt-in RotatingPeerConnector<C> wraps existing native TCP/TLS, QUIC or NativeServiceConnector providers. Node and PeerDriver forward the optional public control; host providers can implement it without native TLS.",
+      "conformance": [
+        "tests/peer_rotation.rs",
+        "tests/peer_rotation/host.rs",
+        "tests/support/node_peer_credentials.rs"
+      ],
+      "scope": "Expected/replacement credential generations are distinct from connection, store and membership generations. Native prepared key/pin replacement preserves the exact peer identity set, wire version, endpoint routes, hard limits and connection-generation counters. Rejected material is returned intact. Accepted old tickets retain capacity through one terminal poll; old leases revoke established sessions and suppress late successful handshakes. Close/drop revoke wrapper leases; underlying provider reclaim requires close and drain. No file loading, durable record, restart policy, membership change or executable rollout is supplied by this mechanism. Wrap before exposing sessions; prior raw sessions do not carry wrapper leases. Host authorizes and durably records the intended rollout before publication."
     }
   ],
   "not_yet_implemented": [

@@ -1,5 +1,40 @@
 # Credential generations and session revocation
 
+## Peer connector rotation in Rust
+
+`connect::PeerCredentialControl` is an optional public provider contract, also
+forwarded by `PeerDriver::replace_peer_credentials` and
+`Node::replace_peer_credentials`. Hosts can implement it without native TLS.
+For the native providers, explicitly wrap a fresh, drained TCP/TLS, QUIC or
+`NativeServiceConnector` in `native::peer_credentials::RotatingPeerConnector`.
+It implements the existing `PeerConnector` and can be supplied in `NodeParts`.
+Only sessions established through the wrapper carry its revocation leases.
+
+Supply a prepared `NativePeerMaterial` containing a validated `NativeTlsConfig`
+and the complete peer-pin map. Call `replace_peer_credentials(expected, next,
+material)` after authorizing and durably recording the intended rollout. The
+wrapper requires its current generation to equal `expected`, and `next` to be
+greater. Native replacement preserves the exact node/store/incarnation set,
+wire version, addresses and limits. Invalid input is returned intact; success
+returns the prior material. Membership changes use the membership protocol.
+
+Successful publication invalidates old established sessions and cancels old
+connection attempts. Accepted tickets keep their slots until their terminal
+receipts are polled. Even a late successful handshake is revoked if it belongs
+to the previous generation. New connections retain increasing connection
+generations and authenticate against the replacement keys and pins. Closing or
+dropping a wrapper revokes its leases; it cannot revoke an unrelated owner's
+sessions. Use `close`, drain accepted receipts, then `into_inner` to reclaim the
+underlying provider and its native worker.
+
+This API performs no file I/O or durable recording. Hosts must recover the
+authorized material and generation on restart. It is not yet wired into the
+executables' peer startup or administrative command paths; their existing
+`reload-access` changes command-channel credentials only. Durable peer rollout
+and executable integration remain the next deliverable. During a rollout,
+incompatible key/pin selections can interrupt connectivity; application work
+already admitted retains its normal original-operation recovery semantics.
+
 `secure::SessionValidity` is a public, bounded, nonblocking check for one fixed
 credential generation. `GuardedSession<S,V>` wraps the existing `SecureSession`
 contract, so native transports and host replacements use the same interface.

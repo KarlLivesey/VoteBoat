@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice207a adds prepared peer-key rotation through an optional public connector
+contract and Node/PeerDriver forwarding. Native TCP/QUIC tests change actual keys,
+reject stale pins, revoke old sessions/late completions and preserve connection
+generation floors. Seven final rotation tests,215 broader all-feature regression
+tests,20 default TCP/connector tests and a core-only Node check pass, with clean
+formatting/four strict Clippy configurations. Durable peer rollout and executable
+startup/command integration remain207b; this Rust API does not persist credentials.
+The inventory adds one combined contract;101 entries remain unreviewed by the
+five-contract obligation ledger. Platform/full-goal acceptance remains open.
+
 Slice201d reviews all five credential journal/record-I/O operations with shared
 core-only host, native memory-I/O and actual-file assertions. Owner identity,
 unchanged rejected state, exact retry writes, generation floors/gaps, uncertain

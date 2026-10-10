@@ -413,3 +413,36 @@ impl PeerConnector for NativeQuicConnector {
         self.hub.take();
     }
 }
+
+impl super::peer_credentials::NativePeerMaterialProvider for NativeQuicConnector {
+    fn replace_material(
+        &mut self,
+        material: super::peer_credentials::NativePeerMaterial,
+    ) -> Result<
+        super::peer_credentials::NativePeerMaterial,
+        (ConnectError, super::peer_credentials::NativePeerMaterial),
+    > {
+        if self.closed {
+            return Err((ConnectError::Closed, material));
+        }
+        if let Err(error) = super::peer_credentials::validate_material(
+            &material,
+            self.tls.wire_version(),
+            self.peers.iter().map(|(id, p)| (*id, p.pin.identity)),
+        ) {
+            return Err((error, material));
+        }
+        let mut previous = BTreeMap::new();
+        for (id, pin) in material.peers {
+            let peer = self
+                .peers
+                .get_mut(&id)
+                .expect("validated peer identity set");
+            previous.insert(id, std::mem::replace(&mut peer.pin, pin));
+        }
+        Ok(super::peer_credentials::NativePeerMaterial {
+            tls: std::mem::replace(&mut self.tls, material.tls),
+            peers: previous,
+        })
+    }
+}

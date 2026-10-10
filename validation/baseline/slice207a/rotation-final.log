@@ -1,0 +1,15 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.38s
+     Running tests/peer_rotation.rs (target/debug/deps/peer_rotation-e526a3eef2e2826f)
+
+running 6 tests
+test host::rejected_material_preserves_live_sessions_and_drop_revokes_them ... ok
+test host::rotation_retains_old_ticket_until_terminal_and_revokes_late_success ... ok
+test tcp_stale_pin_refuses_changed_key_and_corrected_pin_reconnects ... ok
+test quic_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+test tcp_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+test quic_stale_pin_refuses_changed_key_and_corrected_pin_reconnects ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.33s
+

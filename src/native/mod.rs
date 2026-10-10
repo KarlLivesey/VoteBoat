@@ -30,6 +30,8 @@ pub mod lookup_discovery;
 pub mod node;
 pub mod observability;
 pub mod outbound;
+#[cfg(feature = "tls")]
+pub mod peer_credentials;
 pub mod placement;
 pub mod placement_planning;
 #[cfg(feature = "quic")]

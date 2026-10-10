@@ -174,3 +174,21 @@ pub trait PeerConnector {
         self.usage().requests == 0 && self.usage().anonymous == 0
     }
 }
+
+/// Optional prepared credential replacement for one fixed peer identity set.
+/// The host authorizes and durably records the rollout before calling this.
+/// Success preserves local identity, endpoints, wire version and hard limits,
+/// invalidates established old sessions, and cancels old accepted attempts.
+/// Their exact terminal completions still drain normally. It grants no voter
+/// authority and never rolls back already admitted application operations.
+/// Rejection preserves live state and returns the supplied material unchanged.
+pub trait PeerCredentialControl: PeerConnector {
+    type Credentials;
+    fn credential_generation(&self) -> Option<crate::authorization::CredentialGeneration>;
+    fn replace_peer_credentials(
+        &mut self,
+        expected: crate::authorization::CredentialGeneration,
+        replacement: crate::authorization::CredentialGeneration,
+        material: Self::Credentials,
+    ) -> Result<Self::Credentials, (ConnectError, Self::Credentials)>;
+}

@@ -30,6 +30,8 @@ mod drain_recovery;
 mod event_reporting;
 #[path = "node_drain.rs"]
 mod local_drain;
+#[path = "node_peer_credentials.rs"]
+mod peer_credentials;
 type Parts = NodeParts<
     Ready,
     Timers,

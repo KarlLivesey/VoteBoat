@@ -102,12 +102,13 @@ split under revoked/replacement administrators, preserving ownership and retries
 Completed201d covers the reused credential journal/record-I/O contracts with
 shared host/native/file publication checks, exact returned I/O ownership and
 failure/reopen cases. It reviews five more operations, not an entire provider
-ecosystem. Current work reviews the remaining peer credential rotation
-contract against the existing session/journal mechanism. Its purpose is safe
-operational key replacement; dependencies are authenticated peer identity,
-session revocation and restart reconstruction. Completion requires a concrete
-replacement API and TCP/QUIC rotation/restart checks, advancing the secure
-networked service milestone; do not claim completion from command-channel reload.
+ecosystem. Completed207a adds a prepared peer-key replacement API, native
+TCP/QUIC session revocation and typed Node/PeerDriver forwarding. Current207b
+connects it to durable startup and executable administration. It depends on the
+existing credential journal and prepared peer bundle; acceptance requires
+original rollout-ID recovery, stale-file refusal, authenticated commands and
+replicated data/retry continuity through rotation and restart. This advances
+the secure networked service milestone;207a alone is not operational rollout.
 Next, address receive/connection admission and fairness from
 the remaining resource ledger. Its purpose is progress under competing peer and
 client load; dependencies are existing hard admission limits and control reserve.
@@ -118,6 +119,76 @@ authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; completion requires refreshed hints, stale
 generation refusal and parent-offline child continuity across restart. This
 advances P5 discovery without granting ownership from a cached endpoint.
+
+### Slice207a implemented — prepared peer-key rotation for Rust hosts
+
+PeerCredentialControl is an optional core contract for host-authorized prepared
+replacement, forwarded by PeerDriver and Node without changing consensus state.
+The native RotatingPeerConnector wraps existing TCP/TLS, QUIC or selected native
+connectors. Native material validation preserves the exact peer identity set,
+wire version, endpoint map, hard limits and per-peer connection generations.
+Stale expected/replacement generations and invalid material return ownership
+without revoking live sessions. Successful replacement returns previous material.
+
+The wrapper captures a validity lease before admission, invalidates old leases
+at publication, and cancels old accepted attempts. Their slots survive until
+terminal polling, including a provider's late successful completion, which is
+revoked and reported as failed. Existing guarded sessions reject subsequent I/O;
+replacement on one connector leaves another owner's lease valid. New attempts
+authenticate against the changed key/pin pair. Closing/dropping invalidates leases;
+provider extraction requires close and drain. No file I/O, new worker or runtime
+is introduced. Prior raw sessions outside the wrapper do not carry its leases.
+
+Seven tests cover actual changed certificates/keys over TCP and QUIC, stale-pin
+refusal and corrected reconnect, invalid material, preserved connection-generation
+floors, late-success cleanup, returned material and rejected construction owner.
+A core-only host Node check preserves the exact consensus-state view and refuses
+publication after shutdown. The broader all-feature connector/session/effect-owner
+sweep passes215 tests; default TCP rotation/connectors pass20 tests. Final focused
+rotation checks include the strengthened stale-generation assertion. Formatting
+and all four Clippy configurations pass with zero diagnostics. Initial compilation
+identified an incorrect test identity type/unused import, and inventory validation
+caught insertion into the wrong metadata array; both are fixed with logs retained
+in validation/baseline/slice207a.
+
+This is prepared replacement through public Rust composition, not yet durable
+peer rollout or executable/startup integration. Hosts must authorize and persist
+the intended material/generation before calling it and restore that state at
+restart.207b remains current, followed by resource fairness and discovery refresh.
+The new combined contract is inventoried; the obligation ledger still reviews
+five contracts and now leaves101 entries unreviewed. Full P0–P7 remains active.
+
+### Slice207a schema plan — replace peer credentials through the public connector
+
+Previous turn8bafd10 completed shared credential-journal conformance. Native
+TCP/QUIC connectors still retain fixed TLS/pin material. Add one reusable native
+rotation wrapper around the existing PeerConnector, plus a typed optional core
+control trait forwarded by PeerDriver/Node. Host providers may implement the
+same control without depending on native TLS. Existing static connectors remain
+valid and unchanged unless explicitly wrapped.
+
+API shape: expected/current and replacement CredentialGeneration, prepared native
+TLS configuration and bounded peer pins. Reject non-increasing/stale generations,
+changed wire version, peer identity set/store incarnation or invalid/excess pins
+before mutation. This rotation changes keys for fixed identities, not membership,
+routes or provider selection. Return rejected material intact and return previous
+material on success. Preparation and durable recording are host responsibilities.
+
+State/ownership: capture a validity lease before every accepted connection.
+On publication, replace validated material, invalidate all old leases and cancel
+every old accepted connector ticket. Keep those tickets/slots until exactly one
+terminal poll, including uncompleted OS dials. A late old successful session must
+be revoked and returned as failure; existing transferred GuardedSessions reject
+further I/O. New attempts retain monotonic connection generations and authenticate
+against new material. Close/drop invalidate leases; draining transfers original
+provider ownership only after closed and empty. No global runtime or extra worker.
+
+Acceptance: host-controlled late-success/cancellation and rejected ownership
+cases; real TCP/TLS and QUIC key/pin replacement, old-session rejection and fresh
+stable-identity I/O; existing connector regression suites; core-only trait
+compilation and strict lint. Follow with207b durable startup/command integration
+using the existing journal, then resource fairness.207a must not be presented as
+complete operational rotation or restart persistence; full P0–P7 remains active.
 
 ### Slice201d implemented — shared credential provider obligations
 

@@ -641,6 +641,41 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
     }
 }
 
+impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>>
+    super::peer_credentials::NativePeerMaterialProvider for NativePeerConnector<D>
+{
+    fn replace_material(
+        &mut self,
+        material: super::peer_credentials::NativePeerMaterial,
+    ) -> Result<
+        super::peer_credentials::NativePeerMaterial,
+        (ConnectError, super::peer_credentials::NativePeerMaterial),
+    > {
+        if self.closed {
+            return Err((ConnectError::Closed, material));
+        }
+        if let Err(error) = super::peer_credentials::validate_material(
+            &material,
+            self.tls.wire_version(),
+            self.peers.iter().map(|(id, p)| (*id, p.pin.identity)),
+        ) {
+            return Err((error, material));
+        }
+        let mut previous = BTreeMap::new();
+        for (id, pin) in material.peers {
+            let peer = self
+                .peers
+                .get_mut(&id)
+                .expect("validated peer identity set");
+            previous.insert(id, std::mem::replace(&mut peer.pin, pin));
+        }
+        Ok(super::peer_credentials::NativePeerMaterial {
+            tls: std::mem::replace(&mut self.tls, material.tls),
+            peers: previous,
+        })
+    }
+}
+
 /// Explicit native service transport selection; TCP remains available without QUIC.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NativePeerProtocol {
@@ -654,6 +689,21 @@ pub enum NativeServiceConnector {
     Tcp(Box<NativePeerConnector>),
     #[cfg(feature = "quic")]
     Quic(Box<super::quic_connect::NativeQuicConnector>),
+}
+impl super::peer_credentials::NativePeerMaterialProvider for NativeServiceConnector {
+    fn replace_material(
+        &mut self,
+        material: super::peer_credentials::NativePeerMaterial,
+    ) -> Result<
+        super::peer_credentials::NativePeerMaterial,
+        (ConnectError, super::peer_credentials::NativePeerMaterial),
+    > {
+        match self {
+            Self::Tcp(connector) => connector.replace_material(material),
+            #[cfg(feature = "quic")]
+            Self::Quic(connector) => connector.replace_material(material),
+        }
+    }
 }
 impl NativeServiceConnector {
     /// Reclaim the TCP worker, if selected, only after close and drain.

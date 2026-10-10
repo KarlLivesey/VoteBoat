@@ -311,6 +311,26 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     pub fn connector_usage(&self) -> ConnectUsage {
         self.parts.connector.usage()
     }
+    /// Publish host-authorized prepared credentials without changing the roster.
+    pub fn replace_peer_credentials(
+        &mut self,
+        expected: crate::authorization::CredentialGeneration,
+        replacement: crate::authorization::CredentialGeneration,
+        material: <C as PeerCredentialControl>::Credentials,
+    ) -> Result<
+        <C as PeerCredentialControl>::Credentials,
+        (ConnectError, <C as PeerCredentialControl>::Credentials),
+    >
+    where
+        C: PeerCredentialControl,
+    {
+        if self.closed || self.failed.is_some() {
+            return Err((ConnectError::Closed, material));
+        }
+        self.parts
+            .connector
+            .replace_peer_credentials(expected, replacement, material)
+    }
     pub fn is_failed(&self) -> bool {
         self.failed.is_some()
     }
