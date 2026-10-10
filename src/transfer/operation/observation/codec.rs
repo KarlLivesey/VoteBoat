@@ -164,13 +164,23 @@ impl TransferObservation {
                 .as_ref()
                 .is_none_or(|v| v.fence.group == self.read.group && valid(v.fence.index)),
             ObservationValue::Target(v) => {
-                v.group == self.read.group
-                    && v.staged_index.is_none_or(valid)
-                    && v.imported.as_ref().is_none_or(|v| valid(v.index))
-                    && v.activated.is_none_or(|v| valid(v.index))
+                v.group == self.read.group && valid_target_prefix(v, self.index)
             }
         }
     }
+}
+fn valid_target_prefix(v: &TargetStatus, prefix: u64) -> bool {
+    let valid = |i| i > 0 && i <= prefix;
+    v.staged_index.is_none_or(valid)
+        && v.imported
+            .as_ref()
+            .is_none_or(|i| valid(i.index) && v.staged_index.is_some_and(|stage| stage < i.index))
+        && v.activated.is_none_or(|a| {
+            // Publication belongs to the metadata log, not this local prefix.
+            valid(a.index)
+                && a.publication_index > 0
+                && v.imported.as_ref().is_some_and(|i| i.index < a.index)
+        })
 }
 fn put_source(out: &mut Vec<u8>, v: &SourceFenceEvidence) {
     put_fence(out, v.fence);

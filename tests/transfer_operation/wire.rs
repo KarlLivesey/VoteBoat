@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+#[path = "wire_generated.rs"]
+mod generated;
 #[test]
 fn transient_observations_roundtrip_and_reject_truncation_and_trailing_bytes() {
     let mut views = Views::imported();

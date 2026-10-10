@@ -1,5 +1,20 @@
 # Validation report — slice 35
 
+Transfer observation phase consistency: [slice212](baseline/slice212/README.md).
+The original decoder accepts a contradictory imported/activated target lacking
+staging. The new private check requires ordered local phases within the read
+prefix while retaining independent positive metadata publication indices. All12
+all-feature operation checks,4 native TCP/QUIC WAL/checkpoint phase histories and
+18 transfer-service histories pass locally. The initial premature-activation
+fixture failure and two wrong public-module compile paths are retained. This is
+functional lifecycle validation; broad security work is deferred to the user's
+Daybreak run. Previous-source run38046741849 completes with Ubuntu counter158/
+directory19 passing, transfer17 pass/1 failure on merge retirement uncertainty;
+macOS counter153 pass/5 fail, later targets not run. These platform failures
+remain open and are the next functional recovery work.
+Final default/core-only operation checks pass12 each; formatting and all four
+strict Clippy profiles pass with zero diagnostics.
+
 Combined membership/split recovery: [slice211](baseline/slice211/README.md).
 All8 native TCP/QUIC WAL/checkpoint histories pass, including four new source
 Final-before-import cuts over a retained Joint checkpoint plus later Final WAL.

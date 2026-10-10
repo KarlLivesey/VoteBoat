@@ -242,20 +242,46 @@ independent child retry/outbox/cold-recovery checks pass. A reused configuration
 fixture assumption and an incorrect public receipt type namespace failed first;
 both raw failures are retained. The sequential default TCP selection passes4.
 No production protocol or format changes.
-Current: revisit the current Linux/macOS operator acceptance evidence.
-Select a reproduced remaining failure from the recorded platform runs, identify
-its underlying contract, fix it and run the affected histories locally plus the
-supported platform job. Depend on the existing operator fixtures and logs;
-completion is terminal passing evidence for the selected failure, not a claim
-that other platform failures disappeared. This advances the usable service and
-cross-cutting baseline acceptance. CI continues as background feedback.
-Next: broaden malformed transfer-observation decoding evidence using its existing
-public128KiB wire codec and actual completed-read observation fixtures. Generate
-reproducible malformed lengths/counts, truncations and inconsistent identity/
-prefix combinations; require typed refusal, bounded allocation and unchanged
-operator state. This advances P0/P1 defensive recovery and P6 resumable operators,
-depending on existing observation/operation contracts rather than a replacement
-serialization system. Valid native observations must still round-trip.
+Priority update212: the user will run Daybreak for broad security work. Continue
+functional completeness, recovery and platform reliability; keep mandatory
+fencing, durability and identity invariants, but defer the expanded codec fuzz
+corpus. Finish only the reproduced local-phase consistency fix already started.
+
+Implemented212: the corrected original-code regression accepts a contradictory
+imported/activated target without staging and therefore fails. The private codec
+check now enforces Stage<Import<Activation within the completed local prefix;
+foreign metadata publication indices remain independent. All12 all-feature
+operation checks,4 native TCP/QUIC WAL/checkpoint split phase histories and18
+transfer-service histories pass. Native completed observations round-trip with
+unchanged read identity, configuration, prefix and canonical bytes before the
+unchanged operator executes each phase. The initial premature activation fixture
+failure and two mistaken public-module paths are retained, not protocol bugs.
+Macro review212: this closes the selected P6 observation consistency gap; platform
+reliability, provider obligations, broader faults and fixed P7 gates stay open.
+The expanded security/fuzz corpus is deferred to the user's Daybreak work.
+Final default/core-only operation checks also pass12 each; formatting and all
+four strict Clippy configurations pass with zero diagnostics. Raw failures,
+passes and previous-source platform evidence are retained in slice212.
+
+Current: recover the original merge retirement across leadership uncertainty.
+Run38046741849/542428d has Ubuntu counter158/directory19 passing, but transfer
+17 pass/1 fail at merge retirement on exact Unknown(LeadershipChanged). Depend
+on the retained job log, retirement CLI/runner and original source/release
+contract. Identify whether the fixture or production resumption fails before
+editing. Completion requires an explicit uncertain-original-identity regression,
+exact terminal receipt checks and affected native histories locally; background
+platform evidence remains distinct. This advances P6 usable merge and the
+Linux/macOS service milestone without changing deadlines or accepting unrelated
+errors.
+
+Next: diagnose macOS remaining group liveness/preparation failures using actual
+run38046741849 evidence (counter153 pass/5 fail). Depend on retained logs and
+existing shared-group session/owner contracts. Identify the earliest failed
+transition, add bounded diagnostic evidence if necessary and reproduce a focused
+cause before fixing. Completion requires affected original operation/history
+checks locally plus the supported platform run, rather than increasing timeouts
+or accepting all unknown outcomes. This advances the usable service and P2/P4
+platform recovery; CI continues in the background.
 
 Following: select the next unreviewed replaceable provider contract from the
 108-entry inventory and document its actual ownership/budget/recovery obligations.
@@ -264,6 +290,45 @@ and the native provider, including failed admission/terminal cleanup. Completion
 requires cause-detecting assertions and scoped ledger evidence, not merely a
 green metadata check. This advances P0 composition and depends on existing public
 seams/shared conformance patterns;102 entries currently remain unreviewed.
+
+### Slice212 schema plan — bounded transient observation decoding
+
+Use the existing VBTOBS01/128KiB transient codec, public observation API and
+actual-core opaque barriers with intentionally adversarial test values. Existing
+wire tests already cover truncation, trailing bytes and foreign-group matching.
+The target decoder checks individual prefix bounds but not local phase ordering:
+it can accept import without stage, import at/before stage or activation at/before
+import. Strengthen that structural check; do not derive authority from decoding.
+
+Data/API shape: retain the format and public signature. Add a small private
+target-prefix validator for optional Stage→Import→Activation ordering, positive
+foreign publication index and existing local positive/contiguous-prefix bounds.
+Publication indices belong to metadata, not the target log: never compare them
+against the target prefix. Valid historical activations after later source
+movement retain their original local indices and remain valid.
+
+Generate real target application stage/import/activation status behind an actual
+core read barrier, then mutate scalar indices and optional prerequisites. Preserve
+the failing-before decoder case. Malformed length/count/tag/identity cases and
+seeded arbitrary-byte/mutation histories were originally
+planned. The user has since asked to leave broad security work to Daybreak;
+defer that corpus and finish only the reproduced local phase consistency fix
+and foreign-prefix regression. Accepted observations must canonically reencode;
+rejected inputs return typed errors. Retain the outer128KiB and
+before-reserve256-count guards,
+without claiming measured allocator use or a new fuzz/security audit.
+Exercise actual completed Node observations through encode/decode in the native
+split operator fixture and preserve its decisions across all selected phases.
+
+Ownership/failure: borrowed input is not retained, parsing creates only bounded
+owned values and no I/O/state transition/effect. Contradictory input cannot become
+a phase action. Caller authentication and live read matching stay mandatory;
+canonical bytes are not a certificate, cache or permission to publish/activate.
+Acceptance: failing-before local-order case, finite phase-order cases, core-
+only/default/all-feature operation tests, selected native phase recovery and
+zero formatting/all-four strict Clippy profiles. This advances P0/P1 defensive
+recovery and P6 resumption. The next provider-contract review remains linked;
+macOS liveness diagnosis continues independently from its actual CI evidence.
 
 ### Slice210h schema plan — prepare the original drain source under role changes
 

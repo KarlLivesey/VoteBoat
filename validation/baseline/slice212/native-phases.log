@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.51s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+test native::split::quic_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+test native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners has been running for over 60 seconds
+test native::split::tcp_split_resumes_every_phase_from_checkpoint_status_without_dual_owners has been running for over 60 seconds
+test native::split::tcp_split_resumes_every_phase_from_wal_status_without_dual_owners has been running for over 60 seconds
+test native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+test native::split::tcp_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+test native::split::tcp_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 167 filtered out; finished in 94.88s
+

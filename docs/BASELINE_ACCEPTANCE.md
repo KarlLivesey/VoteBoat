@@ -1,5 +1,19 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice212 rejects contradictory local target stage/import/activation sequences
+in transient observations, preserving independent metadata publication indices.
+The corrected original-code regression fails on accepted missing staging;
+all12 all-feature operation checks, all4 native TCP/QUIC WAL/checkpoint split
+phase histories and all18 transfer-service histories pass locally. Native
+completed-read identities/configurations/prefixes and canonical bytes are
+preserved. This is scoped lifecycle recovery evidence, not a broad security audit;
+the user will run Daybreak for that. Latest previous-source platform evidence
+38046741849 has Ubuntu counter158/directory19 pass and transfer17/1 failure on
+merge retirement uncertainty; macOS counter153/5 with later targets unexecuted.
+Full P0–P7, platform and performance acceptance remain open.
+Final default/core-only operation checks pass12 each and formatting/four strict
+Clippy profiles pass with zero diagnostics.
+
 Slice211 adds four source Final-before-import histories to the four existing
 after-activation TCP/QUIC WAL/checkpoint cases; all8 pass. Retained Joint bases
 plus later Final WAL reconstruct exact original receipt index/term and current

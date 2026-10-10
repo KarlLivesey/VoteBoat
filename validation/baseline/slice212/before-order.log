@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests/transfer_operation.rs (target/debug/deps/transfer_operation-11004d1355ae88bd)
+
+running 1 test
+test wire::generated::target_wire_rejects_missing_and_reversed_local_phase_prerequisites ... FAILED
+
+failures:
+
+---- wire::generated::target_wire_rejects_missing_and_reversed_local_phase_prerequisites stdout ----
+
+thread 'wire::generated::target_wire_rejects_missing_and_reversed_local_phase_prerequisites' (211) panicked at tests/transfer_operation/wire_generated.rs:81:9:
+accepted impossible local phase sequence case=0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    wire::generated::target_wire_rejects_missing_and_reversed_local_phase_prerequisites
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test transfer_operation`

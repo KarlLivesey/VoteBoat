@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0603]: module `operation` is private
+  --> tests/routed/split_operator.rs:93:45
+   |
+93 |                 .encode(voteboat::transfer::operation::MAX_TRANSFER_OBSERVATION_BYTES)
+   |                                             ^^^^^^^^^  ------------------------------ constant `MAX_TRANSFER_OBSERVATION_BYTES` is not publicly re-exported
+   |                                             |
+   |                                             private module
+   |
+note: the module `operation` is defined here
+  --> src/transfer.rs:25:1
+   |
+25 | mod operation;
+   | ^^^^^^^^^^^^^
+
+error[E0603]: module `operation` is private
+   --> tests/routed/split_operator.rs:101:49
+    |
+101 |                     .encode(voteboat::transfer::operation::MAX_TRANSFER_OBSERVATION_BYTES)
+    |                                                 ^^^^^^^^^  ------------------------------ constant `MAX_TRANSFER_OBSERVATION_BYTES` is not publicly re-exported
+    |                                                 |
+    |                                                 private module
+    |
+note: the module `operation` is defined here
+   --> src/transfer.rs:25:1
+    |
+ 25 | mod operation;
+    | ^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0603`.
+error: could not compile `voteboat` (test "routed") due to 2 previous errors

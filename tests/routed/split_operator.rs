@@ -87,6 +87,24 @@ fn observations(rig: &mut Split) -> Vec<TransferObservation> {
         );
     }
     values
+        .iter()
+        .map(|value| {
+            let bytes = value
+                .encode(voteboat::transfer::MAX_TRANSFER_OBSERVATION_BYTES)
+                .unwrap();
+            let decoded = TransferObservation::decode_authenticated(&bytes).unwrap();
+            assert_eq!(decoded.read(), value.read());
+            assert_eq!(decoded.configuration(), value.configuration());
+            assert_eq!(decoded.index(), value.index());
+            assert_eq!(
+                decoded
+                    .encode(voteboat::transfer::MAX_TRANSFER_OBSERVATION_BYTES)
+                    .unwrap(),
+                bytes
+            );
+            decoded
+        })
+        .collect()
 }
 
 fn check_reads(plan: &TransferOperation, reads: &[TransferObservation]) {

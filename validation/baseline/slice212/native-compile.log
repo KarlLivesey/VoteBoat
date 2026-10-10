@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0433]: cannot find `transfer_operation` in `voteboat`
+  --> tests/routed/split_operator.rs:93:35
+   |
+93 |                 .encode(voteboat::transfer_operation::MAX_TRANSFER_OBSERVATION_BYTES)
+   |                                   ^^^^^^^^^^^^^^^^^^ could not find `transfer_operation` in `voteboat`
+
+error[E0433]: cannot find `transfer_operation` in `voteboat`
+   --> tests/routed/split_operator.rs:101:39
+    |
+101 |                     .encode(voteboat::transfer_operation::MAX_TRANSFER_OBSERVATION_BYTES)
+    |                                       ^^^^^^^^^^^^^^^^^^ could not find `transfer_operation` in `voteboat`
+
+For more information about this error, try `rustc --explain E0433`.
+error: could not compile `voteboat` (test "routed") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

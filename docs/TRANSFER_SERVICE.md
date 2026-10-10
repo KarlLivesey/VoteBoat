@@ -5,6 +5,11 @@ provides authenticated `status`, `start` and `resume` commands. It uses the publ
 `TransferOperation` decisions and existing durable source/import/publication/
 activation guards. Different groups may have different leaders.
 
+Target observations preserve local stage → import → activation order within
+the completed read prefix. The decoder rejects missing or reversed prerequisites.
+The publication index belongs to the metadata group and is independent of the
+target's local prefix; valid cross-group observations retain that index unchanged.
+
 The split profile supports one native byte-bucket counter source and 2–16
 targets. The merge profile combines partitioned sources into one target, with
 at most18 total metadata/source/target groups. Both use a fixed three-voter
