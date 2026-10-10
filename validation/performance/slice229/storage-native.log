@@ -1,0 +1,49 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.26s
+     Running tests/journal_publication.rs (target/debug/deps/journal_publication-6041d6a41a2ec302)
+
+running 3 tests
+test downstream_default_orders_sync_before_selection_and_preserves_errors ... ok
+test create_barrier_and_recovery_use_downstream_combined_operation ... ok
+test combined_failure_fences_without_releasing_a_ticket_then_recovers_actual_bytes ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/journal_timings.rs (target/debug/deps/journal_timings-1c51afee699905a9)
+
+running 3 tests
+test failed_rename_counts_only_invoked_steps_and_retains_staging_file ... ok
+test failed_publication_is_counted_without_becoming_durable_evidence ... ok
+test timing_selection_preserves_exact_barriers_default_recovery_and_reader_lifetime ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-3fdb3512e3f9bd31)
+
+running 8 tests
+test host_checkpoint_decoder_cannot_bypass_mandatory_log_invariants ... ok
+test rewrite_preserves_exact_live_state_and_never_reuses_tickets ... ok
+test unsupported_codec_and_host_store_decline_maintenance_before_mutation ... ok
+test live_image_can_exceed_one_batch_without_losing_cold_group_or_suffix ... ok
+test pending_transitions_and_encoding_budget_reject_before_replacement ... ok
+test replacement_failure_fences_and_power_loss_recovers_whole_old_or_new_state ... ok
+test native_files_keep_exclusive_selection_and_reclaim_repeatedly ... ok
+test image_codec_rejects_every_truncation_bit_corruption_and_invalid_state ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/log_store.rs (target/debug/deps/log_store-fbf5193a75bd4ff3)
+
+running 9 tests
+test suffix_fence_invalidates_uncompleted_old_generation ... ok
+test valid_checksums_cannot_hide_unbounded_policy_or_command_lengths ... ok
+test user_commands_leave_control_reserve_and_admission_is_bounded ... ok
+test compacted_log_ranges_and_committed_prefix_protection_with_native_and_host ... ok
+test restart_recovers_policy_identity_hard_state_suffix_and_commit ... ok
+test failed_sync_or_publication_fences_without_acknowledging_the_transition ... ok
+test public_store_conformance_runs_against_native_and_host ... ok
+test every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix ... ok
+test codec_roundtrips_rejects_every_single_bit_mutation_and_unbounded_lengths ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

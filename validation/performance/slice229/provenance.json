@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "candidate_base_revision": "9a9f3dcb2d12dbbdcd23561c00e9378f590bfa3d",
+  "measured_source": "candidate.patch and exact candidate/ sources; source.sha256 records working paths at measurement",
+  "candidate_patch_sha256": "d8e0893f7dd8bf516301990e5cdd29efbac33195e5a8ee1ca07752102998b047",
+  "candidate_source_hash_manifest_sha256": "87c264870c9b4decf9e94794f35d07231135720686cdf7b4f39c5a950d060e19",
+  "measured_executable_sha256": "9d94193e75c1b1ae0a7bf512fb920c8ed63fa53fbc4f1126eaf0531b85349916",
+  "build_command": "cargo +stable build --locked --offline --release --example native_benchmark",
+  "measurement_command": "target/release/examples/native_benchmark target/bench-slice229-reference tcp 256 1",
+  "physical_hosts": 1,
+  "physical_devices_for_replicas": 1,
+  "cpu": "AMD Ryzen 7 9800X3D, 16 threads",
+  "kernel": "Linux 7.2.9-2-cachyos x86_64",
+  "filesystem": "btrfs",
+  "device": "Sabrent SB-ROCKET-NVMe4-2TB (/dev/nvme0n1p2)",
+  "mount_options": "rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home",
+  "replicas": 3,
+  "protocol": "TcpTls",
+  "assembly": "startup",
+  "groups": 1,
+  "warmup": 64,
+  "measured_operations": 256,
+  "window": 1,
+  "payload_bytes": 8,
+  "heartbeat_ms": 50,
+  "election_min_ms": 1000,
+  "election_spread_ms": 1000,
+  "durability": "Full WAL File::sync_all, full staging File::sync_all, atomic manifest rename, full directory sync. Staging writes are prepared before WAL sync in the rejected candidate.",
+  "process_exit": 0,
+  "gate_exit": 1,
+  "gate": {
+    "gate": "tcp-startup-serial-p99",
+    "budget_us": 250000,
+    "observed_p99_us": 681978.511,
+    "applied_ops_s": 6.253,
+    "operations": 256,
+    "passed": false,
+    "evidence_scope": "finite reference run; raw checker and native recovery gates required"
+  },
+  "start_utc": "2026-10-10T15:03:09Z",
+  "completion_observed_utc": "2026-10-10T15:05:16Z",
+  "summary_sha256": "5363e79cdad3d7087fa8c2967a94cc7e5235a1ca1385b2b340b06e7e098778bc",
+  "samples_sha256": "3fa3ac379071962eae29a274c1c6be0e3653616ff3ca4197a85f1010db8df3f3",
+  "background": "All local tests/builds terminal and no matching cargo/rustc/native services at pre-run host inspection. No builds/native suites overlap measurement. Shared desktop; no CPU/device isolation. Release build overlaps the earlier broad service suite only.",
+  "candidate_validation": {
+    "native_file_tests": 5,
+    "primitive_interruption_cuts": 59,
+    "new_combined_cuts": 18,
+    "downstream_combined": 3,
+    "journal_timings": 3,
+    "reclaim": 8,
+    "log_store": 9,
+    "provider_conformance": 22,
+    "raft": 41,
+    "shared_barrier": 8,
+    "native_only": [
+      3,
+      3,
+      8,
+      9
+    ],
+    "broad_services": {
+      "counter_pass": 181,
+      "directory_pass": 22,
+      "transfer_pass": 19,
+      "transfer_fail": 2
+    },
+    "selected_transfer": [
+      1,
+      1
+    ],
+    "formatting_and_four_strict_profiles": "zero diagnostics"
+  },
+  "disposition": "Rejected. Production source/tests/inventory restored exactly to base revision; combined API not adopted. Raw artifacts do not prove a causal regression or speedup.",
+  "restored_code_diff_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "restored_release_executable_sha256": "f8887631b0ff44e6a6780a3ba61ca3365ec30109b89219f97e8e5928638d85e9",
+  "restored_validation": "Formatting/four strict profiles finish zero; exact restored code diff is empty. Accepted binaries rebuilt after rejection.",
+  "preceding_ci": {
+    "revision": "9a9f3dcb2d12dbbdcd23561c00e9378f590bfa3d",
+    "run": 38061320631,
+    "ubuntu": {
+      "pass": 179,
+      "fail": 2,
+      "later_targets": "unrun"
+    },
+    "macos": {
+      "pass": 180,
+      "fail": 1,
+      "later_targets": "unrun"
+    }
+  },
+  "limitations": "Finite local original-workload measurement and process interruption checks, not sustainable capacity, physical power-loss, separate-host/macOS or full P0-P7 acceptance. Broad startup failures remain; two isolated passes do not fix them."
+}

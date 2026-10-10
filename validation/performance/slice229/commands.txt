@@ -1,0 +1,51 @@
+SPDX-License-Identifier: RPL-1.5
+Native staging-preparation scheduling candidate; full synchronization retained.
+
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --lib native::log_store::file::tests
+cargo +stable test --locked --offline --all-features --test journal_publication --test journal_timings --test log_store --test log_reclaim --test provider_conformance
+cargo +stable test --locked --offline --all-features --test raft --test shared_barrier
+cargo +stable test --locked --offline --no-default-features --features native --test journal_publication --test journal_timings --test log_store --test log_reclaim
+node validation/check-provider-conformance.mjs
+.githooks/pre-push
+cargo +stable test --locked --offline --all-features --test counter_service --test directory_service --test transfer_service
+cargo +stable build --locked --offline --release --example native_benchmark
+
+The release build overlaps the broad service check, not either selected history
+or the measurement. Broad transfer19/2 is retained. After that terminal failure:
+cargo +stable test --locked --offline --all-features --test transfer_service cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts -- --exact --nocapture
+cargo +stable test --locked --offline --all-features --test transfer_service quic_authenticated_operator_resumes_original_split_after_process_crash -- --exact
+
+After all local tests/builds are terminal; fresh root, shared Btrfs/NVMe host:
+target/release/examples/native_benchmark target/bench-slice229-reference tcp 256 1
+node validation/check-native-benchmark.mjs validation/performance/slice229/reference
+node validation/check-serial-gate.mjs validation/performance/slice229/reference
+
+Source and executable hashes bind the local candidate at base revision
+9a9f3dcb2d12dbbdcd23561c00e9378f590bfa3d. Original workload/timers/payload/replication
+and full File::sync_all plus rename/directory synchronization remain unchanged.
+File formats are unchanged. Host inspection/provenance is retained separately.
+Native service/benchmark loopback, Node gate child launch and GitHub/git operations
+use required sandbox permission. Feature builds spawning services are sequential.
+
+gh run view 38061320631 --json status,conclusion,jobs
+gh run view 38061320631 --job 114240001757 --log
+gh run view 38061320631 --job 114240001919 --log
+
+Push runs the enabled formatting/four strict Clippy hook; it is never bypassed.
+
+After the failed gate, archive exact candidate sources and candidate.patch,
+restore src/native/log_store.rs, src/native/log_store/file.rs,
+tests/journal_timings.rs and docs/component-contracts.json from the base revision,
+and remove the trial-only tests/journal_publication.rs. Then:
+.githooks/pre-push
+cargo +stable build --locked --offline --bins --release --example native_benchmark
+cargo +stable build --locked --offline --bins
+git diff --exit-code HEAD -- src tests Cargo.toml Cargo.lock examples docs/component-contracts.json
+sha256sum --check validation/performance/slice229/candidate-sources.sha256
+git diff --check
+
+strict-candidate.log refers to the measured trial; strict-final.log refers to the
+restored production tree. source-binary.sha256 is the candidate at measurement;
+restored-binary.sha256 binds the restored release example. Neither isolated
+transfer pass erases services-all.log's broad failure.

@@ -1,0 +1,63 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+     Running tests/raft.rs (target/debug/deps/raft-012fe3879bfff57d)
+
+running 41 tests
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test three_node_history_with_only_host_components ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+     Running tests/shared_barrier.rs (target/debug/deps/shared_barrier-3991fe26664139a9)
+
+running 8 tests
+test queued_reclamation_is_not_crossed_by_shared_barriers ... ok
+test queued_requests_share_one_barrier_but_keep_exact_results_and_credits ... ok
+test ready_window_unit_and_byte_bounds_cut_fifo_without_losing_deferred_work ... ok
+test independent_rejected_append_does_not_discard_another_request ... ok
+test store_dependency_limit_bounds_the_shared_window ... ok
+test malformed_or_failed_shared_completion_and_fatal_append_never_acknowledge_pending_work ... ok
+test actual_file_partial_append_sync_and_publication_failures_reopen_without_false_acknowledgements ... ok
+test native_framing_every_byte_cut_of_either_shared_record_preserves_acknowledged_promises ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+

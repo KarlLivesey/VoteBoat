@@ -1,0 +1,5 @@
+validation/performance/slice229/candidate/src/native/log_store.rs: OK
+validation/performance/slice229/candidate/src/native/log_store/file.rs: OK
+validation/performance/slice229/candidate/tests/journal_publication.rs: OK
+validation/performance/slice229/candidate/tests/journal_timings.rs: OK
+validation/performance/slice229/candidate/docs/component-contracts.json: OK

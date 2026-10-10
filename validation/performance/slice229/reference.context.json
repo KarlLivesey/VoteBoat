@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice229-reference",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "9a9f3dcb2d12dbbdcd23561c00e9378f590bfa3d",
+  "executable_sha256": "9d94193e75c1b1ae0a7bf512fb920c8ed63fa53fbc4f1126eaf0531b85349916",
+  "summary_sha256": "5363e79cdad3d7087fa8c2967a94cc7e5235a1ca1385b2b340b06e7e098778bc",
+  "samples_sha256": "3fa3ac379071962eae29a274c1c6be0e3653616ff3ca4197a85f1010db8df3f3",
+  "source_changes": "Tested local candidate.patch at base revision; exact candidate sources archived under candidate/. Candidate is rejected and production scheduling restored after this run.",
+  "candidate_patch_sha256": "d8e0893f7dd8bf516301990e5cdd29efbac33195e5a8ee1ca07752102998b047"
+}

@@ -1,5 +1,17 @@
 # Baseline acceptance map
 
+Slice229 rejects the staging-preparation scheduling candidate. Native/process
+cut and downstream/conformance/consensus checks pass; counter181/directory22 pass.
+Transfer19/2 startup failures are retained, with both original QUIC histories
+passing independently. The actual original TCP serial run completes256 receipts,
+recovery320/original retries/joins but fails250ms at681.979ms p99. Trial patch/
+source/binary/context/results are preserved; production code/tests/inventory
+are restored exactly to9a9f3dc and the combined API is not available. Candidate
+and restored formatting/four strict profiles are zero. Terminal preceding228
+Ubuntu179/2/macOS180/1 retain distinct configuration/drain uncertainty; later
+targets are unrun. Startup/operator/platform, provider/fault/deployment and P7/
+full P0–P7 remain open. Security review stays Daybreak.
+
 Slice228 maps every original measured222 receipt to exact physical append and
 commit-only records across all three replicas in both modes. All256 receipts
 have2 distinct records per replica; later duplicate requests cannot replace

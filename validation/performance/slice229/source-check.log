@@ -1,0 +1,8 @@
+src/native/log_store.rs: OK
+src/native/log_store/file.rs: OK
+tests/journal_publication.rs: OK
+tests/journal_timings.rs: OK
+docs/component-contracts.json: OK
+examples/native_benchmark.rs: OK
+examples/benchmark/observe.rs: OK
+target/release/examples/native_benchmark: OK

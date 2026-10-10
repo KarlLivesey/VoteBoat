@@ -1,5 +1,19 @@
 # Validation report
 
+Rejected staging-preparation candidate: [slice229](performance/slice229/README.md).
+Trial native59 primitive cuts, downstream combined/default/fencing3, timings3,
+reclaim8/log-store9/provider22, native-only3/3/8/9 and Raft41/shared barrier8 pass.
+Counter181/directory22 pass; transfer19/2 fails original startup LeadershipChanged
+and a one-pass metadata leader lookup. Both original QUIC histories pass separately,
+without fixing broad startup acceptance. Actual uninstrumented original serial TCP
+measurement completes256 receipts/recovery320/retries/joins, but681.979ms p99
+fails250ms. Trial source/patch/binary/context/raw receipt/gate evidence is retained;
+production is restored exactly to9a9f3dc, with no combined public API adopted.
+Candidate/restored formatting/four strict profiles are zero. Terminal preceding228
+Ubuntu179/2 and macOS180/1 retain independent configuration/drain uncertainty;
+later suites are unrun. Original gate, startup/platform/provider/fault/deployment
+and full P0–P7 stay open; security remains with Daybreak.
+
 Original physical receipt attribution: [slice228](performance/slice228/README.md).
 All256 original measured receipts match exact earlier append/later commit-only
 records on every replica in both222 modes:512 selected physical batches per

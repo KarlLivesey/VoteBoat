@@ -1,0 +1,29 @@
+Sat Oct 10 15:03:09 UTC 2026
+Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux
+TARGET SOURCE                 FSTYPE OPTIONS
+/home  /dev/nvme0n1p2[/@home] btrfs  rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home
+NAME        TYPE   SIZE MODEL                       ROTA
+sda         disk 931.5G CT1000P3PSSD8                  0
+├─sda1      part   260M                                0
+├─sda2      part    16M                                0
+├─sda3      part    54G                                0
+└─sda4      part   787M                                0
+sdb         disk     0B MassStorageClass               0
+sdc         disk     0B MassStorageClass               0
+zram0       disk  60.5G                                0
+nvme0n1     disk   1.8T Sabrent SB-ROCKET-NVMe4-2TB    0
+├─nvme0n1p1 part     4G                                0
+└─nvme0n1p2 part   1.8T                                0
+nvme1n1     disk   1.8T Sabrent SB-ROCKET-NVMe4-2TB    0
+└─nvme1n1p1 part   1.8T                                0
+Architecture:                            x86_64
+CPU(s):                                  16
+On-line CPU(s) list:                     0-15
+Model name:                              AMD Ryzen 7 9800X3D 8-Core Processor
+Thread(s) per core:                      2
+CPU(s) scaling MHz:                      99%
+NUMA node0 CPU(s):                       0-15
+               total        used        free      shared  buff/cache   available
+Mem:            60Gi        19Gi       4.1Gi       232Mi        36Gi        40Gi
+Swap:           60Gi        10Gi        49Gi
+7.36 10.98 9.00 7/3757 455700

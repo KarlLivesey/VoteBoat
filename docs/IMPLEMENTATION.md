@@ -737,15 +737,48 @@ diagnostic872.815ms remain distinct; full P0–P7 stays active. Security review 
 with Daybreak. No further attribution helper is planned without a concrete need
 for the smallest storage candidate's acceptance check.
 
-Current: use the completed P7 physical attribution to select
-a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
-250ms serial TCP gate. Depend on222's raw reference/diagnostic, one authoritative
-log-store binding and existing JournalIo/native publication contracts; reread the
-design's required storage/consensus chapters before any redesign. Completion
-requires a bounded cause-specific candidate
-with meaningful crash/ownership checks, followed by the unchanged reference gate.
-Aggregate file-call durations alone cannot justify fewer durability barriers or
-optimistic voter evidence. No speculative rewrite or replacement workload.
+Rejected229: the smallest staging-preparation candidate submits unselected
+metadata writes before the full WAL barrier, then retains full metadata sync,
+rename and directory sync. Trial JournalIo combined/default dispatch, fencing and
+recovery checks pass; native5 covers59 process-level cuts (18 new), storage
+3/3/8/9/provider22 and native-only3/3/8/9 pass, as do Raft41/shared barrier8.
+Counter181/directory22 pass; transfer19/2 fails original startup add2/key200/11
+with LeadershipChanged and a one-pass metadata leader lookup. Both original QUIC
+histories pass independently, including ten checkpoint phases, lost fence/
+publication replies, interrupted read, exact retries and joins. Retain broad
+failures; these selected passes do not fix their startup assumptions.
+
+The actual unchanged serial TCP candidate completes all256 receipts, recovery320,
+original retries and joins, but681.979ms p99 exceeds250ms (6.253 applied ops/s).
+Raw arithmetic/gate provenance pass; actual gate exits1. Source/binary hashes,
+fresh shared Btrfs/NVMe host context and the entire candidate patch/source/tests
+are retained in [slice229](../validation/performance/slice229/README.md).
+No local tests/builds overlap measurement; a release build overlaps the earlier
+broad suite. Different shared-host conditions prevent causal performance claims.
+Restore production code/tests/inventory exactly to9a9f3dc; the combined API is
+not adopted. Candidate and restored formatting/four strict profiles finish zero.
+
+Terminal228 at9a9f3dc: Ubuntu179/2 fails configure19770 authenticated-read
+uncertainty and pending21101 missing configuration_queued after preparing deadline;
+macOS180/1 fails original drain19701 handoff LeadershipChanged. Later targets are
+unrun. These remain separate from the local transfer startup failures and trial.
+
+Macro review229 rejects this candidate rather than weakening durability or
+substituting a workload. The fixed gate remains unmet, and the full P0–P7 goal
+stays active. Move the evidenced usable-service startup/original-request boundary
+ahead of further P7 candidates. Existing static service remains usable; broad
+operator/platform acceptance remains open. No security expansion; Daybreak owns
+that review. No additional performance helper is planned without a concrete need.
+
+Current: resolve the two evidenced transfer startup assumptions. Purpose: advance
+P6 and usable-service validation with reliable original-operation recovery.
+Depend on229's retained failures, existing original initialization/data identities,
+operation deduplication, role discovery and admitted-read cancellation checks.
+Check actual state/response ownership before changing fixture policy; a role is
+not a quorum read or durable result. Completion requires actual TCP/QUIC forced
+leadership/unknown-outcome histories, unchanged original receipts/payloads and
+budgets, checkpoint/reopen/joins and no suppression of unrelated errors. No
+production deadline increase or speculative rewrite.
 
 Next: review the next uncovered replacement-provider operation set through
 shared downstream/native checks. Purpose: make the promised mix-and-match Rust
@@ -756,15 +789,53 @@ requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
 
-Following: resolve the next evidenced operator/platform boundary after attribution.
-Purpose: advance P4 and broader usable-service validation without blocking the
-static service. Depend on terminal227's exact grouped-write routing/configuration
-admission deadline,227's original-record admission checks and matching native timings.
-Distinguish stale endpoint, channel ownership and actual scheduling/storage delay
-before editing; keep original operation/record/source scope and existing budgets.
-Completion requires cause-specific actual TCP/QUIC interruption/restart/receipt/
-join checks and matching platform evidence. Do not infer commit from a role,
-deadline or preparation event; no security expansion or automatic success claim.
+Following: choose a P7 candidate that preserves all required durability work.
+Purpose: advance measured tuning with the unchanged250ms original serial gate.
+Depend on222/228's actual physical/timing evidence and229's rejected staging-only
+trial; reread the required design chapters before changing the storage design.
+Completion requires meaningful native crash/ownership checks, actual service
+recovery/retry/join histories and the unchanged raw-validated reference gate.
+No weaker file sync, optimistic voter evidence, replacement workload or causal
+speedup from uncontrolled shared-host comparisons. Keep remaining terminal228
+operator/platform boundaries and the full P0–P7 scope active independently of CI.
+
+### Slice229 schema plan — prepare metadata before the WAL barrier
+
+Purpose/dependencies:228 identifies separate physical append/commit publication
+records for every original measured operation. Try the smallest native scheduling
+candidate: issue staging metadata writes before WAL synchronization so both files'
+writes are already submitted. No speedup or filesystem coalescing is assumed.
+Required design README/02/03/04/07/11/17 and current JournalIo/recovery/publication
+contracts have been reviewed. This advances the current P7 candidate and gate;
+provider review and functional platform boundaries remain the next two items.
+
+Data/API: add JournalIo::sync_and_publish_manifest(bytes) with the existing
+sequential sync_log/publish_manifest default. NativeLogStore create/recover/barrier
+use it; host providers retain their current implementation and semantics. Native
+FileLogIo prepares MANIFEST.tmp (open/write) first, then full WAL sync, full staging
+file sync, atomic rename and full directory sync. No new format, metadata slot,
+provider, worker/runtime, capability fallback or alternate authoritative binding.
+Direct publish_manifest keeps its existing semantics. Optional timing keeps
+manifest work separate from the nested log-sync duration; neither is evidence.
+
+Transitions/ownership: staging is unselected until both file syncs succeed.
+Store durable state/tickets escape only after the full combined call succeeds.
+Any failure fences the store; its source lock remains owned until drop. Recovery
+selects the unchanged legacy/CURRENT pair and validates the unchanged durable
+boundary; an unselected staging file is ignored. Initial failure before rename
+has no initialized store. A late failed rename/directory-sync may select complete
+new metadata, but acknowledges nothing. Cleanup follows existing staging rules.
+
+Acceptance: default downstream journal verifies exact order and short-circuit
+failures; combined-method override is actually reached without bypassing tickets.
+Native process-level cuts at all6 primitive boundaries cover initial, legacy and
+reclaimed journals, acknowledged hard-state/data, session advance and exclusive
+ownership. A failed native staging open does not invoke WAL sync. Retain original
+publication/reclaim corruption and fault histories, journal timings and real
+TCP/QUIC service restart/retry/join checks. Run the unchanged original serial TCP
+250ms gate on the exact candidate after relevant checks, with raw receipts/source/
+binary/host/durability provenance. If it fails, retain it and do not claim an
+accepted optimization or substitute a workload. Keep fmt/four strict profiles zero.
 
 ### Slice228 schema plan — original-operation physical journal attribution
 
