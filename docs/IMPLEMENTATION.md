@@ -129,9 +129,63 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
 | Completed197b2a: executable retained-replica drain | Connect durable gates and handoff to authenticated maintenance and shutdown; advances P4/P2 and chapter09. |197a/197b1 gates and journal,196 durable handoff, authenticated command sessions. | Original identities survive restart; missing journals fail closed; local admission stays closed until durable cancellation; stop requires completed recorded handoff, unchanged stable configuration and local quiescence. Remaining configured voters must satisfy the recursive policy. |
 | Completed197b2b1: Rust membership evacuation | Bind the original evacuation plan and resume joint/final changes; advances coordinated drain, P4/P2 and chapter09. |197b1 durable journal, existing Node readiness and placement authorization, joint consensus. | Bounded host plan, exact digest binding, complete local assignment checks and selected TCP/QUIC joint/final restart histories preserve original IDs and allow remaining voters to write after source shutdown. The source remains a non-voting learner. |
-| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Automatic multi-group orchestration, phase-internal replacement faults and final learner removal remain explicit scope. |
+| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Slice197b2e covers explicit final learner removal after source shutdown, accepted-but-uncommitted recovery and stale-source gating. Automatic multi-group orchestration and broader replacement/retirement faults remain explicit scope. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b2e schema plan — final learner retirement after drain
+
+Finish the existing single-group operator workflow with a separately authorized
+learner-removal record. The current membership executor already accepts this
+record; another retirement engine or command is unnecessary. The provisioned
+record uses a fresh operation ID, expects the evacuation's final configuration,
+preserves its exact voters/policy and other learners, and removes only the
+departed learner. The operator waits for source shutdown, then submits it to a
+remaining leader through the existing authenticated configure command.
+
+Ownership/failure path: the source's journal/gate remains intact; survivors own
+replicated retirement progress. The original retirement ID and record resolve a
+lost reply after the source is unavailable. Local durable acceptance without
+quorum commitment is not completed removal. A later committed record, including
+checkpoint recovery, is the evidence for retirement. No file deletion, schema,
+generation, watermark or new authority is introduced. The source's old image
+must not regain serving rights by forgetting its required drain journal.
+
+Acceptance: TCP/QUIC process histories refuse premature/unauthorized retirement,
+drain/join the source, lose a retirement reply with another voter absent, show
+accepted-but-uncommitted progress, kill/reopen the leader and resume with the
+same identity. Verify exact committed voter/learner sets and operation retention,
+WAL/checkpoint recovery, original retries/new writes, and stale-source admission
+remaining gated. Multi-group coordination remains the current197 deliverable;
+assignment listing198 and cross-platform199 remain the next two deliverables.
+
+### Slice197b2e implementation evidence
+
+The full single-group operator sequence is documented using the existing
+configuration executor. Provisioned learner-removal operation19780 preserves
+the evacuation's final voter policy, expects configuration3 and removes only
+the departed source. No new protocol, API, codec, worker or persistent format
+was needed. The drain runner itself still reports only its original stop
+acceptance and retained-learner result; retirement is a separate authorized step.
+
+Actual TCP/TLS and QUIC process histories refuse premature and unauthorized
+removal, drain and join the source, and persist a retirement record while one
+remaining voter is absent. The recorded accepted configuration advances to4
+while the committed configuration stays3. Killing/reopening the leader and
+returning the other voter completes the same original operation. WAL or pinned
+checkpoint recovery retains the committed voter/learner sets and operation
+identities, with original data retries and new writes. Restarting the source's
+old image keeps its required local journal gate active and refuses new writes.
+See [slice197b2e evidence](../validation/baseline/slice197b2e/README.md).
+All96 service tests and8 command unit tests pass. Formatting and strict
+all/default/no-default-feature Clippy remain clean;103 contract metadata/path
+checks pass. A background CI snapshot for parent revisionacc005c was still
+pending, so this adds no macOS execution claim.
+
+Macro review: selected final learner retirement is now verified through the
+existing operator surface. Multi-group coordination, broader failure schedules,
+platform evidence and the remaining full-roadmap acceptance stay open. This
+does not grant authority to delete local files or bypass source recovery gates.
 
 ### Slice197b2d schema plan — replacement-voter drain and maintenance enrollment
 

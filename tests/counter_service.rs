@@ -43,6 +43,8 @@ mod credential_reload;
 mod drain;
 #[path = "counter_service/drain_replacement.rs"]
 mod drain_replacement;
+#[path = "counter_service/drain_retirement.rs"]
+mod drain_retirement;
 #[path = "counter_service/drain_runner.rs"]
 mod drain_runner;
 #[path = "counter_service/events.rs"]

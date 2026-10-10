@@ -242,8 +242,9 @@ recovery. This is a single-group workflow using explicit operator steps:
 After restart, `resume-drain` resumes any pending original handoff; configuration
 execution still needs the explicit request on the current leader. Cancellation
 only reopens the local gate; it does not restore removed voting rights. Restart
-never automatically stops the service. Source learner deletion, automatic
-multi-group coordination and replacement-promotion fault coverage remain open.
+never automatically stops the service. Final learner removal uses the explicit
+step below. Automatic multi-group coordination and broader replacement-promotion
+fault coverage remain open.
 
 ### Drive the single-group workflow with one client
 
@@ -270,5 +271,42 @@ An interrupted configuration or shutdown request is an unknown outcome.
 
 Success says `shutdown_requested=true`: the source accepted shutdown after its
 local readiness check. It does not certify that remote worker joining finished
-or that every remote voter is currently available. The source remains a learner;
-multi-group coordination and final learner removal remain separate work.
+or that every remote voter is currently available. The source remains a learner
+until the separate, explicitly authorized removal below.
+
+### Remove the retained learner
+
+Before starting the drain, provision a separate learner-removal record in the
+remaining peers' admin files. For the example above, add:
+
+```text
+learners 19780 3 4 - m:2 v:2 v:3
+```
+
+This expects committed configuration3, retains voters2/3 with the same policy,
+and creates configuration4 without source1. Use a distinct operation ID. For
+other plans preserve all other learners and the exact final voters and policy.
+The existing placement authorization and expected-configuration checks apply.
+
+After the source has completed shutdown and joined its workers, submit the
+removal to a remaining leader with the ordinary authenticated client:
+
+```sh
+voteboat-counter client BASE LEADER configure 19780 --service-tls TLS_DIRECTORY --principal ADMIN
+voteboat-counter client BASE LEADER configuration-status 19780 --service-tls TLS_DIRECTORY --principal ADMIN
+```
+
+Use the same `--command-peers FILE` if the endpoints are explicitly configured.
+Preserve the original ID and record after a lost reply; resubmit to a remaining
+leader and inspect its committed status. `action=wait_for_commit` is not finished
+removal. `action=completed` reports the locally durable committed operation;
+it does not certify current remote availability. A new quorum-backed write/read
+can check current service availability separately.
+
+Removal changes membership; it does not delete the source's files or journal.
+Keep the original drain journal and plan if those files are restarted: their
+gate remains active, and the stale source has no authority to rejoin the new
+configuration. Re-enrollment is a separate, explicitly authorized operation.
+Selected TCP/WAL and QUIC/checkpoint tests cover missing-quorum acceptance,
+lost replies, leader restart, exact membership recovery and stale-source
+admission refusal. Multi-group orchestration and arbitrary faults remain open.

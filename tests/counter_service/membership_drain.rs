@@ -13,7 +13,7 @@ pub(super) fn prepare(quic: bool) -> (Cluster, usize, usize) {
         .join(" ");
     let records = format!("joint 19751 1 2 3 {source} m:2 {voters}\nfinal 19751 2 3\n");
     let admin = c.root.join("membership.admin");
-    fs::write(&admin, format!("voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1 1 1\nreplica 2 2 2 1\nreplica 3 3 3 1\n{records}")).unwrap();
+    fs::write(&admin, format!("voteboat-counter-admin-v1\nplacement 2 false\nreplica 1 1 1 1\nreplica 2 2 2 1\nreplica 3 3 3 1\n{records}learners 19780 3 4 - m:2 {voters}\n")).unwrap();
     let plan = c.root.join("membership.drain");
     fs::write(&plan, format!("voteboat-counter-drain-v1\noperation 19701\nsource {source} {source} 1\nhandoff {target} {target} 1\noriginal 1 - m:3 v:1 v:2 v:3\n{records}")).unwrap();
     c.stop();
