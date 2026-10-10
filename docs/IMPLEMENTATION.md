@@ -1127,7 +1127,7 @@ and full counter operator checks, relevant Rust tests and strict formatting/lint
 Keep failures and diagnose their demonstrated cause; never substitute Linux passes
 for Mac evidence. Do not change an existing checkout or global machine settings.
 
-Current244: diagnose automatic election progress under concurrent Mac histories.
+Implemented244a: repair the demonstrated delayed self-vote/queued election defect.
 Purpose: advance usable macOS service acceptance, whose ordinary auto-startup is
 required before optional lifecycle integration. Depend on exact-source243 failures,
 original candidate/term/peer diagnostics and existing timer/durable-vote contracts.
@@ -1138,6 +1138,23 @@ Completion requires a source-bound reproduction, original-operation/read/recover
 and cleanup checks in the failing schedule, plus zero formatting/four strict profiles.
 Keep the broad failures; reduced-concurrency passes cannot replace them. No security
 review, performance claim or weaker synchronization/quorum is needed here.
+
+Current244b: compose explicit operator timing profiles through existing native
+startup contracts. Purpose: make supported Mac/Linux services usable under their
+declared durable-node profile, without assuming the current150–300ms default
+election window fits all storage/runtime combinations. Depend on244a,
+remaining native Mac election/uncertainty diagnostics, TimerConfig validation,
+static/member/multi/rotation startup paths and the pack's throughput100/1000–2000ms
+and edge250/1500–3000ms profile proposals. Those proposal numbers are not measured
+guarantees. Before editing, inspect actual completion/response timing and sketch
+the smallest complete configuration path. Preserve host injection and choose at
+construction, not by live utilization or policy changes. Completion requires
+typed CLI/Rust profile selection, invalid configuration refusal before resource
+ownership, exact protocol/quorum/durability and original caller budgets, and
+Mac/Linux operator/recovery checks under the declared profile plus zero strict
+diagnostics. Explicit election settings must not be confused with widened client
+deadlines or reduced synchronization. Keep remaining failures; full acceptance
+must be supported by the actual selected assembly.
 
 Next245: close status-wait admission/cleanup assumptions. Purpose: advance functional
 Linux/macOS operator acceptance. Depend on source238 macOS96301 missing admission,
@@ -1207,6 +1224,76 @@ or optional integration work. Keep selected embedding/static service passes and
 the broad failures distinct. The next deliverables are244 election progress,
 245 status-wait cleanup and one required operator gap. Full P0–P7 remains active;
 features/macOS/Linux functional acceptance remain first, tuning/security later.
+
+### Slice244 schema plan — durable self-vote starts the response window
+
+Previous turn is progress: direct Mac243 evidence is committed/pushedebc7fae;
+selected TCP/QUIC/embedding/library paths pass, broad concurrent operators fail.
+Current worktree is clean. Core campaign increments the volatile election reset
+before persisting its self-vote. Granted follower votes reset again at valid
+durable completion; After::Campaign does not. TimedShard therefore retains an
+expired/queued Campaign when the first outbound vote requests finally escape.
+This is a concrete completion/timer defect to reproduce, not attribution of every
+Mac failure or permission to weaken disk durability.
+
+Shape/transitions: reuse existing checked election_reset sequence, After::Campaign,
+DurableLog and TimerToken. Only a valid completion of that original self-vote
+starts a fresh candidate response window. TimedShard's existing refresh then
+invalidates the old queued expiration. Pending or rejected/foreign completions
+cannot reset it or release vote requests. Subsequent fresh expiration may still
+retry a failed election; a valid matching ballot must retain the original term.
+No clock access in core, new seam, persistent/wire change, modified quorum or
+widened timer/caller deadline. The reset is volatile and fresh owner/recovery
+reconstructs timers from the recovered durable term/vote as before.
+
+Ownership/checks: model the real public TimedShard/host-store path with delayed
+self-vote, an already queued expiration, exact barrier tickets and matching voter
+context. Before synchronization require old durable term/no released requests;
+foreign completion must fail without reset. After synchronization require same
+term Vote messages, a fresh bounded deadline, stale Campaign suppression, a
+matching durable ballot/election and eventual fresh timeout when no quorum arrives.
+Show the old code fails first. Run runtime/Raft contracts, supported profiles,
+strict formatting/four Clippy configurations and native operator histories. Repeat
+the Mac's original default-concurrency operator schedule on the exact changed
+source, preserving any remaining failures. This advances usable Linux/macOS
+auto-startup; status-wait and required integration remain next. Broader liveness,
+performance/security and full P0–P7 remain distinct.
+
+244 focused correction: after the core reset, the initial regression reaches the
+matching election but its test attempts to release a visit with an unadmitted
+leader-noop persistence dependency. The first broad contract invocation also
+finds that mistake in the fresh-retry test. Preserve both failures. A small shared
+test synchronization helper is needed to admit and complete those exact returned
+updates through the existing public store barrier before visit release. It adds
+no production prerequisite and does not suppress DependencyPending. Confirm the
+leader announcements/new-term requests only after that synchronization.
+
+Implemented244a evidence: the old public TimedShard regression fails0/1 because
+the queued expiration survives self-vote completion. Exact durable completion now
+starts the candidate response window; rejected completion cannot reset it, old
+expiration is fenced, a matching ballot preserves the original term, and absent
+ballots still trigger a fresh retry. Initial test DependencyPending failures are
+retained and corrected by completing exact returned persistence dependencies.
+Linux Raft41/runtime33 and core-only29/25 pass; native all-feature counter197,
+directory22, transfer33 and sequential default counter138 pass. Formatting/four
+strict profiles are zero; inventory108 and conformance metadata remain unchanged.
+
+The exact source patch and seven hashes are checked on the retained immutable
+Mac1e60e8a base (same production source as localebc7fae). Mac Raft41/runtime33,
+formatting/four strict profiles and embedding7/duplicate7/fresh10 with worker
+joins pass. Default-concurrency operators still fail counter121/75, directory20/2
+and transfer17/16; sequential default counter99/38 (passed/failed). Prior243 counts
+were65/131,9/13,14/19 and61/76. These single finite runs cannot establish statistical
+improvement or attribute every failure to the repaired timer defect. No caller
+budget, synchronization/quorum threshold or host setting changed. Source-bound
+logs and original failed stores remain. See [slice244](../validation/baseline/slice244/README.md).
+
+Macro review244a: the demonstrated queued-election defect is closed; concurrent
+Mac service acceptance remains open. The next dependency is explicit native node
+timing-profile composition and actual completion/response timing, followed by
+status-wait cleanup and required operator integration. Keep selected Rust embedding
+passes separate from whole-platform acceptance. Full P0–P7 stays active; functional
+features/macOS/Linux first, measured tuning/security later.
 
 ### Slice243 schema plan — exact-source native Mac verification
 

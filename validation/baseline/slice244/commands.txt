@@ -1,0 +1,37 @@
+Base ebc7fae; production/source code in that commit equals prior1e60e8a.
+Regression before the core reset:
+cargo +stable test --locked --offline --all-features --test runtime campaign_delay
+before.log:0/1,exit101,old queued election token survives durable self-vote.
+
+After core reset, the initial focused regression and first full contract command
+reach new persistence dependencies but incorrectly finish an unadmitted visit:
+after-initial.log:0/1,exit101,DependencyPending.
+contracts-all.log:Raft41 pass; runtime31/2,exit101,DependencyPending.
+The shared synchronization helper admits/completes those exact returned updates
+before releasing the visit. Both initial failures remain; core reset is unchanged.
+
+Final Linux commands, executable feature profiles sequential:
+cargo +stable test --locked --offline --all-features --test runtime --test raft
+cargo +stable test --locked --offline --all-features --no-fail-fast --test counter_service --test directory_service --test transfer_service
+cargo +stable test --locked --offline --test counter_service
+cargo +stable test --locked --offline --no-default-features --test runtime --test raft
+cargo +stable fmt --all -- --check
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Mac uses its retained isolated source1e60e8a checkout (same pre244 production code),
+plus the exact source patch covering src/raft.rs, tests/runtime.rs and the new
+campaign_delay module. Check git diff --quiet and git apply --check before apply;
+verify the source.sha256 manifest after apply. Immutable base plus patch digest
+and verified file hashes identify the tested code; published final code must match.
+Installed stable is1.98.0, arm64/macOS27.0; host settings/deadlines are unchanged.
+Run the original default-concurrency operator schedule, not a serialized substitute:
+cargo +stable test --locked --offline --all-features --test runtime --test raft
+cargo +stable test --locked --offline --all-features --no-fail-fast --test counter_service --test directory_service --test transfer_service
+Follow after the Mac all-feature command is terminal:
+.githooks/pre-push
+cargo +stable test --locked --offline --test counter_service
+cargo +stable run --locked --offline --all-features --example embedded_counter -- create <task>/embedded244 tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <task>/embedded244 tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <task>/embedded244 tests/fixtures/tls 2 3

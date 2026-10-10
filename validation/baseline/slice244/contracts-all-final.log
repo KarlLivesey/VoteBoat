@@ -1,0 +1,87 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.34s
+     Running tests/raft.rs (target/debug/deps/raft-012fe3879bfff57d)
+
+running 41 tests
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test three_node_history_with_only_host_components ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/runtime.rs (target/debug/deps/runtime-7749b7a87d1964a1)
+
+running 33 tests
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test campaign_delay::durable_self_vote_fences_expired_campaign_and_preserves_matching_ballot ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test campaign_delay::missing_ballots_still_retry_after_the_fresh_durable_self_vote_window ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test failed_shared_barrier_fences_submitted_groups_without_votes_escaping ... ok
+test native_scheduler_deadline_clock_and_entropy_conformance ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test timer_contract::native_timer_exact_tokens_and_bounded_histories ... ok
+test virtual_time_leader_loss_and_recovery_use_native_timers_and_wals ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test automatic_timer_history_reopens_three_actual_native_files ... ok
+test native_timer_replication_progress_survives_multiple_heartbeat_retries ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+test hundred_group_history_uses_actual_shared_files_on_three_nodes ... ok
+test hundred_groups_share_native_wals_and_recover_acknowledged_state ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s

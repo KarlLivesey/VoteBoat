@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "base_revision": "ebc7faedd63e172e20a7b25d6dba45791f6777a9",
+  "mac_immutable_base": "1e60e8af1a1fc0080d167925c72ed5a071de0cf3",
+  "source_binding": "Mac immutable base has the same production source as local base; exact three-file patch and seven source hashes identify tested code.",
+  "source_patch_sha256": "3442445801ce7d6fde77b7026a314a3072584f5327e6436b31dce10d91007843",
+  "source_manifest_sha256": "a6b25764316a47b779f518f220a1f74b64dbb891fb977bc0afb3b3f2b7ccaff7",
+  "production_change": "Reset existing volatile election sequence after exact durable self-vote completion, fencing queued old expiration",
+  "new_public_seam": false,
+  "persistent_or_wire_change": false,
+  "host_settings_changed": false,
+  "deadlines_or_quorum_weakened": false,
+  "mac_environment": {
+    "architecture": "arm64",
+    "os": "macOS27.0 build26A428",
+    "logical_cpus": 12,
+    "memory_gib": 96,
+    "rust": "installed stable1.98.0; CI pins1.98.1",
+    "broad_concurrency": "libtest default, RUST_TEST_THREADS unset"
+  },
+  "validation": {
+    "old_code_regression": {
+      "pass": 0,
+      "fail": 1,
+      "exit": 101
+    },
+    "initial_fixture_failures": "DependencyPending from unadmitted noop/new-vote; retained after-initial.log and contracts-all.log",
+    "linux": {
+      "contracts": {
+        "raft": {
+          "pass": 41,
+          "fail": 0
+        },
+        "runtime": {
+          "pass": 33,
+          "fail": 0
+        }
+      },
+      "core_only": {
+        "raft": {
+          "pass": 29,
+          "fail": 0
+        },
+        "runtime": {
+          "pass": 25,
+          "fail": 0
+        }
+      },
+      "operators": {
+        "counter": {
+          "pass": 197,
+          "fail": 0
+        },
+        "directory": {
+          "pass": 22,
+          "fail": 0
+        },
+        "transfer": {
+          "pass": 33,
+          "fail": 0
+        },
+        "exit": 0
+      },
+      "default_counter": {
+        "pass": 138,
+        "fail": 0,
+        "exit": 0
+      },
+      "format_and_four_strict_profiles": "zero diagnostics",
+      "inventory": 108,
+      "conformance": "9 partial reviews /68 operations; unchanged"
+    },
+    "mac": {
+      "source_hashes": "all7 pass",
+      "contracts": {
+        "raft": {
+          "pass": 41,
+          "fail": 0
+        },
+        "runtime": {
+          "pass": 33,
+          "fail": 0
+        },
+        "exit": 0
+      },
+      "operators": {
+        "counter": {
+          "pass": 121,
+          "fail": 75
+        },
+        "directory": {
+          "pass": 20,
+          "fail": 2
+        },
+        "transfer": {
+          "pass": 17,
+          "fail": 16
+        },
+        "exit": 101
+      },
+      "default_counter": {
+        "pass": 99,
+        "fail": 38,
+        "exit": 101
+      },
+      "format_and_four_strict_profiles": "zero diagnostics",
+      "embedding": {
+        "create": {
+          "value": 7,
+          "duplicate": false
+        },
+        "cold_retry": {
+          "value": 7,
+          "duplicate": true
+        },
+        "cold_fresh": {
+          "value": 10,
+          "duplicate": false
+        },
+        "workers_joined": "all3 runs",
+        "exit": 0
+      }
+    },
+    "feature_configurations": "sequential"
+  },
+  "publication": {
+    "original_linux_logs": "target/slice244-unpublished-logs",
+    "original_mac_logs": "target/slice244-macos-final",
+    "failed_mac_stores": "Retained owned task temporary roots",
+    "normalization": "Workspace/task paths replaced; trailing whitespace and final blank lines removed"
+  },
+  "limits": "Finite checks, not general liveness or performance proof. Broad Mac operator failures remain open. Full P0-P7 remains active; performance/security later, Windows/P8 deferred."
+}

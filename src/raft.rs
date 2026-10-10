@@ -1176,6 +1176,10 @@ impl Raft {
     ) -> Result<(), RaftError> {
         match after {
             After::Campaign => {
+                // Vote requests can escape only now. Persistence latency must
+                // not consume the candidate's response window or leave an old
+                // queued election eligible to supersede these requests.
+                self.reset_election()?;
                 self.votes.insert(self.node);
                 if self.membership().is_satisfied(&self.votes) {
                     effects.extend(self.become_leader()?);

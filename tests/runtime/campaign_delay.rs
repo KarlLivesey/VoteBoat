@@ -1,0 +1,173 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+use super::*;
+
+fn synchronize(
+    runtime: &mut TimedShard<HostReady, HostTimers, FixedEntropy>,
+    log: &mut HostLogStore,
+    visit: VisitTicket,
+    now: MonoTime,
+    effects: &[Effect],
+) -> Vec<Effect> {
+    let [Effect::Persist(update)] = effects else {
+        panic!()
+    };
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    runtime
+        .with_core(visit, now, |core| core.admit_effect(update, tickets[0]))
+        .unwrap()
+        .unwrap();
+    let synced = log.barrier(&tickets).unwrap();
+    runtime
+        .with_core(visit, now, |core| core.complete(&synced))
+        .unwrap()
+        .unwrap()
+}
+
+#[test]
+fn durable_self_vote_fences_expired_campaign_and_preserves_matching_ballot() {
+    let (mut runtime, mut log) = host_timed(0, None);
+    runtime.admit(group(1), Event::Campaign).unwrap();
+    let start = MonoTime(1);
+    let visit = runtime.poll(start).unwrap().unwrap();
+    let effects = runtime
+        .step_next(visit, start)
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    let old = runtime.deadline(group(1)).unwrap();
+    let now = MonoTime(old.deadline.0 + 100);
+    assert_eq!(runtime.poll_timers(now).unwrap().admitted, 1);
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 0);
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    runtime
+        .with_core(visit, now, |core| core.admit_effect(update, tickets[0]))
+        .unwrap()
+        .unwrap();
+    let mut foreign = tickets[0];
+    foreign.binding.session = StoreSession::new(2).unwrap();
+    let rejected = runtime
+        .with_core(visit, now, |core| {
+            core.complete(&DurableLog {
+                tickets: vec![foreign],
+            })
+        })
+        .unwrap();
+    assert_eq!(rejected, Err(RaftError::WrongCompletion));
+    assert_eq!(runtime.deadline(group(1)), Some(old));
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 0);
+    let synced = log.barrier(&tickets).unwrap();
+    let requests = runtime
+        .with_core(visit, now, |core| core.complete(&synced))
+        .unwrap()
+        .unwrap();
+    let fresh = runtime.deadline(group(1)).unwrap();
+    assert_ne!(
+        fresh, old,
+        "durable self-vote must start its response window"
+    );
+    assert!(fresh.deadline > now);
+    assert_eq!(fresh.kind, TimerKind::Election);
+    assert_eq!(requests.len(), 2);
+    let Effect::Send(request) = &requests[0] else {
+        panic!()
+    };
+    assert_eq!(request.term, 1);
+    assert!(matches!(request.rpc, Rpc::Vote { .. }));
+    let mut reply = request.clone();
+    reply.from = request.to;
+    reply.to = request.from;
+    reply.sender = HostLogStore::new(reply.from.get().into()).binding();
+    reply.rpc = Rpc::Voted { granted: true };
+    runtime.finish(visit).unwrap();
+    let stale = runtime.poll(now).unwrap().unwrap();
+    assert!(runtime
+        .step_next(stale, now)
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap()
+        .is_empty());
+    runtime.finish(stale).unwrap();
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 1);
+    runtime.admit(group(1), Event::Receive(reply)).unwrap();
+    let ballot = runtime.poll(now).unwrap().unwrap();
+    let effects = runtime
+        .step_next(ballot, now)
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
+    assert_eq!(runtime.core(group(1)).unwrap().role(), Role::Leader);
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 1);
+    let announcements = synchronize(&mut runtime, &mut log, ballot, now, &effects);
+    assert!(announcements.iter().all(|effect| matches!(effect,
+        Effect::Send(message) if message.term == 1 && matches!(message.rpc, Rpc::Append { .. }))));
+    runtime.finish(ballot).unwrap();
+}
+
+#[test]
+fn missing_ballots_still_retry_after_the_fresh_durable_self_vote_window() {
+    let (mut runtime, mut log) = host_timed(0, None);
+    runtime.admit(group(1), Event::Campaign).unwrap();
+    let visit = runtime.poll(MonoTime(1)).unwrap().unwrap();
+    let effects = runtime
+        .step_next(visit, MonoTime(1))
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    let [Effect::Persist(update)] = effects.as_slice() else {
+        panic!()
+    };
+    let now = MonoTime(100);
+    let tickets = log
+        .append_batch(vec![LogMutation::Update(update.clone())])
+        .unwrap();
+    runtime
+        .with_core(visit, now, |core| core.admit_effect(update, tickets[0]))
+        .unwrap()
+        .unwrap();
+    let synced = log.barrier(&tickets).unwrap();
+    let requests = runtime
+        .with_core(visit, now, |core| core.complete(&synced))
+        .unwrap()
+        .unwrap();
+    assert_eq!(requests.len(), 2);
+    let fresh = runtime.deadline(group(1)).unwrap();
+    assert!(fresh.deadline > now);
+    runtime.finish(visit).unwrap();
+    assert_eq!(
+        runtime
+            .poll_timers(MonoTime(fresh.deadline.0 - 1))
+            .unwrap()
+            .admitted,
+        0
+    );
+    let expiry = MonoTime(fresh.deadline.0 + 1);
+    let retry = runtime.poll(expiry).unwrap().unwrap();
+    let effects = runtime
+        .step_next(retry, expiry)
+        .unwrap()
+        .unwrap()
+        .result
+        .unwrap();
+    assert!(matches!(effects.as_slice(), [Effect::Persist(update)] if update.hard_state.term == 2));
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 1);
+    let requests = synchronize(&mut runtime, &mut log, retry, expiry, &effects);
+    assert_eq!(requests.len(), 2);
+    assert!(requests.iter().all(|effect| matches!(effect,
+        Effect::Send(message) if message.term == 2 && matches!(message.rpc, Rpc::Vote { .. }))));
+    assert_eq!(runtime.core(group(1)).unwrap().state().hard_state.term, 2);
+    assert!(runtime.deadline(group(1)).unwrap().deadline > expiry);
+    runtime.finish(retry).unwrap();
+}

@@ -1,5 +1,15 @@
 # Validation report
 
+Durable self-vote election fencing: [slice244](baseline/slice244/README.md).
+Exact completion refreshes the candidate response window and rejects the old queued
+expiration; old-code regression fails and final Raft/runtime contracts pass on
+Linux and Mac. Linux counter197/directory22/transfer33 and default counter138 pass.
+Mac operators remain failing counter121/75, directory20/2, transfer17/16 and default
+counter99/38 (passed/failed). Formatting/four strict profiles are zero on both;
+Mac embedding7/duplicate7/fresh10 joins workers. Source patch/hashes bind the Mac
+run. No caller deadline, synchronization or quorum change. Selected improvement
+is not broad Mac acceptance; next is explicit startup profile composition.
+
 Direct native Mac verification: [slice243](baseline/slice243/README.md).
 Exact published source1e60e8a on arm64/macOS27.0/Rust1.98.0 passes focused write8,
 library71, formatting/four strict profiles and the durable Rust embedding7/retry7/

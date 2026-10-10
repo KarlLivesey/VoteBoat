@@ -1,0 +1,2 @@
+strict 0
+counter-default 101
