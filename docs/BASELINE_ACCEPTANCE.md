@@ -1,6 +1,12 @@
-# Baseline acceptance map — review159, updated189
+# Baseline acceptance map — review192
 
-Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
+Current review starts at 639c1fb (slice191). The roadmap and catalogue below
+retain historical test scopes, with corrections from source inspection and
+fresh selected tests in [slice192](../validation/baseline/slice192/README.md).
+This is not a full-suite or release certificate. The first review started at
+1231153; do not attribute that review's results to today's source.
+
+The original review started at revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
 completion certificate**. Selected tests do not prove all schedules. Detailed
 historical results remain in IMPLEMENTATION.md, BASELINE_AUDIT.md and
@@ -35,9 +41,69 @@ closes the command path's hard-coded loopback limitation; it does not prove
 separate-machine deployment. Slice188 wires authenticated command endpoint
 discovery through the public protocol. Slice189 adds a replicated metadata
 authority executable with explicit initial publication and quorum-backed remote
-manifest lookup. Multi-authority CLI recursion and placement execution remain open.
+manifest lookup. Slice190 adds bounded multi-authority CLI recursion; slice191
+generates explicit learner/replacement/voter plans and executes them through the
+existing authorized membership driver, including interrupted new-store recovery.
+Automatic global orchestration is separate and is not a baseline prerequisite.
 Slice186a preserves original worker errors and corrects test shutdown clocks;
 fresh macOS confirmation remains outstanding.
+
+## R01–R19 requirements
+
+These rows distinguish an implemented mechanism from its acceptance coverage.
+Named historical suites establish only their recorded histories. The fresh192
+run covers22 actual-core Raft tests,6 quorum tests and4 activation-model tests.
+It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
+
+| Requirement | Implementation / direct evidence | Remaining acceptance or limitation |
+| --- | --- | --- |
+| R01 crash-fault consensus | Raft, scoped persistence completions, WAL/recovery; raft, log_store, snapshot and Counter histories. | Selected histories pass; broader combined faults and current platform sweep remain. |
+| R02 recursive responsibility | ResponsibilityManifest, durable delegation and recursive resolve; nested native routed histories; executable lookup190. | General recursive lifecycle fault composition remains; no protocol-specific two-level ceiling. |
+| R03 multiple ordered lanes under one responsibility | Partitioned manifests and independent groups, source/target split and compatible merge; routed histories. | Operator lifecycle workflow and broader recovery coverage remain. No cross-lane total order is claimed. |
+| R04 hierarchical quorums | Policy/JointPolicy, all four election/read/commit sites inspected192; fresh quorum/raft/activation tests pass. | Finite intersection/activation evidence does not establish a distributed protocol proof or all schedules. |
+| R05 selective participation | Explicit assigned local groups, public groups/groups_after iteration, selected manifest paths and cached routing; native parent-offline histories, remote lookup190. | Broader deployment/failure coverage; executable list-assigned-groups command remains missing. |
+| R06 shared WAL throughput | Shared native log worker/barriers and batching; shared_barrier/runtime tests. | Shared mechanism exists; sustainable throughput improvement and original latency gate remain unmet. |
+| R07 cheap idle groups | Shared scheduler/transport/worker, hundred-group histories and static multi-lane benchmark178. | Wider group counts/active fractions and separate idle CPU/allocation measurements remain. |
+| R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
+| R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
+| R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;32 seeded schedules pass freshly. | General replayable/minimizable fault driver and reference-Raft comparison remain. |
+| R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
+| R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
+| R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |
+| R15 embedding / host ownership | Node::from_parts, injected shared providers, downstream ownership/cancellation tests and embedded example. | Wider composition/failure coverage, without creating hidden runtimes or stores. |
+| R16 optional build availability | src/lib.rs native gate; Cargo native/tls/quic features; core/default/all-feature lint profiles. | Supported runtime feature profiles require their own evidence; enabling every feature cannot compile feature-disabled branches. |
+| R17 domain persistence API | LogStore batches/barriers/ranges/truncation/compaction and snapshot/recovery contracts. | Broader backend/device conformance, not replacement with generic byte I/O. |
+| R18 one authoritative log path | Explicit selected store bindings; startup compatibility rejection and host/native assembly tests. | Backend migration is an explicit future procedure, not a second automatic WAL. |
+| R19 replacement safety/bounds | Typed incarnation/version/owner/ticket contracts and rejection/lifetime tests. | Complete reusable conformance and supported provider-combination evidence remain. |
+
+## Chapter09 operator surface
+
+The design allows CLI or host integration through typed contracts. Existing
+Rust lifecycle operations must not be called unimplemented merely because the
+counter executable does not expose them. Conversely, a low-level primitive is
+not a complete operator workflow.
+
+| Required operation | Current surface | Gap |
+| --- | --- | --- |
+| inspect | Counter status/metrics/timings/events; public Node/local/core views. | Broader bounded group/deployment summaries. |
+| explain-quorum | Policy/JointPolicy explanations and authenticated paged Counter command177. | No missing basic operation; hints are explicitly not acknowledgements. |
+| inspect-route | Public resolve/check_owner and executable directory route190. | Broader operational integration; route hint is not write authority. |
+| list-assigned-groups | Public EffectOwner/TimedShard::groups and groups_after over local assignments. | Executable operator command remains missing; reuse these existing cursors rather than adding another inventory abstraction. |
+| drain-node | Runtime close/drain primitives exist. | No coordinated stop-placement, leadership move and membership maintenance workflow. Shutdown alone does not fulfill this. |
+| move-leader | Campaign/Heartbeat controls and ordinary failover. | No targeted leadership-transfer protocol/API found; campaign alone is not a safe maintenance workflow. |
+| add-learner | Node configuration/readiness, native administration and placement-plan191. | Broader lifecycle/authorization fault coverage. |
+| change-membership | Node configure/status/resume, joint/final records and executable administration. | Broader combined schedules; operator-supplied plans remain explicit. |
+| split-preview | Checked TransferIntent and application export bounds exist. | No complete read-only preview reporting support/pause/placement/movement/retention/invariants. Next193. |
+| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts; real native histories. | Complete operator entry point joining these existing stages. Planned194. |
+| resume-operation | Node::resume_configuration plus lifecycle status/query and exact original receipts. | General operator lifecycle resumption workflow; membership resumption already exists. |
+| retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
+
+Mutations must retain durable operation IDs and generation/authorization checks.
+Previews must not reserve resources, fence sources or act as durability evidence.
+Peer credential rotation, full persisted admin audit, complete core metrics and
+rolling-format negotiation/migration evidence also remain open chapter09 work.
+Separate-machine execution and current macOS success have not been established.
 
 ## Roadmap exits
 
@@ -48,9 +114,9 @@ fresh macOS confirmation remains outstanding.
 | P2: shared groups/lane/transport, bounded fair scheduling and unrelated-group isolation | Shared Shard/TimedShard/Node, workers, multiplexed TCP/TLS and QUIC. tests/runtime.rs hundred-group host/native histories; tests/worker.rs and tests/support/{native_node,native_pressure}.rs. | Slice162 adds eight-group forced repair under a one-request recovery quota with concurrent writes;163 composes shared host/native admission and frame budgets under abort and replacement. Broader active fractions, multi-shard/lane deployment, receive/connection fairness and combined recovery/overload evidence remain. No per-group threads/sockets are introduced by these native assemblies. |
 | P3: fixed recursive/weighted policy at every quorum site; intersection/nine-voter/election/read/commit tests | src/quorum.rs; Membership::is_satisfied/frontier; Raft election, read and commitment sites. tests/{quorum,raft,snapshot,activation_model}.rs and src/raft/membership_tests.rs. Nine-voter exhaustive intersection and reference-frontier checks exist. | Finite independent activation model excludes arbitrary log forks/term traces and liveness. Preserve full transition/fault coverage under P4; never infer a runtime proof from intersection alone. Live policy hot reload remains forbidden. |
 | P4: learners, joint changes, exact activation through election/rollback/restart/partial delivery | NativeMemberStartup, readiness/witness contracts, configuration journal and authenticated counter commands. tests/{learners,member_recovery,native_member_startup,counter_service}.rs and src/raft/membership_tests.rs. Slice157 tests public joint receipt loss and serving-leader demotion;161 adds newly enrolled store promotion with interrupted readiness and committed-joint WAL/checkpoint recovery over TCP/QUIC. | Slice185 adds source joint-membership/split-fence abort and recovery with an unread original result, durable resumption and final learner state over TCP/QUIC and WAL/checkpoint. Older mismatching checkpoint combinations, broader revocation and overlapping new-voter fault schedules remain. Slice170 repairs selected service retry assumptions and the snapshot-refusal codec mismatch; the full local48-test service target passes. Cancelled CI runs do not establish successful platform execution. |
-| P5: versioned manifests, selective placement, cached routing/delegation; established children survive parent outage | Directory/LifecycleDirectory, created groups, retained insertion, deletion, local/foreign reparenting, metadata relocation and locator/grant adoption. tests/{directory,group_creation,namespace_creation,retained_insertion,deletion,reparenting,metadata_transfer}.rs; tests/routed native histories. | Slice160 composes automatic manifest lookup with lifecycle and moved metadata serving envelopes, with selected native move/reopen histories. Slice172 adds bounded authenticated remote endpoint refresh, cancellation, source replacement and retained cached-peer operation. Slice184 adds provisioned authenticated remote manifest fetching through the public Rust seam with TCP/QUIC original-read, disconnect and offline-child checks. Slice189 adds executable initial publication and single-authority remote lookup. Recursive executable routing, broader fault gates and placement orchestration remain. Native selected deletion/reparenting/migration paths now exist; they must not be listed as absent. |
+| P5: versioned manifests, selective placement, cached routing/delegation; established children survive parent outage | Directory/LifecycleDirectory, created groups, retained insertion, deletion, local/foreign reparenting, metadata relocation and locator/grant adoption. tests/{directory,group_creation,namespace_creation,retained_insertion,deletion,reparenting,metadata_transfer}.rs; tests/routed native histories. | Slice160 composes automatic manifest lookup with lifecycle and moved metadata serving envelopes, with selected native move/reopen histories. Slice172 adds bounded authenticated remote endpoint refresh, cancellation, source replacement and retained cached-peer operation. Slice184 adds provisioned authenticated remote manifest fetching through the public Rust seam with TCP/QUIC original-read, disconnect and offline-child checks. Slice189 adds executable initial publication;190 adds cold recursive multi-authority lookup;191 connects explicit placement plans to the authorized membership executor. Broader fault gates and the operator lifecycle surface remain. Automatic global orchestration is not a baseline prerequisite. Native selected deletion/reparenting/migration paths now exist; they must not be listed as absent. |
 | P6: staged split/import/fence/publish/activate/merge, retry lineage, exclusive owners and bounded recoverable pauses | ScopeStateMachine and native BucketCounter; transfer source/target/publication/retirement, retained and imported partial owners. tests/transfer_*.rs, tests/{scoped_source,imported_parent,retained_insertion}.rs, tests/routed phase/restart/retirement histories. Metadata migration preserves original authority domains. | Slice185 adds selected same-source joint-membership plus split-fence abort/recovery, exact import configuration lineage and independent target retry/outbox reopen. These are bounded profiles and selected cuts, not every lifecycle composition. Unresolved-creation cancellation is implemented169, with selected native competing-publication owner-loss schedules171. General retention/reclamation policy, broader compatible mapping/provider coverage and other combined failure schedules remain; no automatic timeout unfreeze. |
-| P7: multiple local lanes, batching/pipelining, reclamation and recovery throttling; sustainable improvement at fixed correctness/p99 with attributable costs | Explicit lane/store identities, shared barriers, exact-ticket reclamation and offered-load/maintenance/journal harnesses. tests/{shared_barrier,log_reclaim,maintenance}.rs and validation/performance. Slice158 adds forced eight-group native snapshot recovery and one successful original long QUIC pause run. | Slice162 adds explicit concurrent recovery request/image-capacity admission. Slice165 adds opt-in bounded periodic physical reclamation in Node and the service, with native hundred-group and TCP/QUIC restart/retry evidence. Slice166 adds bounded automatic checkpoint progression in the same Node/service composition; native hundred-group and TCP/QUIC reopen/retry histories pass. Bandwidth shaping and latency guarantees are not implemented. Slice178 adds static multi-lane native composition with disjoint stores/groups, bounded host threads and TCP/QUIC recovery/retry evidence. Automatic live lane placement/migration, sustainable load, fuller allocation/RSS/copy/queue attribution and platform/device coverage remain. Original250ms serial TCP p99 gate remains unmet; latest retained control gate is slice183 (873.492994ms; same host with the older baseline active). Slice183 rejected a Written-stage replication candidate: its first run failed and its repeat had1107.213750ms p99. The source was restored; this is experimental evidence, not an installed feature. Slice158's2918.173043ms offered-load p99 is a different workload, not that gate. |
+| P7: multiple local lanes, batching/pipelining, reclamation and recovery throttling; sustainable improvement at fixed correctness/p99 with attributable costs | Explicit lane/store identities, shared barriers, exact-ticket reclamation and offered-load/maintenance/journal harnesses. tests/{shared_barrier,log_reclaim,maintenance}.rs and validation/performance. Slice158 adds forced eight-group native snapshot recovery and one successful original long QUIC pause run. | Slice162 adds explicit concurrent recovery request/image-capacity admission. Slice165 adds opt-in bounded periodic physical reclamation in Node and the service, with native hundred-group and TCP/QUIC restart/retry evidence. Slice166 adds bounded automatic checkpoint progression in the same Node/service composition; native hundred-group and TCP/QUIC reopen/retry histories pass. Bandwidth shaping and latency guarantees are not implemented. Slice178 adds static multi-lane native composition with disjoint stores/groups, bounded host threads and TCP/QUIC recovery/retry evidence. Sustainable load, fuller allocation/RSS/copy/queue attribution and platform/device coverage remain. Automatic live lane placement/migration is an optional enhancement, not substituted for these acceptance gates. Original250ms serial TCP p99 gate remains unmet; latest retained control gate is slice183 (873.492994ms; same host with the older baseline active). Slice183 rejected a Written-stage replication candidate: its first run failed and its repeat had1107.213750ms p99. The source was restored; this is experimental evidence, not an installed feature. Slice158's2918.173043ms offered-load p99 is a different workload, not that gate. |
 
 Historical QUIC pause failures105/106 remain valid failed observations; the
 single success158 does not reconstruct their packet histories or guarantee
@@ -65,7 +131,7 @@ all transports and compact both surviving replicas beyond each stale prefix.
 | VB-001 identities/envelopes | Distinct node/store/group/configuration/ownership/lane generations; bounded codecs and identity refusal tests in identity/wire/log/transport suites. |
 | VB-002 WAL/recovery | Native framed batches, hard state, barriers, range/suffix/prefix operations, snapshots and corruption/tail tests; general segment cleaning/retention and wider device failures remain. |
 | VB-003 deterministic effects | Raft/EffectOwner scoped persistence dependencies; stale/wrong-body/failed completion tests. Broader generated scheduling remains. |
-| VB-004 three-node writes/retries | Host actual-core and native service histories; general unknown-outcome linearizability checking remains. |
+| VB-004 three-node writes/retries | Host actual-core and native service histories;164 adds independent bounded Counter history checking including unknown outcomes. Broader generated/application histories remain. |
 | VB-005 shared runtime | Hundred-group shared workers/transports and overload-isolation tests; broader scale and active fractions remain. |
 | VB-006 quorum-site audit | Election after durable self-vote and received votes uses Membership::is_satisfied; read readiness uses the same predicate; commitment uses Membership::frontier with local durability/current-term bounds. Joint checks require both policies. No new count-based majority site found in this review. |
 | VB-007 recursive example | Separate services/assignments and parent-offline child progress are exercised by tests/routed/native.rs; broader live discovery remains. |
@@ -100,12 +166,12 @@ operations/scope and test locations; its checker validates metadata only.
 | C14 buffers | BufferPool/FrameBuffer/BufferClass/BufferOwner; native reservations/control reserve/per-peer quotas | Receive/connection/group fairness and broader payload coverage; WAL/snapshot/application buffers remain separate. |
 | C15 admission | AdmissionPolicy/Lease and NativeAdmissionPolicy; hard runtime ceilings | General client, disk, connection and shared-resource admission remains. Policy cannot bypass control reserve or hard bounds. |
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | Broader mappings/automatic split policy; no hidden global ordering. |
-| C17 discovery | PeerDiscovery/DiscoveryConnector, ManifestDiscovery/ManifestReadSource, NativeManifestLookup/AuthorityDiscovery | Slice160 adds public read mappings and automatic lookup across selected native metadata moves/restarts. Slice172 adds native authenticated endpoint fetch/retry/cancel/reconnect through PeerDiscovery, with TCP/TLS and QUIC evidence. Slice184 adds provisioned authenticated remote manifest fetch over TCP/TLS and QUIC, with original read drain and offline-child evidence. Slices188–189 add executable command endpoint discovery and initial metadata authority lookup. Recursive orchestration and broader discovery faults remain. Hints never activate owners. |
-| C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking; slice180 replacement preparation and explicit-policy voter-change plans | Automatic replacement/removal orchestration, measured sample collection/reservations and global rebalancing. Recommendations never change membership alone. |
+| C17 discovery | PeerDiscovery/DiscoveryConnector, ManifestDiscovery/ManifestReadSource, NativeManifestLookup/AuthorityDiscovery | Slice160 adds public read mappings and automatic lookup across selected native metadata moves/restarts. Slice172 adds native authenticated endpoint fetch/retry/cancel/reconnect through PeerDiscovery, with TCP/TLS and QUIC evidence. Slice184 adds provisioned authenticated remote manifest fetch over TCP/TLS and QUIC, with original read drain and offline-child evidence. Slices188–189 add executable command endpoint discovery and initial metadata authority lookup;190 adds recursive multi-authority command-line resolution with bounded cache/hops/attempts. Broader discovery faults and persistent refresh integration remain. Hints never activate owners. |
+| C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking; slice180 replacement preparation and explicit-policy voter-change plans;191 offline plan generation and exact-store executable administration | Automatic sample collection/reservations and global rebalancing are not implemented; broader fault coverage remains. Recommendations never change membership alone. |
 | C19 observability | Observer/NativeCounterObserver, EventObserver/NativeEventObserver, TimingObserver/NativeTimingObserver and optional JournalTimings | Bounded aggregate history, explicit overflow and scoped export are implemented168. Slice176 adds bounded poll/connection duration distributions, including interrupted connections and restart reset. Per-group tracing, queue/critical-path decomposition and external exporter integration remain. |
 | C20 configuration | Typed startup and Node configure/status/resume; authenticated provisioned/client-target service commands | Selected new-store interruption/recovery161 is exercised; broader ingress, revocation and combined failures remain. Native configuration endpoints exist and must not be listed wholly missing. |
 | C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, peer rotation and broader revocation schedules remain. Unflagged loopback mode is explicitly trusted. |
-| C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Preserve this distinction. |
+| C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Chapter17 permits related providers to share an implementation: neither a new trait per checksum helper nor optional compression is automatically a baseline blocker. |
 | C23 scope transfer | ScopeStateMachine/ScopeImage, native BucketCounter, source/target/lifecycle guards | Wider application/provider and recursive fault/retention coverage; core retains fence/publication/activation authority. |
 | C24 transactions | One-group ordered application commands | Cross-group transactions are unsupported P8, not a hidden baseline coordinator. |
 
@@ -116,7 +182,7 @@ operations/scope and test locations; its checker validates metadata only.
 | I01/I02/I03/I04: vote uniqueness, committed history, contiguous durability, effect dependencies | raft/ballots/replication_scope/log_store/shared_barrier/worker/effect_owner | General generated message/storage schedules, external devices and faulted-history checking. |
 | I05: validated effective policy | quorum/activation_model/member_recovery plus actual Raft sites above | Full policy-transition protocol model and arbitrary log/term cases. |
 | I06: exclusive transferred owner | transfer_source/target/publication, scoped_source, metadata_transfer, native routed phase histories | General recursive lifecycle composition and external provider assumptions. |
-| I07/I08/I09: acknowledged recovery, deduplication, valid snapshots | application/raft/snapshot/member_recovery/counter_service/routed | Broader power-loss/device/partial-install combinations, unknown-outcome checker. |
+| I07/I08/I09: acknowledged recovery, deduplication, valid snapshots | application/raft/snapshot/member_recovery/counter_service/routed | Broader power-loss/device/partial-install combinations and generated histories. A bounded independent Counter unknown-outcome checker exists164. |
 | I10: bounded resources | buffer/admission/runtime/worker/transport and configuration_capacity | General disk/client/connection pressure, recovery-throttle fairness. |
 | I11: stale incarnation refusal | identity/wire/log/peers/member_recovery and owner-completion tests | Broader stale-disk/packet/reconnection schedules. |
 | I12: independent child authority | native routed parent-offline and unchanged stopped-file tests | Broader recursive outage/membership/migration combinations. |
@@ -137,14 +203,24 @@ a passing test count.
 
 ## Next implementation decisions
 
-1. Slice170 closes the observed Linux service failure paths;171 records selected
-   creation decision races. The earlier macOS shutdown failure remains unverified.
-   CI stays background feedback; a cancelled run is not a passing baseline.
-2. Slice160 implements automatic lookup across actual metadata source/serving
-   query envelopes, with native move/reopen, inactive/fenced refusal and original
-   read ownership checks. Slice172 adds remote endpoint fetch and selected refresh/source-failure checks. Slice184 adds bounded remote manifest fetch through the public Rust seam; single-authority executable integration is added189; recursive orchestration and broader discovery faults remain.
-3. Slice161 exercises public new-store interruption, exact operation retry and
-   recovery through joint consensus. Slices162–163 close the selected recovery preparation budget and combined shared-provider lifetime gaps. Slice164 adds bounded faulted Counter history verification. Next review the remaining concrete baseline requirements and implement the next unresolved capability; keep broader P0–P7 faults and acceptance work active.
+1. Implement the missing read-only split preview, then connect the existing
+   durable lifecycle stages to explicit operator start/status/resumption. Reuse
+   the current contracts; do not create another consensus or ownership engine.
+   Leadership transfer, coordinated node drain and the assignment-list command
+   remain separate required operator work; public assignment iteration exists.
+2. Retain P7's original fixed250ms gate. The saved183 control is873.492994ms
+   and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
+   different workload, a finite successful recovery, or added static lanes as
+   a sustainable throughput improvement.
+3. Broaden chapter11 evidence: replayable/minimizable actual-core fault schedules,
+   compatible-semantics reference-Raft comparison, fuzz coverage for WAL/RPC/
+   snapshot/routing codecs, declared-scope partitioned histories, and the missing
+   combined membership/lifecycle/storage schedules. Existing deterministic and
+   malformed-input tests remain useful but do not close this whole requirement.
+4. Observe baseline175 and current platform jobs under their original identities.
+   At192 capture the old routed process is live, and CI38025706754 for639c1fb
+   is pending with no jobs yet. Neither is a passing current-source baseline.
+   Continue local feature work while these run.
 
 P8 and Windows are deferred. Automatic global split/merge orchestration,
 busy-polling, custom allocators and particular external adapters are explicitly

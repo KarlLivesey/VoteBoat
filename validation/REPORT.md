@@ -1,5 +1,8 @@
 # Validation report — slice 35
 
+Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Entries below are historical and retain their original source/coverage limits.
+
 The independent Rust model in `tests/ballot_model.rs` explores the complete
 reachable closure within explicit finite bounds: seven configuration phases,
 four candidate/store identities (including one reused NodeId), two local replica
@@ -5477,3 +5480,25 @@ feature-build run is retained with its demonstrated cause, not counted as a
 pass. See [slice191](baseline/slice191/README.md) for commands, source hashes,
 raw results and the offline/operator scope. P0–P7 completion and current platform
 proof remain open.
+
+## Slice192 — baseline requirements and current quorum evidence
+
+At639c1fb, the acceptance ledger now maps R01–R19 and all twelve chapter09
+operations alongside the existing P0–P7, VB-000–011, invariant and component
+catalogues. Source inspection corrects stale claims about recursive lookup,
+explicit placement execution, unknown-outcome Counter histories and public
+assignment iteration. It identifies the remaining operator surface and keeps
+validation/performance gaps separate. No production code changes.
+
+Fresh all-feature checks pass4 activation-model,6 quorum and22 actual-core Raft
+tests. The latter include32 seeded256-action schedules with power-loss recovery,
+partitions, message duplication/reordering and committed-prefix checks. This
+is finite selected evidence; it does not substitute for reference-Raft
+comparison, fuzzing, a general replay/minimization harness or a full protocol
+proof. Format and strict all/default/core-only Clippy finish with zero
+diagnostics;95 inventory records pass shape/path validation only.
+
+Baseline175 cargo1526695/routed1580417 are confirmed live at capture. CI38025706754
+for639c1fb is pending without jobs. No current full-suite or macOS success is
+claimed. Original slice183 fixed250ms performance gates still fail. See
+[commands, provenance and logs](baseline/slice192/README.md).

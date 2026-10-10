@@ -1,0 +1,10 @@
+src/runtime/node.rs:138:pub enum NodeControl {
+src/runtime/node.rs:394:    pub fn configure_wal_maintenance(
+src/runtime/node.rs:409:    pub fn configure_checkpoints(
+src/runtime/node.rs:530:    pub fn configure(
+src/runtime/node.rs:547:    pub fn configuration_status(
+src/runtime/node.rs:567:    pub fn resume_configuration(
+src/runtime/timed.rs:243:    pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
+src/runtime/timed.rs:247:    pub fn groups_after(
+src/runtime/effects.rs:230:    pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
+src/runtime/effects.rs:234:    pub fn groups_after(

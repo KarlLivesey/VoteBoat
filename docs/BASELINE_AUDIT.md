@@ -1,8 +1,44 @@
 # Baseline audits
 
-Latest implementation follow-up: [slice179](#slice179--read-authority-transitions).
-Requirement ledger: [review159](#review159--current-requirements-and-concrete-next-boundary).
+Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
+Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice192 — current baseline and next feature boundary
+
+Reviewed639c1fb against chapter01 R01–R19, chapter09 administrative operations,
+chapter11 invariants/scenarios/testing obligations, chapter12 P0–P7 and
+VB-000–011, and chapter17 composition gates. The current acceptance map now
+separates implemented source surfaces, selected evidence and unclosed gates.
+This is not a new full-suite pass. No production code or persistence format is
+changed in this review.
+
+Corrected stale gaps: recursive executable lookup exists190, explicit placement
+plan generation/execution exists191, and bounded Counter history checking with
+unknown outcomes exists164. Existing public groups/groups_after cursors support
+assignment listing; an executable list command is the remaining surface, not a
+missing inventory contract. The inspected election, received-vote, read-barrier
+and commit-frontier paths still use validated membership policies. Fresh quorum,
+activation-model and actual-core Raft targets pass32 tests, including the32-seed
+fault schedule family. The independent bounded activation model is not a full
+distributed Raft proof.
+
+The operator gaps include split-preview, the complete start/status/resume
+lifecycle workflow, leadership transfer and coordinated drain. Existing native
+split/merge/retirement implementations must be reused rather than replaced by
+another protocol. This changes the immediate mini plan to a read-only preview,
+then explicit lifecycle administration, before another performance experiment.
+The original250ms P7 gate remains unmet: saved183 control873.492994ms and rejected
+candidate repeat1107.213750ms. Automatic global orchestration and optional
+compression are not silently promoted to baseline prerequisites.
+
+Broader chapter11 replay/minimization, reference-Raft comparison, fuzzing,
+declared-scope histories, combined faults and provider-conformance coverage
+remain. Initial source search finds no general reference-Raft/fuzz runner; parser
+negative tests and selected seed tests do not fulfill those whole obligations.
+At capture baseline175 cargo1526695/routed1580417 are confirmed live on the host,
+and CI38025706754 for639c1fb is pending with no jobs. Neither is successful
+current-platform evidence. Logs/provenance are under validation/baseline/slice192.
 
 ## Slice179 — read authority transitions
 

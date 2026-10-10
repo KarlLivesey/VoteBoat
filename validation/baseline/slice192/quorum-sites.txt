@@ -1,0 +1,4 @@
+src/raft/receive.rs:218:        if self.membership().is_satisfied(&self.votes) {
+src/raft.rs:845:                && self.membership().is_satisfied(&r.acknowledgements)
+src/raft.rs:1118:                if self.membership().is_satisfied(&self.votes) {
+src/raft.rs:1464:            .frontier(&self.progress)

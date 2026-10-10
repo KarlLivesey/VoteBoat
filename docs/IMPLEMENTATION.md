@@ -117,9 +117,48 @@ strict profiles clean while advancing the remaining capability work.
 | Completed189: executable metadata authority | Host a real Directory application and committed manifest publication; advances P5/C17. | NativeStartup with Directory, bounded authenticated administration, exact provisioned root and manifest schemas. | Three native processes publish through Raft, recover the same manifests, and answer the public remote manifest protocol using quorum-backed reads. No seeded hint may masquerade as committed authority. |
 | Completed190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, explicit authority-to-endpoint mapping, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
 | Completed191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
-| Current192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
-| Next193: measured durability performance | Address the remaining original P7 latency gate without weakening durability. |192 evidence audit;181 publication costs;183 failed overlap experiment; explicit eligible-append and barrier/heartbeat traces. | Reproduce original committed/applied workload, recovery/retries and fixed250ms p99 criteria; accept a change only with both safety and comparative evidence. |
-| Following194: combined recovery fault closure | Close the concrete membership/lifecycle failures or missing schedules selected by192; advances P4/P6 and deployment confidence. | Requirement-by-requirement audit, current platform results, original operation/receipt lineage and deterministic/native fault drivers. | Exercise the selected missing interleavings through restart, prove no duplicate active owner or lost retry state, and retain any failed histories instead of reducing scope. |
+| Completed192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | R01–R19, operator surface and existing roadmap/catalogue ledgers reconciled;32 fresh quorum/activation/Raft tests pass. Current full-suite/platform and P7 performance remain unclosed. |
+| Current193: split preview contract | Expose the chapter09 read-only preflight for an explicit split; advances the P5/P6 operator surface. | Existing checked TransferIntent, ScopeStateMachine capabilities, target assignment and source export/retention limits; no new consensus protocol. | Report application support, affected scopes, placement, movement/retention bounds and invariants; distinguish measured facts from unavailable estimates; reject incompatible input and never freeze, reserve or activate from a preview. |
+| Next194: recoverable lifecycle administration | Make the existing split execution/status/resumption paths usable through the same explicit operation identity; advances P6 operator support. |193 preview plus current source-fence/import/publication/activation/retirement contracts and authorization. | Exercise an actual operator-started split, interrupted observation, restart and resume with original IDs; require existing durable evidence at each transition and preserve retries/exclusive ownership. Scope the schema before implementation, retaining any unsupported profile explicitly. |
+| Following195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
+
+The192 audit changes the immediate order: chapter09 still has missing operator
+capabilities, so close a usable preview/execution path before another performance
+experiment. The original P7 fixed250ms p99 gate remains required and unmet; the
+measured-performance and combined-recovery macro work is retained, not removed.
+Leadership transfer/node drain and the remaining validation gates are separate
+open work in BASELINE_ACCEPTANCE.md.
+
+### Slice192 schema and acceptance plan
+
+This slice changes evidence and plans only. The ledger records each requirement
+with its implementation surface, evidence scope and remaining acceptance; a
+source path establishes an API exists, not that every failure schedule passes.
+Reconcile R01–R19, P0–P7, VB-000–011, chapter09 administration and chapter11
+validation. Preserve historical source scopes and failed performance results.
+Capture current Git/CI/process identities, then run the existing quorum,
+activation and actual-core Raft targets as fresh bounded evidence. No new
+provider, state transition, resource owner, persistence format or cleanup path
+is introduced. The old baseline process stays observed under its original PID;
+pending CI and a live process cannot become successful results in the ledger.
+
+### Slice192 implementation and acceptance record
+
+Reconciled the acceptance ledger with current source at639c1fb and the design
+requirements. Added R01–R19 and all twelve chapter09 operations, corrected the
+stale recursive-discovery/placement/Counter-history gaps, and distinguished an
+existing public assignment cursor from its missing executable command. Retained
+all P0–P7 gates, the unmet original250ms performance criterion, and the distinction
+between missing features and missing evidence. No production source, protocol,
+schema, dependency or component seam changed.
+
+Fresh all-feature quorum/activation-model/Raft targets pass32 tests, including
+the32-seed actual-core power-loss/network schedule family. Formatting and strict
+Clippy for all/default/no-default features finish with zero diagnostics; the
+inventory checker validates95 contract records' shape and paths only. Source
+hashes, exact commands, quorum sites, logs and live background identities are in
+validation/baseline/slice192. Baseline175 remains running; current CI is pending
+at capture. Neither is recorded as a successful current full-suite/platform run.
 
 ### Slice191 implementation and acceptance record
 

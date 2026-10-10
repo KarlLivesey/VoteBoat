@@ -1,0 +1,52 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.76s
+     Running tests/activation_model.rs (target/debug/deps/activation_model-226e4a95b520e2fb)
+
+running 4 tests
+test available_weighted_quorums_do_not_imply_election_before_joint_delivery_to_learner ... ok
+test final_partial_delivery_requires_request_scope_independent_ballots ... ok
+test election_receipts_need_exact_durable_promises_across_restart ... ok
+test distributed_accepted_activation_preserves_election_certificate_intersection ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/quorum.rs (target/debug/deps/quorum-ed6011ec7b1864c4)
+
+running 6 tests
+test explanation::five_of_nine_ids_do_not_hide_two_unsatisfied_sites ... ok
+test validates_exact_membership_weights_depth_and_budgets ... ok
+test explanation::maximum_weights_and_joint_policies_preserve_separate_thresholds ... ok
+test weighted_and_joint_predicates_are_strict ... ok
+test explanation::every_nine_voter_explanation_matches_reference_and_direct_branch_weights ... ok
+test every_nine_voter_quorum_intersects_and_frontier_matches_reference ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/raft.rs (target/debug/deps/raft-74c99bde91725e98)
+
+running 22 tests
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test three_node_history_with_only_host_components ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
