@@ -444,6 +444,15 @@ impl MetadataAuthoritySource {
             self.directory.active_directory()
         }
     }
+    /// Read-only access to the selected prior target's command builders and
+    /// local diagnostics. Foreign observations still require quorum validation.
+    /// No target is exposed after this source's committed freeze.
+    pub fn serving_target(&self) -> Option<&MetadataServingTarget> {
+        match &self.directory {
+            AuthorityHistory::Serving(target) if self.frozen.is_none() => Some(target),
+            _ => None,
+        }
+    }
     pub fn plan(&self, target: GroupIdentity) -> Result<MetadataMovePlan, ApplicationError> {
         if self.frozen.is_some() || self.directory.contains_authority(target) {
             return Err(ApplicationError::NotApplied);
@@ -691,7 +700,12 @@ impl StateMachine for MetadataAuthoritySource {
         entries: &[LogEntry],
     ) -> Result<Vec<Self::Receipt>, ApplicationError> {
         let mut next = self.clone();
-        let mut receipts = Vec::new();
+        let mut receipts = Vec::with_capacity(
+            entries
+                .iter()
+                .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+                .count(),
+        );
         for e in entries {
             if let Some(r) = next.step(e)? {
                 receipts.push(r);

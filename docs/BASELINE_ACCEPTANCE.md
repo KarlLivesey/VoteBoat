@@ -303,3 +303,12 @@ Complete checkpoint restore keeps those domains separate. Selected native journa
 cuts cover repeat freeze/import/publication/activation and original retries. Profile,
 export and nesting bounds refuse before ownership transfer. Native TCP/QUIC
 metadata-move composition and the wider roadmap exits remain open.
+
+Slice156c4 adds four selected native TCP/TLS/QUIC x WAL/checkpoint histories for
+A->B->C, foreign-parent locator refresh and original full-owner adoption. Each
+selected move/control phase recovers an unread completion and exact retry. The
+data owner preserves its epoch, data and outbox through both moves and serves
+with all metadata stopped; metadata files and recovered logs remain unchanged.
+Retained/imported owner-family native composition, broader failures and the other
+roadmap exits remain open. Background Linux/macOS CI is now activated; a running
+job is not platform validation.

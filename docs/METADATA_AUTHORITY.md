@@ -180,4 +180,15 @@ new incarnation. Retained lineage permits at most `MAX_METADATA_MOVES` successiv
 moves and keeps the separate 64 MiB image ceiling; declared snapshot budgets may
 refuse another move earlier. There is no implicit history pruning or source thaw.
 Selected embedding tests cover three consecutive moves and native journal cuts.
-TCP/QUIC authority-move service composition remains outstanding.
+Use `source().serving_target()` to borrow the repeated profile's existing import
+and activation command builders before its next freeze. Plain source profiles
+and frozen sources return `None`. This local accessor supplies no foreign quorum
+authority; authenticate the observations supplied to those builders as before.
+
+Selected native TCP/TLS and QUIC histories move A->B->C, refresh a foreign parent
+locator and adopt both moves in an original full data owner. Every selected phase
+survives an unread completion, joined worker abort, WAL/checkpoint reopen and
+exact retry. The owner serves and recovers with all metadata stopped; stopped
+metadata files and recovered logs remain unchanged. Retained/imported owner
+families still need this network composition; wider faults and macOS validation
+remain separate work.

@@ -328,6 +328,9 @@ fn repeated_move_preserves_all_authority_domains_creations_and_retries() {
 #[test]
 fn repeated_profiles_refuse_wrong_bindings_stale_views_and_partial_restore() {
     let mut p = prepared();
+    assert!(original().source().serving_target().is_none());
+    assert!(p.template.source().serving_target().is_some());
+    assert!(p.source.source().serving_target().is_none());
     let boot = p.template.bootstrap_command(100000).unwrap();
     assert!(p
         .template

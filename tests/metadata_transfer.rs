@@ -507,3 +507,59 @@ mod owner_locators;
 
 #[path = "metadata_transfer/repeated.rs"]
 mod repeated;
+
+#[test]
+fn metadata_wrappers_retain_receipts_within_declared_capacity() {
+    fn check<A: CheckpointStateMachine + BoundedStateMachine>(
+        template: A,
+        operation: u128,
+        bytes: Vec<u8>,
+    ) where
+        A::Receipt: ApplicationReceipt,
+    {
+        for count in [0, 1, 2, 3, 5] {
+            let mut a = template.clone();
+            let mut entries = vec![LogEntry {
+                index: 1,
+                term: 1,
+                payload: EntryPayload::Noop,
+            }];
+            entries.extend((0..count).map(|i| entry(i as u64 + 2, operation, bytes.clone())));
+            let bound = a.receipt_bytes_bound(&entries).unwrap();
+            let receipts = a.apply_batch(&entries).unwrap();
+            let retained = receipts.capacity() * std::mem::size_of::<A::Receipt>()
+                + receipts
+                    .iter()
+                    .map(|r| r.nested_bytes(bound).unwrap())
+                    .sum::<usize>();
+            assert_eq!(receipts.len(), count);
+            assert!(
+                retained <= bound,
+                "count {count}: retained {retained}, bound {bound}"
+            );
+        }
+    }
+    let a = fresh(16);
+    check(a.clone(), 1000, a.bootstrap_command(100000).unwrap());
+    let s = MetadataPublishingSource::new(a.clone()).unwrap();
+    check(s.clone(), 1000, s.bootstrap_command(100000).unwrap());
+    let plan = MetadataMovePlan::new(group(1), group(9), vec![grant()]).unwrap();
+    let t = MetadataAuthorityTarget::new(a, plan.clone(), op(7), ConfigurationId::new(1).unwrap())
+        .unwrap();
+    check(t.clone(), 7, t.bootstrap_command(100000).unwrap());
+    let t = MetadataServingTarget::new(
+        s,
+        plan,
+        op(7),
+        ConfigurationId::new(1).unwrap(),
+        ConfigurationId::new(2).unwrap(),
+    )
+    .unwrap();
+    check(t.clone(), 7, t.bootstrap_command(100000).unwrap());
+    let bound = t.readiness_requirements().snapshot_bytes;
+    let repeat =
+        MetadataAuthoritySource::from_serving(t, bound).unwrap_or_else(|_| panic!("repeat"));
+    check(repeat.clone(), 7, repeat.bootstrap_command(100000).unwrap());
+    let repeat = MetadataPublishingSource::new(repeat).unwrap();
+    check(repeat.clone(), 7, repeat.bootstrap_command(100000).unwrap());
+}

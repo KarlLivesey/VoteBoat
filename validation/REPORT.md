@@ -4867,3 +4867,31 @@ is the TCP/QUIC service path. The broader P0–P7 goal remains active.
 Final admission checks include a wrong repeated-profile bootstrap operation ID;
 outer source/publication wrappers reject nested target conflicts/non-serving
 outcomes. Final metadata suite reruns cover all40/all31 cases after this change.
+
+## Slice156c4 — native metadata moves, 10 October 2026
+
+Four selected Linux native TCP/TLS/QUIC x WAL/checkpoint histories pass. Separate
+three-voter groups execute A->B->C, foreign-parent locator refresh and original
+full-owner adoption. Every selected control completion remains unread before
+worker abort/join, durable reopen and exact retry, with identical quorum status.
+Source export matches its quorum observation, frozen sources refuse reads and
+unactivated imports refuse service. Partial cache refresh refuses resolution.
+The owner serves after all metadata stops, recovers and retries four writes
+without duplicate data/outbox effects. Stopped metadata files/recovered logs and
+original receipt/history authority domains are checked.
+
+A new retained-receipt capacity test covers four wrappers and repeated profiles,
+including no commands and noop/command mixtures. The native router caught excess
+Vec capacity; exact command-count allocation fixes the cause without relaxing
+the published bound. Plain and frozen sources refuse the new borrowed target
+accessor. Local metadata suites pass41 all-feature and32 core-only tests; strict
+all-feature and core-only all-target Clippy pass with warnings denied. Two TCP-only
+cases also pass with --no-default-features --features native,tls. A bare native
+feature run selected zero socket tests and is not counted. Formatting, whitespace
+and the88-contract inventory/path check pass. Commands use cargo +stable with
+--locked --offline.
+
+These are selected process/worker-abort histories, not physical power-loss or
+arbitrary-fault proof. Retained/imported owner-family native composition and
+other documented P0–P7 work remain. Linux/macOS GitHub CI has been activated and
+was observed running; no remote success is inferred from activation.

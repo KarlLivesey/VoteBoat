@@ -996,3 +996,6 @@ mod deletion;
 
 #[path = "reparenting.rs"]
 mod reparenting;
+
+#[path = "metadata_moves.rs"]
+mod metadata_moves;

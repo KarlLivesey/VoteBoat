@@ -393,7 +393,12 @@ impl StateMachine for MetadataAuthorityTarget {
         entries: &[LogEntry],
     ) -> Result<Vec<Self::Receipt>, ApplicationError> {
         let mut next = self.clone();
-        let mut receipts = Vec::new();
+        let mut receipts = Vec::with_capacity(
+            entries
+                .iter()
+                .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+                .count(),
+        );
         for entry in entries {
             if let Some(receipt) = next.step(entry)? {
                 receipts.push(receipt);
