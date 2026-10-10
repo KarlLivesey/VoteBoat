@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.98s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test assignments::single_group_inventory_does_not_require_a_leader ... ok
+test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 119 filtered out; finished in 7.72s

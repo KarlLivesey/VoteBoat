@@ -1,0 +1,4 @@
+ready node=2 peer=127.0.0.1:10130 transport=Quic command=127.0.0.1:10230
+administration operation=7001 outcome=Committed(ProposalPosition { index: 3, term: 5 })
+administration operation=7001 outcome=Committed(ProposalPosition { index: 4, term: 5 })
+command observation_cancelled pending=Write(ClientTicket { binding: ClientRouterBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ClientRouterGeneration(1) }, sequence: 2, group: GroupIdentity { id: GroupId(7), incarnation: GroupIncarnation(3) }, operation: OperationId(42) }) reason=deadline

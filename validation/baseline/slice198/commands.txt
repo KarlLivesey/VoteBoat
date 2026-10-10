@@ -1,0 +1,13 @@
+# Local Linux execution from repository root; service tests need TCP/UDP sockets.
+cargo +stable test --locked --offline --all-features --bin voteboat-counter assignment_listing
+cargo +stable test --locked --offline --all-features --test counter_service assignments:: -- --nocapture
+cargo +stable test --locked --offline --all-features --test counter_service --bin voteboat-counter
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --all-features --no-deps
+node validation/check-inventory.mjs
+git diff --check
+# The enabled pre-push hook repeats formatting and all four Clippy profiles.

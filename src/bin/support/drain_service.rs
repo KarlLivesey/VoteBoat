@@ -32,16 +32,6 @@ impl Driver {
                 .map(|d| Self::Single(Box::new(d)))
         }
     }
-    pub fn multi(&self) -> bool {
-        matches!(self, Self::Multi(_))
-    }
-    pub fn scopes(&self, service: &Service) -> Vec<voteboat::identity::GroupIdentity> {
-        if self.multi() {
-            service.local().applications.keys().copied().collect()
-        } else {
-            Vec::new()
-        }
-    }
     pub fn busy(&self) -> bool {
         match self {
             Self::Single(d) => d.busy(),
@@ -82,19 +72,4 @@ impl Driver {
             Self::Multi(d) => d.command(service, words, quit),
         }
     }
-}
-pub fn authorize(
-    channel: &super::service_access::Channel,
-    access: Option<&super::service_access::ActiveAccess>,
-    command: &super::group_command::Command<'_>,
-    scopes: &[voteboat::identity::GroupIdentity],
-    time: MonoTime,
-) -> Result<(), String> {
-    channel.authorize(access, command.group, command.text, time)?;
-    if is_command(command.text.split_whitespace().next()) {
-        for scope in scopes {
-            channel.authorize(access, *scope, command.text, time)?;
-        }
-    }
-    Ok(())
 }

@@ -414,6 +414,7 @@ impl Channel {
                 | "explain-quorum"
                 | "events"
                 | "maintenance"
+                | "list-assigned-groups"
                 | "configuration-status"
                 | "leadership-status"
                 | "drain-status"

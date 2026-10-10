@@ -1,7 +1,7 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
-Latest focused implementation evidence: [slice197b4b2b4 foreground multi-group drain](baseline/slice197b4b2b4/README.md).
+Latest focused implementation evidence: [slice198 authenticated local assignment pages](baseline/slice198/README.md).
 Entries below are historical and retain their original source/coverage limits.
 
 The independent Rust model in `tests/ballot_model.rs` explores the complete

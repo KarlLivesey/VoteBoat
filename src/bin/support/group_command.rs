@@ -85,3 +85,21 @@ pub fn payload(words: &[String]) -> &[String] {
         words
     }
 }
+
+/// Check all local scopes before node-wide inventory or drain output/actions.
+pub fn authorize(
+    channel: &super::service_access::Channel,
+    access: Option<&super::service_access::ActiveAccess>,
+    command: &Command<'_>,
+    scopes: &[voteboat::identity::GroupIdentity],
+    time: voteboat::runtime::MonoTime,
+) -> Result<(), String> {
+    channel.authorize(access, command.group, command.text, time)?;
+    let verb = command.text.split_whitespace().next();
+    if super::drain_service::is_command(verb) || verb == Some("list-assigned-groups") {
+        for scope in scopes {
+            channel.authorize(access, *scope, command.text, time)?;
+        }
+    }
+    Ok(())
+}

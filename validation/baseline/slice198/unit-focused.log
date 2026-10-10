@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.85s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 2 tests
+test assignment_listing::tests::cursor_rejects_changed_identity_inventory_and_configuration ... ok
+test assignment_listing::tests::maximum_identity_page_and_inventory_are_bounded ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.00s

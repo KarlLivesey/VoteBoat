@@ -136,9 +136,80 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2a: executable group data commands | Make the shared node usable from actual service processes; advances P2 and enables197b4b2b. |197b4b1 native startup, existing scoped command authorization and recursive policy grammar. | Explicit bounded original group file, group-addressed status/read/add/checkpoint and exact-scope authentication; TCP/QUIC independent operation histories survive checkpoint/reopen. |
 | Completed197b4b2b3: multi-group source drain controls | Bind node maintenance to every actual assignment; advances P4/P2 and chapter09. |197b4b2b1/2 group membership/leadership, mixed-role plans, native journal and Node readiness. | Bounded complete original manifest, all-group permission checks, durable start/cancel/recovery, one-row inspection and authoritative stop refusal. TCP/WAL and QUIC/checkpoint partial-progress histories plus bounds and publication-failure tests pass; full evidence below. |
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
-| Current198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
-| Next199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
-| Following200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
+| Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
+| Current199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+| Next200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
+| Following201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
+
+### Slice198 schema plan — authenticated local assignment pages
+
+Use the existing ordered owner group iterator and `groups_after` cursor. A
+read-only `list-assigned-groups CURSOR LIMIT` command reports at most eight
+rows from the bounded256-group executable inventory. Rows name exact group
+and incarnation, latest locally accepted configuration, stable configuration
+and optional joint target. Label this local accepted state, not committed
+membership, global placement, ownership or read authority.
+
+The first cursor is `-`; subsequent cursors bind the last returned group to a
+SHA-256 digest of the complete ordered assignment/configuration view and exact
+node/store/incarnation/session. Reject malformed, absent-group or stale cursors.
+Ordinary data writes do not invalidate cursors; membership/view changes and
+store reopen do. No persistent cursor state, resources or background work.
+The read occurs within one service command turn with no intervening poll.
+
+Require Inspect on group1 and every actual local assignment before emitting
+any page, including an empty/end page. Group-prefixed node inventory commands
+remain invalid. Acceptance: authenticated TCP and QUIC paging, no duplicates,
+scope refusal, invalid/bounded inputs, configuration and restart staleness,
+single-group compatibility, maximum identity/response size, and unchanged data
+retries. This advances P2/P5 and chapter09; platform recovery199 and explicit
+retirement200 remain the next two deliverables.
+
+The first full regression exposed an interrupted observation of the fixture's
+already-acknowledged write after source restart. The server log records that
+exact pending operation42 being cancelled on the command wait deadline; the
+CLI returned UNKNOWN. The fixture retries only that identical operation42 and
+payload after the observed transport/leadership uncertainties and still requires
+the duplicate receipt. Other errors and expiration fail the test. No client,
+server deadline, durability or outcome classification changes are made.
+
+### Slice198 implementation and validation
+
+Added `list-assigned-groups CURSOR LIMIT` over the existing ordered owner
+iterator. It snapshots at most256 local rows and returns at most eight per
+page. Exact node/store/incarnation/session and ordered accepted configuration
+fields bind the cursor. Changed configuration, missing cursor group or store
+reopen refuses the cursor. Ordinary writes leave it valid. Responses label
+local accepted state explicitly, never a committed/global ownership view.
+
+The existing all-scope command authorization helper now lives with group
+command parsing and applies to inventory as well as drain. Every actual
+local group requires Inspect before any output; a group1-only grant cannot
+leak another assignment. The executable's fixed local inventory supplies the
+scope set even without the drain profile. Existing trusted loopback behavior
+remains. No public provider, core/storage protocol or dependency was added.
+
+Three focused service tests pass over TCP and QUIC (7.72s), including scoped
+reader access, rejected incomplete grants, bounded/malformed requests, paging,
+configuration/restart invalidation, preserved duplicate write receipts and
+single-group inspection without a leader. Two unit tests check maximum IDs,
+256-row/eight-row/reply bounds, malformed and stale cursors. The final affected
+regression passes122 service tests (56.28s) and16 command tests, with zero
+failures or ignored tests. Formatting, all four strict Clippy profiles,
+warnings-denied API docs and the105-contract inventory check pass.
+
+The initial full run's one failure and its server observation are retained:
+an already-acknowledged write's post-restart reply wait expired. The fixture
+now explicitly retries that exact original operation/payload for the observed
+unknown responses and requires its duplicate receipt. No timeout or client
+outcome was weakened. See [slice198 evidence](../validation/baseline/slice198/README.md).
+
+Macro review: the basic assignment-list operator gap is closed. Cross-platform
+operator validation199 remains current; explicit retirement200 and provider
+conformance201 follow. The read-only review found older run38029044043 still
+running Ubuntu at9e1e612, with macOS job114146478974 failed at the incompatible
+maintenance-profile refusal test. That is evidence for the next investigation,
+not a current-source macOS result. Full P0–P7 remains active.
 
 ### Slice197b4b2b4 schema plan — bounded foreground multi-group runner
 

@@ -61,7 +61,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R02 recursive responsibility | ResponsibilityManifest, durable delegation and recursive resolve; nested native routed histories; executable lookup190. | General recursive lifecycle fault composition remains; no protocol-specific two-level ceiling. |
 | R03 multiple ordered lanes under one responsibility | Partitioned manifests and independent groups, source/target split and compatible merge; routed histories. | Operator lifecycle workflow and broader recovery coverage remain. No cross-lane total order is claimed. |
 | R04 hierarchical quorums | Policy/JointPolicy, all four election/read/commit sites inspected192; fresh quorum/raft/activation tests pass. | Finite intersection/activation evidence does not establish a distributed protocol proof or all schedules. |
-| R05 selective participation | Explicit assigned local groups, public groups/groups_after iteration, selected manifest paths and cached routing; native parent-offline histories, remote lookup190. | Broader deployment/failure coverage; executable list-assigned-groups command remains missing. |
+| R05 selective participation | Explicit assigned local groups, public groups/groups_after iteration, selected manifest paths and cached routing; native parent-offline histories, remote lookup190. | Slice198 adds bounded authenticated local assignment pages with configuration/session-bound cursors; broader deployment/failure coverage remains. |
 | R06 shared WAL throughput | Shared native log worker/barriers and batching; shared_barrier/runtime tests. | Shared mechanism exists; sustainable throughput improvement and original latency gate remain unmet. |
 | R07 cheap idle groups | Shared scheduler/transport/worker, hundred-group histories and static multi-lane benchmark178. | Wider group counts/active fractions and separate idle CPU/allocation measurements remain. |
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
@@ -89,7 +89,7 @@ not a complete operator workflow.
 | inspect | Counter status/metrics/timings/events; public Node/local/core views. | Broader bounded group/deployment summaries. |
 | explain-quorum | Policy/JointPolicy explanations and authenticated paged Counter command177. | No missing basic operation; hints are explicitly not acknowledgements. |
 | inspect-route | Public resolve/check_owner and executable directory route190. | Broader operational integration; route hint is not write authority. |
-| list-assigned-groups | Public EffectOwner/TimedShard::groups and groups_after over local assignments. | Executable operator command remains missing; reuse these existing cursors rather than adding another inventory abstraction. |
+| list-assigned-groups | Public EffectOwner/TimedShard::groups and groups_after over local assignments. | Slice198 adds the executable command over the existing ordered iterator: bounded pages, all-group Inspect authorization and stale cursor refusal. Local accepted configuration is not global placement or committed authority. |
 | drain-node | Slice197a adds the local admission/campaign gate;197b1 adds the bounded durable journal and ordered cancellation. Slice197b2a connects authenticated retained-replica drain/start/status/resume/cancel/stop to durable handoff, restored gates and worker shutdown, with TCP/QUIC restart, lost reply and failed-publication evidence. Slice197b2b1 adds journal-bound Rust evacuation plans and exact committed-membership readiness. Slice197b2b2 connects bounded original executable plans to explicit authenticated membership commands with TCP/QUIC joint/final restart, lost replies and source shutdown. Slice197b2c adds a bounded authenticated foreground runner for the single-group sequence and interrupted-runner recovery. Slice197b2d adds explicit maintenance-profile learner enrollment and selected TCP/QUIC replacement-voter drain, absent-learner refusal, interrupted-runner and survivor-restart histories. Slice197b2e documents and verifies explicit final learner removal, uncommitted-retirement recovery and stale-source gating. | Local status is not remote-quorum or decommission evidence. Automatic/full multi-group orchestration and broader replacement/retirement faults remain open. |
 | move-leader | Slice196a supplies the core;196b1 adds durable original-ID Rust maintenance, Node controls and selected native TCP/QUIC restart/status histories. | Slice196b2 adds authenticated start/status/resume/cancel in the explicit counter schema2/wire8 profile, including TCP/QUIC recovery and lost/disconnected waits. General multi-group drain and broader profiles remain; terminal records describe historical completion. |
 | add-learner | Node configuration/readiness, native administration and placement-plan191. | Broader lifecycle/authorization fault coverage. |
@@ -106,8 +106,9 @@ restores before polling and checks all-assignment readiness before stop.
 Selected TCP/WAL and QUIC/checkpoint source recovery, all-group permissions,
 bounded manifest input and failed publication are exercised. Slice197b4b2b4 adds the bounded foreground multi-group runner with selected
 TCP/WAL and QUIC/checkpoint interrupted-runner/source recovery evidence.
-Assignment listing and broader platform/fault acceptance remain open; these
-selected histories do not close those ledger entries.
+Slice198 adds bounded authenticated assignment listing and selected TCP/QUIC
+configuration/restart cursor tests. Broader platform/fault acceptance remains
+open; these selected histories do not close those ledger entries.
 
 Mutations must retain durable operation IDs and generation/authorization checks.
 Previews must not reserve resources, fence sources or act as durability evidence.
@@ -219,8 +220,8 @@ a passing test count.
    Slice196a supplies the targeted handoff primitive;196b1 adds durable Rust
    operation tracking;196b2 adds authenticated counter-profile operator execution.
    Broader lifecycle profiles remain open; do not create another ownership engine.
-   Coordinated node drain and the assignment-list command
-   remain required operator work; public assignment iteration exists.
+   Bounded coordinated node drain197 and assignment listing198 are implemented;
+   broader lifecycle/operator profiles and failure coverage remain.
 2. Retain P7's original fixed250ms gate. The saved183 control is873.492994ms
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as

@@ -33,6 +33,8 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // concurrent fork can briefly inherit an exclusive lock until exec closes it.
 // Child execution and waiting stay outside this gate and remain parallel.
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
+#[path = "counter_service/assignments.rs"]
+mod assignments;
 #[path = "counter_service/command_discovery.rs"]
 mod command_discovery;
 #[path = "counter_service/command_endpoints.rs"]

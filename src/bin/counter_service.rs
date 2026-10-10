@@ -17,6 +17,8 @@
 mod administration;
 #[path = "support/administration_set.rs"]
 mod administration_set;
+#[path = "support/assignment_listing.rs"]
+mod assignment_listing;
 #[path = "support/command_client.rs"]
 mod command_client;
 #[path = "support/command_discovery.rs"]
@@ -108,6 +110,7 @@ voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY -
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.\n\
 Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
 Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
+Local inventory: list-assigned-groups CURSOR LIMIT (start with -; limit 1..8); requires Inspect on every local group.\n\
 Multi-group membership: --group-admin-plans FILE selects per-group trusted plans; requires --groups and --service-access.\n\
 Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.\n\
 Multi-group leadership: --groups FILE --leadership-maintenance enabled; use the same group prefix for move-leader, leadership-status, resume-leadership and cancel-leadership.\n\
@@ -201,6 +204,7 @@ fn command(
         ["discover"] => return Ok(Phase::DiscoveryAck { source: discovery.clone().ok_or("endpoint discovery disabled")?, sent: 0 }),
         ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
         ["maintenance"] => maintenance_status(service),
+        ["list-assigned-groups", cursor, limit] => assignment_listing::list(service, cursor, limit)?,
         ["events", session, after, count] => observer.events(session, after, count)?,
         ["metrics"] => observer.metrics(),
         ["timings"] => observer.timings(),
@@ -459,7 +463,7 @@ fn run_service(
     let mut observer = Diagnostics::new(owner).map_err(|e| format!("diagnostic setup: {e:?}"))?;
     let command_local = service_access::server_local(id, owner.store.session);
     let discovery = prepared.discovery;
-    let drain_scopes = drain.as_ref().map_or_else(Vec::new, |d| d.scopes(&service));
+    let command_scopes = service.local().owner.groups().collect::<Vec<_>>();
     let mut command_generation = 0u64;
     let start = Instant::now();
     println!(
@@ -490,7 +494,7 @@ fn run_service(
             c.poll(
                 access,
                 command_local,
-                &drain_scopes,
+                &command_scopes,
                 SecureSessionGeneration::new(command_generation).unwrap(),
                 time,
                 |s| {
@@ -731,7 +735,7 @@ impl Connection {
         &mut self,
         access: Option<&service_access::ActiveAccess>,
         local: voteboat::secure::LocalIdentity,
-        drain_scopes: &[GroupIdentity],
+        command_scopes: &[GroupIdentity],
         generation: SecureSessionGeneration,
         time: MonoTime,
         mut command: impl FnMut(&str) -> Result<Phase, String>,
@@ -767,11 +771,11 @@ impl Connection {
                                         return Err("one command per connection".into());
                                     }
                                     let selected = group_command::parse(s)?;
-                                    drain_service::authorize(
+                                    group_command::authorize(
                                         &self.stream,
                                         access,
                                         &selected,
-                                        drain_scopes,
+                                        command_scopes,
                                         time,
                                     )?;
                                     command(s)

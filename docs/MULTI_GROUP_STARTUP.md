@@ -100,6 +100,29 @@ before startup.
 WAL maintenance and automatic checkpoints operate through the existing shared
 Node. Single-group invocations remain available without `--groups`.
 
+## List local assignments
+
+```sh
+voteboat-counter client 40000 1 list-assigned-groups - 8 --service-tls ./tls --principal 3
+```
+
+Use the returned `next` cursor for the next page; `more=false` ends the list.
+Limits are1..8 rows per page and256 total assignments. Each comma-separated
+`assignments` row is `GROUP:INCARNATION:ACCEPTED:STABLE:NEXT`, where the last
+field is the joint configuration's target ID, or `-` outside a joint change.
+The header includes the exact local node, store, store incarnation and session.
+
+This is locally accepted configuration state, which can precede durability or
+commitment. It is not global placement, live ownership or quorum evidence.
+The command works on followers and without a quorum. Inspection permission
+is required for group1 and every local group, even for a single-row page; a
+group prefix is not supported. Existing trusted loopback mode stays available.
+
+Cursors bind the complete assignment/configuration view and store session.
+Membership changes or a reopened store invalidate them; restart the listing
+with `-`. Ordinary data writes do not invalidate the view. The service retains
+no cursor resources between requests.
+
 ## Group membership administration
 
 Add `--group-admin-plans FILE` to select trusted plans for individual groups:
