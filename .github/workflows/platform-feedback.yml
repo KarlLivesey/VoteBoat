@@ -40,6 +40,13 @@ jobs:
       - name: Install pinned Rust toolchain
         run: rustup toolchain install 1.98.1 --profile minimal --component rustfmt --component clippy
       - run: cargo fetch --locked
-      - run: cargo test --locked --offline --all-features
-      - run: cargo test --locked --offline --no-default-features
-      - run: cargo test --locked --offline --no-default-features --features native
+      - name: Test feature configurations sequentially
+        shell: bash
+        run: |
+          set -e
+          # Native three-node/100-group fixtures retain 300 snapshot-store locks.
+          # macOS shells can inherit a 256-file limit; adjust this step only.
+          if [[ "$RUNNER_OS" == macOS ]]; then ulimit -n 4096; fi
+          cargo test --locked --offline --all-features
+          cargo test --locked --offline --no-default-features
+          cargo test --locked --offline --no-default-features --features native

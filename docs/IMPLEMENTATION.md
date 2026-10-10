@@ -1322,18 +1322,75 @@ original-operation recovery/cleanup and source-bound evidence or an explicit
 remaining item for every required baseline feature and supported Mac/Linux workflow.
 Selected suites cannot certify full coverage; full P0–P7 remains active.
 
-Next250: implement a confirmed missing functional exit from249's audit.
-Purpose: advance the baseline feature milestone rather than add speculative
-helpers. Depend on the original chapter12/17 requirements, public contracts and
-the concrete gap selected by249. State its schema and completion checks before
-editing; require usable Rust/executable behavior, recovery/cleanup and relevant
-Mac/Linux checks with zero diagnostics. A gap not yet inspected is planned work,
-not an absent implementation claim. Keep performance/security gates separate.
+249 audit schema before edits: compare original R01–R19, C01–C24, P0–P7 and the
+chapter09 operations with current public/native callers and assertion paths.
+Keep implemented behavior, fresh finite acceptance, missing functional capability,
+broader contract/fault evidence and deferred tuning/security/P8 distinct. No
+new API, state transition, authority, durable effect or helper is justified solely
+by an old remaining-work label. The metadata inventory still lists budgeted events
+and executable endpoint refresh as wholly absent although168/176/209 implement
+them; the operator map omits implemented transfer retirement. Correct those
+specific statements after inspecting production and tests. Ownership/failure
+contracts remain unchanged; source-bound Rust/provider checks can reveal an
+actual missing behavior before selecting250. Completion requires source/assertion
+references for the audited baseline operations, corrected remaining categories,
+fresh relevant public-provider/core checks on Mac/Linux and zero strict profiles.
+The complete full-goal audit still includes broader faults and P7 measurements;
+do not manufacture a feature gap or label the full goal complete from this review.
+
+249 platform schema after the fresh failed check: the Mac SSH shell inherits a
+256-file soft limit. Each FileSnapshotIo deliberately retains one exclusive lock
+descriptor; the three-node/100-group snapshot fixture alone needs300, before WAL,
+transport and temporary publication files. It fails with EMFILE even with one
+test thread. Keep those locks and original fixture sizes/assertions. Run native
+acceptance with4096 descriptors in the child shell only, then make that resource
+condition explicit in platform CI and local-check documentation. This adds no
+provider, persistent state, authority or host-wide setting; process exit releases
+the limit and file ownership follows unchanged provider drop/join contracts.
+Acceptance: preserve both failed logs, run the identical ten-target suite at
+original concurrency, record the inherited/configured limits and source hashes,
+and retain every original result. This is test/deployment resource configuration,
+not a storage optimization or a claim that a256-descriptor process supports300
+simultaneously open snapshot stores.
+
+249 implemented evidence: [source-bound results](../validation/baseline/slice249/README.md)
+correct stale missing-feature labels for bounded events/timing observations,
+executable endpoint refresh, voter replacement and transfer retirement. Inventory
+now separates absent capabilities from broader validation; its108 entries and
+9 partial reviews/68 operations remain metadata. Linux passes365 selected core/
+provider histories. Mac at inherited256 descriptors passes358/fails7 with EMFILE;
+the unchanged isolated300-snapshot-store fixture also fails. A child-shell4096
+limit removes EMFILE, but the original broad run passes361/fails4 on native
+progress deadlines. The unchanged isolated snapshot history then passes1 in93.62s
+at4096; it does not close the other failures or identify their exact cause.
+Formatting/four strict profiles pass on both hosts and647 build inputs match
+3071fc2. No Rust, provider, persistent/wire format, assertion, deadline, group
+count or production change. CI/local test resource conditions are now explicit,
+with no host-wide settings change. Original failed logs/stores remain.
+
+Macro review249: basic retirement/discovery/diagnostic and planned membership
+operators are implemented, so duplicate helpers do not advance the feature
+milestone. Full reusable provider acceptance and broader combined faults remain;
+four reproduced Mac native progress failures are the next concrete supported-
+platform dependency. P7/security/P8 remain separate. This bounded audit is not
+a feature-complete certificate or the whole active P0–P7 goal.
+
+Next250: diagnose the four native Mac progress failures at sufficient descriptors.
+Purpose: make the existing shared100-group Rust assembly reliable under its
+declared test resource conditions. Depend on249's broad361/4 and isolated1/0
+results, worker/transport/snapshot ownership contracts and original fixture
+deadlines. Inspect actual stalled states and identify a cause before changing
+production or fixture concurrency; no blanket timeout extension, lost ownership
+check or speculative provider runner. Sketch the focused schema before editing.
+Completion requires original catch-up/checkpoint/reconnect/reopen/retry assertions,
+joined workers, matched broad Mac/Linux runs and zero strict profiles. Selected
+functional acceptance advances P1/P2 and the usable Rust milestone; it does not
+promise a P7 latency gain or close all replacement-provider obligations.
 
 Following251: verify the resulting baseline functional assembly across supported
 Mac/Linux Rust and executable configurations. Purpose: advance P0–P6/platform
 feature acceptance, keeping P7 tuning/security gates explicit. Depend on249's
-original requirement/contract/exit audit and250's confirmed change. Select relevant
+original requirement/contract/exit audit and250's confirmed progress fix. Select relevant
 real native lifecycle/provider histories before declaring a broader milestone;
 inspect failures and preserve exact operation/cleanup contracts. Completion checks
 are the original functional exits, actual source-bound platform evidence and zero

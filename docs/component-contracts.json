@@ -2753,14 +2753,17 @@
   "not_yet_implemented": [
     "incremental-segment-cleaning-and-general-retention",
     "client-disk-and-connection-admission-policy",
-    "executable-remote-discovery-live-endpoint-refresh-and-broader-discovery-faults",
-    "observability-latency-and-budgeted-events",
+    "per-group-critical-path-tracing-and-external-exporters",
     "general-durable-authorization-audit",
-    "compression",
-    "complete-interrupted-and-recursive-scope-transfer-lifecycle",
-    "transactions",
-    "voter-replacement-and-global-placement-orchestration",
-    "configuration-ingress-interruption-revocation-and-new-voter-fault-release",
-    "broader-interrupted-recursive-directory-ownership-lifecycle"
+    "optional-bounded-compression",
+    "cross-group-transaction-layer-P8",
+    "automatic-global-placement-orchestration"
+  ],
+  "remaining_validation": [
+    "broader-executable-discovery-endpoint-refresh-and-reconnection-faults",
+    "combined-interrupted-recursive-scope-transfer-lifecycle",
+    "configuration-ingress-revocation-new-voter-and-ticket-release-fault-combinations",
+    "combined-recursive-directory-ownership-movement-faults",
+    "complete-reusable-provider-operation-and-lifetime-conformance"
   ]
 }

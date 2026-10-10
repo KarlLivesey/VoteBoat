@@ -17,6 +17,7 @@ cargo run --locked --example replicated_counter -- /tmp/voteboat-counter 1 7
 - [Rust embedding and node API](docs/NODE.md)
 - [Roadmap and implementation status](docs/IMPLEMENTATION.md)
 - [Validation evidence](validation/REPORT.md)
+- [Local formatting, lint and test commands](docs/LOCAL_CHECKS.md)
 
 Enable local checks before every push:
 

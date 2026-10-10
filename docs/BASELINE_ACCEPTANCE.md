@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Functional ledger and Mac resource conditions: [slice249](../validation/baseline/slice249/README.md).
+Existing retirement, bounded diagnostics, endpoint refresh and voter replacement
+are distinguished from broader evidence gaps. Linux selected core/provider365
+passes; Mac initially358/7 at256 descriptors, then361/4 at child-shell4096.
+An unchanged isolated snapshot history passes at4096, while the four broad native
+progress failures remain open. Formatting/four strict profiles pass on both;
+647 build inputs match3071fc2. No production or assertion change. Current250
+investigates these actual platform failures; full P0–P7 remains active.
+
 Bounded drain observation pacing: [slice248](../validation/baseline/slice248/README.md).
 Actual round cost spaces original observations across unchanged absolute/request
 budgets; no authority, timer, quorum or durability change. Final Linux counter197/
@@ -911,7 +920,7 @@ not a complete operator workflow.
 | split-preview | Public preview_transfer193 and executable split-preview report bounded scope/placement/payload/pause/retention requirements. Native and host providers plus executable refusal tests pass. | CLI is an offline native template profile, not a live data import test or reservation. Operator lifecycle execution remains separate. |
 | begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts;194a public TransferOperation and194b authenticated native split commands join the existing stages.203 adds the compatible merge executable profile. | Broader recursive/retained profiles and phase-internal fault coverage. Native whole-responsibility counter split and compatible merge are exercised over TCP/QUIC. |
 | resume-operation | Node::resume_configuration plus lifecycle status/query, exact original receipts and194b authenticated split resumption. Slice195 checks every native split phase over TCP/WAL and QUIC/checkpoints plus admitted fence/publication reply loss. | Broader lifecycle profiles, phase-internal power loss and combined membership cuts; membership resumption already exists. |
-| retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
+| retire-group | RetirementGuard/proofs, durable Directory deletion and authenticated transfer `retire SOURCE RELEASE_ID`; exact profile-bound proof, quorum status, lost-reply retry and cold-reopen histories in `tests/transfer_service/retirement.rs` and `merge.rs`. | General retention policy and broader combined retirement faults; the explicit transfer retirement operator is implemented. |
 
 Slices197b4b2a–197b4b2b3 add authenticated multi-group data, membership and
 leadership commands plus complete source-side drain controls. The drain binds

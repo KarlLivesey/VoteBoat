@@ -1,0 +1,10 @@
+Build/source identity:3071fc2ee6740859bdfa2188bf66e1d45a105dfa, unchanged647 inputs.
+Linux: sha256sum -c build-source.sha256
+Mac: shasum -a256 -c the same manifest (recorded source.log).
+Identical Linux/Mac all-feature selection:
+cargo +stable test --locked --offline --all-features --no-fail-fast --test provider_conformance --test raft --test runtime --test effect_owner --test transport --test quorum --test activation_model --test log_store --test application --test snapshot
+Mac initial inherited limit:256; configured child-shell rerun: ulimit -n 4096.
+Isolated Mac history at both limits:
+cargo +stable test --locked --offline --all-features --test effect_owner native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport -- --exact --test-threads=1
+Both hosts: cargo +stable fmt --all -- --check and .githooks/pre-push (four strict Clippy profiles).
+Local: node validation/check-inventory.mjs; node validation/check-provider-conformance.mjs; git diff --check.

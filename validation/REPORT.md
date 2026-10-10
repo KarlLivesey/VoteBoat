@@ -1,5 +1,15 @@
 # Validation report
 
+Functional ledger and Mac resource conditions: [slice249](baseline/slice249/README.md).
+Linux selected core/provider365 passes; identical Mac selection passes358/fails7
+at inherited256 descriptors, then361/4 at child-shell4096. Original EMFILE and
+native progress failures are retained. The unchanged isolated snapshot history
+passes1 at4096 in93.62s overall; it does not establish the broad failure cause.
+Formatting/four strict profiles pass on both, with647 matched build inputs.
+No production/deadline/assertion change or complete platform acceptance claim.
+Implemented operator/diagnostic/discovery capabilities are separated from wider
+validation gaps. Full P0–P7 remains active;250 diagnoses actual native progress.
+
 Bounded drain observation pacing: [slice248](baseline/slice248/README.md).
 Original Mac QUIC exhausts128 requests at7764ms while original configuration and
 election observations repeat; TCP passes in that isolated diagnostic. Round pacing

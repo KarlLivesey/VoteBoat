@@ -1,0 +1,21 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7952e9ee0f22c14f)
+
+running 1 test
+test native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport ... FAILED
+
+failures:
+
+---- native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport stdout ----
+
+thread 'native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport' (16829211) panicked at tests/effect_owner.rs:2702:22:
+called `Result::unwrap()` on an `Err` value: Uncertain("Too many open files (os error 24)")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 178 filtered out; finished in 16.27s
+
+error: test failed, to rerun pass `--test effect_owner`

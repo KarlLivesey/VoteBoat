@@ -15,6 +15,10 @@ assert.ok(Array.isArray(inventory.not_yet_implemented));
 assert.ok(inventory.not_yet_implemented.every(item => typeof item === 'string' && item.length > 0),
     'not_yet_implemented must contain names, not implemented contract records');
 assert.equal(new Set(inventory.not_yet_implemented).size, inventory.not_yet_implemented.length);
+assert.ok(Array.isArray(inventory.remaining_validation));
+assert.ok(inventory.remaining_validation.every(item => typeof item === 'string' && item.length > 0),
+    'remaining_validation must contain named evidence gaps');
+assert.equal(new Set(inventory.remaining_validation).size, inventory.remaining_validation.length);
 const names = new Set();
 for (const contract of inventory.contracts) {
     assert.ok(contract && typeof contract === 'object' && !Array.isArray(contract));
