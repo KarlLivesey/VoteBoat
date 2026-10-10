@@ -1,0 +1,20 @@
+Preceding source: 132648ae8002ab13f0399d899a0fc74c0fac4477
+gh run view 38058728922 --json status,conclusion,jobs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114232437242/logs
+gh run view 38058728922 --job 114232437386 --log
+
+Native checks, including retained initial failures and focused revisions:
+cargo +stable fmt --all
+cargo +stable test --locked --offline --all-features --test counter_service preparing_command -- --nocapture
+
+Final validation at source.sha256:
+cargo +stable test --locked --offline --all-features --test counter_service preparing_command -- --nocapture
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --test counter_service native_configuration_close_deadline_and_unread_commit_recover
+cargo +stable test --locked --offline --test counter_service preparing_command -- --nocapture
+.githooks/pre-push
+sha256sum --check validation/baseline/slice227/source.sha256
+git diff --check
+
+Service-spawning feature configurations ran sequentially. Loopback/network/git
+operations use the required sandbox permission. Push repeats the enabled hook.

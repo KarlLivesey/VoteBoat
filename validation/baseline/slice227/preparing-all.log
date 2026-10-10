@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 4 tests
+test preparing_command::committed_reply_is_not_preparing_evidence_and_does_not_reroute ... ok
+preparing_follower_refusal endpoint=2 refusals=1 record="configure-record joint 17911 3 4 5 - m:3 v:1 v:2 v:3"
+preparing_follower_refusal endpoint=2 refusals=1 record="configure-record joint 17911 3 4 5 - m:3 v:1 v:2 v:3"
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_tcp ... ok
+test preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting ... ok
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 177 filtered out; finished in 8.32s
+

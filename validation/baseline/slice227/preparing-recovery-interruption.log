@@ -1,0 +1,25 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.57s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+preparing_follower_refusal endpoint=1 refusals=1 record="configure-record joint 17911 3 4 5 - m:3 v:1 v:2 v:3"
+preparing_follower_refusal endpoint=2 refusals=1 record="configure-record joint 17911 3 4 5 - m:3 v:1 v:2 v:3"
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_tcp ... ok
+test preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting ... ok
+
+thread 'preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic' (3975283) panicked at tests/counter_service.rs:2379:9:
+["configure-record", "joint 17911 3 4 5 - m:3 v:1 v:2 v:3"]: UNKNOWN authenticated read failed; retry the same configuration operation ID and record
+ Error: "request interrupted after connection; automatic routing stopped"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic ... FAILED
+
+failures:
+
+failures:
+    preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 177 filtered out; finished in 6.79s
+
+error: test failed, to rerun pass `--test counter_service`

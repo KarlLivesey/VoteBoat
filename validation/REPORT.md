@@ -1,5 +1,22 @@
 # Validation report
 
+Native preparing admission: [slice227](baseline/slice227/README.md). The fixture
+reroutes an unchanged record only after an actual exact follower refusal; fresh
+local preparing evidence retains its unread channel for the original kill cut.
+Interrupted/UNKNOWN/conflicting/committed results never authorize that cut.
+Actual TCP/QUIC promotion/cancellation/checkpoint/reopen/retry/join and durable
+UNKNOWN/conflict checks pass. Final counter181/selected4/default interruption1/
+default selected3 and formatting/four strict profiles pass. Initial ownership and
+response-assumption failures are retained with focused fixes. The subsequent
+explicit configuration caller recognizes one documented uncertainty line under
+its original record and10s budget; production contracts/deadlines remain unchanged.
+Terminal226 Ubuntu175/2 fails initial19701 source3 NOT_LEADER; macOS176/1 fails
+group7/3 original add42/5 at an authentication deadline. Later suites are unrun.
+Original macOS17015/preparation/static TCP/QUIC histories pass, which does not
+prove225's earlier cause or fix226's separate failures. Matching227/platform,
+P7/provider/fault/deployment and full P0–P7 remain open; broader security stays
+with Daybreak. Independent P7 attribution is next while CI runs.
+
 Preparation completion: [slice226](baseline/slice226/README.md). The counter
 fixture retains original19750 and waits for its Completed quorum read before
 starting19701. Forced TCP/QUIC source-change checks pass; full counter177 passes

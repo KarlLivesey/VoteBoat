@@ -1,0 +1,80 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.85s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+preparing_follower_refusal endpoint=2 refusals=1 record="configure-record joint 17911 3 4 5 - m:3 v:1 v:2 v:3"
+preparing_follower_refusal endpoint=2 refusals=1 record="configure-record joint 17911 3 4 5 - m:3 v:1 v:2 v:3"
+
+thread 'preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting' (3964283) panicked at tests/counter_service/preparing_command.rs:196:5:
+preparation unresolved endpoint=3 refusals=0: interrupted channel Truncated; ready node=3 peer=127.0.0.1:10003 transport=TcpTls command=127.0.0.1:10103
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(17920)) reason=deadline
+administration observation_cancelled operation=17920 phase=configuration_queued reason=deadline
+administration operation=17920 outcome=Unknown(CancelledWait)
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting ... FAILED
+
+thread 'preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic' (3964284) panicked at tests/counter_service.rs:2608:9:
+missing administration observation_cancelled operation=17911 phase=preparing reason=channel; logs at "/tmp/voteboat-service-3964282-1791641809350403216-1/1-recover-member.log": ready node=1 peer=127.0.0.1:10257 transport=Quic command=127.0.0.1:10357
+administration operation=17911 preparing_learner=3 readiness_admitted=true
+administration operation=17911 preparing_learner=3 readiness_admitted=true
+administration operation=17911 preparing_learner=3 readiness_admitted=true
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(17911)) reason=deadline
+administration observation_cancelled operation=17911 phase=preparing reason=deadline
+
+diagnostics nodes=2 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Leader term=3 committed=6\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=2 polls=15811 failed_polls=0 owner_steps=716 step_errors=0 worker_events=18 snapshot_events=0 snapshot_installs=0 persistence_batches=9 applications=3 peer_sends=364 peer_received=363 ingress_blocked=0 connection_failures=2 peer_driver=1 peer_attempts=1 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=1 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=1 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=0 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=2 rejected=0 percentile=bucket_upper_bound PollCompleted=15854,sum:1352918708,min:22512,max:1742847,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=9,sum:391962431,min:6780918,max:49379129,p99_upper:67108863 ConnectionInterrupted=1,sum:5000022901,min:5000022901,max:5000022901,p99_upper:8589934591\n" stderr=""
+node=2 command=status exit=Some(0) stdout="OK role=Follower term=3 committed=6\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=2 polls=15998 failed_polls=0 owner_steps=366 step_errors=0 worker_events=18 snapshot_events=0 snapshot_installs=0 persistence_batches=9 applications=3 peer_sends=366 peer_received=366 ingress_blocked=0 connection_failures=2 peer_driver=1 peer_attempts=1 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=1 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=1 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=0 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=2 rejected=0 percentile=bucket_upper_bound PollCompleted=16040,sum:1311500556,min:21781,max:1270769,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=9,sum:434655199,min:46557865,max:49401140,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic ... FAILED
+
+thread 'preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_tcp' (3964285) panicked at tests/counter_service.rs:2608:9:
+missing administration observation_cancelled operation=17911 phase=preparing reason=channel; logs at "/tmp/voteboat-service-3964282-1791641809350407053-2/1-recover-member.log": ready node=1 peer=127.0.0.1:10129 transport=TcpTls command=127.0.0.1:10229
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+administration operation=17911 preparing_learner=3 readiness_admitted=false
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(17911)) reason=deadline
+administration observation_cancelled operation=17911 phase=preparing reason=deadline
+
+diagnostics nodes=2 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Leader term=3 committed=6\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=2 polls=16056 failed_polls=0 owner_steps=711 step_errors=1 worker_events=18 snapshot_events=0 snapshot_installs=0 persistence_batches=9 applications=3 peer_sends=363 peer_received=364 ingress_blocked=0 connection_failures=7 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=1 peer_connecting=0 peer_reserved_bytes=6291456 peer_authorized=2 peer_bound=1 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=0 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=2 rejected=0 percentile=bucket_upper_bound PollCompleted=16101,sum:1135112821,min:20599,max:1058771,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=10,sum:432051586,min:6575792,max:48103120,p99_upper:67108863 ConnectionInterrupted=1,sum:5000482706,min:5000482706,max:5000482706,p99_upper:8589934591\n" stderr=""
+node=2 command=status exit=Some(0) stdout="OK role=Follower term=3 committed=6\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=2 polls=16246 failed_polls=0 owner_steps=367 step_errors=1 worker_events=18 snapshot_events=0 snapshot_installs=0 persistence_batches=9 applications=3 peer_sends=366 peer_received=367 ingress_blocked=0 connection_failures=7 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=1 peer_connecting=0 peer_reserved_bytes=6291456 peer_authorized=2 peer_bound=1 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=0 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=2 rejected=0 percentile=bucket_upper_bound PollCompleted=16290,sum:1096201662,min:20609,max:908297,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=9,sum:434431101,min:47295863,max:50118218,p99_upper:67108863 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_tcp ... FAILED
+
+failures:
+
+failures:
+    preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting
+    preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic
+    preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_tcp
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 177 filtered out; finished in 18.93s
+
+error: test failed, to rerun pass `--test counter_service`

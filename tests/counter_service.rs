@@ -87,6 +87,8 @@ mod peer_credentials;
 mod peer_discovery;
 #[path = "counter_service/placement.rs"]
 mod placement;
+#[path = "counter_service/preparing_command.rs"]
+mod preparing_command;
 #[path = "counter_service/quorum.rs"]
 mod quorum;
 #[path = "counter_service/read_failover.rs"]
@@ -2360,7 +2362,7 @@ fn retryable_leader_response(args: &[&str], text: &str) -> bool {
         ["read"] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["resume-leadership" | "leadership-status", _] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["add", _, _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
-        ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n" | "UNKNOWN exact record locally durable but not committed; preserve original record\n"),
+        ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n" | "UNKNOWN exact record locally durable but not committed; preserve original record\n" | "UNKNOWN authenticated read failed; retry the same configuration operation ID and record\n"),
         ["cancel-leadership", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n" | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n" | "ERR Unavailable(LeadershipChanged)\n"),
         _ => false,
     }
@@ -2663,16 +2665,15 @@ fn interrupted_native_configuration_history(quic: bool) {
     learner.wait().unwrap();
     let leader = cluster.leader();
     cancel_closed_and_expired(&cluster, leader);
-    let abandoned = UnobservedCommand::send(
-        &cluster,
+    let preparing = preparing_command::send(
+        &mut cluster,
         leader,
         "configure-record joint 17015 3 4 5 - m:3 v:1 v:2 v:3",
-    );
-    wait_administration_event(
-        &cluster,
-        leader,
         "administration operation=17015 preparing_learner=3",
-    );
+    )
+    .unwrap();
+    let leader = preparing.endpoint;
+    let abandoned = preparing.channel;
     // The prepared target has no live learner proof and cannot be proposed.
     // Reopen the killed serving voter before asking for election: this current
     // two-voter policy requires both voters, independent of the future target.

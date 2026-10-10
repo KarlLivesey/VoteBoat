@@ -671,18 +671,44 @@ ordering without broadening production protocol or Daybreak's security scope.
 Matching macOS/operator, broader provider/fault/deployment, original P7 and full
 P0–P7 acceptance remain open. Local success does not close those obligations.
 
-Current: resolve remaining cause-specific operator admission/recovery boundaries.
-Purpose: advance usable-service/P4 acceptance. Depend on223–226 native shutdown,
-original-intent routing/completion, terminal225 exact failures and fixed budgets.
-For17015, inspect the actual selected endpoint/admission result before assuming
-one unobserved send reached preparing; do not replay an accepted request under a
-new identity. Collect matching226 macOS results and the original runner bound if
-it recurs. Completion requires original immutable records/receipts, TCP/QUIC
-interruption/restart and clean joins, with matching platform evidence. No timer
-widening, generic UNKNOWN retry or security expansion. Continue the independent
-next item while CI runs; online drain acceptance does not block static use.
+Implemented227: the private native fixture distinguishes a fresh local preparing
+event from an exact pre-admission NOT_LEADER reply. It closes refused channels,
+keeps the original record and shared12s budget, and returns the actual preparing
+endpoint with an unread channel for17015's original kill/reopen cut. Interrupted,
+UNKNOWN, conflict and positive committed replies do not authorize that cut or an
+automatic resend. Real TCP/QUIC forced-follower histories pass promotion, channel
+cancellation, original-record retry, checkpoint/reopen, exact data retry and joins.
+An actual dropped quorum-lost reply retains its durable original; subsequent
+explicit caller retries observe UNKNOWN and conflict without changing that state,
+then recover the original after quorum returns. A committed native reply is
+explicitly not mistaken for preparing evidence. Final counter181, selected4,
+default original interruption1/default selected3 pass. Formatting/four strict
+profiles finish zero. Initial failed checks and focused fixes are retained;
+production protocol, limits, synchronization and provider inventory are unchanged.
 
-Next: attribute the failed P7 gate to exact durability operations before selecting
+The subsequent explicit configuration-recovery caller recognizes only the exact
+documented authenticated-read interruption in addition to its existing exact
+responses, under the unchanged10s budget and record. Native retained-record
+comparison/deduplication supplies receipt evidence; uncertainty does not. No
+blanket UNKNOWN recognition is added to preparing admission or other callers.
+
+Terminal226 run38058728922: Ubuntu175/2 fails both initial authenticated runner
+starts with source3 NOT_LEADER; macOS176/1 fails grouped7/3 original add42/5 at an
+authentication deadline, retaining high sampled terms46/47. Later suites do not
+run. Original17015 TCP/QUIC and preparation regressions pass on that preceding
+source, as do the original macOS killed-runner and static TCP/QUIC recovery cases.
+Thus227 does not prove225's missed-event cause or fix226's separate refusals.
+No runner-budget diagnostic occurs in these logs. Preserve source/platform
+identity and original requests; investigate those boundaries without claiming
+one cause or changing production timing from this evidence alone.
+
+Macro review227 completes the selected local admission-observation mini item,
+not full P4/platform acceptance. Broader security stays with Daybreak. The static
+service remains usable; online runner acceptance is not its prerequisite. Move
+the independent failed-P7 attribution to current work while matching CI runs,
+keeping remaining operator/platform feedback and full P0–P7 active.
+
+Current: attribute the failed P7 gate to exact durability operations before selecting
 a storage/scheduling candidate. Purpose: advance measured tuning with the fixed
 250ms serial TCP gate. Depend on222's raw reference/diagnostic, one authoritative
 log-store binding and existing JournalIo/native publication contracts; reread the
@@ -692,7 +718,7 @@ with meaningful crash/ownership checks, followed by the unchanged reference gate
 Aggregate file-call durations alone cannot justify fewer durability barriers or
 optimistic voter evidence. No speculative rewrite or replacement workload.
 
-Following: review the next uncovered replacement-provider operation set through
+Next: review the next uncovered replacement-provider operation set through
 shared downstream/native checks. Purpose: make the promised mix-and-match Rust
 interfaces assessable, not add another prerequisite to using the service.
 Depend on the existing108-entry inventory and8 partial reviews/57 operations;
@@ -700,6 +726,62 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+Following: resolve the next evidenced operator/platform boundary after attribution.
+Purpose: advance P4 and broader usable-service validation without blocking the
+static service. Depend on terminal226's exact initial source refusal/grouped-write
+deadline,227's original-record admission checks and matching native timings.
+Distinguish stale endpoint, channel ownership and actual scheduling/storage delay
+before editing; keep original operation/record/source scope and existing budgets.
+Completion requires cause-specific actual TCP/QUIC interruption/restart/receipt/
+join checks and matching platform evidence. Do not infer commit from a role,
+deadline or preparation event; no security expansion or automatic success claim.
+
+### Slice227 schema plan — observe preparing admission across endpoint changes
+
+Purpose/dependencies: preceding225 macOS misses17015 preparing after an unread
+send to a leader sampled before close-notify/deadline cancellation. The command
+requires a current Leader; channel flush alone does not prove admission. Reuse
+the existing authenticated fixture channel and local preparing event, keeping
+the original record/operation and12s observation budget. This advances P4's
+actual canceled/unobserved preparation history, not a new production retry mode.
+
+Data/API: a private test helper returns the actual preparing endpoint, retained
+unread channel and number of explicit follower refusals. Check fresh local log
+output first; once the exact operation/learner preparing event appears, preserve
+the unread channel for the original kill/reopen cut. Before that event, poll a
+bounded reply buffer. Only the complete exact ERR NOT_LEADER line permits closing
+that refused channel and selecting a current leader for the identical record.
+Positive, partial, unknown, unrelated errors and transport failures are terminal
+for this helper. No new operation/source identity, timeout renewal, provider seam,
+durability token or inference of commitment from preparation.
+
+Transitions/ownership: flushed request -> either locally observed preparing or
+explicit pre-admission follower refusal. The former remains externally unresolved
+and must survive the existing killed-server absence/retry checks; the latter has
+not created a target and can reroute. Each refused channel is closed before the
+next opens. Failure drops the channel; Cluster's existing child cleanup remains.
+Per-attempt log offsets prevent old preparing lines from authorizing a new cut.
+
+Acceptance: real TCP/QUIC native checks deliberately send the original promotion
+record first to a follower, require an actual refusal before preparing on the
+leader, and preserve canceled/unobserved records, checkpoint/reopen, exact data
+retry and clean joins. Existing original17015 close/deadline/kill histories must
+still pass. Test terminal replies and bounded failure behavior without retrying
+uncertain admission. Formatting/four strict profiles stay zero. Matching226 CI
+is live; inspect that same run while continuing independent P7 work. This slice
+does not claim to have proved the preceding macOS missed-event cause.
+
+227 focused revision after actual native checks: the new test must close/flush
+its pending channel before querying that same server; otherwise the query waits
+behind the command and the original command expires. A separate actual QUIC
+resumption produces the exact authenticated-read interruption after connection.
+For the subsequent explicit configuration caller, accept only that complete
+documented uncertainty line within its existing10s budget and unchanged record.
+Native exact-record comparison/deduplication decides the retained/committed result;
+the interruption is never a committed receipt. Preparing admission itself still
+reroutes only NOT_LEADER. Keep arbitrary/modified errors terminal and retain the
+failed raw checks. No production deadlines or unknown-result semantics change.
 
 ### Slice226 schema plan — finish fixture preparation before starting a drain
 

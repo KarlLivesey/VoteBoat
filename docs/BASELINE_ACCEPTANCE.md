@@ -1,4 +1,20 @@
-# Baseline acceptance map — review192, operator206 and provider201b evidence
+# Baseline acceptance map
+
+Slice227 distinguishes an actual follower refusal from a fresh preparing event
+in the native unread-configuration fixture. It retains the original record and
+channel for the kill/reopen cut; uncertainty/conflict/committed replies cannot
+authorize preparing. Real TCP/QUIC refusal/cancellation/promotion/checkpoint/
+reopen/data-retry/join and retained UNKNOWN/conflict checks pass. Final counter181,
+selected4/default interruption1/default selected3 and formatting/four strict
+profiles pass. Initial failed checks and focused ownership/response fixes remain
+retained. No production protocol/provider/deadline changes. The explicit later
+configuration caller recognizes one documented read-interruption line under its
+unchanged record/budget. Terminal226 Ubuntu175/2 fails initial source3 NOT_LEADER;
+macOS176/1 fails group7/3 original add42/5 at an authentication deadline, before
+later suites. Original macOS17015/preparation/static TCP/QUIC histories pass but
+do not prove225's earlier cause or fix226's separate failures. Matching227,
+broader platform/provider/fault/deployment/P7 and full P0–P7 remain open. P7
+attribution proceeds independently of CI; security stays with Daybreak.
 
 Slice225 adds failure-only local runner bound attribution while preserving its
 original UNKNOWN, exchange/time limits and readiness/stop contracts. Unit19/

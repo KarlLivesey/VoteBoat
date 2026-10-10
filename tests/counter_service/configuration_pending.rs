@@ -7,7 +7,7 @@ const RECORD: &str = "learners 21101 1 2 - m:3 v:1 v:2 v:3";
 const UNKNOWN: &str =
     "UNKNOWN exact record locally durable but not committed; preserve original record\n";
 
-fn setup(quic: bool) -> Cluster {
+pub(super) fn setup(quic: bool) -> Cluster {
     let mut c = Cluster::new();
     c.quic = quic;
     let access = c.root.join("pending-access.txt");
