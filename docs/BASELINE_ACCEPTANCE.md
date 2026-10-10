@@ -1,4 +1,4 @@
-# Baseline acceptance map — review159, updated167
+# Baseline acceptance map — review159, updated168
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
@@ -14,6 +14,9 @@ recovery over TCP/TLS and QUIC. Selected histories require foreground apply,
 durable checkpoint and later physical reclaim while a recovery receipt remains
 held; then all stale groups recover and original retries survive another reopen.
 This covers the selected composition, not general fairness or a latency bound.
+Slice168 adds bounded post-poll operational history with host/native injection,
+explicit overflow/cursor gaps and scoped service export. No observer becomes
+consensus authority; latency and critical-path attribution remain unimplemented.
 The full P0–P7 objective stays active. RPL-1.5; Linux and macOS targets.
 
 ## Roadmap exits
@@ -79,7 +82,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | Broader mappings/automatic split policy; no hidden global ordering. |
 | C17 discovery | PeerDiscovery/DiscoveryConnector, ManifestDiscovery/ManifestReadSource, NativeManifestLookup/AuthorityDiscovery | Slice160 adds public read mappings and automatic lookup across selected native metadata moves/restarts. Bounded external remote refresh/live endpoints remain. Hints never activate owners. |
 | C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking | General voter replacement/removal, measured sample collection/reservations and global rebalancing. Recommendations never change membership alone. |
-| C19 observability | Observer/NativeCounterObserver and optional JournalTimings | General budgeted event history, latency/queue/critical-path telemetry and exporter integration. |
+| C19 observability | Observer/NativeCounterObserver, EventObserver/NativeEventObserver and optional JournalTimings | Bounded aggregate history, explicit overflow and scoped export are implemented168. Per-group tracing, latency/queue/critical-path attribution and external exporter integration remain. |
 | C20 configuration | Typed startup and Node configure/status/resume; authenticated provisioned/client-target service commands | Selected new-store interruption/recovery161 is exercised; broader ingress, revocation and combined failures remain. Native configuration endpoints exist and must not be listed wholly missing. |
 | C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess | Live rotation/external issuer/durable audit and broader revocation schedules. Unflagged loopback mode is explicitly trusted. |
 | C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Preserve this distinction. |

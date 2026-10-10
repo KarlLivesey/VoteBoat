@@ -1,0 +1,22 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.18s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-df5ff286ac217b9a)
+
+running 4 tests
+test connection_budget::local_configuration_events_reserve_peer_union_before_ownership_and_release_on_rejection ... ok
+test peer_driver::local_configuration_admission_uses_retained_pins_and_prevents_queued_route_withdrawal ... ok
+test application_results::byte_ceiling_prevents_application_and_close_drains_without_closing_shared_app ... ok
+test node_facade::event_reporting::failed_event_sink_cannot_change_original_write_read_or_shutdown ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 149 filtered out; finished in 0.00s
+
+     Running tests/observability.rs (target/debug/deps/observability-49c2c9e6d956107e)
+
+running 3 tests
+test events::native_event_conformance_and_construction_limits ... ok
+test events::host_event_conformance_and_shared_view_independence ... ok
+test events::reporter_bounds_kinds_and_refusal_preserves_state_change_for_retry ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+

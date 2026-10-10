@@ -13,7 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Bounded, volatile post-poll diagnostics; never consensus or durability evidence.
+mod events;
 use crate::runtime::{MonoTime, NodeError, NodeProgress, NodeState, RuntimeOwner};
+pub use events::*;
 
 /// Fixed cardinality, saturating event counts. These are returned progress, not
 /// durable/apply watermarks, client success counts or complete I/O attribution.
@@ -26,6 +28,7 @@ pub struct NodeCounters {
     pub worker_events: u64,
     pub snapshot_events: u64,
     pub snapshot_installs: u64,
+    pub snapshot_send_refusals: u64,
     pub persistence_batches: u64,
     pub applications: u64,
     pub peer_sends: u64,
@@ -45,6 +48,9 @@ impl NodeCounters {
             snapshot_installs: self
                 .snapshot_installs
                 .saturating_add(other.snapshot_installs),
+            snapshot_send_refusals: self
+                .snapshot_send_refusals
+                .saturating_add(other.snapshot_send_refusals),
             persistence_batches: self
                 .persistence_batches
                 .saturating_add(other.persistence_batches),
@@ -86,6 +92,7 @@ impl NodeObservation {
                 counters.worker_events = r.worker_events as u64;
                 counters.snapshot_events = r.snapshot_events as u64;
                 counters.snapshot_installs = r.snapshot_installs as u64;
+                counters.snapshot_send_refusals = r.snapshot_send_refusals as u64;
                 counters.persistence_batches = r.persistence_batches as u64;
                 counters.applications = r.applications as u64;
             }

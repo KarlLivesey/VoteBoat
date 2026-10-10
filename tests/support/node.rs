@@ -24,6 +24,8 @@ use voteboat::outbound::*;
 mod automatic_checkpoints;
 #[path = "node_maintenance.rs"]
 mod automatic_maintenance;
+#[path = "node_events.rs"]
+mod event_reporting;
 type Parts = NodeParts<
     Ready,
     Timers,

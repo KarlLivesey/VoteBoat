@@ -1,0 +1,12 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: the function has a cognitive complexity of (26/25)
+   --> tests/observability/events.rs:146:4
+    |
+146 | fn conformance(mut sink: impl EventObserver) {
+    |    ^^^^^^^^^^^
+    |
+    = help: you could split it up into multiple smaller functions
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#cognitive_complexity
+    = note: requested on the command line with `-D clippy::cognitive-complexity`
+
+error: could not compile `voteboat` (test "observability") due to 1 previous error

@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 use std::{cell::RefCell, rc::Rc};
 use voteboat::{identity::*, observability::*, runtime::*};
+#[path = "observability/events.rs"]
+mod events;
 fn owner(id: u128) -> RuntimeOwner {
     RuntimeOwner {
         store: StoreBinding {
@@ -45,6 +47,7 @@ fn counters(n: u64) -> NodeCounters {
         worker_events: n,
         snapshot_events: n,
         snapshot_installs: n,
+        snapshot_send_refusals: n,
         persistence_batches: n,
         applications: n,
         peer_sends: n,
@@ -185,6 +188,7 @@ fn capture_counts_returned_work_and_never_fabricates_progress_for_failed_polls()
             worker_events: 2,
             snapshot_events: 3,
             snapshot_installs: 1,
+            snapshot_send_refusals: 2,
             persistence_batches: 4,
             applications: 5,
             ..Default::default()
@@ -208,6 +212,7 @@ fn capture_counts_returned_work_and_never_fabricates_progress_for_failed_polls()
             worker_events: 2,
             snapshot_events: 3,
             snapshot_installs: 1,
+            snapshot_send_refusals: 2,
             persistence_batches: 4,
             applications: 5,
             peer_sends: 6,

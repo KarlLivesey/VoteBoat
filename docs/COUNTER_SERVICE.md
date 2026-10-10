@@ -197,6 +197,9 @@ proposal commitment or physical failure-domain validation.
 For local process counters, run `voteboat-counter client BASE_PORT NODE metrics`.
 These counters reset on restart and are labelled `evidence=local_volatile`;
 they do not establish quorum or durability. See [observability](OBSERVABILITY.md).
+For bounded recent operational events, use `client BASE_PORT NODE events 0 0 16`,
+then continue with the returned session and next cursor. Events reset on restart;
+overflow and cursor gaps are reported explicitly.
 
 Inspect local roles if needed:
 

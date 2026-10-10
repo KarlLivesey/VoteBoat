@@ -1,0 +1,27 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.93s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+
+thread 'events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations' (844876) panicked at tests/counter_service.rs:250:9:
+["events", "0", "0", "1"]:  Error: "node unavailable before connection"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... FAILED
+
+thread 'events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations' (844875) panicked at tests/counter_service.rs:250:9:
+["events", "0", "0", "1"]:  Error: "node unavailable before connection"
+
+test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... FAILED
+
+failures:
+
+failures:
+    events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations
+    events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 45 filtered out; finished in 1.08s
+
+error: test failed, to rerun pass `--test counter_service`

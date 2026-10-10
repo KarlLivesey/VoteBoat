@@ -33,6 +33,8 @@ static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // concurrent fork can briefly inherit an exclusive lock until exec closes it.
 // Child execution and waiting stay outside this gate and remain parallel.
 static STORE_SPAWN: Mutex<()> = Mutex::new(());
+#[path = "counter_service/events.rs"]
+mod events;
 #[path = "counter_service/history.rs"]
 mod history;
 #[path = "support/history.rs"]
@@ -1987,6 +1989,27 @@ fn invalid_service_access_fails_before_store_creation_or_listener_ownership() {
     assert!(!directory.exists());
 }
 
+fn remote_plan_command(cluster: &mut Cluster, operation: &str, success: bool) -> String {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let leader = cluster.leader();
+        let output = cluster.request(leader, &["configure", operation]);
+        let text = String::from_utf8(output.stdout).unwrap();
+        if text != "ERR NOT_LEADER\n" {
+            assert_eq!(
+                output.status.success(),
+                success,
+                "operation={operation}: {text} {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+            return text;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "configuration leader did not settle: {text}"
+        );
+    }
+}
 fn remote_configuration_history(quic: bool) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
@@ -2031,28 +2054,20 @@ fn remote_configuration_history(quic: bool) {
         );
     }
     cluster.command_principal = Some(3);
-    let missing = cluster.request(leader, &["configure", "15002"]);
-    assert!(!missing.status.success());
-    assert!(String::from_utf8(missing.stdout)
-        .unwrap()
-        .contains("absent from provisioned plan"));
+    let missing = remote_plan_command(&mut cluster, "15002", false);
+    assert!(
+        missing.contains("absent from provisioned plan"),
+        "{missing}"
+    );
     assert!(cluster
         .ok(leader, &["configuration-status", "15001"])
         .contains("inconclusive_local_absence"));
-    let applied = cluster.ok(leader, &["configure", "15001"]);
+    let applied = remote_plan_command(&mut cluster, "15001", true);
     assert!(applied.contains("committed_index="), "{applied}");
-    assert!(cluster
-        .ok(leader, &["configure", "15001"])
-        .contains("action=completed"));
-    assert!(cluster
-        .ok(leader, &["configure", "15003"])
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["configure", "15003"])
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["configure", "15003"])
-        .contains("action=completed"));
+    assert!(remote_plan_command(&mut cluster, "15001", true).contains("action=completed"));
+    assert!(remote_plan_command(&mut cluster, "15003", true).contains("committed_index="));
+    assert!(remote_plan_command(&mut cluster, "15003", true).contains("committed_index="));
+    assert!(remote_plan_command(&mut cluster, "15003", true).contains("action=completed"));
     assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     for id in 1..=3 {
@@ -2062,10 +2077,8 @@ fn remote_configuration_history(quic: bool) {
     for id in 1..=3 {
         cluster.start(id, "recover-member");
     }
-    let leader = cluster.leader();
-    assert!(cluster
-        .ok(leader, &["configure", "15001"])
-        .contains("action=completed"));
+    cluster.leader();
+    assert!(remote_plan_command(&mut cluster, "15001", true).contains("action=completed"));
     assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("duplicate=true"));
     assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     cluster.stop();

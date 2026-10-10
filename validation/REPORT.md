@@ -5108,3 +5108,22 @@ commit's Linux CI checkpoint timeout remains a failed remote observation;
 current local success does not prove its remote resolution or macOS execution.
 No universal fairness, throughput or latency bound, wider device coverage or
 complete P0–P7 result is claimed. Bounded operational events are next.
+
+### Slice168 — operational event history
+
+Public EventObserver/EventReporter and the native preallocated ring add bounded,
+volatile aggregate events with exact owner/generation cursors, oldest/latest
+positions, eviction totals and cursor gaps. Post-poll recording cannot alter the
+original Node result. The executable exports bounded Inspect-authorized pages
+and rejects old-session cursors after restart.
+
+Six all-feature and four core-only observer tests,147 core-only owner tests,
+selected all-feature owner tests and two sequence/export-limit unit tests pass.
+Both new TCP/TLS and QUIC service histories pass, including checkpoint events,
+full worker joins/reopen, stale-cursor rejection and original operation retries.
+The final complete service target passes47/47 in41.11s.
+Strict Clippy in both configurations, formatting, warnings-denied docs and
+92-record metadata validation pass. [Slice168 evidence](baseline/slice168/README.md)
+retains commands, raw unsuccessful service runs and the bounded fixture fixes.
+This is not per-group tracing, latency attribution, durable event storage or a
+new macOS claim. The broader baseline and lifecycle acceptance work remain open.

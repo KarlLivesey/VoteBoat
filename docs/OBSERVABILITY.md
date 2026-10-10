@@ -8,9 +8,9 @@ The counter service explicitly selects `native::observability::NativeCounterObse
 and uses the same public contract as a host replacement.
 
 Observations contain RuntimeOwner, host-supplied monotonic sample time, post-call
-NodeState and 13 fixed u64 counters. There are no group labels, request payloads,
+NodeState and 14 fixed u64 counters. There are no group labels, request payloads,
 strings, event queue or persistent format. Capture counts returned owner steps,
-step errors, worker/snapshot events, snapshot installs, persistence batches,
+step errors, worker/snapshot events, snapshot installs, refused snapshot sends, persistence batches,
 application deliveries and peer sends/receives/blocked ingress/connection failures.
 It walks the already bounded returned step list. Failed polls count once as failed
 and carry no invented partial-progress counts. Application deliveries are not
@@ -64,6 +64,56 @@ runs three-process TCP/TLS and QUIC metrics/write/read/retry histories, closes/
 joins workers and reopens stores; new counters start without replay deliveries
 while original retries and values survive. These are finite conformance histories,
 not a performance or full protocol proof.
+
+## Bounded operational history
+
+`EventObserver` is a separate public contract for fixed `OperationalEvent`
+records. `NativeEventObserver` supplies a preallocated ring with constructor
+limits on record count, retained allocation bytes and copied page count.
+The default is256 records and16 per page. No record contains a request body,
+arbitrary label, credential or string. The five event kinds summarize state
+changes, failed polls, step failures, snapshot progress and queue/connection
+pressure. These summaries are observations, not per-operation receipts.
+
+`EventReporter::record_sample` converts a `NodeObservation` after polling to at
+most five records. It retains the last successfully reported state and counts
+refused event deliveries. Sink rejection cannot change the original poll
+result. The service uses this bounded history instead of writing every step
+error synchronously to stderr. Fatal service errors still return normally.
+
+Each cursor binds RuntimeOwner, EventGeneration and a local sequence. Replacing
+a stream requires a fresh binding: a new runtime/store session or a new event
+generation. Events are not restored after restart. The sequence orders accepted
+diagnostics only; it is never a commit, applied or durable prefix.
+
+On a full native ring, new records evict the oldest. Pages report cumulative
+`discarded` and the exact `missed` gap after a supplied cursor. Rejected writes
+do not consume sequence numbers. Wrong bindings, future cursors, invalid page
+limits, regressed event times and writes after close reject without mutation.
+Sequence exhaustion rejects new records without evicting history. Closing
+retains readable history; exported pages are independent caller-owned copies.
+The host owns export I/O and any external retention; there is no exporter thread.
+
+The service exposes its local history through the same Inspect authorization
+as metrics (or the existing trusted loopback mode):
+
+```sh
+voteboat-counter client BASE_PORT NODE events 0 0 16
+voteboat-counter client BASE_PORT NODE events SESSION NEXT 16
+```
+
+The first command starts at the oldest retained event. Continue using the
+returned `store_session` and `next`; old-session cursors reject after restart.
+Replies are single bounded lines, labelled `evidence=local_volatile`, with
+generation, oldest/latest sequence, loss counters and encoded records.
+Count must be1–16. Reading history neither consumes records nor polls consensus.
+
+Host/native conformance checks cover copied-page lifetime, eviction/gaps,
+binding/time/limit rejection, close and independent shared views. A refusing
+event sink is exercised beside actual Node write/read/shutdown. TCP/TLS and
+QUIC service histories observe checkpoints, restart with stale-cursor refusal
+and preserve original write retries. This implements bounded aggregate history;
+per-group tracing, latency attribution and external exporters remain open.
 
 ## Optional native journal timing
 

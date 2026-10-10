@@ -15,12 +15,15 @@
 //! Native TCP/TLS or optional QUIC counter service, with bounded local controls.
 #[path = "support/counter_admin.rs"]
 mod administration;
+#[path = "support/diagnostics.rs"]
+mod diagnostics;
 #[path = "support/local_client.rs"]
 mod local_client;
 #[path = "support/service_access.rs"]
 mod service_access;
 #[path = "support/counter_setup.rs"]
 mod setup;
+use diagnostics::Diagnostics;
 use setup::{checked, group, Failure, Service};
 use std::{
     io::{Read, Write},
@@ -29,15 +32,16 @@ use std::{
     time::{Duration, Instant},
 };
 use voteboat::membership::ConfigurationResumeAction;
+use voteboat::observability::*;
 use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
-use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
+voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
 Default peer ports are BASE+1..3; local command ports are BASE+101..103.\n\
 TLS_DIRECTORY contains ca.der, node1..3.der and node1..3-key.der.\n\
 Commands are local-only trusted-user controls. Peer traffic uses mutual TLS.\n\
@@ -101,7 +105,7 @@ fn maintenance_status(service: &Service) -> String {
 }
 fn command(
     service: &mut Service,
-    observer: &impl Observer,
+    observer: &Diagnostics,
     command: &str,
     administration: &mut Option<administration::Administration>,
     quit: &mut bool,
@@ -109,6 +113,7 @@ fn command(
     let words = command.split_whitespace().collect::<Vec<_>>();
     let reply = match words.as_slice() {
         ["maintenance"] => maintenance_status(service),
+        ["events", session, after, count] => observer.events(session, after, count)?,
         ["metrics"] => {
             let snapshot = observer.snapshot_counters();
             let c = snapshot.counters;
@@ -196,7 +201,7 @@ fn command(
             "OK shutting_down".into()
         }
         _ => {
-            return Err("expected status, metrics, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
+            return Err("expected status, metrics, events SESSION AFTER LIMIT, maintenance, configuration-status OPERATION_ID, read, add OPERATION_ID DELTA, checkpoint or quit".into())
         }
     };
     Ok(Phase::Output {
@@ -279,7 +284,7 @@ fn serve(
     let mut service = setup::open(config, protocol, mode == "recover-member")?;
     options.configure_maintenance(&mut service)?;
     let owner = service.local().owner.identity();
-    let mut observer = NativeCounterObserver::new(owner);
+    let mut observer = Diagnostics::new(owner).map_err(|e| format!("diagnostic setup: {e:?}"))?;
     let command_local = service_access::server_local(id, owner.store.session);
     let mut command_generation = 0u64;
     let start = Instant::now();
@@ -626,7 +631,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
 
 fn poll_service(
     service: &mut Service,
-    observer: &mut NativeCounterObserver,
+    observer: &mut Diagnostics,
     administration: Option<&administration::Administration>,
     connection: &Option<Connection>,
     access: Option<&service_access::Access>,
@@ -653,21 +658,13 @@ fn poll_service(
         service.poll(time, NodePollBudget::default())
     };
     // Diagnostics run after poll and cannot replace its original result.
-    let _ = observer.record_bounded(NodeObservation::from_poll(
+    observer.record(NodeObservation::from_poll(
         owner,
         time,
         service.state(),
         &result,
     ));
-    let progress = checked(result)?;
-    if let Some(replica) = progress.replica {
-        for step in replica.steps {
-            // Client/read errors are reported through their exact output tickets.
-            if let Some(error) = step.error {
-                eprintln!("event: {error:?}");
-            }
-        }
-    }
+    checked(result)?;
     Ok(())
 }
 fn accept_connection(

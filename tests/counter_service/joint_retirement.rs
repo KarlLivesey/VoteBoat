@@ -179,6 +179,48 @@ fn verify_files(cluster: &Cluster, retired: usize) {
     }
 }
 
+fn current_term(cluster: &Cluster, node: usize) -> u64 {
+    cluster
+        .ok(node, &["status"])
+        .split("term=")
+        .nth(1)
+        .unwrap()
+        .split_whitespace()
+        .next()
+        .unwrap()
+        .parse()
+        .unwrap()
+}
+fn unread_joint(cluster: &mut Cluster, original: usize, joint: &str) {
+    let command = format!("configure-record {joint}");
+    let mut attempted = Some((original, current_term(cluster, original)));
+    let mut pending = vec![UnobservedCommand::send(cluster, original, &command)];
+    let deadline = Instant::now() + Duration::from_secs(15);
+    loop {
+        let status = cluster.request(original, &["configuration-status", "18001"]);
+        let text = String::from_utf8(status.stdout).unwrap();
+        if status.status.success() && text.contains("action=finalize_requires_authorization") {
+            break;
+        }
+        let leader = cluster.leader();
+        let term = current_term(cluster, leader);
+        if attempted != Some((leader, term)) {
+            assert!(pending.len() < 8, "too many unread joint attempts");
+            pending.push(UnobservedCommand::send(cluster, leader, &command));
+            attempted = Some((leader, term));
+        }
+        assert!(
+            Instant::now() < deadline,
+            "joint did not commit locally: {text}; files at {:?}",
+            cluster.root
+        );
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+    for channel in pending {
+        channel.disconnect();
+    }
+}
+
 fn history(quic: bool, checkpoint: bool) {
     let mut cluster = setup(quic);
     let leader = cluster.leader();
@@ -191,13 +233,7 @@ fn history(quic: bool, checkpoint: bool) {
         .collect::<Vec<_>>()
         .join(" ");
     let joint = format!("joint 18001 1 2 3 {leader} m:2 {voters}");
-    let unread = UnobservedCommand::send(&cluster, leader, &format!("configure-record {joint}"));
-    wait_administration_event(
-        &cluster,
-        leader,
-        "administration operation=18001 outcome=Committed(",
-    );
-    unread.disconnect();
+    unread_joint(&mut cluster, leader, &joint);
     cut_leader(&mut cluster, leader, checkpoint);
     let replacement = cluster.leader();
     assert_ne!(replacement, leader);

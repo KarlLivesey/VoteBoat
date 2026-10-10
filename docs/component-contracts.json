@@ -2255,6 +2255,28 @@
         "tests/snapshot_worker.rs"
       ],
       "scope": "Opt-in volatile threshold/interval scan with bounded groups examined and bounded queued/executing requests. Exact existing AdmissionTicket scope; matching execution plus a durable local base at/above the target establishes completion. Local base is not a quorum receipt or global watermark. Pending/busy groups are skipped within an ordered cursor budget; overload retains no new request. Latest-only diagnostics. Shutdown stops admission and drains; recovery receives original tracked ownership. No new worker/clock/durability token, no wire/storage change, automatic policy proposal or retention override. Application state, deduplication and fencing continue through existing checkpoint validation. Full general retention, incremental cleaning and sustainable fixed-latency/disk-capacity guarantees remain unimplemented."
+    },
+    {
+      "design_id": "C19",
+      "public_contract": "EventObserver / EventReporter / EventBinding / EventCursor / EventLimits",
+      "operations": [
+        "binding",
+        "limits",
+        "record_bounded",
+        "read_events",
+        "close",
+        "EventReporter::record_sample",
+        "EventReporter::rejected_events"
+      ],
+      "native": "NativeEventObserver: explicit construction-time bounded volatile ring; counter service selects it alongside NativeCounterObserver through the same public contracts.",
+      "conformance": [
+        "tests/observability/events.rs",
+        "tests/support/node_events.rs",
+        "tests/counter_service/events.rs",
+        "src/native/observability/events.rs",
+        "src/bin/support/diagnostics.rs"
+      ],
+      "scope": "Fixed Copy event variants, exact RuntimeOwner and EventGeneration cursor binding, checked record/byte/page limits, preallocated native ring, monotonic accepted sequence and event time. Full native ring evicts oldest and reports discarded totals and exact cursor gaps. Invalid binding/future cursor/page/time/closed intake reject without mutation; sequence exhaustion preserves history. Copied bounded exports have independent lifetime; close preserves reads and affects only one view. Post-poll reporter emits at most five aggregate records, retains last successfully reported state and counts sink rejections without changing the original Node result. A failing host sink cannot change actual write/read/shutdown. Native service exposes bounded Inspect-authorized event pages, rejects old store-session cursors after restart and preserves original operation retries over TCP/TLS and QUIC. No durability/leadership authority, request payloads, strings, hidden I/O/export workers, per-group tracing or latency attribution. Host implementations must obey nonblocking resource contracts; arbitrary blocking/panicking code is not sandboxed."
     }
   ],
   "not_yet_implemented": [

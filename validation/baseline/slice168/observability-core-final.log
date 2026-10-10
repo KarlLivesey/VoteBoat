@@ -1,0 +1,13 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.72s
+     Running tests/observability.rs (target/debug/deps/observability-7ea42d255db3bf15)
+
+running 4 tests
+test downstream_observer_conformance_and_shared_scope_close ... ok
+test capture_counts_returned_work_and_never_fabricates_progress_for_failed_polls ... ok
+test events::host_event_conformance_and_shared_view_independence ... ok
+test events::reporter_bounds_kinds_and_refusal_preserves_state_change_for_retry ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

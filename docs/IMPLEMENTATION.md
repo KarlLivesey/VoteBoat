@@ -93,13 +93,65 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Completed: maintenance under recovery pressure167 | Validate maintenance alongside recovering replicas and shared-group work; advances broader P1/P2/P7 validation. | Both automatic policies, recovery quotas162 and existing snapshot catch-up. | Selected TCP/QUIC lag/restart histories preserve known operations, bounded admission, foreground apply/checkpoint/reclaim and original retries; detailed evidence below. |
-| Current: bounded operational event reporting | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded event cardinality/retention, overflow reporting and failing-sink isolation with no consensus dependency. |
-| Next: unresolved group-creation cancellation | Close the remaining pre-activation lifecycle gap; advances recursive responsibilities and split/merge. | Existing creation intents, assigned bootstrap identities and irreversible activation boundary. | Bounded recorded cancellation and recovery reject late readiness/publication without canceling any active owner; no-dual-owner and receipt-loss histories. |
-| Following: recorded lifecycle fault schedules | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, completed cancellation semantics and deterministic fault fixtures. | Recorded bounded crash/restart cuts preserve exact operation identities, prevent dual active owners and retain reproducible failed schedules; keep unexplored combinations explicit. |
+| Completed: bounded operational event reporting168 | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded aggregate event retention, cursor-gap reporting, failing-sink isolation and TCP/QUIC service export/restart checks; detailed evidence below. |
+| Current: unresolved group-creation cancellation | Close the remaining pre-activation lifecycle gap; advances recursive responsibilities and split/merge. | Existing creation intents, assigned bootstrap identities and irreversible activation boundary. | Bounded recorded cancellation and recovery reject late readiness/publication without canceling any active owner; no-dual-owner and receipt-loss histories. |
+| Next: recorded lifecycle fault schedules | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, completed cancellation semantics and deterministic fault fixtures. | Recorded bounded crash/restart cuts preserve exact operation identities, prevent dual active owners and retain reproducible failed schedules; keep unexplored combinations explicit. |
+| Following: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
+
+#### 168 schema sketch (planned, before implementation)
+
+Add a separate public EventObserver contract beside the existing counter
+Observer. Fixed Copy event kinds summarize state changes, failed polls, step
+failures, snapshot progress and pressure. No arbitrary strings or caller labels
+are retained. Bind each volatile stream to RuntimeOwner plus an explicit local
+observer generation; cursors also carry that binding. Sequence is an event-log
+position only, never a durable or applied prefix. Recreating a stream requires
+a fresh owner/generation and does not restore old events.
+
+NativeEventObserver owns a construction-bounded ring. Validate event count,
+payload-capacity bytes and maximum export page before allocation. Recording
+evicts the oldest entry when full and increments a saturating discard count;
+reads return copied bounded pages, oldest/latest positions and an exact cursor
+gap while sequence remains representable. Wrong binding, future cursor,
+backwards clock, closed intake and sequence exhaustion reject without mutation.
+Close preserves readable retained events; exported copies belong to the caller.
+There is no background exporter, shared singleton, disk I/O or new worker.
+
+EventReporter converts an already returned NodeObservation to at most five
+events, retaining only last successfully reported state and fixed delivery-loss
+counters. Sink rejection never changes the original Node poll result or calls
+back into consensus. Add the existing ordinary-snapshot refusal count to the
+counter observation so pressure is visible. The executable explicitly assembles
+the native counter and event observers and exposes bounded cursor pages through
+its authenticated/local command path; old-session cursors reject after restart.
+
+Acceptance: common host/native conformance for bounds, overflow/gaps, copied
+page lifetime, cursor scope, close and independent shared views; reporter refusal
+tests and an actual host Node write/read/shutdown with a failing sink; TCP/QUIC
+service snapshot events, restart rejection and original operation retry.
+Existing counter metrics stay compatible. Broader latency/critical-path
+attribution and exporters remain future C19 work, not claims of this slice.
+
+The full service target exposes an older remote-plan test whose missing-plan
+assertion hides the actual reply after multiple calls to a cached leader.
+Use a bounded fixture helper for plan commands which refreshes the leader only
+after explicit NOT_LEADER (proven refusal), preserves the operation ID and
+reports every other unexpected response verbatim. Authorization checks and
+the missing-plan expectation remain unchanged; no uncertain success is assumed.
+
+A later full run reaches an actual leadership change while the joint-retirement
+request's reply is deliberately unread. The fixture previously waited forever
+for the old leader's Committed log line after it recorded Unknown. Preserve the
+original joint record (including the original leader being demoted), retain all
+unread command channels, and resend only that exact record after observing a
+new leader/term, with a bounded attempt count/deadline. Before cutting the
+original process, require its own durable configuration status to show the
+committed joint phase. This keeps the crash/reopen and no-promoted-learner
+checks while covering an intervening leadership change. No client write reply
+is observed and no original operation is retargeted or replaced.
 
 #### 167 schema sketch (planned, before implementation)
 
@@ -15586,3 +15638,49 @@ This completes the selected maintenance/recovery composition and advances
 P1/P2/P7; it does not finish the full roadmap. The macro milestones remain open.
 The next deliverable is bounded operational event reporting, followed by
 unresolved-creation cancellation and broader recorded lifecycle fault schedules.
+
+### Slice168 — bounded operational event history and export
+
+Added public EventObserver, EventReporter, fixed OperationalEvent kinds,
+EventBinding/EventGeneration cursors, EventLimits and copied EventPage exports.
+The native provider is a preallocated volatile ring, selected explicitly beside
+the existing counter observer. It records no application payloads or arbitrary
+labels, and owns no thread, file, clock or external exporter. Native retention
+evicts oldest records at capacity and reports cumulative discarded events plus
+an exact cursor gap. Record count, allocation capacity and export pages are
+bounded at construction. Rejected identity/time/limit/closed operations preserve
+history, and sequence exhaustion refuses new records without eviction.
+
+EventReporter consumes an already returned NodeObservation and emits at most
+five aggregate records for state, failed polls, step failures, snapshot progress
+and pressure. The counter observation now includes ordinary snapshot-send
+refusals. Reporter state advances only when its state event is accepted; sink
+failure counts are diagnostic and never replace the original Node result.
+The service replaces per-step stderr output with this bounded path and adds
+`events SESSION AFTER LIMIT`, protected by the existing Inspect authorization.
+Default retention is256 records, pages are limited to16, and stale session
+cursors refuse after restart. Fatal service errors still propagate normally.
+
+Validation: six all-feature and four core-only observer tests pass, including
+host/native conformance, export lifetime, eviction/gaps, binding/time/limit
+rejection, close and independent views. All147 core-only owner tests pass; the
+new host Node history proves writes, quorum reads and shutdown progress while
+the event sink rejects every delivery. Its selected all-feature run also passes.
+Native sequence-exhaustion and maximum-value service-page unit tests pass.
+TCP/TLS and QUIC event/checkpoint/restart histories pass and preserve the original
+write identity. Both strict Clippy profiles, formatting, warnings-denied API
+documentation and92-record inventory metadata checks pass.
+The final complete service target passes47/47 in41.11s.
+
+Broad service validation exposed older fixture assumptions about cached leaders
+and unread configuration replies. Exact request identities and durable phase
+assertions remain; bounded retries now follow explicit refusals or observed term
+changes while unread replies stay unread. Raw failures and corrected runs are
+retained under `validation/baseline/slice168`, with details and limits in its
+README. These are finite local Linux checks. Previous-commit CI was still running
+for Linux and macOS when inspected; no new platform success is inferred.
+
+This closes bounded aggregate event history/export, not per-group tracing,
+latency attribution or an external metrics backend. Full P0–P7 remains active.
+The linked mini plan now advances unresolved creation cancellation, recorded
+lifecycle fault schedules and bounded remote discovery refresh.

@@ -13,7 +13,9 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Fixed-size native counters, selected explicitly by the host.
+mod events;
 use crate::{observability::*, runtime::RuntimeOwner};
+pub use events::NativeEventObserver;
 
 pub struct NativeCounterObserver {
     snapshot: CounterSnapshot,
