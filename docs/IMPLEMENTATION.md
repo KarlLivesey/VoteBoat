@@ -124,9 +124,10 @@ operation retries. These advance P2/P7 isolation without a general latency claim
 Completed209a fixes authenticated unchanged-endpoint lease renewal. Completed209b
 adds opt-in connector-owned discovery progress and bounded waiting admission,
 including native Node reconnect/reopen and QUIC connection evidence. Completed209c
-adds connector-driven source-session reconnection with host/TCP/QUIC checks. Current209
-continues executable source provisioning and recursive restart/parent-offline
-composition against the existing authenticated endpoint/manifest source and
+adds connector-driven source-session reconnection with host/TCP/QUIC checks.
+Completed209d covers cold child WAL/checkpoint recovery with metadata offline.
+Current209 continues executable source provisioning and combined long-lived
+endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
 Completion requires refreshed hints, stale generation refusal and parent-offline
@@ -144,6 +145,64 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209d implemented — restart children while metadata stays offline
+
+Four selected native histories cover TCP/TLS and QUIC with WAL or actual installed
+checkpoints. Each first resolves a three-level root/service/child path through an
+authenticated remote source backed by original Directory quorum reads. After
+bootstrapping the child and acknowledging operation1, it drains/closes every
+metadata node and the source, drops the routing cache, and records every stopped
+metadata file's bytes. Metadata is never restarted during the remaining history.
+
+Two successive child reopenings use fresh store sessions and application objects.
+Before campaigning, recovered state must contain the prior value, initialization,
+exact grant and expected checkpoint base. A new empty route cache still refuses
+root resolution against the actually closed remote source, even with a lookup
+budget; admitting the recovered child's grant enables only direct child
+routing with zero lookups. Original operation receipts survive, new operations
+advance7 ->10 ->15, child-quorum reads confirm current values, and stale epoch
+routes refuse. All stopped metadata files remain byte-for-byte unchanged.
+
+The first execution exposed a test assumption: retrying operation1 after a later
+write returns its original value7, not the current counter value10. The assertion
+now checks the original receipt separately from fresh quorum reads. No production
+behavior, protocol or persistence change was needed. Initial compile diagnostics
+and the failing receipt assertion are retained with final evidence under
+validation/baseline/slice209d. The all-feature automatic/remote routing selection
+passes10 tests; strict formatting and all four Clippy profiles remain clean.
+
+Macro review: this closes the selected cold-child restart/parent-outage coverage
+gap in209/P5. It does not compose endpoint-source reconnection with a moving
+multi-authority tree, persist discovery caches, or supply executable endpoint
+source provisioning. Those remain within209; the next linked deliverables are
+provider obligations and current-platform/operator acceptance. Full P0–P7 stays
+active, with no new platform or performance claim.
+
+### Slice209d schema plan — cold child restart during metadata outage
+
+The existing remote route history resolves root/service/child manifests over an
+authenticated session and serves a live child after parent shutdown. Add the
+missing cold child restart with all metadata replicas and their discovery source
+still stopped. Reuse the current public native startup, remote manifest lookup,
+routed application and cache contracts; no new protocol or persistence format.
+
+Initial state is a quorum-read three-level route and a bootstrapped independent
+child with an acknowledged operation. Drain the metadata read/session owners and
+all parent nodes, then fingerprint every parent file. Restart the child from its
+own WAL or installed checkpoint with fresh local store sessions and empty route
+caches. A checked grant from the recovered child may populate only that child's
+route; a cold root lookup must remain unavailable. The direct child lookup must
+make no source call. Replay the original operation, commit a fresh write and read
+under the child quorum, reject a stale-epoch route, and verify parent files are
+byte-for-byte unchanged. A second restart retains both operation IDs and values.
+
+Run explicit TCP/TLS and QUIC histories for WAL and actual checkpoint recovery.
+Require drained/joined native workers before reopen, inspect restored data and
+fresh store sessions before serving, and assert that metadata is not restarted
+as a hidden test prerequisite. This advances209/P5's recursive outage/restart
+acceptance; endpoint-source executable provisioning remains next within209,
+followed by the linked provider obligations and platform/operator acceptance.
 
 ### Slice209c implemented — reconnect and release failed discovery sessions
 

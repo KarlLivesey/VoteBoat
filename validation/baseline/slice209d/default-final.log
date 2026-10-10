@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.47s
+     Running tests/routed.rs (target/debug/deps/routed-3e2a837d4f0f1279)
+
+running 2 tests
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 87 filtered out; finished in 0.87s
+

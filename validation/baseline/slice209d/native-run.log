@@ -1,0 +1,28 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0609]: no field `node` on type `RuntimeOwner`
+  --> tests/routed/remote_manifest_restart.rs:89:22
+   |
+89 |             (binding.node, binding.store)
+   |                      ^^^^ unknown field
+   |
+   = note: available fields are: `store`, `lane`, `generation`
+
+error[E0609]: no field `node` on type `RuntimeOwner`
+   --> tests/routed/remote_manifest_restart.rs:117:36
+    |
+117 |         assert_eq!(original[&local.node].identity, local.store.identity);
+    |                                    ^^^^ unknown field
+    |
+    = note: available fields are: `store`, `lane`, `generation`
+
+error[E0609]: no field `node` on type `RuntimeOwner`
+   --> tests/routed/remote_manifest_restart.rs:118:36
+    |
+118 |         assert_ne!(original[&local.node].session, local.store.session);
+    |                                    ^^^^ unknown field
+    |
+    = note: available fields are: `store`, `lane`, `generation`
+
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `voteboat` (test "routed") due to 3 previous errors

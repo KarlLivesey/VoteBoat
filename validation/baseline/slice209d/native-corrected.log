@@ -1,0 +1,35 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.61s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+
+thread 'native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline' (3180032) panicked at tests/routed/remote_manifest_restart.rs:174:5:
+RoutedReceipt { index: 9, operation: OperationId(1), outcome: Applied(CounterReceipt { index: 9, operation: OperationId(1), outcome: Value(7), duplicate: true }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline ... FAILED
+
+thread 'native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline' (3180031) panicked at tests/routed/remote_manifest_restart.rs:174:5:
+RoutedReceipt { index: 9, operation: OperationId(1), outcome: Applied(CounterReceipt { index: 9, operation: OperationId(1), outcome: Value(7), duplicate: true }) }
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... FAILED
+
+thread 'native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline' (3180033) panicked at tests/routed/remote_manifest_restart.rs:174:5:
+RoutedReceipt { index: 9, operation: OperationId(1), outcome: Applied(CounterReceipt { index: 9, operation: OperationId(1), outcome: Value(7), duplicate: true }) }
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... FAILED
+
+thread 'native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline' (3180034) panicked at tests/routed/remote_manifest_restart.rs:174:5:
+RoutedReceipt { index: 9, operation: OperationId(1), outcome: Applied(CounterReceipt { index: 9, operation: OperationId(1), outcome: Value(7), duplicate: true }) }
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline ... FAILED
+
+failures:
+
+failures:
+    native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline
+    native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline
+    native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline
+    native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 159 filtered out; finished in 2.45s
+
+error: test failed, to rerun pass `--test routed`

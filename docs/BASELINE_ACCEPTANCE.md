@@ -1,5 +1,13 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209d adds selected cold child restart while every metadata replica and its
+remote source remain closed. TCP/TLS and QUIC histories cover WAL and installed
+checkpoint recovery, empty-cache root refusal, routing from the actual recovered
+child grant, original receipts and new writes across two fresh store sessions.
+All metadata files remain byte-identical. This closes that selected outage/restart
+gap; combined endpoint-source/tree movement, executable source provisioning,
+multi-authority migration faults and platform acceptance remain open.
+
 Slice209c adds bounded automatic source-session reconnection through a dedicated
 public PeerConnector. Host and real TCP/TLS/QUIC histories preserve cache floors
 and unrelated live hints, reject stale replacement hints, and drain exact owned

@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
+#[path = "remote_manifest_restart.rs"]
+mod restart;
 use voteboat::{native::remote_manifest::*, secure::*};
 #[path = "../support/manifest_sessions.rs"]
 mod sessions;
