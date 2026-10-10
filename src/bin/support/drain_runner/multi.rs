@@ -55,6 +55,16 @@ impl Runner {
     }
     pub(super) fn execute_multi(&mut self) -> Result<(), Failure> {
         let original = self.multi_begin()?;
+        self.execute_multi_started(original)
+    }
+    pub(super) fn execute_planned_single(&mut self, text: &str) -> Result<(), Failure> {
+        let original = Progress::parse(text, self.sequence, self.operation)?;
+        if original.groups != 1 {
+            return Err("drain-run requires exactly one group; use group-drain-run".into());
+        }
+        self.execute_multi_started(original)
+    }
+    fn execute_multi_started(&mut self, original: Progress) -> Result<(), Failure> {
         let assignments = self.assignments(original.groups)?;
         let resume = self.source(&format!(
             "resume-drain {} {}",

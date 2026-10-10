@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "base_revision": "9dfb2ffe57e35715d961964a2ab7af5adb1005bf",
+  "scope": "Functional planned single-group drain after source leadership loss; reuse existing journal/assignment/leader orchestration",
+  "validation": {
+    "before_tcp": {
+      "pass": 0,
+      "fail": 1,
+      "exit": 101,
+      "reason": "ERR NOT_LEADER"
+    },
+    "before_quic": {
+      "pass": 0,
+      "fail": 1,
+      "exit": 101,
+      "reason": "ERR NOT_LEADER"
+    },
+    "initial_broad": {
+      "counter_pass": 182,
+      "counter_fail": 1,
+      "unit_pass": 40,
+      "reason": "changed-plan refusal wording"
+    },
+    "final_all": {
+      "counter": 183,
+      "unit": 41
+    },
+    "default_drain": {
+      "counter": 28,
+      "unit": 23
+    },
+    "all_contracts": {
+      "journal": 11,
+      "membership": 9
+    },
+    "native_contracts": {
+      "journal": 11,
+      "membership": 9
+    },
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "budgets": {
+    "single_exchanges": 128,
+    "single_total_seconds": 45,
+    "attempt_seconds": 5
+  },
+  "source_manifest_sha256": "873a478043dccc8e8886475ad9b285d0a92410728395cbe093a3aee8007ae246",
+  "publication": {
+    "redacted_workspace_logs": 8,
+    "private_logs": "ignored local target/slice233-unpublished-logs/",
+    "contents": "Source, test results and synthetic operation identities; no local hostname or hardware/mount inventory."
+  },
+  "limits": "Finite Linux native TCP/QUIC histories; no current-source macOS, full P4, arbitrary failures, performance or security completion."
+}

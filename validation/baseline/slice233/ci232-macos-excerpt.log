@@ -1,0 +1,16 @@
+2026-10-10T16:05:51.9136770Z test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... FAILED
+2026-10-10T16:06:55.5991420Z test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp ... FAILED
+2026-10-10T16:07:42.1655990Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... FAILED
+2026-10-10T16:09:48.4457230Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... FAILED
+2026-10-10T16:09:53.9406770Z thread 'configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp' (18792) panicked at tests/counter_service.rs:2608:9:
+2026-10-10T16:09:53.9408070Z missing phase=configuration_queued; logs at "<github-temp>": ready node=3 peer=127.0.0.1:16275 transport=TcpTls command=127.0.0.1:16375
+2026-10-10T16:09:53.9409330Z command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(21101)) reason=deadline
+2026-10-10T16:09:53.9410230Z administration observation_cancelled operation=21101 phase=preparing reason=deadline
+2026-10-10T16:09:53.9441950Z thread 'group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp' (26260) panicked at tests/counter_service/group_leadership.rs:35:9:
+2026-10-10T16:09:53.9444280Z ["group", "7", "3", "move-leader", "40001", "9", "2", "2", "1"]: ERR not_proposed=Busy
+2026-10-10T16:09:53.9456070Z thread 'joint_retirement::public_joint_survives_demoted_leader_loss_quic' (31687) panicked at tests/counter_service/joint_retirement.rs:109:5:
+2026-10-10T16:09:53.9456830Z assertion failed: String::from_utf8_lossy(&refused.stdout).contains("conflicts with retained record")
+2026-10-10T16:09:53.9476100Z thread '<unnamed>' (48765) panicked at tests/counter_service.rs:1967:55:
+2026-10-10T16:09:53.9478290Z called `Result::unwrap()` on an `Err` value: Os { code: 35, kind: WouldBlock, message: "Resource temporarily unavailable" }
+2026-10-10T16:09:53.9502010Z thread 'trickled_reply_cannot_extend_the_clients_absolute_routing_deadline' (48762) panicked at tests/counter_service.rs:1995:28:
+2026-10-10T16:09:53.9514860Z test result: FAILED. 177 passed; 4 failed; 0 ignored; 0 measured; 0 filtered out; finished in 283.36s

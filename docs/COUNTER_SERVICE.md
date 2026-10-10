@@ -25,6 +25,8 @@ add durable maintenance/reboot with a restored admission gate.
 The [membership-drain workflow](MAINTENANCE.md#executable-membership-drain-workflow)
 combines an original plan file with authenticated joint/final configuration commands.
 `drain-run` drives that single-group workflow and requests checked source shutdown.
+The planned source may be a follower; admission persists its local plan before
+the runner drives the exact handoff and membership changes through the leader.
 
 ## Start three processes
 

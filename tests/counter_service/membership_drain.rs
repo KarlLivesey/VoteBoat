@@ -238,7 +238,7 @@ fn membership_drain_recovery_refuses_changed_or_omitted_original_plan() {
     refused(
         &mut c,
         source,
-        "drain plan differs from original durable intent",
+        "group drain differs from original durable plan",
     );
     fs::write(&path, original).unwrap();
     c.membership_drain = None;

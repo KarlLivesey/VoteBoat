@@ -3,6 +3,8 @@
 use super::*;
 #[path = "drain_runner/confirmation.rs"]
 mod confirmation;
+#[path = "drain_runner/follower.rs"]
+mod follower;
 pub(super) use confirmation::confirmed;
 
 pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u64) -> Command {

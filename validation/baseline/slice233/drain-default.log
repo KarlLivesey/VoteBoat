@@ -1,0 +1,65 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.58s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-bb57fd26736980db)
+
+running 23 tests
+test drain_runner::multi::actions::tests::only_known_authority_transitions_return_to_observation ... ok
+test drain_commands::validation::tests::retained_capacity_uses_recursive_policy_not_voter_count ... ok
+test drain_runner::observation_tests::observation_retry_refuses_authentication_failure_and_invalid_transport_data ... ok
+test drain_runner::recovery_tests::uncertain_configuration_attempts_require_observation ... ok
+test drain_runner::recovery_tests::invalid_configuration_transport_is_not_hidden_by_retry ... ok
+test drain_runner::multi::rows::tests::progress_binds_identity_active_phase_count_and_plan_digest ... ok
+test drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections ... ok
+test drain_runner::tests::exhausted_runner_budgets_refuse_before_connection ... ok
+test drain_runner::multi::actions::tests::handoff_receipts_must_match_original_bound_target_and_operation ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test drain_runner::multi::rows::tests::single_runner_refuses_multi_group_plan_before_remote_actions ... ok
+test drain_runner::multi::rows::tests::assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields ... ok
+test drain_runner::tests::source_progress_rejects_wrong_duplicate_missing_and_non_membership_fields ... ok
+test operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_tcp ... ok
+test drain_runner::observation_tests::uncertain_admission_preserves_actual_source_refusal_without_advancing ... ok
+test drain_runner::observation_tests::completed_observation_still_rejects_invalid_identity_or_authorization ... ok
+test drain_runner::observation_tests::stalled_observation_cannot_renew_the_absolute_deadline ... ok
+test drain_runner::observation_tests::lost_source_observation_cannot_replenish_exhausted_requests ... ok
+test drain_runner::observation_tests::source_authentication_timeout_preserves_observation_budget ... ok
+test drain_runner::observation_tests::lost_assignment_page_reply_repeats_the_same_offset ... ok
+test drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation ... ok
+test drain_runner::recovery_tests::configuration_reply_timeout_cannot_replenish_request_budget_or_stop_source ... ok
+test drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop ... ok
+
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 5.33s
+
+     Running tests/counter_service.rs (target/debug/deps/counter_service-1be0e026107a32da)
+
+running 28 tests
+test drain_runner::confirmation::caller_refuses_wrong_duplicate_and_unconfirmed_success_fields ... ok
+test drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record ... ok
+test drain_runner::confirmation::caller_bounds_unknown_invocations_and_preserves_terminal_refusals ... ok
+test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+test drain_runner::follower::planned_runner_drains_original_source_after_leader_change_tcp ... ok
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+test membership_drain::preparation::prepared_source_completes_previous_handoff_before_new_drain_tcp ... ok
+test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 101 filtered out; finished in 10.14s
+

@@ -1,5 +1,16 @@
 # Baseline acceptance map
 
+Slice233 closes the selected source-leadership dependency for planned single-group
+drain admission. Existing journal/assignment/leader orchestration now handles an
+original source that becomes a follower. Both actual TCP/QUIC regressions fail
+before and pass after; full counter183/unit41, default drain28/unit23, all/native
+journal11/membership9 and formatting/four strict profiles pass. Source shutdown,
+original plan/operation/journal identities, values/retries and joins remain exact.
+No new core, provider or file format; no broader P4/macOS completion claim. See
+[slice233](../validation/baseline/slice233/README.md). Preceding source232 macOS
+counter177/4 fails separate preparing/Busy/conflict/socket cases; later targets
+are unrun, Ubuntu is still live at observation. Functional platform fixes follow.
+
 Priority232: complete baseline features and functional Linux/macOS reliability
 before performance tuning and the user's Daybreak security pass. Breaking public
 interface changes are authorized while no users depend on them; keep contracts,

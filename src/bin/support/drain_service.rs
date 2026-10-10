@@ -25,7 +25,7 @@ impl Driver {
         plan: Option<MembershipDrainPlan>,
         multi: bool,
     ) -> Result<Self, Failure> {
-        if multi {
+        if multi || plan.is_some() {
             group_drain::Driver::open(service, root, create, plan).map(|d| Self::Multi(Box::new(d)))
         } else {
             drain_commands::Driver::open(service, root, create, plan)

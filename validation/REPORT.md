@@ -1,5 +1,18 @@
 # Validation report
 
+Planned drain admission after source leadership loss:
+[slice233](baseline/slice233/README.md). Actual TCP/QUIC regressions reproduce the
+original NOT_LEADER before and pass after composing the existing local group-drain
+path for one-group plans. Original plan/journal identities, membership operations,
+values/retries and joins remain; no widened budgets, new storage or consensus
+protocol. Final full counter183/unit41, default drain28/unit23, all/native
+journal11/membership9 and formatting/four strict profiles pass. Inventory108 and
+unchanged partial conformance metadata pass. The initial182/1 refusal-wording
+failure is retained. Matching macOS and broader P4 remain open; source232 macOS
+counter177/4 fails independent preparing/Busy/conflict/socket checks before later
+targets, with Ubuntu still live at observation. Features and functional platform
+work stay ahead of tuning and the Daybreak security pass.
+
 Rejected manifest-journal trial: [slice232](performance/slice232/README.md).
 Native file8, timings3/reclaim8/log-store9/new public1/provider27/Raft41/shared
 barrier8 pass; full Linux counter181/directory22/transfer28 pass. Candidate

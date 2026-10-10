@@ -236,16 +236,18 @@ Store identities must match deployment. Both files are bounded to64KiB; malforme
 or incompatible plans refuse startup. Changes to an active journal's plan refuse
 recovery. This is a single-group workflow using explicit operator steps:
 
-1. On the source leader, issue authenticated `drain-node 1 19701`. It persists
-   the bound intent before releasing handoff. Preserve the IDs after a lost reply.
-2. On the current leader, issue `configure 19751`; inspect
+1. On the source, issue authenticated `drain-node 1 19701`. It durably publishes
+   the bound local intent and restores admission/campaign gates. The source may
+   be a follower. Preserve the IDs after a lost reply.
+2. If needed, use the existing `move-leader` workflow on the current leader to
+   reach the plan's exact handoff target. Then issue `configure 19751`; inspect
    `configuration-status 19751`. Resume the same operation to finalize once the
    joint configuration has committed. Every request requires live Admin authority.
 3. On the source, inspect `drain-status 1 19701`. Only `ready=true` permits
    `drain-stop 1 19701`, which rechecks final membership and joins workers.
 
-After restart, `resume-drain` resumes any pending original handoff; configuration
-execution still needs the explicit request on the current leader. Cancellation
+After restart, `resume-drain` reports the restored original plan; handoff and
+configuration execution still need explicit requests on the current leader. Cancellation
 only reopens the local gate; it does not restore removed voting rights. Restart
 never automatically stops the service. Final learner removal uses the explicit
 step below. Automatic multi-group coordination and broader replacement-promotion
@@ -261,10 +263,12 @@ voteboat-counter drain-run BASE SOURCE SEQUENCE OP \
 ```
 
 Use `--command-peers FILE` for explicit remote endpoints. Include the source
-and eligible leaders. The source must initially lead, or already have this
-durable drain. The runner starts/resumes that identity, reads the bound
-membership operation and plan fingerprint from authenticated source status,
-finds the current leader and drives joint/final completion. It asks the source
+and eligible leaders, including the plan's handoff target. Planned single-group
+admission uses the same local journal path as a multi-group plan: the source may
+be a follower. Status exposes `multi=true groups=1` and one authenticated
+`drain-group SEQUENCE OP 0` row. The runner starts/resumes that identity, reads
+the bound assignment and plan fingerprint, finds the current leader and drives
+the exact handoff and joint/final completion. It asks the source
 to stop only after `ready=true` and the source rechecks its own stop conditions.
 
 The runner makes at most128 requests within45 seconds, with five-second request

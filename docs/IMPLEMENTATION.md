@@ -870,22 +870,52 @@ integration and matching Linux/macOS evidence are the release work. Optional glo
 orchestration, external adapters, P8 and Windows do not become prerequisites.
 The full roadmap stays active, with performance/security as later milestones.
 
-Current: resolve the evidenced original drain confirmation boundary. Purpose:
-advance P4 operator recovery/platform acceptance without blocking static service.
-Depend on terminal229's exact19701 ERR NOT_LEADER, original durable drain record
-and current confirmation/routing contracts. Completion requires a native forced
-leader-change history, exact original plan/operation preservation and terminal
-conflict/error refusal, recovery/retry/join evidence and zero strict diagnostics.
-Select the smallest demonstrated cause before editing; do not infer commit/read
-readiness from a role or widen deadlines. Background CI is feedback, not a gate.
+Implemented233: planned single-group drains now compose the existing local
+group-drain publication and assignment protocol. The source may be a follower;
+its exact local plan is durable before admission/campaign gates are restored or
+a receipt escapes. drain-run requires one assignment and retains128 exchanges/
+45s total/5s attempts while reusing actual leader/handoff/Joint/Final orchestration.
+Final membership/application-prefix/owned-work readiness still controls stop.
+No provider, core, wire or journal format change. Retained-replica drains keep
+their original handoff path. Status/CLI documentation and contracts change together.
 
-Next: resolve the macOS recursive-route observation-floor failure. Purpose:
+Both forced TCP/QUIC source-role changes reproduce the exact original NOT_LEADER
+before and pass after. The final source preserves plan19701, configuration19751,
+counter values and original retries, typed recovered journal identity/phase,
+shutdown and worker joins. Full all-feature counter183 and unit41 pass; default
+drain integration28/unit23 and all-feature/native-only journal11/membership9 pass.
+Formatting and four strict profiles finish zero; inventory108/conformance metadata
+pass without increasing the9 partial reviews/68 operations. First broad182/1
+fails only the changed refusal wording, retained alongside final results in
+[slice233](../validation/baseline/slice233/README.md). Finite native histories do
+not close every failure schedule, matching macOS or the whole P4 milestone.
+
+Macro review233 closes the selected source-leadership admission dependency and
+advances functional service/operator completion. Performance/security remain later.
+Preceding9dfb2ff operator run38066100713 has completed failed macOS job114253943898:
+counter177/4, then later targets unrun. Failures are configuration21101 preparing
+observation, group7/3 handoff40001 Busy replay, a joint conflict-refusal assertion
+and trickled-socket WouldBlock. Ubuntu job114253944056 remains live at observation.
+These are preceding-source results, not233 validation; matching feedback follows
+the push in the background.
+
+Current: resolve the macOS recursive-route observation-floor failure. Purpose:
 advance P5 lookup correctness and the Linux/macOS feature milestone. Depend on
 source231's exact failure, existing directory route/read adapters and current
 manifest-upgrade contracts. Before editing classify the original unknown outcome
 versus terminal refusal. Completion requires original root observation floors,
 exact retained query/receipt semantics, bounded leader-loss/reopen checks, strict
 zero diagnostics and matching platform feedback. Do not relax floors or deadlines.
+
+Next: close the concrete macOS operator failures. Purpose: advance P4 and
+Linux/macOS functional acceptance. Depend on retained source232 job/log identity
+and existing original-operation/readiness/deadline contracts, not platform guesses.
+Classify preparing versus admitted configuration, explicit no-proposal Busy versus
+terminal conflict, actual conflict response versus authority loss, and macOS
+socket WouldBlock before each focused edit. Completion requires meaningful local
+regressions, unchanged records/floors/absolute budgets, cause-specific TCP/QUIC
+recovery and strict zero diagnostics; matching macOS feedback remains background.
+Do not weaken assertions to accept unrelated failures or run performance tuning.
 
 Following: close concrete baseline operator/deployment integration gaps. Purpose:
 advance usable service, online membership and split/merge completion. Depend on
@@ -897,6 +927,57 @@ relevant Linux/macOS checks and updated contracts after any interface changes.
 Do not count optional global orchestration, performance tuning or security audits
 as feature blockers. Generated membership validation follows where a concrete
 functional gap requires it; a blanket provider audit is not a release prerequisite.
+
+### Slice233 schema plan — planned drain admission independent of leadership
+
+Previous goal turn: progress;232 archives/restores the rejected trial and commits
+the user's feature-first Linux/macOS plan. The worktree is clean at9dfb2ff.
+The exact prior229 Ubuntu failure is initial single-group drain-run admission
+returning ERR NOT_LEADER for source3/sequence1/operation19701. The source's role
+can change after preparation. Current single admission submits LeadershipCommand
+through that source before publishing its drain journal; retry alone cannot make
+a follower the original leader. Multi-group admission already has the correct
+durable-local-plan/remote-leader separation and the same MembershipDrainPlan.
+
+Data/API: compose the existing group-drain driver for every explicit membership
+plan, including one group. Its existing bounded assignment/status protocol also
+drives drain-run, retaining the single command's128 exchanges/45s total/5s attempt
+budgets and requiring exactly one assignment. Keep retained-replica (no membership
+plan) admission on its existing handoff path. No new provider, consensus engine,
+file format, implicit migration or requirement for a new subsystem. Status for
+planned single drains now exposes group rows; callers/contracts change together.
+
+Transitions/ownership: validate original committed configuration and exact plan;
+publish the original drain record before replying/restoring local admission and
+campaign gates. Then discover the serving leader, verify original assignment,
+handoff to the bound target when necessary and submit exact Joint/Final records
+through the existing executor. Role is only a hint. Stop requires the existing
+durable final-membership/application-prefix and all-owned-work readiness. Restart
+reopens the same journal and fingerprint before polling; a lost caller does not
+undo accepted work. Changed plans, identities and terminal refusals still stop.
+Publication stays on its owned worker and joins before lock release. Cancellation
+restores only local gates; it does not undo committed membership or a handoff.
+
+Acceptance: first reproduce a forced handoff between preparation and drain-run
+on actual TCP and QUIC, preserving original plan19701 and verifying source is a
+follower. The old implementation must fail; the new path must complete unchanged
+configuration19751, stop/join source and preserve original counter retries/value.
+Exercise existing interrupted-runner/source WAL/checkpoint recovery, replacement
+learner readiness/retirement, retained/multi-group workflows, unknown admission,
+exact receipt/conflict refusal and unchanged runner budget tests. Formatting/four
+strict profiles must finish zero. Matching Linux/macOS feedback stays source-bound
+and background; no performance/security work is included. Advances P4 and usable
+Linux/macOS service; route-floor recovery and operator/deployment closure follow.
+
+233 validation revision: both original forced TCP/QUIC handoff histories fail
+with the exact NOT_LEADER before the change and pass after composition. First
+broad counter result is182/1: changed-plan recovery actually refuses with the
+reused group driver's error label, while the fixture expects the former single
+driver wording. Update only that exact expectation; keep the required failure,
+changed/omitted plan rejection and restored original cancellation assertions.
+The last runner revision explicitly resolves the existing group-publication-busy
+reply through the same original-source observation and enforces the single-row
+bound before remote actions; request/time limits are unchanged.
 
 ### Slice232 schema plan — bounded append-only manifest publication candidate
 

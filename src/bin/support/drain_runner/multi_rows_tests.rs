@@ -3,6 +3,24 @@
 use super::*;
 
 #[test]
+fn single_runner_refuses_multi_group_plan_before_remote_actions() {
+    let (mut runner, _listener, _access, root) = recovery_tests::fixture();
+    let deadline = runner.deadline;
+    let remaining = runner.remaining;
+    let text = format!("OK sequence=1 operation=2 phase=Active multi=true membership_change=true groups=2 ready=false plan_digest={}", "ab".repeat(32));
+    assert_eq!(
+        runner
+            .execute_planned_single(&text)
+            .unwrap_err()
+            .to_string(),
+        "drain-run requires exactly one group; use group-drain-run"
+    );
+    assert_eq!(runner.remaining, remaining);
+    assert_eq!(runner.deadline, deadline);
+    std::fs::remove_dir_all(root).unwrap();
+}
+
+#[test]
 fn progress_binds_identity_active_phase_count_and_plan_digest() {
     let text = format!("OK sequence=1 operation=2 phase=Active multi=true membership_change=true groups=2 ready=false plan_digest={}", "ab".repeat(32));
     let original = Progress::parse(&text, 1, 2).unwrap();

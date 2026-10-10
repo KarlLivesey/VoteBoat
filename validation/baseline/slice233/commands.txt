@@ -1,0 +1,33 @@
+Before production changes (new forced-leader-change test only; both exit101):
+cargo +stable test --locked --offline --all-features --test counter_service planned_runner_drains_original_source_after_leader_change_tcp -- --exact drain_runner::follower::planned_runner_drains_original_source_after_leader_change_tcp
+cargo +stable test --locked --offline --all-features --test counter_service drain_runner::follower::planned_runner_drains_original_source_after_leader_change_quic -- --exact
+
+After composition, forced TCP/QUIC histories pass2:
+cargo +stable test --locked --offline --all-features --test counter_service drain_runner::follower
+
+First broad counter182/1 plus unit40; final counter183/unit41 after exact
+refusal-wording correction and final single-assignment/publication-busy checks:
+cargo +stable test --locked --offline --all-features --test counter_service --bin voteboat-counter
+
+Final public plan/journal contracts (11/9 each):
+cargo +stable test --locked --offline --all-features --test drain_membership --test drain_journal
+cargo +stable test --locked --offline --no-default-features --features native --test drain_membership --test drain_journal
+
+Default TCP paths after all-feature executable tests finish (unit23/integration28):
+cargo +stable test --locked --offline --test counter_service --bin voteboat-counter drain
+
+Metadata only (not general conformance certification):
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Formatting and all four strict feature profiles:
+.githooks/pre-push
+
+Final convenience binaries, after service-spawning tests finish:
+cargo +stable build --locked --offline --all-features --bins
+
+Background preceding-source job observation:
+gh run view 38066100713 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114253943898/logs
+
+No performance measurement, security audit or broad unchanged-source test loop.

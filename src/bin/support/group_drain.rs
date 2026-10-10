@@ -153,7 +153,8 @@ impl Driver {
                     .collect::<String>()
             })
             .unwrap_or_default();
-        format!("OK sequence={} operation={} phase={:?} multi=true membership_change=true groups={} plan_digest={} ready={} publication_pending={} evidence=local_durable retained_replica=true cancellation_scope=local_gate", record.sequence, record.request.operation.get(), record.phase, record.request.groups.len(), digest, self.ready(service).unwrap_or(false), self.busy())
+        let resuming = service.local_drain_status().is_some_and(|s| s.resuming);
+        format!("OK sequence={} operation={} phase={:?} multi=true membership_change=true groups={} plan_digest={} ready={} resuming={} publication_pending={} evidence=local_durable retained_replica=true cancellation_scope=local_gate", record.sequence, record.request.operation.get(), record.phase, record.request.groups.len(), digest, self.ready(service).unwrap_or(false), resuming, self.busy())
     }
 }
 impl Drop for Driver {

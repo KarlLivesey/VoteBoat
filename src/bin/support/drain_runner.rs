@@ -191,13 +191,18 @@ impl Runner {
         let text = self.source_observation(None)?;
         progress(&text, self.sequence, self.operation)
     }
-    fn resolve_admission(&mut self) -> Result<Progress, Failure> {
-        self.status().map_err(|error| {
-            format!(
+    fn resolve_admission(&mut self) -> Result<String, Failure> {
+        self.source_observation(None)
+            .and_then(|text| {
+                identity(&text, self.sequence, self.operation)?;
+                Ok(text)
+            })
+            .map_err(|error| {
+                format!(
                 "UNKNOWN initial drain admission: {error}; rerun the same sequence and operation"
             )
-            .into()
-        })
+                .into()
+            })
     }
     fn configure(&mut self, operation: u128) -> Result<(), Failure> {
         for target in 0..self.endpoints.len() {
@@ -214,20 +219,27 @@ impl Runner {
             self.source,
             &format!("drain-node {} {}", self.sequence, self.operation),
         )?;
-        let original = match begin {
-            Attempt::Reply(ref text) if text.starts_with("OK ") => {
-                progress(text, self.sequence, self.operation)?
-            }
+        let text = match begin {
+            Attempt::Reply(text) if text.starts_with("OK ") => text,
             // An unobserved admission is resolved through the original journal.
             Attempt::Interrupted(_) => self.resolve_admission()?,
             Attempt::Reply(ref text)
-                if text.starts_with("UNKNOWN ") || text.contains("drain busy") =>
+                if text.starts_with("UNKNOWN ")
+                    || text.contains("drain busy")
+                    || text == "ERR group drain publication busy\n" =>
             {
                 self.resolve_admission()?
             }
             Attempt::Reply(text) => return Err(text.into()),
             Attempt::Unavailable => return Err("source unavailable before drain request".into()),
         };
+        if text
+            .split_whitespace()
+            .any(|word| word.starts_with("multi="))
+        {
+            return self.execute_planned_single(&text);
+        }
+        let original = progress(&text, self.sequence, self.operation)?;
         let resume = self.source(&format!(
             "resume-drain {} {}",
             self.sequence, self.operation
