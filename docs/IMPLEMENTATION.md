@@ -133,6 +133,8 @@ Completed209g exposes static native preparation for host discovery composition,
 with TCP/TLS and QUIC downstream startup/reopen and cleanup evidence.
 Completed209h extends that same preparation to member recovery and shared
 multi-group startup, with TCP/QUIC receipt, checkpoint and cleanup evidence.
+Completed209i supplies an authenticated executable source for exact Raft
+node/store/incarnation hints, keeping command-service identities separate.
 Current209 continues executable peer-source provisioning and combined long-lived
 endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
@@ -152,6 +154,70 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209i implemented — exact peer identities in the executable source
+
+The counter discovery source now accepts `voteboat-peer-discovery-v1 GENERATION`
+with explicit node/store/incarnation/address/name rows. Its existing command
+v1/v2 formats retain their synthetic service identities. Both use the same
+bounded source and authenticated responder; no extra protocol, runtime, listener
+or trust distribution is introduced. The peer format rejects invalid/nonunique
+identities and addresses, empty/oversized maps and zero generations before
+storage startup. Address updates preserve identity/name and retain the existing
+explicit volatile generation/restart contract.
+
+Two parser/source checks cover exact identity matching, wrong node/store/
+incarnation and command identity refusal, unchanged identity/name after an
+update, original-file reconstruction and saved-generation reconstruction, plus
+malformed inputs and the64-target/16KiB limits. Three executable cases cover
+pre-storage refusal and real authenticated NativeRemotePeerDiscovery consumption
+alongside TCP/QUIC counter operation. Reader update refusal, exact latest update
+retry, untouched input file, saved source restart and unchanged replicated data
+retries are asserted. The discovery channel remains TCP/TLS in both cases;
+QUIC is the Raft data transport in the QUIC history.
+
+Evidence is under validation/baseline/slice209i. All11 all-feature discovery
+service tests pass;7 parser/source tests pass. The default build independently
+passes7 source tests and8 service histories. The full36-test counter unit target
+passes with socket permission; an earlier sandbox-denied bind run is retained.
+The first compile caught StoreIdentity lacking Ord; duplicate-store validation
+uses its existing ordered ID/incarnation components. Formatting and all four
+strict Clippy profiles pass with zero diagnostics. Inventory108 and metadata13
+checks pass; this extends the existing C17 implementation, not its reviewed
+provider-obligation count.
+
+Macro review: this closes the source identity mismatch that blocked executable
+Raft discovery consumption. The next bounded deliverable is the consuming
+startup/connection path with explicit source-session ownership and reconnect;
+combined recursive movement follows it. Provider/platform obligations and full
+P0–P7 remain active. These Linux loopback results do not establish separate-host,
+macOS, automatic counter peer discovery or durable endpoint publication.
+
+### Slice209i schema plan — executable source for exact peer identities
+
+The existing counter discovery source publishes synthetic command-service
+identities; passing those hints to a Raft connector cannot match provisioned
+node/store pins. Add an explicit `voteboat-peer-discovery-v1 GENERATION` input
+profile under the existing authenticated --discovery-peers service, with rows
+`NODE STORE_ID STORE_INCARNATION SOCKET_ADDRESS TLS_SERVER_NAME`. Preserve the
+command v1/v2 profiles. Bound the peer input to the same16KiB/64-target limit,
+validate unique node/store/address tuples and nonzero generations before any
+store opens, and resolve only the exact configured PeerIdentity. Updates may
+change an existing address, never its identity or provisioned TLS name; preserve
+the existing compare-and-set generation, exact latest retry and explicit
+volatile/restart semantics. The source is a hint authority, not membership or
+ownership authority.
+
+Use the existing authenticated command upgrade and native discovery responder;
+do not create another listener protocol or trust mechanism. Test the actual
+executable source with a public NativeRemotePeerDiscovery consumer, including
+wrong store/incarnation, command-vs-peer identity confusion, address update,
+authorization, source restart and saved generation. Keep normal replicated
+counter write/retry data intact alongside the source. This is the necessary
+source-side part of executable peer bootstrap under209/P0/P5; the next part
+connects that source to the prepared native data connector with explicit
+session ownership and bounded reconnect. Combined recursive movement follows;
+provider obligations and reproduced platform failures remain linked next work.
 
 ### Slice209h schema plan — member and shared-group discovery preparation
 

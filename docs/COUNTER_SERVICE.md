@@ -206,6 +206,28 @@ scope. Hints confer no membership, ownership or quorum authority. Endpoint
 requests do not touch Raft. Recursive responsibility manifests still require a
 separate authority service; this option does not implement that service.
 
+To serve **Raft peer endpoints** to Rust hosts, use an explicit peer identity
+file with the same `--discovery-peers` option:
+
+```text
+voteboat-peer-discovery-v1 10
+1 401 7 127.0.0.1:43001 node1.voteboat.test
+2 402 9 127.0.0.1:43002 node2.voteboat.test
+```
+
+Rows are `NODE STORE_ID STORE_INCARNATION SOCKET_ADDRESS TLS_SERVER_NAME`.
+The file permits at most64 unique nodes, exact stores and addresses within16KiB.
+The existing authenticated `discover` upgrade serves these entries through
+`NativeRemotePeerDiscovery`; lookup requires the exact node/store/incarnation.
+Command-service identities do not match this profile. Transport pins remain the
+consumer's configuration; a returned address cannot provision a new peer.
+
+The same `discovery-status` and administrator-only `discovery-update` commands
+apply. Updates preserve identities and TLS names and remain volatile. Save the
+matching peer file and generation before restart. This supplies a peer source
+for Rust hosts; automatic consumption by the counter's own Raft startup remains
+separate work. Use command v1/v2 files with the existing `client --discover-via`.
+
 Executable TCP/QUIC cluster tests use wildcard listeners and non-default loopback
 ports, verify access denial and TLS-name rejection, then preserve same-ID retries
 across leader loss, checkpoint and restart. Separate-machine and macOS execution

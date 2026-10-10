@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0277]: the trait bound `voteboat::identity::StoreIdentity: Ord` is not satisfied
+  --> src/bin/support/command_discovery/peer_source.rs:50:65
+   |
+50 |         if identities.insert(number, peer).is_some() || !stores.insert(peer.store) {
+   |                                                                 ^^^^^^ the trait `Ord` is not implemented for `voteboat::identity::StoreIdentity`
+   |
+note: required by a bound in `std::collections::BTreeSet::<T, A>::insert`
+  --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/collections/btree/set.rs:900:4
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `voteboat` (bin "voteboat-counter" test) due to 1 previous error

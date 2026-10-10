@@ -1,0 +1,43 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 36 tests
+test command_discovery::tests::malformed_versioned_sources_are_rejected ... ok
+test command_discovery::tests::existing_source_views_observe_checked_address_updates_and_close_independently ... ok
+test command_discovery::tests::invalid_updates_preserve_all_current_hints_and_generation ... ok
+test command_discovery::tests::explicit_generation_survives_binding_and_legacy_sources_keep_session_generation ... ok
+test command_discovery::tests::only_the_exact_latest_update_can_be_retried ... ok
+test diagnostics::tests::maximum_timing_values_fit_reply_and_closed_sink_reports_loss ... ok
+test assignment_listing::tests::cursor_rejects_changed_identity_inventory_and_configuration ... ok
+test command_discovery::tests::peer_source_preserves_exact_store_identity_through_updates_and_reconstruction ... ok
+test drain_commands::validation::tests::retained_capacity_uses_recursive_policy_not_voter_count ... ok
+test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+test assignment_listing::tests::maximum_identity_page_and_inventory_are_bounded ... ok
+test drain_runner::multi::actions::tests::only_known_authority_transitions_return_to_observation ... ok
+test drain_runner::multi::actions::tests::handoff_receipts_must_match_original_bound_target_and_operation ... ok
+test drain_runner::multi::rows::tests::progress_binds_identity_active_phase_count_and_plan_digest ... ok
+test command_discovery::tests::malformed_or_oversized_peer_sources_fail_before_publication ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test drain_runner::recovery_tests::invalid_configuration_transport_is_not_hidden_by_retry ... ok
+test drain_runner::observation_tests::observation_retry_refuses_authentication_failure_and_invalid_transport_data ... ok
+test drain_runner::multi::rows::tests::assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields ... ok
+test drain_runner::recovery_tests::uncertain_configuration_attempts_require_observation ... ok
+test drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections ... ok
+test drain_runner::tests::exhausted_runner_budgets_refuse_before_connection ... ok
+test quorum_diagnostics::tests::joint_views_require_both_policies_and_keep_parent_indexes_when_paged ... ok
+test quorum_diagnostics::tests::maximum_weight_pages_fit_the_bounded_reply ... ok
+test drain_runner::tests::source_progress_rejects_wrong_duplicate_missing_and_non_membership_fields ... ok
+test peer_credentials::tests::shutdown_joins_unpublished_preparation_and_startup_recovers_its_original_record ... ok
+test peer_credentials::tests::malformed_or_unauthenticated_selection_cannot_create_a_peer_record ... ok
+test drain_runner::observation_tests::completed_observation_still_rejects_invalid_identity_or_authorization ... ok
+test drain_runner::observation_tests::stalled_observation_cannot_renew_the_absolute_deadline ... ok
+test drain_runner::observation_tests::lost_source_observation_cannot_replenish_exhausted_requests ... ok
+test drain_runner::observation_tests::lost_assignment_page_reply_repeats_the_same_offset ... ok
+test drain_runner::observation_tests::source_authentication_timeout_preserves_observation_budget ... ok
+test drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation ... ok
+test drain_runner::recovery_tests::configuration_reply_timeout_cannot_replenish_request_budget_or_stop_source ... ok
+test drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.33s
+

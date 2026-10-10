@@ -20,12 +20,15 @@ use super::{
 };
 use std::{
     cell::RefCell,
+    collections::BTreeMap,
     net::SocketAddr,
     path::Path,
     rc::Rc,
     time::{Duration, Instant},
 };
 use voteboat::{discovery::*, native::remote_discovery::*, runtime::MonoTime, secure::*};
+#[path = "command_discovery/peer_source.rs"]
+mod peer_source;
 
 pub const ACK: &str = "OK discovery-v1\n";
 pub type Server = NativeDiscoveryResponder<Box<dyn SecureSession>, Source>;
@@ -37,6 +40,7 @@ pub struct Source {
 }
 struct Snapshot {
     endpoints: Vec<Endpoint>,
+    identities: BTreeMap<u64, PeerIdentity>,
     generation: HintGeneration,
     last: Option<Update>,
 }
@@ -57,6 +61,18 @@ impl Source {
     }
     fn parse(text: &str) -> Result<Self, Failure> {
         let header = text.lines().next().unwrap_or("");
+        if header.starts_with(peer_source::HEADER) {
+            let peers = peer_source::parse(text)?;
+            return Ok(Self::from_snapshot(
+                Snapshot {
+                    endpoints: peers.endpoints,
+                    identities: peers.identities,
+                    generation: peers.generation,
+                    last: None,
+                },
+                true,
+            ));
+        }
         let (generation, explicit, endpoints) = if header.starts_with("voteboat-discovery-peers-v2")
         {
             let words = header.split_whitespace().collect::<Vec<_>>();
@@ -76,15 +92,26 @@ impl Source {
                 command_endpoints::parse(text)?,
             )
         };
-        Ok(Self {
-            current: Rc::new(RefCell::new(Snapshot {
+        let identities = endpoints
+            .iter()
+            .map(|e| (e.node, service_access::transport_identity(e.node, false)))
+            .collect();
+        Ok(Self::from_snapshot(
+            Snapshot {
                 endpoints,
+                identities,
                 generation,
                 last: None,
-            })),
+            },
+            explicit,
+        ))
+    }
+    fn from_snapshot(snapshot: Snapshot, explicit: bool) -> Self {
+        Self {
+            current: Rc::new(RefCell::new(snapshot)),
             explicit,
             closed: false,
-        })
+        }
     }
     pub fn bind_session(&mut self, session: u64) {
         if !self.explicit {
@@ -120,7 +147,7 @@ impl Source {
     }
     fn replace(&self, update: Update) -> Result<String, String> {
         if self.closed || !self.explicit {
-            return Err("endpoint updates require an open v2 discovery source".into());
+            return Err("endpoint updates require an open versioned discovery source".into());
         }
         let mut current = self.current.borrow_mut();
         if current.last == Some(update) {
@@ -179,7 +206,7 @@ impl PeerDiscovery for Source {
         let entry = current
             .endpoints
             .iter()
-            .find(|e| service_access::transport_identity(e.node, false) == peer)
+            .find(|e| current.identities.get(&e.node) == Some(&peer))
             .ok_or(DiscoveryError::Missing)?;
         let expires_at = MonoTime(
             now.0

@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209i adds an explicit executable source profile for exact Raft peer
+node/store/incarnation mappings. The authenticated responder and update/restart
+semantics are shared with existing command discovery, while synthetic command
+identities remain separate. Parser/bounds checks and real native-client
+TCP/QUIC-counter histories cover mismatch refusal, authorized address updates,
+saved-generation source restart and unchanged data retries. All11 all-feature
+and8 default discovery service tests pass. This supplies the source-side
+identity contract; automatic consumption by counter Raft startup, combined
+recursive movement and wider acceptance remain open.
+
 Slice209h extends prepare_for_discovery to member recovery and shared multi-group
 startup. Member preparation preserves Recover-only validation and provisioned
 stores; shared preparation preserves the exact group/application inventory and

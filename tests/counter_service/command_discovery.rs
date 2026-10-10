@@ -222,5 +222,7 @@ fn discovery_scope_and_startup_validation_fail_before_submission() {
     fs::remove_dir_all(&c.root).unwrap();
 }
 
+#[path = "peer_source.rs"]
+mod peer_source;
 #[path = "command_discovery_updates.rs"]
 mod updates;

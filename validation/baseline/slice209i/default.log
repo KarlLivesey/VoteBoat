@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.58s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-bb57fd26736980db)
+
+running 7 tests
+test command_discovery::tests::malformed_versioned_sources_are_rejected ... ok
+test command_discovery::tests::existing_source_views_observe_checked_address_updates_and_close_independently ... ok
+test command_discovery::tests::explicit_generation_survives_binding_and_legacy_sources_keep_session_generation ... ok
+test command_discovery::tests::invalid_updates_preserve_all_current_hints_and_generation ... ok
+test command_discovery::tests::only_the_exact_latest_update_can_be_retried ... ok
+test command_discovery::tests::peer_source_preserves_exact_store_identity_through_updates_and_reconstruction ... ok
+test command_discovery::tests::malformed_or_oversized_peer_sources_fail_before_publication ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 29 filtered out; finished in 0.00s
+
+     Running tests/counter_service.rs (target/debug/deps/counter_service-1be0e026107a32da)
+
+running 8 tests
+test command_discovery::updates::versioned_source_rejects_zero_generation_before_storage_is_opened ... ok
+test command_discovery::peer_source::invalid_peer_source_refuses_before_opening_store ... ok
+test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_tcp ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_tcp ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 93 filtered out; finished in 3.31s
+

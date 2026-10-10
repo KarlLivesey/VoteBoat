@@ -392,11 +392,15 @@ versioned acknowledgement hands the existing authenticated session to the binary
 protocol, without losing its credential guard. The original command deadline
 bounds all refreshes. The server owner loop remains the progress driver.
 
-Each response uses the recovered source store session as its hint generation and
-a30-second TTL. Within a source process its configured endpoints cannot change.
-Restart reads a new view and obtains a new store session. This CLI starts a new
-client cache per invocation and does not compare generations from different
-sources. It does not persist or reuse an address after a failed refresh.
+The original command v1 profile uses the recovered source store session as its
+hint generation and a30-second TTL. Command v2 uses an explicit generation and
+supports checked volatile address updates. Slice209i adds an exact Raft peer
+profile, `voteboat-peer-discovery-v1 GENERATION`, binding each hint to its node,
+store ID and incarnation. It uses the same authenticated source protocol and
+bounded updates; command identities cannot resolve its entries. See
+[source formats and restart rules](COUNTER_SERVICE.md) for configuration.
+The command CLI starts a new cache per invocation and does not compare
+generations from different sources or persist addresses after failed refresh.
 
 Only addresses come from discovery. Requested service identities, certificate
 pins and TLS names remain client configuration. The source cannot redirect a
@@ -405,7 +409,7 @@ exercise changed versus bootstrap addresses, access denial, missing mappings,
 source-name refusal and original retries after checkpoint/restart over TCP and
 QUIC peer clusters. These are loopback tests, not separate-host certification.
 
-This integrates endpoint discovery only. The executable does not yet host the
-Directory application, publish committed responsibility manifests, or orchestrate
-placement. See COUNTER_SERVICE.md for commands and REMOTE_MANIFESTS.md for the
-separate Rust manifest-discovery component.
+The peer-source profile is consumed through the public Rust discovery API;
+automatic counter Raft-startup consumption remains separate. The directory
+executable and remote manifest provider supply responsibility lookup separately;
+peer endpoint hints do not publish responsibility manifests or change placement.

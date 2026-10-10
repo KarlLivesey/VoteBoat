@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.04s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 7 tests
+test command_discovery::tests::malformed_versioned_sources_are_rejected ... ok
+test command_discovery::tests::existing_source_views_observe_checked_address_updates_and_close_independently ... ok
+test command_discovery::tests::explicit_generation_survives_binding_and_legacy_sources_keep_session_generation ... ok
+test command_discovery::tests::only_the_exact_latest_update_can_be_retried ... ok
+test command_discovery::tests::invalid_updates_preserve_all_current_hints_and_generation ... ok
+test command_discovery::tests::peer_source_preserves_exact_store_identity_through_updates_and_reconstruction ... ok
+test command_discovery::tests::malformed_or_oversized_peer_sources_fail_before_publication ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 29 filtered out; finished in 0.00s
+

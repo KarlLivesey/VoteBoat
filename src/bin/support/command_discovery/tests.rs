@@ -106,3 +106,94 @@ fn malformed_versioned_sources_are_rejected() {
         assert!(Source::parse(text).is_err());
     }
 }
+
+fn raft_peer(node: u64, store: u128, incarnation: u64) -> PeerIdentity {
+    use voteboat::identity::*;
+    PeerIdentity {
+        node: NodeId::new(node).unwrap(),
+        store: StoreIdentity {
+            id: StoreId::new(store).unwrap(),
+            incarnation: StoreIncarnation::new(incarnation).unwrap(),
+        },
+    }
+}
+#[test]
+fn peer_source_preserves_exact_store_identity_through_updates_and_reconstruction() {
+    let file = "voteboat-peer-discovery-v1 10\n1 401 7 127.0.0.1:4001 node1.voteboat.test\n2 402 9 127.0.0.1:4002 node2.voteboat.test\n";
+    let mut source = Source::parse(file).unwrap();
+    source.bind_session(500);
+    let peer = raft_peer(1, 401, 7);
+    let before = source.resolve(peer, MonoTime(5)).unwrap();
+    assert_eq!(before.generation.get(), 10);
+    for wrong in [
+        raft_peer(1, 401, 8),
+        raft_peer(1, 402, 7),
+        raft_peer(2, 401, 7),
+        service_access::transport_identity(1, false),
+    ] {
+        assert_eq!(
+            source.resolve(wrong, MonoTime(5)),
+            Err(DiscoveryError::Missing)
+        );
+    }
+    source.update(&["10", "11", "1", "127.0.0.1:5001"]).unwrap();
+    assert_eq!(
+        source.resolve(peer, MonoTime(5)).unwrap().endpoint.port(),
+        5001
+    );
+    assert_eq!(source.current.borrow().identities[&1], peer);
+    assert_eq!(
+        source.current.borrow().endpoints[0].server_name,
+        "node1.voteboat.test"
+    );
+    let mut original = Source::parse(file).unwrap();
+    assert_eq!(original.resolve(peer, MonoTime(5)).unwrap(), before);
+    let mut saved =
+        Source::parse(&file.replace("v1 10", "v1 11").replace(":4001", ":5001")).unwrap();
+    assert_eq!(
+        saved.resolve(peer, MonoTime(5)).unwrap(),
+        source.resolve(peer, MonoTime(5)).unwrap()
+    );
+    assert_eq!(
+        source
+            .resolve(raft_peer(2, 402, 9), MonoTime(5))
+            .unwrap()
+            .endpoint
+            .port(),
+        4002
+    );
+}
+
+#[test]
+fn malformed_or_oversized_peer_sources_fail_before_publication() {
+    for text in [
+        "voteboat-peer-discovery-v1 0\n1 401 7 127.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1 extra\n1 401 7 127.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n",
+        "voteboat-peer-discovery-v1 1\n0 401 7 127.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n4097 401 7 127.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 0 7 127.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 0 127.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 127.0.0.1:0 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 0.0.0.0:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 224.0.0.1:4001 node1.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 127.0.0.1:4001 invalid/name\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 127.0.0.1:4001 node1.voteboat.test\n1 402 7 127.0.0.1:4002 node2.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 127.0.0.1:4001 node1.voteboat.test\n2 401 7 127.0.0.1:4002 node2.voteboat.test\n",
+        "voteboat-peer-discovery-v1 1\n1 401 7 127.0.0.1:4001 node1.voteboat.test\n2 402 7 127.0.0.1:4001 node2.voteboat.test\n",
+    ] {
+        assert!(Source::parse(text).is_err(), "{text}");
+    }
+    let mut text = String::from("voteboat-peer-discovery-v1 1\n");
+    for node in 1..=64 {
+        text.push_str(&format!(
+            "{node} {node} 1 127.0.0.1:{} node{node}.voteboat.test\n",
+            4000 + node
+        ));
+    }
+    assert!(Source::parse(&text).is_ok());
+    assert!(
+        Source::parse(&(text.clone() + "65 65 1 127.0.0.1:4065 node65.voteboat.test\n")).is_err()
+    );
+    assert!(Source::parse(&(text + &" ".repeat(16 * 1024))).is_err());
+}
