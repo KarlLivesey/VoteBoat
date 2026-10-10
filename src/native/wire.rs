@@ -181,9 +181,6 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         | Rpc::CommittedLearnerRepairSnapshot { snapshot } => {
             validate_snapshot(m, version, snapshot)?
         }
-        Rpc::SnapshotAck { index } if *index == 0 => {
-            return Err(WireError::InvalidMessage("snapshot ack boundary"))
-        }
         Rpc::Compacted { index, term } => {
             if *index == 0 {
                 return Err(WireError::InvalidMessage("compacted boundary"));

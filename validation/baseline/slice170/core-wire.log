@@ -1,0 +1,78 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.95s
+     Running tests/raft.rs (target/debug/deps/raft-6099308b6abe1197)
+
+running 22 tests
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test three_node_history_with_only_host_components ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/snapshot.rs (target/debug/deps/snapshot-12f4b198e21e5cbc)
+
+running 22 tests
+test durable_pin_switch_conformance_with_host_provider ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test native::downstream_snapshot_codec_is_used_and_incompatible_version_is_rejected ... ok
+test native::bounded_codec_rejects_oversize_lengths_even_with_valid_checksums ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test native::native_files_restore_checkpoint_plus_tail_and_exclude_concurrent_writers ... ok
+test native::native_snapshot_conformance_and_restart_session_fencing ... ok
+test native::pins_survive_restart_and_legacy_manifest_upgrade ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test native::staged_corruption_is_detected_against_submitted_bytes_before_sealing ... ok
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+test native::native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test buffered_compaction_schedules_survive_native_file_reopen_and_original_retry ... ok
+test native::native_snapshot_catchup_history_and_actual_files ... ok
+test native::corruption_truncation_missing_data_and_identity_mismatch_fail_closed ... ok
+test native::interrupted_chunks_seals_and_publication_recover_old_or_complete_new ... ok
+test native::snapshot_log_failure_and_lost_application_completion_recover_without_false_ack ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running tests/wire.rs (target/debug/deps/wire-7ec290ce383bccd5)
+
+running 14 tests
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+test native::frame_command_entry_count_and_decoded_memory_limits_are_symmetric ... ok
+test native::wire_two_recursive_weighted_policy_survives_without_changing_bootstrap ... ok
+test native::native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip ... ok
+test native::authority_format_is_explicit_bounded_and_preserves_membership_payloads ... ok
+test native::valid_checksums_cannot_hide_unbounded_lengths_or_invalid_identity_and_entries ... ok
+test native::snapshot_policy_shape_weights_membership_and_payload_budgets_are_checked ... ok
+test native::explicit_wire_two_roundtrips_all_configuration_phases_and_joint_final_snapshots ... ok
+test native::readiness_format_checks_envelope_capabilities_and_explicit_version ... ok
+test native::wire_two_membership_base_rejects_invalid_history_and_operation_sets ... ok
+test native::wire_two_resource_limits_include_configurations_and_checkpoint_operation_history ... ok
+test native::every_single_bit_truncation_trailing_data_and_unknown_version_fail_closed ... ok
+test native::wire_two_maximum_checkpoint_operation_set_remains_bounded_and_lossless ... ok
+test native::wire_two_integrity_truncation_and_valid_crc_hostile_configuration_fields_fail_closed ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.32s
+

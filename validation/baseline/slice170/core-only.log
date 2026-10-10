@@ -1,0 +1,41 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.97s
+     Running tests/raft.rs (target/debug/deps/raft-ef870167f3a6c747)
+
+running 10 tests
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test three_node_history_with_only_host_components ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/snapshot.rs (target/debug/deps/snapshot-6a44d99726b64e24)
+
+running 10 tests
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test durable_pin_switch_conformance_with_host_provider ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/wire.rs (target/debug/deps/wire-b55f96139125af94)
+
+running 1 test
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

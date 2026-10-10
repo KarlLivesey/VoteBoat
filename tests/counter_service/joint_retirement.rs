@@ -93,20 +93,19 @@ fn cut_leader(cluster: &mut Cluster, leader: usize, checkpoint: bool) {
     }
 }
 
-fn finish(cluster: &Cluster, leader: usize, joint: &str) {
+fn finish(cluster: &mut Cluster, leader: usize, joint: &str) {
     assert!(cluster
         .ok(leader, &["configuration-status", "18001"])
         .contains("action=finalize_requires_authorization"));
-    assert!(cluster
-        .ok(leader, &["configure-record", joint])
-        .contains("duplicate=true"));
+    assert!(leader_write(cluster, &["configure-record", joint]).contains("duplicate=true"));
     let conflict = joint.replacen("1 2 3", "1 2 99", 1);
     let refused = cluster.request(leader, &["configure-record", &conflict]);
     assert!(!refused.status.success());
     assert!(String::from_utf8_lossy(&refused.stdout).contains("conflicts with retained record"));
-    assert!(cluster
-        .ok(leader, &["configure-record", "final 18001 2 3"])
-        .contains("committed_index="));
+    assert!(
+        leader_write(cluster, &["configure-record", "final 18001 2 3"])
+            .contains("committed_index=")
+    );
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         let complete = (1..=3).all(|id| {
@@ -239,7 +238,7 @@ fn history(quic: bool, checkpoint: bool) {
     assert_ne!(replacement, leader);
     cluster.start(leader, "recover-member");
     cluster.wait_configuration_status(leader, "18001");
-    finish(&cluster, replacement, &joint);
+    finish(&mut cluster, replacement, &joint);
     cluster.stop();
     verify_files(&cluster, leader);
     for id in 1..=3 {

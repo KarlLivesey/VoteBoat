@@ -5155,3 +5155,26 @@ ReadNotReady and a nonzero shutdown exit. Those are retained follow-up failures,
 not evidence of completed platform validation. The linked plan now includes
 these service regressions alongside recorded lifecycle schedules. Full P0–P7
 and macOS acceptance remain unproven.
+
+### Slice170 — service snapshot refusals and exact retries
+
+The first local service run passed47/48, retaining a QUIC child failure at
+`Wire(InvalidMessage("snapshot ack boundary"))`. The native codec now carries the
+real core's zero-index, higher-term snapshot refusal in formats1–7. A deterministic
+public-core test reproduced the failure before the fix and now checks encoding,
+no snapshot installation/commit credit, same-term refusal rejection, higher-term
+persistence and recovery. Core quorum and persistence rules are unchanged.
+
+The final service run passes48/48 in41.17s, including TCP/QUIC maintenance,
+election, membership and restart histories. Raft/snapshot/wire regression targets
+pass58 all-feature and21 core-only tests. The CLI's exact read-not-ready retry
+has fake-peer coverage; uncertain writes remain terminal and test-owned retries
+retain their original identities. Shutdown and checkpoint failures print the
+actual child log. Formatting and both strict Clippy profiles pass; detailed
+commands, raw development failures and limitations are retained in
+[slice170 evidence](baseline/slice170/README.md).
+
+These Linux results do not prove the earlier macOS shutdown failure fixed.
+Base-commit test jobs remained in progress at inspection; their lint job passed.
+Broader recorded lifecycle faults, discovery refresh and full P0–P7 acceptance
+remain open. No new power-loss, multi-host or complete protocol proof is claimed.

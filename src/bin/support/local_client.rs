@@ -221,7 +221,9 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
             }
             match exchange(base, id, text.as_bytes(), deadline, auth.as_ref(), start) {
                 Attempt::Unavailable => (),
-                Attempt::Reply(response) if response == NOT_LEADER => (),
+                Attempt::Reply(response)
+                    if response == NOT_LEADER
+                        || command == ["read"] && response == "ERR NotRead(ReadNotReady)\n" => {}
                 Attempt::Reply(response) => return terminal(response),
                 Attempt::Interrupted(reason) => return interrupted(command, reason),
             }

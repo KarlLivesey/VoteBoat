@@ -1,0 +1,2 @@
+ready node=3 peer=127.0.0.1:14099 transport=Quic command=127.0.0.1:14199
+Error: "Peer(Roster(Transport(Wire(InvalidMessage(\"snapshot ack boundary\")))))"

@@ -88,6 +88,8 @@ pub enum Rpc {
     Snapshot {
         snapshot: Box<Snapshot>,
     },
+    /// Zero index refuses an older-term snapshot and conveys the durable term.
+    /// A successful reply must match the exact requested snapshot boundary.
     SnapshotAck {
         index: u64,
     },

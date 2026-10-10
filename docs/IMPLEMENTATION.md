@@ -94,9 +94,48 @@ strict profiles clean while advancing the remaining capability work.
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
 | Completed: bounded operational event reporting168 | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded aggregate event retention, cursor-gap reporting, failing-sink isolation and TCP/QUIC service export/restart checks; detailed evidence below. |
-| Current: recorded lifecycle fault schedules and service regressions | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, schema16 cancellation semantics, deterministic fault fixtures and prior-commit CI failures. | Resolve the recorded transient read/write/configuration and shutdown failures without weakening assertions; recorded crash/restart cuts preserve exact IDs and prevent dual active owners; keep unexplored combinations explicit. |
+| Current: recorded lifecycle fault schedules and remaining platform regressions | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, schema16 cancellation semantics, deterministic fault fixtures and slice170 service fixes. | Recorded crash/restart cuts preserve exact IDs and prevent dual active owners; diagnose any repeated macOS shutdown failure using the new child-process logs; keep unexplored combinations explicit. |
 | Next: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
 | Following: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, discovery refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
+
+### Slice170 schema plan — observed service retries and shutdown evidence
+
+Purpose: close concrete service failures before expanding lifecycle schedules;
+advances usable service, P0/P4 validation and the current mini-plan item. The
+next two deliverables remain bounded discovery refresh and the baseline audit.
+
+Data/API: keep the existing bounded CLI exchange and its absolute deadline.
+Auto read may retry the exact `NotRead(ReadNotReady)` refusal; unknown writes
+still return to the caller. Existing test-owned retry helpers preserve exact
+write/configuration operation IDs and bytes. No quorum, storage, persistent
+schema, provider, or success-reply contract changes.
+
+State/ownership: an auto-read attempt closes its socket before another bounded
+attempt; the original deadline/attempt limit still bounds all work. Explicit
+write/configuration retries use the existing deduplication protocol, not fresh
+operations. No unrelated errors become retryable. Shutdown continues to require
+successful drain and joins; record each child exit plus its actual service log
+on failure in the test output retained by CI.
+
+Acceptance: fake-peer CLI history rejects read-not-ready then serves a read;
+unknown writes still stop with original identity, deadline and malformed/denied
+reply tests remain. Run the concrete event, maintenance and joint-retirement
+histories and the full service target with unchanged data/recovery assertions.
+Diagnose a nonzero shutdown from retained logs before claiming it fixed; do not
+turn an unexplained failed process into a successful shutdown. Keep strict lint
+and formatting at zero; macOS claims require actual CI evidence.
+
+Observed follow-up: the first48-test service run passed47 histories but QUIC
+maintenance failed. Its node3 log records `snapshot ack boundary`: the core emits
+`SnapshotAck { index: 0 }` for an older-term snapshot, while the native codec
+rejects that existing refusal. Permit that semantic value in all seven existing
+wire versions without changing framing or the core's acknowledgement rules.
+The refusal carries the already-durable current term; no snapshot data, matching
+prefix or commit evidence is created. An old leader must persist the higher term
+before further operation; a same-term zero index still cannot satisfy its exact
+snapshot request. Add a deterministic real-core delayed-snapshot history through
+each codec, check unchanged application/commit boundaries and durable restart,
+then rerun maintenance and all service histories. No new provider seam is needed.
 
 ### Slice169 schema plan — unresolved creation cancellation
 
@@ -15765,3 +15804,38 @@ P5/P6. The full P0–P7 goal remains open; recorded lifecycle schedules, bounded
 discovery refresh, broader membership/platform/fault evidence remain in the linked
 mini/macro plan. Cancellation does not reclaim provisioned storage or replace the
 forward-only transfer protocol.
+
+### Slice170 — service refusals, exact retries and retained failure evidence
+
+Fixed a real native codec/core mismatch: an older-term snapshot produces a
+zero-index SnapshotAck refusal, but the codec rejected that valid reply and
+terminated the service. All seven existing wire versions now carry the refusal.
+The core still rejects a same-term zero index for a live snapshot request and
+persists a higher term without granting snapshot, matching-prefix or commit
+credit. No wire layout, persistence schema or quorum rule changed.
+
+The automatic local CLI retries the exact read-not-ready refusal for reads under
+its existing absolute deadline and attempt bound. Writes still return unknown
+outcomes to the caller. Maintenance and joint-retirement test callers now use
+the existing explicit retry helpers with unchanged operation IDs and payloads
+after LeadershipChanged. Shutdown still requires successful drain and joins;
+failures now print the actual last-start child log and exit status. Checkpoint
+timeouts retain the final reply and child log too.
+
+Validation: the first service run passed47/48 and retained node3's codec failure.
+A deterministic real-core delayed-snapshot history reproduced it before the
+codec change. The final service run passes48/48 in41.17s. The all-feature Raft,
+snapshot and wire targets pass58 tests; core-only versions pass21. The final
+refusal test passes through sizing, provided-buffer encoding and decoding in
+all seven versions, checks unchanged commit/application state, and recovers the
+persisted higher term. Both strict Clippy profiles pass with zero diagnostics.
+See `validation/baseline/slice170` for raw runs and exact verification commands.
+
+The earlier macOS shutdown failure had no child log and was not reproduced
+locally; it is not declared fixed by these Linux runs. Base ecaa2ab CI had passed
+formatting/both Clippy profiles but its Linux/macOS test jobs were still running
+when inspected. Macro review: this advances the usable-service validation
+milestone and C07 conformance; no whole milestone completes. The linked current
+work remains recorded lifecycle schedules and unresolved platform evidence;
+bounded discovery refresh and the full baseline audit follow. Full P0–P7 remains
+active, with P8/Windows deferred and RPL-1.5 unchanged.

@@ -64,6 +64,7 @@ struct Cluster {
     root: PathBuf,
     base: u16,
     children: Vec<Option<Child>>,
+    service_logs: BTreeMap<usize, PathBuf>,
     endpoints: Option<PathBuf>,
     deployment: Option<PathBuf>,
     admin_plan: Option<PathBuf>,
@@ -126,6 +127,7 @@ impl Cluster {
             root,
             base,
             children: (0..3).map(|_| None).collect(),
+            service_logs: BTreeMap::new(),
             endpoints: None,
             deployment: None,
             admin_plan: None,
@@ -153,7 +155,9 @@ impl Cluster {
         // early peers can connect to a placeholder listener for a later child.
         self.listeners.clear();
         self.udp_sockets.clear();
-        let log = fs::File::create(self.root.join(format!("{id}-{mode}.log"))).unwrap();
+        let log_path = self.root.join(format!("{id}-{mode}.log"));
+        let log = fs::File::create(&log_path).unwrap();
+        self.service_logs.insert(id, log_path);
         let tls = self.tls.clone().unwrap_or_else(|| {
             PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls")
         });
@@ -249,9 +253,10 @@ impl Cluster {
         let output = self.request(id, args);
         assert!(
             output.status.success(),
-            "{args:?}: {} {}",
+            "node {id} {args:?}: {} {}\nservice log: {}",
             String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr)
+            String::from_utf8_lossy(&output.stderr),
+            self.service_log(id)
         );
         String::from_utf8(output.stdout).unwrap()
     }
@@ -314,19 +319,35 @@ impl Cluster {
             }
         }
         let deadline = Instant::now() + Duration::from_secs(15);
-        for child in &mut self.children {
-            if let Some(c) = child.as_mut() {
+        for i in 0..self.children.len() {
+            if self.children[i].is_some() {
                 loop {
-                    if let Some(status) = c.try_wait().unwrap() {
-                        assert!(status.success());
+                    if let Some(status) = self.children[i].as_mut().unwrap().try_wait().unwrap() {
+                        assert!(
+                            status.success(),
+                            "node {} exit {status}: {}",
+                            i + 1,
+                            self.service_log(i + 1)
+                        );
                         break;
                     }
-                    assert!(Instant::now() < deadline, "shutdown timeout");
+                    assert!(
+                        Instant::now() < deadline,
+                        "node {} shutdown timeout: {}",
+                        i + 1,
+                        self.service_log(i + 1)
+                    );
                     std::thread::sleep(Duration::from_millis(10));
                 }
-                *child = None;
+                self.children[i] = None;
             }
         }
+    }
+    fn service_log(&self, id: usize) -> String {
+        self.service_logs.get(&id).map_or_else(
+            || "no service log".into(),
+            |path| fs::read_to_string(path).unwrap_or_else(|e| format!("{}: {e}", path.display())),
+        )
     }
 }
 impl Drop for Cluster {
@@ -1688,6 +1709,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         Some(b"OK outcome=Value(7)".as_slice()),
         Some(b"UNKNOWN LeadershipChanged\n".as_slice()),
         Some(b"ERR Overloaded\n".as_slice()),
+        Some(b"ERR NotRead(ReadNotReady)\n".as_slice()),
     ] {
         let mut cluster = Cluster::new();
         let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));
@@ -1716,6 +1738,39 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         );
         std::fs::remove_dir_all(&cluster.root).unwrap();
     }
+}
+#[test]
+fn automatic_read_retries_only_the_exact_read_not_ready_refusal() {
+    for reply in [
+        b"ERR NotRead(ReadNotReady)\n".as_slice(),
+        b"ERR NotRead(StaleRead)\n",
+    ] {
+        let mut cluster = Cluster::new();
+        let first = reply_peer(cluster.take_listener(101), Some(reply));
+        let second = cluster.take_listener(102);
+        if reply == b"ERR NotRead(ReadNotReady)\n" {
+            let second = reply_peer(second, Some(b"OK value=7\n"));
+            assert_eq!(cluster.routed(&["read"]), "OK value=7\n");
+            assert_eq!(second.join().unwrap(), b"read\n");
+        } else {
+            second.set_nonblocking(true).unwrap();
+            assert!(!cluster.target("auto", &["read"]).status.success());
+            assert_eq!(
+                second.accept().unwrap_err().kind(),
+                std::io::ErrorKind::WouldBlock
+            );
+        }
+        assert_eq!(first.join().unwrap(), b"read\n");
+        fs::remove_dir_all(&cluster.root).unwrap();
+    }
+    let mut cluster = Cluster::new();
+    let first = reply_peer(
+        cluster.take_listener(101),
+        Some(b"ERR NotRead(ReadNotReady)\n"),
+    );
+    assert!(!cluster.request(1, &["read"]).status.success());
+    assert_eq!(first.join().unwrap(), b"read\n");
+    fs::remove_dir_all(&cluster.root).unwrap();
 }
 
 #[test]
