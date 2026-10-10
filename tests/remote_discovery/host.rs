@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
+#[path = "reconnect.rs"]
+mod reconnect;
 use std::{cell::RefCell, collections::VecDeque, rc::Rc};
 type Bytes = Rc<RefCell<VecDeque<u8>>>;
 pub(super) struct HostSession {

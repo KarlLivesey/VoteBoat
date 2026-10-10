@@ -1,0 +1,16 @@
+    Blocking waiting for file lock on build directory
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: the `Err`-variant returned from this function is very large
+  --> src/native/remote_discovery/reconnect.rs:70:10
+   |
+70 |     ) -> Result<Self, (DiscoveryError, NativeRemotePeerDiscovery<C::Session>, C)> {
+   |          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the `Err`-variant is at least 741 bytes
+   |
+   = help: try reducing the size of `(discovery::DiscoveryError, native::remote_discovery::client::NativeRemotePeerDiscovery<<C as connect::PeerConnector>::Session>, C)`, for example by boxing large elements or replacing it with `Box<(discovery::DiscoveryError, native::remote_discovery::client::NativeRemotePeerDiscovery<<C as connect::PeerConnector>::Session>, C)>`
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#result_large_err
+   = note: `-D clippy::result-large-err` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::result_large_err)]`
+
+error: could not compile `voteboat` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (lib test) due to 1 previous error

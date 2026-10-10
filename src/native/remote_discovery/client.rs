@@ -33,6 +33,12 @@ pub struct NativeRemotePeerDiscovery<S> {
     failed: bool,
 }
 impl<S: SecureSession> NativeRemotePeerDiscovery<S> {
+    pub(super) fn reconnect_binding(&self) -> (SessionBinding, MonoTime) {
+        (self.channel.binding, self.now)
+    }
+    pub(super) fn is_closed(&self) -> bool {
+        self.closed
+    }
     pub fn new(
         session: S,
         source: PeerIdentity,
@@ -70,6 +76,22 @@ impl<S: SecureSession> NativeRemotePeerDiscovery<S> {
     /// authenticated session must have a later generation in the same local
     /// recovered store and authenticate the same provisioned source identity.
     pub fn replace_session(&mut self, session: S) -> Result<S, (RemoteDiscoveryError, S)> {
+        if !self.channel.has_session() {
+            return Err((DiscoveryError::Unavailable.into(), session));
+        }
+        self.attach_session(session)
+            .map(|old| old.expect("attached source"))
+    }
+    pub(super) fn retire_failed_session(&mut self) {
+        if self.failed && self.pending.is_none() {
+            self.channel.close();
+            drop(self.channel.take_session());
+        }
+    }
+    pub(super) fn attach_session(
+        &mut self,
+        session: S,
+    ) -> Result<Option<S>, (RemoteDiscoveryError, S)> {
         if self.closed || !self.failed || self.pending.is_some() {
             return Err((DiscoveryError::Unavailable.into(), session));
         }
@@ -82,11 +104,11 @@ impl<S: SecureSession> NativeRemotePeerDiscovery<S> {
         if channel.binding.local != old.local || channel.binding.generation <= old.generation {
             return Err((DiscoveryError::WrongBinding.into(), channel.into_session()));
         }
-        let old = std::mem::replace(&mut self.channel, channel);
+        let mut old = std::mem::replace(&mut self.channel, channel);
         self.sequence = 0;
         self.negative = None;
         self.failed = false;
-        Ok(old.into_session())
+        Ok(old.take_session())
     }
     /// Keep the accepted slot until its response or deadline; suppress publication.
     pub fn cancel(&mut self, request: RefreshRequest) -> bool {
@@ -97,8 +119,17 @@ impl<S: SecureSession> NativeRemotePeerDiscovery<S> {
         true
     }
     pub fn into_session(self) -> Result<S, Box<Self>> {
-        if (self.closed || self.failed) && self.pending.is_none() {
+        if (self.closed || self.failed) && self.pending.is_none() && self.channel.has_session() {
             Ok(self.channel.into_session())
+        } else {
+            Err(Box::new(self))
+        }
+    }
+    /// Reclaim a stopped source, including automatic reconnect's detached state.
+    /// None means the failed session was already dropped to release its lease.
+    pub fn into_optional_session(mut self) -> Result<Option<S>, Box<Self>> {
+        if (self.closed || self.failed) && self.pending.is_none() {
+            Ok(self.channel.take_session())
         } else {
             Err(Box::new(self))
         }

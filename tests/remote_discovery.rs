@@ -19,7 +19,13 @@ mod host;
 mod renewal;
 #[path = "remote_discovery/scenario.rs"]
 mod scenario;
+#[cfg(feature = "tls")]
+#[path = "remote_discovery/source_reconnect.rs"]
+mod source_reconnect;
 mod support;
+#[cfg(feature = "tls")]
+#[path = "remote_discovery/tcp_reconnect.rs"]
+mod tcp_reconnect;
 use voteboat::{discovery::*, native::remote_discovery::*, runtime::MonoTime, secure::*};
 fn peer(id: u64) -> PeerIdentity {
     PeerIdentity {

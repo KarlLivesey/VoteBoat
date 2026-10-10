@@ -51,3 +51,18 @@ fn quic_authenticated_endpoint_leases_renew_without_changing_generation() {
     let b = sessions.remove(&(2, 1)).unwrap();
     renewal::exercise(a, b, MonoTime(now));
 }
+
+#[path = "../remote_discovery/source_reconnect.rs"]
+mod source_reconnect;
+#[test]
+fn quic_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup() {
+    let mut connectors = connectors();
+    let (mut sessions, now) = establish(&mut connectors, 0, 1);
+    let a = sessions.remove(&(1, 2)).unwrap();
+    let b = sessions.remove(&(2, 1)).unwrap();
+    drop(sessions);
+    let client = connectors.remove(0);
+    let server = connectors.remove(0);
+    let endpoint = server.local_addr();
+    source_reconnect::exercise(a, b, client, server, endpoint, MonoTime(now));
+}

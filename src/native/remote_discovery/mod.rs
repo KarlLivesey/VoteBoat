@@ -16,6 +16,7 @@
 mod channel;
 mod client;
 mod codec;
+mod reconnect;
 mod server;
 use crate::{
     discovery::DiscoveryError,
@@ -23,6 +24,10 @@ use crate::{
     secure::{PeerIdentity, SessionBinding, SessionError},
 };
 pub use client::NativeRemotePeerDiscovery;
+pub use reconnect::{
+    ReconnectingPeerDiscovery, SourceReconnectConfig, SourceReconnectRejected,
+    SourceReconnectStatus,
+};
 pub use server::NativeDiscoveryResponder;
 
 /// Wire version is independent of Raft's wire format. Use a dedicated session.

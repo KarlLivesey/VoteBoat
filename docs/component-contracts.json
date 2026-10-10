@@ -2671,6 +2671,33 @@
         "tests/directory_service/peer_credentials.rs"
       ],
       "scope": "Expected/replacement credential generations are distinct from connection, store and membership generations. Native prepared key/pin replacement preserves the exact peer identity set, wire version, endpoint routes, hard limits and connection-generation counters. Rejected material is returned intact. Accepted old tickets retain capacity through one terminal poll; old leases revoke established sessions and suppress late successful handshakes. Close/drop revoke wrapper leases; underlying provider reclaim requires close and drain. No file loading, durable record, restart policy, membership change or executable rollout is supplied by this mechanism. Wrap before exposing sessions; prior raw sessions do not carry wrapper leases. Host authorizes and durably records the intended rollout before publication. Slice207b1 binds restart to the exact recorded generation, owner and SHA-256 of local TLS bytes, wire version and complete peer identity/pin/name map before sockets or stores open. A host-authorized initial generation may omit a record; the host must preserve the journal and serialize its writer. Native startup recovers recorded but unpublished material; TCP/QUIC three-group data/retries and QUIC checkpoints survive live rotation and restart. Rejected startup drains and returns original resources. Filesystem loading, authenticated executable rollout and cluster coordination remain external to this startup adapter. Counter startup/admin integration207b2 uses explicit generation plus immutable key-directory manifests and separate durable peer records. Commands require permission on every actual local group, without an implicit group1. TCP/QUIC single/multi-group executable histories preserve writes, reads and retries through new CA/leaf/key rollout and unread-reply/process-loss recovery. Bad/stale/missing startup selection refuses; command-channel keys remain independent. Slice207b3 supplies the same commands for transfer metadata/source/target roles and directory authorities. TCP/QUIC process histories retain original split receipts/data and committed manifests across peer key replacement, unread replies, checkpoint/restart and stale/omitted startup selection. Directory command-access reload uses the same worker independently. Cluster-wide automatic coordination and broader platform/failure evidence remain external."
+    },
+    {
+      "design_id": "C17",
+      "public_contract": "ReconnectingPeerDiscovery / SourceReconnectConfig",
+      "operations": [
+        "new",
+        "source",
+        "resolve",
+        "invalidate",
+        "poll_discovery",
+        "discovery_pending",
+        "discovery_deadline",
+        "status",
+        "last_connect_error",
+        "close",
+        "is_drained",
+        "into_parts",
+        "NativeRemotePeerDiscovery::into_optional_session"
+      ],
+      "native": "Dedicated public PeerConnector drives authenticated source-session replacement for NativeRemotePeerDiscovery",
+      "conformance": [
+        "tests/remote_discovery/reconnect.rs",
+        "tests/remote_discovery/source_reconnect.rs",
+        "tests/remote_discovery/tcp_reconnect.rs",
+        "tests/quic_connect/remote_discovery.rs"
+      ],
+      "scope": "Opt-in bounded source reconnection via DiscoveryDriver; one dedicated connector, explicit numeric endpoint, exact preprovisioned peer/store pin and host-reserved nonoverlapping connection generations later than the initial session. Construction rejects invalid limits/time/binding, closed source or pending owners without closing either provider. Retire and drop failed sessions before dialing to release native QUIC same-peer socket leases, retaining cache/floors and source identity. One visit advances either source protocol or connector; rejected attempts consume generations, retry is delayed and finite range exhaustion stops admission. Check exact accepted completion, local store session, source identity, generation and wire before publication. Cancellation/deadline/close retain work until its actual terminal receipt; provider violations stop new attempts and retain unidentified ownership. Reclamation distinguishes detached failed sessions through optional-session extraction. No hidden runtime, source endpoint discovery, trust provisioning, durable endpoint cache, executable provisioning or recursive ownership authority."
     }
   ],
   "not_yet_implemented": [

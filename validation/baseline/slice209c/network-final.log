@@ -1,0 +1,37 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.92s
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-95ac16d5a239c80e)
+
+running 15 tests
+test credential_refresh::native::native_replace_is_monotonic_returns_material_and_close_is_scoped ... ok
+test failed_construction_returns_socket_without_starting_protocol_work ... ok
+test discovered::discovered_quic_dial_validates_endpoint_and_cannot_replace_peer_pin ... ok
+test cancellation_and_expiry_keep_exact_terminal_slots_and_reject_stale_or_wrong_requests ... ok
+test discovered::downstream_hint_provider_selects_actual_authenticated_quic_endpoint ... ok
+test discovered::refreshed_quic_hint_selects_new_address_and_retained_peer_lease_bounds_reconnect ... ok
+test credential_refresh::native::native_transport_returns_exact_accepted_batch_as_failed_after_revocation ... ok
+test one_socket_per_node_establishes_multiple_peers_and_close_preserves_transferred_sessions ... ok
+test remote_discovery::quic_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test remote_discovery::driven::quic_connector_poll_drives_remote_lookup_and_authenticates_target ... ok
+test retired_leases_release_socket_routes_for_fresh_generations ... ok
+test credential_refresh::quic_rotation_revokes_old_io_and_reconnect_preserves_identity ... ok
+test shared_quic_connector_preserves_selected_versions_and_rejects_mismatches ... ok
+test remote_discovery::quic_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup ... FAILED
+
+failures:
+
+---- remote_discovery::quic_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup stdout ----
+
+thread 'remote_discovery::quic_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup' (3116313) panicked at tests/quic_connect/../remote_discovery/source_reconnect.rs:163:5:
+source reconnect stalled: Exhausted, Some(Overloaded)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    remote_discovery::quic_source_reconnect_retains_floors_live_cache_and_drains_pending_lookup
+
+test result: FAILED. 14 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.40s
+
+error: test failed, to rerun pass `--test quic_connect`

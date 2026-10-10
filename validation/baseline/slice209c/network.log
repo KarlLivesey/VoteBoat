@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0308]: mismatched types
+  --> tests/remote_discovery/tcp_reconnect.rs:57:16
+   |
+57 |         if let Some(mut dialer) = connector.into_dialer().ok().unwrap() {
+   |                ^^^^^^^^^^^^^^^^   ------------------------------------- this expression has type `NativeTcpDialer`
+   |                |
+   |                expected `NativeTcpDialer`, found `Option<_>`
+   |
+   = note: expected struct `NativeTcpDialer`
+                found enum `Option<_>`
+help: you might have meant to use field `sender` whose type is `Option<SyncSender<voteboat::native::dial::Job>>`
+   |
+57 |         if let Some(mut dialer) = connector.into_dialer().ok().unwrap().sender {
+   |                                                                        +++++++
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (test "remote_discovery") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

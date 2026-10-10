@@ -1,5 +1,16 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209c adds bounded automatic source-session reconnection through a dedicated
+public PeerConnector. Host and real TCP/TLS/QUIC histories preserve cache floors
+and unrelated live hints, reject stale replacement hints, and drain exact owned
+work. QUIC requires dropping the failed session before reusing its per-peer
+socket lease; the remote cache remains in place. Outer connector polling drives
+source repair without manual resolver progress. Executable source provisioning,
+recursive restart/parent-offline integration, durable discovery floors and
+broader platform/fault acceptance remain unclosed; this is not full209 or P5
+completion. The inventory now has108 entries; five obligation reviews leave103
+entries unreviewed by that ledger.
+
 Slice209b adds opt-in owned discovery progress through the existing connector and
 Node poll. Bounded waiting requests avoid the reproduced50ms-lease/100ms-backoff
 starvation. Host checks preserve request/terminal ownership, and native TCP Node

@@ -19,7 +19,7 @@ use super::{
 use crate::{runtime::MonoTime, secure::*};
 /// One fixed input and output; each call moves at most one prefix in each direction.
 pub(super) struct Channel<S> {
-    session: S,
+    session: Option<S>,
     pub binding: SessionBinding,
     input: [u8; LENGTH],
     read: usize,
@@ -39,7 +39,7 @@ impl<S: SecureSession> Channel<S> {
             ));
         }
         Ok(Self {
-            session,
+            session: Some(session),
             binding,
             input: [0; LENGTH],
             read: 0,
@@ -67,8 +67,9 @@ impl<S: SecureSession> Channel<S> {
         if budget.io_calls == 0 {
             return Ok(None);
         }
-        self.session.poll(now, budget)?;
-        if require_authenticated(&self.session)? != self.binding {
+        let session = self.session.as_mut().ok_or(SessionError::Closed)?;
+        session.poll(now, budget)?;
+        if require_authenticated(session)? != self.binding {
             return Err(Error::Protocol);
         }
         self.write(budget.write_bytes)?;
@@ -78,6 +79,8 @@ impl<S: SecureSession> Channel<S> {
         let limit = (LENGTH - self.read).min(budget.read_bytes);
         match self
             .session
+            .as_mut()
+            .ok_or(SessionError::Closed)?
             .read_plaintext(&mut self.input[self.read..self.read + limit])
         {
             Ok(0) => return Err(SessionError::Closed.into()),
@@ -102,6 +105,8 @@ impl<S: SecureSession> Channel<S> {
         let count = (LENGTH - self.written).min(limit);
         match self
             .session
+            .as_mut()
+            .ok_or(SessionError::Closed)?
             .write_plaintext(&output[self.written..self.written + count])
         {
             Ok(n) if n <= count => self.written += n,
@@ -115,9 +120,17 @@ impl<S: SecureSession> Channel<S> {
         Ok(())
     }
     pub fn close(&mut self) {
-        self.session.close();
+        if let Some(session) = &mut self.session {
+            session.close();
+        }
+    }
+    pub fn has_session(&self) -> bool {
+        self.session.is_some()
+    }
+    pub fn take_session(&mut self) -> Option<S> {
+        self.session.take()
     }
     pub fn into_session(self) -> S {
-        self.session
+        self.session.expect("attached channel")
     }
 }

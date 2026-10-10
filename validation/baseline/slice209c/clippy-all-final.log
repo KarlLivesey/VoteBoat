@@ -1,0 +1,30 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: called `unwrap` on `source` after checking its variant with `is_some`
+   --> tests/remote_discovery/source_reconnect.rs:159:21
+    |
+158 |         if driver.status() == SourceReconnectStatus::Ready && source.is_some() {
+    |                                                               ---------------- the check is happening here
+159 |             return (source.unwrap(), now);
+    |                     ^^^^^^^^^^^^^^^
+    |
+    = help: try using `match`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#unnecessary_unwrap
+    = note: `-D clippy::unnecessary-unwrap` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_unwrap)]`
+
+error: could not compile `voteboat` (test "remote_discovery") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: called `unwrap` on `source` after checking its variant with `is_some`
+   --> tests/quic_connect/../remote_discovery/source_reconnect.rs:159:21
+    |
+158 |         if driver.status() == SourceReconnectStatus::Ready && source.is_some() {
+    |                                                               ---------------- the check is happening here
+159 |             return (source.unwrap(), now);
+    |                     ^^^^^^^^^^^^^^^
+    |
+    = help: try using `match`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#unnecessary_unwrap
+    = note: `-D clippy::unnecessary-unwrap` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_unwrap)]`
+
+error: could not compile `voteboat` (test "quic_connect") due to 1 previous error

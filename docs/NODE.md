@@ -142,3 +142,27 @@ assembly. A host using `Raft::with_batched_joint_repair` with the generic Node
 must supply a version-5 peer roster; construction refuses missing/older peer
 assemblies before service and returns all parts. Repair carries no commitment
 claim and never substitutes for a normal election. See WIRE_FORMAT.md.
+
+## Reconnecting endpoint discovery
+
+For opt-in remote endpoint discovery, supply a `DiscoveryConnector::new_driven`
+with `ReconnectingPeerDiscovery` as its resolver. Construct that resolver from
+an authenticated `NativeRemotePeerDiscovery`, a dedicated public
+`PeerConnector<Endpoint = SocketAddr>`, and `SourceReconnectConfig`. The
+connector must already trust the same source identity. Supply its numeric address
+and a reserved, nonoverlapping connection-generation range strictly later than
+the initial source session; the host remains responsible for fresh store sessions
+on restart. The source connector cannot discover its own source address.
+
+Ordinary Node polling drives lookups and source reconnection. A failed source
+retains valid cached hints and generation floors, releases its failed session,
+and retries after the configured delay. Each attempt consumes a generation;
+`status` and `last_connect_error` expose failure or exhaustion. One poll advances
+one phase under the caller's budget. Hints still grant no membership or ownership.
+
+Close, continue polling until `is_drained`, then reclaim with `into_parts`.
+`NativeRemotePeerDiscovery::into_optional_session` returns `None` if the failed
+session was already released; otherwise it returns the owned session. Finish
+any recovered native connector workers through their existing join APIs.
+Caches and floors are volatile; this does not provide executable source
+provisioning or a durable discovery service.

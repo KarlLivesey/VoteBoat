@@ -123,8 +123,9 @@ operation retries. These advance P2/P7 isolation without a general latency claim
 
 Completed209a fixes authenticated unchanged-endpoint lease renewal. Completed209b
 adds opt-in connector-owned discovery progress and bounded waiting admission,
-including native Node reconnect/reopen and QUIC connection evidence. Current209
-continues source-session reconnection and recursive restart/parent-offline
+including native Node reconnect/reopen and QUIC connection evidence. Completed209c
+adds connector-driven source-session reconnection with host/TCP/QUIC checks. Current209
+continues executable source provisioning and recursive restart/parent-offline
 composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
@@ -143,6 +144,91 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209c implemented — reconnect and release failed discovery sessions
+
+ReconnectingPeerDiscovery composes the existing remote cache/protocol with a
+dedicated public PeerConnector and the existing DiscoveryDriver. The source has
+an explicit numeric address and provisioned pin; the host reserves a finite
+nonoverlapping range of connection generations. One poll advances one phase.
+Accepted tickets survive deadline, connector errors and close until their exact
+terminal receipt. Invalid replies fence reconnection; exhaustion stops retries.
+Construction failures return both original owners in a boxed typed rejection.
+
+The first native QUIC history exposed a real lease dependency: the failed session
+still owned its shared per-peer socket route after close. Releasing that failed
+session before dialing fixes the deadlock without weakening the connector's
+one-lease rule. The detached channel retains immutable binding, cache and floors;
+checked attachment creates fresh framing state. Public explicit replacement keeps
+its original return contract; optional-session reclamation distinguishes an
+already released session. Host tests cover this detached shutdown state.
+
+Host checks exercise reserved ranges, backoff/exhaustion, pending ownership,
+wrong tickets/local/store/generation/wire bindings, closed sessions, malformed
+rejections, zero budgets, monotonic time and exact construction return. Another
+host composition completes the original target ticket using only outer connector
+polling, with no separate resolver poll. Shared native TCP/TLS and QUIC histories
+replace the failed source through its original connector, reject a stale hint,
+accept a newer hint, preserve an unrelated live cache entry and drain a pending
+lookup on close. Native TCP worker joins are checked.
+
+Validation is recorded in validation/baseline/slice209c. The broad all-feature
+selection passes245 tests, including176 owner/Node tests. This predates only the
+additional outer-connector host test; final all-feature checks pass42 overlapping
+tests, default55, native-only33 and core-only7. Formatting and all four strict
+Clippy profiles pass without diagnostics. The108-entry inventory and13 obligation
+metadata checks pass; this seam does not add a reviewed obligation set.
+The original status assertion, QUIC lease failure and development diagnostics
+are retained alongside successful evidence. No persistent format, Raft protocol,
+new runtime, trust distribution or executable source provisioning is introduced.
+Caches remain volatile. Macro review: this closes automatic source-session
+replacement in209, while recursive restart/parent-offline integration and
+executable provisioning remain. Provider obligations and supported-platform
+operator acceptance remain the next two deliverables; full P0–P7 stays active.
+
+### Slice209c schema plan — reconnect the authenticated discovery source
+
+Native QUIC validation exposed a required ownership transition: closing a failed
+session does not release its retained per-peer socket lease until it is dropped.
+Before submitting a replacement, detach and drop only the failed session, keeping
+the remote cache, generation floors and immutable source binding. The private
+channel may therefore be detached while the source is failed; it cannot perform
+I/O or accept new lookup work then. A checked replacement attaches a fresh
+channel and resets its framing state. Public explicit replace_session continues
+returning its original session; automatic replacement uses a private optional
+old-session path. Closing/reclaiming an exhausted detached source must not
+fabricate a session or a successful replacement. Test native QUIC against this
+exact same-peer lease dependency as well as TCP, not a fresh unrelated connector.
+
+The driven Node path can recover peer connections, but a failed dedicated
+discovery session currently requires mutable host intervention. Add an opt-in
+ReconnectingPeerDiscovery over the existing NativeRemotePeerDiscovery and a
+dedicated public PeerConnector. No new runtime, socket owner or resolver protocol
+is needed. The reconnect connector has an explicit source endpoint/pin and a
+host-reserved generation range later than the initial session; it must not
+depend on the resolver it is repairing. Construction returns both owners on
+invalid binding, non-quiescence, range, address, time or retry configuration.
+
+State is ready, retry delay, one accepted connection ticket, exhausted, or closed.
+One supplied discovery visit drives either the remote protocol or the source
+connector, never both sets of I/O. A failed source retains cached hints/floors;
+after bounded delay the driver submits one exact source ticket. Success must
+match local recovered-store binding, provisioned peer identity, ticket generation
+and wire selection before replace_session. Failures consume only reserved
+generations, retry with bounded delay and stop at exhaustion. A source generation
+does not change peer endpoint generations or grant ownership. Pending connection
+ownership survives cancellation/deadline/close until its terminal receipt.
+
+Implement the existing DiscoveryDriver/PeerDiscovery contracts so the209b Node
+integration drives reconnection without core changes. Include reconnect deadlines
+and owned work in pending/drain state. Closing both views suppresses publication,
+but cached hints remain useful during ordinary source outages until their expiry.
+Host checks must cover exact original tickets, backoff, exhausted ranges, wrong
+sessions, rejected construction and close/drain. Native TCP/TLS and QUIC histories
+must replace an unavailable source session and refresh through the replacement
+without losing peer floors or unrelated valid cache entries. Recursive
+parent-offline/restart composition follows; provider obligations and current
+platform/operator acceptance remain the next linked deliverables.
 
 ### Slice209b implemented — connector-owned discovery progress
 
