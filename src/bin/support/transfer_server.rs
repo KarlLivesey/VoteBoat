@@ -4,6 +4,7 @@ use super::{
     app::{self, App},
     connection::Connection,
     credential_reload::Credentials,
+    peer_credentials::Peers,
     profile::{Binding, Profile, Role},
     service_access,
     setup::{self, checked, Failure},
@@ -43,14 +44,15 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
         "recover" => false,
         _ => return Err("expected create or recover".into()),
     };
-    let peers = match rest {
-        [] => setup::PeerInput::Legacy(None),
-        [flag, path] if flag == "--deployment" => setup::PeerInput::Deployment(Path::new(path)),
-        _ => return Err("expected optional --deployment FILE".into()),
-    };
+    let (peers, peer_path) = options(rest)?;
+    Peers::validate_profile(Path::new(root), peer_path, true)?;
     let mut config =
         setup::configuration(Path::new(root), id, base, Path::new(tls), create, peers)?;
     config.startup.bootstrap.group = binding.group;
+    let wire = config.startup.tls.wire_version();
+    let peers = peer_path
+        .map(|p| Peers::load(&mut config, p, wire))
+        .transpose()?;
     let source_binding = super::binding::SourceBinding::new(&config, &profile, binding);
     if let Some(record) = &source_binding {
         record.check(create)?;
@@ -77,38 +79,88 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
     let listener = TcpListener::bind(super::command_endpoints::listener(None, true, base, id)?)?;
     listener.set_nonblocking(true)?;
     match binding.role {
-        Role::Metadata => {
-            let app = app::metadata(&profile)?;
-            run(
-                setup::open_application(config, protocol, false, app)?,
-                listener,
-                profile,
-                binding,
-                access,
-                id,
-            )
-        }
+        Role::Metadata => run(
+            open(config, protocol, app::metadata(&profile)?, peers.as_ref())?,
+            listener,
+            profile,
+            binding,
+            access,
+            id,
+            peers,
+        ),
         Role::Source => {
             if profile.retirement {
                 let app = super::retirement::source(&profile, binding)?;
-                let node = open_source(config, protocol, app, source_binding, create)?;
-                return run(node, listener, profile, binding, access, id);
+                let node = open_source(
+                    config,
+                    protocol,
+                    app,
+                    source_binding,
+                    create,
+                    peers.as_ref(),
+                )?;
+                return run(node, listener, profile, binding, access, id, peers);
             }
-            let app = app::source(&profile, binding)?;
-            let node = open_source(config, protocol, app, source_binding, create)?;
-            run(node, listener, profile, binding, access, id)
+            let node = open_source(
+                config,
+                protocol,
+                app::source(&profile, binding)?,
+                source_binding,
+                create,
+                peers.as_ref(),
+            )?;
+            run(node, listener, profile, binding, access, id, peers)
         }
-        Role::Target => {
-            let app = app::target(&profile, binding)?;
-            run(
-                setup::open_application(config, protocol, false, app)?,
-                listener,
-                profile,
-                binding,
-                access,
-                id,
-            )
+        Role::Target => run(
+            open(
+                config,
+                protocol,
+                app::target(&profile, binding)?,
+                peers.as_ref(),
+            )?,
+            listener,
+            profile,
+            binding,
+            access,
+            id,
+            peers,
+        ),
+    }
+}
+fn options(args: &[String]) -> Result<(setup::PeerInput<'_>, Option<&Path>), Failure> {
+    if !args.len().is_multiple_of(2) {
+        return Err("expected --deployment FILE or --peer-credentials FILE".into());
+    }
+    let (mut deployment, mut credentials) = (None, None);
+    for pair in args.as_chunks::<2>().0 {
+        match pair[0].as_str() {
+            "--deployment" if deployment.is_none() => deployment = Some(Path::new(&pair[1])),
+            "--peer-credentials" if credentials.is_none() => {
+                credentials = Some(Path::new(&pair[1]))
+            }
+            _ => return Err("unknown or duplicate transfer option".into()),
         }
+    }
+    Ok((
+        deployment.map_or(setup::PeerInput::Legacy(None), setup::PeerInput::Deployment),
+        credentials,
+    ))
+}
+fn open<A: App>(
+    config: voteboat::native::startup::NativeMemberStartup,
+    protocol: NativePeerProtocol,
+    app: A,
+    peers: Option<&Peers>,
+) -> Result<Node<A>, Failure> {
+    match peers {
+        Some(p) => setup::open_application_with_rotation(
+            config,
+            protocol,
+            false,
+            app,
+            Some(p.startup(protocol)),
+        ),
+        None => setup::open_application(config, protocol, false, app),
     }
 }
 fn open_source<A: App>(
@@ -117,8 +169,9 @@ fn open_source<A: App>(
     app: A,
     record: Option<super::binding::SourceBinding>,
     create: bool,
+    peers: Option<&Peers>,
 ) -> Result<Node<A>, Failure> {
-    let node = setup::open_application(config, protocol, false, app)?;
+    let node = open(config, protocol, app, peers)?;
     if let Some(record) = record {
         if let Err(error) = record.finish(create) {
             recover(node, Instant::now())?;
@@ -134,6 +187,7 @@ fn run<A: App>(
     b: Binding,
     access: Credentials,
     id: u64,
+    peers: Option<Peers>,
 ) -> Result<(), Failure>
 where
     A::Receipt: Debug,
@@ -141,6 +195,7 @@ where
     // Join accepted credential publication before releasing the node's exclusive
     // directory ownership, including when drive or connection cleanup fails.
     let mut credentials = access;
+    let mut peers = peers;
     let local = service_access::server_local(id, node.local().owner.identity().store.session);
     println!(
         "ready transfer group={} node={id} role={:?} command={}",
@@ -155,6 +210,7 @@ where
         p: &p,
         b,
         credentials: &mut credentials,
+        peers: &mut peers,
         local,
         start,
         sequence: 0,
@@ -167,7 +223,8 @@ where
         let _ = c.cancel(host.node);
     }
     let finished = credentials.finish();
-    let result = result.and(finished);
+    let peer_finished = peers.as_mut().map_or(Ok(()), Peers::finish);
+    let result = result.and(finished).and(peer_finished);
     if result.is_err() {
         recover(node, start)?;
     } else {
@@ -183,6 +240,7 @@ struct Host<'a, A: App> {
     p: &'a Profile,
     b: Binding,
     credentials: &'a mut Credentials,
+    peers: &'a mut Option<Peers>,
     local: LocalIdentity,
     start: Instant,
     sequence: u64,
@@ -194,7 +252,8 @@ impl<A: App> Host<'_, A> {
     fn drive(&mut self) -> Result<(), Failure> {
         loop {
             let now = MonoTime(self.start.elapsed().as_millis().min(u64::MAX as u128) as u64);
-            if self.credentials.poll() {
+            let peer_failure = !self.quit && self.peers.as_mut().is_some_and(|p| p.poll(self.node));
+            if self.credentials.poll() || peer_failure {
                 eprintln!("credential reload has uncertain durable state; stopping");
                 self.quit = true;
             }
@@ -223,8 +282,14 @@ impl<A: App> Host<'_, A> {
                     local: self.local,
                     now,
                 };
-                if c.poll(self.node, &context, &mut self.quit, &mut commands)
-                    .unwrap_or(true)
+                if c.poll(
+                    self.node,
+                    &context,
+                    &mut self.quit,
+                    &mut commands,
+                    self.peers,
+                )
+                .unwrap_or(true)
                 {
                     c.cancel(self.node)?;
                     self.connection = None;

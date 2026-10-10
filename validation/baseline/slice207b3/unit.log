@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.12s
+     Running unittests src/bin/directory_service.rs (target/debug/deps/voteboat_directory-79774abd27047b3c)
+
+running 6 tests
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test peer_credentials::tests::malformed_or_unauthenticated_selection_cannot_create_a_peer_record ... ok
+test peer_credentials::tests::shutdown_joins_unpublished_preparation_and_startup_recovers_its_original_record ... ok
+test route_discovery::tests::authority_authentication_cannot_extend_the_lookup_deadline ... ok
+test route_discovery::tests::authority_authentication_timeout_preserves_remaining_lookup_budget ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.50s
+
+     Running unittests src/bin/transfer_service.rs (target/debug/deps/voteboat_transfer-a17822a37a58e1c3)
+
+running 7 tests
+test binding::tests::source_binding_is_required_immutable_and_fail_closed ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test peer_credentials::tests::malformed_or_unauthenticated_selection_cannot_create_a_peer_record ... ok
+test profile::tests::merge_plan_rejects_overlapping_identities_and_invalid_boundaries ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+test peer_credentials::tests::shutdown_joins_unpublished_preparation_and_startup_recovers_its_original_record ... ok
+test profile::tests::merge_profile_rejects_mislabeled_missing_and_conflicting_bindings ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -22,6 +22,8 @@ mod initialization;
 mod interrupt;
 #[path = "transfer_service/merge.rs"]
 mod merge;
+#[path = "transfer_service/peer_credentials.rs"]
+mod peer_credentials;
 #[path = "transfer_service/profiles.rs"]
 mod profiles;
 #[path = "transfer_service/retirement.rs"]
@@ -52,6 +54,7 @@ struct Cluster {
     base: u16,
     quic: bool,
     admin: u64,
+    peer_credentials: bool,
     children: Vec<(u128, u16, Child)>,
 }
 impl Cluster {
@@ -62,6 +65,9 @@ impl Cluster {
         Self::with_profile(quic, retirement, false)
     }
     fn with_profile(quic: bool, retirement: bool, merge: bool) -> Self {
+        Self::with_options(quic, retirement, merge, false)
+    }
+    fn with_options(quic: bool, retirement: bool, merge: bool, peer_credentials: bool) -> Self {
         let reservation = fixture_gate();
         let (base, held, udp) = loop {
             let base = NEXT.fetch_add(1024, Ordering::Relaxed);
@@ -148,8 +154,12 @@ impl Cluster {
             base,
             quic,
             admin: 3,
+            peer_credentials,
             children: Vec::new(),
         };
+        if peer_credentials {
+            peer_credentials::select(&rig, 1, &rig.tls());
+        }
         rig.start("create");
         rig
     }
@@ -158,20 +168,25 @@ impl Cluster {
     }
     fn start_one(&mut self, g: u128, slot: usize, node: u16, mode: &str) {
         let log = fs::File::create(self.root.join(format!("{g}-{node}.log"))).unwrap();
-        let child = spawn(
-            Command::new(BIN)
-                .args(["serve", mode])
-                .arg(self.root.join(format!("{g}/{node}")))
-                .arg(node.to_string())
-                .arg((self.base + slot as u16 * 128).to_string())
-                .arg(self.tls())
-                .arg(self.root.join("profile"))
-                .arg(g.to_string())
-                .arg(self.root.join("access"))
-                .arg(if self.quic { "quic" } else { "tcp" })
-                .stdout(log.try_clone().unwrap())
-                .stderr(log),
-        );
+        let mut command = Command::new(BIN);
+        command
+            .args(["serve", mode])
+            .arg(self.root.join(format!("{g}/{node}")))
+            .arg(node.to_string())
+            .arg((self.base + slot as u16 * 128).to_string())
+            .arg(self.tls())
+            .arg(self.root.join("profile"))
+            .arg(g.to_string())
+            .arg(self.root.join("access"))
+            .arg(if self.quic { "quic" } else { "tcp" })
+            .stdout(log.try_clone().unwrap())
+            .stderr(log);
+        if self.peer_credentials {
+            command
+                .arg("--peer-credentials")
+                .arg(self.root.join("peer-credentials"));
+        }
+        let child = spawn(&mut command);
         self.children.push((g, node, child));
     }
     fn start(&mut self, mode: &str) {

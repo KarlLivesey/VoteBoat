@@ -1,0 +1,32 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.10s
+     Running unittests src/bin/directory_service.rs (target/debug/deps/voteboat_directory-b50d3021c1f59e0e)
+
+running 2 tests
+test peer_credentials::tests::malformed_or_unauthenticated_selection_cannot_create_a_peer_record ... ok
+test peer_credentials::tests::shutdown_joins_unpublished_preparation_and_startup_recovers_its_original_record ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running unittests src/bin/transfer_service.rs (target/debug/deps/voteboat_transfer-bcbcf57dad5d2dae)
+
+running 2 tests
+test peer_credentials::tests::malformed_or_unauthenticated_selection_cannot_create_a_peer_record ... ok
+test peer_credentials::tests::shutdown_joins_unpublished_preparation_and_startup_recovers_its_original_record ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests/directory_service.rs (target/debug/deps/directory_service-1a699e253be56a51)
+
+running 1 test
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_tcp ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 3.97s
+
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-dd9e22fa20ce81be)
+
+running 1 test
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 15.32s
+

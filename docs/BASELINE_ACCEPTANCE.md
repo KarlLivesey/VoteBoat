@@ -1,5 +1,12 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice207b3 extends the existing durable peer credential command path to transfer
+metadata/source/target and directory authority executables. Selected TCP/QUIC
+histories preserve split data/retries and committed manifests across key changes,
+unread replies, restart and stale-file refusal; directory command-access reload
+uses the shared worker. Automatic cluster rollout, full administrative audit,
+platform acceptance, admission fairness and persistent discovery remain open.
+
 Slice207b2 connects the counter executable to durable native peer rotation.
 An explicit bounded manifest selects independent peer TLS material; one shared
 typed worker records it before publication. Static/member/multi-group profiles
@@ -7,8 +14,8 @@ use authenticated local commands with permission on every actual local group.
 TCP/QUIC histories cover new CA/leaf/key material, original data/retry continuity,
 lost reply/process recovery, bad preparation and stale/changed/omitted startup
 selection. The shared command worker retains its previous behavior and refuses
-further preparation after uncertainty. Transfer/directory peer commands and
-broader platform acceptance remain open; this is not a cluster-wide transaction.
+further preparation after uncertainty. Transfer/directory peer commands follow in207b3; broader platform acceptance
+remains open. This is not a cluster-wide transaction.
 
 Slice207b1 connects guarded native peer credentials to static, member and shared
 multi-group startup. Host-loaded journal records bind exact owner/generation and
@@ -272,7 +279,7 @@ profiles and full platform/fault acceptance remain separate obligations.
 
 Mutations must retain durable operation IDs and generation/authorization checks.
 Previews must not reserve resources, fence sources or act as durability evidence.
-Peer credential rotation, full persisted admin audit, complete core metrics and
+Full persisted admin audit, complete core metrics and
 rolling-format negotiation/migration evidence also remain open chapter09 work.
 Separate-machine execution and current macOS success have not been established.
 
@@ -338,7 +345,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C06 transport | PeerTransport/Factory, PeerDriver/Roster/Connector; native TCP/TLS and QUIC | General receive/connection admission/fairness and separate-host evidence. Local send completion is never remote durability. |
 | C07 wire | WireCodec/NativeWireCodec, bounded negotiated formats | Fuzzing/compatibility expansion; no gRPC/Protobuf implementation. |
 | C08 persistent codec | LogCodec/VoteLogCodec/SnapshotCodec and native codecs | Persistent format migration remains explicit, separate from trait compatibility. |
-| C09 secure session | SecureSession and native rustls/QUIC | Slices173–174 add validity guards, prepared replacement and durable executable command-channel reload. Selected key/pin, TCP/QUIC revocation, lost-reply and restart checks exist. Peer credential orchestration, broader failure and platform coverage remain. |
+| C09 secure session | SecureSession and native rustls/QUIC | Slices173–174 add validity guards, prepared replacement and durable executable command-channel reload. Selected key/pin, TCP/QUIC revocation, lost-reply and restart checks exist. Explicit executable peer rollout is supplied by207b1–b3; automatic credential distribution/coordination, broader failure and platform coverage remain. |
 | C10 scheduler | ReadyScheduler, FairScheduler, Shard/TimedShard/EffectOwner/Node | Wider multi-lane deployment/resource isolation. |
 | C11 timers | TimerService/DeadlineQueue, generation-scoped expiration | Broader queue/lateness attribution. |
 | C12 clock | Clock/MonotonicClock and explicit core MonoTime | No hidden core wall clock; maintain host injection. |
@@ -350,7 +357,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking; slice180 replacement preparation and explicit-policy voter-change plans;191 offline plan generation and exact-store executable administration | Automatic sample collection/reservations and global rebalancing are not implemented; broader fault coverage remains. Recommendations never change membership alone. |
 | C19 observability | Observer/NativeCounterObserver, EventObserver/NativeEventObserver, TimingObserver/NativeTimingObserver and optional JournalTimings | Bounded aggregate history, explicit overflow and scoped export are implemented168. Slice176 adds bounded poll/connection duration distributions, including interrupted connections and restart reset. Per-group tracing, queue/critical-path decomposition and external exporter integration remain. |
 | C20 configuration | Typed startup and Node configure/status/resume; authenticated provisioned/client-target service commands | Selected new-store interruption/recovery161 is exercised; broader ingress, revocation and combined failures remain. Native configuration endpoints exist and must not be listed wholly missing. |
-| C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, peer rotation and broader revocation schedules remain. Unflagged loopback mode is explicitly trusted. |
+| C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, automatic cross-node credential coordination and broader revocation schedules remain; explicit executable peer rotation is supplied by207b1–b3. Unflagged loopback mode is explicitly trusted. |
 | C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Chapter17 permits related providers to share an implementation: neither a new trait per checksum helper nor optional compression is automatically a baseline blocker. |
 | C23 scope transfer | ScopeStateMachine/ScopeImage, native BucketCounter, source/target/lifecycle guards | Wider application/provider and recursive fault/retention coverage; core retains fence/publication/activation authority. |
 | C24 transactions | One-group ordered application commands | Cross-group transactions are unsupported P8, not a hidden baseline coordinator. |

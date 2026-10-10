@@ -17,6 +17,8 @@ mod connection;
 mod credential_reload;
 #[path = "support/credential_worker.rs"]
 mod credential_worker;
+#[path = "support/peer_credentials.rs"]
+mod peer_credentials;
 #[path = "support/transfer_profile.rs"]
 mod profile;
 #[path = "support/transfer_retirement.rs"]
@@ -26,11 +28,12 @@ mod server;
 #[path = "support/service_access.rs"]
 mod service_access;
 #[path = "support/service_setup.rs"]
-mod setup;
+mod service_setup;
+use service_setup as setup;
 #[path = "support/transfer_wire.rs"]
 mod wire;
 use setup::Failure;
-const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--deployment FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...";
+const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--deployment FILE] [--peer-credentials FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...\nPeer commands: reload-peers REQUEST EXPECTED NEXT; peer-credential-status REQUEST";
 fn main() -> Result<(), Failure> {
     let args = std::env::args().skip(1).collect::<Vec<_>>();
     match args.as_slice() {

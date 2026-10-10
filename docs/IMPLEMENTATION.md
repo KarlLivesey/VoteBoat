@@ -107,14 +107,14 @@ TCP/QUIC session revocation and typed Node/PeerDriver forwarding. Completed207b1
 connects native static/member/multi-group startup to the host-loaded durable
 record and tests actual replicated data/retry recovery through key changes.
 Completed207b2 connects that startup path to counter executable preparation
-and authenticated administration. Current207b3 applies the same shared worker
+and authenticated administration. Implemented207b3 applies the same shared worker
 and generic native-node publisher to transfer/directory executable profiles.
 It depends on the
 existing credential journal and prepared peer bundle; acceptance requires
 original rollout-ID recovery, stale-file refusal, authenticated commands and
 replicated data/retry continuity through rotation and restart. This advances
 the secure networked service milestone;207a alone is not operational rollout.
-Next, address receive/connection admission and fairness from
+Current: address receive/connection admission and fairness from
 the remaining resource ledger. Its purpose is progress under competing peer and
 client load; dependencies are existing hard admission limits and control reserve.
 Completion requires bounded acceptance/rejection and demonstrated control/recovery
@@ -124,6 +124,41 @@ authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; completion requires refreshed hints, stale
 generation refusal and parent-offline child continuity across restart. This
 advances P5 discovery without granting ownership from a cached endpoint.
+Then extend the next unreviewed public-provider obligations selected from the
+contract ledger. Reuse host/native implementations and their injected failures;
+completion requires executable shared assertions for ownership, rejection and
+shutdown, not just metadata entries. This advances composable Rust embedding
+under P0/P2 without making a particular external backend a prerequisite.
+
+### Slice207b3 implemented — peer rollout in transfer and directory services
+
+Transfer metadata, source, retirable-source and target profiles, plus the
+directory authority, accept the existing peer manifest and expose authenticated
+reload/status commands. They reuse the prepared native publisher, exact startup
+record checks and shared credential worker. Directory command-access reload now
+uses the same existing adapter as counter and transfer. Each command authorizes
+its actual local group; peer replacement cannot change the profile, membership,
+route or application bindings. Shutdown/error scope retains accepted credential
+workers until they join before releasing the node's data-directory ownership.
+
+Selected TCP/QUIC process histories pass for all transfer roles and the directory.
+They retain the original split state and data/retries, committed manifests and
+quorum lookups through changed CA/leaf/key material, unread replies followed by
+node loss, whole-service restart, and QUIC checkpoints. Stale/same-generation
+changed files and omitted flags refuse before readiness; failed transfer key
+preparation leaves the current generation usable. Directory command access can
+be replaced independently and its record survives restart. All13 executable
+unit checks pass, including held preparation and uncertainty fencing. All50
+affected all-feature tests pass (13 unit,19 directory,18 transfer). Complete
+default-feature peer checks pass6 tests; formatting and all four strict Clippy
+profiles pass with zero diagnostics. Results are recorded in
+validation/baseline/slice207b3.
+
+Macro review: this closes the pending peer-credential command integration for
+the three executable families. It does not add automatic cluster coordination,
+secret distribution, a full administrative audit, macOS or separate-host
+acceptance. The current deliverable advances to receive/connection fairness,
+followed by persistent discovery refresh and provider conformance.
 
 ### Slice207b3 schema plan — remaining executable peer rollout
 
@@ -135,6 +170,10 @@ and access files independent. Transfer roles each own one group and directory
 owns its actual authority group; authorize Configure/Inspect on that group
 before submitting or observing a peer reload. Preserve the configured wire
 version, provisioned identities, routes and application/profile binding.
+Directory command access uses the same existing Credentials adapter as counter
+and transfer so both credential lifetimes have one owner and the same durable
+shutdown/restart rules. This also exposes the existing reload-access/status
+commands there, without introducing another preparation worker implementation.
 
 The state sequence remains selected initial bundle -> authenticated single-flight
 preparation -> durable exact owner/request/generation/digest record -> native

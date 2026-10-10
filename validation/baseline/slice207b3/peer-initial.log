@@ -1,0 +1,18 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.30s
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 2 tests
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_tcp ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 5.65s
+
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 2 tests
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 17.17s
+

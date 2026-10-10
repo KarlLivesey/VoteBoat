@@ -1,12 +1,19 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Remaining executable peer rollout: [slice207b3](baseline/slice207b3/README.md).
+The transfer and directory services now use the same bounded worker and native
+startup checks as counter. Selected TCP/QUIC histories preserve split state,
+data retries and committed manifests across independent peer key replacement,
+unread replies, process restart and stale-file rejection. Directory command
+access reload is independently durable. Full affected suites and strict checks
+are recorded with their actual source scope in that evidence directory.
 Counter peer rollout: [slice207b2](baseline/slice207b2/README.md). The explicit
 manifest and authenticated local peer commands use the verified native startup
 and a shared typed preparation worker. TCP/QUIC executable histories cover key
 replacement, original operation recovery, all-local-group permissions and stale
 startup refusal. Counter publication is generic over native applications;
-transfer/directory peer command integration and platform acceptance remain open.
+Transfer/directory integration follows in207b3; platform acceptance remains open.
 Native peer startup: [slice207b1](baseline/slice207b1/README.md), with exact
 host-loaded durable record/material checks before startup side effects and
 guarded static/member/multi-group assembly. TCP/QUIC replicated data and retries

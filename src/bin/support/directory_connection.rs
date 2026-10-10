@@ -44,6 +44,8 @@ pub struct Commands<'a> {
     pub bootstrap: OperationId,
     pub records: &'a BTreeMap<OperationId, Vec<u8>>,
     pub quit: &'a mut bool,
+    pub credentials: super::credential_reload::Commands<'a>,
+    pub peers: &'a mut Option<super::peer_credentials::Peers>,
 }
 impl Connection {
     pub fn new(stream: TcpStream, generation: SecureSessionGeneration) -> Result<Self, Failure> {
@@ -163,8 +165,15 @@ impl Connection {
             return Err("one command per connection".into());
         }
         self.channel.authorize(Some(access), c.group, input, now)?;
+        if let Some(result) = super::peer_credentials::command(c.peers, input) {
+            self.reply(result?);
+            return Ok(());
+        }
         let words = input.split_whitespace().collect::<Vec<_>>();
         match words.as_slice() {
+            ["credential-status" | "reload-access", ..] => {
+                self.reply(c.credentials.command(&words)?)
+            }
             ["status"] => {
                 let pending_reads = owner.node().local().reads.usage().requests;
                 let core = owner

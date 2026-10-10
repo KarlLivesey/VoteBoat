@@ -53,6 +53,7 @@ impl Connection {
         context: &Context<'_>,
         quit: &mut bool,
         credentials: &mut super::credential_reload::Commands<'_>,
+        peers: &mut Option<super::peer_credentials::Peers>,
     ) -> Result<bool, Failure>
     where
         A::Receipt: Debug,
@@ -80,7 +81,9 @@ impl Connection {
                         input.extend_from_slice(&bytes[..n]);
                         if input.contains(&b'\n') {
                             let text = String::from_utf8(input.clone())?;
-                            if let Err(e) = self.execute(node, context, quit, credentials, &text) {
+                            if let Err(e) =
+                                self.execute(node, context, quit, credentials, peers, &text)
+                            {
                                 self.reply(format!("ERR {e}"));
                             }
                         }
@@ -116,6 +119,7 @@ impl Connection {
         context: &Context<'_>,
         quit: &mut bool,
         credentials: &mut super::credential_reload::Commands<'_>,
+        peers: &mut Option<super::peer_credentials::Peers>,
         text: &str,
     ) -> Result<(), Failure> {
         if !text.ends_with('\n') || text.trim_end_matches('\n').contains('\n') {
@@ -124,6 +128,10 @@ impl Connection {
         let (p, b) = (context.profile, context.binding);
         self.channel
             .authorize(Some(context.access), b.group, text, context.now)?;
+        if let Some(result) = super::peer_credentials::command(peers, text) {
+            self.reply(result?);
+            return Ok(());
+        }
         let words = text.split_whitespace().collect::<Vec<_>>();
         match words.as_slice() {
             ["credential-status" | "reload-access", ..] => {

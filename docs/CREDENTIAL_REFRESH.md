@@ -55,8 +55,8 @@ A missing journal record selects a host-authorized initial generation. It does
 not prove that no prior rotation occurred: the host must preserve/load the
 journal and must not silently substitute an empty journal after rotation.
 These APIs do not perform file loading or journal I/O inside Node polling.
-The counter executable exposes peer preparation/status as described below;
-transfer/directory peer administration remains follow-on work.
+The counter, transfer and directory executables expose peer preparation/status
+as described below.
 `reload-access` still changes command-channel credentials only. During a rollout,
 incompatible key/pin selections can interrupt connectivity; application work
 already admitted retains its normal original-operation recovery semantics.
@@ -112,7 +112,7 @@ an accepted batch with its exact ticket and Failed outcome after revocation.
 revocation. These are selected Linux histories, not complete operational rotation
 or macOS/separate-host evidence.
 
-## Counter executable peer rotation
+## Executable peer rotation
 
 Start the counter with both `--service-access ACCESS` and
 `--peer-credentials MANIFEST`. This works with static, member and multi-group
@@ -144,6 +144,23 @@ Inspect permission on every local group. Neither command requires a group1
 that the node does not actually own. Requests cannot select filesystem paths
 or alter membership. Each node has its own increasing request sequence and
 credential generation; apply the rollout explicitly to every node.
+
+Transfer and directory servers also accept `--peer-credentials MANIFEST` with
+the same format and startup checks. Their existing authenticated command
+interfaces expose both peer verbs. Transfer commands authorize the selected
+local metadata/source/target group; directory commands authorize its configured
+authority group. For example:
+
+```sh
+voteboat-transfer command PROFILE ONE_REPLICA_ENDPOINTS COMMAND_TLS ADMIN GROUP reload-peers REQUEST EXPECTED NEXT
+voteboat-directory client BASE NODE COMMAND_TLS ADMIN reload-peers REQUEST EXPECTED NEXT
+```
+
+Repeat per replica; query `peer-credential-status REQUEST` on that same replica.
+Command TLS remains at the original startup path. Peer replacement does not
+change the transfer profile, committed manifests, membership or ownership.
+Peer and command credentials have independent journals and each permits one
+pending preparation worker; they share the preparation implementation.
 
 `queued=true` confirms admission. One owned worker loads bounded material,
 validates its generation and persists the exact digest in
@@ -179,6 +196,8 @@ Use the existing `client ... --service-tls DIRECTORY --principal ID` options.
 The transfer executable exposes the same commands through its authenticated
 `command PROFILE ENDPOINTS TLS PRINCIPAL GROUP ...` interface; see
 [transfer access replacement](TRANSFER_SERVICE.md#replacing-command-access).
+Directory exposes both verbs through `client BASE NODE TLS PRINCIPAL ...` and
+uses its mandatory startup access file as the fixed source path.
 It shares the same preparation, publication, shutdown and restart implementation.
 First stage the intended files at the fixed startup access/TLS paths. The access
 file header must name NEXT, which must exceed EXPECTED. REQUEST is a nonzero

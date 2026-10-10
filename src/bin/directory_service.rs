@@ -19,6 +19,10 @@ mod authority_endpoints;
 mod command_client;
 #[path = "support/command_endpoints.rs"]
 mod command_endpoints;
+#[path = "support/credential_reload.rs"]
+mod credential_reload;
+#[path = "support/credential_worker.rs"]
+mod credential_worker;
 #[path = "support/directory_client.rs"]
 mod directory_client;
 #[path = "support/directory_connection.rs"]
@@ -27,6 +31,8 @@ mod directory_connection;
 mod directory_owner;
 #[path = "support/directory_plan.rs"]
 mod directory_plan;
+#[path = "support/peer_credentials.rs"]
+mod peer_credentials;
 #[path = "support/policy_input.rs"]
 mod policy_input;
 #[path = "support/preview_input.rs"]
@@ -38,7 +44,8 @@ mod route_discovery;
 #[path = "support/service_access.rs"]
 mod service_access;
 #[path = "support/service_setup.rs"]
-mod setup;
+mod service_setup;
+use service_setup as setup;
 #[path = "support/transfer_preview.rs"]
 mod transfer_preview;
 use setup::Failure;
@@ -57,7 +64,7 @@ use voteboat::{
     runtime::*,
 };
 type Node = NativeNode<Directory, NativeServiceConnector>;
-const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit [--command-peers FILE]\nvoteboat-directory lookup BASE NODE TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
+const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--peer-credentials FILE]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
 fn ids(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     let base: u16 = base.parse()?;
     let id: u64 = id.parse()?;
@@ -73,6 +80,7 @@ struct Options {
     listen: Option<SocketAddr>,
     peers: Option<PathBuf>,
     deployment: Option<PathBuf>,
+    peer_credentials: Option<PathBuf>,
     protocol: NativePeerProtocol,
 }
 fn options(args: &[String]) -> Result<Options, Failure> {
@@ -80,6 +88,7 @@ fn options(args: &[String]) -> Result<Options, Failure> {
         listen: None,
         peers: None,
         deployment: None,
+        peer_credentials: None,
         protocol: NativePeerProtocol::TcpTls,
     };
     let mut transport = false;
@@ -93,6 +102,9 @@ fn options(args: &[String]) -> Result<Options, Failure> {
                 o.deployment = Some(PathBuf::from(&pair[1]))
             }
             "--peers" if o.peers.is_none() => o.peers = Some(PathBuf::from(&pair[1])),
+            "--peer-credentials" if o.peer_credentials.is_none() => {
+                o.peer_credentials = Some(PathBuf::from(&pair[1]));
+            }
             "--transport" if !transport => {
                 transport = true;
                 o.protocol = match pair[1].as_str() {
@@ -116,6 +128,11 @@ fn serve(args: &[String]) -> Result<(), Failure> {
     };
     let (base, id) = ids(base, id)?;
     let options = options(rest)?;
+    peer_credentials::Peers::validate_profile(
+        Path::new(root),
+        options.peer_credentials.as_deref(),
+        true,
+    )?;
     let create = match mode.as_str() {
         "create" => true,
         "recover" => false,
@@ -134,27 +151,75 @@ fn serve(args: &[String]) -> Result<(), Failure> {
         },
     )?;
     config.startup.bootstrap.group = plan.authority;
-    let access = service_access::Access::load(Path::new(access), Path::new(tls), id)?;
-    let digest = access.digest;
-    let access = service_access::ActiveAccess::new(access.policy.generation(), access);
+    let wire = config.startup.tls.wire_version();
+    let peers = options
+        .peer_credentials
+        .as_deref()
+        .map(|p| peer_credentials::Peers::load(&mut config, p, wire))
+        .transpose()?;
+    let access = credential_reload::Credentials::load(
+        Path::new(root),
+        Some(Path::new(access)),
+        Path::new(tls),
+        id,
+        voteboat::secure::PeerIdentity {
+            node: config.startup.node,
+            store: config.startup.store,
+        },
+    )?;
+    let digest = access
+        .access
+        .as_ref()
+        .and_then(|a| a.material())
+        .ok_or("missing command credentials")?
+        .digest;
     let address = command_endpoints::listener(options.listen, true, base, id)?;
     let listener = TcpListener::bind(address)?;
     listener.set_nonblocking(true)?;
-    let node = setup::open_application(config, options.protocol, false, plan.app)?;
+    let node = match &peers {
+        Some(p) => setup::open_application_with_rotation(
+            config,
+            options.protocol,
+            false,
+            plan.app.clone(),
+            Some(p.startup(options.protocol)),
+        )?,
+        None => setup::open_application(config, options.protocol, false, plan.app.clone())?,
+    };
+    println!("credential_digest={digest:02x?}");
+    run(node, plan, listener, access, peers, id)
+}
+fn run(
+    node: Node,
+    plan: directory_plan::Plan,
+    listener: TcpListener,
+    access: credential_reload::Credentials,
+    peers: Option<peer_credentials::Peers>,
+    id: u64,
+) -> Result<(), Failure> {
     let local = service_access::server_local(id, node.local().owner.identity().store.session);
     let mut owner = directory_owner::Owner::new(node, plan.authority);
+    // Accepted credential preparation must finish before directory ownership ends.
+    let mut credentials = access;
+    let mut peers = peers;
     let start = Instant::now();
     let mut connection = None;
     let mut sequence = 0u64;
     let mut quit = false;
     let mut shutdown = None;
     println!(
-        "ready directory node={id} authority={:?} command={} credential_digest={digest:02x?}",
+        "ready directory node={id} authority={:?} command={}",
         plan.authority,
         listener.local_addr()?
     );
     loop {
         let now = MonoTime(start.elapsed().as_millis().min(u64::MAX as u128) as u64);
+        let peer_failure = !quit && peers.as_mut().is_some_and(|p| p.poll(owner.node()));
+        if credentials.poll() || peer_failure {
+            eprintln!("credential reload has uncertain durable state; stopping");
+            owner.close_remote();
+            quit = true;
+        }
         if !quit && connection.is_none() && !owner.remote() {
             match listener.accept() {
                 Ok((stream, _)) => {
@@ -171,13 +236,22 @@ fn serve(args: &[String]) -> Result<(), Failure> {
             }
         }
         if let Some(c) = connection.as_mut() {
+            let (access, reload) = credentials.split();
             let mut commands = directory_connection::Commands {
                 group: plan.authority,
                 bootstrap: plan.bootstrap,
                 records: &plan.commands,
                 quit: &mut quit,
+                credentials: reload,
+                peers: &mut peers,
             };
-            if c.poll(&mut owner, &access, local, now, &mut commands)? {
+            if c.poll(
+                &mut owner,
+                access.ok_or("missing command credentials")?,
+                local,
+                now,
+                &mut commands,
+            )? {
                 connection = None;
             }
         }
@@ -194,6 +268,10 @@ fn serve(args: &[String]) -> Result<(), Failure> {
             return Err("metadata shutdown timed out; recover before reuse".into());
         }
         std::thread::park_timeout(Duration::from_millis(1));
+    }
+    credentials.finish()?;
+    if let Some(peers) = &mut peers {
+        peers.finish()?;
     }
     setup::join(owner.take())?;
     println!("stopped node={id} workers_joined=true");

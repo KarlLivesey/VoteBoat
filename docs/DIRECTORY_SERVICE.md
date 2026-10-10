@@ -46,6 +46,12 @@ and `--command-listen ADDRESS` select explicit endpoints using the existing
 formats. `--transport quic` requires a build with `--features quic`; command and
 manifest sessions still use TCP/TLS. This binary exposes static membership.
 
+`--peer-credentials MANIFEST` enables independent, durable peer key rotation.
+The authenticated client supports `reload-peers REQUEST EXPECTED NEXT` and
+`peer-credential-status REQUEST`. Command access supports `reload-access`
+and `credential-status` with the same arguments. See [credential reload](CREDENTIAL_REFRESH.md)
+for manifests, permissions, original request retries and restart checks.
+
 ## Publish and inspect
 
 Inspect local election status to find the leader; status is not a quorum read:

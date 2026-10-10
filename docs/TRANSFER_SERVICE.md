@@ -201,6 +201,11 @@ explicit per replica; there is no atomic cluster-wide credential switch.
 
 ## Contracts and limits
 
+For independent peer keys, add `--peer-credentials MANIFEST` to each server.
+Use `reload-peers REQUEST EXPECTED NEXT` and `peer-credential-status REQUEST`
+through the same per-group command interface. See [peer credential rotation](CREDENTIAL_REFRESH.md#executable-peer-rotation)
+for the manifest, durable ordering and restart requirements.
+
 Read replies originate from `Node::complete_read`. The transient observation
 format preserves group/configuration/committed-prefix data, accepts at most128KiB
 and rejects truncated, trailing or inconsistent structure. Decoding is **not**

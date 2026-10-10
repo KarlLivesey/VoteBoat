@@ -29,6 +29,8 @@ use voteboat::{
     directory::DirectoryCommand, identity::*, placement::PlacementRequirements, routing::*,
 };
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-directory");
+#[path = "directory_service/peer_credentials.rs"]
+mod peer_credentials;
 // Keep fixture listeners below Linux's ephemeral client-port range. A client
 // can otherwise claim a later replica's port between reservation and startup.
 static NEXT: AtomicU64 = AtomicU64::new(20000);
@@ -99,6 +101,7 @@ struct Cluster {
     held: Vec<TcpListener>,
     udp: Vec<UdpSocket>,
     quic: bool,
+    peer_credentials: bool,
 }
 impl Cluster {
     fn new(quic: bool) -> Self {
@@ -146,6 +149,7 @@ impl Cluster {
             held,
             udp,
             quic,
+            peer_credentials: false,
         }
     }
     fn tls(&self) -> PathBuf {
@@ -162,6 +166,10 @@ impl Cluster {
             .arg(self.root.join("access"));
         if self.quic {
             c.args(["--transport", "quic"]);
+        }
+        if self.peer_credentials {
+            c.arg("--peer-credentials")
+                .arg(self.root.join("peer-credentials"));
         }
         c
     }
