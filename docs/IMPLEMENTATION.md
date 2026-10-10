@@ -106,8 +106,10 @@ ecosystem. Completed207a adds a prepared peer-key replacement API, native
 TCP/QUIC session revocation and typed Node/PeerDriver forwarding. Completed207b1
 connects native static/member/multi-group startup to the host-loaded durable
 record and tests actual replicated data/retry recovery through key changes.
-Current207b2 connects that startup path to executable preparation and
-administration. It depends on the
+Completed207b2 connects that startup path to counter executable preparation
+and authenticated administration. Current207b3 applies the same shared worker
+and generic native-node publisher to transfer/directory executable profiles.
+It depends on the
 existing credential journal and prepared peer bundle; acceptance requires
 original rollout-ID recovery, stale-file refusal, authenticated commands and
 replicated data/retry continuity through rotation and restart. This advances
@@ -122,6 +124,106 @@ authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; completion requires refreshed hints, stale
 generation refusal and parent-offline child continuity across restart. This
 advances P5 discovery without granting ownership from a cached endpoint.
+
+### Slice207b3 schema plan — remaining executable peer rollout
+
+Reuse the207b2 peer manifest, generic preparation worker and native startup
+binding in the transfer and directory executables. This is required to finish
+the secure-service milestone: a public Rust replacement seam alone cannot rotate
+the peer sessions owned by those executables. Keep their original command TLS
+and access files independent. Transfer roles each own one group and directory
+owns its actual authority group; authorize Configure/Inspect on that group
+before submitting or observing a peer reload. Preserve the configured wire
+version, provisioned identities, routes and application/profile binding.
+
+The state sequence remains selected initial bundle -> authenticated single-flight
+preparation -> durable exact owner/request/generation/digest record -> native
+publication. Shutdown joins accepted preparation before releasing the node;
+recovery installs the exact recorded bundle even if the previous process never
+observed publication. Missing flags and stale/changed/unrecorded bundles refuse
+before listeners or storage open. Uncertain preparation stops service; definite
+invalid material leaves the current peer generation usable. Do not introduce a
+second journal format, credential authority or consensus path.
+
+Acceptance: real TCP/QUIC transfer metadata/source/target roles retain original
+split receipts and data across key replacement and restart; directory retains
+committed manifests and quorum-backed lookup. Exercise non-admin refusal,
+original reload IDs, lost replies, invalid preparation and stale/omitted startup
+selection. Reuse the existing shared-worker failure tests, run the affected
+service suites and all strict lint profiles. Then advance to receive/connection
+fairness and persistent discovery refresh as recorded above.
+
+### Slice207b2 implemented — counter executable peer rollout
+
+The counter exposes `--peer-credentials FILE`, `reload-peers REQUEST EXPECTED
+NEXT`, and `peer-credential-status REQUEST` for static/member/multi-group
+startup. The bounded trusted manifest selects a generation and immutable TLS
+directory. Full material is loaded off-thread; its exact digest is recorded
+in PEER-CREDENTIAL-RELOAD before the existing Node publication revokes old peer
+sessions. Original local requests are retryable and recover after unread replies
+or process loss. The loader/publisher is generic over native applications.
+Command-channel TLS and the command reload journal remain independent.
+
+Command and peer credentials now share one typed single-flight worker. This
+preserves the prior command-policy reload behavior, adds sticky refusal after
+uncertain preparation, and joins accepted work before local store release.
+Peer shutdown may leave a durable record without installing it in memory;
+the next startup checks and installs the exact recorded generation/material.
+The existing journal prevents silently dropping the peer startup flag.
+
+Authorization checks all actual local groups, without requiring a phantom
+group1. Configure is required for rotation and Inspect for status; incomplete
+group permissions refuse before preparation. Current TCP/QUIC single/multi-group
+histories exercise changed CA/leaf/key material, unchanged command access,
+original data retries, quorum reads, lost reply/process restart, invalid
+preparation and stale/changed/newer/omitted startup selection. A separate
+two-group fixture omits group1 entirely. Worker checks cover held preparation,
+shutdown/restart publication ordering and uncertainty fencing. Full executed
+results are recorded in validation/baseline/slice207b2/README.md. Final all-feature
+counter/shared-worker execution passes172 tests; separate default-feature unit,
+peer and command-access execution passes39. Formatting and all four strict
+Clippy profiles pass with zero diagnostics. Earlier failed fixture assumptions
+and their corrections remain in the evidence directory.
+
+This completes the counter command path, not all executable profiles or a
+cluster-atomic rollout. Transfer/directory integration remains207b3; resource
+fairness and persistent discovery remain the following mini-plan items.
+
+### Slice207b2 schema plan — authenticated executable peer rollout
+
+Add explicit `--peer-credentials FILE` to the counter service. The bounded
+trusted file selects a generation and an immutable TLS directory; routes, peer
+names, node/store identities, membership and command credentials remain the
+existing startup inputs. Load after selecting the final wire profile. Use the
+207b1 startup check and a separate `PEER-CREDENTIAL-RELOAD` record so command
+credential history cannot be mistaken for peer history. Refuse an existing peer
+record when the startup flag is omitted. Initial generation is trusted; after a
+record exists require its exact generation and material digest.
+
+Share the existing single-flight preparation/journal/status worker between
+command and peer credentials through a small internal typed material source.
+This extraction is needed to keep durable ordering, original-ID retries,
+bounded failure status, panic/uncertainty handling and worker ownership identical.
+New authenticated commands are `reload-peers REQUEST EXPECTED NEXT` (Configure)
+and `peer-credential-status REQUEST` (Inspect), authorized across every local
+group because peer keys serve the entire node. A worker reads/validates the full
+replacement and persists its digest before host publication. Invalid input
+leaves old sessions/generation live; uncertain persistence or publication failure
+stops the node. No filesystem work runs during Node polling. On every exit,
+accepted preparation joins before local store ownership is released; a recorded
+but unpublished replacement is installed at restart under the same request ID.
+
+Acceptance: TCP/QUIC executable writes/reads/retries through real key changes,
+lost reply/status recovery, stale/changed/omitted startup file refusal, wrong
+generation and authorization refusal, and retained command-channel access.
+Exercise multi-group permission scope and the existing command reload worker
+after extraction. This advances secure service operation under207b; transfer
+and directory executable rollout remain follow-on integration where applicable.
+The new member fixture must bootstrap before selecting explicit member
+deployment, and use recover-member consistently for rejection checks. A first
+observed write reply may be a duplicate only after an explicit unknown-outcome
+retry of the same operation/payload; track that retry and verify each group with
+a quorum read instead of assuming first observation equals first application.
 
 ### Slice207b1 implemented — native startup checks durable peer records
 

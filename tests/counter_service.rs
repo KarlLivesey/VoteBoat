@@ -77,6 +77,8 @@ mod maintenance;
 mod membership_drain;
 #[path = "counter_service/new_voter.rs"]
 mod new_voter;
+#[path = "counter_service/peer_credentials.rs"]
+mod peer_credentials;
 #[path = "counter_service/placement.rs"]
 mod placement;
 #[path = "counter_service/quorum.rs"]
@@ -111,6 +113,7 @@ struct Cluster {
     remote_admin: bool,
     targets_admin: bool,
     command_access: Option<PathBuf>,
+    peer_credentials: Option<PathBuf>,
     command_principal: Option<u64>,
     command_peers: Option<PathBuf>,
     remote_commands: bool,
@@ -185,6 +188,7 @@ impl Cluster {
             remote_admin: false,
             targets_admin: false,
             command_access: None,
+            peer_credentials: None,
             command_principal: None,
             command_peers: None,
             remote_commands: false,
@@ -276,6 +280,9 @@ impl Cluster {
                     "--admin-plan"
                 })
                 .arg(path);
+        }
+        if let Some(path) = &self.peer_credentials {
+            command.arg("--peer-credentials").arg(path);
         }
         if let Some(path) = &self.command_access {
             command.arg("--service-access").arg(path);

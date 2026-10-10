@@ -13,6 +13,8 @@ the command endpoint defaults to 127.0.0.1. Its default mode is trusted
 plaintext; `--service-access FILE` requires authenticated, scoped
 commands. See [principal permissions and client flags](AUTHORIZATION.md).
 An explicit [remote command endpoint](#remote-command-endpoints) requires that authentication.
+`--peer-credentials FILE` enables authenticated peer-key rotation and restart
+checks; see [peer credential rollout](CREDENTIAL_REFRESH.md#counter-executable-peer-rotation).
 
 An opt-in [leadership maintenance profile](MAINTENANCE.md#authenticated-counter-executable)
 adds authenticated move/status/resume/cancel commands with durable original IDs.

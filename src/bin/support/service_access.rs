@@ -421,6 +421,7 @@ impl Channel {
                 | "drain-status"
                 | "drain-group"
                 | "credential-status"
+                | "peer-credential-status"
                 | "discover",
             ) => ServiceAction::Inspect,
             Some("read" | "manifest-session" | "transfer-read") => ServiceAction::Read,
@@ -428,8 +429,8 @@ impl Channel {
             Some("checkpoint") => ServiceAction::Checkpoint,
             Some("quit" | "drain-stop") => ServiceAction::Shutdown,
             Some(
-                "configure" | "configure-record" | "reload-access" | "initialize" | "publish"
-                | "grant" | "transfer-step" | "transfer-export" | "move-leader"
+                "configure" | "configure-record" | "reload-access" | "reload-peers" | "initialize"
+                | "publish" | "grant" | "transfer-step" | "transfer-export" | "move-leader"
                 | "resume-leadership" | "cancel-leadership" | "drain-node" | "resume-drain"
                 | "cancel-drain" | "retire-group",
             ) => ServiceAction::Configure,

@@ -94,12 +94,21 @@ pub fn authorize(
     scopes: &[voteboat::identity::GroupIdentity],
     time: voteboat::runtime::MonoTime,
 ) -> Result<(), String> {
-    channel.authorize(access, command.group, command.text, time)?;
     let verb = command.text.split_whitespace().next();
-    if super::drain_service::is_command(verb) || verb == Some("list-assigned-groups") {
+    if super::drain_service::is_command(verb)
+        || matches!(
+            verb,
+            Some("list-assigned-groups" | "reload-peers" | "peer-credential-status")
+        )
+    {
+        if scopes.is_empty() {
+            return Err("AUTHORIZATION".into());
+        }
         for scope in scopes {
             channel.authorize(access, *scope, command.text, time)?;
         }
+    } else {
+        channel.authorize(access, command.group, command.text, time)?;
     }
     Ok(())
 }

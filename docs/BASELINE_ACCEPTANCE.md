@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice207b2 connects the counter executable to durable native peer rotation.
+An explicit bounded manifest selects independent peer TLS material; one shared
+typed worker records it before publication. Static/member/multi-group profiles
+use authenticated local commands with permission on every actual local group.
+TCP/QUIC histories cover new CA/leaf/key material, original data/retry continuity,
+lost reply/process recovery, bad preparation and stale/changed/omitted startup
+selection. The shared command worker retains its previous behavior and refuses
+further preparation after uncertainty. Transfer/directory peer commands and
+broader platform acceptance remain open; this is not a cluster-wide transaction.
+
 Slice207b1 connects guarded native peer credentials to static, member and shared
 multi-group startup. Host-loaded journal records bind exact owner/generation and
 TLS/peer material before startup side effects. Native TCP/QUIC three-group

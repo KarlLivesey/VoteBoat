@@ -13,17 +13,19 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::*;
+use crate::credential_worker::{journal, prepare, Pending, Rejected};
+use std::thread;
 use std::{
     fs,
     sync::atomic::{AtomicU64, Ordering},
     sync::mpsc,
 };
+use voteboat::credential_reload::*;
 use voteboat::identity::{NodeId, StoreId, StoreIdentity, StoreIncarnation};
 static NEXT: AtomicU64 = AtomicU64::new(0);
 struct Fixture {
     root: PathBuf,
-    reload: Reload,
-    active: ActiveAccess,
+    credentials: Credentials,
 }
 impl Fixture {
     fn new() -> Self {
@@ -44,12 +46,14 @@ impl Fixture {
                 incarnation: StoreIncarnation::new(1).unwrap(),
             },
         };
-        let reload = Reload::new(&root, &path, &tls, 1, owner, &access).unwrap();
+        let reload = reload(&root, &path, &tls, 1, owner, &access).unwrap();
         let active = ActiveAccess::new(access.policy.generation(), access);
         Self {
             root,
-            reload,
-            active,
+            credentials: Credentials {
+                reload: Some(reload),
+                access: Some(active),
+            },
         }
     }
 }
@@ -69,47 +73,69 @@ fn request() -> CredentialReloadRequest {
 fn held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns() {
     let mut f = Fixture::new();
     fs::write(
-        &f.reload.paths.access,
+        &f.credentials.reload.as_mut().unwrap().paths.source.access,
         "voteboat-service-access-v1 2\n3 admin 1 1\n",
     )
     .unwrap();
-    let paths = f.reload.paths.clone();
+    let paths = f.credentials.reload.as_mut().unwrap().paths.clone();
     let (release, held) = mpsc::channel();
-    f.reload.pending = Some(Pending {
+    f.credentials.reload.as_mut().unwrap().pending = Some(Pending {
         request: request(),
         handle: thread::spawn(move || {
             held.recv().unwrap();
             prepare(paths, request())
         }),
     });
-    assert!(!f.reload.poll(&mut f.active));
-    assert_eq!(f.active.generation(), Some(request().expected));
-    assert_eq!(journal(&f.reload.paths).unwrap().latest().unwrap(), None);
+    assert!(!f.credentials.poll());
+    assert_eq!(
+        f.credentials.access.as_mut().unwrap().generation(),
+        Some(request().expected)
+    );
+    assert_eq!(
+        journal(&f.credentials.reload.as_mut().unwrap().paths)
+            .unwrap()
+            .latest()
+            .unwrap(),
+        None
+    );
     assert!(f
+        .credentials
         .reload
+        .as_mut()
+        .unwrap()
         .submit(request(), request().expected)
         .unwrap()
         .contains("pending=true"));
     let mut other = request();
     other.sequence = 2;
     assert_eq!(
-        f.reload.submit(other, request().expected),
+        f.credentials
+            .reload
+            .as_mut()
+            .unwrap()
+            .submit(other, request().expected),
         Err("credential reload busy".into())
     );
     release.send(()).unwrap();
-    f.reload.finish(&mut f.active).unwrap();
-    assert!(f.reload.pending.is_none());
-    assert_eq!(f.active.generation(), Some(request().replacement));
+    f.credentials.finish().unwrap();
+    assert!(f.credentials.reload.as_mut().unwrap().pending.is_none());
     assert_eq!(
-        journal(&f.reload.paths).unwrap().latest().unwrap(),
-        f.reload.latest
+        f.credentials.access.as_mut().unwrap().generation(),
+        Some(request().replacement)
+    );
+    assert_eq!(
+        journal(&f.credentials.reload.as_mut().unwrap().paths)
+            .unwrap()
+            .latest()
+            .unwrap(),
+        f.credentials.reload.as_mut().unwrap().latest
     );
 }
 #[test]
 fn uncertain_worker_result_fences_current_credentials_and_drains_the_handle() {
     let mut f = Fixture::new();
-    let lease = f.active.lease().unwrap();
-    f.reload.pending = Some(Pending {
+    let lease = f.credentials.access.as_mut().unwrap().lease().unwrap();
+    f.credentials.reload.as_mut().unwrap().pending = Some(Pending {
         request: request(),
         handle: thread::spawn(|| {
             Err(Rejected {
@@ -118,8 +144,22 @@ fn uncertain_worker_result_fences_current_credentials_and_drains_the_handle() {
             })
         }),
     });
-    assert!(f.reload.finish(&mut f.active).is_err());
-    assert!(f.active.generation().is_none());
+    assert!(f.credentials.finish().is_err());
+    assert!(f
+        .credentials
+        .access
+        .as_mut()
+        .unwrap()
+        .generation()
+        .is_none());
     assert!(voteboat::secure::SessionValidity::validate(&lease).is_err());
-    assert!(f.reload.pending.is_none());
+    assert!(f.credentials.reload.as_mut().unwrap().pending.is_none());
+    assert!(f
+        .credentials
+        .reload
+        .as_mut()
+        .unwrap()
+        .submit(request(), request().expected)
+        .unwrap_err()
+        .contains("fenced"));
 }

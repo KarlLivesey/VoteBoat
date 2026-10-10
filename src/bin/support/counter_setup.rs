@@ -133,11 +133,21 @@ pub fn open(
     protocol: NativePeerProtocol,
     member: bool,
     maintenance: bool,
+    rotation: Option<NativePeerRotationStartup>,
 ) -> Result<Service, Failure> {
     let mut config = config;
     if maintenance {
         config.startup.tls = checked(config.startup.tls.with_wire_version(8))?;
     }
     let app = super::counter_application::Application::new(application()?, maintenance)?;
-    super::service_setup::open_application(config, protocol, member, app)
+    match rotation {
+        Some(rotation) => super::service_setup::open_application_with_rotation(
+            config,
+            protocol,
+            member,
+            app,
+            Some(rotation),
+        ),
+        None => super::service_setup::open_application(config, protocol, member, app),
+    }
 }

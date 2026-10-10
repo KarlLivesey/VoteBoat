@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.59s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 7 tests
+test peer_credentials::peer_administration_uses_actual_local_scopes_without_requiring_group_one ... ok
+test peer_credentials::tcp_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+
+thread 'peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation' (2607917) panicked at tests/counter_service/peer_credentials.rs:134:13:
+Error: "explicit deployment requires recover-member; enrollment uses enroll create|recover"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation ... FAILED
+
+thread 'peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation' (2607922) panicked at tests/counter_service/peer_credentials.rs:134:13:
+Error: "explicit deployment requires recover-member; enrollment uses enroll create|recover"
+
+test peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation ... FAILED
+test peer_credentials::tcp_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+test peer_credentials::quic_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+test peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+
+failures:
+
+failures:
+    peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation
+    peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation
+
+test result: FAILED. 5 passed; 2 failed; 0 ignored; 0 measured; 131 filtered out; finished in 4.08s
+
+error: test failed, to rerun pass `--test counter_service`

@@ -55,7 +55,8 @@ A missing journal record selects a host-authorized initial generation. It does
 not prove that no prior rotation occurred: the host must preserve/load the
 journal and must not silently substitute an empty journal after rotation.
 These APIs do not perform file loading or journal I/O inside Node polling.
-Executable peer preparation/status commands remain the next integration;
+The counter executable exposes peer preparation/status as described below;
+transfer/directory peer administration remains follow-on work.
 `reload-access` still changes command-channel credentials only. During a rollout,
 incompatible key/pin selections can interrupt connectivity; application work
 already admitted retains its normal original-operation recovery semantics.
@@ -110,6 +111,60 @@ an accepted batch with its exact ticket and Failed outcome after revocation.
 `tests/quic_connect/credential_refresh.rs` checks native QUIC reauthentication and
 revocation. These are selected Linux histories, not complete operational rotation
 or macOS/separate-host evidence.
+
+## Counter executable peer rotation
+
+Start the counter with both `--service-access ACCESS` and
+`--peer-credentials MANIFEST`. This works with static, member and multi-group
+profiles over TCP or QUIC. The manifest contains exactly:
+
+```text
+voteboat-peer-credentials-v1 1
+tls keys-v1
+```
+
+The TLS directory is absolute or relative to the manifest's parent; its path
+cannot contain whitespace. It contains `ca.der`, the local
+`nodeN.der`/`nodeN-key.der`, and `nodeN.der` for every provisioned peer.
+Node/store identities, peer names, endpoint addresses and wire profile come
+from trusted startup configuration. Command-channel credentials still use the
+ordinary TLS/access paths. Use distinct immutable key directories for peer
+versions; install a complete manifest before submitting a request.
+
+To rotate, change the manifest to the next generation and key directory, then
+use the authenticated counter client on each node:
+
+```text
+reload-peers REQUEST EXPECTED NEXT
+peer-credential-status REQUEST
+```
+
+Mutation requires Configure permission on every local group; status requires
+Inspect permission on every local group. Neither command requires a group1
+that the node does not actually own. Requests cannot select filesystem paths
+or alter membership. Each node has its own increasing request sequence and
+credential generation; apply the rollout explicitly to every node.
+
+`queued=true` confirms admission. One owned worker loads bounded material,
+validates its generation and persists the exact digest in
+`PEER-CREDENTIAL-RELOAD`; only then does the host replace peer credentials and
+revoke old connections. `state=recorded` plus the expected current generation
+confirms local publication or reconstruction at startup. After a lost reply,
+query/retry the original request. Only the latest durable request is retained;
+`unknown` is not proof an older request never ran.
+
+Invalid preparation leaves the current generation usable. An uncertain record
+or failed publication fences further reloads and stops the service. Shutdown
+joins accepted preparation before releasing the data directory, even when the
+prepared keys were not installed in memory. Restart requires the recorded
+manifest generation and exact material. Stale, changed or unrecorded newer
+material is refused; an existing journal also prevents silently dropping the
+startup flag. Preserve the manifest, immutable key directory and journal.
+Deliberately deleting a journal is outside this protection.
+
+This is local rollout control, not a cluster-wide transaction. Mixed key/pin
+versions can temporarily interrupt peer connectivity; committed data and
+original operation IDs retain the normal recovery guarantees.
 
 ## Executable command-channel reload
 

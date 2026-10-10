@@ -29,6 +29,8 @@ mod command_endpoints;
 mod counter_application;
 #[path = "support/credential_reload.rs"]
 mod credential_reload;
+#[path = "support/credential_worker.rs"]
+mod credential_worker;
 #[path = "support/diagnostics.rs"]
 mod diagnostics;
 #[path = "support/drain_commands.rs"]
@@ -51,6 +53,8 @@ mod leadership_commands;
 mod leadership_set;
 #[path = "support/local_client.rs"]
 mod local_client;
+#[path = "support/peer_credentials.rs"]
+mod peer_credentials;
 #[path = "support/placement_format.rs"]
 mod placement_format;
 #[path = "support/placement_input.rs"]
@@ -107,7 +111,7 @@ Retained-replica drain: --node-drain enabled requires the maintenance profile.\n
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
 Membership drain: source uses --membership-drain FILE and all peers use --remote-admin-plan FILE; see docs/MAINTENANCE.md.\n\
 voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
-Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.\n\
+Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST. Peer rotation: --peer-credentials FILE enables reload-peers REQUEST EXPECTED NEXT and peer-credential-status REQUEST.\n\
 Multi-group data service: --groups FILE requires --service-access; see docs/MULTI_GROUP_STARTUP.md.\n\
 Commands: group ID INC status|read|add OP DELTA|checkpoint; auto routing supports group reads and adds.\n\
 Local inventory: list-assigned-groups CURSOR LIMIT (start with -; limit 1..8); requires Inspect on every local group.\n\
@@ -327,6 +331,7 @@ fn outputs(
 struct PreparedService {
     service: Service,
     credentials: credential_reload::Credentials,
+    peers: Option<peer_credentials::Peers>,
     administration: Option<administration_set::Administrations>,
     listener: TcpListener,
     peer_address: std::net::SocketAddr,
@@ -359,7 +364,8 @@ fn prepare_service(
         plan_path.is_some(),
     )?;
     options.validate_profiles(root)?;
-    let config = setup::configuration(root, id, base, tls, create, input)?;
+    let mut config = setup::configuration(root, id, base, tls, create, input)?;
+    let peers = options.prepare_peer_credentials(&mut config, mode)?;
     let credentials = credential_reload::Credentials::load(
         root,
         access_path,
@@ -407,6 +413,7 @@ fn prepare_service(
         protocol,
         mode == "recover-member",
         options.leadership_maintenance,
+        peers.as_ref().map(|p| p.startup(protocol)),
     )?;
     options.configure_maintenance(&mut service)?;
     let drain = options
@@ -427,6 +434,7 @@ fn prepare_service(
     Ok(PreparedService {
         service,
         credentials,
+        peers,
         administration,
         listener,
         peer_address,
@@ -446,6 +454,17 @@ fn serve(
     let prepared = prepare_service(mode, root, id, base, tls, input, options)?;
     run_service(prepared, id, options.protocol)
 }
+fn peer_command(
+    peers: &mut Option<peer_credentials::Peers>,
+    text: &str,
+) -> Option<Result<Phase, String>> {
+    peer_credentials::command(peers, text).map(|result| {
+        result.map(|reply| Phase::Output {
+            bytes: format!("{reply}\n").into_bytes(),
+            sent: 0,
+        })
+    })
+}
 fn run_service(
     prepared: PreparedService,
     id: u64,
@@ -455,6 +474,7 @@ fn run_service(
     // Declare after service: error exits join the credential worker before
     // releasing the service's exclusive data-directory ownership.
     let mut credentials = prepared.credentials;
+    let mut peers = prepared.peers;
     let mut drain = prepared.drain;
     let mut administration = prepared.administration;
     let listener = prepared.listener;
@@ -476,10 +496,7 @@ fn run_service(
     let mut leadership = leadership_set::Leaders::new(&service);
     loop {
         let time = now(start);
-        if credentials.poll() {
-            eprintln!("credential reload has uncertain durable state; stopping");
-            quit = true;
-        }
+        poll_credential_updates(&mut service, &mut credentials, &mut peers, &mut quit);
         // Observe command closure/deadline and cancel its exact pending work
         // before this iteration can authorize queued membership execution.
         if !quit && connection.is_none() {
@@ -501,6 +518,9 @@ fn run_service(
                     if let Some(result) =
                         maintenance_command(&mut service, &mut leadership, &mut drain, s, &mut quit)
                     {
+                        return result;
+                    }
+                    if let Some(result) = peer_command(&mut peers, s) {
                         return result;
                     }
                     command(
@@ -555,12 +575,25 @@ fn run_service(
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
-    finish_service(service, drain, credentials, observer, id)
+    finish_service(service, drain, credentials, peers, observer, id)
+}
+fn poll_credential_updates(
+    service: &mut Service,
+    credentials: &mut credential_reload::Credentials,
+    peers: &mut Option<peer_credentials::Peers>,
+    quit: &mut bool,
+) {
+    let peer_failure = !*quit && peers.as_mut().is_some_and(|p| p.poll(service));
+    if credentials.poll() || peer_failure {
+        eprintln!("credential reload has uncertain durable state; stopping");
+        *quit = true;
+    }
 }
 fn finish_service(
     service: Service,
     mut drain: Option<drain_service::Driver>,
     mut credentials: credential_reload::Credentials,
+    mut peers: Option<peer_credentials::Peers>,
     mut observer: Diagnostics,
     id: u64,
 ) -> Result<(), Failure> {
@@ -569,6 +602,9 @@ fn finish_service(
         drain.finish()?;
     }
     credentials.finish()?;
+    if let Some(peers) = &mut peers {
+        peers.finish()?;
+    }
     observer.close();
     setup::join(service)?;
     println!("stopped node={id} workers_joined=true");
@@ -875,6 +911,7 @@ struct StartupOptions {
     deployment: Option<std::path::PathBuf>,
     admin_plan: Option<std::path::PathBuf>,
     service_access: Option<std::path::PathBuf>,
+    peer_credentials: Option<std::path::PathBuf>,
     command_listen: Option<SocketAddr>,
     discovery_peers: Option<std::path::PathBuf>,
     remote_admin: administration::Mode,
@@ -888,6 +925,28 @@ struct StartupOptions {
     group_drain_plan: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
+    fn prepare_peer_credentials(
+        &self,
+        config: &mut voteboat::native::startup::NativeMemberStartup,
+        mode: &str,
+    ) -> Result<Option<peer_credentials::Peers>, Failure> {
+        self.peer_credentials
+            .as_deref()
+            .map(|path| {
+                let wire = config.startup.tls.wire_version().max(
+                    if self.groups.is_some() || self.leadership_maintenance {
+                        8
+                    } else if mode == "recover-member" {
+                        7
+                    } else {
+                        1
+                    },
+                );
+                peer_credentials::Peers::load(config, path, wire)
+            })
+            .transpose()
+    }
+
     fn drain_plan(
         &self,
         stores: &std::collections::BTreeMap<NodeId, StoreIdentity>,
@@ -934,6 +993,11 @@ impl StartupOptions {
             .transpose()
     }
     fn validate_profiles(&self, root: &Path) -> Result<(), Failure> {
+        peer_credentials::Peers::validate_profile(
+            root,
+            self.peer_credentials.as_deref(),
+            self.service_access.is_some(),
+        )?;
         if self.group_drain_plan.is_some() && (self.groups.is_none() || !self.node_drain) {
             return Err("--group-drain-plan requires --groups and --node-drain enabled".into());
         }
@@ -1031,6 +1095,7 @@ fn is_startup_option(flag: &str) -> bool {
             | "--groups"
             | "--group-admin-plans"
             | "--group-drain-plan"
+            | "--peer-credentials"
     )
 }
 fn parse_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
@@ -1049,6 +1114,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut deployment = None;
     let mut admin_plan = None;
     let mut service_access = None;
+    let mut peer_credentials = None;
     let mut command_listen = None;
     let mut discovery_peers = None;
     let mut remote_admin = administration::Mode::Automatic;
@@ -1096,6 +1162,9 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--service-access" if service_access.is_none() && args[0] == "serve" => {
                 service_access = Some(std::path::PathBuf::from(value));
             }
+            "--peer-credentials" if peer_credentials.is_none() && args[0] == "serve" => {
+                peer_credentials = Some(std::path::PathBuf::from(value));
+            }
             "--discovery-peers" if discovery_peers.is_none() && args[0] == "serve" => {
                 discovery_peers = Some(std::path::PathBuf::from(value));
             }
@@ -1125,6 +1194,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         deployment,
         admin_plan,
         service_access,
+        peer_credentials,
         command_listen,
         discovery_peers,
         remote_admin,

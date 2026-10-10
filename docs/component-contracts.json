@@ -890,16 +890,18 @@
         "read",
         "replace"
       ],
-      "native": "NativeCredentialJournal<I> over host-supplied atomic record I/O; FileCredentialRecord uses stage, file sync, rename and directory sync. The executable owns one preparation worker and publishes through NativeCredentialSet.",
+      "native": "NativeCredentialJournal<I> over host-supplied atomic record I/O; FileCredentialRecord uses stage, file sync, rename and directory sync. The executable owns one preparation worker and publishes through NativeCredentialSet. Counter peer reload and counter/transfer command reload share one internal typed preparation worker; peer material publishes through the optional Node credential-control contract.",
       "conformance": [
         "tests/credential_journal.rs",
         "tests/provider_conformance/credential.rs",
         "tests/provider_conformance/credential_native.rs",
         "tests/counter_service/credential_reload.rs",
         "tests/transfer_service/revocation.rs",
-        "src/bin/support/credential_reload_tests.rs"
+        "src/bin/support/credential_reload_tests.rs",
+        "tests/counter_service/peer_credentials.rs",
+        "src/bin/support/peer_credentials_tests.rs"
       ],
-      "scope": "Version1 local fixed128-byte checksummed latest preparation record binds stable node/store identity, request sequence, expected/replacement generations and exact loaded material digest. Exact latest retries are idempotent; changed/superseded sequences and older expected generations reject. Uncertain writes fence until reopen. Caller provides exclusive writer lifetime and runs blocking I/O outside Node polling. Executable reload uses fixed trusted paths, bounded complete material validation, single-flight worker ownership, durable preparation before publication, guarded old-session revocation and status after lost replies. Failed preparation retains old credentials; uncertain publication stops service. Shutdown/error exits join accepted workers. Reopen refuses rollback and same-generation digest mismatch; higher trusted startup configuration remains allowed. Command-channel TLS/policy only: no automatic peer credential rotation, secret distribution, full audit history or cluster-wide atomic update. Finite corruption/partial-stage and before/after replacement tests are not physical power-loss proof."
+      "scope": "Version1 local fixed128-byte checksummed latest preparation record binds stable node/store identity, request sequence, expected/replacement generations and exact loaded material digest. Exact latest retries are idempotent; changed/superseded sequences and older expected generations reject. Uncertain writes fence until reopen. Caller provides exclusive writer lifetime and runs blocking I/O outside Node polling. Executable reload uses fixed trusted paths, bounded complete material validation, single-flight worker ownership, durable preparation before publication, guarded old-session revocation and status after lost replies. Failed preparation retains old credentials; uncertain publication stops service. Shutdown/error exits join accepted workers. Reopen refuses rollback and same-generation digest mismatch; higher trusted startup configuration remains allowed. Command-channel TLS/policy only: no automatic peer credential rotation, secret distribution, full audit history or cluster-wide atomic update. Finite corruption/partial-stage and before/after replacement tests are not physical power-loss proof. Slice207b2 adds explicit counter --peer-credentials manifests with separate peer records, complete prepared native key/pin loading, all-local-group authorization, latest-ID recovery and strict peer startup generation/digest checks. The generic worker preserves one in-flight request, original IDs, and sticky fencing after uncertainty; drop/stop joins accepted preparation before the node releases storage. Peer loading/publication is application-agnostic over native Nodes; transfer/directory command integration remains open."
     },
     {
       "design_id": "C09",
@@ -2638,9 +2640,11 @@
         "tests/peer_rotation/host.rs",
         "tests/support/node_peer_credentials.rs",
         "tests/startup/peer_rotation.rs",
-        "tests/startup/multi/peer_rotation.rs"
+        "tests/startup/multi/peer_rotation.rs",
+        "tests/counter_service/peer_credentials.rs",
+        "src/bin/support/peer_credentials_tests.rs"
       ],
-      "scope": "Expected/replacement credential generations are distinct from connection, store and membership generations. Native prepared key/pin replacement preserves the exact peer identity set, wire version, endpoint routes, hard limits and connection-generation counters. Rejected material is returned intact. Accepted old tickets retain capacity through one terminal poll; old leases revoke established sessions and suppress late successful handshakes. Close/drop revoke wrapper leases; underlying provider reclaim requires close and drain. No file loading, durable record, restart policy, membership change or executable rollout is supplied by this mechanism. Wrap before exposing sessions; prior raw sessions do not carry wrapper leases. Host authorizes and durably records the intended rollout before publication. Slice207b1 binds restart to the exact recorded generation, owner and SHA-256 of local TLS bytes, wire version and complete peer identity/pin/name map before sockets or stores open. A host-authorized initial generation may omit a record; the host must preserve the journal and serialize its writer. Native startup recovers recorded but unpublished material; TCP/QUIC three-group data/retries and QUIC checkpoints survive live rotation and restart. Rejected startup drains and returns original resources. Filesystem loading, authenticated executable rollout and cluster coordination remain external to this startup adapter."
+      "scope": "Expected/replacement credential generations are distinct from connection, store and membership generations. Native prepared key/pin replacement preserves the exact peer identity set, wire version, endpoint routes, hard limits and connection-generation counters. Rejected material is returned intact. Accepted old tickets retain capacity through one terminal poll; old leases revoke established sessions and suppress late successful handshakes. Close/drop revoke wrapper leases; underlying provider reclaim requires close and drain. No file loading, durable record, restart policy, membership change or executable rollout is supplied by this mechanism. Wrap before exposing sessions; prior raw sessions do not carry wrapper leases. Host authorizes and durably records the intended rollout before publication. Slice207b1 binds restart to the exact recorded generation, owner and SHA-256 of local TLS bytes, wire version and complete peer identity/pin/name map before sockets or stores open. A host-authorized initial generation may omit a record; the host must preserve the journal and serialize its writer. Native startup recovers recorded but unpublished material; TCP/QUIC three-group data/retries and QUIC checkpoints survive live rotation and restart. Rejected startup drains and returns original resources. Filesystem loading, authenticated executable rollout and cluster coordination remain external to this startup adapter. Counter startup/admin integration207b2 uses explicit generation plus immutable key-directory manifests and separate durable peer records. Commands require permission on every actual local group, without an implicit group1. TCP/QUIC single/multi-group executable histories preserve writes, reads and retries through new CA/leaf/key rollout and unread-reply/process-loss recovery. Bad/stale/missing startup selection refuses; command-channel keys remain independent. Transfer/directory executable integration remains."
     }
   ],
   "not_yet_implemented": [
@@ -2648,7 +2652,7 @@
     "client-disk-and-connection-admission-policy",
     "executable-remote-discovery-live-endpoint-refresh-and-broader-discovery-faults",
     "observability-latency-and-budgeted-events",
-    "cluster-peer-credential-rotation-and-general-durable-authorization-audit",
+    "remaining-executable-peer-credential-rollout-and-general-durable-authorization-audit",
     "compression",
     "complete-interrupted-and-recursive-scope-transfer-lifecycle",
     "transactions",

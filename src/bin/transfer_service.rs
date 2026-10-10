@@ -15,6 +15,8 @@ mod command_endpoints;
 mod connection;
 #[path = "support/credential_reload.rs"]
 mod credential_reload;
+#[path = "support/credential_worker.rs"]
+mod credential_worker;
 #[path = "support/transfer_profile.rs"]
 mod profile;
 #[path = "support/transfer_retirement.rs"]

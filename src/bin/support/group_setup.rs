@@ -121,18 +121,33 @@ impl Prepared {
         protocol: NativePeerProtocol,
         member: bool,
         maintenance: bool,
+        rotation: Option<NativePeerRotationStartup>,
     ) -> Result<Service, Failure> {
         let (config, applications) = match self {
-            Self::Single(config) => return setup::open(*config, protocol, member, maintenance),
+            Self::Single(config) => {
+                return setup::open(*config, protocol, member, maintenance, rotation)
+            }
             Self::Multi(config, applications) => (config, applications),
         };
-        match config.open(
-            protocol,
-            TimerConfig::default(),
-            applications,
-            Arc::new(ThreadWake::current()),
-            MonoTime(0),
-        ) {
+        let wake = Arc::new(ThreadWake::current());
+        let opened = if let Some(rotation) = rotation {
+            config.open_with_peer_rotation(
+                rotation,
+                TimerConfig::default(),
+                applications,
+                wake,
+                MonoTime(0),
+            )
+        } else {
+            config.open(
+                protocol,
+                TimerConfig::default(),
+                applications,
+                wake,
+                MonoTime(0),
+            )
+        };
+        match opened {
             Ok(service) => Ok(service),
             Err(mut rejected) => {
                 let deadline = Instant::now() + Duration::from_secs(10);

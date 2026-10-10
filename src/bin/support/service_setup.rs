@@ -163,10 +163,23 @@ pub fn configuration(
     Ok(config)
 }
 pub fn open_application<A>(
+    config: NativeMemberStartup,
+    protocol: NativePeerProtocol,
+    member: bool,
+    app: A,
+) -> Result<NativeNode<A, NativeServiceConnector>, Failure>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    open_application_with_rotation(config, protocol, member, app, None)
+}
+pub fn open_application_with_rotation<A>(
     mut config: NativeMemberStartup,
     protocol: NativePeerProtocol,
     member: bool,
     app: A,
+    rotation: Option<NativePeerRotationStartup>,
 ) -> Result<NativeNode<A, NativeServiceConnector>, Failure>
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
@@ -179,11 +192,21 @@ where
         if config.startup.tls.wire_version() < 7 {
             config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
         }
-        config.open_with_protocol(protocol, app, wake, MonoTime(0))
+        match rotation {
+            Some(rotation) => config.open_with_peer_rotation(rotation, app, wake, MonoTime(0)),
+            None => config.open_with_protocol(protocol, app, wake, MonoTime(0)),
+        }
     } else {
-        config
-            .startup
-            .open_with_protocol(protocol, app, wake, MonoTime(0))
+        match rotation {
+            Some(rotation) => {
+                config
+                    .startup
+                    .open_with_peer_rotation(rotation, app, wake, MonoTime(0))
+            }
+            None => config
+                .startup
+                .open_with_protocol(protocol, app, wake, MonoTime(0)),
+        }
     };
     match opened {
         Ok(node) => Ok(node),

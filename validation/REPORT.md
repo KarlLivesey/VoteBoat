@@ -1,6 +1,12 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Counter peer rollout: [slice207b2](baseline/slice207b2/README.md). The explicit
+manifest and authenticated local peer commands use the verified native startup
+and a shared typed preparation worker. TCP/QUIC executable histories cover key
+replacement, original operation recovery, all-local-group permissions and stale
+startup refusal. Counter publication is generic over native applications;
+transfer/directory peer command integration and platform acceptance remain open.
 Native peer startup: [slice207b1](baseline/slice207b1/README.md), with exact
 host-loaded durable record/material checks before startup side effects and
 guarded static/member/multi-group assembly. TCP/QUIC replicated data and retries
