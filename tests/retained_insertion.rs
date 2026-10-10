@@ -23,6 +23,59 @@ use voteboat::{
 };
 type Source = ScopedTransferSource<BucketCounter<Policy>, Policy>;
 type Target = TransferTarget<BucketCounter<Policy>, Policy>;
+#[test]
+fn preview_retains_unmoved_source_scope_without_changing_directory() {
+    use std::collections::BTreeMap;
+    use voteboat::{membership::Configuration, placement::ReplicaPlacement};
+    let (directory, _, intent) = setup(false);
+    let before = directory.checkpoint(200000).unwrap();
+    let source = BucketCounter::new(range(0, 256), Policy, bucket_limits()).unwrap();
+    let target = BucketCounter::new(range(0, 128), Policy, bucket_limits()).unwrap();
+    let boot = support::bootstrap(21, 3);
+    let replicas: BTreeMap<_, _> = boot
+        .voter_stores
+        .iter()
+        .map(|(&n, &s)| {
+            (
+                n,
+                ReplicaPlacement {
+                    store: s,
+                    domain: FailureDomainId::new(n.get()).unwrap(),
+                },
+            )
+        })
+        .collect();
+    let config = Configuration::new(
+        boot.configuration,
+        boot.policy,
+        boot.voter_stores,
+        BTreeMap::new(),
+    )
+    .unwrap();
+    let adapter = intent.before().input().application;
+    let p = preview_transfer(
+        &intent,
+        &[PreviewSource {
+            group: group(20),
+            adapter,
+            application: &source,
+            export_bytes: 100000,
+        }],
+        &[PreviewTarget {
+            group: group(21),
+            adapter,
+            application: &target,
+            configuration: &config,
+            replicas: &replicas,
+            import_bytes: 100000,
+        }],
+        100000,
+    )
+    .unwrap();
+    assert_eq!(p.sources[0].retained_scopes, vec![range(128, 256)]);
+    assert_eq!(p.exports[0].scope, range(0, 128));
+    assert_eq!(directory.checkpoint(200000).unwrap(), before);
+}
 fn commit<A: StateMachine>(a: &mut A, id: u128, bytes: Vec<u8>) -> A::Receipt {
     a.apply_batch(&[entry(a.applied_index() + 1, id, bytes)])
         .unwrap()

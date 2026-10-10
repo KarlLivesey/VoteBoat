@@ -71,41 +71,7 @@ impl NativePlacementAuthorizer {
         self.requirements
     }
     fn configuration(&self, configuration: &Configuration) -> Result<(), PlacementError> {
-        for (&node, store) in configuration
-            .voter_stores()
-            .iter()
-            .chain(configuration.learners())
-        {
-            let placement = self
-                .replicas
-                .get(&node)
-                .ok_or(PlacementError::UnknownReplica(node))?;
-            if &placement.store != store {
-                return Err(PlacementError::WrongStore(node));
-            }
-        }
-        let domains: BTreeSet<_> = configuration
-            .voter_stores()
-            .keys()
-            .map(|node| self.replicas[node].domain)
-            .collect();
-        if domains.len() < self.requirements.minimum_voting_domains {
-            return Err(PlacementError::TooFewVotingDomains);
-        }
-        if self.requirements.survive_any_single_domain_loss {
-            for domain in domains {
-                let survivors = configuration
-                    .voter_stores()
-                    .keys()
-                    .copied()
-                    .filter(|node| self.replicas[node].domain != domain)
-                    .collect();
-                if !configuration.policy().is_satisfied(&survivors) {
-                    return Err(PlacementError::DomainLossPreventsQuorum(domain));
-                }
-            }
-        }
-        Ok(())
+        validate_configuration_placement(configuration, &self.replicas, self.requirements)
     }
 }
 impl PlacementAuthorizer for NativePlacementAuthorizer {

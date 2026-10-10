@@ -72,43 +72,9 @@ pub(super) fn tree<'a>(
     depth: usize,
     remaining: &mut usize,
 ) -> Result<Tree, Failure> {
-    if depth > 32 || *remaining == 0 {
-        return Err("administration policy exceeds bounds".into());
-    }
-    *remaining -= 1;
-    let token = tokens.next().ok_or("truncated administration policy")?;
-    let (kind, value) = token
-        .split_once(':')
-        .ok_or("expected v:N, m:COUNT or w:COUNT")?;
-    if kind == "v" {
-        return Ok(Tree::Voter(node(value)?));
-    }
-    let count: usize = value.parse()?;
-    if count == 0 || count > *remaining {
-        return Err("invalid administration branch size".into());
-    }
-    match kind {
-        "m" => {
-            let mut children = Vec::new();
-            for _ in 0..count {
-                children.push(tree(tokens, depth + 1, remaining)?);
-            }
-            Ok(Tree::Majority(children))
-        }
-        "w" => {
-            let mut children = Vec::new();
-            for _ in 0..count {
-                let weight = tokens.next().ok_or("missing policy weight")?.parse()?;
-                children.push(WeightedChild {
-                    weight,
-                    node: tree(tokens, depth + 1, remaining)?,
-                });
-            }
-            Ok(Tree::Weighted(children))
-        }
-        _ => Err("unknown administration policy branch".into()),
-    }
+    super::policy_input::tree(tokens, depth, remaining, MAX_NODE)
 }
+
 fn parse_record<'a>(
     kind: &str,
     mut tokens: impl Iterator<Item = &'a str>,

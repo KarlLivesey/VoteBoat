@@ -27,6 +27,10 @@ mod directory_connection;
 mod directory_owner;
 #[path = "support/directory_plan.rs"]
 mod directory_plan;
+#[path = "support/policy_input.rs"]
+mod policy_input;
+#[path = "support/preview_input.rs"]
+mod preview_input;
 #[path = "support/route_client.rs"]
 mod route_client;
 #[path = "support/route_discovery.rs"]
@@ -35,6 +39,8 @@ mod route_discovery;
 mod service_access;
 #[path = "support/service_setup.rs"]
 mod setup;
+#[path = "support/transfer_preview.rs"]
+mod transfer_preview;
 use setup::Failure;
 use std::{
     net::{SocketAddr, TcpListener},
@@ -51,7 +57,7 @@ use voteboat::{
     runtime::*,
 };
 type Node = NativeNode<Directory, NativeServiceConnector>;
-const HELP: &str = "voteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit [--command-peers FILE]\nvoteboat-directory lookup BASE NODE TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
+const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit [--command-peers FILE]\nvoteboat-directory lookup BASE NODE TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
 fn ids(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     let base: u16 = base.parse()?;
     let id: u64 = id.parse()?;
@@ -204,6 +210,7 @@ fn main() -> Result<(), Failure> {
         [verb, rest @ ..] if verb == "client" => directory_client::command(rest),
         [verb, rest @ ..] if verb == "lookup" => directory_client::lookup(rest),
         [verb, rest @ ..] if verb == "route" => route_client::route(rest),
+        [verb, rest @ ..] if verb == "split-preview" => transfer_preview::command(rest),
         [arg] if arg == "--help" => {
             println!("{HELP}");
             Ok(())

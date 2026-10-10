@@ -154,3 +154,10 @@ binary. Placement orchestration and lifecycle administration remain subsequent
 work. The native acceptance tests are local
 multiprocess TCP/QUIC histories; separate-host and current macOS validation remain
 open. The full P0–P7 roadmap is not complete.
+
+## Transfer preflight
+
+`voteboat-directory split-preview PROFILE` checks an explicit offline split/merge
+plan and prints its scopes, placement and payload bounds without submitting it.
+See [the profile and Rust contract](TRANSFER_PREVIEW.md). It does not recover
+live data or begin a transfer; operator lifecycle execution remains separate.

@@ -1,0 +1,10 @@
+cargo +stable test --locked --offline --all-features --test scopes --test transfer_preview_cli --test placement --test placement_planning
+cargo +stable test --locked --offline --no-default-features --test scopes
+cargo +stable test --locked --offline --all-features --test retained_insertion preview
+cargo +stable test --locked --offline --all-features --test counter_service placement -- --nocapture
+cargo +stable test --locked --offline --all-features --test transfer_preview_cli
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs

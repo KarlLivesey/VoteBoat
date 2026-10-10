@@ -5502,3 +5502,28 @@ Baseline175 cargo1526695/routed1580417 are confirmed live at capture. CI38025706
 for639c1fb is pending without jobs. No current full-suite or macOS success is
 claimed. Original slice183 fixed250ms performance gates still fail. See
 [commands, provenance and logs](baseline/slice192/README.md).
+
+## Slice193 — pure transfer preview and native command
+
+The new public preview uses the existing scope provider and checked transfer
+intent contracts. Native/host tests check split/merge mapping, exact proposed
+placement, retained source scopes, schema/provider-bound failures and unchanged
+source/target state. A hostile provider panics if preview tries exporting or
+importing data. Native CLI tests exercise recursive policy input, exact store
+incarnations, malformed/oversized/unsupported profiles and no-success output on
+failure. The CLI explicitly reports configured bounds rather than live data.
+
+A first retained test failed because the moved range was used as the original
+ownership scope. The corrected implementation subtracts transferred ranges
+from the original manifest and verifies the source application covers them.
+The failure and passing regression are retained. No lifecycle mutation, quorum
+rule, persistence or wire-format change is introduced. Native placement and
+counter policy parsing reuse shared implementations.
+
+Fresh results:36 all-feature scope/placement/planning/CLI tests;11 core-only
+scope tests;1 selected retained preview;5 counter placement tests including TCP
+and QUIC recovery. The3 CLI cases pass again after rendering extraction. All
+three strict Clippy profiles and formatting pass with zero diagnostics;96
+inventory records pass metadata validation only. See
+[commands and evidence](baseline/slice193/README.md). These selected tests do not
+establish full baseline/platform acceptance or actual target import readiness.

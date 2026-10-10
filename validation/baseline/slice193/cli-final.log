@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running tests/transfer_preview_cli.rs (target/debug/deps/transfer_preview_cli-5bd93d403c7d2765)
+
+running 3 tests
+test native_offline_preview_preserves_exact_placement_and_declares_limits ... ok
+test unsupported_application_and_oversized_profile_are_rejected ... ok
+test malformed_profiles_refuse_without_printing_success ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

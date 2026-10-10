@@ -118,9 +118,10 @@ strict profiles clean while advancing the remaining capability work.
 | Completed190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, explicit authority-to-endpoint mapping, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
 | Completed191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
 | Completed192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | R01–R19, operator surface and existing roadmap/catalogue ledgers reconciled;32 fresh quorum/activation/Raft tests pass. Current full-suite/platform and P7 performance remain unclosed. |
-| Current193: split preview contract | Expose the chapter09 read-only preflight for an explicit split; advances the P5/P6 operator surface. | Existing checked TransferIntent, ScopeStateMachine capabilities, target assignment and source export/retention limits; no new consensus protocol. | Report application support, affected scopes, placement, movement/retention bounds and invariants; distinguish measured facts from unavailable estimates; reject incompatible input and never freeze, reserve or activate from a preview. |
-| Next194: recoverable lifecycle administration | Make the existing split execution/status/resumption paths usable through the same explicit operation identity; advances P6 operator support. |193 preview plus current source-fence/import/publication/activation/retirement contracts and authorization. | Exercise an actual operator-started split, interrupted observation, restart and resume with original IDs; require existing durable evidence at each transition and preserve retries/exclusive ownership. Scope the schema before implementation, retaining any unsupported profile explicitly. |
-| Following195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
+| Completed193: split preview contract | Expose the chapter09 read-only preflight for an explicit split; advances the P5/P6 operator surface. | Existing checked TransferIntent, ScopeStateMachine capabilities, target assignment and source export/retention limits; no new consensus protocol. | Report application support, affected scopes, placement, movement/retention bounds and invariants; distinguish measured facts from unavailable estimates; reject incompatible input and never freeze, reserve or activate from a preview. |
+| Current194: recoverable lifecycle administration | Make the existing split execution/status/resumption paths usable through the same explicit operation identity; advances P6 operator support. |193 preview plus current source-fence/import/publication/activation/retirement contracts and authorization. | Exercise an actual operator-started split, interrupted observation, restart and resume with original IDs; require existing durable evidence at each transition and preserve retries/exclusive ownership. Scope the schema before implementation, retaining any unsupported profile explicitly. |
+| Next195: operator-driven split recovery cuts | Validate the new operator path at the existing durability boundaries; advances P4/P6 fault acceptance. |194 execution, source membership snapshot recovery and retained operation/receipt identities. | Interrupt before/after source fence, target import and publication; reopen and resume original intent, preserve retry state and verify no dual owner. Retain failures and identify any uncovered phase rather than claiming a complete fault matrix. |
+| Following196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
 
 The192 audit changes the immediate order: chapter09 still has missing operator
 capabilities, so close a usable preview/execution path before another performance
@@ -159,6 +160,68 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice193 implementation and acceptance record
+
+Added public preview_transfer over checked intents and borrowed existing scope
+providers, plus voteboat-directory split-preview for a bounded offline native
+profile. The report covers source/target ranges, retained scopes, exact target
+configurations/replica stores/domains, source applied observations, intent digest
+and conservative export/import payload bounds. It labels unknown duration/WAL
+retention and preserves per-group ordering. CLI templates are explicitly not
+live/recovered state. Preview does not copy/import data, mutate applications,
+reserve resources or authorize execution. Other application providers use the
+same public Rust contract; the CLI selects native bucket/byte-partition profiles.
+
+Reused native placement validation in a shared internal pure function. The
+existing bounded recursive policy parser is shared by the CLI and counter admin,
+retaining counter node limits. No quorum, durable state or wire format changed.
+A retained-scope regression initially exposed that intent.sources describes the
+moved range, not the full original ownership. The report now subtracts transfer
+ranges from the original manifest's owned ranges and verifies source coverage.
+The original failure is retained; the corrected test passes.
+
+Eight new tests cover native/host scope providers, schema/provider bounds,
+immutable inputs, split/merge/retained mapping, recursive placement and executable
+input/output. Fresh runs pass36 all-feature scope/placement/planning/CLI tests,
+11 core-only scope tests, the retained preview test, and5 counter placement tests
+including TCP/QUIC execution/recovery. The final CLI rerun passes3 tests after
+extracting its rendering helper. Formatting and strict default/all/core Clippy
+finish with zero diagnostics;96 inventory records pass metadata checks. Exact
+logs, source hashes and commands are in validation/baseline/slice193.
+
+No live snapshot consistency, actual import success, reserved capacity,
+automatic split execution, full operator lifecycle or P0–P7 completion is
+claimed. The next mini plan connects the existing durable lifecycle stages to
+operator start/status/resumption; P7 and current platform gates remain open.
+
+### Slice193 schema and acceptance plan
+
+Add a pure public transfer-preview function over a checked TransferIntent,
+borrowed ScopeStateMachine source/target applications, exact target
+configurations/store/domain assignments and explicit payload budgets. Validate
+source/target coverage, schema/scheme/scope compatibility, export bounds,
+aggregate imports and placement using the same validation as native membership.
+Reports retain intent digest/epochs, affected ranges, per-group ordering,
+proposed replicas and source applied observations. Payload upper bounds are not
+reservations, future data-fit guarantees, target readiness or ownership evidence.
+
+The native CLI reads a bounded offline profile with native bucket application
+and partition policy templates, explicitly labelled configured bounds rather
+than live/recovered state. Keep parser/rendering outside the library; preserve
+exact group/store incarnations and recursive voting policies. No I/O or mutation
+in the core preview; no persistence, admission ticket, worker or new watermark.
+Borrowed providers keep ownership. Errors change no application state; dropping
+a result only frees bounded metadata. Rebuild after restart or configuration
+change. Pause lasts from source fence through valid target activation with no
+numeric upper duration promised; WAL retention remains a separate obligation.
+
+Acceptance: native and downstream host providers; split/merge and retained-scope
+mapping; mismatch, duplicate/missing assignment and budget refusals; unchanged
+applications on success/error; executable canonical output and malformed-input
+checks. Run affected lifecycle/placement tests and all strict lint profiles.
+A shared internal placement validator is needed to reuse existing native policy
+checks in the core-only preview, without inventing a second quorum policy.
 
 ### Slice191 implementation and acceptance record
 

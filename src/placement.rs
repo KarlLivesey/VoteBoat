@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Administrative placement checks. These never replace journal or quorum rules.
 use crate::{identity::*, membership::*};
+use std::collections::BTreeSet;
 mod planning;
 pub use planning::*;
 mod changes;
@@ -55,4 +56,46 @@ pub struct PlacementRequirements {
     /// Every single configured voting domain may fail while a quorum remains.
     /// This does not claim tolerance of simultaneous multiple-domain failures.
     pub survive_any_single_domain_loss: bool,
+}
+
+/// Shared deterministic check used by native authorization and offline preview.
+pub(crate) fn validate_configuration_placement(
+    configuration: &Configuration,
+    replicas: &std::collections::BTreeMap<NodeId, ReplicaPlacement>,
+    requirements: PlacementRequirements,
+) -> Result<(), PlacementError> {
+    for (&node, store) in configuration
+        .voter_stores()
+        .iter()
+        .chain(configuration.learners())
+    {
+        let placement = replicas
+            .get(&node)
+            .ok_or(PlacementError::UnknownReplica(node))?;
+        if &placement.store != store {
+            return Err(PlacementError::WrongStore(node));
+        }
+    }
+    let domains: BTreeSet<_> = configuration
+        .voter_stores()
+        .keys()
+        .map(|node| replicas[node].domain)
+        .collect();
+    if domains.len() < requirements.minimum_voting_domains {
+        return Err(PlacementError::TooFewVotingDomains);
+    }
+    if requirements.survive_any_single_domain_loss {
+        for domain in domains {
+            let survivors = configuration
+                .voter_stores()
+                .keys()
+                .copied()
+                .filter(|node| replicas[node].domain != domain)
+                .collect();
+            if !configuration.policy().is_satisfied(&survivors) {
+                return Err(PlacementError::DomainLossPreventsQuorum(domain));
+            }
+        }
+    }
+    Ok(())
 }

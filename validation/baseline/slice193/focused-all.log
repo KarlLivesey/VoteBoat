@@ -1,0 +1,62 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.67s
+     Running tests/placement.rs (target/debug/deps/placement-486146be5bd2b5d6)
+
+running 8 tests
+test administration_plan_binds_complete_intent_group_and_application_envelope ... ok
+test domain_counts_do_not_substitute_for_weighted_or_recursive_quorum_evaluation ... ok
+test finalization_cannot_skip_the_accepted_joint_target_policy ... ok
+test learners_never_supply_voting_domain_count_or_quorum_survival ... ok
+test exact_group_incarnation_store_and_learner_assignment_are_required ... ok
+test placement_permission_does_not_waive_journal_grammar ... ok
+test invalid_or_oversized_plans_return_original_assignments ... ok
+test administration_plan_rejects_ambiguous_or_unbounded_intents_and_returns_inputs ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/placement_planning.rs (target/debug/deps/placement_planning-b8b792444011f39d)
+
+running 13 tests
+test changes::existing_learner_promotion_needs_no_new_slot_and_denial_accepts_nothing ... ok
+test changes::invalid_promotion_and_stale_samples_fail_before_authorization ... ok
+test changes::replacement_preserves_recursive_edges_and_promotes_only_after_learner_admission ... ok
+test changes::native_replacement_selection_and_removal_respect_declared_failure_domains ... ok
+test common_gate_refuses_forged_provider_scope_sample_store_and_existing_or_disabled_nodes ... ok
+test changes::removal_explicitly_retires_or_retains_old_voters_and_preserves_unrelated_learners ... ok
+test downstream_planner_builds_only_an_authorized_learner_record_and_does_not_mutate_membership ... ok
+test changes::transition_operation_and_two_id_boundaries_fail_without_authorizing ... ok
+test native_rank_is_deterministic_domain_then_load_capacity_node_and_authorization_is_independent ... ok
+test invalid_or_stale_samples_fail_before_planner_or_authorizer ... ok
+test changes::replacement_replays_joint_before_final_and_retains_identity_through_checkpoint ... ok
+test changes::replacement_and_voter_change_refuse_invalid_intent_and_full_history ... ok
+test joint_transition_history_exhaustion_and_id_overflow_refuse_before_recommendation ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/scopes.rs (target/debug/deps/scopes-fb54ba662a8cd874)
+
+running 12 tests
+test compatible_scope_combination_preserves_data_history_and_original_outcomes ... ok
+test downstream_scope_provider_uses_public_contract_with_its_own_format ... ok
+test rejection_returns_owned_policy_and_image_buffers_and_caps_query_capacity ... ok
+test pending_admission_capacity_overflow_and_failed_batches_preserve_state ... ok
+test preview::merge_sums_each_source_export_at_target_and_keeps_original_scopes ... ok
+test preview::provider::rejects_incompatible_schemas_and_impossible_provider_bounds_without_copying_data ... ok
+test preview::preview_rejects_wrong_assignments_scope_schema_placement_and_budgets ... ok
+test split_import_rebases_target_prefix_and_preserves_retry_results_and_outbox ... ok
+test import_refuses_gaps_overlap_order_collision_and_capacity_atomically ... ok
+test preview::preview_uses_native_application_and_host_scope_contract_without_mutation ... ok
+test native_snapshot_publication_recovers_imported_retry_history_at_target_boundary ... ok
+test every_checkpoint_and_command_truncation_is_atomic_and_metadata_is_bound ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/transfer_preview_cli.rs (target/debug/deps/transfer_preview_cli-5bd93d403c7d2765)
+
+running 3 tests
+test native_offline_preview_preserves_exact_placement_and_declares_limits ... ok
+test unsupported_application_and_oversized_profile_are_rejected ... ok
+test malformed_profiles_refuse_without_printing_success ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

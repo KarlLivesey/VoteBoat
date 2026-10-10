@@ -2356,6 +2356,21 @@
         "src/bin/support/diagnostics.rs"
       ],
       "scope": "Version1 post-boundary duration diagnostics. RuntimeOwner and monotonic sample times are checked; closed or exhausted sinks refuse without mutation. Zero and every u64 nanosecond duration fit65 logarithmic buckets. Percentiles are nearest-rank bucket upper bounds, not exact samples. Connection completion means locally flushed output, including error replies, not client receipt, successful application or durability. Interrupted connections are retained separately; restart resets the view. No per-group tracing, additive critical-path attribution or performance improvement is established."
+    },
+    {
+      "design_id": "C18/C20/C23",
+      "public_contract": "TransferPreview / PreviewSource / PreviewTarget / preview_transfer",
+      "operations": [
+        "preview_transfer"
+      ],
+      "native": "Read-only preflight over the native BucketCounter ScopeStateMachine; executable split-preview loads bounded explicit templates and exact target configuration/store/domain input.",
+      "conformance": [
+        "tests/scopes/preview.rs",
+        "tests/scopes/preview/provider.rs",
+        "tests/retained_insertion.rs",
+        "tests/transfer_preview_cli.rs"
+      ],
+      "scope": "Version1 synchronous pure preview; borrowed applications/configurations and checked TransferIntent remain caller-owned and unchanged on success/error. Validates adapter/scheme/schema/scope, complete identity assignments, aggregate export/import payload bounds (hard64MiB) and target placement via the same validator as native authorization. Report owns bounded metadata: at most256 source/target routes and4096 replica rows, intent digest/epochs, local applied observations, transfer payload upper bounds, retained ranges and exact target configuration/store/domain identities. No data export/import, admission, I/O, resource reservation, worker, durable evidence or activation; source views must be serialized by their owner. Does not estimate numeric pause duration, WAL retention, actual/future data-fit or available quorum. Configured CLI templates are labelled separately from current applied source views. Recompute after restart or changed intent/configuration; executing a later operation still needs all existing authorization, fence, durable import/publication/activation and retention-release checks. Existing ScopeStateMachine is the provider seam; host View tests panic if data export/import is attempted. Split, merge and selected retained insertion use the same checked route mapping."
     }
   ],
   "not_yet_implemented": [

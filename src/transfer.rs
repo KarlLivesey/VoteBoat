@@ -17,9 +17,11 @@ use crate::transfer_publication::{TransferPublication, TransferPublicationStatus
 use crate::{application::*, directory::*, identity::*, log::*, routing::codec::*, routing::*};
 use std::{collections::BTreeSet, mem::size_of};
 mod insertion;
+mod preview;
 mod remaining;
 pub use insertion::InsertionChild;
 pub(crate) use insertion::{insertion_len, put_insertion, read_insertion};
+pub use preview::*;
 
 // One Single plus at most 256 concrete-group routes fits the existing envelope.
 pub const MAX_TRANSFER_INTENT_BYTES: usize = MAX_DIRECTORY_PUBLICATION_BYTES;

@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.50s
+     Running tests/retained_insertion.rs (target/debug/deps/retained_insertion-7086bc02c9063975)
+
+running 1 test
+test preview_retains_unmoved_source_scope_without_changing_directory ... FAILED
+
+failures:
+
+---- preview_retains_unmoved_source_scope_without_changing_directory stdout ----
+
+thread 'preview_retains_unmoved_source_scope_without_changing_directory' (358) panicked at tests/retained_insertion.rs:75:5:
+assertion `left == right` failed
+  left: []
+ right: [BucketRange { start: 128, end: 256 }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    preview_retains_unmoved_source_scope_without_changing_directory
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 38 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test retained_insertion`

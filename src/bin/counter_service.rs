@@ -33,6 +33,8 @@ mod placement_format;
 mod placement_input;
 #[path = "support/placement_plan.rs"]
 mod placement_plan;
+#[path = "support/policy_input.rs"]
+mod policy_input;
 #[path = "support/quorum_diagnostics.rs"]
 mod quorum_diagnostics;
 #[path = "support/service_access.rs"]

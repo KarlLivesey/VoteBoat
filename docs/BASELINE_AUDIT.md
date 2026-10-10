@@ -1,8 +1,21 @@
 # Baseline audits
 
+Latest implementation: [slice193](#slice193--transfer-preview).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice193 — transfer preview
+
+The missing split-preview operation now has a pure Rust contract and a bounded
+native CLI profile. It checks scope/schema/placement and export/import payload
+bounds, reporting exact target identities, affected/retained ranges and the
+pause/retention conditions. Native and host applications use the same existing
+ScopeStateMachine contract. Input providers remain unchanged and no export,
+import, persistence, reservation or activation occurs. Configured CLI templates
+are explicitly distinguished from live state. Eight new tests and selected
+existing regressions pass; see validation/baseline/slice193. Operator lifecycle
+execution and the remaining baseline/validation/performance gates stay open.
 
 ## Slice192 — current baseline and next feature boundary
 

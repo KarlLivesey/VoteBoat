@@ -1,4 +1,4 @@
-# Baseline acceptance map — review192
+# Baseline acceptance map — review192, updated193
 
 Current review starts at 639c1fb (slice191). The roadmap and catalogue below
 retain historical test scopes, with corrections from source inspection and
@@ -94,8 +94,8 @@ not a complete operator workflow.
 | move-leader | Campaign/Heartbeat controls and ordinary failover. | No targeted leadership-transfer protocol/API found; campaign alone is not a safe maintenance workflow. |
 | add-learner | Node configuration/readiness, native administration and placement-plan191. | Broader lifecycle/authorization fault coverage. |
 | change-membership | Node configure/status/resume, joint/final records and executable administration. | Broader combined schedules; operator-supplied plans remain explicit. |
-| split-preview | Checked TransferIntent and application export bounds exist. | No complete read-only preview reporting support/pause/placement/movement/retention/invariants. Next193. |
-| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts; real native histories. | Complete operator entry point joining these existing stages. Planned194. |
+| split-preview | Public preview_transfer193 and executable split-preview report bounded scope/placement/payload/pause/retention requirements. Native and host providers plus executable refusal tests pass. | CLI is an offline native template profile, not a live data import test or reservation. Operator lifecycle execution remains separate. |
+| begin-split | TransferSource/ScopedTransferSource freeze, TargetImport and TransferPublication contracts; real native histories. | Complete operator entry point joining these existing stages. Current194. |
 | resume-operation | Node::resume_configuration plus lifecycle status/query and exact original receipts. | General operator lifecycle resumption workflow; membership resumption already exists. |
 | retire-group | RetirementGuard/proofs and durable Directory deletion; native retired-owner histories. | General operator workflow and retention policy, not the absence of retirement semantics. |
 
@@ -203,7 +203,7 @@ a passing test count.
 
 ## Next implementation decisions
 
-1. Implement the missing read-only split preview, then connect the existing
+1. Slice193 implements read-only split preview; next connect the existing
    durable lifecycle stages to explicit operator start/status/resumption. Reuse
    the current contracts; do not create another consensus or ownership engine.
    Leadership transfer, coordinated node drain and the assignment-list command

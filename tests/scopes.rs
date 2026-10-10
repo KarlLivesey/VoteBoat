@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use voteboat::{application::*, bucket_counter::*, identity::*, log::*, routing::*, scope::*};
+#[path = "scopes/preview.rs"]
+mod preview;
 
 #[derive(Clone, Debug)]
 struct HostPolicy;

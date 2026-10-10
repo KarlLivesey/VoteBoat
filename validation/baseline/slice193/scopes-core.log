@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.55s
+     Running tests/scopes.rs (target/debug/deps/scopes-3e78e7421ef0371c)
+
+running 11 tests
+test compatible_scope_combination_preserves_data_history_and_original_outcomes ... ok
+test downstream_scope_provider_uses_public_contract_with_its_own_format ... ok
+test preview::merge_sums_each_source_export_at_target_and_keeps_original_scopes ... ok
+test pending_admission_capacity_overflow_and_failed_batches_preserve_state ... ok
+test rejection_returns_owned_policy_and_image_buffers_and_caps_query_capacity ... ok
+test preview::preview_rejects_wrong_assignments_scope_schema_placement_and_budgets ... ok
+test preview::provider::rejects_incompatible_schemas_and_impossible_provider_bounds_without_copying_data ... ok
+test split_import_rebases_target_prefix_and_preserves_retry_results_and_outbox ... ok
+test import_refuses_gaps_overlap_order_collision_and_capacity_atomically ... ok
+test preview::preview_uses_native_application_and_host_scope_contract_without_mutation ... ok
+test every_checkpoint_and_command_truncation_is_atomic_and_metadata_is_bound ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
