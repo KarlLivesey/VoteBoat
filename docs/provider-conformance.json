@@ -528,6 +528,157 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "CredentialJournal / CredentialRecordIo",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/credential.rs",
+          "symbol": "host_credential_journal_satisfies_shared_publication_contract_without_native"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "native_host_io_journal_satisfies_shared_contract_and_exact_retry_is_not_rewritten"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "file_journal_satisfies_shared_contract_and_independent_reopen"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "host_and_file_record_io_preserve_exact_bounded_replacement"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+        },
+        {
+          "file": "tests/provider_conformance/credential_native.rs",
+          "symbol": "failed_construction_returns_the_same_io_owner_without_replacement"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "owner"
+          ],
+          "obligation": "The fixed node, store ID and store incarnation identify the journal owner. Foreign fields are refused without publishing. Failed construction returns the same supplied I/O owner.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential.rs",
+              "symbol": "exercise"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "failed_construction_returns_the_same_io_owner_without_replacement"
+            }
+          ],
+          "remaining": [
+            "Caller-provided exclusive writer lifetime is a precondition; these tests do not establish safety for concurrent writers."
+          ]
+        },
+        {
+          "names": [
+            "latest"
+          ],
+          "obligation": "Return no record for a new journal or the exact latest complete publication. Uncertain writes fence observations until reopen, which recovers the actual old or new record.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential.rs",
+              "symbol": "exercise"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "file_journal_satisfies_shared_contract_and_independent_reopen"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+            }
+          ],
+          "remaining": [
+            "Latest-only state is not a full administrative audit history; physical power-loss durability depends on the filesystem/device contract."
+          ]
+        },
+        {
+          "names": [
+            "publish"
+          ],
+          "obligation": "Validate the exact owner, nonzero sequence and increasing generations before replacement. Exact latest retries are idempotent; changed/superseded sequences and expected generations below the retained floor fail without mutation. Higher trusted startup generations may skip ahead. Certain failures preserve prior state; uncertain failures fence all further publication until reopen.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential.rs",
+              "symbol": "exercise"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "native_host_io_journal_satisfies_shared_contract_and_exact_retry_is_not_rewritten"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+            }
+          ],
+          "remaining": [
+            "Injected before/after replacement failures are a bounded memory-I/O model, not every operating-system or device failure."
+          ]
+        },
+        {
+          "names": [
+            "read"
+          ],
+          "obligation": "Return the exact fixed 128-byte published record or absence; reject invalid lengths and propagate read failure. Journal construction validates checksum and ownership and returns the original I/O value on failure.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "raw_roundtrip"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "host_and_file_record_io_preserve_exact_bounded_replacement"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "failed_construction_returns_the_same_io_owner_without_replacement"
+            },
+            {
+              "file": "tests/credential_journal.rs",
+              "symbol": "every_byte_corruption_of_committed_record_fails_closed"
+            }
+          ],
+          "remaining": [
+            "A checksum detects corruption but does not authenticate a hostile filesystem; path and writer ownership remain host responsibilities."
+          ]
+        },
+        {
+          "names": [
+            "replace"
+          ],
+          "obligation": "Replace exactly one bounded record recoverably. The same raw byte suite runs against memory and real files. A certain error preserves the prior bytes; an uncertain error permits either old or new complete record and requires reopening the journal.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "raw_roundtrip"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "host_and_file_record_io_preserve_exact_bounded_replacement"
+            },
+            {
+              "file": "tests/provider_conformance/credential_native.rs",
+              "symbol": "certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts"
+            },
+            {
+              "file": "tests/credential_journal.rs",
+              "symbol": "native_file_recovery_ignores_partial_staging_and_validates_published_record"
+            }
+          ],
+          "remaining": [
+            "Real-file tests cover successful process reopen and ignored partial staging; hardware power-loss and all rename/directory-sync fault combinations are not established."
+          ]
+        }
+      ]
     }
   ]
 }

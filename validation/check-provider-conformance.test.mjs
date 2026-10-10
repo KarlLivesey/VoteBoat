@@ -11,10 +11,10 @@ const read = file => fs.readFileSync(new URL(file, root), 'utf8');
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 4);
-    assert.equal(report.reviewed_operations, 30);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 4);
-    for (const name of ['LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker']) {
+    assert.equal(report.reviewed_contracts, 5);
+    assert.equal(report.reviewed_operations, 35);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 5);
+    for (const name of ['LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }
 });

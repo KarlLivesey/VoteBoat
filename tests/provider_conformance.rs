@@ -2,6 +2,11 @@
 // Copyright (c) 2026 Karl Livesey
 #[path = "provider_conformance/log_store.rs"]
 mod cases;
+#[path = "provider_conformance/credential.rs"]
+mod credential_cases;
+#[cfg(feature = "native")]
+#[path = "provider_conformance/credential_native.rs"]
+mod credential_native;
 #[path = "provider_conformance/snapshot.rs"]
 mod snapshot_cases;
 #[cfg(feature = "native")]

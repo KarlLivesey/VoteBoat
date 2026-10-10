@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.66s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-dda7fda5b64439ba)
+
+running 4 tests
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

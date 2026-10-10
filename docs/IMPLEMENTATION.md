@@ -99,23 +99,92 @@ unknown initialization outcomes, with original-ID recovery, exact receipt
 validation and passing directory/recursive-routing tests. Completed202b exposes
 durable command-access reload to the transfer service and verifies an interrupted
 split under revoked/replacement administrators, preserving ownership and retries.
-Current201d extends provider obligations for the credential journal/record-I/O
-contracts just reused by both executables. It depends on their existing public
-contracts, host/native fixtures and the inventory; completion requires shared
-assertions for ownership, monotonic publication, uncertain outcomes and reopen,
-with actual runtime checks. This advances replaceable Rust embedding without
-treating a metadata count as provider certification.
-Next, review the remaining peer credential rotation
+Completed201d covers the reused credential journal/record-I/O contracts with
+shared host/native/file publication checks, exact returned I/O ownership and
+failure/reopen cases. It reviews five more operations, not an entire provider
+ecosystem. Current work reviews the remaining peer credential rotation
 contract against the existing session/journal mechanism. Its purpose is safe
 operational key replacement; dependencies are authenticated peer identity,
 session revocation and restart reconstruction. Completion requires a concrete
 replacement API and TCP/QUIC rotation/restart checks, advancing the secure
 networked service milestone; do not claim completion from command-channel reload.
-Following peer rotation, address receive/connection admission and fairness from
+Next, address receive/connection admission and fairness from
 the remaining resource ledger. Its purpose is progress under competing peer and
 client load; dependencies are existing hard admission limits and control reserve.
 Completion requires bounded acceptance/rejection and demonstrated control/recovery
 progress under the chosen overload schedule, advancing P2/P7 resource isolation.
+Following that, integrate persistent discovery refresh against the existing
+authenticated endpoint/manifest source and bounded cache. Its purpose is usable
+reconnect after discovery changes; completion requires refreshed hints, stale
+generation refusal and parent-offline child continuity across restart. This
+advances P5 discovery without granting ownership from a cached endpoint.
+
+### Slice201d implemented — shared credential provider obligations
+
+One generic CredentialJournal suite now runs against an independent core-only
+host journal and native journals using memory record I/O and actual files.
+It checks all owner fields, empty/latest state, zero/invalid requests, unchanged
+rejected state, same-sequence digest/expected/replacement conflicts, superseded
+sequences, generation floors and explicitly permitted trusted generation gaps.
+Exact retries produce no additional native replacement writes. Two independent
+file journals retain state when the other is reopened/dropped.
+
+Shared raw-I/O checks preserve exact128-byte records and reject invalid file
+lengths. A four-case memory-I/O failure matrix distinguishes certain failure
+from unknown old/new replacement and explicit fencing: only certain failure
+permits an in-place retry, while uncertain paths suppress later I/O until
+reopen. Constructor read/corruption/owner failures return the same supplied
+I/O handle and leave its bytes and write count intact. Existing every-byte
+corruption and partial-stage file tests are executed alongside these checks.
+No production code or persistent format is changed. File reopen is process
+evidence; the memory fault matrix is not physical power-loss coverage.
+
+Final checks pass20 all-feature and20 native-only tests across the provider and
+credential-journal targets,4 core-only host tests and13 ledger metadata tests.
+Formatting and all four strict Clippy configurations pass with zero diagnostics.
+The first lint run caught an unnecessary explicit drop of a plain test value;
+the fixture now uses a lexical scope. The failed log is retained. The reviewed
+ledger now contains5 contracts/35 operations, with100 contracts unreviewed by
+that ledger; an unreviewed entry does not imply an unimplemented feature.
+Evidence is in validation/baseline/slice201d.
+
+Macro review: this advances replaceable Rust embedding and the security-provider
+dependency of peer rotation. Native peer connectors still capture a fixed TLS
+bundle; extending rotation must address pending authentication and established
+session revocation, not merely rewrite files or update command credentials.
+The linked current/next plans retain that work, resource fairness and discovery
+refresh. Full P0–P7 and platform/performance acceptance remain open.
+
+### Slice201d schema plan — credential journal provider conformance
+
+The previous turn completed202b and pushed d14ab17. Both executable assemblies
+now depend on the same credential journal, but the reviewed provider ledger
+does not yet cover its five operations. Existing journal tests cover selected
+corruption and uncertain writes; they do not run one complete obligation suite
+against a core-only host journal and the native file journal.
+
+Data/API: retain CredentialJournal's owner/latest/publish and CredentialRecordIo's
+fixed128-byte read/replace contracts. Shared public-trait cases check exact owner
+fields, initial absence, successful publication, latest-only idempotence,
+sequence/body conflict, generation floors and permitted generation gaps. A
+minimal independent host journal runs without native features. Native memory-I/O
+and actual-file journals run the same cases and reopen with the same latest
+record. Raw I/O cases check exact bytes, replacement and missing records.
+
+Failure/ownership: certain failures preserve the prior record and allow retry;
+uncertain before/after replacement and explicit fencing suppress further I/O
+until reopen. Reopen must recover the actual old/new complete record. Constructor
+failures return the original I/O owner for retry, including read errors, corrupt
+bytes and a different node/store/incarnation. Dropping or reopening one journal
+must not invalidate another independent owner. Actual file reopen and injected
+memory failure schedules are distinct from physical power-loss guarantees.
+
+Acceptance: shared host/native/file assertions, rejected inputs leave the latest
+record unchanged, exact retries avoid repeated replacement, returned-I/O identity,
+core-only/native-only/all-feature tests, five explicit ledger operation rows,
+metadata checks, formatting and four strict Clippy profiles. No new provider or
+storage design is required. This advances P0/C09/C21 replaceable embedding and
+the next peer-rotation work; it does not certify every provider or finish P0–P7.
 
 ### Slice202b implemented — transfer access replacement during split recovery
 

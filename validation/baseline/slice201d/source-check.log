@@ -1,0 +1,10 @@
+tests/provider_conformance.rs: OK
+tests/provider_conformance/credential.rs: OK
+tests/provider_conformance/credential_native.rs: OK
+docs/component-contracts.json: OK
+docs/provider-conformance.json: OK
+validation/check-provider-conformance.test.mjs: OK
+docs/IMPLEMENTATION.md: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+validation/REPORT.md: OK
+validation/baseline/slice201d/README.md: OK

@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice201d reviews all five credential journal/record-I/O operations with shared
+core-only host, native memory-I/O and actual-file assertions. Owner identity,
+unchanged rejected state, exact retry writes, generation floors/gaps, uncertain
+old/new reopen and return of the original I/O owner on construction failure are
+checked.20 all-feature and20 native-only provider/journal tests,4 core-only host
+tests and13 metadata checks pass; formatting/four strict Clippy profiles are
+clean. The ledger now reviews5 contracts/35 operations, with100 inventory
+contracts still unreviewed. No production storage or format change is made;
+file reopen and injected failures do not establish physical power-loss safety.
+
 Slice202b exposes the existing durable credential reload implementation through
 the transfer service. Two TCP/QUIC histories recover an interrupted source fence,
 revoke the original administrator, resume the identical split under replacement

@@ -1,6 +1,12 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Credential-provider evidence: [slice201d](baseline/slice201d/README.md), with
+shared core-only host/native/file cases and returned I/O ownership checks.
+20 all-feature,20 native-only and4 core-only tests pass, along with13 metadata
+checks and all formatting/strict lint profiles. The ledger reviews5 contracts
+and35 operations, leaving100 entries unreviewed. No production or format change;
+the failed initial test-fixture lint and its lexical-scope correction are retained.
 Transfer access replacement: [slice202b](baseline/slice202b/README.md). The old
 executable fails the new regression on unsupported reload; the shared credential
 mechanism now supports revocation and original split recovery over TCP/QUIC.
