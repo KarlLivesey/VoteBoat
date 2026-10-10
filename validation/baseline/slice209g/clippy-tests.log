@@ -1,0 +1,13 @@
+    Blocking waiting for file lock on build directory
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: unused import: `PeerConnector`
+  --> tests/startup/discovery.rs:18:35
+   |
+18 |     connect::{DiscoveryConnector, PeerConnector},
+   |                                   ^^^^^^^^^^^^^
+   |
+   = note: `-D unused-imports` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(unused_imports)]`
+
+error: could not compile `voteboat` (test "startup") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

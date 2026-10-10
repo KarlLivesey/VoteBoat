@@ -43,8 +43,10 @@ wall-clock timestamp. Hosts must refresh expired hints externally.
 `SocketAddr` connector and `PeerDiscovery`. It works with native TCP/TLS, selected
 native service connectors and host providers through the same public contract.
 Select it in `PeerParts.connector` when assembling an embedded `PeerDriver`/Node;
-no core edits are required. The executable startup path retains its existing
-static endpoint configuration in this slice.
+no core edits are required. Static Rust hosts can also use
+`NativeStartup::prepare_for_discovery` to obtain recovered native parts before
+wrapping their connector; see [prepared startup](NODE.md). The executable peer
+startup path retains its configured endpoints.
 
 Construction validates connector limits and quiescence; failure returns both
 providers without closing them. Dial submission first checks local identity,

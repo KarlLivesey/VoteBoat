@@ -1,5 +1,14 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209g adds NativeStartup::prepare_for_discovery for static Rust hosts. The
+normal recovery/worker path returns native parts for host discovery injection;
+final Node validation remains mandatory. Discovered QUIC Dial addresses are
+explicitly enabled with fixed pins/Accept routes. Five downstream tests cover
+TCP/QUIC writes, original receipt/WAL recovery, rejected assembly ownership and
+abandoned-worker/listener cleanup; all87 startup/member tests pass. Broader
+startup profiles, executable source bootstrap and recursive movement integration
+remain open alongside platform/provider/performance acceptance.
+
 Slice209f composes the existing source reconnect wrapper with an owning native
 TCP/TLS Node. The original source closes, one data peer disconnects, an unaffected
 peer sustains a committed write, and Node polling repairs source and data sessions.

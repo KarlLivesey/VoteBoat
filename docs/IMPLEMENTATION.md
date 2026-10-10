@@ -129,7 +129,9 @@ Completed209d covers cold child WAL/checkpoint recovery with metadata offline.
 Completed209e adds versioned counter command-endpoint updates with explicit
 volatile/restart semantics. Completed209f composes source-session repair with
 the owning TCP/TLS Node, healthy-quorum writes and original receipt recovery.
-Current209 continues native peer-source provisioning and combined long-lived
+Completed209g exposes static native preparation for host discovery composition,
+with TCP/TLS and QUIC downstream startup/reopen and cleanup evidence.
+Current209 continues broader native peer-source provisioning and combined long-lived
 endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
@@ -148,6 +150,69 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209g implemented — native preparation for host discovery
+
+NativeStartup::prepare_for_discovery returns the original public NativeNodeParts
+after native bootstrap/recovery, application replay and worker setup. Hosts can
+use the recovered local store session to provision discovery and wrap the
+original connector before calling Node::from_parts. The final Node still checks
+all components and limits. This method opts QUIC into discovered Dial addresses;
+provisioned identities/pins and Accept addresses remain fixed. Existing open
+methods share preparation and preserve configured-address behavior.
+
+Preparation has side effects and transfers resource ownership. Failure returns
+the original startup cleanup owner and current application. Successful parts
+must be assembled or explicitly closed/joined; a rejected final Node assembly
+returns those parts without closing a supplied discovery source. No second
+runtime, store, log, identity scheme or discovery protocol was introduced.
+
+Five new downstream tests cover TCP/TLS and QUIC three-node writes through
+host-discovered addresses while configured Dial defaults are stale. WAL reopen
+uses fresh store sessions and retains original receipt values and deduplication.
+They also cover invalid timing/missing recovery, rejected final assembly with
+an unchanged open host source, independent source-view lifetime, and abandoned
+parts with explicit worker joins and listener release. Initial compilation
+required unboxing the existing Node rejection's owned parts; the first runtime
+fixture lacked its parent directory. Both diagnostics and corrected results
+are retained in validation/baseline/slice209g.
+
+All87 all-feature startup/member tests pass (37 startup and50 member-recovery).
+All26 default-feature startup tests pass independently.
+Formatting and all four strict Clippy profiles pass with zero diagnostics.
+The108-entry inventory adds this operation to the existing startup contract;
+no new provider or reviewed obligation family is claimed. Macro review: static
+Rust startup now supplies the composition point for discovery. Member/multi-group
+convenience preparation, automatic executable source-session provisioning and
+combined recursive movement remain distinct work. Full P0–P7 remains active;
+the selected Linux histories do not establish macOS/separate-host acceptance.
+
+### Slice209g schema plan — native startup parts for discovery composition
+
+Expose the existing validated single-group native startup through
+prepare_for_discovery as public NativeNodeParts, before Node::from_parts.
+It explicitly enables discovered QUIC Dial addresses while keeping original
+Accept addresses and pins. This gives Rust hosts the recovered
+local store session and original native connector needed to provision a
+discovery source and wrap the connector with DiscoveryConnector. It avoids
+duplicating bootstrap/replay/worker construction or adding a second runtime.
+
+Preparation performs the same configuration, wire, identity and fresh-application
+checks as open, then the same listener, authoritative WAL/snapshot recovery and
+bounded worker setup. It accepts no Node requests or peer connections. Success
+transfers all parts to the caller, who must assemble or explicitly close/drain
+them; failure returns the current application and ordinary startup cleanup owner.
+Keep existing open APIs and their cleanup semantics unchanged by sharing the
+same preparation implementation. The prepared host must use the selected limits
+and time when constructing Node; Node still validates all resulting parts.
+
+Acceptance: real TCP/TLS and QUIC startup parts accept a host discovery provider,
+route around stale configured dial addresses, preserve original data/retries
+across reopen and drain/join the original workers. Bad configuration/recovery
+must keep existing refusal/cleanup behavior. Cover abandoned/rejected composition
+with explicit cleanup and independent host-source lifetime. This advances209/P0/P5
+embedding; it does not automatically distribute trust, persist discovery floors
+or complete recursive movement/platform acceptance.
 
 ### Slice209f implemented — owning Node source repair
 

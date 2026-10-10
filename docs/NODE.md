@@ -55,6 +55,34 @@ accepted work.
 
 ## Driving and service ownership
 
+For a static group that needs discovered peer addresses, call
+`NativeStartup::prepare_for_discovery(protocol, timers, application, wake, now)`.
+It performs the normal native bootstrap/recovery and returns `NativeNodeParts`
+before constructing the Node. Read the recovered local identity from
+`parts.local.owner.identity()` when provisioning an authenticated discovery
+source. Destructure the returned `PeerParts`, wrap its connector in
+`DiscoveryConnector::new` or `new_driven`, and construct new typed parts for
+`Node::from_parts` using the original limits and time. The original native
+storage, snapshot workers, applications, roster and ingress stay in those parts.
+[The downstream startup fixture](../tests/startup/discovery.rs) demonstrates
+this composition over TCP/TLS and QUIC with stale configured dial addresses.
+
+This opt-in preparation permits discovered QUIC Dial addresses while keeping
+provisioned identities, certificate pins and Accept addresses fixed. Normal
+`open` methods retain their configured-address behavior. Preparation creates
+the listener/files/workers and may advance the recovered store session; it
+does not poll connections or admit Node work. `Node::from_parts` still validates
+the final assembly, including any host changes. Initial source authentication
+is explicit host work, and hints grant no membership or ownership authority.
+
+On preparation failure, use the returned `NativeStartupRejected::try_cleanup`
+until complete before reopening files. On success, the caller owns every part:
+assemble and shut down the Node, or close the unused owner/connector/workers and
+join them explicitly. Rejection from `Node::from_parts` returns those original
+parts; it does not close the host's discovery source. The prepared method
+currently covers static single-group startup; member/multi-group convenience
+preparation and automatic executable source-session provisioning are separate.
+
 The serialized host calls `poll(now, NodePollBudget)`. Both local and network
 budgets and monotonic time are validated before either driver does work. Peer
 connection, transport and ingress progress precede local worker completions,

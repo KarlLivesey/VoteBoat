@@ -1,0 +1,71 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0308]: mismatched types
+    --> src/native/startup.rs:619:44
+     |
+ 619 |             let application = reject_parts(rejected.parts, &mut cleanup).remove(&group);
+     |                               ------------ ^^^^^^^^^^^^^^ expected `NodeParts<..., ..., ..., _, ..., ..., ..., _, ...>`, found `Box<...>`
+     |                               |
+     |                               arguments to this function are incorrect
+     |
+     = note: expected struct `runtime::node::NodeParts<_, _, _, _, _, _, _, _, _>`
+                found struct `std::boxed::Box<runtime::node::NodeParts<_, _, _, A, _, _, _, native::connect::NativeServiceConnector, _>>`
+note: function defined here
+    --> src/native/startup.rs:1257:4
+     |
+1257 | fn reject_parts<A, C: StartupConnector>(
+     |    ^^^^^^^^^^^^
+1258 |     mut parts: NativeNodeParts<A, C>,
+     |     --------------------------------
+help: consider unboxing the value
+     |
+ 619 |             let application = reject_parts(*rejected.parts, &mut cleanup).remove(&group);
+     |                                            +
+
+error[E0308]: mismatched types
+    --> src/native/startup.rs:1080:37
+     |
+1080 |         *application = reject_parts(rejected.parts, cleanup).remove(&group);
+     |                        ------------ ^^^^^^^^^^^^^^ expected `NodeParts<..., ..., ..., _, ..., ..., ..., _, ...>`, found `Box<...>`
+     |                        |
+     |                        arguments to this function are incorrect
+     |
+     = note: expected struct `runtime::node::NodeParts<_, _, _, _, _, _, _, _, _>`
+                found struct `std::boxed::Box<runtime::node::NodeParts<_, _, _, A, _, _, _, C, _>>`
+note: function defined here
+    --> src/native/startup.rs:1257:4
+     |
+1257 | fn reject_parts<A, C: StartupConnector>(
+     |    ^^^^^^^^^^^^
+1258 |     mut parts: NativeNodeParts<A, C>,
+     |     --------------------------------
+help: consider unboxing the value
+     |
+1080 |         *application = reject_parts(*rejected.parts, cleanup).remove(&group);
+     |                                     +
+
+error[E0308]: mismatched types
+    --> src/native/startup.rs:1253:46
+     |
+1253 |         prepared.applications = reject_parts(rejected.parts, cleanup);
+     |                                 ------------ ^^^^^^^^^^^^^^ expected `NodeParts<..., ..., ..., ..., ..., ..., ..., _, ...>`, found `Box<...>`
+     |                                 |
+     |                                 arguments to this function are incorrect
+     |
+     = note: expected struct `runtime::node::NodeParts<_, _, _, _, _, _, _, _, _>`
+                found struct `std::boxed::Box<runtime::node::NodeParts<_, _, _, _, _, _, _, C, _>>`
+note: function defined here
+    --> src/native/startup.rs:1257:4
+     |
+1257 | fn reject_parts<A, C: StartupConnector>(
+     |    ^^^^^^^^^^^^
+1258 |     mut parts: NativeNodeParts<A, C>,
+     |     --------------------------------
+help: consider unboxing the value
+     |
+1253 |         prepared.applications = reject_parts(*rejected.parts, cleanup);
+     |                                              +
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (lib) due to 3 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (lib test) due to 3 previous errors

@@ -611,6 +611,67 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        let limits = self.limits;
+        let group = self.bootstrap.group;
+        let parts = self.prepare_with_protocol_as(protocol, app, wake, now, options, false)?;
+        NativeNode::from_parts(parts, limits, now).map_err(|rejected| {
+            let mut cleanup = Cleanup::default();
+            let application = reject_parts(*rejected.parts, &mut cleanup).remove(&group);
+            Box::new(NativeStartupRejected {
+                reason: error("node assembly", rejected.reason),
+                application,
+                cleanup,
+            })
+        })
+    }
+
+    /// Prepare validated native storage, workers and peer parts for discovery.
+    /// QUIC permits discovered Dial addresses; peer pins and Accept addresses stay fixed.
+    /// This opens resources and may advance the recovered store session, but accepts
+    /// no Node work. Wrap the connector, then call Node::from_parts with the same
+    /// limits and time. On abandonment the caller owns closing/draining all parts.
+    /// Failures return the application and the ordinary explicit cleanup owner.
+    pub fn prepare_for_discovery<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.prepare_with_protocol_as(
+            protocol,
+            app,
+            wake,
+            now,
+            (StartupAuthorization::Static, timers, None, None),
+            true,
+        )
+    }
+    fn prepare_with_protocol_as<A>(
+        self,
+        protocol: NativePeerProtocol,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+        options: (
+            StartupAuthorization,
+            TimerConfig,
+            Option<JournalTimings>,
+            Option<NativePeerRotationStartup>,
+        ),
+        discovered_dials: bool,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        #[cfg(not(feature = "quic"))]
+        let _ = discovered_dials;
         let (authorization, timers, timings, rotation) = options;
         let mut cleanup = Cleanup::default();
         let mut application = Some(app);
@@ -642,7 +703,7 @@ impl NativeStartup {
             match protocol {
                 NativePeerProtocol::TcpTls => {
                     let listener = TcpListener::bind(self.listen)?;
-                    build(
+                    build_parts(
                         self,
                         (authorization, timers, timings),
                         &mut application,
@@ -671,7 +732,7 @@ impl NativeStartup {
                         ));
                     }
                     let socket = std::net::UdpSocket::bind(self.listen)?;
-                    build(
+                    build_parts(
                         self,
                         (authorization, timers, timings),
                         &mut application,
@@ -683,20 +744,20 @@ impl NativeStartup {
                                 .into_iter()
                                 .map(|(n, p)| (n, (config.peers[&n].address, p)))
                                 .collect();
-                            super::quic_connect::NativeQuicConnector::new(
-                                NativeConnectConfig {
-                                    local,
-                                    limits: ConnectLimits::default(),
-                                    session: SessionLimits::default(),
-                                },
-                                config.tls.clone(),
-                                peers,
-                                socket,
-                                now,
-                            )
-                            .map(|c| NativeServiceConnector::Quic(Box::new(c)))
-                            .map_err(|e| error("QUIC connector", e.reason))
-                            .and_then(|c| peer_rotation::wrap(c, rotation.as_ref(), cleanup))
+                            let connect_config = NativeConnectConfig {
+                                local,
+                                limits: ConnectLimits::default(),
+                                session: SessionLimits::default(),
+                            };
+                            let make = if discovered_dials {
+                                super::quic_connect::NativeQuicConnector::new_with_discovered_dials
+                            } else {
+                                super::quic_connect::NativeQuicConnector::new
+                            };
+                            make(connect_config, config.tls.clone(), peers, socket, now)
+                                .map(|c| NativeServiceConnector::Quic(Box::new(c)))
+                                .map_err(|e| error("QUIC connector", e.reason))
+                                .and_then(|c| peer_rotation::wrap(c, rotation.as_ref(), cleanup))
                         },
                     )
                 }
@@ -1017,6 +1078,33 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
+    let limits = config.limits;
+    let group = config.bootstrap.group;
+    let parts = build_parts(config, options, application, cleanup, wake, now, connector)?;
+    NativeNode::from_parts(parts, limits, now).map_err(|rejected| {
+        *application = reject_parts(*rejected.parts, cleanup).remove(&group);
+        error("node assembly", rejected.reason)
+    })
+}
+fn build_parts<A, C: StartupConnector>(
+    config: NativeStartup,
+    options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
+    application: &mut Option<A>,
+    cleanup: &mut Cleanup,
+    wake: Arc<dyn WorkerWake>,
+    now: MonoTime,
+    connector: impl FnOnce(
+        &NativeStartup,
+        &BTreeMap<NodeId, StoreIdentity>,
+        LocalIdentity,
+        Arc<dyn WorkerWake>,
+        &mut Cleanup,
+    ) -> Result<C, NativeStartupError>,
+) -> Result<NativeNodeParts<A, C>, NativeStartupError>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
     let (authorization, timers, timings) = options;
     let StartupStorage {
         store,
@@ -1035,7 +1123,7 @@ where
         cores: vec![core],
         applications: [(group, application.take().unwrap())].into(),
     };
-    let result = assemble(
+    let result = assemble_parts(
         config,
         (authorization, timers),
         &mut prepared,
@@ -1047,7 +1135,7 @@ where
     *application = prepared.applications.remove(&group);
     result
 }
-fn assemble<A, C: StartupConnector>(
+fn assemble_parts<A, C: StartupConnector>(
     config: NativeStartup,
     options: (StartupAuthorization, TimerConfig),
     prepared: &mut PreparedStartup<A>,
@@ -1061,7 +1149,7 @@ fn assemble<A, C: StartupConnector>(
         Arc<dyn WorkerWake>,
         &mut Cleanup,
     ) -> Result<C, NativeStartupError>,
-) -> Result<NativeNode<A, C>, NativeStartupError>
+) -> Result<NativeNodeParts<A, C>, NativeStartupError>
 where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
@@ -1117,48 +1205,74 @@ where
     ))?;
     let stores = authorization.stores(&config);
     let connector = connector(&config, stores, local, wake.clone(), cleanup)?;
-    let built = NativeNode::<A, C>::from_parts(
-        NativeNodeParts {
-            local: NativeLocalParts {
-                owner,
-                persistence: cleanup.log.take().unwrap(),
-                applications: std::mem::take(&mut prepared.applications),
-                results,
-                clients,
-                reads,
-                outbound,
-                snapshots: Some(NodeSnapshots {
-                    router,
-                    worker: cleanup.snapshots.take().unwrap(),
-                }),
-            },
-            peers: Some(PeerParts {
-                admission_routes: admission_routes(&authorization, &config),
-                connector,
-                roster,
-                factory,
-                ingress,
-                routes: remote
-                    .keys()
-                    .map(|n| (*n, connection_direction(&config, *n)))
-                    .collect(),
+    Ok(NativeNodeParts {
+        local: NativeLocalParts {
+            owner,
+            persistence: cleanup.log.take().unwrap(),
+            applications: std::mem::take(&mut prepared.applications),
+            results,
+            clients,
+            reads,
+            outbound,
+            snapshots: Some(NodeSnapshots {
+                router,
+                worker: cleanup.snapshots.take().unwrap(),
             }),
         },
-        config.limits,
-        now,
-    );
-    match built {
-        Ok(node) => Ok(node),
-        Err(mut r) => {
-            prepared.applications = r.parts.local.applications;
-            cleanup.log = Some(r.parts.local.persistence);
-            cleanup.snapshots = r.parts.local.snapshots.take().map(|s| s.worker);
-            if let Some(peers) = r.parts.peers.take() {
-                peers.connector.reject(cleanup);
-            }
-            Err(error("node assembly", r.reason))
-        }
+        peers: Some(PeerParts {
+            admission_routes: admission_routes(&authorization, &config),
+            connector,
+            roster,
+            factory,
+            ingress,
+            routes: remote
+                .keys()
+                .map(|n| (*n, connection_direction(&config, *n)))
+                .collect(),
+        }),
+    })
+}
+
+fn assemble<A, C: StartupConnector>(
+    config: NativeStartup,
+    options: (StartupAuthorization, TimerConfig),
+    prepared: &mut PreparedStartup<A>,
+    cleanup: &mut Cleanup,
+    wake: Arc<dyn WorkerWake>,
+    now: MonoTime,
+    connector: impl FnOnce(
+        &NativeStartup,
+        &BTreeMap<NodeId, StoreIdentity>,
+        LocalIdentity,
+        Arc<dyn WorkerWake>,
+        &mut Cleanup,
+    ) -> Result<C, NativeStartupError>,
+) -> Result<NativeNode<A, C>, NativeStartupError>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let limits = config.limits;
+    let parts = assemble_parts(config, options, prepared, cleanup, wake, now, connector)?;
+    NativeNode::from_parts(parts, limits, now).map_err(|rejected| {
+        prepared.applications = reject_parts(*rejected.parts, cleanup);
+        error("node assembly", rejected.reason)
+    })
+}
+fn reject_parts<A, C: StartupConnector>(
+    mut parts: NativeNodeParts<A, C>,
+    cleanup: &mut Cleanup,
+) -> BTreeMap<GroupIdentity, A>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    cleanup.log = Some(parts.local.persistence);
+    cleanup.snapshots = parts.local.snapshots.take().map(|s| s.worker);
+    if let Some(peers) = parts.peers.take() {
+        peers.connector.reject(cleanup);
     }
+    parts.local.applications
 }
 
 fn connection_direction(config: &NativeStartup, node: NodeId) -> ConnectDirection<SocketAddr> {

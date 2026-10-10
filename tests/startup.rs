@@ -27,6 +27,8 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+#[path = "startup/discovery.rs"]
+mod discovery;
 #[path = "startup/maintenance.rs"]
 mod maintenance;
 #[path = "startup/multi.rs"]
