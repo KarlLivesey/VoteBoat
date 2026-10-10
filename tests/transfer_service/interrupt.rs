@@ -1,17 +1,48 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+
+#[path = "interrupt/observation.rs"]
+mod observation;
+#[path = "interrupt/recovery.rs"]
+mod recovery;
+
+fn prepared(
+    rig: &Cluster,
+    mut probe: impl FnMut() -> Result<Option<u16>, String>,
+) -> Result<u16, String> {
+    startup_discovery::wait(
+        Instant::now() + Duration::from_secs(15),
+        || match probe()? {
+            Some(node) => observation::ready(
+                node,
+                initialization::response(rig.request(
+                    node,
+                    rig.admin,
+                    1,
+                    &["transfer-read", "intent"],
+                )),
+            ),
+            None => Ok(None),
+        },
+        Instant::now,
+        || std::thread::sleep(Duration::from_millis(10)),
+    )
+}
+
+fn released(
+    mut status: impl FnMut() -> Result<String, (String, String)>,
+    deadline: Instant,
+    now: impl FnMut() -> Instant,
+    pause: impl FnMut(),
+) -> Result<(), String> {
+    startup_discovery::wait(deadline, || observation::released(status()), now, pause)
+}
+
 pub(super) fn read(rig: &mut Cluster) {
-    let leader = startup_discovery::leader(rig, 1, &[1, 2, 3]);
     // The selected role alone cannot authorize the read cut. Complete a fresh
     // quorum read at that endpoint before deliberately removing its quorum.
-    let ready = rig.request(leader, rig.admin, 1, &["transfer-read", "intent"]);
-    assert!(
-        ready.status.success(),
-        "metadata preparation: {}",
-        String::from_utf8_lossy(&ready.stderr)
-    );
-    assert!(String::from_utf8_lossy(&ready.stdout).starts_with("OK observation "));
+    let leader = prepared(rig, || startup_discovery::probe(rig, 1, &[1, 2, 3])).unwrap();
     let stopped = (1..=3).filter(|n| *n != leader).collect::<Vec<_>>();
     for n in &stopped {
         let at = rig
@@ -46,13 +77,13 @@ pub(super) fn read(rig: &mut Cluster) {
     }
     pending.kill().unwrap();
     pending.wait().unwrap();
-    let out = rig.request(leader, 3, 1, &["status"]);
-    assert!(
-        out.status.success(),
-        "status after disconnect: {}",
-        String::from_utf8_lossy(&out.stderr)
-    );
-    assert!(String::from_utf8_lossy(&out.stdout).contains("pending_reads=0"));
+    released(
+        || initialization::response(rig.request(leader, 3, 1, &["status"])),
+        Instant::now() + Duration::from_secs(5),
+        Instant::now,
+        || std::thread::sleep(Duration::from_millis(1)),
+    )
+    .unwrap();
     for n in stopped {
         rig.start_one(1, 0, n, "recover");
     }

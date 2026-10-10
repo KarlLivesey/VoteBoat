@@ -1,0 +1,36 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.42s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 3 tests
+test interrupt::recovery::disconnected_wait_observes_usage_until_actual_release ... FAILED
+test interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic ... FAILED
+test interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_tcp ... FAILED
+
+failures:
+
+---- interrupt::recovery::disconnected_wait_observes_usage_until_actual_release stdout ----
+
+thread 'interrupt::recovery::disconnected_wait_observes_usage_until_actual_release' (592824) panicked at tests/transfer_service/interrupt/recovery.rs:71:5:
+Err("read cancellation not completed")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic stdout ----
+
+thread 'interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic' (592825) panicked at tests/transfer_service/interrupt/recovery.rs:36:5:
+Err("metadata preparation unavailable")
+
+---- interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_tcp stdout ----
+
+thread 'interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_tcp' (592826) panicked at tests/transfer_service/interrupt/recovery.rs:36:5:
+Err("metadata preparation unavailable")
+
+
+failures:
+    interrupt::recovery::disconnected_wait_observes_usage_until_actual_release
+    interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic
+    interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_tcp
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 28 filtered out; finished in 13.40s
+
+error: test failed, to rerun pass `--test transfer_service`

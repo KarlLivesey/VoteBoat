@@ -30,15 +30,15 @@ pub(super) fn probe(rig: &Cluster, group: u128, nodes: &[u16]) -> Result<Option<
     }
     Ok(None)
 }
-pub(super) fn wait(
+pub(super) fn wait<T>(
     deadline: Instant,
-    mut probe: impl FnMut() -> Result<Option<u16>, String>,
+    mut probe: impl FnMut() -> Result<Option<T>, String>,
     mut now: impl FnMut() -> Instant,
     mut pause: impl FnMut(),
-) -> Result<u16, String> {
+) -> Result<T, String> {
     loop {
         if now() >= deadline {
-            return Err("leader discovery deadline".into());
+            return Err("observation deadline expired".into());
         }
         if let Some(node) = probe()? {
             return Ok(node);
@@ -51,7 +51,7 @@ pub(super) fn wait(
 fn delayed_election_is_observed_after_the_initial_no_leader_scan() {
     let start = Instant::now();
     let mut calls = 0;
-    let result = wait(
+    let result = wait::<u16>(
         start + Duration::from_secs(15),
         || {
             calls += 1;
@@ -69,7 +69,7 @@ fn discovery_deadline_is_not_renewed_and_other_probe_failures_are_terminal() {
     let start = Instant::now();
     let now = std::cell::Cell::new(start);
     let mut calls = 0;
-    let result = wait(
+    let result = wait::<u16>(
         start + Duration::from_secs(15),
         || {
             calls += 1;
@@ -81,7 +81,7 @@ fn discovery_deadline_is_not_renewed_and_other_probe_failures_are_terminal() {
     assert!(result.is_err());
     assert_eq!(calls, 1);
     let mut calls = 0;
-    assert!(wait(
+    assert!(wait::<u16>(
         start + Duration::from_secs(15),
         || {
             calls += 1;

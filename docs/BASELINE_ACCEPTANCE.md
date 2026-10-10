@@ -1,5 +1,19 @@
 # Baseline acceptance map
 
+Transfer readiness and read cleanup observations: [slice237](../validation/baseline/slice237/README.md).
+The fixture requires a bounded authenticated group1/inc1 intent observation before
+the fault cut, reselects only on exact read unavailability, and observes actual
+local pending-read release after client death. Native sampled-authority stalls and
+usage1->0 reproduce3 failures before; final selected5, all-feature transfer33 and
+default24 pass. Formatting/four strict profiles and inventory108/conformance
+metadata pass. Initial response-shape compilation is retained. Production/core,
+formats and lifecycle semantics are unchanged; observation guards do not promise
+stricter end-to-end wall-clock deadlines. Source235 macOS counter186 passes but
+directory21/1 fails AddrInUse; source236 Ubuntu184/2 and macOS183/3 fail original
+handoff binding/current-authority cases before later targets. These are preceding
+source results, not current237 platform acceptance. Features stay ahead of tuning
+and the user's Daybreak security review.
+
 Owned handoff cleanup after terminal intent: [slice236](../validation/baseline/slice236/README.md).
 Actual native Cancel-admitted-before-applied histories reproduce the orphaned
 proposal pause over TCP/QUIC. The driver cancels only its tracked operation through

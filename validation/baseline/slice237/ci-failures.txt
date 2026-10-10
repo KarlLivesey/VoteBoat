@@ -1,0 +1,25 @@
+235 macOS: preceding source, not237 acceptance
+2026-10-10T16:38:55.0907560Z test result: ok. 186 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 312.36s
+2026-10-10T16:39:31.1058350Z test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... FAILED
+2026-10-10T16:39:40.5574220Z thread 'routes::recursive_route_rejects_wrong_parent_epoch_and_scope' (67218) panicked at tests/directory_service.rs:224:21:
+2026-10-10T16:39:40.5574990Z Error: Os { code: 48, kind: AddrInUse, message: "Address already in use" }
+2026-10-10T16:39:40.5617270Z test result: FAILED. 21 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 45.42s
+236 Ubuntu: preceding source, not237 acceptance
+2026-10-10T16:41:18.7087828Z test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp ... FAILED
+2026-10-10T16:41:18.8062911Z test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic ... FAILED
+2026-10-10T16:43:38.6693517Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp' (6495) panicked at tests/counter_service.rs:2385:9:
+2026-10-10T16:43:38.6694461Z ["move-leader", "19769", "2", "1", "1", "1"]: ERR InvalidCommand
+2026-10-10T16:43:38.6713013Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic' (6468) panicked at tests/counter_service.rs:2385:9:
+2026-10-10T16:43:38.6713767Z ["move-leader", "19769", "2", "1", "1", "1"]: ERR InvalidCommand
+2026-10-10T16:43:38.6730597Z test result: FAILED. 184 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 171.85s
+236 macOS: preceding source, not237 acceptance
+2026-10-10T16:41:34.9698250Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... FAILED
+2026-10-10T16:41:35.7344860Z test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic ... FAILED
+2026-10-10T16:44:50.2583490Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... FAILED
+2026-10-10T16:45:12.8068100Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp' (14686) panicked at tests/counter_service/drain_replacement.rs:245:5:
+2026-10-10T16:45:12.8069160Z  Error: "original handoff is historical but its target is not the current leader; inspect the original drain plan"
+2026-10-10T16:45:12.8278900Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic' (14705) panicked at tests/counter_service/drain_replacement.rs:245:5:
+2026-10-10T16:45:12.8281090Z  Error: "original handoff is historical but its target is not the current leader; inspect the original drain plan"
+2026-10-10T16:45:12.8309180Z thread 'read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp' (36201) panicked at tests/counter_service.rs:379:9:
+2026-10-10T16:45:12.8310700Z node 2 ["add", "19901", "7"]: ERR NOT_LEADER
+2026-10-10T16:45:12.8347320Z test result: FAILED. 183 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 260.77s

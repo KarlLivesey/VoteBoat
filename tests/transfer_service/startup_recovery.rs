@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
-struct Paused(Option<u32>);
+pub(super) struct Paused(Option<u32>);
 fn signal(pid: u32, action: &str) -> bool {
     Command::new("kill")
         .args([action, &pid.to_string()])
@@ -10,11 +10,11 @@ fn signal(pid: u32, action: &str) -> bool {
         .is_ok_and(|s| s.success())
 }
 impl Paused {
-    fn new(pid: u32) -> Self {
+    pub(super) fn new(pid: u32) -> Self {
         assert!(signal(pid, "-STOP"));
         Self(Some(pid))
     }
-    fn resume(mut self) {
+    pub(super) fn resume(mut self) {
         assert!(signal(self.0.unwrap(), "-CONT"));
         self.0.take();
     }

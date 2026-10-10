@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "base_revision": "cee252df008f81ffedf78630f1c8e0df5e8dc20b",
+  "scope": "Transfer test-fixture fresh readiness and observed read cancellation cleanup",
+  "production_behavior_change": false,
+  "validation": {
+    "compile_failure": {
+      "exit": 101,
+      "reason": "classifier accepts the response Result"
+    },
+    "before": {
+      "pass": 0,
+      "fail": 3,
+      "exit": 101
+    },
+    "after_selected": 5,
+    "full_all": 33,
+    "full_default": 24,
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "observation_guards": {
+    "readiness_between_probe_seconds": 15,
+    "cleanup_between_probe_seconds": 5,
+    "current_cli_ask_seconds": 12,
+    "end_to_end_deadline_claim": false
+  },
+  "source_manifest_sha256": "c8f6530a3c909c22e64d355015048ad283b282135c7edc8a0278681f6050cfe7",
+  "publication": {
+    "redacted_workspace_logs": 5,
+    "private_logs": "target/slice237-unpublished-logs"
+  },
+  "limits": "Finite Linux native TLS/TCP and QUIC histories; no identical macOS event-order proof, current-source platform, broad P6/P0-P7, performance or security completion."
+}

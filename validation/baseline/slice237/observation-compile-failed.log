@@ -1,0 +1,42 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+error[E0308]: `?` operator has incompatible types
+  --> tests/transfer_service/interrupt.rs:28:27
+   |
+28 |     observation::released(status()?)?.ok_or_else(|| "read cancellation not completed".into())
+   |                           ^^^^^^^^^ expected `Result<String, (String, String)>`, found `String`
+   |
+   = note: `?` operator cannot convert from `String` to `Result<String, (String, String)>`
+   = note: expected enum `Result<String, (String, String)>`
+            found struct `String`
+help: try removing this `?`
+   |
+28 -     observation::released(status()?)?.ok_or_else(|| "read cancellation not completed".into())
+28 +     observation::released(status())?.ok_or_else(|| "read cancellation not completed".into())
+   |
+help: try wrapping the expression in `Ok`
+   |
+28 |     observation::released(Ok(status()?))?.ok_or_else(|| "read cancellation not completed".into())
+   |                           +++         +
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> tests/transfer_service/interrupt.rs:28:35
+   |
+27 | ) -> Result<(), String> {
+   |      ------------------ expected `String` because of this
+28 |     observation::released(status()?)?.ok_or_else(|| "read cancellation not completed".into())
+   |                           --------^ the trait `From<(String, String)>` is not implemented for `String`
+   |                           |
+   |                           this can't be annotated with `?` because it has type `Result<_, (String, String)>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+Some errors have detailed explanations: E0277, E0308.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `voteboat` (test "transfer_service") due to 2 previous errors

@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 5 tests
+test interrupt::recovery::disconnected_wait_observes_usage_until_actual_release ... ok
+test interrupt::recovery::cleanup_deadline_and_invalid_status_cannot_become_release ... ok
+test interrupt::recovery::readiness_retries_only_exact_unavailability_and_rejects_invalid_observations ... ok
+test interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_tcp ... ok
+test interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 27.94s
+

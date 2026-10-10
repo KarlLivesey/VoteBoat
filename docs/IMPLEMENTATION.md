@@ -977,29 +977,112 @@ after UNKNOWN LeadershipChanged, and replacement-node write after role change.
 Later targets are unrun; macOS114259713970 remains live at observation. Feature
 and platform work continues; tuning/security remain later milestones.
 
-Current: close the macOS transfer preparation/read cleanup assumptions. Purpose:
-advance P6 and functional Linux/macOS workflow acceptance. Depend on exact source234
-macOS114257755869 failures, existing original transfer/query identities and read
-cancellation contracts. Completion requires actual quorum readiness before the
-fault cut and observed wait release after disconnect, with cause-specific native
-TCP/QUIC regressions, unchanged request/deadline scope and zero strict diagnostics.
-A sampled role or a successful control enqueue is not completed recovery.
+Implemented237: the native transfer fixture now combines metadata role discovery
+with an actual authenticated intent observation for group1/inc1. It decodes the
+bounded result and checks the exact query. Only the exact documented empty-reply
+group-unavailable failure permits another read attempt. The existing bounded wait
+is generic over its result, sharing the fixed15s retry guard without inventing a
+leader sentinel for cleanup. Individual CLI asks retain12s; no new end-to-end15s
+wall-clock guarantee. After client death/join, the same metadata server's local
+pending usage must actually reach zero under the fixed5s between-probe guard
+plus the current CLI ask's bounded deadline. This is not an end-to-end5s guarantee.
+Malformed, authorization, wrong-query and command failures remain terminal.
 
-Next: close the source235 counter administration role/unknown-outcome assumptions.
-Purpose: advance P4/service functional acceptance. Depend on retained job114259713867
-and existing original7001 Joint, handoff, placement and data contracts. Select one
-cause before editing: historical completion is not current leadership, or exact
-UNKNOWN is not committed Joint. Completion requires unchanged original operation
-replay, actual receipt/current-quorum evidence, restart/data continuity and strict
-zero; do not widen budgets or accept arbitrary errors. CI stays background.
+Native TCP/QUIC paused-sampled-authority histories and usage1->0 scripts fail3
+before and pass after; final selected5 checks pass. Original profile, child data,
+intent/query identities, complete split/retries and worker joins survive. Full
+all-feature transfer33 and default24 pass sequentially; formatting/four strict
+profiles and inventory108/conformance metadata pass. Initial response-shape compile
+failure is retained with its focused correction in
+[slice237](../validation/baseline/slice237/README.md). No production/core/provider,
+wire, lifecycle or persistent-format change; finite Linux fixture evidence does
+not prove the precise timing of preceding macOS failures or close broad P6.
 
-Following: close one concrete required operator/deployment integration gap.
-Purpose: complete usable service, membership and split/merge feature integration.
-Depend on public workflow reconciliation against chapter09 and the acceptance map;
-select an actual missing end-to-end capability before adding helpers. Completion
-requires public executable/Rust usage, original-operation recovery/cleanup evidence
-and Linux/macOS validation with aligned contracts. Full roadmap remains active;
-performance/security, optional global orchestration, P8 and Windows are separate.
+Macro review237 completes this local P6/service read-observation deliverable.
+Source235 operator38067782454 is terminal: Ubuntu181/5 retains the previously
+recorded role/Joint cases; macOS counter186 passes, directory21/1 fails startup
+AddrInUse in the wrong-parent test, then transfer is unrun. Source236
+operator38068525739 is terminal: Ubuntu184/2 rejects fresh19769 on its new local
+target with ERR InvalidCommand; macOS183/3 fails two resumed planned drains because
+an historical handoff target no longer leads, plus a sampled-node19901 write with
+NOT_LEADER. Later targets are unrun. These exact source-specific results select
+administrative original-intent/current-authority composition next; they are not
+237 platform acceptance. Feature work and platform recovery remain the priority.
+
+Current: close original handoff binding and planned drain after another election.
+Purpose: advance P4/service Linux/macOS feature completion. Depend on exact source236
+Linux114261132503 and macOS114261132642 failures, durable LeadershipIntent and
+MembershipDrainPlan contracts, and existing bounded runner actions. Before editing,
+check how an original source is reconstructed before its record applies and why
+an historical target is required to remain leader. Completion requires unchanged
+original intent/target/plan through receipt loss, rollback/election and replay;
+actual quorum-backed handoff/configuration readiness and source shutdown, with
+native TCP/QUIC/default checks and strict zero. Interface changes are authorized;
+do not turn a current role hint or invalid changed intent into success.
+
+Next: close concrete startup reservation and sampled data/read assumptions.
+Purpose: advance functional Linux/macOS operator acceptance. Depend on retained
+source235 AddrInUse and source23619901 NOT_LEADER evidence and existing listener,
+original-write and cancellation contracts. Select one cause before editing;
+completion requires a reproducible reservation/ownership or role-change history,
+correct bounded original request recovery and cleanup, with zero strict diagnostics.
+Do not widen deadlines or accept unrelated errors; CI remains background.
+
+Following: close one required operator/deployment integration gap. Purpose:
+complete usable service, membership and split/merge feature integration. Depend
+on chapter09/public-workflow reconciliation and the acceptance map; select an
+actual missing end-to-end capability before adding helpers. Completion requires
+public executable/Rust usage, original-operation recovery/cleanup evidence and
+Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
+security, optional global orchestration, P8 and Windows stay separate.
+
+### Slice237 schema plan — fresh transfer readiness and observed read cleanup
+
+Previous turn progressed:236 fixes terminal handoff pause release, passes native
+and full counter/default checks with zero strict diagnostics, and pushes cee252d.
+The worktree is clean. Source234 macOS114257755869 passes counter183/directory22
+but transfer26/2 fails a one-shot metadata read after sampled leadership and an
+immediate pending_reads=0 check after killing the waiting client. These are exact
+retained failures, not current-source platform results. Source235 macOS and236
+matching jobs are live/pending at the initial observation.
+
+Shape/contracts: keep production CLI, lifecycle, Node/read cancellation and wire
+formats unchanged. The fixture's readiness selector combines role discovery with
+an actual authenticated transfer-read intent observation for metadata group1/inc1.
+Decode the bounded observation and require the exact query; only the exact empty
+stdout plus documented group-unavailable CLI error permits another read attempt.
+Reuse the existing15s between-probe deadline without renewing it; each CLI request
+keeps its12s budget. This is not a stricter end-to-end15s wall-clock guarantee.
+
+State/ownership: sampled roles remain hints. Do not remove metadata quorums until
+an actual matching observation completes. After an accepted status read's client
+is killed/joined, observe the same server's local pending-read usage until zero
+under a fixed5s between-probe cleanup guard plus the current bounded CLI ask;
+queued cancellation is not synchronous success.
+Positive usage is a wait, malformed/authentication/command errors are terminal.
+The fixture owns all stopped processes and the waiting client; native fault
+helpers resume paused processes on unwind, recover the original metadata stores,
+and preserve the original profile, data receipts and final worker joins.
+
+Acceptance: native TCP/QUIC tests pause the originally sampled metadata leader,
+elect a replacement, and force the first pinned readiness request to fail. Old
+one-shot preparation must fail; fixed preparation must reselect and read the same
+query without changing profile/operations. Scripted usage1 then0 must wait rather
+than fail or claim immediate release; deadline/terminal/malformed and wrong-query
+checks must stay bounded. Full transfer suite plus default relevant paths,
+fmt/four strict profiles and source-bound CI evidence follow. Helpers exist only
+to expose readiness and queued-cancellation observation to these actual fixtures;
+no production test hook, new provider seam, performance or security work. Advances
+P6/service and Linux/macOS feature acceptance; original counter administration
+uncertainty and concrete operator/deployment integration follow.
+
+237 fixture corrections: the initial compilation unwraps the response before its
+classifier; retain the error and pass the owned Result directly. The existing
+bounded wait becomes generic over its observed value, so fresh metadata nodes
+and completed cleanup use the same deadline contract without invented leader
+sentinels or a second timer loop. Existing no-value error tests specify u16.
+Native resumed-leader tests probe the established replacement set after the
+first unavailable sample; a resumed process is not instantly current authority.
 
 ### Slice236 schema plan — release owned handoff after terminal intent
 

@@ -1,0 +1,19 @@
+New reproduction against old one-shot readiness/cleanup (0/3; exit101), after
+initial response-shape compile fix. Corrected selected observations (5/0):
+cargo +stable test --locked --offline --all-features --test transfer_service interrupt::recovery
+
+Final full suites executed sequentially (33 all-feature;24 default):
+cargo +stable test --locked --offline --all-features --test transfer_service
+cargo +stable test --locked --offline --test transfer_service
+
+cargo +stable fmt --all
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+cargo +stable build --locked --offline --all-features --bins
+
+gh run view 38067782454 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114259713970/logs
+gh run view 38068525739 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114261132503/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114261132642/logs

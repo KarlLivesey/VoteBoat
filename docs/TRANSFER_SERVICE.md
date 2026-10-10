@@ -105,6 +105,12 @@ QUIC/checkpoints. They also interrupt admitted fence/publication commands before
 quorum acknowledgement. Original IDs, serving restrictions and child retries
 are checked. This is selected process-crash coverage, not arbitrary power loss.
 
+Read interruption histories require a fresh authenticated metadata observation
+before removing its quorum. A sampled leader role does not establish readiness.
+After disconnect, cancellation is queued; the histories observe pending-read
+usage reaching zero before asserting cleanup. Local usage is cleanup evidence,
+not a quorum receipt or permission to advance a transfer.
+
 ## Retiring the original source
 
 Select `plan ... --retirement` **before creating the source stores**. This emits
