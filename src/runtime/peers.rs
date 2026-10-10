@@ -311,6 +311,13 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     pub fn connector_usage(&self) -> ConnectUsage {
         self.parts.connector.usage()
     }
+    /// Current credential generation, separate from connection generations.
+    pub fn credential_generation(&self) -> Option<crate::authorization::CredentialGeneration>
+    where
+        C: PeerCredentialControl,
+    {
+        self.parts.connector.credential_generation()
+    }
     /// Publish host-authorized prepared credentials without changing the roster.
     pub fn replace_peer_credentials(
         &mut self,

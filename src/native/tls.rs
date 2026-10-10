@@ -38,6 +38,7 @@ pub struct NativeTlsConfig {
     pub(crate) client: Arc<ClientConfig>,
     pub(crate) server: Arc<ServerConfig>,
     wire_version: u16,
+    pub(crate) credential_fingerprint: [u8; 32],
 }
 impl NativeTlsConfig {
     pub fn new(material: TlsCredentials) -> Result<Self, SessionError> {
@@ -62,6 +63,7 @@ impl NativeTlsConfig {
         {
             return Err(SessionError::InvalidCredentials);
         }
+        let credential_fingerprint = credential_fingerprint(&material);
         let provider = Arc::new(rustls::crypto::ring::default_provider());
         let mut roots = RootCertStore::empty();
         for der in material.roots {
@@ -103,6 +105,7 @@ impl NativeTlsConfig {
             client: Arc::new(client),
             server: Arc::new(server),
             wire_version: 1,
+            credential_fingerprint,
         })
     }
     /// Select one exact native message format (1–8) for future sessions.
@@ -117,6 +120,20 @@ impl NativeTlsConfig {
     pub fn wire_version(&self) -> u16 {
         self.wire_version
     }
+}
+fn credential_fingerprint(material: &TlsCredentials) -> [u8; 32] {
+    let mut hash = ring::digest::Context::new(&ring::digest::SHA256);
+    hash.update(b"voteboat-peer-tls-v1");
+    for collection in [&material.roots, &material.certificate_chain] {
+        hash.update(&(collection.len() as u64).to_be_bytes());
+        for bytes in collection {
+            hash.update(&(bytes.len() as u64).to_be_bytes());
+            hash.update(bytes);
+        }
+    }
+    hash.update(&(material.private_key.len() as u64).to_be_bytes());
+    hash.update(&material.private_key);
+    hash.finish().as_ref().try_into().unwrap()
 }
 /// Trusted construction-time certificate pin and stable node/store identity.
 /// Certificate bytes are public, not a private key. The server name is verified

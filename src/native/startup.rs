@@ -33,7 +33,9 @@ use crate::{
 };
 use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
 mod multi;
+mod peer_rotation;
 pub use multi::*;
+pub use peer_rotation::NativePeerRotationStartup;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NativeOpenMode {
@@ -238,6 +240,7 @@ impl NativeMemberStartup {
                 StartupAuthorization::Member(self.provisioned_stores),
                 timers,
                 None,
+                None,
             ),
         )
     }
@@ -343,6 +346,15 @@ impl StartupConnector for NativePeerConnector {
 impl StartupConnector for NativeServiceConnector {
     fn reject(self, cleanup: &mut Cleanup) {
         match self {
+            Self::RotatingTcp(mut c) => {
+                c.close();
+                let c = c
+                    .into_inner()
+                    .unwrap_or_else(|_| unreachable!("unused startup connector"));
+                cleanup.connector = Some(c);
+            }
+            #[cfg(feature = "quic")]
+            Self::RotatingQuic(_) => (),
             Self::Tcp(c) => cleanup.connector = Some(*c),
             #[cfg(feature = "quic")]
             Self::Quic(_) => (), // No requests accepted during assembly; drop releases socket.
@@ -554,7 +566,7 @@ impl NativeStartup {
             app,
             wake,
             now,
-            (StartupAuthorization::Static, timers, None),
+            (StartupAuthorization::Static, timers, None, None),
         )
     }
     /// Open the same static native assembly with optional file-call timing.
@@ -578,6 +590,7 @@ impl NativeStartup {
                 StartupAuthorization::Static,
                 options.timers,
                 Some(options.journal),
+                None,
             ),
         )
     }
@@ -587,13 +600,18 @@ impl NativeStartup {
         app: A,
         wake: Arc<dyn WorkerWake>,
         now: MonoTime,
-        options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
+        options: (
+            StartupAuthorization,
+            TimerConfig,
+            Option<JournalTimings>,
+            Option<NativePeerRotationStartup>,
+        ),
     ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
     where
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        let (authorization, timers, timings) = options;
+        let (authorization, timers, timings, rotation) = options;
         let mut cleanup = Cleanup::default();
         let mut application = Some(app);
         let result = (|| {
@@ -607,6 +625,9 @@ impl NativeStartup {
                 return Err(error("timers", "initial election deadline overflow"));
             }
             authorization.validate(&self)?;
+            if let Some(rotation) = &rotation {
+                rotation.validate(&self, authorization.stores(&self))?;
+            }
             application
                 .as_ref()
                 .unwrap()
@@ -631,6 +652,7 @@ impl NativeStartup {
                         |config, stores, local, wake, cleanup| {
                             tcp_connector(config, stores, local, listener, wake, cleanup, now)
                                 .map(|c| NativeServiceConnector::Tcp(Box::new(c)))
+                                .and_then(|c| peer_rotation::wrap(c, rotation.as_ref(), cleanup))
                         },
                     )
                 }
@@ -656,7 +678,7 @@ impl NativeStartup {
                         &mut cleanup,
                         wake,
                         now,
-                        |config, stores, local, _, _| {
+                        |config, stores, local, _, cleanup| {
                             let peers = pins(config, stores)
                                 .into_iter()
                                 .map(|(n, p)| (n, (config.peers[&n].address, p)))
@@ -674,6 +696,7 @@ impl NativeStartup {
                             )
                             .map(|c| NativeServiceConnector::Quic(Box::new(c)))
                             .map_err(|e| error("QUIC connector", e.reason))
+                            .and_then(|c| peer_rotation::wrap(c, rotation.as_ref(), cleanup))
                         },
                     )
                 }

@@ -31,6 +31,8 @@ use voteboat::{
 mod maintenance;
 #[path = "startup/multi.rs"]
 mod multi;
+#[path = "startup/peer_rotation.rs"]
+mod peer_rotation;
 #[derive(Clone)]
 struct HostApplication(Counter);
 impl StateMachine for HostApplication {

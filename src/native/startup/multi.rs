@@ -98,6 +98,44 @@ impl NativeMultiStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        self.open_as((protocol, timers, None), applications, wake, now)
+    }
+    /// Shared multi-group startup with durable peer credential binding.
+    pub fn open_with_peer_rotation<A>(
+        self,
+        rotation: NativePeerRotationStartup,
+        timers: TimerConfig,
+        applications: BTreeMap<GroupIdentity, A>,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeMultiStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.open_as(
+            (rotation.protocol, timers, Some(rotation)),
+            applications,
+            wake,
+            now,
+        )
+    }
+    fn open_as<A>(
+        self,
+        options: (
+            NativePeerProtocol,
+            TimerConfig,
+            Option<NativePeerRotationStartup>,
+        ),
+        applications: BTreeMap<GroupIdentity, A>,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeMultiStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        let (protocol, timers, rotation) = options;
         let mut cleanup = Cleanup::default();
         let mut prepared = PreparedStartup {
             store: None,
@@ -108,6 +146,9 @@ impl NativeMultiStartup {
         let result = (|| {
             self.validate(&prepared.applications)?;
             checked(timers.validate())?;
+            if let Some(rotation) = &rotation {
+                rotation.validate(&self.startup, &self.provisioned_stores)?;
+            }
             if timers
                 .election_min_ms
                 .checked_add(timers.election_spread_ms - 1)
@@ -132,7 +173,9 @@ impl NativeMultiStartup {
                 wake,
                 now,
                 |config, stores, local, wake, cleanup| {
-                    socket.connect(config, stores, local, wake, cleanup, now)
+                    socket
+                        .connect(config, stores, local, wake, cleanup, now)
+                        .and_then(|c| peer_rotation::wrap(c, rotation.as_ref(), cleanup))
                 },
             )
         })();

@@ -1,6 +1,14 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Native peer startup: [slice207b1](baseline/slice207b1/README.md), with exact
+host-loaded durable record/material checks before startup side effects and
+guarded static/member/multi-group assembly. TCP/QUIC replicated data and retries
+survive actual key changes and recorded-but-unpublished restart; QUIC includes
+checkpoints. Executable peer rollout and broader platform acceptance remain open.
+The local broad selection passes115 tests, final startup checks7 and default
+startup/security checks41; formatting/four strict lint profiles and metadata
+checks pass. The journal remains host-owned and must be preserved across restart.
 Prepared peer rotation: [slice207a](baseline/slice207a/README.md). Seven final
 TCP/QUIC/host tests pass, alongside215 connector/session/runtime regression tests,
 20 default TCP tests and one core-only Node forwarding check. Formatting/four

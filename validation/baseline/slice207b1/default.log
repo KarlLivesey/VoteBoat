@@ -1,0 +1,62 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.59s
+     Running tests/peer_rotation.rs (target/debug/deps/peer_rotation-d5b2ba663c31213c)
+
+running 5 tests
+test host::wrapping_active_provider_returns_original_owner_without_consuming_its_attempt ... ok
+test host::rotation_retains_old_ticket_until_terminal_and_revokes_late_success ... ok
+test host::rejected_material_preserves_live_sessions_and_drop_revokes_them ... ok
+test tcp_stale_pin_refuses_changed_key_and_corrected_pin_reconnects ... ok
+test tcp_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/secure.rs (target/debug/deps/secure-03661c8b9774a056)
+
+running 14 tests
+test production_rejects_simulation_even_with_ready_identity ... ok
+test tls::oversized_fragmented_handshake_stops_at_exact_ciphertext_ceiling ... ok
+test session_limits_and_poll_budgets_are_checked_without_native_provider ... ok
+test tls::deadline_backward_time_zero_budget_and_revocation_latch ... ok
+test tls::exact_certificate_pin_is_required_beyond_valid_ca ... ok
+test tls::invalid_credentials_and_limits_fail_before_session_admission ... ok
+test tls::server_requires_a_client_certificate ... ok
+test tls::clean_closure_drains_data_and_unclean_eof_fails ... ok
+test tls::tls_rejects_untrusted_root_and_wrong_dns_name ... ok
+test tls::authenticated_hello_cannot_choose_a_different_node_or_store ... ok
+test tls::mutual_tls_short_io_binds_recovered_sessions_and_bounds_plaintext ... ok
+test tls::real_tcp_selects_wire_three_and_rejects_a_different_peer_version ... ok
+test tls::real_tcp_tls_transfers_wire_frames_and_connection_rotation_is_isolated ... ok
+test tls::explicit_wire_versions_are_exact_authenticated_and_do_not_mutate_shared_configs ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/startup.rs (target/debug/deps/startup-837c499ba72ebae4)
+
+running 22 tests
+test invalid_startup_is_side_effect_free_and_returns_the_host_application ... ok
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application ... ok
+test peer_rotation::material_digest_binds_local_tls_and_every_peer_field ... ok
+test peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers ... ok
+test explicit_startup_timers_validate_before_files_and_use_host_deadlines ... ok
+test startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines ... ok
+test native_administration_receipts_commit_joint_and_final_and_reopen_exact_history ... ok
+test host_application_and_non_demo_identities_write_and_recover_through_startup ... ok
+test late_constructor_failure_returns_application_and_joins_every_started_worker ... ok
+test peer_rotation::static_and_member_startup_install_the_recorded_generation ... ok
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test stopping_one_startup_does_not_stop_another_or_the_shared_host_wake ... ok
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+test tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... ok
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... ok
+test multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.36s
+

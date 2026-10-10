@@ -12,13 +12,14 @@
   "contracts": [
     {
       "design_id": "C10/C15",
-      "public_contract": "NativeStartup / NativeStartupPeer / NativeOpenMode / NativeStartupRejected<A> / NativePeerProtocol",
+      "public_contract": "NativeStartup / NativeStartupPeer / NativeOpenMode / NativeStartupRejected<A> / NativePeerProtocol / NativePeerRotationStartup",
       "operations": [
         "validate",
         "open",
         "open_with_protocol",
         "open_with_protocol_and_timers",
-        "try_cleanup"
+        "try_cleanup",
+        "open_with_peer_rotation"
       ],
       "native": "Explicit single-group native filesystem/listener/worker assembly over public NodeParts providers; TCP/TLS default, optional QUIC with shared UDP socket and two storage workers.",
       "conformance": [
@@ -26,9 +27,11 @@
         "tests/counter_service.rs",
         "examples/embedded_counter.rs",
         "tests/directory_service.rs",
-        "tests/directory_service/routes.rs"
+        "tests/directory_service/routes.rs",
+        "tests/startup/peer_rotation.rs",
+        "tests/startup/multi/peer_rotation.rs"
       ],
-      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Single-group recovery requires the complete one-group durable WAL inventory, refusing an omitted multi-group profile. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; open_with_protocol_and_timers exposes validated caller-selected TimerConfig for static/member hosts, rejecting invalid timing and initial election deadline overflow before binding/files. Original wrappers retain defaults. A TCP/QUIC downstream test checks invalid inputs are side-effect free and host-relative custom election deadlines. Timing grants no quorum or membership authority; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1–6, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3/4. Format 6 selects historical committed learner snapshot repair and matching core/codec/roster on member recovery; native member tests cover TCP/QUIC stable and compacted-joint images. Explicit NativeMemberStartup selects receive-side configuration replication; static NativeStartup retains its default ingress gate. Slice189 composes a native metadata authority executable with explicit initial-plan publication, quorum-backed remote manifest reads, accepted-read draining and checkpoint retry recovery; broader recursive orchestration remains open. Slice190 adds a cold executable recursive route client: bounded explicit authority endpoints, independently pinned TLS sessions, original quorum-backed manifest protocol and the existing checked resolver. Three independent three-voter authorities cover TCP/QUIC traversal, required-path-only lookup, unavailable endpoint rotation, stale floors, parent/epoch/scope/schema refusals and interrupted leaf reads. A known child remains discoverable with ancestors stopped. Output remains a per-invocation hint; it cannot activate ownership or execute a write."
+      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Single-group recovery requires the complete one-group durable WAL inventory, refusing an omitted multi-group profile. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; open_with_protocol_and_timers exposes validated caller-selected TimerConfig for static/member hosts, rejecting invalid timing and initial election deadline overflow before binding/files. Original wrappers retain defaults. A TCP/QUIC downstream test checks invalid inputs are side-effect free and host-relative custom election deadlines. Timing grants no quorum or membership authority; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1\u20136, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3/4. Format 6 selects historical committed learner snapshot repair and matching core/codec/roster on member recovery; native member tests cover TCP/QUIC stable and compacted-joint images. Explicit NativeMemberStartup selects receive-side configuration replication; static NativeStartup retains its default ingress gate. Slice189 composes a native metadata authority executable with explicit initial-plan publication, quorum-backed remote manifest reads, accepted-read draining and checkpoint retry recovery; broader recursive orchestration remains open. Slice190 adds a cold executable recursive route client: bounded explicit authority endpoints, independently pinned TLS sessions, original quorum-backed manifest protocol and the existing checked resolver. Three independent three-voter authorities cover TCP/QUIC traversal, required-path-only lookup, unavailable endpoint rotation, stale floors, parent/epoch/scope/schema refusals and interrupted leaf reads. A known child remains discoverable with ancestors stopped. Output remains a per-invocation hint; it cannot activate ownership or execute a write. Slice207b1 adds opt-in guarded credentials and pre-side-effect durable record validation to static/member/multi-group startup, using the existing credential journal and host-owned preparation."
     },
     {
       "design_id": "C10/C15",
@@ -880,9 +883,22 @@
     {
       "design_id": "C09/C21",
       "public_contract": "CredentialJournal / CredentialRecordIo",
-      "operations": ["owner", "latest", "publish", "read", "replace"],
+      "operations": [
+        "owner",
+        "latest",
+        "publish",
+        "read",
+        "replace"
+      ],
       "native": "NativeCredentialJournal<I> over host-supplied atomic record I/O; FileCredentialRecord uses stage, file sync, rename and directory sync. The executable owns one preparation worker and publishes through NativeCredentialSet.",
-      "conformance": ["tests/credential_journal.rs", "tests/provider_conformance/credential.rs", "tests/provider_conformance/credential_native.rs", "tests/counter_service/credential_reload.rs", "tests/transfer_service/revocation.rs", "src/bin/support/credential_reload_tests.rs"],
+      "conformance": [
+        "tests/credential_journal.rs",
+        "tests/provider_conformance/credential.rs",
+        "tests/provider_conformance/credential_native.rs",
+        "tests/counter_service/credential_reload.rs",
+        "tests/transfer_service/revocation.rs",
+        "src/bin/support/credential_reload_tests.rs"
+      ],
       "scope": "Version1 local fixed128-byte checksummed latest preparation record binds stable node/store identity, request sequence, expected/replacement generations and exact loaded material digest. Exact latest retries are idempotent; changed/superseded sequences and older expected generations reject. Uncertain writes fence until reopen. Caller provides exclusive writer lifetime and runs blocking I/O outside Node polling. Executable reload uses fixed trusted paths, bounded complete material validation, single-flight worker ownership, durable preparation before publication, guarded old-session revocation and status after lost replies. Failed preparation retains old credentials; uncertain publication stops service. Shutdown/error exits join accepted workers. Reopen refuses rollback and same-generation digest mismatch; higher trusted startup configuration remains allowed. Command-channel TLS/policy only: no automatic peer credential rotation, secret distribution, full audit history or cluster-wide atomic update. Finite corruption/partial-stage and before/after replacement tests are not physical power-loss proof."
     },
     {
@@ -2467,7 +2483,7 @@
         "src/bin/support/transfer_binding.rs",
         "tests/transfer_service/merge.rs"
       ],
-      "scope": "Bounded explicit whole-responsibility native byte-counter split with one metadata group, one source and2–16 targets; each group has independent stores and leaders. All roles and operation/incarnation IDs are profile-bound. Read observations require completed quorum reads; trusted Configure principals publish lifecycle evidence through existing guards. Unknown writes are followed by fresh observations. One connection owns at most one exact read/proposal ticket; disconnect cancels it and completions continue draining. Profiles128KiB, command lines270KiB, app commands/images64KiB, fixed deadlines and existing native queue limits. Normal shutdown joins workers; owner failure uses recovery cleanup. Tests cover actual TCP/QUIC command execution, accepted-read disconnect, access rejection, first-import process loss/reopen/resume, source fencing and independent child retries with parents stopped. This is an executable assembly, not a replacement provider seam or a Byzantine certificate protocol. Explicit fresh v2 source profiles select RetirementGuard before bootstrap and persist an immutable profile/node/store/group binding before serving. Recovery refuses missing, corrupt or changed bindings; v1 refuses a marked source. Authenticated retirement uses the original lifecycle operation and an explicit retention release; status is quorum-read and exact retries survive WAL/checkpoint recovery. Retirement releases application payload, not physical files or external backups. Broader recursive/retained profiles, general retention, phase-internal persistence cuts, combined membership faults, macOS execution and separate-host validation remain open. Slice203 adds explicit fresh-v3 native compatible merge/retirement profiles, bounded multiple-image client collection, source-local command ranges and three executable TCP/QUIC histories including import/activation receipt loss and independent source retirement."
+      "scope": "Bounded explicit whole-responsibility native byte-counter split with one metadata group, one source and2\u201316 targets; each group has independent stores and leaders. All roles and operation/incarnation IDs are profile-bound. Read observations require completed quorum reads; trusted Configure principals publish lifecycle evidence through existing guards. Unknown writes are followed by fresh observations. One connection owns at most one exact read/proposal ticket; disconnect cancels it and completions continue draining. Profiles128KiB, command lines270KiB, app commands/images64KiB, fixed deadlines and existing native queue limits. Normal shutdown joins workers; owner failure uses recovery cleanup. Tests cover actual TCP/QUIC command execution, accepted-read disconnect, access rejection, first-import process loss/reopen/resume, source fencing and independent child retries with parents stopped. This is an executable assembly, not a replacement provider seam or a Byzantine certificate protocol. Explicit fresh v2 source profiles select RetirementGuard before bootstrap and persist an immutable profile/node/store/group binding before serving. Recovery refuses missing, corrupt or changed bindings; v1 refuses a marked source. Authenticated retirement uses the original lifecycle operation and an explicit retention release; status is quorum-read and exact retries survive WAL/checkpoint recovery. Retirement releases application payload, not physical files or external backups. Broader recursive/retained profiles, general retention, phase-internal persistence cuts, combined membership faults, macOS execution and separate-host validation remain open. Slice203 adds explicit fresh-v3 native compatible merge/retirement profiles, bounded multiple-image client collection, source-local command ranges and three executable TCP/QUIC histories including import/activation receipt loss and independent source retirement."
     },
     {
       "design_id": "C01/C07/C10",
@@ -2612,15 +2628,19 @@
         "replace_peer_credentials",
         "replace_material",
         "new",
-        "into_inner"
+        "into_inner",
+        "digest",
+        "with_peer_rotation"
       ],
-      "native": "Opt-in RotatingPeerConnector<C> wraps existing native TCP/TLS, QUIC or NativeServiceConnector providers. Node and PeerDriver forward the optional public control; host providers can implement it without native TLS.",
+      "native": "Opt-in RotatingPeerConnector<C> wraps existing native TCP/TLS, QUIC or NativeServiceConnector providers. Node and PeerDriver forward the optional public control; host providers can implement it without native TLS. NativeServiceConnector has opt-in guarded TCP/QUIC variants; static, member and shared multi-group startup accept NativePeerRotationStartup with the latest host-loaded journal record.",
       "conformance": [
         "tests/peer_rotation.rs",
         "tests/peer_rotation/host.rs",
-        "tests/support/node_peer_credentials.rs"
+        "tests/support/node_peer_credentials.rs",
+        "tests/startup/peer_rotation.rs",
+        "tests/startup/multi/peer_rotation.rs"
       ],
-      "scope": "Expected/replacement credential generations are distinct from connection, store and membership generations. Native prepared key/pin replacement preserves the exact peer identity set, wire version, endpoint routes, hard limits and connection-generation counters. Rejected material is returned intact. Accepted old tickets retain capacity through one terminal poll; old leases revoke established sessions and suppress late successful handshakes. Close/drop revoke wrapper leases; underlying provider reclaim requires close and drain. No file loading, durable record, restart policy, membership change or executable rollout is supplied by this mechanism. Wrap before exposing sessions; prior raw sessions do not carry wrapper leases. Host authorizes and durably records the intended rollout before publication."
+      "scope": "Expected/replacement credential generations are distinct from connection, store and membership generations. Native prepared key/pin replacement preserves the exact peer identity set, wire version, endpoint routes, hard limits and connection-generation counters. Rejected material is returned intact. Accepted old tickets retain capacity through one terminal poll; old leases revoke established sessions and suppress late successful handshakes. Close/drop revoke wrapper leases; underlying provider reclaim requires close and drain. No file loading, durable record, restart policy, membership change or executable rollout is supplied by this mechanism. Wrap before exposing sessions; prior raw sessions do not carry wrapper leases. Host authorizes and durably records the intended rollout before publication. Slice207b1 binds restart to the exact recorded generation, owner and SHA-256 of local TLS bytes, wire version and complete peer identity/pin/name map before sockets or stores open. A host-authorized initial generation may omit a record; the host must preserve the journal and serialize its writer. Native startup recovers recorded but unpublished material; TCP/QUIC three-group data/retries and QUIC checkpoints survive live rotation and restart. Rejected startup drains and returns original resources. Filesystem loading, authenticated executable rollout and cluster coordination remain external to this startup adapter."
     }
   ],
   "not_yet_implemented": [

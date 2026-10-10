@@ -103,8 +103,11 @@ Completed201d covers the reused credential journal/record-I/O contracts with
 shared host/native/file publication checks, exact returned I/O ownership and
 failure/reopen cases. It reviews five more operations, not an entire provider
 ecosystem. Completed207a adds a prepared peer-key replacement API, native
-TCP/QUIC session revocation and typed Node/PeerDriver forwarding. Current207b
-connects it to durable startup and executable administration. It depends on the
+TCP/QUIC session revocation and typed Node/PeerDriver forwarding. Completed207b1
+connects native static/member/multi-group startup to the host-loaded durable
+record and tests actual replicated data/retry recovery through key changes.
+Current207b2 connects that startup path to executable preparation and
+administration. It depends on the
 existing credential journal and prepared peer bundle; acceptance requires
 original rollout-ID recovery, stale-file refusal, authenticated commands and
 replicated data/retry continuity through rotation and restart. This advances
@@ -119,6 +122,65 @@ authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; completion requires refreshed hints, stale
 generation refusal and parent-offline child continuity across restart. This
 advances P5 discovery without granting ownership from a cached endpoint.
+
+### Slice207b1 implemented — native startup checks durable peer records
+
+NativeServiceConnector now offers explicit guarded TCP/QUIC variants while
+retaining the existing service type and worker reclamation. Static connectors
+reject credential control; guarded connectors refuse raw replacement that
+would bypass revocation. PeerDriver exposes the active credential generation.
+Native static/member/multi-group startup accepts NativePeerRotationStartup
+with the host-loaded latest journal record. It checks exact owner, valid request,
+recorded generation and the actual material digest before sockets/files.
+NativePeerMaterial hashes local TLS bytes, wire version, and the complete ordered
+peer identity/certificate/name map; no new persistent record format is introduced.
+
+The new native TCP/QUIC histories rotate actual keys for three replicas serving
+three groups, preserve old operation receipts and new writes, and reopen through
+the existing WAL/checkpoint paths. They also publish a second original request
+durably while omitting in-memory publication on one node; all replicas recover
+that same recorded generation and retained application retries. Eight malformed
+owner/request/generation/digest cases reject with a fresh returned application
+before a deliberately occupied socket or absent directory can be touched.
+Static/member selection and late TCP/QUIC startup cleanup are also exercised.
+
+The host still owns journal loading, exclusive writer lifetime, replacement
+validation/publication and uncertainty fencing. Missing initial records are
+trusted host input, not deletion detection. The executable preparation/status
+path remains207b2; this is not completed cluster-wide operational rollout.
+Actual validation is recorded in validation/baseline/slice207b1/README.md.
+The broad all-feature selection passes115 tests; the final startup rotation
+selection passes7; the default startup/rotation/security selection passes41.
+Formatting and all four strict Clippy profiles pass. Inventory106 and the13
+obligation metadata checks pass; no additional contract obligation review is
+claimed. These are local Linux results, not current macOS acceptance.
+
+### Slice207b1 schema plan — durable peer startup binding
+
+The immediate dependency for executable rollout207b is a native startup that
+installs the existing revocation wrapper and rejects a stale credential bundle
+before opening sockets or storage. Add an opt-in startup selection containing
+the protocol, credential generation and latest host-loaded credential journal
+record. Bind that record to a deterministic digest of the actual local TLS
+material, wire version and complete stable peer identity/pin/name map. The
+existing journal remains the single durable record; no new persistence format
+or implicit file watcher is introduced. Host loading and journal publication
+remain outside the consensus poll loop.
+
+State/ownership: fresh raw connector -> generation-guarded connector -> prepared
+replacement -> revoked old sessions and new connections -> close/drain -> exact
+provider reclamation. Startup checks record owner, request shape, exact recorded
+generation and material digest before side effects. A host-authorized initial
+generation may have no prior record; the host must retain/load the journal after
+rollout and serialize its writer. A missing record cannot prove no earlier
+rotation occurred. Failed startup returns the application and normal cleanup;
+failed replacement retains input and does not change consensus membership.
+
+Acceptance: actual TCP/QUIC native Node startup, replicated writes and original
+retries through key change and WAL/checkpoint recovery; stale/changed/wrong-owner
+records rejected before files or binds; static/member/multi-group startup and
+connector cleanup stay compatible. This is the startup half of207b; authenticated
+executable preparation/status integration still follows before207b is complete.
 
 ### Slice207a implemented — prepared peer-key rotation for Rust hosts
 

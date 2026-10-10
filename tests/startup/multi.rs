@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use voteboat::{native::connect::*, raft::Role};
+#[path = "multi/peer_rotation.rs"]
+mod peer_rotation;
 type MultiNode = NativeNode<HostApplication, NativeServiceConnector>;
 fn groups() -> Vec<Bootstrap> {
     let stores = (1..=3)

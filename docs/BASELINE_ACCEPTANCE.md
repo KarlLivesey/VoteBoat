@@ -1,5 +1,18 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice207b1 connects guarded native peer credentials to static, member and shared
+multi-group startup. Host-loaded journal records bind exact owner/generation and
+TLS/peer material before startup side effects. Native TCP/QUIC three-group
+histories preserve data and original retries through live rotation, restart and
+durable preparation that one node never publishes in memory; QUIC includes
+checkpoint recovery. Startup refusal and late resource cleanup are checked.
+Executable peer preparation/status remains207b2. The host must preserve the
+journal and serialize its writer; missing records are trusted initial input,
+not proof of no previous rotation. Full-goal/platform acceptance remains open.
+The broad local all-feature selection passes115 tests, final startup checks7,
+and default startup/security checks41. Formatting/four strict Clippy profiles,
+the106-entry inventory and13 obligation metadata checks pass.
+
 Slice207a adds prepared peer-key rotation through an optional public connector
 contract and Node/PeerDriver forwarding. Native TCP/QUIC tests change actual keys,
 reject stale pins, revoke old sessions/late completions and preserve connection

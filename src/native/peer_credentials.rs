@@ -12,6 +12,29 @@ pub struct NativePeerMaterial {
     pub tls: NativeTlsConfig,
     pub peers: BTreeMap<NodeId, TlsPeer>,
 }
+impl NativePeerMaterial {
+    /// Bind a durable local rollout to the exact TLS bytes, wire version and
+    /// ordered peer identities, certificates and names. Routes are unchanged
+    /// by rotation and are deliberately not credential material.
+    pub fn digest(&self) -> [u8; 32] {
+        let mut hash = ring::digest::Context::new(&ring::digest::SHA256);
+        hash.update(b"voteboat-peer-material-v1");
+        hash.update(&self.tls.credential_fingerprint);
+        hash.update(&self.tls.wire_version().to_be_bytes());
+        hash.update(&(self.peers.len() as u64).to_be_bytes());
+        for (node, peer) in &self.peers {
+            hash.update(&node.get().to_be_bytes());
+            hash.update(&peer.identity.node.get().to_be_bytes());
+            hash.update(&peer.identity.store.id.get().to_be_bytes());
+            hash.update(&peer.identity.store.incarnation.get().to_be_bytes());
+            for bytes in [peer.certificate.as_slice(), peer.server_name.as_bytes()] {
+                hash.update(&(bytes.len() as u64).to_be_bytes());
+                hash.update(bytes);
+            }
+        }
+        hash.finish().as_ref().try_into().unwrap()
+    }
+}
 
 /// Native mechanism used by RotatingPeerConnector. A successful replacement
 /// preserves identities/routes/limits and leaves cancellation receipts drainable.

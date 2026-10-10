@@ -27,11 +27,36 @@ dropping a wrapper revokes its leases; it cannot revoke an unrelated owner's
 sessions. Use `close`, drain accepted receipts, then `into_inner` to reclaim the
 underlying provider and its native worker.
 
-This API performs no file I/O or durable recording. Hosts must recover the
-authorized material and generation on restart. It is not yet wired into the
-executables' peer startup or administrative command paths; their existing
-`reload-access` changes command-channel credentials only. Durable peer rollout
-and executable integration remain the next deliverable. During a rollout,
+`NativeServiceConnector::with_peer_rotation` enables the same guards while
+preserving the native service connector type. Static connectors reject rotation;
+guarded connectors reject direct raw material replacement that would bypass
+revocation. `PeerDriver::credential_generation` reports the active generation.
+
+For native static, member or multi-group startup, use
+`NativePeerRotationStartup::from_journal(protocol, generation, &journal)` and
+`open_with_peer_rotation`. The host first loads the selected TLS/pin bundle and
+the existing `NativeCredentialJournal` under exclusive local-store ownership.
+Startup checks the latest record's owner, request shape, exact replacement
+generation and material digest before binding sockets or opening storage.
+`NativePeerMaterial::digest()` binds the exact CA/certificate/key bytes, wire
+version, and every ordered peer identity, certificate and server name. Endpoint
+addresses are routing input and do not change during credential replacement.
+
+Prepare and validate replacement material off the poll thread, then durably
+publish a `CredentialReloadRecord` containing its digest before calling
+`Node::replace_peer_credentials`. Retain the original request sequence and both
+generations. If the process stops after recording but before in-memory
+publication, restart with those recorded credentials; startup installs their
+generation and normal WAL/checkpoint replay recovers application state.
+An uncertain journal result requires stopping and reopening the journal before
+resuming; a recorded result does not prove every node has installed its keys.
+
+A missing journal record selects a host-authorized initial generation. It does
+not prove that no prior rotation occurred: the host must preserve/load the
+journal and must not silently substitute an empty journal after rotation.
+These APIs do not perform file loading or journal I/O inside Node polling.
+Executable peer preparation/status commands remain the next integration;
+`reload-access` still changes command-channel credentials only. During a rollout,
 incompatible key/pin selections can interrupt connectivity; application work
 already admitted retains its normal original-operation recovery semantics.
 
