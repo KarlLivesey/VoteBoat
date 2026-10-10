@@ -123,7 +123,8 @@ strict profiles clean while advancing the remaining capability work.
 | Completed194b: recoverable lifecycle administration | Make split execution/status/resumption usable through authenticated commands; advances P6 operator support. |194a decisions, existing guarded applications, TLS authorization and bounded service ownership. | Actual TCP/QUIC three-replica role services complete a split; QUIC resumes original IDs after all processes are killed following first import. Accepted-read disconnect cleanup, authorization, source refusal and independent child retries are checked. Whole-responsibility native counter profiles only. |
 | Completed195: operator-driven split recovery cuts | Validate the new operator path at durability boundaries; advances P4/P6 fault acceptance. |194 execution, original operation IDs and guarded native applications. | Both TCP/WAL and QUIC/checkpoint histories pass all10 phase boundaries plus lost fence/publication replies; source refusal, staged-target refusal and independent active-child retries/new writes are checked. Phase-internal power loss, combined membership and broader profiles remain open. |
 | Completed196a: deterministic targeted handoff | Supply the protocol primitive needed for maintenance; advances P4 and chapter09. | Existing quorum, durable replication/election contracts and exact wire capability selection. | Host-driven stable/recursive elections, catch-up and ballot persistence boundaries, restart/cancellation/identity/membership refusals; wire8 encoding and exact TCP/QUIC session selection. This is not a durable administrative operation. |
-| Current196b: recoverable maintenance leadership transfer | Expose the targeted move-leader operation to Rust hosts and authenticated operators; advances P4 and chapter09 maintenance. |196a, bounded durable administrative operation identity/status, existing Node ownership and command authorization. | Catch up an eligible target, preserve election/durability rules under loss/restart, verify current target authority before completion, retain explicit unknown outcomes and reject stale/non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
+| Completed196b1: durable Rust maintenance | Preserve original intent/status through the existing group log and checkpoints; advances P4/chapter09 and usable embedding. |196a, opt-in application composition, Node result ownership and execution-time proposal context. | Bounded records, original-ID retries/cancellation, host context rechecks, every-byte torn journal records, and native TCP/WAL and QUIC/checkpoint pending/completed recovery plus fresh quorum status. |
+| Current196b2: authenticated move-leader commands | Expose the durable Rust workflow to operators; advances P4 and chapter09 maintenance. |196b1, existing bounded authenticated command sessions, explicit application schema and wire8 selection. | Start/status/resume/cancel retain original IDs and return applied or explicit unknown outcomes; unauthorized commands fail, disconnected waits release resources, and actual executable TCP/QUIC recovery histories preserve data. Coordinated drain then composes this completed196 workflow with membership. |
 | Next197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
 | Following198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. |
 
@@ -164,6 +165,98 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice196b1 implemented evidence — durable Rust maintenance
+
+`Maintenance<A>` provides the opt-in application wrapper, explicit framed data
+and administrative commands, one pending intent and a bounded permanent history.
+Begin, Complete and Cancel preserve original operation/identity/configuration
+and prepared/terminal positions. Inner data still uses the same log and sees
+every contiguous index. New schemas/checkpoints reject incompatible group,
+capacity or inner application; no live migration/default service format changes.
+Record capacity is reserved at Begin, so terminal updates need no extra slot.
+
+The optional ProposalAdmission context check runs at both initial admission and
+execution. Composite hosts must forward it for their inner commands. Completion
+requires the exact target/current term/configuration and a current-term committed
+prefix; delayed context checks cannot authorize a stale proposal. The ordinary
+client router owns results. Node controls reject unsupported wire before queuing
+handoff; cancellation still means local quiescence, not rollback of delivery.
+The pure next-action API has no I/O or hidden executor. Hosts own timeout and
+ticket bookkeeping; the executable host remains196b2.
+
+Five application tests check data/control retries, conflicts, one pending
+operation, capacity, malformed input and atomic checkpoint restore. A sixth
+cuts every byte of native Begin/Complete journal frames using the prior durable
+manifest, and rejects a missing prefix claimed by the newer manifest. One host
+router test checks admission/execution context changes before persistence. Three
+native tests cover unsupported-wire refusal and actual TCP/WAL plus
+QUIC/checkpoint recovery at pending and completed states, exact retries, stale
+completion refusal, new target writes and completed quorum-backed status reads.
+
+Initial native failures identified a temporary-directory collision, simultaneous
+persisted startup ballots and a read submitted before current-term commitment.
+The fixture now separates directories, observes authenticated connections and a
+settled/caught-up election, and waits for current-term commitment. It does not
+raise deadlines or weaken election/read checks. Initial journal-fixture failure
+correctly rejected missing bytes already declared durable; that refusal is now
+an explicit negative check. Failed runs are retained alongside final evidence.
+
+Final local regressions:301 all-feature tests and233 core-only tests pass in the
+selected scopes, including all five existing WAL maintenance tests. Formatting,
+all three strict Clippy configurations and warnings-denied rustdoc pass.
+Commands, hashes and limits are in validation/baseline/slice196b1.
+
+Macro review: Rust embedding maintenance advances, but196 still requires the
+authenticated executable start/status/resume/cancel workflow and disconnected
+client histories196b2. Graceful native restart is not process-kill, hardware
+power-loss, macOS, arbitrary fault scheduling or full P0–P7 evidence. The next
+two deliverables remain coordinated drain197 and assignment listing198.
+
+### Slice196b schema plan — durable maintenance and operator execution
+
+Previous goal turn was progress: b53b7b4 committed the tested core handoff.
+Existing configuration records cannot represent maintenance intent without
+pretending to change membership. Use one opt-in `Maintenance<A>` application
+wrapper on the same group's ordinary replicated command/checkpoint path. No
+second journal, ancestor dependency or silent conversion of existing files.
+The wrapper has a distinct configured schema, framed data/admin commands,
+bounded permanent operation records and at most one pending leadership intent.
+Its inner application still sees every contiguous index; administration entries
+become Noops for it. Data and administration receipts retain their original IDs.
+
+Record states: missing -> Pending(original exact source/target/configuration,
+prepared index/term) -> Completed or Cancelled, each with its own committed
+position. Same original requests are idempotent; conflicting content cannot
+replace history. Cancellation records stop retries but do not claim a delivered
+core signal was undone. Capacity is reserved on Begin; terminal updates cannot
+need another record slot. Checkpoints retain all original records and inner
+state, reject wrong group/schema/capacity, and install atomically after validation.
+
+The required context seam checks proposals both at admission and execution.
+Begin requires an eligible stable exact target. Completion requires the exact
+target's local identity, original configuration, expected current leader term,
+and a committed current-term prefix through the intent. It then commits through
+ordinary Raft. A receipt is historical completion evidence, not a perpetual
+claim that the target still leads. Delayed proposals cannot use a stale term
+check. Inner data admission and result bounds remain delegated to A.
+
+The Node control path selects wire8 before admitting Transfer/Cancel. The host
+driver observes committed wrapper state, requests the existing volatile handoff,
+and records completion at the target. It owns bounded waits/tickets, cancels
+only local quiescence on deadline, and retains pending durable intent for status
+or resumption. Shutdown drains original client/read ownership; timeout or lost
+reply remains unknown until a quorum status query resolves it. Authenticated
+operator commands must use existing Admin permission; status uses Inspect.
+
+Acceptance: downstream host application composition; stale execution context,
+conflicting retries and record capacity; atomic checkpoint roundtrip/corruption;
+native TCP/QUIC handoff with original IDs, target write/read, WAL/checkpoint
+restart, pending restart and lost reply; unauthorized mutations and old-wire
+refusal. Implement the durable Rust contract/Node integration first, then expose
+the same contract through the executable. Both parts are required for196b and196
+completion. This advances P4/chapter09 and is required by coordinated drain197;
+assignment listing198 and the remaining full-roadmap gates retain their scope.
 
 ### Slice196a implemented evidence — deterministic leadership handoff
 

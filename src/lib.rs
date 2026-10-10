@@ -29,6 +29,7 @@ pub mod directory;
 pub mod discovery;
 pub mod identity;
 pub mod log;
+pub mod maintenance;
 pub mod membership;
 pub mod metadata_transfer;
 #[cfg(feature = "native")]

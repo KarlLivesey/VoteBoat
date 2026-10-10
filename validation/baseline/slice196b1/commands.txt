@@ -1,0 +1,10 @@
+cargo +stable test --locked --offline --all-features --test leadership_maintenance
+cargo +stable test --locked --offline --all-features --test startup maintenance::
+cargo +stable test --locked --offline --all-features --lib --test effect_owner --test startup --test maintenance --test leadership_maintenance --test raft --test wire
+cargo +stable test --locked --offline --no-default-features --lib --test effect_owner --test leadership_maintenance --test raft
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --no-deps --all-features
+node validation/check-inventory.mjs

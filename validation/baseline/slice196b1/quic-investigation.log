@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.03s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 1 test
+campaign 1: [(Leader, HardState { term: 1, voted_for: Some(NodeId(1)) }, 0, 1, 1), (Follower, HardState { term: 1, voted_for: Some(NodeId(1)) }, 0, 1, 1), (Follower, HardState { term: 1, voted_for: Some(NodeId(1)) }, 0, 1, 1)]
+campaign 1: [(Candidate, HardState { term: 2, voted_for: Some(NodeId(1)) }, 2, 2, 1), (Follower, HardState { term: 2, voted_for: Some(NodeId(2)) }, 2, 2, 1), (Follower, HardState { term: 2, voted_for: Some(NodeId(3)) }, 2, 2, 1)]
+
+thread 'maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic' (3582713) panicked at tests/startup/maintenance.rs:84:13:
+native maintenance timeout at election: [(Follower, 3, 3, 2, 3, None), (Leader, 3, 3, 2, 3, None), (Follower, 3, 3, 2, 3, None)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... FAILED
+
+failures:
+
+failures:
+    maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 10.09s
+
+error: test failed, to rerun pass `--test startup`

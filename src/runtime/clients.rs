@@ -244,6 +244,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         {
             return Err(ClientError::Application(ApplicationError::NotApplied));
         }
+        application
+            .validate_proposal_context(core, request.operation, &request.bytes)
+            .map_err(ClientError::Application)?;
         let log = state
             .entries
             .iter()
@@ -422,6 +425,8 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 let group = core.state().bootstrap.group;
                 let app =
                     application(group).ok_or(RaftError::Admission(ApplicationError::NotApplied))?;
+                app.validate_proposal_context(core, *operation, bytes)
+                    .map_err(RaftError::Admission)?;
                 if app.applied_index() < core.state().base_index()
                     || app.applied_index() > core.state().commit_index
                 {

@@ -32,6 +32,19 @@ pub trait ProposalAdmission: BoundedStateMachine
 where
     Self::Receipt: ApplicationReceipt,
 {
+    /// Optional deterministic check against the current consensus context.
+    /// The owning client router calls this at admission and again immediately
+    /// before execution. It may restrict proposals; it grants no consensus or
+    /// authentication authority. Hosts bypassing that router must do the same.
+    /// Composite applications must forward this check for their inner commands.
+    fn validate_proposal_context(
+        &self,
+        _core: &Raft,
+        _operation: OperationId,
+        _bytes: &[u8],
+    ) -> Result<(), ApplicationError> {
+        Ok(())
+    }
     fn validate_proposal<'a>(
         &self,
         operation: OperationId,

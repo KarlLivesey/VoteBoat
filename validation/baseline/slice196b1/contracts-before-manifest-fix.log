@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.46s
+     Running tests/leadership_maintenance.rs (target/debug/deps/leadership_maintenance-675d2e7c553f10b4)
+
+running 6 tests
+test capacity_reserves_terminal_updates_and_inner_exhaustion_cannot_block_them ... ok
+test conflicting_intent_and_second_pending_request_cannot_replace_original ... ok
+test command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles ... ok
+test data_and_administration_retries_remain_independent_and_survive_checkpoint ... ok
+test every_torn_native_record_recovers_old_or_complete_administrative_state ... FAILED
+test malformed_batches_and_checkpoint_refusals_leave_the_original_state_unchanged ... ok
+
+failures:
+
+---- every_torn_native_record_recovers_old_or_complete_administrative_state stdout ----
+
+thread 'every_torn_native_record_recovers_old_or_complete_administrative_state' (146) panicked at tests/leadership_maintenance.rs:324:82:
+called `Result::unwrap()` on an `Err` value: Corrupt("durable log prefix missing")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    every_torn_native_record_recovers_old_or_complete_administrative_state
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test leadership_maintenance`

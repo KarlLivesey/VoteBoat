@@ -27,6 +27,8 @@ use voteboat::{
     quorum::*,
     runtime::*,
 };
+#[path = "startup/maintenance.rs"]
+mod maintenance;
 #[derive(Clone)]
 struct HostApplication(Counter);
 impl StateMachine for HostApplication {
@@ -884,7 +886,12 @@ fn reconcile_wire_nodes(
     }
 }
 
-fn drain_wire_nodes(mut nodes: Vec<WireNode>) {
+fn drain_wire_nodes<A>(
+    mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
+) where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
     for node in &mut nodes {
         node.begin_shutdown();
     }

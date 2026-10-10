@@ -136,6 +136,11 @@ pub type NodeRecoveryParts<S, T, E, A, W, O, H, C, F> =
     NodeRecovery<NodeLocalParts<S, T, E, A, W, O, H>, <A as StateMachine>::Receipt, C, F>;
 #[derive(Clone, Copy, Debug)]
 pub enum NodeControl {
+    /// Volatile handoff; the host owns durable intent, timeout and result.
+    TransferLeadership(crate::raft::LeadershipTransferRequest),
+    CancelLeadershipTransfer {
+        context: crate::raft::RequestContext,
+    },
     Campaign,
     Heartbeat,
     Checkpoint,
@@ -494,6 +499,19 @@ where
             return Err(NodeError::Closed);
         }
         let event = match control {
+            NodeControl::TransferLeadership(request) => {
+                if self
+                    .peers
+                    .as_ref()
+                    .is_none_or(|p| p.roster().wire_version() < 8)
+                {
+                    return Err(NodeError::IncompatiblePeerProtocol);
+                }
+                Event::TransferLeadership(request)
+            }
+            NodeControl::CancelLeadershipTransfer { context } => {
+                Event::CancelLeadershipTransfer { context }
+            }
             NodeControl::Campaign => Event::Campaign,
             NodeControl::Heartbeat => Event::Heartbeat,
             NodeControl::Checkpoint => {

@@ -693,7 +693,7 @@ mod client_admission {
             .unwrap();
         // A stricter selected host gate refuses this command at execution.
         // Its state/boundary are identical; the runtime cannot trust the old check.
-        let host = HostApplication(apps[&group(1)].clone(), 0);
+        let host = HostApplication(apps[&group(1)].clone(), 0, None);
         let steps = clients
             .advance(&mut owner, MonoTime(400), 1, |_| Some(&host))
             .unwrap();
@@ -716,7 +716,7 @@ mod client_admission {
         clients
             .submit(&mut owner, &apps[&group(1)], request(1, 2, 7))
             .unwrap();
-        let grown = HostApplication(apps[&group(1)].clone(), 1);
+        let grown = HostApplication(apps[&group(1)].clone(), 1, None);
         let steps = clients
             .advance(&mut owner, MonoTime(400), 1, |_| Some(&grown))
             .unwrap();
@@ -832,7 +832,7 @@ mod client_admission {
         assert!(clients.is_drained());
         assert!(results.is_drained());
     }
-    struct HostApplication(Counter, usize);
+    struct HostApplication(Counter, usize, Option<u64>);
     impl StateMachine for HostApplication {
         type Receipt = CounterReceipt;
         fn applied_index(&self) -> u64 {
@@ -851,6 +851,20 @@ mod client_admission {
         }
     }
     impl ProposalAdmission for HostApplication {
+        fn validate_proposal_context(
+            &self,
+            core: &Raft,
+            _: OperationId,
+            _: &[u8],
+        ) -> Result<(), ApplicationError> {
+            if self
+                .2
+                .is_some_and(|term| term != core.state().hard_state.term)
+            {
+                return Err(ApplicationError::NotApplied);
+            }
+            Ok(())
+        }
         fn validate_proposal<'a>(
             &self,
             operation: OperationId,
@@ -869,7 +883,7 @@ mod client_admission {
     #[test]
     fn host_admission_policy_and_wrong_runtime_reject_without_touching_shared_application() {
         let (mut owner, _, mut clients, _, mut apps) = setup(1, 2);
-        let app = HostApplication(apps.remove(&group(1)).unwrap(), 0);
+        let app = HostApplication(apps.remove(&group(1)).unwrap(), 0, None);
         assert_eq!(
             clients
                 .submit(&mut owner, &app, request(1, 1, 3))
@@ -898,6 +912,38 @@ mod client_admission {
             ClientOutcome::Unknown(ClientUnknown::Aborted)
         ));
         assert!(clients.is_drained());
+        assert_eq!(app.applied_index(), 1);
+    }
+    #[test]
+    fn proposal_context_is_checked_before_admission_and_again_before_persistence() {
+        let (mut owner, _, mut clients, _, mut apps) = setup(1, 2);
+        let term = owner.core(group(1)).unwrap().state().hard_state.term;
+        let before = owner.core(group(1)).unwrap().state().clone();
+        let mut app = HostApplication(apps.remove(&group(1)).unwrap(), 0, Some(term + 1));
+        assert_eq!(
+            clients
+                .submit(&mut owner, &app, request(1, 1, 7))
+                .unwrap_err()
+                .reason,
+            ClientError::Application(ApplicationError::NotApplied)
+        );
+        assert!(clients.is_drained());
+        app.2 = Some(term);
+        let ticket = clients.submit(&mut owner, &app, request(1, 1, 7)).unwrap();
+        app.2 = Some(term + 1);
+        clients
+            .advance(&mut owner, MonoTime(400), 3, |g| {
+                (g == group(1)).then_some(&app)
+            })
+            .unwrap();
+        let completion = clients.poll().unwrap();
+        assert_eq!(completion.ticket(), ticket);
+        assert!(matches!(
+            clients.complete(completion).unwrap(),
+            ClientOutcome::NotProposed(RaftError::Admission(ApplicationError::NotApplied))
+        ));
+        assert_eq!(owner.core(group(1)).unwrap().state(), &before);
+        assert!(owner.take_effect().unwrap().is_none());
         assert_eq!(app.applied_index(), 1);
     }
     #[test]

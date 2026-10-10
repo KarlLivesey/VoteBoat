@@ -1,9 +1,22 @@
 # Baseline audits
 
-Latest implementation: [slice196a](#slice196a--deterministic-leadership-handoff).
+Latest implementation: [slice196b1](#slice196b1--durable-rust-maintenance).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice196b1 — durable Rust maintenance
+
+The opt-in Maintenance application wrapper preserves bounded original intent,
+completion and cancellation history in the existing log/checkpoint path. Node
+controls and proposal context rechecks enforce the exact target and current
+term before a completion may be proposed. Selected TCP/WAL and QUIC/checkpoint
+histories recover pending/completed operations and verify fresh quorum status
+and target writes.301 all-feature and233 core-only regression tests pass in
+the recorded scopes; strict lint/format/rustdoc checks are clean. See
+[evidence](../validation/baseline/slice196b1/README.md).
+Executable authorization/disconnect histories remain196b2; these checks do not
+close full P0–P7, platform, process-kill or arbitrary-fault gates.
 
 ## Slice196a — deterministic leadership handoff
 

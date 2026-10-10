@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.49s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 3 tests
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.81s
+

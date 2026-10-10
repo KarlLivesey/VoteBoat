@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.79s
+     Running tests/leadership_maintenance.rs (target/debug/deps/leadership_maintenance-675d2e7c553f10b4)
+
+running 6 tests
+test capacity_reserves_terminal_updates_and_inner_exhaustion_cannot_block_them ... ok
+test conflicting_intent_and_second_pending_request_cannot_replace_original ... ok
+test command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles ... ok
+test data_and_administration_retries_remain_independent_and_survive_checkpoint ... ok
+test malformed_batches_and_checkpoint_refusals_leave_the_original_state_unchanged ... ok
+test every_torn_native_record_recovers_old_or_complete_administrative_state ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

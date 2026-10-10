@@ -1,0 +1,25 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.75s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 3 tests
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... FAILED
+
+failures:
+
+---- maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic stdout ----
+node 2 maintenance step OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 1 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 9 }, operation: None, read: Some(ReadRequestId(1)), error: Some(ReadNotReady) }
+
+thread 'maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic' (3592086) panicked at tests/startup/maintenance.rs:206:21:
+expected quorum-backed maintenance status
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.81s
+
+error: test failed, to rerun pass `--test startup`
