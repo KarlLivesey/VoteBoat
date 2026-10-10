@@ -1314,7 +1314,7 @@ requirements before selecting another implementation; performance/security later
 Windows/P8 deferred and full P0–P7 active. No broader prerequisite/helper chain is
 introduced by the cadence fix.
 
-Current249: close one required operator integration gap and reconcile functional
+Completed249: reconcile required operator integration and functional
 requirements/platform evidence. Purpose: make the baseline feature boundary explicit.
 Depend on247/248 and chapter12/acceptance map. Select an actual missing capability
 before adding helpers. Completion requires public executable/Rust usage with
@@ -1375,7 +1375,7 @@ four reproduced Mac native progress failures are the next concrete supported-
 platform dependency. P7/security/P8 remain separate. This bounded audit is not
 a feature-complete certificate or the whole active P0–P7 goal.
 
-Next250: diagnose the four native Mac progress failures at sufficient descriptors.
+Current250: diagnose the four native Mac progress failures at sufficient descriptors.
 Purpose: make the existing shared100-group Rust assembly reliable under its
 declared test resource conditions. Depend on249's broad361/4 and isolated1/0
 results, worker/transport/snapshot ownership contracts and original fixture
@@ -1387,7 +1387,102 @@ joined workers, matched broad Mac/Linux runs and zero strict profiles. Selected
 functional acceptance advances P1/P2 and the usable Rust milestone; it does not
 promise a P7 latency gain or close all replacement-provider obligations.
 
-Following251: verify the resulting baseline functional assembly across supported
+250 diagnosis schema before edits: enrich only the existing timeout failures with
+bounded three-node worker/router/peer/owner usage and aggregate100-group positions,
+plus the helper caller location. Data stays test-local; no timer, poll allowance,
+storage format or acceptance deadline changes. Emit only on the original failure,
+preserving cleanup and original operation IDs. Source-bind the diagnostic patch
+and run the same broad effect_owner target on the Mac at4096 descriptors. Inspect
+whether work is pending in storage, transport or owner/application publication
+before selecting a focused fix. The helper is justified solely by the current
+timeout messages omitting the state needed to diagnose the four reproduced
+failures; it is not a new production abstraction or a provider certification.
+
+250 focused fixture schema after diagnostics: the source-bound Mac run again
+passes175/fails4. Caller locations place all four failures in initial snapshot
+catch-up, not the later overload/checkpoint/reconnect cuts. Third replicas retain
+four snapshot jobs and unchanged effect retries; no send/receive quarantine or
+failure is reported. A one-second owned-process sample shows six independent
+fixture setups simultaneously publishing/compacting/synchronizing hundreds of
+snapshot files. The unchanged isolated snapshot history passed249. This supports
+a test resource-admission correction rather than deleting synchronization or
+extending an acceptance deadline; it does not establish a kernel-level cause.
+
+Add one native-test-local mutex lease at the start of each of the eight100-group
+disk histories, held through its original whole-cluster lifetime and explicit
+worker/store cleanup. Each leased history retains three concurrent nodes, shared
+workers,100 groups, actual network IO and its internal pressure/partition cuts.
+Other deterministic tests still run under the default harness concurrency. Use
+the same resource policy on Linux/macOS; no production lock/provider/queue changes.
+Guard drop releases fixture admission after normal cleanup or stack unwinding;
+on a failed history, accepted worker work is still subject to its original
+abandoned-observation/drop contract, not falsely claimed joined. Keep bounded
+failure state/caller diagnostics. Acceptance: original179-test all-feature target
+on both hosts, sequential supported feature configurations, source verification,
+exact assertions and zero formatting/four strict Clippy. This is explicitly a
+changed fixture concurrency condition, not a passing result at the old six-
+cluster simultaneous disk load or the unmet P7 latency gate.
+
+250 pressure observation schema after the gated run: Mac initial catch-up now
+passes in all four original failing histories. The ten-target selection passes
+364/fails1; the remaining failure is the later instantaneous `staged_batches > 0`
+assertion after a healthy quorum read. That read does not settle peer3's separate
+authenticated transport/control exchange; retained work may not have reached
+the driver's staging queue at that instant. Keep the exact positive staged-work
+assertion and original full Bulk lease, stale peer3 value and healthy quorum
+receipts. Drive the same three nodes at original MonoTime100 with the existing
+15-second progress helper until staged work is observed, then check peer3 remains
+stale and every original resource ceiling. This explicitly observes the intended
+backpressure before releasing the lease; do not substitute unrelated queue usage
+or turn an unknown into success. On failure the unchanged helper deadline/state
+diagnostic remains terminal. Acceptance: actual Mac pressure/reconnect/reopen/
+retry history, matched broad Mac/Linux suites and four zero strict profiles.
+
+250 revised pressure schema after the focused failure: the bounded staged-send
+wait fails0/1. Its diagnostics show empty queues/leases with no transport failure;
+source reads/commands can finish while peer3's outstanding replication reply is
+unread. The native transport reserves unclassified input from Bulk, and Raft
+preserves an outstanding request until its response rather than replacing it.
+Full Bulk pressure can therefore block receive before a new data send is staged.
+`staged_batches > 0` is not the public pressure contract. Do not force a new
+request, change those production rules or keep polling a state that cannot occur.
+
+Wrap only this fixture's native BufferPool through its existing public trait,
+delegating original buffers, limits, ownership, class accounting and close.
+Record actual Bulk Overloaded results on exact node1->node3 transport clones
+with a shared scoped counter. Sample the counter after deliberate fixture
+allocation/refusal and before reconnect, so the later increase witnesses native
+transport activity, not the test's own acquire call. Require that increase,
+continued exact full owner quota, peer3's original value, peer2's actual durable
+quorum writes/reads, catch-up after release and original cold-retry/zero-credit
+cleanup checks. This replaces the invalid internal staging expectation with a
+stronger provider-bound refusal witness. No native provider/core/API/format,
+quota size, heartbeat, operation or acceptance deadline change. The wrapper is
+needed to attribute real transport refusal without inventing a production seam.
+
+250 implemented evidence: [source-bound artifacts](../validation/baseline/slice250/README.md)
+retain the ungated175/4 native failures, admitted178/1 and failed0/1 staging wait.
+One fixture lease preserves each original three-node/100-group history while
+bounding cross-fixture disk work. The transparent injected BufferPool observer
+then replaces an invalid staging assumption with actual exact-peer native Bulk
+refusal after the deliberate fixture baseline. Healthy quorum data/reads, full
+quota, stale pressured peer, release/catch-up, original cold retries and joined
+zero-credit cleanup remain checked. Mac focused1 and final365 selected core/
+provider tests pass; Linux365 passes. Sequential core171/native174 pass on both,
+with final formatting/four strict profiles zero and647 input hashes verified.
+No production/core/provider/API/format/quota/deadline change. A wrong initial
+diagnostic trait name is corrected; its compiler log remains. Raw sample/logs and
+all failed Mac stores remain. This is explicitly changed fixture admission,
+not acceptance at the original six-cluster disk load or a P7 performance gain.
+
+Macro review250 closes the four reproduced native progress failures and later
+pressure-observation dependency for the selected Mac/Linux Rust assembly.
+This advances P1/P2 and public provider composition. It does not close every
+P0–P6 fault/provider/operator obligation or the unmet P7 fixed250ms/capacity gates.
+Broader supported lifecycle assembly251 and application-contract review252 are
+next; full P0–P7 stays active, features first and tuning/security later.
+
+Next251: verify the resulting baseline functional assembly across supported
 Mac/Linux Rust and executable configurations. Purpose: advance P0–P6/platform
 feature acceptance, keeping P7 tuning/security gates explicit. Depend on249's
 original requirement/contract/exit audit and250's confirmed progress fix. Select relevant
@@ -1396,6 +1491,17 @@ inspect failures and preserve exact operation/cleanup contracts. Completion chec
 are the original functional exits, actual source-bound platform evidence and zero
 formatting/four strict profiles. Do not infer completion from this planned sweep
 or substitute performance/security work for a missing usable feature.
+
+Following252: review the unreviewed C05/VB-000 application-provider obligations
+against StateMachine/ReadableStateMachine/checkpoint source and existing host,
+application, snapshot and effect-owner assertions. Purpose: make the Rust
+embedding's existing application contracts independently checkable when hosts
+replace implementations. Depend on251's platform results and the original
+chapter17 contracts. Add a shared runner only for a demonstrated uncovered
+obligation; state its schema before editing. Completion checks are actual native/
+host owned-command/result/replay/failure assertions, source-linked operation
+review and Mac/Linux zero strict profiles. A missing review is not an absent
+application feature; this advances P0 composition without a speculative backend.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,

@@ -1,0 +1,78 @@
+diff --git a/tests/effect_owner.rs b/tests/effect_owner.rs
+index c0d16d7..2c2b99a 100644
+--- a/tests/effect_owner.rs
++++ b/tests/effect_owner.rs
+@@ -2059,13 +2059,26 @@ mod native {
+         }
+         establish(nodes, MonoTime(0));
+     }
++    #[track_caller]
+     fn drain(nodes: &mut [Node], isolated: Option<NodeId>, now: MonoTime) {
+         let deadline = Instant::now() + Duration::from_secs(10);
+         let mut network = VecDeque::new();
+         loop {
+             assert!(
+                 Instant::now() < deadline,
+-                "effect-owner cluster did not drain"
++                "effect-owner cluster did not drain: {:?}",
++                nodes
++                    .iter()
++                    .map(|n| (
++                        n.owner.usage(),
++                        n.worker.usage(),
++                        n.outbound.usage(),
++                        n.router.as_ref().map(SnapshotRouter::usage),
++                        n.snapshots.as_ref().map(SnapshotWorker::usage),
++                        n.sent,
++                        n.received,
++                    ))
++                    .collect::<Vec<_>>()
+             );
+             for n in nodes.iter_mut() {
+                 poll_replica_outputs(n, now);
+diff --git a/tests/support/native_node.rs b/tests/support/native_node.rs
+index 7237d08..2dbcaf9 100644
+--- a/tests/support/native_node.rs
++++ b/tests/support/native_node.rs
+@@ -64,12 +64,14 @@ fn facade_make_with<F: voteboat::transport::PeerTransportFactory<Session>>(
+         })
+         .collect()
+ }
++#[track_caller]
+ fn facade_drive<F: voteboat::transport::PeerTransportFactory<Session>>(
+     nodes: &mut [Facade<F>],
+     mut done: impl FnMut(&mut [Facade<F>]) -> bool,
+ ) {
+     facade_drive_at(nodes, MonoTime(0), &mut done)
+ }
++#[track_caller]
+ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+     nodes: &mut [Facade<F>],
+     now: MonoTime,
+@@ -99,7 +101,25 @@ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+         if done(nodes) {
+             return;
+         }
+-        assert!(Instant::now() < deadline, "facade progress timed out");
++        assert!(
++            Instant::now() < deadline,
++            "facade progress timed out: {:?}",
++            nodes.iter().map(|n| {
++                let local = n.local();
++                (
++                    local.owner.usage(),
++                    local.persistence.usage(),
++                    local.snapshots.as_ref().map(|s| (s.router.usage(), s.worker.usage())),
++                    local.outbound.usage(),
++                    n.replica_usage(),
++                    n.peers().map(PeerDriver::usage),
++                    (1..=100).map(|g| (
++                        local.owner.core(group(g)).unwrap().state().commit_index,
++                        local.applications[&group(g)].applied_index(),
++                    )).fold((u64::MAX, u64::MAX), |min, p| (min.0.min(p.0), min.1.min(p.1))),
++                )
++            }).collect::<Vec<_>>()
++        );
+         std::thread::park_timeout(Duration::from_millis(1));
+     }
+ }

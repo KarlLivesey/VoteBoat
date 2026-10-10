@@ -1,0 +1,171 @@
+diff --git a/tests/effect_owner.rs b/tests/effect_owner.rs
+index c0d16d7..a129de0 100644
+--- a/tests/effect_owner.rs
++++ b/tests/effect_owner.rs
+@@ -1701,9 +1701,15 @@ mod native {
+     #[cfg(feature = "tls")]
+     include!("support/native_node.rs");
+     use std::{
+-        sync::Arc,
++        sync::{Arc, Mutex, MutexGuard},
+         time::{Duration, Instant},
+     };
++    // Each fixture retains three native 100-group stores. Admit one fixture's
++    // disk workload at a time; its nodes/workers/network remain concurrent.
++    static LARGE_DISK_FIXTURE: Mutex<()> = Mutex::new(());
++    fn large_disk_fixture() -> MutexGuard<'static, ()> {
++        LARGE_DISK_FIXTURE.lock().unwrap_or_else(|e| e.into_inner())
++    }
+     use voteboat::{
+         native::{log_store::*, outbound::NativeOutbound, worker::*},
+         outbound::*,
+@@ -2059,13 +2065,26 @@ mod native {
+         }
+         establish(nodes, MonoTime(0));
+     }
++    #[track_caller]
+     fn drain(nodes: &mut [Node], isolated: Option<NodeId>, now: MonoTime) {
+         let deadline = Instant::now() + Duration::from_secs(10);
+         let mut network = VecDeque::new();
+         loop {
+             assert!(
+                 Instant::now() < deadline,
+-                "effect-owner cluster did not drain"
++                "effect-owner cluster did not drain: {:?}",
++                nodes
++                    .iter()
++                    .map(|n| (
++                        n.owner.usage(),
++                        n.worker.usage(),
++                        n.outbound.usage(),
++                        n.router.as_ref().map(SnapshotRouter::usage),
++                        n.snapshots.as_ref().map(SnapshotWorker::usage),
++                        n.sent,
++                        n.received,
++                    ))
++                    .collect::<Vec<_>>()
+             );
+             for n in nodes.iter_mut() {
+                 poll_replica_outputs(n, now);
+@@ -2286,6 +2305,7 @@ mod native {
+     }
+     #[test]
+     fn hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport() {
++        let _fixture = large_disk_fixture();
+         let root =
+             std::env::temp_dir().join(format!("voteboat-snapshot-router-{}", std::process::id()));
+         std::fs::create_dir_all(&root).unwrap();
+@@ -2459,6 +2479,7 @@ mod native {
+     }
+     #[test]
+     fn automatic_elections_and_partition_replacement_preserve_hundred_group_history() {
++        let _fixture = large_disk_fixture();
+         let root =
+             std::env::temp_dir().join(format!("voteboat-automatic-network-{}", std::process::id()));
+         std::fs::create_dir_all(&root).unwrap();
+@@ -2515,6 +2536,7 @@ mod native {
+     }
+     #[test]
+     fn hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport() {
++        let _fixture = large_disk_fixture();
+         let root =
+             std::env::temp_dir().join(format!("voteboat-effect-owner-{}", std::process::id()));
+         let _ = std::fs::remove_dir_all(&root);
+diff --git a/tests/native/driven_discovery.rs b/tests/native/driven_discovery.rs
+index 179dafe..c6ecaa6 100644
+--- a/tests/native/driven_discovery.rs
++++ b/tests/native/driven_discovery.rs
+@@ -251,6 +251,7 @@ impl Cluster {
+
+ #[test]
+ fn owning_node_drives_discovery_renews_reconnects_and_reopens_original_data() {
++    let _fixture = large_disk_fixture();
+     let root =
+         std::env::temp_dir().join(format!("voteboat-driven-discovery-{}", std::process::id()));
+     std::fs::create_dir_all(&root).unwrap();
+@@ -367,6 +368,7 @@ fn discovered_node(
+
+ #[test]
+ fn owning_node_repairs_closed_discovery_source_without_stopping_healthy_quorum() {
++    let _fixture = large_disk_fixture();
+     let root =
+         std::env::temp_dir().join(format!("voteboat-reconnecting-node-{}", std::process::id()));
+     std::fs::create_dir_all(&root).unwrap();
+diff --git a/tests/support/native_checkpoints.rs b/tests/support/native_checkpoints.rs
+index 143b685..3d307cd 100644
+--- a/tests/support/native_checkpoints.rs
++++ b/tests/support/native_checkpoints.rs
+@@ -14,6 +14,7 @@
+ // rights and limitations under the RPL.
+ #[test]
+ fn automatic_hundred_group_checkpoints_reclaim_and_reopen() {
++    let _fixture = large_disk_fixture();
+     let root =
+         std::env::temp_dir().join(format!("voteboat-auto-checkpoints-{}", std::process::id()));
+     std::fs::create_dir_all(&root).unwrap();
+diff --git a/tests/support/native_node.rs b/tests/support/native_node.rs
+index 7237d08..79ba110 100644
+--- a/tests/support/native_node.rs
++++ b/tests/support/native_node.rs
+@@ -64,12 +64,14 @@ fn facade_make_with<F: voteboat::transport::PeerTransportFactory<Session>>(
+         })
+         .collect()
+ }
++#[track_caller]
+ fn facade_drive<F: voteboat::transport::PeerTransportFactory<Session>>(
+     nodes: &mut [Facade<F>],
+     mut done: impl FnMut(&mut [Facade<F>]) -> bool,
+ ) {
+     facade_drive_at(nodes, MonoTime(0), &mut done)
+ }
++#[track_caller]
+ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+     nodes: &mut [Facade<F>],
+     now: MonoTime,
+@@ -99,7 +101,25 @@ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+         if done(nodes) {
+             return;
+         }
+-        assert!(Instant::now() < deadline, "facade progress timed out");
++        assert!(
++            Instant::now() < deadline,
++            "facade progress timed out: {:?}",
++            nodes.iter().map(|n| {
++                let local = n.local();
++                (
++                    local.owner.usage(),
++                    local.persistence.usage(),
++                    local.snapshots.as_ref().map(|s| (s.router.usage(), s.worker.usage())),
++                    local.outbound.usage(),
++                    n.replica_usage(),
++                    n.peers().map(PeerDriver::usage),
++                    (1..=100).map(|g| (
++                        local.owner.core(group(g)).unwrap().state().commit_index,
++                        local.applications[&group(g)].applied_index(),
++                    )).fold((u64::MAX, u64::MAX), |min, p| (min.0.min(p.0), min.1.min(p.1))),
++                )
++            }).collect::<Vec<_>>()
++        );
+         std::thread::park_timeout(Duration::from_millis(1));
+     }
+ }
+@@ -199,6 +219,7 @@ fn facade_close_at<F: voteboat::transport::PeerTransportFactory<Session>>(
+ include!("native_pressure.rs");
+ #[test]
+ fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
++    let _fixture = large_disk_fixture();
+     let root = std::env::temp_dir().join(format!("voteboat-node-facade-{}", std::process::id()));
+     std::fs::create_dir_all(&root).unwrap();
+     let mut nodes = facade_make(&root, false);
+diff --git a/tests/support/native_pressure.rs b/tests/support/native_pressure.rs
+index 6774017..373e59f 100644
+--- a/tests/support/native_pressure.rs
++++ b/tests/support/native_pressure.rs
+@@ -123,6 +123,7 @@ fn pooled_read(nodes: &mut [Facade<PooledFactory>], now: MonoTime, expected: i64
+ }
+ #[test]
+ fn native_shared_peer_quota_pressure_reconnect_restart_and_retry() {
++    let _fixture = large_disk_fixture();
+     let root =
+         std::env::temp_dir().join(format!("voteboat-node-peer-quota-{}", std::process::id()));
+     std::fs::create_dir_all(&root).unwrap();

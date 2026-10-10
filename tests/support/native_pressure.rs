@@ -18,16 +18,59 @@ use voteboat::{
     native::{buffer::NativeBufferPool, transport::NativeSharedTransportFactory},
     transport::TransportLimits,
 };
-type PooledFactory = NativeSharedTransportFactory<NativeWireCodec, NativeBufferPool>;
+use std::sync::atomic::{AtomicUsize, Ordering as AtomicOrdering};
+
+#[derive(Clone)]
+struct ObservedPool {
+    native: NativeBufferPool,
+    refused: Arc<AtomicUsize>,
+    owner: Option<BufferOwner>,
+}
+impl ObservedPool {
+    fn new(native: NativeBufferPool) -> Self {
+        Self { native, refused: Arc::new(AtomicUsize::new(0)), owner: None }
+    }
+    fn bulk_refusals(&self) -> usize {
+        self.refused.load(AtomicOrdering::Relaxed)
+    }
+    fn owner_usage(&self) -> Option<BufferUsage> {
+        self.native.owner_usage()
+    }
+}
+impl BufferPool for ObservedPool {
+    type Buffer = <NativeBufferPool as BufferPool>::Buffer;
+    fn limits(&self) -> BufferLimits { self.native.limits() }
+    fn usage(&self) -> BufferUsage { self.native.usage() }
+    fn control_reserve(&self) -> Option<BufferLimits> { self.native.control_reserve() }
+    fn owner_limits(&self) -> Option<BufferOwnerLimits> { self.native.owner_limits() }
+    fn bind_owner(&mut self, owner: BufferOwner) -> Result<(), BufferError> {
+        self.native.bind_owner(owner)?;
+        self.owner = Some(owner);
+        Ok(())
+    }
+    fn acquire(&self, reservation: usize, initial_len: usize) -> Result<Self::Buffer, BufferError> {
+        self.acquire_class(BufferClass::Bulk, reservation, initial_len)
+    }
+    fn acquire_class(&self, class: BufferClass, reservation: usize, initial_len: usize) -> Result<Self::Buffer, BufferError> {
+        let result = self.native.acquire_class(class, reservation, initial_len);
+        if class == BufferClass::Bulk && matches!(result, Err(BufferError::Overloaded))
+            && self.owner.is_some_and(|o| o.local_node == node(1) && o.peer_node == node(3)) {
+            self.refused.fetch_add(1, AtomicOrdering::Relaxed);
+        }
+        result
+    }
+    fn close(&mut self) { self.native.close(); }
+}
+type PooledFactory = NativeSharedTransportFactory<NativeWireCodec, ObservedPool>;
 fn pooled_facades(
     root: &std::path::Path,
     recover: bool,
-) -> (Vec<Facade<PooledFactory>>, Vec<NativeBufferPool>) {
+) -> (Vec<Facade<PooledFactory>>, Vec<ObservedPool>) {
     let mut pools = Vec::new();
     let nodes = facade_make_with(root, recover, |_| {
         let limits = TransportLimits::default();
         let frame = limits.send_frame_bytes.max(limits.receive_frame_bytes);
-        let pool = NativeBufferPool::new_with_owner_limits(
+        let pool = ObservedPool::new(NativeBufferPool::new_with_owner_limits(
             BufferLimits {
                 reserved_bytes: 5 * frame,
                 leases: 5,
@@ -44,7 +87,7 @@ fn pooled_facades(
                 },
             },
         )
-        .unwrap();
+        .unwrap());
         pools.push(pool.clone());
         NativeTransportFactory::new(NativeWireCodec::new(Default::default()).unwrap(), limits)
             .unwrap()
@@ -123,6 +166,7 @@ fn pooled_read(nodes: &mut [Facade<PooledFactory>], now: MonoTime, expected: i64
 }
 #[test]
 fn native_shared_peer_quota_pressure_reconnect_restart_and_retry() {
+    let _fixture = large_disk_fixture();
     let root =
         std::env::temp_dir().join(format!("voteboat-node-peer-quota-{}", std::process::id()));
     std::fs::create_dir_all(&root).unwrap();
@@ -152,6 +196,7 @@ fn native_shared_peer_quota_pressure_reconnect_restart_and_retry() {
         pressured.acquire(1, 0),
         Err(BufferError::Overloaded)
     ));
+    let before_transport = pressured.bulk_refusals();
     // Reconnect at the configured first retry boundary, below the minimum
     // election deadline. The new real TLS session shares the held quota.
     facade_drive_at(&mut nodes, MonoTime(100), |nodes| {
@@ -167,7 +212,9 @@ fn native_shared_peer_quota_pressure_reconnect_restart_and_retry() {
     pooled_write(&mut nodes, MonoTime(100), 2, 2, 3, 10, false);
     pooled_read(&mut nodes, MonoTime(100), 10);
     assert!(pooled_values(&nodes[2..], 1, 7));
-    assert!(nodes[0].peers().unwrap().usage().staged_batches > 0);
+    // Bulk may refuse unclassified receive before a new data send is staged.
+    // The counter excludes our deliberate pre-reconnect acquire/refusal above.
+    assert!(pressured.bulk_refusals() > before_transport);
     for pool in &pools {
         assert!(pool.usage().reserved_bytes <= pool.limits().reserved_bytes);
         assert!(pool.usage().leases <= pool.limits().leases);

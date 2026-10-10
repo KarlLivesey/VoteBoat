@@ -1,0 +1,164 @@
+Analysis of sampling effect_owner-7952e9ee0f22c14f (pid 9207) every 1 millisecond
+Process:         effect_owner-7952e9ee0f22c14f [9207]
+Path:            /private/tmp/*/effect_owner-7952e9ee0f22c14f
+Load Address:    0x100aa8000
+Identifier:      effect_owner-7952e9ee0f22c14f
+Version:         0
+Code Type:       ARM64
+Platform:        macOS
+Parent Process:  cargo [9200]
+Target Type:     live task
+
+Date/Time:       2026-10-10 20:48:11.058 +0100
+Launch Time:     2026-10-10 20:47:12.514 +0100
+OS Version:      macOS 27.0 (26A428)
+Report Version:  7
+Analysis Tool:   /usr/bin/sample
+
+Physical footprint:         50.8M
+Physical footprint (peak):  57.3M
+Idle exit:                  untracked
+----
+
+Excerpt: native fixture thread names and selected setup/synchronization frames.
+    247 Thread_16858524: native::automatic_hundred_group_checkpoints_reclaim_and_reopen
+    +                                                       147 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+    +                                                       ! :   | +       !     12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | +       !       8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | +       7 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | 11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | 11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | 14 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | 7 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       59 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+    +                                                       ! :   | 12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | 6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : |     + 9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : |       2 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       40 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691
+    +                                                       ! 40 _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+    +                                                       !   27 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+    +                                                       !   : | 10 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !   :   3 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !   13 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+    +                                                       !         | 6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !           1 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       1 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3944  [0x100b298cc]  effect_owner.rs:2747
+    247 Thread_16858525: native::driven_discovery::owning_node_drives_discovery_renews_r
+    +                                                   114 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+    +                                                   ! :   | 11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 10 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +       !     11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +       !       5 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +       8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   67 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+    +                                                   ! :   | 13 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 3 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! : |     + 8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! : |       5 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   66 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691
+    +                                                     66 _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+    +                                                       38 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+    +                                                       :     | 14 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       :     | 12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       28 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+    +                                                         | 5 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                           4 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    247 Thread_16858526: native::driven_discovery::owning_node_repairs_closed_discovery_
+    +                                                   105 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+    +                                                   ! :   | 14 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +       !     4 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +       !       4 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   |         9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !     | 10 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !     | 4 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   71 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691
+    +                                                   ! 71 _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+    +                                                   !   38 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+    +                                                   !   :     | 12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !   :     | 12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !   33 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+    +                                                   !     | 12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !     | 10 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   71 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+    +                                                     :   | 9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                     :   | 5 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                     : |     + 11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                     : |       8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    247 Thread_16858527: native::hundred_compacted_groups_catch_up_over_workers_and_auth
+    +                                                   142 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+    +                                                   ! :   | +       !     9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +       !       8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | +   !   20 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 12 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 4 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !     | 10 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !     | 7 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   67 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691
+    +                                                   ! 67 _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+    +                                                   !   36 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+    +                                                   !   :     | 17 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !   :     | 8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !   31 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+    +                                                   !     | 7 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   !       3 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   37 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+    +                                                   ! :   | 2 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! :   | 1 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! : |     + 3 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   ! : |       2 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                   1 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 1308  [0x100b28e80]  effect_owner.rs:2726
+    247 Thread_16858529: native::native_shared_peer_quota_pressure_reconnect_restart_and
+    +                                                       157 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+    +                                                       ! :   | +       !     10 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | +       !       9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | +       20 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : | + 14 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : | + 6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : | + 15 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : | + 6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       60 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691
+    +                                                       ! 60 _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+    +                                                       !   37 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+    +                                                       !   :   | + 14 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !   :   | + 8 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !   23 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+    +                                                       !     | 7 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !     | 6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       30 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+    +                                                         :       + 3 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                         :         1 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                         :   | 3 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                         :   | 2 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    247 Thread_16858530: native::owning_native_facade_checkpoints_restarts_and_retries_h
+    +                                                       115 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+    +                                                       ! :   | +       !     13 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | +       !       13 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | +       11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : | + 16 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! : | + 7 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !     | 6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       !     | 4 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       99 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+    +                                                       ! :   | 11 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :   | 5 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :       + 9 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       ! :         6 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                       33 _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691
+    +                                                         33 _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+    +                                                           27 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+    +                                                           :     | 13 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                           :       1 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                           6 _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+    +                                                             | 2 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+    +                                                             | 2 _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+        90       _RNvMs2_NtCs7mRY9FNn263_3std2fsNtB5_4File8sync_all  (in effect_owner-7952e9ee0f22c14f) + 48  [0x1014dafb8]
+        6       _RINvMNtCslWxY2MhVcag_4core4boolb4thenINtNtNtCsiqMBLmU9uKN_8voteboat6native14snapshot_store19NativeSnapshotStoreNtBC_14FileSnapshotIoENCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0EB2d_  (in effect_owner-7952e9ee0f22c14f) + 92  [0x100b4999c]  bool.rs:66
+        6       _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 496  [0x101062e50]  effect_owner.rs:2711
+        6       _RNCNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups0B5_  (in effect_owner-7952e9ee0f22c14f) + 760  [0x101062f58]  effect_owner.rs:2710
+        6       _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 2920  [0x100b294cc]  effect_owner.rs:2734
+        6       _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 3316  [0x100b29658]  effect_owner.rs:2735
+        6       _RNvNtCslG9yj0TzMbt_12effect_owner6native17load_owner_groups  (in effect_owner-7952e9ee0f22c14f) + 988  [0x100b28d40]  effect_owner.rs:2691

@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 #[test]
 fn automatic_hundred_group_checkpoints_reclaim_and_reopen() {
+    let _fixture = large_disk_fixture();
     let root =
         std::env::temp_dir().join(format!("voteboat-auto-checkpoints-{}", std::process::id()));
     std::fs::create_dir_all(&root).unwrap();

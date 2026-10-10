@@ -1,5 +1,16 @@
 # Validation report
 
+Native fixture admission and exact quota-refusal witness:
+[slice250](baseline/slice250/README.md). Original ungated Mac175/4 initial catch-up
+failures, admitted178/1 staging failure and failed0/1 bounded staging wait remain.
+Full Bulk quota may block unclassified receive before any data send is staged;
+the final injected observer attributes native refusal after the fixture baseline.
+Original data, pressure, release/catch-up, cold retry and joined zero-credit checks
+pass. Final Mac/Linux365 selected core/provider histories and core171/native174
+pass, with formatting/four strict profiles zero and647 source inputs verified.
+The fixture admission condition changes; no production/durability/deadline/quota
+change or performance/full-roadmap acceptance is claimed. Full P0–P7 stays active.
+
 Functional ledger and Mac resource conditions: [slice249](baseline/slice249/README.md).
 Linux selected core/provider365 passes; identical Mac selection passes358/fails7
 at inherited256 descriptors, then361/4 at child-shell4096. Original EMFILE and

@@ -251,6 +251,7 @@ impl Cluster {
 
 #[test]
 fn owning_node_drives_discovery_renews_reconnects_and_reopens_original_data() {
+    let _fixture = large_disk_fixture();
     let root =
         std::env::temp_dir().join(format!("voteboat-driven-discovery-{}", std::process::id()));
     std::fs::create_dir_all(&root).unwrap();
@@ -367,6 +368,7 @@ fn discovered_node(
 
 #[test]
 fn owning_node_repairs_closed_discovery_source_without_stopping_healthy_quorum() {
+    let _fixture = large_disk_fixture();
     let root =
         std::env::temp_dir().join(format!("voteboat-reconnecting-node-{}", std::process::id()));
     std::fs::create_dir_all(&root).unwrap();

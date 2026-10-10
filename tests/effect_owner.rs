@@ -1701,9 +1701,15 @@ mod native {
     #[cfg(feature = "tls")]
     include!("support/native_node.rs");
     use std::{
-        sync::Arc,
+        sync::{Arc, Mutex, MutexGuard},
         time::{Duration, Instant},
     };
+    // Each fixture retains three native 100-group stores. Admit one fixture's
+    // disk workload at a time; its nodes/workers/network remain concurrent.
+    static LARGE_DISK_FIXTURE: Mutex<()> = Mutex::new(());
+    fn large_disk_fixture() -> MutexGuard<'static, ()> {
+        LARGE_DISK_FIXTURE.lock().unwrap_or_else(|e| e.into_inner())
+    }
     use voteboat::{
         native::{log_store::*, outbound::NativeOutbound, worker::*},
         outbound::*,
@@ -2059,13 +2065,26 @@ mod native {
         }
         establish(nodes, MonoTime(0));
     }
+    #[track_caller]
     fn drain(nodes: &mut [Node], isolated: Option<NodeId>, now: MonoTime) {
         let deadline = Instant::now() + Duration::from_secs(10);
         let mut network = VecDeque::new();
         loop {
             assert!(
                 Instant::now() < deadline,
-                "effect-owner cluster did not drain"
+                "effect-owner cluster did not drain: {:?}",
+                nodes
+                    .iter()
+                    .map(|n| (
+                        n.owner.usage(),
+                        n.worker.usage(),
+                        n.outbound.usage(),
+                        n.router.as_ref().map(SnapshotRouter::usage),
+                        n.snapshots.as_ref().map(SnapshotWorker::usage),
+                        n.sent,
+                        n.received,
+                    ))
+                    .collect::<Vec<_>>()
             );
             for n in nodes.iter_mut() {
                 poll_replica_outputs(n, now);
@@ -2286,6 +2305,7 @@ mod native {
     }
     #[test]
     fn hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport() {
+        let _fixture = large_disk_fixture();
         let root =
             std::env::temp_dir().join(format!("voteboat-snapshot-router-{}", std::process::id()));
         std::fs::create_dir_all(&root).unwrap();
@@ -2459,6 +2479,7 @@ mod native {
     }
     #[test]
     fn automatic_elections_and_partition_replacement_preserve_hundred_group_history() {
+        let _fixture = large_disk_fixture();
         let root =
             std::env::temp_dir().join(format!("voteboat-automatic-network-{}", std::process::id()));
         std::fs::create_dir_all(&root).unwrap();
@@ -2515,6 +2536,7 @@ mod native {
     }
     #[test]
     fn hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport() {
+        let _fixture = large_disk_fixture();
         let root =
             std::env::temp_dir().join(format!("voteboat-effect-owner-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&root);

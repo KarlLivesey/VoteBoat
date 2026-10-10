@@ -30,3 +30,10 @@ removing locks or reducing group counts. If the host hard limit prevents this
 command, report that resource constraint rather than claiming a passing suite.
 Normal small deployments need fewer handles; budget one snapshot-store lock per
 local group plus provider/transport resources. No system-wide limit is changed.
+
+The effect-owner suite admits one large disk fixture at a time. Each fixture
+still runs three concurrent nodes with100 groups and real workers/network IO;
+the harness continues running other tests concurrently. This avoids mixing six
+independent snapshot initialization workloads into a single functional deadline.
+Those deadlines and assertions stay intact. It does not validate performance at
+that combined disk load; performance measurement uses separate declared workloads.

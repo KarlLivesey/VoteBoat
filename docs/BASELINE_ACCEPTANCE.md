@@ -1,5 +1,15 @@
 # Baseline acceptance map
 
+Native fixture admission and exact quota-refusal witness:
+[slice250](../validation/baseline/slice250/README.md). Each original three-node/
+100-group disk history retains its internal concurrency and bounds while an
+explicit fixture lease bounds cross-fixture IO. The pressure case observes real
+exact-peer native Bulk refusals rather than requiring a staged send while receive
+is blocked. Final Mac/Linux365 selected core/provider tests and sequential core171/
+native174 pass; formatting/four strict profiles are zero and647 inputs verify.
+Original failures remain. No production/API/format/quota/deadline change, full
+platform certificate or P7 gain. Broader lifecycle/operator/provider work remains.
+
 Functional ledger and Mac resource conditions: [slice249](../validation/baseline/slice249/README.md).
 Existing retirement, bounded diagnostics, endpoint refresh and voter replacement
 are distinguished from broader evidence gaps. Linux selected core/provider365

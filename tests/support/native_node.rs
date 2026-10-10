@@ -64,12 +64,14 @@ fn facade_make_with<F: voteboat::transport::PeerTransportFactory<Session>>(
         })
         .collect()
 }
+#[track_caller]
 fn facade_drive<F: voteboat::transport::PeerTransportFactory<Session>>(
     nodes: &mut [Facade<F>],
     mut done: impl FnMut(&mut [Facade<F>]) -> bool,
 ) {
     facade_drive_at(nodes, MonoTime(0), &mut done)
 }
+#[track_caller]
 fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
     nodes: &mut [Facade<F>],
     now: MonoTime,
@@ -99,7 +101,25 @@ fn facade_drive_at<F: voteboat::transport::PeerTransportFactory<Session>>(
         if done(nodes) {
             return;
         }
-        assert!(Instant::now() < deadline, "facade progress timed out");
+        assert!(
+            Instant::now() < deadline,
+            "facade progress timed out: {:?}",
+            nodes.iter().map(|n| {
+                let local = n.local();
+                (
+                    local.owner.usage(),
+                    local.persistence.usage(),
+                    local.snapshots.as_ref().map(|s| (s.router.usage(), s.worker.usage())),
+                    local.outbound.usage(),
+                    n.replica_usage(),
+                    n.peers().map(PeerDriver::usage),
+                    (1..=100).map(|g| (
+                        local.owner.core(group(g)).unwrap().state().commit_index,
+                        local.applications[&group(g)].applied_index(),
+                    )).fold((u64::MAX, u64::MAX), |min, p| (min.0.min(p.0), min.1.min(p.1))),
+                )
+            }).collect::<Vec<_>>()
+        );
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
@@ -199,6 +219,7 @@ fn facade_close_at<F: voteboat::transport::PeerTransportFactory<Session>>(
 include!("native_pressure.rs");
 #[test]
 fn owning_native_facade_checkpoints_restarts_and_retries_hundred_groups() {
+    let _fixture = large_disk_fixture();
     let root = std::env::temp_dir().join(format!("voteboat-node-facade-{}", std::process::id()));
     std::fs::create_dir_all(&root).unwrap();
     let mut nodes = facade_make(&root, false);

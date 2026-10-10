@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (MAC_TASK_ROOT/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.57s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-7952e9ee0f22c14f)
+
+running 1 test
+test native::native_shared_peer_quota_pressure_reconnect_restart_and_retry ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 178 filtered out; finished in 41.82s
+

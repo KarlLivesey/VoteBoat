@@ -1,0 +1,16 @@
+Base:ef79051; no production changes. Diagnostic patch:two test inputs.
+Final patch:five test inputs, all647 build/source inputs checked on both hosts.
+Candidate artifacts distinguish ungated diagnostics, resource-admitted staging
+failure, failed bounded staging wait and final actual native refusal observation.
+Mac child-shell limit4096; default test-harness concurrency retained.
+Ungated diagnostic reproducer on Mac and Linux:
+cargo +stable test --locked --offline --all-features --test effect_owner
+Owned Mac process sampled for one second using sample PID 1 -file TASK_ROOT/slice250/sample.txt.
+Final identical Mac/Linux all-feature selection:
+cargo +stable test --locked --offline --all-features --no-fail-fast --test provider_conformance --test raft --test runtime --test effect_owner --test transport --test quorum --test activation_model --test log_store --test application --test snapshot
+Then sequentially on each host:
+cargo +stable test --locked --offline --no-default-features --test effect_owner
+cargo +stable test --locked --offline --no-default-features --features native --test effect_owner
+Both hosts: .githooks/pre-push (formatting and four strict Clippy profiles).
+Metadata only: node validation/check-inventory.mjs; node validation/check-provider-conformance.mjs.
+Source/patch integrity: sha256sum -c build-source.sha256 (Mac shasum -a256); git apply -R --check source.patch; git diff --check.
