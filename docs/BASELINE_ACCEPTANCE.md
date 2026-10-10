@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice201e adds shared admission-provider ownership checks:32 seeded256-action
+histories per host/native provider, independent unique-reservation accounting,
+batch/message/byte refusal, view close/drop and cross-thread final lease release.
+A deliberately incorrect early-release provider fails the shared checker.
+All62 selected all-feature admission/outbound/provider/transport checks pass,
+alongside9 core-only and30 native-only checks. The metadata ledger now reviews
+6 contracts/39 operations and leaves102 contract entries unreviewed. This is
+selected evidence, not full provider certification or general disk/client
+admission. Formatting and all four strict Clippy profiles remain clean.
+
 Slice209k adds the selected combined discovery/recursive-recovery history. After
 two actual metadata moves and owner/parent locator adoption, all metadata stays
 offline. TCP/QUIC WAL/checkpoint cases recover the child, drop its endpoint-source

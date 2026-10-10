@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
+#[path = "provider_conformance/admission.rs"]
+mod admission_cases;
 #[path = "provider_conformance/log_store.rs"]
 mod cases;
 #[path = "provider_conformance/credential.rs"]

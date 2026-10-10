@@ -61,6 +61,15 @@ reserve/Drop and rollback obligations; an interface cannot sandbox a callback.
 
 # Evidence and limits
 
+The shared provider checks in `tests/provider_conformance/admission.rs` run32
+seeded256-action ownership histories against each host/native policy. An
+independent model accounts unique reservations across lease clones, dropped
+views, closes and capacity refusal. Separate checks transfer the final owner
+between threads and count one opaque-token destructor. An intentionally broken
+early-release provider verifies that the model detects lost reservation
+ownership. These are finite histories; they do not certify arbitrary concurrent
+callbacks or general client/disk admission.
+
 `tests/admission.rs` implements an independent downstream fixed-sample policy and
 injects it into native queues. It checks exact rejection allocation, metadata
 scope, permissive/refusing policy versus mandatory limits/control, invalid/delayed

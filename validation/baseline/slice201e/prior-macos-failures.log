@@ -1,0 +1,526 @@
+Operators on macos-latest	Exercise operator recovery	﻿2026-10-10T09:37:39.1793870Z ##[group]Run set -o pipefail
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1794170Z ^[[36;1mset -o pipefail^[[0m
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1794430Z ^[[36;1mcargo test --locked --offline --all-features \^[[0m
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1794870Z ^[[36;1m  --test counter_service --test directory_service --test transfer_service \^[[0m
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1795330Z ^[[36;1m  2>&1 | tee operator-recovery.log^[[0m
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1831980Z shell: /bin/bash --noprofile --norc -e -o pipefail {0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1832320Z env:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1832550Z   CARGO_TERM_COLOR: never
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1832710Z   RUST_BACKTRACE: 1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.1832860Z ##[endgroup]
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.3447420Z    Compiling libc v0.2.190
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.3448570Z    Compiling find-msvc-tools v0.1.14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.3449100Z    Compiling cfg-if v1.0.5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.4325420Z    Compiling shlex v2.0.1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.6337770Z    Compiling proc-macro2 v1.0.107
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:39.6995560Z    Compiling cc v1.6.0
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:41.0527430Z    Compiling ring v0.17.14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:42.8425230Z    Compiling quote v1.0.47
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.0047410Z    Compiling unicode-ident v1.0.26
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.5231020Z    Compiling rand_core v0.10.1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.5616440Z    Compiling getrandom v0.2.17
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.6688150Z    Compiling once_cell v1.21.4
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.8403540Z    Compiling zeroize v1.9.1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.8611600Z    Compiling untrusted v0.9.0
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.9278530Z    Compiling getrandom v0.4.3
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:43.9723300Z    Compiling rustls-pki-types v1.15.1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:44.1150210Z    Compiling syn v3.0.6
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:44.4506410Z    Compiling rustls v0.23.45
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:44.5520150Z    Compiling thiserror v2.0.21
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:44.8799370Z    Compiling tracing-core v0.1.36
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:45.2744450Z    Compiling chacha20 v0.10.2
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:45.4209860Z    Compiling pin-project-lite v0.2.17
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:45.4658340Z    Compiling subtle v2.6.1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:45.5399210Z    Compiling tracing v0.1.44
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:45.6762220Z    Compiling rand v0.10.3
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:45.7971400Z    Compiling thiserror-impl v2.0.21
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:46.2098180Z    Compiling rand_pcg v0.10.2
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:46.3051090Z    Compiling slab v0.4.12
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:46.4456740Z    Compiling lru-slab v0.1.3
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:46.5374810Z    Compiling tinyvec v1.13.3
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:46.7967670Z    Compiling bytes v1.12.1
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:47.0314480Z    Compiling rustc-hash v2.1.3
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:48.5941900Z    Compiling rustls-webpki v0.103.15
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:51.1081540Z    Compiling quinn-proto v0.11.19
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:37:52.8259250Z    Compiling voteboat v0.1.0 (/Users/runner/work/VoteBoat/VoteBoat)
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:23.4032500Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 44.14s
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:23.4104180Z      Running tests/counter_service.rs (target/debug/deps/counter_service-e6ec83c06bc1cc6b)
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:23.4149170Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:23.4150590Z running 152 tests
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:23.6401100Z test assignments::single_group_inventory_does_not_require_a_leader ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:25.6408630Z test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:26.3868300Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:26.5253320Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:26.5495640Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:26.6815510Z test automatic_read_retries_only_exact_unavailable_replica_replies ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:28.2699850Z test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:35.0512700Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:35.1785750Z test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:40.3001200Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:40.8225510Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:41.4793610Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:41.9598220Z test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:42.2676500Z test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:43.1300710Z test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:43.9760430Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:43.9801210Z test command_discovery::peer_source::invalid_peer_source_refuses_before_opening_store ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:44.6526250Z test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:45.3120420Z test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:45.3167030Z test command_discovery::updates::versioned_source_rejects_zero_generation_before_storage_is_opened ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:45.3265580Z test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:45.3765060Z test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:45.3904260Z test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:49.3204480Z test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:49.7902760Z test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:49.8522540Z test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:53.2171040Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:53.4474980Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:55.0970730Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:55.9156680Z test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:56.7690310Z test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:57.2330510Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:57.9243070Z test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:58.4166570Z test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:38:59.0049480Z test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:00.2016000Z test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:01.5802260Z test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:05.8503290Z test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:15.2213970Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:18.8173210Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:21.8650100Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:24.2473660Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:25.7858440Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:26.3670920Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:26.8221660Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:27.8106020Z test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:28.2259600Z test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:29.6699860Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:30.1427160Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:32.5630760Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:34.5211040Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:42.5399230Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:46.5695000Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:46.7129020Z test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:46.9306910Z test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:48.0482670Z test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:49.6622640Z test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:51.0058960Z test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:57.4320170Z test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:57.5432960Z test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:39:58.0602370Z test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:17.8359460Z test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:19.7230050Z test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:23.2049720Z test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:23.3378350Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:31.5160920Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:54.4540890Z test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:40:58.0947920Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic has been running for over 60 seconds
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:02.8261140Z test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:06.5280010Z test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:09.3229470Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:15.7651790Z test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:23.3672980Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic has been running for over 60 seconds
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:23.3947090Z test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:23.5566080Z test groups::authenticated_group_commands_quic_recover_independent_histories ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:23.6193140Z test groups::group_routing_preserves_exact_request_and_stops_after_uncertainty ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:23.6438340Z test groups::invalid_group_commands_are_rejected_before_connecting ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:24.0198260Z test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:29.9742510Z test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:35.5683230Z test history::quic_faulted_client_histories_are_linearizable ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:35.5841570Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:35.6653920Z test invalid_administration_is_rejected_before_store_open ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:35.7380550Z test invalid_deployment_is_rejected_before_store_creation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:35.7444340Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:38.1674230Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:42.0097500Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:52.2385900Z test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:55.4169610Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:57.3200790Z test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:41:59.1888530Z test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:02.7496920Z test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:03.3399000Z test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:05.3803520Z test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:06.7338310Z test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:09.1191340Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:09.2517650Z test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:11.1446220Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:11.4403680Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:11.4527680Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:11.4661230Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:12.8863390Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:15.5779170Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:19.7520900Z test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:20.6417140Z test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:22.9950530Z test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:23.0081810Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:23.5752350Z test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:30.8940340Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:34.5537710Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:34.7297690Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:36.6546080Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:46.8513250Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:49.5143430Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:51.9631940Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:42:52.2766780Z test peer_credentials::peer_administration_uses_actual_local_scopes_without_requiring_group_one ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:00.0228050Z test peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:10.7521250Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:12.5551460Z test peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:17.1691500Z test peer_credentials::quic_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:17.9236920Z test peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:21.9024670Z test peer_credentials::tcp_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:25.5228110Z test peer_credentials::tcp_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:28.0305060Z test peer_discovery::discovered_member_recovery_and_peer_rotation_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:30.1151140Z test peer_discovery::discovered_member_recovery_and_peer_rotation_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:34.7700280Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint has been running for over 60 seconds
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:38.2453460Z test peer_discovery::discovered_shared_groups_and_peer_rotation_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:47.3163080Z test peer_discovery::discovered_shared_groups_and_peer_rotation_quic ... FAILED
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:47.5521300Z test peer_discovery::executable_consumes_peer_discovery_and_recovers_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:47.7029190Z test peer_discovery::malformed_peer_discovery_client_refuses_before_store_creation ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:47.9759000Z test peer_discovery::unavailable_peer_source_does_not_block_commands_or_shutdown ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:47.9854390Z test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:50.1485830Z test peer_discovery::executable_consumes_peer_discovery_and_recovers_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:51.7139580Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:51.7272560Z test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:51.7557770Z test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:57.1568480Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:58.2035220Z test placement::generated_placement_executes_and_recovers_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:58.2323380Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:43:59.1965020Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:01.6718280Z test placement::generated_placement_executes_and_recovers_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:01.7380880Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:01.8043800Z test read_failover::automatic_read_repeats_an_empty_disconnect_but_not_a_partial_reply ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:02.5480820Z test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:02.5510490Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:05.7287400Z test read_failover::automatic_read_escapes_silent_replica_with_original_scope ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:09.0678660Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:10.7676650Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:11.9274910Z test read_failover::automatic_read_stalls_cannot_renew_the_absolute_deadline ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:13.3040960Z test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:13.7381740Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:14.6744200Z test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:18.5316770Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:21.1301270Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.6996320Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9415710Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9416860Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9417330Z failures:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9417630Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9418180Z ---- assignments::assignment_pages_quic_bind_permissions_membership_and_reopen stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9418950Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9419740Z thread 'assignments::assignment_pages_quic_bind_permissions_membership_and_reopen' (20618) panicked at tests/counter_service/assignments.rs:36:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9421400Z original retry status=exit status: 1 stdout="UNKNOWN authentication deadline expired; retry the same operation ID and delta\n" stderr=Error: "request interrupted after connection; automatic routing stopped"
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9422150Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9422440Z node1=ready node=1 peer=127.0.0.1:10129 transport=Quic command=127.0.0.1:10229
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9423090Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9423240Z node2=ready node=2 peer=127.0.0.1:10130 transport=Quic command=127.0.0.1:10230
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9423610Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9423870Z node3=ready node=3 peer=127.0.0.1:10131 transport=Quic command=127.0.0.1:10231
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9424390Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9424560Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9424810Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9425290Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9425780Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9426280Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9426770Z    2: counter_service::assignments::original_retry
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9427210Z              at ./tests/counter_service/assignments.rs:36:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9427550Z    3: counter_service::assignments::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9427980Z              at ./tests/counter_service/assignments.rs:110:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9428600Z    4: counter_service::assignments::assignment_pages_quic_bind_permissions_membership_and_reopen
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9429120Z              at ./tests/counter_service/assignments.rs:120:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9433640Z    5: counter_service::assignments::assignment_pages_quic_bind_permissions_membership_and_reopen::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9434190Z              at ./tests/counter_service/assignments.rs:119:66
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9435900Z    6: <counter_service::assignments::assignment_pages_quic_bind_permissions_membership_and_reopen::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9436700Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9439390Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9440010Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9441970Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9442450Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9442860Z ---- group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9443330Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9445230Z thread 'group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready' (29885) panicked at tests/counter_service/groups.rs:42:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9447780Z group 1: ready node=1 peer=127.0.0.1:20241 transport=Quic command=127.0.0.1:20341
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9448150Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9448210Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9448470Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9448970Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9449440Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9449950Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9450410Z    2: counter_service::groups::leader
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9450750Z              at ./tests/counter_service/groups.rs:42:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9451110Z    3: counter_service::group_admin::configure
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9451460Z              at ./tests/counter_service/group_admin.rs:79:22
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9451750Z    4: counter_service::group_drain::setup
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9452080Z              at ./tests/counter_service/group_drain.rs:28:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9453080Z    5: counter_service::group_drain::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9453460Z              at ./tests/counter_service/group_drain.rs:115:17
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9454030Z    6: counter_service::group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9454510Z              at ./tests/counter_service/group_drain.rs:184:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9455070Z    7: counter_service::group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9455610Z              at ./tests/counter_service/group_drain.rs:183:83
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9456480Z    8: <counter_service::group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9457280Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9458360Z    9: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9459490Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9460130Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9460490Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9460800Z ---- group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9461200Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9461640Z thread 'group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope' (27834) panicked at tests/counter_service/groups.rs:42:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9463160Z group 8: ready node=1 peer=127.0.0.1:19473 transport=Quic command=127.0.0.1:19573
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9464060Z administration operation=7001 outcome=Committed(ProposalPosition { index: 7, term: 27 })
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9464720Z administration historical operations completed; inspect configuration-status for local evidence
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9466290Z administration operation=7001 outcome=Unknown(LeadershipChanged)
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9467250Z command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(2) }, OperationId(7001)) reason=deadline
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9469110Z administration observation_cancelled operation=7001 phase=preparing reason=deadline
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9470200Z command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(2) }, OperationId(7001)) reason=deadline
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9471160Z administration observation_cancelled operation=7001 phase=preparing reason=deadline
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9471590Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9472090Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9472650Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9473580Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9475040Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9481600Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9502730Z    2: counter_service::groups::leader
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9504330Z              at ./tests/counter_service/groups.rs:42:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9506570Z    3: counter_service::group_admin::configure
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9507760Z              at ./tests/counter_service/group_admin.rs:79:22
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9508870Z    4: counter_service::group_admin::histories
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9509310Z              at ./tests/counter_service/group_admin.rs:172:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9510050Z    5: counter_service::group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9511090Z              at ./tests/counter_service/group_admin.rs:193:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9512930Z    6: counter_service::group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9514010Z              at ./tests/counter_service/group_admin.rs:192:73
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9514960Z    7: <counter_service::group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9516220Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9518250Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9524800Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9526390Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9526760Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9528520Z ---- group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9529260Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9531350Z thread 'group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints' (33047) panicked at tests/counter_service/groups.rs:42:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9532470Z group 8: ready node=1 peer=127.0.0.1:21393 transport=Quic command=127.0.0.1:21493
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9533380Z leadership local attempt expired; durable intent remains pending
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9534170Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9534550Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9535270Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9540740Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9543170Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9547540Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9551280Z    2: counter_service::groups::leader
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9551980Z              at ./tests/counter_service/groups.rs:42:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9553090Z    3: counter_service::group_leadership::command
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9556290Z              at ./tests/counter_service/group_leadership.rs:15:22
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9558380Z    4: counter_service::group_leadership::begin
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9559380Z              at ./tests/counter_service/group_leadership.rs:57:18
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9561820Z    5: counter_service::group_leadership::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9563540Z              at ./tests/counter_service/group_leadership.rs:187:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9565450Z    6: counter_service::group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9567510Z              at ./tests/counter_service/group_leadership.rs:246:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9568650Z    7: counter_service::group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9583270Z              at ./tests/counter_service/group_leadership.rs:245:82
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9584290Z    8: <counter_service::group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9586980Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9587630Z    9: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9588210Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9590250Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9590630Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9590880Z ---- group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9592100Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9592530Z thread 'group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic' (30462) panicked at tests/counter_service.rs:2069:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9595520Z UNKNOWN reply deadline expired; retry the same operation ID and delta
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9595780Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9597300Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9597700Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9598480Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9599680Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9601090Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9602910Z    2: counter_service::authenticated_write
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9605110Z              at ./tests/counter_service.rs:2069:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9606220Z    3: counter_service::group_drain_runner::finish
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9608520Z              at ./tests/counter_service/group_drain_runner.rs:41:13
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9609240Z    4: counter_service::group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9611680Z              at ./tests/counter_service/group_drain_runner.rs:57:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9613210Z    5: counter_service::group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9613780Z              at ./tests/counter_service/group_drain_runner.rs:52:70
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9615830Z    6: <counter_service::group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9618130Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9618780Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9619970Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9621910Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9623780Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9624090Z ---- group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9633360Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9633880Z thread 'group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic' (35397) panicked at tests/counter_service/group_leadership.rs:21:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9635050Z ["group", "7", "3", "move-leader", "40001", "9", "2", "2", "1"]: "ERR not_proposed=Busy\n" Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9635920Z ; ready node=1 peer=127.0.0.1:21905 transport=Quic command=127.0.0.1:22005
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9636330Z leadership status admitted operation=40001
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9636690Z leadership status admitted operation=40001
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9637060Z leadership local attempt expired; durable intent remains pending
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9638230Z leadership status admitted operation=40001
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9639000Z leadership status admitted operation=40001
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9639400Z leadership status admitted operation=40001
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9639820Z leadership status admitted operation=40001
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9640030Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9640190Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9640500Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9641250Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9641780Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9642290Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9642770Z    2: counter_service::group_leadership::command
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9643430Z              at ./tests/counter_service/group_leadership.rs:21:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9643960Z    3: counter_service::group_leadership::historical::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9644390Z              at ./tests/counter_service/group_leadership/historical.rs:48:21
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9645050Z    4: counter_service::group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9646030Z              at ./tests/counter_service/group_leadership/historical.rs:13:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9646710Z    5: counter_service::group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9647420Z              at ./tests/counter_service/group_leadership/historical.rs:12:71
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9648190Z    6: <counter_service::group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9649150Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9649750Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9650440Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9651030Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9651360Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9651610Z ---- groups::authenticated_group_commands_quic_recover_independent_histories stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9651970Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9652700Z thread 'groups::authenticated_group_commands_quic_recover_independent_histories' (36106) panicked at tests/counter_service/groups.rs:50:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9653330Z OK outcome=Value(9) duplicate=true
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9653930Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9654050Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9654280Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9672780Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9673320Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9673780Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9674190Z    2: counter_service::groups::data
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9674470Z              at ./tests/counter_service/groups.rs:50:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9674750Z    3: counter_service::groups::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9675080Z              at ./tests/counter_service/groups.rs:113:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9675980Z    4: counter_service::groups::authenticated_group_commands_quic_recover_independent_histories
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9676450Z              at ./tests/counter_service/groups.rs:152:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9676910Z    5: counter_service::groups::authenticated_group_commands_quic_recover_independent_histories::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9677500Z              at ./tests/counter_service/groups.rs:151:69
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9678130Z    6: <counter_service::groups::authenticated_group_commands_quic_recover_independent_histories::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9679500Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9680420Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9681040Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9681600Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9681960Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9682190Z ---- joint_retirement::public_joint_survives_demoted_leader_loss_tcp stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9682490Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9683310Z thread 'joint_retirement::public_joint_survives_demoted_leader_loss_tcp' (38233) panicked at tests/counter_service/joint_retirement.rs:109:5:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9684050Z assertion failed: String::from_utf8_lossy(&refused.stdout).contains("conflicts with retained record")
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9684530Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9684760Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9685130Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9685610Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9686000Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9686390Z    2: core::panicking::panic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9686760Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:150:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9687260Z    3: counter_service::joint_retirement::finish
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9687570Z              at ./tests/counter_service/joint_retirement.rs:109:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9687930Z    4: counter_service::joint_retirement::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9688250Z              at ./tests/counter_service/joint_retirement.rs:238:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9688790Z    5: counter_service::joint_retirement::public_joint_survives_demoted_leader_loss_tcp
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9689310Z              at ./tests/counter_service/joint_retirement.rs:356:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9689790Z    6: counter_service::joint_retirement::public_joint_survives_demoted_leader_loss_tcp::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9690320Z              at ./tests/counter_service/joint_retirement.rs:354:51
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9690970Z    7: <counter_service::joint_retirement::public_joint_survives_demoted_leader_loss_tcp::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9691640Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9692220Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9693060Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9693670Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9693940Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9694240Z ---- group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9694580Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9695090Z thread 'group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic' (32380) panicked at tests/counter_service/group_drain_runner.rs:24:5:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9695810Z  Error: "UNKNOWN drain runner budget expired; rerun the same sequence and operation"
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9696140Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9696200Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9696490Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9696870Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9697320Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9697750Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9698380Z    2: counter_service::group_drain_runner::finish
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9698740Z              at ./tests/counter_service/group_drain_runner.rs:24:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9699080Z    3: counter_service::group_drain_runner::interrupted
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9699450Z              at ./tests/counter_service/group_drain_runner.rs:128:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9699970Z    4: counter_service::group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9700500Z              at ./tests/counter_service/group_drain_runner.rs:137:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9701050Z    5: counter_service::group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9701640Z              at ./tests/counter_service/group_drain_runner.rs:136:80
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9702260Z    6: <counter_service::group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9703250Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9705030Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9705550Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9706030Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9706300Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9706520Z ---- peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9706810Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9707140Z thread 'peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions' (46163) panicked at tests/counter_service.rs:393:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9707760Z ["group", "7", "3", "read"]:  Error: "no eligible configured leader found within the routing deadline"
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9708060Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9708110Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9708270Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9708590Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9708940Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9709270Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9709620Z    2: <counter_service::Cluster>::routed
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9709840Z              at ./tests/counter_service.rs:393:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9710070Z    3: counter_service::peer_credentials::data
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9710330Z              at ./tests/counter_service/peer_credentials.rs:100:15
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9710930Z    4: counter_service::peer_credentials::history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9711200Z              at ./tests/counter_service/peer_credentials.rs:190:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9711610Z    5: counter_service::peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9712030Z              at ./tests/counter_service/peer_credentials.rs:241:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9712470Z    6: counter_service::peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9712910Z              at ./tests/counter_service/peer_credentials.rs:240:65
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9713480Z    7: <counter_service::peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9714150Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9714660Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9715170Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9715990Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9716350Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9716610Z ---- peer_discovery::discovered_shared_groups_and_peer_rotation_quic stdout ----
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9716940Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9717260Z thread 'peer_discovery::discovered_shared_groups_and_peer_rotation_quic' (49126) panicked at tests/counter_service.rs:2070:9:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9717880Z leadership failed to settle: UNKNOWN LeadershipChanged; retry the same operation ID and delta
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9718190Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9718240Z stack backtrace:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9718390Z    0: __rustc::rust_begin_unwind
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9718710Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9719060Z    1: core::panicking::panic_fmt
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9719420Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9719790Z    2: counter_service::authenticated_write
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9720020Z              at ./tests/counter_service.rs:2070:9
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9720290Z    3: counter_service::peer_discovery::rotated_data
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9720560Z              at ./tests/counter_service/peer_discovery.rs:115:21
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9720840Z    4: counter_service::peer_discovery::profile_history
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9721120Z              at ./tests/counter_service/peer_discovery.rs:195:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9721560Z    5: counter_service::peer_discovery::discovered_shared_groups_and_peer_rotation_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9721940Z              at ./tests/counter_service/peer_discovery.rs:284:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9722340Z    6: counter_service::peer_discovery::discovered_shared_groups_and_peer_rotation_quic::{closure#0}
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9722750Z              at ./tests/counter_service/peer_discovery.rs:283:53
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9723270Z    7: <counter_service::peer_discovery::discovered_shared_groups_and_peer_rotation_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9724120Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9724710Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9725220Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9725690Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9725950Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9725950Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9726010Z failures:
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9726250Z     assignments::assignment_pages_quic_bind_permissions_membership_and_reopen
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9726900Z     group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9727370Z     group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9727840Z     group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9728320Z     group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9728830Z     group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9729350Z     group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9729800Z     groups::authenticated_group_commands_quic_recover_independent_histories
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9730180Z     joint_retirement::public_joint_survives_demoted_leader_loss_tcp
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9730560Z     peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9730940Z     peer_discovery::discovered_shared_groups_and_peer_rotation_quic
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9731160Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9731380Z test result: FAILED. 141 passed; 11 failed; 0 ignored; 0 measured; 0 filtered out; finished in 360.35s
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9732030Z 
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9732190Z error: test failed, to rerun pass `--test counter_service`
+Operators on macos-latest	Exercise operator recovery	2026-10-10T09:44:23.9759660Z ##[error]Process completed with exit code 101.

@@ -8,13 +8,15 @@ const root = new URL('../', import.meta.url);
 const inventory = JSON.parse(fs.readFileSync(new URL('docs/component-contracts.json', root), 'utf8'));
 const ledger = JSON.parse(fs.readFileSync(new URL('docs/provider-conformance.json', root), 'utf8'));
 const read = file => fs.readFileSync(new URL(file, root), 'utf8');
+const admissionReview = value => value.reviews.find(
+    review => review.public_contract === 'AdmissionPolicy / AdmissionRequest / AdmissionLease');
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 5);
-    assert.equal(report.reviewed_operations, 35);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 5);
-    for (const name of ['LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo']) {
+    assert.equal(report.reviewed_contracts, 6);
+    assert.equal(report.reviewed_operations, 39);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 6);
+    for (const name of ['LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }
 });
@@ -31,7 +33,9 @@ for (const [name, mutate] of [
     ['false completion claim', d => { d.reviews[0].status = 'complete'; }],
     ['missing limitation', d => { d.reviews[0].operations[0].remaining = []; }],
     ['missing snapshot operation', d => { d.reviews[1].operations.pop(); }],
-    ['missing retention assertion', d => { d.reviews[2].operations[0].assertions[0].symbol = 'invented'; }]
+    ['missing retention assertion', d => { d.reviews[2].operations[0].assertions[0].symbol = 'invented'; }],
+    ['missing admission operation', d => { admissionReview(d).operations.pop(); }],
+    ['missing admission assertion', d => { admissionReview(d).operations[0].assertions = []; }]
 ]) {
     test(`rejects ${name}`, () => {
         const changed = structuredClone(ledger);

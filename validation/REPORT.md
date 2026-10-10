@@ -1,5 +1,13 @@
 # Validation report — slice 35
 
+Shared admission obligations: [slice201e](baseline/slice201e/README.md). Host and
+native providers pass the same32 seeded ownership histories and explicit
+cross-thread final-release checks. A deliberately faulty early-release provider
+is detected. Selected all-feature tests62, core-only9 and native-only30 pass,
+with formatting/four strict lint profiles clean. The ledger covers6 reviewed
+contracts/39 operations; arbitrary concurrent schedules and general admission
+policy remain outside this evidence.
+
 Recursive endpoint repair: [slice209k](baseline/slice209k/README.md). Four native
 TCP/QUIC WAL/checkpoint histories pass after two metadata moves with every
 metadata group offline. Explicit source disconnection, later authenticated

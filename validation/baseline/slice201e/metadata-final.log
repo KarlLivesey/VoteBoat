@@ -1,0 +1,23 @@
+✔ review counts only audited operations and retains unreviewed contracts (2.897318ms)
+✔ rejects unknown contract (0.551637ms)
+✔ rejects unknown operation (0.343246ms)
+✔ rejects missing operation (0.577837ms)
+✔ rejects duplicate operation (0.290016ms)
+✔ rejects missing assertion (0.206007ms)
+✔ rejects missing function (0.236494ms)
+✔ rejects missing test (0.221246ms)
+✔ rejects escaping path (0.18106ms)
+✔ rejects false completion claim (0.3349ms)
+✔ rejects missing limitation (0.265569ms)
+✔ rejects missing snapshot operation (0.676963ms)
+✔ rejects missing retention assertion (0.530878ms)
+✔ rejects missing admission operation (1.677745ms)
+✔ rejects missing admission assertion (1.659711ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18.280303

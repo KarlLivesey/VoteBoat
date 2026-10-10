@@ -679,6 +679,132 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "AdmissionPolicy / AdmissionRequest / AdmissionLease",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "host_admission_generated_ownership_and_refusal_history"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "native_admission_generated_ownership_and_refusal_history"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "host_admission_final_credit_release_crosses_threads_and_view_close"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "native_admission_final_credit_release_crosses_threads_and_view_close"
+        },
+        {
+          "file": "tests/provider_conformance/admission.rs",
+          "symbol": "opaque_lease_destroys_its_provider_token_once_after_all_thread_owners"
+        },
+        {
+          "file": "tests/admission.rs",
+          "symbol": "permissive_policy_cannot_cross_node_peer_background_or_control_reserves"
+        },
+        {
+          "file": "tests/admission.rs",
+          "symbol": "host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch"
+        },
+        {
+          "file": "tests/transport.rs",
+          "symbol": "policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "reserve"
+          ],
+          "obligation": "Reserve bounded optional bulk credits before payload ownership transfer. For the declared finite host/native budget profiles, each successful reservation owns its exact cost; rejected requests retain no partial batch/message/byte credits. Queue hard limits and reserved control capacity are independent of optional policy.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "reserve"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "refused_dimension"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "batch_ceiling"
+            },
+            {
+              "file": "tests/admission.rs",
+              "symbol": "permissive_policy_cannot_cross_node_peer_background_or_control_reserves"
+            }
+          ],
+          "remaining": [
+            "Generated traces are sequential and bounded to 32 seeds of 256 actions for each provider; they do not prove arbitrary concurrent schedules or every host policy. General client/disk/tenant admission remains separate."
+          ]
+        },
+        {
+          "names": [
+            "close"
+          ],
+          "obligation": "Closing an admission view stops its new reservations without revoking existing leases or closing sibling views. Credits remain owned after the original view is dropped, until the final lease owner releases them.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "cross_thread_release"
+            },
+            {
+              "file": "tests/admission.rs",
+              "symbol": "host_policy_in_native_queue_preserves_rejection_scope_and_last_owned_batch"
+            }
+          ],
+          "remaining": [
+            "Thread handoff checks selected explicit orderings. They do not establish bounded execution of arbitrary host callbacks or system-wide shutdown policy."
+          ]
+        },
+        {
+          "names": [
+            "AdmissionLease::new",
+            "clone"
+          ],
+          "obligation": "A new opaque lease owns its provider token. Clones share the same reservation rather than charging again or releasing credits early. Exactly one final token destructor runs, including when lease ownership crosses threads or outlives a queue and its policy view.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "opaque_lease_destroys_its_provider_token_once_after_all_thread_owners"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "history"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "cross_thread_release"
+            },
+            {
+              "file": "tests/provider_conformance/admission.rs",
+              "symbol": "shared_history_detects_a_provider_releasing_accepted_credits_early"
+            },
+            {
+              "file": "tests/transport.rs",
+              "symbol": "policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release"
+            }
+          ],
+          "remaining": [
+            "Opaque token allocation failure and all concurrent queue/transport failure compositions are not established. Leases convey volatile accounting only, never durability or remote delivery."
+          ]
+        }
+      ]
     }
   ]
 }

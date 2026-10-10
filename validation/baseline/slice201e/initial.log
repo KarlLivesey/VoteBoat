@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.52s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-70ab728b605d1ee5)
+
+running 7 tests
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::native_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test snapshot_native::file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions ... ok
+test admission_cases::native_admission_generated_ownership_and_refusal_history ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+

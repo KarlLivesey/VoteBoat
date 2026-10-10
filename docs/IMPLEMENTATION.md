@@ -145,25 +145,94 @@ preserve original receipts/outbox, reject stale hints after source reconnection,
 and recover data again without altering stopped metadata. This closes the
 selected209 combined history; broader discovery faults and durable cache policy
 remain explicit limitations.
-Current: extend the next unreviewed public-provider obligations selected from the
-contract ledger. Reuse host/native implementations and their injected failures;
-completion requires executable shared assertions for ownership, rejection and
-shutdown, not just metadata entries. This advances composable Rust embedding
-under P0/P2 without making a particular external backend a prerequisite.
-Next: revisit the current Linux/macOS operator acceptance evidence.
+Completed201e reviews the shared AdmissionPolicy/AdmissionLease obligations:
+identical host/native generated ownership traces, capacity refusal, independent
+view close and cross-thread final-owner release. Six contracts/39 operations
+now have selected reviewed assertions;102 inventory entries remain unreviewed.
+Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
 supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
-Following: select an uncovered combined membership/lifecycle recovery schedule
+Next: select an uncovered combined membership/lifecycle recovery schedule
 from the acceptance ledger, using the existing native phase/restart fixtures and
 independent original-receipt observations. Check source fencing, exact accepted
 configuration and one writable owner through the selected cut, then repeat
 original operations after cold recovery. This advances P4/P6 and depends on the
 existing journals, snapshot lineage and source/target services; it does not
 require global automatic orchestration.
+
+Following: broaden malformed-input and bounded decoding evidence using the
+existing wire/snapshot/log codec contracts. Use reproducible generated inputs,
+explicit byte/count limits and unchanged rejected-state assertions. This
+advances P0/P1 defensive recovery and depends on existing native/host codecs,
+not a replacement serialization system. Select an uncovered codec family from
+the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice201e schema plan — reusable admission ownership histories
+
+The production admission seam already exposes reserve/close and an opaque shared
+lease. No new production trait or backend is needed. A downstream test-only
+adapter exposes quiescent usage for the existing mutex-based host and native
+atomic policies. Both run the same bounded generated histories. The independent
+model sums unique live reservation identities; cloning adds an owner, not cost.
+Requests use declared batch/message/byte limits, known bulk classes and exact
+owner bindings. Closed views refuse; sibling views and retained leases remain
+valid. Individual exhausted dimensions must reject without retaining partial
+credits. Native concurrent usage fields remain samples, so exact comparisons
+occur only when worker threads are joined or held at explicit barriers.
+
+Use channels for cross-thread lifetime handoff and release, never sleeps as a
+correctness premise. Dropping/closing a view must not release a still-owned
+reservation; dropping the final lease must restore capacity. A direct opaque
+token test counts one final destructor invocation. Retain existing native queue
+and transport tests for control bypass, rejected completion and exact payload
+ownership rather than duplicating their assembly in the shared model.
+Acceptance: both providers pass identical generated traces and threaded release
+checks, core-only tests run without native types, existing admission/transport
+regressions pass, and formatting/four strict Clippy profiles remain clean.
+Record a partial review of all four inventory operations with explicit limits;
+this advances P0/P2 replaceable embedding, not general disk/client admission or
+full provider certification. Platform/operator acceptance and combined P4/P6
+faults remain the next two linked deliverables.
+
+### Slice201e implemented — shared admission ownership obligations
+
+Host and native admission providers now run the same32 seeded256-action
+histories. The independent model charges unique live reservations while lease
+handles are cloned/dropped and policy views close or are replaced. Explicit
+batch-only exhaustion, message/byte refusal and oversized arithmetic inputs
+leave no leaked partial credits. Cross-thread handoff keeps the original cost
+charged after closing/dropping the admitting view; only the last lease release
+restores capacity. Direct opaque-token checks observe exactly one destructor
+after eight thread owners release. A deliberately faulty early-release provider
+fails the shared model, checking the test's ability to detect that violation.
+
+All-feature provider22, admission8, outbound4 and transport28 tests pass; core-only
+provider8/admission1 and native-only provider22/admission8 pass. Formatting and
+all four strict Clippy configurations are clean. The inventory remains108
+entries. The ledger reviews this contract's four operations, reaching6
+contracts/39 operations;15 metadata integrity checks pass. Those references
+are not a completion certificate. Logs and scope are in
+validation/baseline/slice201e. No production API, dependency or format changes.
+
+Initial Clippy caught a manual divisibility expression, corrected without
+changing thresholds. The broad sandbox run passed provider/admission/outbound
+but denied the real TCP transport test's socket; the same transport target
+passes under its required local-socket permission. The first ledger attempted
+to list the intentionally panicking checker self-test as a provider runner;
+it remains an assertion/self-check rather than a successful provider runner.
+
+Macro review: this advances replaceable P0/P2 resource ownership. General
+client/disk policies, arbitrary concurrent schedules and the unreviewed provider
+families remain open. The next platform review has captured terminal evidence
+from operator run38041871867 at942fd93: Ubuntu succeeds; macOS has141 passing and
+11 failing counter-service cases. The newer cd54071 jobs are still active at
+inspection. Select a specific failure's contract and reproduce before editing;
+these historical results do not establish current macOS acceptance. The full
+P0–P7 goal remains active.
 
 ### Slice209k schema plan — endpoint refresh after recursive metadata movement
 
