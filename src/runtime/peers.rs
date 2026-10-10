@@ -778,12 +778,25 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 return Err(PeerDriverError::ProviderViolation);
             }
         }
+        self.poll_connections(outbound, now, b.connector, &mut out)?;
+        self.start_connections(now, b.connection_visits, &mut out)?;
+        self.poll_peer_io(outbound, b.peer_visits, &mut out)?;
+        self.submit_sends(outbound, b.sends, &mut out)?;
+        Ok(out)
+    }
+    fn poll_connections<O: OutboundQueue>(
+        &mut self,
+        outbound: &mut O,
+        now: MonoTime,
+        budget: crate::connect::ConnectPollBudget,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
         let events = self
             .parts
             .connector
-            .poll(now, b.connector)
+            .poll(now, budget)
             .map_err(PeerDriverError::Connect)?;
-        if events.len() > b.connector.completions {
+        if events.len() > budget.completions {
             return Err(PeerDriverError::ProviderViolation);
         }
         self.check_connector()?;
@@ -839,6 +852,17 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 }
             }
         }
+        Ok(())
+    }
+    fn start_connections(
+        &mut self,
+        now: MonoTime,
+        visits: usize,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError>
+    where
+        C::Endpoint: Clone,
+    {
         if !self.closed {
             let active = &self.attempts;
             let mut slots = self
@@ -850,7 +874,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             let tickets = self
                 .parts
                 .roster
-                .due_connections_filtered(now, b.connection_visits, |peer| {
+                .due_connections_filtered(now, visits, |peer| {
                     if slots == 0 || active.iter().any(|t| t.peer.node == peer) {
                         false
                     } else {
@@ -889,8 +913,16 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 self.check_connector()?;
             }
         }
+        Ok(())
+    }
+    fn poll_peer_io<O: OutboundQueue>(
+        &mut self,
+        outbound: &mut O,
+        visits: usize,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
         // Complete transport-owned output before admitting more outbound work.
-        for _ in 0..b.peer_visits.min(self.peers.len()) {
+        for _ in 0..visits.min(self.peers.len()) {
             let peer = self.peers[self.cursor];
             self.cursor = (self.cursor + 1) % self.peers.len();
             match self.parts.roster.take_send(peer) {
@@ -936,7 +968,15 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 }
             }
         }
-        for _ in 0..b.sends {
+        Ok(())
+    }
+    fn submit_sends<O: OutboundQueue>(
+        &mut self,
+        outbound: &mut O,
+        limit: usize,
+        out: &mut PeerDriverProgress,
+    ) -> Result<(), PeerDriverError> {
+        for _ in 0..limit {
             if self.staged.len() == self.limits.staged_batches {
                 break;
             }
@@ -950,7 +990,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
             };
             self.staged.push_back(batch);
         }
-        for _ in 0..self.staged.len().min(b.sends) {
+        for _ in 0..self.staged.len().min(limit) {
             let batch = self.staged.pop_front().unwrap();
             if self.closed || self.parts.roster.peer_identity(batch.ticket.peer).is_none() {
                 let ticket = batch.ticket;
@@ -982,7 +1022,7 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
                 }
             }
         }
-        Ok(out)
+        Ok(())
     }
     fn check_connector(&self) -> Result<(), PeerDriverError> {
         let u = self.parts.connector.usage();

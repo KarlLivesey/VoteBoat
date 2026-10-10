@@ -170,7 +170,7 @@ The full macro roadmap remains active; broader fault/platform cases are not impl
    unchanged formats/refusal/atomicity using each affected subsystem's tests;
    completion requires strict all-target all-feature/core-only Clippy with no
    warnings. No suppressed baseline or increased thresholds. Directory, routed/log and native cleanups have reduced production findings
-   from48 to18. Remaining runtime/transfer functions and fixture findings remain explicit work. This priority does not redefine a red lint job as green.
+   from48 to8. Remaining scope/transfer functions and fixture findings remain explicit work. This priority does not redefine a red lint job as green.
 2. **156c, remaining native authority-move composition (next; P5/P6).**
    Original full-owner/cache adoption156c1, retained-owner adoption156c2a and
    full/partial imported-owner adoption/retirement156c2b and foreign directory/cache
@@ -13775,3 +13775,47 @@ remaining scope/transfer production findings and test fixtures. Acceptance is
 unchanged runtime admission/ownership/fault tests and strict all-target lint.
 The next capability items remain native authority-move owner-family coverage
 (P5/P6) and public administration ingress (P4), as recorded in the linked plan.
+
+### Runtime lint cleanup — schema plan
+
+Separate admission preflight from ownership transfer in application, client,
+read and snapshot routers. Borrow the caller's original query/request/lease for
+checks; return the same owned input on refusal. Keep reservation, provider call,
+result validation, publication and credit release in the existing order. Snapshot
+reservation remains before image creation; failed providers still fence the owner.
+
+Separate Node group/peer contract validation and configuration authorization from
+assembly/polling. Split peer poll phases (connections, completed sends/receives,
+staging) and replica poll phases (reclaims, snapshots, persistence, effect intake
+and retries). Each helper borrows the same queues/progress and preserves budget,
+FIFO/fairness and cleanup paths; no new provider, buffer, thread or API. Verify
+runtime, effect-owner, worker, peer, startup, read and snapshot failure histories
+in all-feature/core profiles, followed by strict lint. This advances current
+mini item1 across all macro milestones; items2/3 and P0–P7 remain unchanged.
+
+## Runtime lint cleanup — implemented evidence
+
+Application, client, read and snapshot admission now separate borrowed preflight
+checks from ownership transfer, provider execution and result publication. Failed
+admission retains the original owned inputs. Node assembly separates group
+contract checks; configuration authorization still runs at execution time. Peer
+polling separates connection completion/start and receive/send phases in the
+original order. Replica polling separates reclaims, snapshots, effect collection
+and typed retries without changing budgets, queue order or accepted-work cleanup.
+No public API, wire/storage schema, provider contract or lint threshold changed.
+
+Local validation (cargo +stable --locked --offline):272 all-feature tests pass
+across runtime, effect_owner, snapshot_worker, worker, peers, startup,
+native_member_startup, application and maintenance. The applicable core-only
+selection passes180 tests. Formatting, whitespace and the88-contract inventory
+pass. Strict library Clippy still fails with8 production diagnostics; strict
+all-target/all-feature Clippy reports these plus9 inline-test diagnostics.
+Integration fixture findings remain incompletely enumerated while the library
+fails. All ten runtime production diagnostics were removed without suppression.
+This is not a clean-lint or full-suite claim.
+
+Next under mini item1: separate scope/transfer command projection, transactional
+application and checkpoint restoration responsibilities. Preserve exact schema
+bytes, validation order, candidate publication, retained lineage and no-dual-owner
+checks; then clean inline and integration fixtures. Capability items2/3 remain
+native owner-family composition (P5/P6) and public administration ingress (P4).

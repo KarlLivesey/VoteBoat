@@ -182,6 +182,69 @@ impl<R> ReadRouter<R> {
         self.held.is_empty()
     }
 
+    fn check_submit<
+        A: BoundedReadableStateMachine<ReadResult = R>,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &self,
+        owner: &EffectOwner<Q, T, E>,
+        lease: &EffectLease,
+        application: &A,
+        query: &A::Query,
+    ) -> Result<(ReadBarrier, usize, usize, u64), ReadRouteError> {
+        if self.closed {
+            return Err(ReadRouteError::Closed);
+        }
+        if owner.identity() != self.binding.owner || lease.ticket.visit.owner != self.binding.owner
+        {
+            return Err(ReadRouteError::WrongBinding);
+        }
+        owner.validate_lease(lease).map_err(ReadRouteError::Owner)?;
+        let Effect::ReadReady(barrier) = lease.effect else {
+            return Err(ReadRouteError::WrongEffect);
+        };
+        if self.usage.results == self.limits.results
+            || self.groups.get(&barrier.group()).copied().unwrap_or(0) >= self.limits.group_results
+        {
+            return Err(ReadRouteError::Overloaded);
+        }
+        let nested = application
+            .query_bytes(query, self.limits.query_bytes)
+            .map_err(ReadRouteError::Application)?;
+        let bound = application
+            .read_result_bound(query)
+            .map_err(ReadRouteError::Application)?;
+        if nested > self.limits.query_bytes
+            || bound < size_of::<R>()
+            || bound > self.limits.result_bytes
+        {
+            return Err(ReadRouteError::ResultTooLarge);
+        }
+        let charged = nested
+            .checked_add(size_of::<A::Query>())
+            .and_then(|n| n.checked_add(bound))
+            .and_then(|n| n.checked_add(size_of::<Held<R>>()))
+            .ok_or(ReadRouteError::ResultTooLarge)?;
+        if charged > self.limits.bytes - self.usage.bytes {
+            return Err(ReadRouteError::Overloaded);
+        }
+        let sequence = self
+            .sequence
+            .checked_add(1)
+            .ok_or(ReadRouteError::Exhausted)?;
+        let core = owner
+            .core(barrier.group())
+            .ok_or(ReadRouteError::WrongBinding)?;
+        application
+            .validate_group(barrier.group())
+            .map_err(ReadRouteError::Application)?;
+        if application.applied_index() > core.state().commit_index {
+            return Err(ReadRouteError::Application(ApplicationError::NotApplied));
+        }
+        Ok((barrier, bound, charged, sequence))
+    }
     pub fn submit<
         A: BoundedReadableStateMachine<ReadResult = R>,
         Q: ReadyScheduler,
@@ -195,62 +258,7 @@ impl<R> ReadRouter<R> {
         query: A::Query,
         now: MonoTime,
     ) -> Result<ReadResultTicket, ReadSubmitError<A::Query>> {
-        let checked = (|| {
-            if self.closed {
-                return Err(ReadRouteError::Closed);
-            }
-            if owner.identity() != self.binding.owner
-                || lease.ticket.visit.owner != self.binding.owner
-            {
-                return Err(ReadRouteError::WrongBinding);
-            }
-            owner
-                .validate_lease(&lease)
-                .map_err(ReadRouteError::Owner)?;
-            let Effect::ReadReady(barrier) = lease.effect else {
-                return Err(ReadRouteError::WrongEffect);
-            };
-            if self.usage.results == self.limits.results
-                || self.groups.get(&barrier.group()).copied().unwrap_or(0)
-                    >= self.limits.group_results
-            {
-                return Err(ReadRouteError::Overloaded);
-            }
-            let nested = application
-                .query_bytes(&query, self.limits.query_bytes)
-                .map_err(ReadRouteError::Application)?;
-            let bound = application
-                .read_result_bound(&query)
-                .map_err(ReadRouteError::Application)?;
-            if nested > self.limits.query_bytes
-                || bound < size_of::<R>()
-                || bound > self.limits.result_bytes
-            {
-                return Err(ReadRouteError::ResultTooLarge);
-            }
-            let charged = nested
-                .checked_add(size_of::<A::Query>())
-                .and_then(|n| n.checked_add(bound))
-                .and_then(|n| n.checked_add(size_of::<Held<R>>()))
-                .ok_or(ReadRouteError::ResultTooLarge)?;
-            if charged > self.limits.bytes - self.usage.bytes {
-                return Err(ReadRouteError::Overloaded);
-            }
-            let sequence = self
-                .sequence
-                .checked_add(1)
-                .ok_or(ReadRouteError::Exhausted)?;
-            let core = owner
-                .core(barrier.group())
-                .ok_or(ReadRouteError::WrongBinding)?;
-            application
-                .validate_group(barrier.group())
-                .map_err(ReadRouteError::Application)?;
-            if application.applied_index() > core.state().commit_index {
-                return Err(ReadRouteError::Application(ApplicationError::NotApplied));
-            }
-            Ok((barrier, bound, charged, sequence))
-        })();
+        let checked = self.check_submit(owner, &lease, application, &query);
         let (barrier, bound, charged, sequence) = match checked {
             Ok(v) => v,
             Err(reason) => {

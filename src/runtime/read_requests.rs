@@ -232,6 +232,82 @@ impl<Q, R> ReadRequests<Q, R> {
     pub fn is_drained(&self) -> bool {
         self.pending.is_empty() && self.execution.is_drained()
     }
+    fn check_submit<
+        A: BoundedReadableStateMachine<Query = Q, ReadResult = R>,
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &self,
+        owner: &EffectOwner<S, T, E>,
+        application: &A,
+        group: GroupIdentity,
+        query: &Q,
+    ) -> Result<(usize, usize, usize, u64, ReadRequestId, u64), ReadInvocationError> {
+        if self.closed {
+            return Err(ReadInvocationError::Closed);
+        }
+        if owner.identity() != self.binding.owner {
+            return Err(ReadInvocationError::WrongBinding);
+        }
+        if owner.is_failed() {
+            return Err(ReadInvocationError::Fenced);
+        }
+        let core = owner.core(group).ok_or(ReadInvocationError::UnknownGroup)?;
+        if core.role() != Role::Leader {
+            return Err(ReadInvocationError::Consensus(RaftError::NotLeader));
+        }
+        if self.active.contains_key(&group) {
+            return Err(ReadInvocationError::InFlight);
+        }
+        if self.usage.requests == self.limits.requests
+            || self.groups.get(&group).copied().unwrap_or(0) >= self.limits.group_requests
+        {
+            return Err(ReadInvocationError::Overloaded);
+        }
+        if application.applied_index() > core.state().commit_index {
+            return Err(ReadInvocationError::Application(
+                ApplicationError::NotApplied,
+            ));
+        }
+        let nested = application
+            .query_bytes(query, self.limits.query_bytes)
+            .map_err(ReadInvocationError::Application)?;
+        let bound = application
+            .read_result_bound(query)
+            .map_err(ReadInvocationError::Application)?;
+        if nested > self.limits.query_bytes
+            || bound < size_of::<R>()
+            || bound > self.limits.result_bytes
+        {
+            return Err(ReadInvocationError::TooLarge);
+        }
+        let charged = nested
+            .checked_add(bound)
+            .and_then(|n| n.checked_add(size_of::<Pending<Q, R>>()))
+            .ok_or(ReadInvocationError::TooLarge)?;
+        if charged > self.limits.bytes - self.usage.bytes {
+            return Err(ReadInvocationError::Overloaded);
+        }
+        let sequence = self
+            .sequence
+            .checked_add(1)
+            .ok_or(ReadInvocationError::Exhausted)?;
+        let request = core
+            .read_request_floor()
+            .checked_add(1)
+            .map(|n| n.max(sequence))
+            .and_then(ReadRequestId::new)
+            .ok_or(ReadInvocationError::Exhausted)?;
+        Ok((
+            nested,
+            bound,
+            charged,
+            sequence,
+            request,
+            core.state().hard_state.term,
+        ))
+    }
     pub fn submit<
         A: BoundedReadableStateMachine<Query = Q, ReadResult = R>,
         S: ReadyScheduler,
@@ -244,71 +320,7 @@ impl<Q, R> ReadRequests<Q, R> {
         group: GroupIdentity,
         query: Q,
     ) -> Result<ReadInvocationTicket, ReadInvocationRejected<Q>> {
-        let checked = (|| {
-            if self.closed {
-                return Err(ReadInvocationError::Closed);
-            }
-            if owner.identity() != self.binding.owner {
-                return Err(ReadInvocationError::WrongBinding);
-            }
-            if owner.is_failed() {
-                return Err(ReadInvocationError::Fenced);
-            }
-            let core = owner.core(group).ok_or(ReadInvocationError::UnknownGroup)?;
-            if core.role() != Role::Leader {
-                return Err(ReadInvocationError::Consensus(RaftError::NotLeader));
-            }
-            if self.active.contains_key(&group) {
-                return Err(ReadInvocationError::InFlight);
-            }
-            if self.usage.requests == self.limits.requests
-                || self.groups.get(&group).copied().unwrap_or(0) >= self.limits.group_requests
-            {
-                return Err(ReadInvocationError::Overloaded);
-            }
-            if application.applied_index() > core.state().commit_index {
-                return Err(ReadInvocationError::Application(
-                    ApplicationError::NotApplied,
-                ));
-            }
-            let nested = application
-                .query_bytes(&query, self.limits.query_bytes)
-                .map_err(ReadInvocationError::Application)?;
-            let bound = application
-                .read_result_bound(&query)
-                .map_err(ReadInvocationError::Application)?;
-            if nested > self.limits.query_bytes
-                || bound < size_of::<R>()
-                || bound > self.limits.result_bytes
-            {
-                return Err(ReadInvocationError::TooLarge);
-            }
-            let charged = nested
-                .checked_add(bound)
-                .and_then(|n| n.checked_add(size_of::<Pending<Q, R>>()))
-                .ok_or(ReadInvocationError::TooLarge)?;
-            if charged > self.limits.bytes - self.usage.bytes {
-                return Err(ReadInvocationError::Overloaded);
-            }
-            let sequence = self
-                .sequence
-                .checked_add(1)
-                .ok_or(ReadInvocationError::Exhausted)?;
-            let request = core
-                .read_request_floor()
-                .checked_add(1)
-                .map(|n| n.max(sequence))
-                .and_then(ReadRequestId::new)
-                .ok_or(ReadInvocationError::Exhausted)?;
-            Ok((
-                nested,
-                bound,
-                charged,
-                sequence,
-                request,
-                core.state().hard_state.term,
-            ))
-        })();
+        let checked = self.check_submit(owner, application, group, &query);
         let (query_bound, result_bound, charged, sequence, request, term) = match checked {
             Ok(v) => v,
             Err(reason) => {
@@ -469,6 +481,31 @@ impl<Q, R> ReadRequests<Q, R> {
         );
         Ok(())
     }
+    fn check_execution<S: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &self,
+        owner: &EffectOwner<S, T, E>,
+        lease: &EffectLease,
+    ) -> Result<(u64, ReadBarrier), ReadInvocationError> {
+        if owner.identity() != self.binding.owner {
+            return Err(ReadInvocationError::WrongBinding);
+        }
+        owner
+            .validate_lease(lease)
+            .map_err(|e| ReadInvocationError::Execution(ReadRouteError::Owner(e)))?;
+        let Effect::ReadReady(barrier) = lease.effect else {
+            return Err(ReadInvocationError::Execution(ReadRouteError::WrongEffect));
+        };
+        let sequence = self
+            .active
+            .get(&barrier.group())
+            .copied()
+            .ok_or(ReadInvocationError::StaleTicket)?;
+        let p = &self.pending[&sequence];
+        if !p.stepped || p.ticket.request != barrier.request() || p.terminal {
+            return Err(ReadInvocationError::StaleTicket);
+        }
+        Ok((sequence, barrier))
+    }
     /// Execute only the query owned by the original read invocation. A cancelled
     /// wait consumes its ready lease without requiring application catchup.
     pub fn execute<
@@ -483,27 +520,7 @@ impl<Q, R> ReadRequests<Q, R> {
         application: &A,
         now: MonoTime,
     ) -> Result<(), ReadExecutionError> {
-        let checked = (|| {
-            if owner.identity() != self.binding.owner {
-                return Err(ReadInvocationError::WrongBinding);
-            }
-            owner
-                .validate_lease(&lease)
-                .map_err(|e| ReadInvocationError::Execution(ReadRouteError::Owner(e)))?;
-            let Effect::ReadReady(barrier) = lease.effect else {
-                return Err(ReadInvocationError::Execution(ReadRouteError::WrongEffect));
-            };
-            let sequence = self
-                .active
-                .get(&barrier.group())
-                .copied()
-                .ok_or(ReadInvocationError::StaleTicket)?;
-            let p = &self.pending[&sequence];
-            if !p.stepped || p.ticket.request != barrier.request() || p.terminal {
-                return Err(ReadInvocationError::StaleTicket);
-            }
-            Ok((sequence, barrier))
-        })();
+        let checked = self.check_execution(owner, &lease);
         let (sequence, barrier) = match checked {
             Ok(v) => v,
             Err(reason) => {

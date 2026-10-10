@@ -220,44 +220,7 @@ where
             if parts.peers.is_some() && parts.local.snapshots.is_none() {
                 return Err(NodeError::MissingSnapshots);
             }
-            for group in parts.local.owner.groups() {
-                let core = parts.local.owner.core(group).unwrap();
-                if core.configuration_replication_enabled()
-                    && parts
-                        .peers
-                        .as_ref()
-                        .is_none_or(|p| p.roster.wire_version() < 2)
-                {
-                    return Err(NodeError::IncompatiblePeerProtocol);
-                }
-                if core.learner_repair_wire_version().is_some_and(|version| {
-                    parts
-                        .peers
-                        .as_ref()
-                        .is_none_or(|p| p.roster.wire_version() != version)
-                }) {
-                    return Err(NodeError::IncompatiblePeerProtocol);
-                }
-                if core.state().base_index() > 0 && parts.local.snapshots.is_none() {
-                    return Err(NodeError::MissingSnapshots);
-                }
-                let connection_peers = core
-                    .connection_replicas(65536)
-                    .map_err(|e| NodeError::Owner(EffectOwnerError::Consensus(e)))?;
-                for (peer, store) in connection_peers {
-                    if peer == core.local_node() {
-                        continue;
-                    }
-                    let network = parts.peers.as_ref().ok_or(NodeError::MissingPeers)?;
-                    if network
-                        .roster
-                        .peer_identity(peer)
-                        .is_none_or(|p| p.store != store)
-                    {
-                        return Err(NodeError::WrongPeerStore);
-                    }
-                }
-            }
+            Self::validate_group_parts(&parts)?;
             let budget = parts
                 .peers
                 .as_ref()
@@ -338,6 +301,47 @@ where
             failure: None,
             configuration,
         })
+    }
+    fn validate_group_parts(parts: &NodeParts<S, T, E, A, W, O, H, C, F>) -> Result<(), NodeError> {
+        for group in parts.local.owner.groups() {
+            let core = parts.local.owner.core(group).unwrap();
+            if core.configuration_replication_enabled()
+                && parts
+                    .peers
+                    .as_ref()
+                    .is_none_or(|p| p.roster.wire_version() < 2)
+            {
+                return Err(NodeError::IncompatiblePeerProtocol);
+            }
+            if core.learner_repair_wire_version().is_some_and(|version| {
+                parts
+                    .peers
+                    .as_ref()
+                    .is_none_or(|p| p.roster.wire_version() != version)
+            }) {
+                return Err(NodeError::IncompatiblePeerProtocol);
+            }
+            if core.state().base_index() > 0 && parts.local.snapshots.is_none() {
+                return Err(NodeError::MissingSnapshots);
+            }
+            let connection_peers = core
+                .connection_replicas(65536)
+                .map_err(|e| NodeError::Owner(EffectOwnerError::Consensus(e)))?;
+            for (peer, store) in connection_peers {
+                if peer == core.local_node() {
+                    continue;
+                }
+                let network = parts.peers.as_ref().ok_or(NodeError::MissingPeers)?;
+                if network
+                    .roster
+                    .peer_identity(peer)
+                    .is_none_or(|p| p.store != store)
+                {
+                    return Err(NodeError::WrongPeerStore);
+                }
+            }
+        }
+        Ok(())
     }
     pub fn state(&self) -> NodeState {
         self.state
@@ -777,41 +781,7 @@ where
                 &mut self.local.as_parts(),
                 now,
                 budget.replica,
-                |core, event| {
-                    let Event::Configure(proposal) = event else {
-                        return Ok(());
-                    };
-                    authorize(core, proposal).map_err(RaftError::from)?;
-                    if network.is_none() {
-                        use crate::membership::ConfigurationChange;
-                        if matches!(&proposal.record.change,
-                            ConfigurationChange::Learners(next) | ConfigurationChange::Joint { next, .. }
-                            if next.voter_stores().keys().chain(next.learners().keys()).any(|n| *n != core.local_node())) {
-                            return Err(ConfigurationProposalError::MissingPeerTransport.into());
-                        }
-                    }
-                    if network.is_some_and(|p| p.roster().wire_version() < 2) {
-                        return Err(ConfigurationProposalError::UnsupportedWireVersion(
-                            network.unwrap().roster().wire_version(),
-                        )
-                        .into());
-                    }
-                    for proof in &proposal.readiness {
-                        let request = proof.ready.request();
-                        let binding =
-                            network.and_then(|p| p.roster().binding(request.learner.node));
-                        if !binding.is_some_and(|b| {
-                            b.wire_version >= 4 && b.peer.store == proof.authenticated
-                        }) {
-                            return Err(ConfigurationProposalError::AuthenticationRequired.into());
-                        }
-                    }
-                    if let Some(network) = network {
-                        network.configuration_capacity(core, proposal)
-                            .map_err(ConfigurationProposalError::TransportCapacity)?;
-                    }
-                    Ok(())
-                },
+                |core, event| Self::authorize_configuration(network, core, event, authorize),
             )
             .map_err(NodeError::Replica)?;
         self.configuration
@@ -864,6 +834,49 @@ where
             replica: Some(replica),
             peers,
         })
+    }
+    fn authorize_configuration(
+        network: Option<&PeerDriver<C, F>>,
+        core: &Raft,
+        event: &Event,
+        authorize: &mut impl FnMut(
+            &Raft,
+            &ConfigurationProposal,
+        ) -> Result<(), ConfigurationProposalError>,
+    ) -> Result<(), RaftError> {
+        let Event::Configure(proposal) = event else {
+            return Ok(());
+        };
+        authorize(core, proposal).map_err(RaftError::from)?;
+        if network.is_none() {
+            use crate::membership::ConfigurationChange;
+            if matches!(&proposal.record.change,
+                            ConfigurationChange::Learners(next) | ConfigurationChange::Joint { next, .. }
+                            if next.voter_stores().keys().chain(next.learners().keys()).any(|n| *n != core.local_node()))
+            {
+                return Err(ConfigurationProposalError::MissingPeerTransport.into());
+            }
+        }
+        if network.is_some_and(|p| p.roster().wire_version() < 2) {
+            return Err(ConfigurationProposalError::UnsupportedWireVersion(
+                network.unwrap().roster().wire_version(),
+            )
+            .into());
+        }
+        for proof in &proposal.readiness {
+            let request = proof.ready.request();
+            let binding = network.and_then(|p| p.roster().binding(request.learner.node));
+            if !binding.is_some_and(|b| b.wire_version >= 4 && b.peer.store == proof.authenticated)
+            {
+                return Err(ConfigurationProposalError::AuthenticationRequired.into());
+            }
+        }
+        if let Some(network) = network {
+            network
+                .configuration_capacity(core, proposal)
+                .map_err(ConfigurationProposalError::TransportCapacity)?;
+        }
+        Ok(())
     }
     fn enter_recovery(&mut self, reason: NodeError) {
         // Both aborts preserve previously produced/consumer-held results, and

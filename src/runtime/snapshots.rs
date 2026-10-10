@@ -115,6 +115,116 @@ impl SnapshotRouter {
     pub fn is_drained(&self) -> bool {
         self.pending.is_empty()
     }
+    fn prepare_work<
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        W: SnapshotWorker + ?Sized,
+        A: CheckpointStateMachine,
+    >(
+        &self,
+        owner: &mut EffectOwner<Q, T, E>,
+        worker: &W,
+        lease: &EffectLease,
+        application: &A,
+    ) -> Result<(usize, SnapshotWork), SnapshotRouteError> {
+        if owner.identity() != self.owner {
+            return Err(SnapshotRouteError::WrongOwner);
+        }
+        if worker.binding() != self.worker {
+            return Err(SnapshotRouteError::WrongWorker);
+        }
+        owner
+            .validate_lease(lease)
+            .map_err(SnapshotRouteError::Owner)?;
+        application
+            .validate_group(lease.ticket.visit.group)
+            .map_err(|e| SnapshotRouteError::Checkpoint(CheckpointError::Application(e)))?;
+        if !matches!(
+            lease.effect,
+            Effect::VerifyLearnerReadiness(_)
+                | Effect::StageSnapshot(_)
+                | Effect::SnapshotRequired { .. }
+                | Effect::SnapshotInstalled(_)
+                | Effect::CheckpointRequired { .. }
+                | Effect::CheckpointCompacted(_)
+        ) {
+            return Err(SnapshotRouteError::NotSnapshot);
+        }
+        if self.pending.len() >= self.limits.requests {
+            return Err(SnapshotRouteError::Overloaded);
+        }
+        if self
+            .pending
+            .values()
+            .any(|p| p.lease.ticket.visit.group == lease.ticket.visit.group)
+        {
+            return Err(SnapshotRouteError::Owner(EffectOwnerError::StaleEffect));
+        }
+        let allowance = worker
+            .load_reservation(lease.ticket.visit.group)
+            .ok_or(SnapshotRouteError::WrongWorker)?;
+        if allowance == 0 || allowance > self.limits.max_image_bytes {
+            return Err(SnapshotRouteError::TooLarge);
+        }
+        if let Effect::StageSnapshot(message) = &lease.effect {
+            if let Rpc::Snapshot { snapshot } = &message.rpc {
+                if snapshot_image_bytes(snapshot).is_none_or(|n| n > allowance) {
+                    return Err(SnapshotRouteError::TooLarge);
+                }
+            }
+        }
+        // Reserve before cloning a Publish image or polling a Load result.
+        // The minimum avoids repeatedly charging a rejected lease on retry.
+        // Readiness can retain the loaded anchor and a live application
+        // checkpoint simultaneously during deterministic owner validation.
+        let extra = allowance
+            .checked_mul(
+                if matches!(lease.effect, Effect::VerifyLearnerReadiness(_)) {
+                    2
+                } else {
+                    1
+                },
+            )
+            .ok_or(SnapshotRouteError::TooLarge)?
+            .checked_add(4096)
+            .ok_or(SnapshotRouteError::TooLarge)?;
+        owner
+            .reserve_snapshot(lease, extra)
+            .map_err(SnapshotRouteError::Owner)?;
+        let core = owner.core(lease.ticket.visit.group).unwrap();
+        let work = if let Effect::CheckpointRequired { context } = &lease.effect {
+            let max_bytes = worker
+                .checkpoint_bytes(lease.ticket.visit.group)
+                .filter(|n| *n > 0 && *n <= allowance)
+                .ok_or(SnapshotRouteError::TooLarge)?;
+            let work = prepare_local_checkpoint_work(
+                core,
+                application,
+                lease.ticket.visit,
+                *context,
+                self.worker,
+                max_bytes,
+            )
+            .map_err(SnapshotRouteError::Checkpoint)?;
+            if let SnapshotJob::Publish { snapshot, .. } = &work.job {
+                if snapshot_image_bytes(snapshot).is_none_or(|n| n > allowance) {
+                    return Err(SnapshotRouteError::TooLarge);
+                }
+            }
+            work
+        } else {
+            prepare_snapshot_work(
+                core,
+                application,
+                lease.ticket.visit,
+                &lease.effect,
+                self.worker,
+            )
+            .map_err(SnapshotRouteError::Checkpoint)?
+        };
+        Ok((allowance, work))
+    }
     pub fn submit<
         Q: ReadyScheduler,
         T: TimerService,
@@ -128,104 +238,7 @@ impl SnapshotRouter {
         lease: EffectLease,
         application: &A,
     ) -> Result<SnapshotWorkTicket, SnapshotRouteRejected> {
-        let checked = (|| {
-            if owner.identity() != self.owner {
-                return Err(SnapshotRouteError::WrongOwner);
-            }
-            if worker.binding() != self.worker {
-                return Err(SnapshotRouteError::WrongWorker);
-            }
-            owner
-                .validate_lease(&lease)
-                .map_err(SnapshotRouteError::Owner)?;
-            application
-                .validate_group(lease.ticket.visit.group)
-                .map_err(|e| SnapshotRouteError::Checkpoint(CheckpointError::Application(e)))?;
-            if !matches!(
-                lease.effect,
-                Effect::VerifyLearnerReadiness(_)
-                    | Effect::StageSnapshot(_)
-                    | Effect::SnapshotRequired { .. }
-                    | Effect::SnapshotInstalled(_)
-                    | Effect::CheckpointRequired { .. }
-                    | Effect::CheckpointCompacted(_)
-            ) {
-                return Err(SnapshotRouteError::NotSnapshot);
-            }
-            if self.pending.len() >= self.limits.requests {
-                return Err(SnapshotRouteError::Overloaded);
-            }
-            if self
-                .pending
-                .values()
-                .any(|p| p.lease.ticket.visit.group == lease.ticket.visit.group)
-            {
-                return Err(SnapshotRouteError::Owner(EffectOwnerError::StaleEffect));
-            }
-            let allowance = worker
-                .load_reservation(lease.ticket.visit.group)
-                .ok_or(SnapshotRouteError::WrongWorker)?;
-            if allowance == 0 || allowance > self.limits.max_image_bytes {
-                return Err(SnapshotRouteError::TooLarge);
-            }
-            if let Effect::StageSnapshot(message) = &lease.effect {
-                if let Rpc::Snapshot { snapshot } = &message.rpc {
-                    if snapshot_image_bytes(snapshot).is_none_or(|n| n > allowance) {
-                        return Err(SnapshotRouteError::TooLarge);
-                    }
-                }
-            }
-            // Reserve before cloning a Publish image or polling a Load result.
-            // The minimum avoids repeatedly charging a rejected lease on retry.
-            // Readiness can retain the loaded anchor and a live application
-            // checkpoint simultaneously during deterministic owner validation.
-            let extra = allowance
-                .checked_mul(
-                    if matches!(lease.effect, Effect::VerifyLearnerReadiness(_)) {
-                        2
-                    } else {
-                        1
-                    },
-                )
-                .ok_or(SnapshotRouteError::TooLarge)?
-                .checked_add(4096)
-                .ok_or(SnapshotRouteError::TooLarge)?;
-            owner
-                .reserve_snapshot(&lease, extra)
-                .map_err(SnapshotRouteError::Owner)?;
-            let core = owner.core(lease.ticket.visit.group).unwrap();
-            let work = if let Effect::CheckpointRequired { context } = &lease.effect {
-                let max_bytes = worker
-                    .checkpoint_bytes(lease.ticket.visit.group)
-                    .filter(|n| *n > 0 && *n <= allowance)
-                    .ok_or(SnapshotRouteError::TooLarge)?;
-                let work = prepare_local_checkpoint_work(
-                    core,
-                    application,
-                    lease.ticket.visit,
-                    *context,
-                    self.worker,
-                    max_bytes,
-                )
-                .map_err(SnapshotRouteError::Checkpoint)?;
-                if let SnapshotJob::Publish { snapshot, .. } = &work.job {
-                    if snapshot_image_bytes(snapshot).is_none_or(|n| n > allowance) {
-                        return Err(SnapshotRouteError::TooLarge);
-                    }
-                }
-                work
-            } else {
-                prepare_snapshot_work(
-                    core,
-                    application,
-                    lease.ticket.visit,
-                    &lease.effect,
-                    self.worker,
-                )
-                .map_err(SnapshotRouteError::Checkpoint)?
-            };
-            Ok((allowance, work))
-        })();
+        let checked = self.prepare_work(owner, worker, &lease, application);
         let (allowance, work) = match checked {
             Ok(v) => v,
             Err(reason) => {

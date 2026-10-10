@@ -15,7 +15,7 @@
 //! Bounded application outcomes; persistence and core commitment remain separate.
 use super::*;
 use crate::application::*;
-use crate::log::EntryPayload;
+use crate::log::{EntryPayload, LogEntry};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ApplicationRouterBinding {
@@ -195,6 +195,94 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
     pub fn is_drained(&self) -> bool {
         self.held.is_empty()
     }
+    fn check_submit<
+        A: BoundedStateMachine<Receipt = R>,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &self,
+        owner: &EffectOwner<Q, T, E>,
+        lease: &EffectLease,
+        application: &A,
+    ) -> Result<(usize, usize, usize, bool, u64, u64), ApplicationRouteError> {
+        if self.failed {
+            return Err(ApplicationRouteError::Fenced);
+        }
+        if self.closed {
+            return Err(ApplicationRouteError::Closed);
+        }
+        if owner.identity() != self.binding.owner {
+            return Err(ApplicationRouteError::WrongBinding);
+        }
+        owner
+            .validate_lease(lease)
+            .map_err(ApplicationRouteError::Owner)?;
+        let Effect::Committed(entries) = &lease.effect else {
+            return Err(ApplicationRouteError::WrongEffect);
+        };
+        let Some(first) = entries.first() else {
+            return Err(ApplicationRouteError::WrongEffect);
+        };
+        let through = entries.last().unwrap().index;
+        let state = owner.core(lease.ticket.visit.group).unwrap().state();
+        application
+            .validate_group(state.bootstrap.group)
+            .map_err(ApplicationRouteError::Application)?;
+        if through > state.commit_index
+            || entries.iter().any(|e| state.entry_at(e.index) != Some(e))
+        {
+            return Err(ApplicationRouteError::WrongEffect);
+        }
+        if application.applied_index().checked_add(1) != Some(first.index)
+            || entries
+                .windows(2)
+                .any(|e| e[0].index.checked_add(1) != Some(e[1].index))
+        {
+            return Err(ApplicationRouteError::Application(
+                ApplicationError::IndexGap,
+            ));
+        }
+        let count = entries
+            .iter()
+            .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
+            .count();
+        if count > self.limits.batch_receipts {
+            return Err(ApplicationRouteError::ResultTooLarge);
+        }
+        let bound = application
+            .receipt_bytes_bound(entries)
+            .map_err(ApplicationRouteError::Application)?;
+        if bound > self.limits.batch_bytes
+            || count.checked_mul(size_of::<R>()).is_none_or(|n| n > bound)
+        {
+            return Err(ApplicationRouteError::ResultTooLarge);
+        }
+        let bytes = bound
+            .checked_add(
+                count
+                    .checked_mul(size_of::<ProposalPosition>())
+                    .ok_or(ApplicationRouteError::ResultTooLarge)?,
+            )
+            .and_then(|n| n.checked_add(size_of::<Held<R>>()))
+            .ok_or(ApplicationRouteError::ResultTooLarge)?;
+        let control = count == 0;
+        let l = self.limits;
+        if self.usage.batches >= l.batches
+            || count > l.receipts - self.usage.receipts
+            || bytes > l.bytes - self.usage.bytes
+            || (!control
+                && (self.bulk.batches >= l.batches - l.control_batches
+                    || bytes > (l.bytes - l.control_bytes).saturating_sub(self.bulk.bytes)))
+        {
+            return Err(ApplicationRouteError::Overloaded);
+        }
+        let sequence = self
+            .sequence
+            .checked_add(1)
+            .ok_or(ApplicationRouteError::Exhausted)?;
+        Ok((count, bound, bytes, control, sequence, through))
+    }
     pub fn submit<
         A: BoundedStateMachine<Receipt = R>,
         Q: ReadyScheduler,
@@ -207,84 +295,7 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         application: &mut A,
         now: MonoTime,
     ) -> Result<ApplicationResultTicket, ApplicationRouteRejected> {
-        let preflight = (|| {
-            if self.failed {
-                return Err(ApplicationRouteError::Fenced);
-            }
-            if self.closed {
-                return Err(ApplicationRouteError::Closed);
-            }
-            if owner.identity() != self.binding.owner {
-                return Err(ApplicationRouteError::WrongBinding);
-            }
-            owner
-                .validate_lease(&lease)
-                .map_err(ApplicationRouteError::Owner)?;
-            let Effect::Committed(entries) = &lease.effect else {
-                return Err(ApplicationRouteError::WrongEffect);
-            };
-            let Some(first) = entries.first() else {
-                return Err(ApplicationRouteError::WrongEffect);
-            };
-            let through = entries.last().unwrap().index;
-            let state = owner.core(lease.ticket.visit.group).unwrap().state();
-            application
-                .validate_group(state.bootstrap.group)
-                .map_err(ApplicationRouteError::Application)?;
-            if through > state.commit_index
-                || entries.iter().any(|e| state.entry_at(e.index) != Some(e))
-            {
-                return Err(ApplicationRouteError::WrongEffect);
-            }
-            if application.applied_index().checked_add(1) != Some(first.index)
-                || entries
-                    .windows(2)
-                    .any(|e| e[0].index.checked_add(1) != Some(e[1].index))
-            {
-                return Err(ApplicationRouteError::Application(
-                    ApplicationError::IndexGap,
-                ));
-            }
-            let count = entries
-                .iter()
-                .filter(|e| matches!(e.payload, EntryPayload::Command { .. }))
-                .count();
-            if count > self.limits.batch_receipts {
-                return Err(ApplicationRouteError::ResultTooLarge);
-            }
-            let bound = application
-                .receipt_bytes_bound(entries)
-                .map_err(ApplicationRouteError::Application)?;
-            if bound > self.limits.batch_bytes
-                || count.checked_mul(size_of::<R>()).is_none_or(|n| n > bound)
-            {
-                return Err(ApplicationRouteError::ResultTooLarge);
-            }
-            let bytes = bound
-                .checked_add(
-                    count
-                        .checked_mul(size_of::<ProposalPosition>())
-                        .ok_or(ApplicationRouteError::ResultTooLarge)?,
-                )
-                .and_then(|n| n.checked_add(size_of::<Held<R>>()))
-                .ok_or(ApplicationRouteError::ResultTooLarge)?;
-            let control = count == 0;
-            let l = self.limits;
-            if self.usage.batches >= l.batches
-                || count > l.receipts - self.usage.receipts
-                || bytes > l.bytes - self.usage.bytes
-                || (!control
-                    && (self.bulk.batches >= l.batches - l.control_batches
-                        || bytes > (l.bytes - l.control_bytes).saturating_sub(self.bulk.bytes)))
-            {
-                return Err(ApplicationRouteError::Overloaded);
-            }
-            let sequence = self
-                .sequence
-                .checked_add(1)
-                .ok_or(ApplicationRouteError::Exhausted)?;
-            Ok((count, bound, bytes, control, sequence, through))
-        })();
+        let preflight = self.check_submit(owner, &lease, application);
         let (count, bound, bytes, control, sequence, through) = match preflight {
             Ok(v) => v,
             Err(reason) => {
@@ -311,29 +322,14 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
                 });
             }
         };
-        let valid = (|| {
-            if application.applied_index() != through || receipts.len() != count {
-                return None;
-            }
-            let mut retained = receipts.capacity().checked_mul(size_of::<R>())?;
-            if retained > bound {
-                return None;
-            }
-            let mut expected = entries.iter().filter_map(|e| match e.payload {
-                EntryPayload::Command { operation, .. } => Some((e.index, operation)),
-                _ => None,
-            });
-            for receipt in &receipts {
-                if expected.next() != Some((receipt.index(), receipt.operation())) {
-                    return None;
-                }
-                retained = retained.checked_add(receipt.nested_bytes(bound - retained).ok()?)?;
-                if retained > bound {
-                    return None;
-                }
-            }
-            Some(())
-        })()
+        let valid = Self::validate_receipts(
+            application.applied_index(),
+            through,
+            &receipts,
+            entries,
+            count,
+            bound,
+        )
         .is_some();
         if !valid {
             self.failed = true;
@@ -400,6 +396,36 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         );
         self.ready.push_back(sequence);
         Ok(ticket)
+    }
+    fn validate_receipts(
+        applied: u64,
+        through: u64,
+        receipts: &Vec<R>,
+        entries: &[LogEntry],
+        count: usize,
+        bound: usize,
+    ) -> Option<()> {
+        if applied != through || receipts.len() != count {
+            return None;
+        }
+        let mut retained = receipts.capacity().checked_mul(size_of::<R>())?;
+        if retained > bound {
+            return None;
+        }
+        let mut expected = entries.iter().filter_map(|e| match e.payload {
+            EntryPayload::Command { operation, .. } => Some((e.index, operation)),
+            _ => None,
+        });
+        for receipt in receipts {
+            if expected.next() != Some((receipt.index(), receipt.operation())) {
+                return None;
+            }
+            retained = retained.checked_add(receipt.nested_bytes(bound - retained).ok()?)?;
+            if retained > bound {
+                return None;
+            }
+        }
+        Some(())
     }
     pub fn poll(&mut self) -> Option<ApplicationResults<R>> {
         let sequence = self.ready.pop_front()?;

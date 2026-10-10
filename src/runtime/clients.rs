@@ -204,6 +204,78 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
     pub fn is_drained(&self) -> bool {
         self.pending.is_empty()
     }
+    fn check_submit<
+        A: ProposalAdmission<Receipt = R>,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &self,
+        owner: &EffectOwner<Q, T, E>,
+        application: &A,
+        request: &ClientRequest,
+    ) -> Result<(usize, usize, u64, u64), ClientError> {
+        if self.closed {
+            return Err(ClientError::Closed);
+        }
+        if owner.identity() != self.binding.owner {
+            return Err(ClientError::WrongBinding);
+        }
+        if owner.is_failed() {
+            return Err(ClientError::Fenced);
+        }
+        let core = owner.core(request.group).ok_or(ClientError::UnknownGroup)?;
+        if core.role() != Role::Leader {
+            return Err(ClientError::Consensus(RaftError::NotLeader));
+        }
+        if request.bytes.len() > self.limits.command_bytes
+            || request.bytes.capacity() > self.limits.bytes
+        {
+            return Err(ClientError::RequestTooLarge);
+        }
+        if self.usage.requests >= self.limits.requests
+            || self.groups.get(&request.group).copied().unwrap_or(0) >= self.limits.group_requests
+        {
+            return Err(ClientError::Overloaded);
+        }
+        let state = core.state();
+        if application.applied_index() < state.base_index()
+            || application.applied_index() > state.commit_index
+        {
+            return Err(ClientError::Application(ApplicationError::NotApplied));
+        }
+        let log = state
+            .entries
+            .iter()
+            .filter(|e| e.index > application.applied_index())
+            .filter_map(|e| match &e.payload {
+                EntryPayload::Command { operation, bytes } => Some((*operation, bytes.as_slice())),
+                _ => None,
+            });
+        let queued = self
+            .pending
+            .values()
+            .filter(|p| p.ticket.group == request.group)
+            .map(|p| (p.ticket.operation, p.bytes.as_slice()));
+        let receipt_bound = application
+            .validate_proposal(request.operation, &request.bytes, log.chain(queued))
+            .map_err(ClientError::Application)?;
+        if receipt_bound < size_of::<R>() || receipt_bound > self.limits.receipt_bytes {
+            return Err(ClientError::RequestTooLarge);
+        }
+        let charged = request
+            .bytes
+            .capacity()
+            .checked_add(request.bytes.len())
+            .and_then(|n| n.checked_add(receipt_bound))
+            .and_then(|n| n.checked_add(size_of::<Pending<R>>()))
+            .ok_or(ClientError::RequestTooLarge)?;
+        if charged > self.limits.bytes - self.usage.bytes {
+            return Err(ClientError::Overloaded);
+        }
+        let sequence = self.sequence.checked_add(1).ok_or(ClientError::Exhausted)?;
+        Ok((receipt_bound, charged, sequence, state.hard_state.term))
+    }
     pub fn submit<
         A: ProposalAdmission<Receipt = R>,
         Q: ReadyScheduler,
@@ -215,71 +287,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         application: &A,
         request: ClientRequest,
     ) -> Result<ClientTicket, ClientRejected> {
-        let check = (|| {
-            if self.closed {
-                return Err(ClientError::Closed);
-            }
-            if owner.identity() != self.binding.owner {
-                return Err(ClientError::WrongBinding);
-            }
-            if owner.is_failed() {
-                return Err(ClientError::Fenced);
-            }
-            let core = owner.core(request.group).ok_or(ClientError::UnknownGroup)?;
-            if core.role() != Role::Leader {
-                return Err(ClientError::Consensus(RaftError::NotLeader));
-            }
-            if request.bytes.len() > self.limits.command_bytes
-                || request.bytes.capacity() > self.limits.bytes
-            {
-                return Err(ClientError::RequestTooLarge);
-            }
-            if self.usage.requests >= self.limits.requests
-                || self.groups.get(&request.group).copied().unwrap_or(0)
-                    >= self.limits.group_requests
-            {
-                return Err(ClientError::Overloaded);
-            }
-            let state = core.state();
-            if application.applied_index() < state.base_index()
-                || application.applied_index() > state.commit_index
-            {
-                return Err(ClientError::Application(ApplicationError::NotApplied));
-            }
-            let log = state
-                .entries
-                .iter()
-                .filter(|e| e.index > application.applied_index())
-                .filter_map(|e| match &e.payload {
-                    EntryPayload::Command { operation, bytes } => {
-                        Some((*operation, bytes.as_slice()))
-                    }
-                    _ => None,
-                });
-            let queued = self
-                .pending
-                .values()
-                .filter(|p| p.ticket.group == request.group)
-                .map(|p| (p.ticket.operation, p.bytes.as_slice()));
-            let receipt_bound = application
-                .validate_proposal(request.operation, &request.bytes, log.chain(queued))
-                .map_err(ClientError::Application)?;
-            if receipt_bound < size_of::<R>() || receipt_bound > self.limits.receipt_bytes {
-                return Err(ClientError::RequestTooLarge);
-            }
-            let charged = request
-                .bytes
-                .capacity()
-                .checked_add(request.bytes.len())
-                .and_then(|n| n.checked_add(receipt_bound))
-                .and_then(|n| n.checked_add(size_of::<Pending<R>>()))
-                .ok_or(ClientError::RequestTooLarge)?;
-            if charged > self.limits.bytes - self.usage.bytes {
-                return Err(ClientError::Overloaded);
-            }
-            let sequence = self.sequence.checked_add(1).ok_or(ClientError::Exhausted)?;
-            Ok((receipt_bound, charged, sequence, state.hard_state.term))
-        })();
+        let check = self.check_submit(owner, application, &request);
         let (receipt_bound, charged, sequence, term) = match check {
             Ok(v) => v,
             Err(reason) => return Err(ClientRejected { reason, request }),

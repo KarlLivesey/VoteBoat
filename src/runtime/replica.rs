@@ -439,7 +439,45 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<ReplicaProgress, ReplicaError> {
         let mut out = ReplicaProgress::default();
-        let reclaims = p.persistence.poll_reclaims(1);
+        self.poll_reclaims(p.persistence)?;
+        self.poll_snapshots(p, now, b.snapshot_events, &mut out)?;
+        let events = p.persistence.poll(b.worker_events);
+        if events.len() > b.worker_events {
+            return Err(ReplicaError::ProviderContract);
+        }
+        for event in events {
+            out.worker_events += 1;
+            p.owner
+                .deliver_worker(event, now)
+                .map_err(ReplicaError::Owner)?;
+        }
+        out.steps = p
+            .clients
+            .advance_authorized(
+                p.owner,
+                now,
+                b.steps,
+                |g| p.applications.get(&g),
+                configuration,
+            )
+            .map_err(ReplicaError::Client)?;
+        p.reads
+            .observe_steps(p.owner, &out.steps)
+            .map_err(ReplicaError::Read)?;
+        self.collect_effects(p.owner, b.effects, &mut out)?;
+        self.retry_effects(p, now, b.retries, &mut out)?;
+        self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
+        self.submit_batch(p.owner, p.persistence, now, false, &mut out)?;
+        p.clients
+            .reconcile(p.owner, b.reconcile)
+            .map_err(ReplicaError::Client)?;
+        p.reads
+            .reconcile(p.owner, b.reconcile)
+            .map_err(ReplicaError::Read)?;
+        Ok(out)
+    }
+    fn poll_reclaims<W: PersistenceWorker>(&mut self, worker: &mut W) -> Result<(), ReplicaError> {
+        let reclaims = worker.poll_reclaims(1);
         if reclaims.len() > 1 {
             return Err(ReplicaError::ProviderContract);
         }
@@ -468,9 +506,25 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
                 return Err(ReplicaError::Maintenance(e));
             }
         }
+        Ok(())
+    }
+    fn poll_snapshots<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        now: MonoTime,
+        limit: usize,
+        out: &mut ReplicaProgress,
+    ) -> Result<(), ReplicaError> {
         if let Some(s) = &mut p.snapshots {
-            let events = s.worker.poll(b.snapshot_events);
-            if events.len() > b.snapshot_events {
+            let events = s.worker.poll(limit);
+            if events.len() > limit {
                 return Err(ReplicaError::ProviderContract);
             }
             for event in events {
@@ -498,34 +552,19 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
                     .map_err(ReplicaError::Snapshot)?;
             }
         }
-        let events = p.persistence.poll(b.worker_events);
-        if events.len() > b.worker_events {
-            return Err(ReplicaError::ProviderContract);
-        }
-        for event in events {
-            out.worker_events += 1;
-            p.owner
-                .deliver_worker(event, now)
-                .map_err(ReplicaError::Owner)?;
-        }
-        out.steps = p
-            .clients
-            .advance_authorized(
-                p.owner,
-                now,
-                b.steps,
-                |g| p.applications.get(&g),
-                configuration,
-            )
-            .map_err(ReplicaError::Client)?;
-        p.reads
-            .observe_steps(p.owner, &out.steps)
-            .map_err(ReplicaError::Read)?;
-        for _ in 0..b.effects {
+        Ok(())
+    }
+    fn collect_effects<S: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &mut EffectOwner<S, T, E>,
+        limit: usize,
+        out: &mut ReplicaProgress,
+    ) -> Result<(), ReplicaError> {
+        for _ in 0..limit {
             if self.usage().leases() == self.limits.leases {
                 break;
             }
-            let Some(lease) = p.owner.take_effect().map_err(ReplicaError::Owner)? else {
+            let Some(lease) = owner.take_effect().map_err(ReplicaError::Owner)? else {
                 break;
             };
             out.effects += 1;
@@ -546,140 +585,208 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
                 self.retries.push_back(lease);
             }
         }
-        for _ in 0..self.retries.len().min(b.retries) {
-            let lease = self.retries.pop_front().unwrap();
-            out.retries += 1;
-            let group = lease.ticket.visit.group;
-            match &lease.effect {
-                Effect::Send(_) => {
-                    let EffectLease {
-                        ticket,
-                        effect: Effect::Send(message),
-                    } = lease
-                    else {
-                        unreachable!()
-                    };
-                    let peer = message.to;
-                    match p.outbound.submit(vec![message]) {
-                        Ok(accepted) => {
-                            if accepted.binding != self.binding.outbound
-                                || accepted.peer != peer
-                                || accepted.sequence == 0
-                            {
-                                let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
-                                p.owner
-                                    .discard_failed_transfer(ticket)
-                                    .map_err(ReplicaError::Owner)?;
-                                return Err(ReplicaError::ProviderContract);
-                            }
-                            if let Err(reason) = p.owner.release_transferred_send(ticket) {
-                                let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
-                                let _ = p.owner.discard_failed_transfer(ticket);
-                                return Err(ReplicaError::Owner(reason));
-                            }
-                            out.sends += 1;
-                        }
-                        Err(mut rejected) => {
-                            if rejected.messages.len() != 1 {
-                                let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
-                                p.owner
-                                    .discard_failed_transfer(ticket)
-                                    .map_err(ReplicaError::Owner)?;
-                                return Err(ReplicaError::ProviderContract);
-                            }
-                            self.retries.push_back(EffectLease {
-                                ticket,
-                                effect: Effect::Send(rejected.messages.remove(0)),
-                            });
-                            if rejected.reason != OutboundError::Overloaded {
-                                return Err(ReplicaError::Outbound(rejected.reason));
-                            }
-                        }
-                    }
+        Ok(())
+    }
+    fn retry_send<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        lease: EffectLease,
+        out: &mut ReplicaProgress,
+    ) -> Result<(), ReplicaError> {
+        let EffectLease {
+            ticket,
+            effect: Effect::Send(message),
+        } = lease
+        else {
+            unreachable!()
+        };
+        let peer = message.to;
+        match p.outbound.submit(vec![message]) {
+            Ok(accepted) => {
+                if accepted.binding != self.binding.outbound
+                    || accepted.peer != peer
+                    || accepted.sequence == 0
+                {
+                    let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
+                    p.owner
+                        .discard_failed_transfer(ticket)
+                        .map_err(ReplicaError::Owner)?;
+                    return Err(ReplicaError::ProviderContract);
                 }
-                Effect::Committed(_) => {
-                    let Some(app) = p.applications.get_mut(&group) else {
-                        self.retries.push_back(lease);
-                        return Err(ReplicaError::MissingApplication);
-                    };
-                    match p.results.submit(p.owner, lease, app, now) {
-                        Ok(_) => {
-                            let output = p.results.poll().ok_or(ReplicaError::ProviderContract)?;
-                            if let Err(rejected) = p.clients.deliver(p.owner, p.results, output) {
-                                self.failed_result = Some(*rejected.results);
-                                return Err(ReplicaError::Client(rejected.reason));
-                            }
-                            out.applications += 1;
-                        }
-                        Err(rejected) => {
-                            self.retries.push_back(*rejected.lease);
-                            if rejected.reason != ApplicationRouteError::Overloaded {
-                                return Err(ReplicaError::Application(rejected.reason));
-                            }
-                        }
-                    }
+                if let Err(reason) = p.owner.release_transferred_send(ticket) {
+                    let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
+                    let _ = p.owner.discard_failed_transfer(ticket);
+                    return Err(ReplicaError::Owner(reason));
                 }
-                Effect::ReadReady(_) => {
-                    let Some(app) = p.applications.get(&group) else {
-                        self.retries.push_back(lease);
-                        return Err(ReplicaError::MissingApplication);
-                    };
-                    match p.reads.execute(p.owner, lease, app, now) {
-                        Ok(()) => out.reads += 1,
-                        Err(ReadExecutionError::Rejected { reason, lease }) => {
-                            self.retries.push_back(*lease);
-                            if !matches!(
-                                reason,
-                                ReadInvocationError::Execution(
-                                    ReadRouteError::Overloaded
-                                        | ReadRouteError::Owner(EffectOwnerError::Consensus(
-                                            RaftError::NotApplied
-                                        ))
-                                )
-                            ) {
-                                return Err(ReplicaError::Read(reason));
-                            }
-                        }
-                        Err(ReadExecutionError::Failed { reason }) => {
-                            return Err(ReplicaError::Read(reason))
-                        }
-                    }
+                out.sends += 1;
+            }
+            Err(mut rejected) => {
+                if rejected.messages.len() != 1 {
+                    let _ = p.owner.fail::<()>(EffectOwnerError::ProviderContract);
+                    p.owner
+                        .discard_failed_transfer(ticket)
+                        .map_err(ReplicaError::Owner)?;
+                    return Err(ReplicaError::ProviderContract);
                 }
-                _ => {
-                    let Some(s) = &mut p.snapshots else {
-                        self.retries.push_back(lease);
-                        return Err(ReplicaError::MissingSnapshots);
-                    };
-                    let Some(app) = p.applications.get(&group) else {
-                        self.retries.push_back(lease);
-                        return Err(ReplicaError::MissingApplication);
-                    };
-                    match s.router.submit(p.owner, s.worker, lease, app) {
-                        Ok(_) => (),
-                        Err(rejected) => {
-                            self.retries.push_back(*rejected.lease);
-                            if !matches!(
-                                rejected.reason,
-                                SnapshotRouteError::Overloaded
-                                    | SnapshotRouteError::Worker(SnapshotWorkError::Overloaded)
-                                    | SnapshotRouteError::Owner(EffectOwnerError::Overloaded)
-                            ) {
-                                return Err(ReplicaError::Snapshot(rejected.reason));
-                            }
-                        }
-                    }
+                self.retries.push_back(EffectLease {
+                    ticket,
+                    effect: Effect::Send(rejected.messages.remove(0)),
+                });
+                if rejected.reason != OutboundError::Overloaded {
+                    return Err(ReplicaError::Outbound(rejected.reason));
                 }
             }
         }
-        self.submit_batch(p.owner, p.persistence, now, true, &mut out)?;
-        self.submit_batch(p.owner, p.persistence, now, false, &mut out)?;
-        p.clients
-            .reconcile(p.owner, b.reconcile)
-            .map_err(ReplicaError::Client)?;
-        p.reads
-            .reconcile(p.owner, b.reconcile)
-            .map_err(ReplicaError::Read)?;
-        Ok(out)
+        Ok(())
+    }
+    fn retry_committed<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        lease: EffectLease,
+        now: MonoTime,
+        out: &mut ReplicaProgress,
+    ) -> Result<(), ReplicaError> {
+        let group = lease.ticket.visit.group;
+
+        let Some(app) = p.applications.get_mut(&group) else {
+            self.retries.push_back(lease);
+            return Err(ReplicaError::MissingApplication);
+        };
+        match p.results.submit(p.owner, lease, app, now) {
+            Ok(_) => {
+                let output = p.results.poll().ok_or(ReplicaError::ProviderContract)?;
+                if let Err(rejected) = p.clients.deliver(p.owner, p.results, output) {
+                    self.failed_result = Some(*rejected.results);
+                    return Err(ReplicaError::Client(rejected.reason));
+                }
+                out.applications += 1;
+            }
+            Err(rejected) => {
+                self.retries.push_back(*rejected.lease);
+                if rejected.reason != ApplicationRouteError::Overloaded {
+                    return Err(ReplicaError::Application(rejected.reason));
+                }
+            }
+        }
+        Ok(())
+    }
+    fn retry_read<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        lease: EffectLease,
+        now: MonoTime,
+        out: &mut ReplicaProgress,
+    ) -> Result<(), ReplicaError> {
+        let group = lease.ticket.visit.group;
+
+        let Some(app) = p.applications.get(&group) else {
+            self.retries.push_back(lease);
+            return Err(ReplicaError::MissingApplication);
+        };
+        match p.reads.execute(p.owner, lease, app, now) {
+            Ok(()) => out.reads += 1,
+            Err(ReadExecutionError::Rejected { reason, lease }) => {
+                self.retries.push_back(*lease);
+                if !matches!(
+                    reason,
+                    ReadInvocationError::Execution(
+                        ReadRouteError::Overloaded
+                            | ReadRouteError::Owner(EffectOwnerError::Consensus(
+                                RaftError::NotApplied
+                            ))
+                    )
+                ) {
+                    return Err(ReplicaError::Read(reason));
+                }
+            }
+            Err(ReadExecutionError::Failed { reason }) => return Err(ReplicaError::Read(reason)),
+        }
+        Ok(())
+    }
+    fn retry_snapshot<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        lease: EffectLease,
+    ) -> Result<(), ReplicaError> {
+        let group = lease.ticket.visit.group;
+
+        let Some(s) = &mut p.snapshots else {
+            self.retries.push_back(lease);
+            return Err(ReplicaError::MissingSnapshots);
+        };
+        let Some(app) = p.applications.get(&group) else {
+            self.retries.push_back(lease);
+            return Err(ReplicaError::MissingApplication);
+        };
+        match s.router.submit(p.owner, s.worker, lease, app) {
+            Ok(_) => (),
+            Err(rejected) => {
+                self.retries.push_back(*rejected.lease);
+                if !matches!(
+                    rejected.reason,
+                    SnapshotRouteError::Overloaded
+                        | SnapshotRouteError::Worker(SnapshotWorkError::Overloaded)
+                        | SnapshotRouteError::Owner(EffectOwnerError::Overloaded)
+                ) {
+                    return Err(ReplicaError::Snapshot(rejected.reason));
+                }
+            }
+        }
+        Ok(())
+    }
+    fn retry_effects<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: ProposalAdmission<Receipt = R> + BoundedReadableStateMachine + CheckpointStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        &mut self,
+        p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
+        now: MonoTime,
+        limit: usize,
+        out: &mut ReplicaProgress,
+    ) -> Result<(), ReplicaError> {
+        for _ in 0..self.retries.len().min(limit) {
+            let lease = self.retries.pop_front().unwrap();
+            out.retries += 1;
+            match &lease.effect {
+                Effect::Send(_) => self.retry_send(p, lease, out)?,
+                Effect::Committed(_) => self.retry_committed(p, lease, now, out)?,
+                Effect::ReadReady(_) => self.retry_read(p, lease, now, out)?,
+                _ => self.retry_snapshot(p, lease)?,
+            }
+        }
+        Ok(())
     }
     fn submit_batch<
         S: ReadyScheduler,
