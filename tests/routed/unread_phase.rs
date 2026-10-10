@@ -1,0 +1,193 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+// Unless explicitly acquired and licensed from Licensor under another license,
+// the contents of this file are subject to the Reciprocal Public License
+// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
+// not copy or use this file in either source code or executable form, except
+// in compliance with the terms and conditions of the RPL.
+//
+// All software distributed under the RPL is provided strictly on an "AS IS"
+// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
+// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+// rights and limitations under the RPL.
+use super::*;
+
+// Keep the successful application result owned by the original client router.
+// Only known authority refusal and leadership uncertainty are completed/retried.
+pub(super) fn write<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    operation: u128,
+    bytes: &[u8],
+    mut after_accept: impl FnMut(&mut [Node<A>], ClientTicket),
+) where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let id = OperationId::new(operation).unwrap();
+    for _ in 0..4 {
+        assert_eq!(nodes[0].local().clients.usage().requests, 0);
+        let ticket = match nodes[0].propose(ClientRequest {
+            group: group(g),
+            operation: id,
+            bytes: bytes.to_vec(),
+        }) {
+            Ok(ticket) => ticket,
+            Err(rejected) => {
+                assert_eq!(rejected.request.group, group(g));
+                assert_eq!(rejected.request.operation, id);
+                assert_eq!(rejected.request.bytes, bytes);
+                assert!(matches!(
+                    rejected.reason,
+                    ClientError::Consensus(voteboat::raft::RaftError::NotLeader)
+                ));
+                campaign(nodes, clock, g);
+                continue;
+            }
+        };
+        after_accept(nodes, ticket);
+        let completion = terminal(nodes, clock, g, ticket);
+        match completion.outcome() {
+            ClientOutcome::Applied { position, receipt } => {
+                assert_eq!(receipt.operation(), id);
+                assert_eq!(receipt.index(), position.index);
+                return;
+            }
+            ClientOutcome::NotProposed(e) => {
+                eprintln!("unread phase {g}/{operation}: NotProposed {e:?}");
+                assert_eq!(*e, voteboat::raft::RaftError::NotLeader);
+            }
+            ClientOutcome::Unknown(e) => {
+                eprintln!("unread phase {g}/{operation}: Unknown {e:?}");
+                assert_eq!(*e, ClientUnknown::LeadershipChanged);
+            }
+        }
+        let outcome = nodes[0]
+            .complete_client(completion)
+            .unwrap_or_else(|_| panic!("unread recovery completion rejected"));
+        assert!(matches!(
+            outcome,
+            ClientOutcome::NotProposed(voteboat::raft::RaftError::NotLeader)
+                | ClientOutcome::Unknown(ClientUnknown::LeadershipChanged)
+        ));
+        assert_eq!(nodes[0].local().clients.usage().requests, 0);
+        campaign(nodes, clock, g);
+    }
+    panic!("group {g} operation {operation} repeatedly lost its applied unread cut");
+}
+
+fn terminal<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    g: u128,
+    ticket: ClientTicket,
+) -> ClientCompletion<A::Receipt>
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let mut completion = None;
+    drive(nodes, clock, |ns| {
+        if completion.is_none() {
+            completion = ns[0].poll_client();
+        }
+        completion.as_ref().is_some_and(|c| match c.outcome() {
+            ClientOutcome::Applied { position, .. } => ns.iter().all(|n| {
+                n.local().owner.core(group(g)).unwrap().state().commit_index >= position.index
+                    && n.local().applications[&group(g)].applied_index() >= position.index
+            }),
+            ClientOutcome::NotProposed(_) | ClientOutcome::Unknown(_) => true,
+        })
+    });
+    let completion = completion.unwrap();
+    assert_eq!(completion.ticket(), ticket);
+    assert_eq!(nodes[0].local().clients.usage().requests, 1);
+    completion
+}
+
+fn lose_uncommitted(nodes: &mut [Node<Counter>], clock: &Instant, ticket: ClientTicket) {
+    drive(&mut nodes[..1], clock, |ns| {
+        let state = ns[0].local().owner.core(ticket.group).unwrap().state();
+        state.entries.iter().any(|e| {
+            matches!(
+                e.payload, EntryPayload::Command { operation, .. }
+                    if operation == ticket.operation && e.index > state.commit_index
+            )
+        })
+    });
+    let core = nodes[0].local().owner.core(ticket.group).unwrap();
+    let term = core.state().hard_state.term;
+    assert_eq!(
+        nodes[0].local().applications[&ticket.group]
+            .read_applied(0)
+            .unwrap(),
+        0
+    );
+    nodes[0]
+        .control(ticket.group, NodeControl::Campaign)
+        .unwrap();
+    drive(&mut nodes[..1], clock, |ns| {
+        let core = ns[0].local().owner.core(ticket.group).unwrap();
+        core.role() == voteboat::raft::Role::Candidate && core.state().hard_state.term > term
+    });
+    assert_eq!(nodes[0].local().clients.usage().requests, 1);
+}
+
+#[test]
+fn accepted_unknown_must_not_be_an_applied_unread_cut() {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let clock = Instant::now();
+    let root = std::env::temp_dir().join(format!("voteboat-unread-cut-{}", std::process::id()));
+    let fresh = || Counter::new(64).unwrap();
+    let mut nodes = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        NativePeerProtocol::TcpTls,
+        fresh,
+    );
+    campaign(&mut nodes, &clock, 1);
+    let operation = OperationId::new(4243).unwrap();
+    let bytes = 7i64.to_le_bytes().to_vec();
+    let mut faulted = false;
+    write(
+        &mut nodes,
+        &clock,
+        1,
+        operation.get(),
+        &bytes,
+        |ns, ticket| {
+            assert_eq!(ticket.operation, operation);
+            if !faulted {
+                lose_uncommitted(ns, &clock, ticket);
+                faulted = true;
+            }
+        },
+    );
+    assert!(faulted);
+    assert!(nodes
+        .iter()
+        .all(|n| n.local().applications[&group(1)].read_applied(0).unwrap() == 7));
+    assert_eq!(nodes[0].local().clients.usage().requests, 1);
+    let logs = creation::abandon(nodes, 1);
+    assert!(logs.values().all(|log| log.entries.iter().any(|e| matches!(
+        &e.payload, EntryPayload::Command { operation: id, bytes: payload }
+            if *id == operation && payload == &bytes && e.index <= log.commit_index
+    ))));
+    let mut nodes = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        NativePeerProtocol::TcpTls,
+        fresh,
+    );
+    campaign(&mut nodes, &clock, 1);
+    let receipt = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes);
+    assert_eq!(receipt.operation, operation);
+    assert_eq!(receipt.outcome, CounterOutcome::Value(7));
+    assert!(receipt.duplicate);
+    assert_eq!(read_recovering(&mut nodes, &clock, 1, ()), 7);
+    close(nodes, &clock, 1, || {});
+    std::fs::remove_dir_all(root).unwrap();
+}

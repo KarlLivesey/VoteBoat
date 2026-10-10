@@ -25730,3 +25730,129 @@ Acceptance remains original named TCP/QUIC deletion/created-source histories and
 affected shared helper histories on both platforms, source-linked failure and
 final evidence, fmt/four strict profiles zero. Current254c still advances P5/P6;
 next255 audit and following256 separate-host service remain linked above.
+
+254c deletion diagnostic scope: add only post-observation logging to the existing
+phase_write, before its same ticket/retained-credit checks. Borrow the public
+ClientCompletion::outcome without completing it; record Applied position/receipt
+operation/index versus typed NotProposed/Unknown and each exact replica's term,
+commit/applied prefix and original operation index. No new API, outcome conversion,
+application effect, retry, poll schedule, timer, fault cut or cleanup change.
+Use --nocapture for the unchanged original deletion family so failures expose
+the causal terminal kind immediately rather than waiting for sibling histories.
+The observed original2/2 failure remains evidence; logging may alter later timing
+and is not by itself a successful correction or proof of recovery. Acceptance
+for this diagnostic is exact outcome/prefix evidence at the failing original
+phase, strict zero and preserved source inputs, then a separate correction schema
+from the observed class. Mac's existing created-source process must finish before
+replacing its source/build. Current254c/next255/following256 remain unchanged.
+
+Mac diagnostic ownership plan: the original created-source process is still
+actively polling its existing Node on source652, so preserve its source/build
+and run outcome diagnostics in a separate scoped repo254d. Copy only the exact
+652 recorded build inputs; clone/copy its idle build artifacts to a distinct
+owned target directory, then let Cargo validate/rebuild that new directory.
+Existing test executables/sources are untouched. New processes/files belong only
+to the diagnostic; source hashes, original four-test concurrency, absolute budgets
+and scoped descriptor/TMPDIR conditions remain explicit. No service runtime or
+provider prerequisite is added. This avoids delaying P5/P6 diagnosis on the live
+sibling family; failed diagnostic roots are retained and successful explicit
+cleanup remains required. Verify available disk before the temporary build copy.
+
+254d applied-phase correction schema: Mac diagnostic actually observes group1/
+operation200 Unknown(LeadershipChanged), original index5 above commit/applied4
+on node1 and absent from nodes2/3. The shared fixture's old completion/prefix
+predicate can therefore return before the submitted phase is applied. This
+establishes the helper gap, not retrospective attribution of each earlier2/2
+failure. Preserve the diagnostic source/build until terminal.
+
+Data/API stays private phase_write(group,operation,bytes); extract its retained
+unread path into one cohesive private module so a test-owned after-admission
+callback can force a real local persisted, uncommitted operation followed by
+a higher-term campaign. This callback is needed for a stable native negative,
+not a new production seam/helper prerequisite. First run the unchanged predicate
+under this actual Node fault and require original value7/applied phase: old code
+must fail. Then bounded four-attempt recovery may consume only terminal
+NotProposed(NotLeader) or Unknown(LeadershipChanged), release the exact old credit
+and retry the same ID/bytes through an actual ready leader. Other outcomes fail.
+Success requires Applied with exact operation/position and every replica's
+applied prefix at that position; retain its completion unconsumed/one credit
+until original owner abort. An Unknown cannot certify the cut, even if another
+operation advanced the current prefix. First attempt uncertainty may commit,
+so same-ID dedup still protects value/outbox; no new operation is generated.
+
+Keep all original phase facts, unconditional cold duplicate/full-fence checks,
+WAL/checkpoint boundaries and frozen metadata/cleanup. The regression must also
+abort/reclaim actual workers and cold-recover the same ID/value7 as duplicate.
+Review all phase_write callers as intended applied cuts; leave unrelated raw
+uncommitted/partial-quorum faults untouched. Acceptance: negative and fixed
+regression, original deletion TCP/QUIC four cases plus affected shared applied
+phase histories on Linux/Mac, formatting/four strict profiles zero and source-
+linked logs. No production/protocol/quorum/deadline/quota/storage format change.
+This is current254c P5/P6; next255 and following256 remain linked above.
+
+254d controlled negative: unchanged unread predicate fails0/1 on Linux in0.05s.
+Actual operation4243 is locally persisted at index2 above commit/applied1, a
+forced original-source higher-term campaign emits Unknown(LeadershipChanged),
+and other replicas lack the operation. The old helper returns while value is0
+instead of7. Negative source653 and exact body are retained. The diagnostic Mac
+run finishes3/1 and source652 still verifies; its Unknown200/uncommitted witness
+establishes the shared helper gap independently of earlier2/2 attribution.
+
+Implement the planned retained-applied correction with the existing four-attempt
+bound: exact known NotLeader refusal or terminal leadership uncertainty releases
+only that invocation's credit before ready-leader selection and same-ID/bytes
+retry. Applied remains unconsumed, with matching operation/position and all
+replicas committed/applied through that position. Original copied bytes stay
+caller-owned until an accepted invocation owns its copy. Other classes still
+fail. The controlled callback remains test-owned and runs once; normal callers
+supply no fault. This changes fixture qualification of an applied phase, not
+unrelated raw uncommitted/partial-quorum histories or production contracts.
+
+254d coverage review: direct/shared phase_write callers live under native::
+delegation (retained/parent moves, cross-authority, imported partial, reparenting,
+metadata moves and deletion). Launch the whole65-test family on exact fixed
+source; keep it distinct from the focused1+4 acceptance. The separately queued
+native::reparenting selector is outside its actual module and must not count
+if it selects zero; reparenting belongs to the65-test family. Unrelated raw
+namespace/insertion partial-quorum histories remain unchanged.
+
+Mini-plan update: current254d applied-phase qualification advances P5/P6
+functional recovery. Purpose: never certify an unknown/uncommitted phase as
+applied before owner abort. Dependencies: actual Mac prefix/outcome trace and
+controlled native negative. Completion: fixed controlled original-ID/value/cold
+duplicate/cleanup, original deletion four cases and shared65 family on both,
+fmt/four strict profiles zero and source-linked failure/final evidence.
+Next254e source-readiness diagnosis advances P6 namespace split compatibility:
+original Mac created-source family finishes3/1; QUIC/WAL times out at initialization
+operation1002 in resume_namespace. Depend on its preserved body/source and the
+now explicit applied-versus-unknown contract; first trace its actual terminal
+kind/app facts under the unchanged15s wait before deciding whether to reuse the
+shared recovery. Do not infer this timeout's cause from the deletion gap.
+Completion: actual causal witness, focused correction preserving original Ready/
+publish/activate/import/fence/retry/cold cuts and four source histories both
+platforms plus affected callers/strict zero.
+Following255 functional release-gap audit advances P0–P6's usable release:
+source-link R01–R19 and existing interfaces/operator paths, separate missing
+functionality from wider evidence gaps, retain exact platform scopes and specify
+the smallest remaining functional exit with schema/ownership/restart/refusal and
+checks. Depend on these functional results and the preserved original full-run
+ledger; pending original Mac results stay pending. Later256 separate-host static
+service acceptance retains its existing provisioned two-Linux/one-Mac TCP/QUIC,
+original IDs/cold recovery and owned cleanup checks. Macro review keeps full
+P0–P7 active, features first; P7 tuning/security and Windows/P8 remain separate.
+
+254d focused acceptance: controlled old-predicate negative0/1 on each host, then
+corrected actual native regression1/0 and original deletion TCP/QUIC WAL/checkpoint
+four cases4/0 on Linux/Mac. Counter retains value7 and its original4243 ID/bytes,
+exact cold duplicate and committed log evidence after actual worker reclamation;
+final Applied envelope remains unconsumed/one credit until abort. Original
+delete fact/fence/duplicate and metadata-byte/log assertions remain. Both hosts
+have zero formatting/four strict profiles and653 final inputs verify. Earlier
+Mac2/2, diagnostic3/1 and both controlled negatives remain source-linked in
+[254d evidence](../validation/baseline/slice254d/README.md). No production/public
+interface/format/protocol/timing/quota change. Macro review advances P5/P6's
+actual applied-phase recovery qualification, not full platform/provider acceptance.
+Broader65 shared-family checks remain live on both fixed sources, so254d's
+broad completion check remains pending. Next254e readiness-timeout diagnosis,
+following255 audit and later256 cross-host service retain their recorded scope.
+Full P0–P7 stays active, features first.

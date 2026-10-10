@@ -1,5 +1,15 @@
 # Validation report
 
+Applied unread-phase qualification: [254d](baseline/slice254d/README.md). Mac
+traces expose leadership-unknown operations above the committed/applied prefix.
+Controlled actual native negatives fail0/1 on both; bounded original-ID/content
+recovery then passes regression1/0 and original deletion4/0 on both, with retained
+unconsumed Applied results, cold duplicates/fences and actual cleanup. Formatting/
+four strict profiles are zero and653 final inputs match. No production/timer/quota
+change. Shared65 histories remain running separately; original Mac created-source
+3/1 retains its QUIC/WAL readiness timeout. These are separate scopes, not a full
+current platform/provider/roadmap certificate.
+
 Namespace caller recovery: [254c-namespace](baseline/slice254c-namespace/README.md).
 Original typed NotLeader at positive reservation, manifest setup and duplicate
 retry exposes stale-leader caller assumptions. Existing bounded original-ID/content

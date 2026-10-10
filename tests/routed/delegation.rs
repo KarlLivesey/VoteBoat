@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 use super::split::{compact, observe};
+#[path = "unread_phase.rs"]
+mod unread_phase;
 use super::*;
 #[path = "../delegation/fixtures.rs"]
 mod fixture;
@@ -120,8 +122,9 @@ struct Delegated {
     metadata: [fn() -> LifecycleDirectory; 2],
     insertion_plan: Option<DelegationPlan>,
 }
-// Capture an original terminal envelope without consuming its application result.
-// Explicit owner abort later preserves the unknown observation and joins workers.
+// Retain the applied phase result without consuming it. Earlier leadership
+// uncertainty is recovered with the original request before selecting this cut.
+// Explicit owner abort later loses that result and joins the actual workers.
 fn phase_write<A>(
     unread: bool,
     nodes: &mut [Node<A>],
@@ -133,37 +136,11 @@ fn phase_write<A>(
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
-    if !unread {
+    if unread {
+        unread_phase::write(nodes, clock, g, operation, &bytes, |_, _| {});
+    } else {
         let _ = propose_recovering(nodes, clock, g, operation, bytes);
-        return;
     }
-    assert_eq!(nodes[0].local().clients.usage().requests, 0);
-    let ticket = nodes[0]
-        .propose(ClientRequest {
-            group: group(g),
-            operation: OperationId::new(operation).unwrap(),
-            bytes,
-        })
-        .unwrap();
-    let mut completion = None;
-    drive(nodes, clock, |ns| {
-        if completion.is_none() {
-            completion = ns[0].poll_client();
-        }
-        completion.is_some()
-            && ns.iter().all(|n| {
-                n.local().applications[&group(g)].applied_index()
-                    >= ns[0]
-                        .local()
-                        .owner
-                        .core(group(g))
-                        .unwrap()
-                        .state()
-                        .commit_index
-            })
-    });
-    assert_eq!(completion.unwrap().ticket(), ticket);
-    assert_eq!(nodes[0].local().clients.usage().requests, 1);
 }
 impl Delegated {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {

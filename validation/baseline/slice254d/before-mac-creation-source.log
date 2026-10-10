@@ -1,0 +1,52 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_checkpoint has been running for over 60 seconds
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal has been running for over 60 seconds
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_checkpoint has been running for over 60 seconds
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_wal has been running for over 60 seconds
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_checkpoint ... ok
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_wal ... ok
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_checkpoint ... ok
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal ... FAILED
+
+failures:
+
+---- native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal stdout ----
+created source Quic checkpoint=false phase=Ready
+
+thread 'native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal' (17503505) panicked at tests/routed/creation_source.rs:147:5:
+native routed progress timed out
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: routed::native::drive::<voteboat::namespace_creation::application::CreatedNamespace<voteboat::bucket_counter::BucketCounter<routed::source_fixture::Policy>, routed::source_fixture::Policy, voteboat::transfer_source::TransferSource<voteboat::bucket_counter::BucketCounter<routed::source_fixture::Policy>, routed::source_fixture::Policy>>, routed::native::creation_source::unread<voteboat::namespace_creation::application::CreatedNamespace<voteboat::bucket_counter::BucketCounter<routed::source_fixture::Policy>, routed::source_fixture::Policy, voteboat::transfer_source::TransferSource<voteboat::bucket_counter::BucketCounter<routed::source_fixture::Policy>, routed::source_fixture::Policy>>, <routed::native::creation_source::CreatedSplit>::resume_namespace::{closure#0}>::{closure#0}>
+             at ./tests/routed/native.rs:206:9
+   3: routed::native::creation_source::unread::<voteboat::namespace_creation::application::CreatedNamespace<voteboat::bucket_counter::BucketCounter<routed::source_fixture::Policy>, routed::source_fixture::Policy, voteboat::transfer_source::TransferSource<voteboat::bucket_counter::BucketCounter<routed::source_fixture::Policy>, routed::source_fixture::Policy>>, <routed::native::creation_source::CreatedSplit>::resume_namespace::{closure#0}>
+             at ./tests/routed/creation_source.rs:147:5
+   4: <routed::native::creation_source::CreatedSplit>::resume_namespace
+             at ./tests/routed/creation_source.rs:415:13
+   5: <routed::native::creation_source::CreatedSplit>::resume_one
+             at ./tests/routed/creation_source.rs:368:35
+   6: routed::native::creation_source::history
+             at ./tests/routed/creation_source.rs:1016:25
+   7: routed::native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal
+             at ./tests/routed/creation_source.rs:1080:5
+   8: routed::native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal::{closure#0}
+             at ./tests/routed/creation_source.rs:1079:66
+   9: <routed::native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  10: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 172 filtered out; finished in 860.41s
+
+error: test failed, to rerun pass `--test routed`

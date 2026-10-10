@@ -1,0 +1,2 @@
+owned_copy_stopped_for_clone
+independent_clone_complete

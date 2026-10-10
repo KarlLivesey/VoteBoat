@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 173 filtered out; finished in 12.94s

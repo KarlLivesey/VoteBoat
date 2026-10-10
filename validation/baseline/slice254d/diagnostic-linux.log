@@ -1,0 +1,107 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.72s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+unread phase 1/200: Applied ProposalPosition { index: 5, term: 2 }, receipt OperationId(200) index 5
+unread phase 1/200: store NodeId(1), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(2), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(3), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: Applied ProposalPosition { index: 5, term: 2 }, receipt OperationId(200) index 5
+unread phase 1/200: store NodeId(1), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(2), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(3), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: Applied ProposalPosition { index: 5, term: 2 }, receipt OperationId(200) index 5
+unread phase 1/200: store NodeId(1), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(2), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(3), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: Applied ProposalPosition { index: 5, term: 2 }, receipt OperationId(200) index 5
+unread phase 1/200: store NodeId(1), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(2), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 1/200: store NodeId(3), term 2, commit 5, applied 5, operation index Some(5)
+unread phase 2/210: Applied ProposalPosition { index: 14, term: 11 }, receipt OperationId(210) index 14
+unread phase 2/210: store NodeId(1), term 11, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(2), term 11, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(3), term 11, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: Applied ProposalPosition { index: 14, term: 11 }, receipt OperationId(210) index 14
+unread phase 2/210: store NodeId(1), term 11, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(2), term 11, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(3), term 11, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: Applied ProposalPosition { index: 14, term: 12 }, receipt OperationId(210) index 14
+unread phase 2/210: store NodeId(2), term 12, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(1), term 12, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(3), term 12, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: Applied ProposalPosition { index: 14, term: 12 }, receipt OperationId(210) index 14
+unread phase 2/210: store NodeId(2), term 12, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(1), term 12, commit 14, applied 14, operation index Some(14)
+unread phase 2/210: store NodeId(3), term 12, commit 14, applied 14, operation index Some(14)
+unread phase 21/210: Applied ProposalPosition { index: 12, term: 9 }, receipt OperationId(210) index 12
+unread phase 21/210: store NodeId(1), term 9, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(2), term 9, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(3), term 9, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: Applied ProposalPosition { index: 12, term: 9 }, receipt OperationId(210) index 12
+unread phase 21/210: store NodeId(1), term 9, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(2), term 9, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(3), term 9, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: Applied ProposalPosition { index: 12, term: 12 }, receipt OperationId(210) index 12
+unread phase 21/210: store NodeId(1), term 12, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(2), term 12, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(3), term 12, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: Applied ProposalPosition { index: 12, term: 12 }, receipt OperationId(210) index 12
+unread phase 21/210: store NodeId(1), term 12, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(2), term 12, commit 12, applied 12, operation index Some(12)
+unread phase 21/210: store NodeId(3), term 12, commit 12, applied 12, operation index Some(12)
+unread phase 2/211: Applied ProposalPosition { index: 39, term: 36 }, receipt OperationId(211) index 39
+unread phase 2/211: store NodeId(3), term 36, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(1), term 36, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(2), term 36, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: Applied ProposalPosition { index: 39, term: 36 }, receipt OperationId(211) index 39
+unread phase 2/211: store NodeId(3), term 36, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(1), term 36, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(2), term 36, commit 39, applied 39, operation index Some(39)
+unread phase 20/200: Applied ProposalPosition { index: 20, term: 19 }, receipt OperationId(200) index 20
+unread phase 20/200: store NodeId(2), term 19, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(1), term 19, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(3), term 19, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: Applied ProposalPosition { index: 20, term: 20 }, receipt OperationId(200) index 20
+unread phase 20/200: store NodeId(2), term 20, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(1), term 20, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(3), term 20, commit 20, applied 20, operation index Some(20)
+unread phase 1/201: Applied ProposalPosition { index: 60, term: 57 }, receipt OperationId(201) index 60
+unread phase 1/201: store NodeId(1), term 57, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(2), term 57, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(3), term 57, commit 60, applied 60, operation index Some(60)
+unread phase 2/211: Applied ProposalPosition { index: 39, term: 38 }, receipt OperationId(211) index 39
+unread phase 2/211: store NodeId(3), term 38, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(1), term 38, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(2), term 38, commit 39, applied 39, operation index Some(39)
+unread phase 1/201: Applied ProposalPosition { index: 60, term: 58 }, receipt OperationId(201) index 60
+unread phase 1/201: store NodeId(1), term 58, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(2), term 58, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(3), term 58, commit 60, applied 60, operation index Some(60)
+unread phase 2/211: Applied ProposalPosition { index: 39, term: 40 }, receipt OperationId(211) index 39
+unread phase 2/211: store NodeId(3), term 40, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(1), term 40, commit 39, applied 39, operation index Some(39)
+unread phase 2/211: store NodeId(2), term 40, commit 39, applied 39, operation index Some(39)
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+unread phase 20/200: Applied ProposalPosition { index: 20, term: 25 }, receipt OperationId(200) index 20
+unread phase 20/200: store NodeId(2), term 25, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(1), term 25, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(3), term 25, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: Applied ProposalPosition { index: 20, term: 28 }, receipt OperationId(200) index 20
+unread phase 20/200: store NodeId(2), term 28, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(1), term 28, commit 20, applied 20, operation index Some(20)
+unread phase 20/200: store NodeId(3), term 28, commit 20, applied 20, operation index Some(20)
+unread phase 1/201: Applied ProposalPosition { index: 60, term: 60 }, receipt OperationId(201) index 60
+unread phase 1/201: store NodeId(1), term 60, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(2), term 60, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(3), term 60, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: Applied ProposalPosition { index: 60, term: 64 }, receipt OperationId(201) index 60
+unread phase 1/201: store NodeId(1), term 64, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(2), term 64, commit 60, applied 60, operation index Some(60)
+unread phase 1/201: store NodeId(3), term 64, commit 60, applied 60, operation index Some(60)
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 172 filtered out; finished in 11.31s

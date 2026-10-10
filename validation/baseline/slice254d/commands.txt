@@ -1,0 +1,12 @@
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed native::delegation::deletion:: -- --nocapture
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed accepted_unknown_must_not_be_an_applied_unread_cut -- --nocapture
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed native::delegation::
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+
+Mac repo254d is independent of preserved repo252 split and original repo full suite.
+PATH=$HOME/.cargo/bin:$PATH; TMPDIR=/tmp/voteboat-macos-CzK1if/test-roots; ulimit -n4096.
+Full65 family results are pending, not included in focused success.

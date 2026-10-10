@@ -1,0 +1,39 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.72s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+unread phase 1/4243: Unknown LeadershipChanged
+unread phase 1/4243: store NodeId(1), term 2, commit 1, applied 1, operation index Some(2)
+unread phase 1/4243: store NodeId(2), term 1, commit 1, applied 1, operation index None
+unread phase 1/4243: store NodeId(3), term 1, commit 1, applied 1, operation index None
+
+thread 'native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut' (972416) panicked at tests/routed/unread_phase.rs:145:5:
+assertion failed: nodes.iter().all(|n|
+        n.local().applications[&group(1)].read_applied(0).unwrap() == 7)
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:150:5
+   3: routed::native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut
+             at ./tests/routed/unread_phase.rs:145:5
+   4: routed::native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut::{closure#0}
+             at ./tests/routed/unread_phase.rs:115:56
+   5: <routed::native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+   6: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut ... FAILED
+
+failures:
+
+failures:
+    native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 176 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `--test routed`
