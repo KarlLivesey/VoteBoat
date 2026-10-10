@@ -1059,23 +1059,45 @@ configuration/read-wait uncertainty cases. No new provider or Raft protocol; the
 existing public maintenance contract gains an explicit OperationConflict refusal.
 Serialized fields are unchanged, with an expanded same-term completion grammar.
 
-Current240: diagnose and correct listener-startup reservation failure.
-Purpose: advance functional Linux/macOS service acceptance. Depend on final239
-peer-discovery node2 AddrInUse, retained native logs and the existing fixture port
-reservation/child ownership contracts. Inspect actual failing addresses, local
-port allocation and reservation release before selecting a fix; do not assume
-an older macOS directory failure has the same cause. Completion requires a
-reproduced ownership/allocation history, a focused fix and child/socket cleanup,
-relevant executable checks and zero formatting/four strict Clippy diagnostics.
-A helper is justified only to expose or preserve the actual reserved resource.
+Implemented240: retained239 recovery logs identify peer33426 inside this host's
+Linux automatic client range32768–60999. The late-allocation regression fails the
+old pool at33041 and passes after fixture listeners move to248 bounded blocks
+below32768. Exact TCP/UDP probing, no per-process reuse, fake-peer listener
+handoff and child cleanup remain. The extracted existing reservation function is
+needed solely to test a local late-allocation history without hundreds of children
+or fictitious global used blocks. No production/API/format/deadline change.
 
-Next: close original configuration/write and status-wait recovery assumptions.
-Purpose: advance P4 and functional Linux/macOS operator acceptance. Depend on
-source237/238 configure19770 and write91001 uncertainty, source23619901 role loss,
-source238 macOS96301 wait admission, and original-operation/cancellation contracts.
-Select one retained failure and identify its cause before editing. Completion
-requires bounded unchanged-ID recovery or exact owned-ticket release, original
-receipts/data and cleanup evidence without widened deadlines or swallowed errors.
+Eight all-feature peer-discovery histories and the final full counter191 pass,
+including actual TCP/QUIC recovery, data retries and joins. The full default counter134 passes sequentially afterward. Formatting/four strict profiles and inventory108/
+conformance metadata pass. See [slice240](../validation/baseline/slice240/README.md).
+The lost transient socket owner is not identified; a reproduced allocation-range
+hazard and passing finite histories do not prove freedom from external bind races
+or custom automatic-port ranges. Older macOS directory AddrInUse has no established
+shared cause. Current source239 CI runs in the background, not240 acceptance.
+
+Macro review240 closes this selected counter fixture allocation dependency for
+functional service verification. Original configuration/write/status-wait
+uncertainty and broader P0–P7 exits remain open. Keep feature integration and
+functional Linux/macOS acceptance first; no performance/security work is added.
+
+Current241: recover original planned configuration after sampled authority loss.
+Purpose: advance P4/service Linux/macOS operator acceptance. Depend on retained
+source237/238 configure19770 UNKNOWN LeadershipChanged/read failures, the unchanged
+trusted plan, configuration journal and current exact-record admission contracts.
+The fixture currently samples c.leader then asserts one configure reply. Sketch
+original-ID/record retry ownership before editing; use existing bounded retry/
+observation paths rather than another orchestrator. Completion requires a native
+unread/election history that fails the one-shot assumption, exact original Joint/
+Final receipts and data/restart cleanup, terminal refusal checks and zero strict
+formatting/four Clippy diagnostics. Never turn an unknown reply into success.
+
+Next242: close sampled write/status-wait recovery assumptions. Purpose: advance
+functional Linux/macOS operator acceptance. Depend on source237 write91001 and
+source23619901 role loss, source238 macOS96301 wait admission, plus original data
+and cancellation/read-ticket ownership contracts. Select one retained cause before
+editing. Completion requires bounded unchanged-ID recovery or exact owned-ticket
+release, original receipts/data and cleanup evidence without widened deadlines
+or swallowed errors. Current241 does not imply these separate cases are complete.
 
 Following: close one required operator/deployment integration gap. Purpose:
 complete usable service, membership and split/merge feature integration. Depend
@@ -1084,6 +1106,43 @@ actual missing end-to-end capability before adding helpers. Completion requires
 public executable/Rust usage, original-operation recovery/cleanup evidence and
 Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
 security, optional global orchestration, P8 and Windows stay separate.
+
+### Slice240 schema plan — keep fixture listeners out of automatic client ports
+
+Previous goal turn progressed:239 is committed/pushed19e4fb5, original handoff
+binding and runner composition have focused native/default evidence and zero
+strict diagnostics. Final broad189/1 retains peer-discovery startup AddrInUse.
+This turn inspects the retained node2 recover log and sibling ready records:
+base33424, node2 peer33426, node3 peer33427. Linux automatic client ports are
+32768–60999. The existing10000..49000 allocator reaches that interval after late
+allocations and releases all placeholders before child startup/restart. A client
+can then occupy a future listener address. The original transient owner is no
+longer available; this evidence alone cannot identify which client claimed it.
+
+Shape/ownership: change only the executable fixture's candidate pool to bounded
+nonprivileged1024..32768, retaining128 stride, exact TCP/UDP probe reservations,
+never-reused per-process blocks and fake-peer listener handoff. Extract the existing
+reservation operation for a local occupied-block set so a regression can exercise
+late allocation without launching hundreds of clusters or polluting the global
+used-block set. The helper is solely needed for this observed startup contract.
+No production listener API, Raft rule, recovery format or deadline changes.
+
+State/failure: the chosen block remains exclusively reserved until existing child
+startup clears placeholders; native processes keep their own endpoint ownership.
+Ports skipped by actual bind probes stay unavailable. A bounded exhausted pool
+still fails explicitly, without wrapping/recycling. Cleanup remains child join and
+owned descriptor drop. This reduces fixture exposure to default client allocation;
+it does not promise immunity to custom ephemeral ranges or external bind races.
+
+Acceptance: reproduce the late-allocation range violation against old allocator
+using the actual Linux port-range observation and real bound endpoints. Corrected
+allocator must reserve peer/command endpoints below that range, preserve fake-peer
+ownership and close descriptors. Run the recorded peer-discovery native TCP/QUIC
+histories plus final broad/default checks sequentially; preserve any distinct
+failure. Formatting/four strict profiles and inventory/conformance remain zero/
+aligned. Existing source239 CI is background, not current240 platform acceptance.
+This advances functional Linux/macOS service acceptance; sampled original
+configuration/write/status-wait recovery is next, performance/security remain later.
 
 ### Slice239 schema plan — explicitly bind a handoff before admission
 

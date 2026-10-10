@@ -1,0 +1,19 @@
+Before allocator range change (0/1,exit101,ports-before.log):
+cargo +stable test --locked --offline --all-features --test counter_service late_listener_reservations_avoid_kernel_client_ports
+
+After correction (1 pass,ports-after.log): same focused command.
+cargo +stable test --locked --offline --all-features --test counter_service peer_discovery
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --test counter_service
+
+cargo +stable fmt --all -- --check
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Recorded-source inspection:
+cat /proc/sys/net/ipv4/ip_local_port_range
+Native node2 recover log reports filesystem/listener AddrInUse; sibling ready
+records identify node2 peer33426 and node3 peer33427, retained239-startup.txt.
+
+gh run view 38071895206 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url

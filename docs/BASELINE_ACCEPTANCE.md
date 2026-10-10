@@ -1,5 +1,17 @@
 # Baseline acceptance map
 
+Counter fixture listener allocation: [slice240](../validation/baseline/slice240/README.md).
+Retained239 peer33426 falls inside this Linux host's automatic client range.
+The actual late-allocation check fails the old pool and passes after fixture
+listeners move below32768. Exact TCP/UDP reservation and release, no block reuse,
+fake-peer listener handoff and child cleanup remain. All8 peer-discovery histories
+and the full191-test all-feature counter suite pass. The full default134-test counter suite passes sequentially afterward. Formatting/four strict profiles are zero; inventory108 and
+conformance metadata unchanged. No production/API/format/deadline change. The
+original transient owner is gone; this fixes a reproduced fixture allocation
+hazard, not every bind race or custom kernel range. Preceding239 background CI is
+not240 macOS acceptance. Original configuration/write/status-wait recovery and
+broader P0–P7 remain open; features/Linux/macOS functional work stay first.
+
 Explicit original handoff binding: [slice239](../validation/baseline/slice239/README.md).
 The executable and Rust maintenance path retain the full source/target identity
 before admission. Any current leader may admit that bound request under its

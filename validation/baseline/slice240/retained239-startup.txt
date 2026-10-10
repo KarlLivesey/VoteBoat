@@ -1,0 +1,18 @@
+Source19e4fb5: retained final239 native process logs
+
+2-recover.log
+Error: NativeStartupError { stage: "filesystem/listener", detail: "AddrInUse" }
+
+3-recover.log
+ready node=3 peer=127.0.0.1:33427 transport=TcpTls command=127.0.0.1:33527
+
+2-create.log
+ready node=2 peer=127.0.0.1:33426 transport=TcpTls command=127.0.0.1:33526
+stopped node=2 workers_joined=true
+
+peers-2
+1 127.0.0.1:33425 node1.voteboat.test
+2 127.0.0.1:33426 node2.voteboat.test
+3 127.0.0.1:33627 node3.voteboat.test
+
+Observed Linux ip_local_port_range: 32768	60999

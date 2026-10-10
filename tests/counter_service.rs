@@ -27,6 +27,10 @@ use std::{
     time::{Duration, Instant},
 };
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-counter");
+// Keep listeners below the default Linux client range; macOS is exercised by CI.
+// 248 bounded blocks retain the existing no-reuse and exact bind-probe contract.
+const PORT_BASE_START: u16 = 1024;
+const PORT_BASE_END: u16 = 32768;
 static PORT_BLOCKS: Mutex<BTreeSet<u16>> = Mutex::new(BTreeSet::new());
 static DIRECTORIES: AtomicU64 = AtomicU64::new(0);
 // Coordinate only parent-held native store handles and process creation. A
@@ -112,6 +116,37 @@ fn run(command: &mut Command) -> Output {
     };
     child.wait_with_output().unwrap()
 }
+// Reserve exact endpoints; native children bind after placeholders are released.
+fn reserve_ports(blocks: &mut BTreeSet<u16>) -> (u16, BTreeMap<u16, TcpListener>, Vec<UdpSocket>) {
+    let (base, listeners, udp_sockets) = (PORT_BASE_START..PORT_BASE_END)
+        .step_by(128)
+        .find_map(|base| {
+            if blocks.contains(&base) {
+                return None;
+            }
+            [1, 2, 3, 4, 11, 12, 13, 101, 102, 103, 104, 111, 112, 113]
+                .into_iter()
+                .map(|offset| {
+                    TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset))
+                        .map(|listener| (offset, listener))
+                })
+                .collect::<Result<BTreeMap<_, _>, _>>()
+                .ok()
+                .and_then(|listeners| {
+                    [1, 2, 3, 4, 11, 12, 13]
+                        .into_iter()
+                        .map(|n| UdpSocket::bind((Ipv4Addr::LOCALHOST, base + n)))
+                        .collect::<Result<Vec<_>, _>>()
+                        .ok()
+                        .map(|sockets| (base, listeners, sockets))
+                })
+        })
+        .expect("available independent port block");
+    blocks.insert(base);
+    (base, listeners, udp_sockets)
+}
+#[path = "counter_service/startup_ports.rs"]
+mod startup_ports;
 struct Cluster {
     root: PathBuf,
     base: u16,
@@ -155,38 +190,10 @@ impl Cluster {
             DIRECTORIES.fetch_add(1, Ordering::Relaxed)
         ));
         fs::create_dir(&root).unwrap();
-        // Never recycle a fixture's block within this test process: accepted
-        // TCP sockets can still be closing after its listeners/children drop.
-        // The growing suite has 305 candidate blocks. Unavailable blocks are
-        // skipped by binding every reserved TCP/UDP endpoint.
+        // Never recycle a fixture block: accepted sockets may still be closing.
         let (base, listeners, udp_sockets) = {
             let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
-            let (base, listeners, udp_sockets) = (10000u16..49000)
-                .step_by(128)
-                .find_map(|base| {
-                    if blocks.contains(&base) {
-                        return None;
-                    }
-                    [1, 2, 3, 4, 11, 12, 13, 101, 102, 103, 104, 111, 112, 113]
-                        .into_iter()
-                        .map(|offset| {
-                            TcpListener::bind((Ipv4Addr::LOCALHOST, base + offset))
-                                .map(|listener| (offset, listener))
-                        })
-                        .collect::<Result<BTreeMap<_, _>, _>>()
-                        .ok()
-                        .and_then(|listeners| {
-                            [1, 2, 3, 4, 11, 12, 13]
-                                .into_iter()
-                                .map(|n| UdpSocket::bind((Ipv4Addr::LOCALHOST, base + n)))
-                                .collect::<Result<Vec<_>, _>>()
-                                .ok()
-                                .map(|sockets| (base, listeners, sockets))
-                        })
-                })
-                .expect("available independent port block");
-            blocks.insert(base);
-            (base, listeners, udp_sockets)
+            reserve_ports(&mut blocks)
         };
         Self {
             root,

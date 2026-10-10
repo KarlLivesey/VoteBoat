@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "base_revision": "19e4fb57cc110055fc0d963439bf9a3ed3befc45",
+  "scope": "Late executable fixture listener allocation below automatic Linux client ports",
+  "production_behavior_change": false,
+  "new_public_seam": false,
+  "core_or_persistent_format_change": false,
+  "observed": {
+    "retained_peer_port": 33426,
+    "linux_automatic_client_range": [
+      32768,
+      60999
+    ],
+    "original_transient_socket_owner": "Unavailable; no causal identity claim",
+    "before_range": [
+      10000,
+      49000
+    ],
+    "after_range": [
+      1024,
+      32768
+    ],
+    "exclusive_end": true,
+    "stride": 128,
+    "candidate_blocks": 248
+  },
+  "validation": {
+    "before": {
+      "pass": 0,
+      "fail": 1,
+      "exit": 101,
+      "late_listener": 33041
+    },
+    "after": 1,
+    "peer_discovery_all": 8,
+    "counter_all": 191,
+    "counter_default": 134,
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "source_manifest_sha256": "20c7e8e66e45c9a2e91217f6104bd018a404b4628e7811378229572b0119a2a7",
+  "publication": {
+    "redacted_workspace_logs": 4,
+    "private_logs": "target/slice240-unpublished-logs",
+    "normalization": "Trailing whitespace and final blank lines removed"
+  },
+  "preceding_ci": {
+    "run": 38071895206,
+    "source": "19e4fb57cc110055fc0d963439bf9a3ed3befc45",
+    "state_at_observation": "in_progress",
+    "macos_job": 114270824821,
+    "linux_job": 114270825119,
+    "current_source_acceptance": false
+  },
+  "limits": "Finite Linux native TCP/QUIC executable histories; Linux-only runtime range regression. No matching current macOS, custom automatic-port range/external-bind immunity, general startup, full P0-P7, performance or security completion."
+}
