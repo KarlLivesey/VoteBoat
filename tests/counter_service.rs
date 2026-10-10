@@ -2357,6 +2357,27 @@ fn wait_administration_event(cluster: &Cluster, id: usize, event: &str) {
         std::thread::park_timeout(Duration::from_millis(5));
     }
 }
+fn retry_configuration_record(cluster: &mut Cluster, record: &str) {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let leader = cluster.leader();
+        let output = cluster.request(leader, &["configure-record", record]);
+        if output.status.success() {
+            return;
+        }
+        let text = String::from_utf8(output.stdout).unwrap();
+        assert!(
+            text.starts_with("UNKNOWN LeadershipChanged;") || text == "ERR NOT_LEADER\n",
+            "configuration retry failed: {text} {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(
+            Instant::now() < deadline,
+            "leadership failed to settle: {text}"
+        );
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+}
 fn interrupted_native_configuration_history(quic: bool) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
@@ -2381,12 +2402,8 @@ fn interrupted_native_configuration_history(quic: bool) {
     for id in 1..=3 {
         cluster.start(id, "recover-member");
     }
-    let leader = cluster.leader();
-    cluster.ok(
-        leader,
-        &["configure-record", "joint 17010 1 2 3 3 m:2 v:1 v:2"],
-    );
-    cluster.ok(leader, &["configure-record", "final 17010 2 3"]);
+    retry_configuration_record(&mut cluster, "joint 17010 1 2 3 3 m:2 v:1 v:2");
+    retry_configuration_record(&mut cluster, "final 17010 2 3");
     let mut learner = cluster.children[2].take().unwrap();
     learner.kill().unwrap();
     learner.wait().unwrap();

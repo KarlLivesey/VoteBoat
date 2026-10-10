@@ -1,0 +1,27 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.42s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+maintenance recovery files: /tmp/voteboat-shared-repair-650179-TcpTls-1791600305540935083
+maintenance recovery files: /tmp/voteboat-shared-repair-650179-Quic-1791600305540934512
+protocol=TcpTls phase=initial-write
+protocol=Quic phase=initial-write
+protocol=TcpTls phase=survivor-write
+protocol=TcpTls phase=automatic-checkpoint
+protocol=TcpTls phase=reopen
+protocol=TcpTls phase=arm-recovery
+protocol=Quic phase=survivor-write
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=TcpTls groups=8 snapshot_installs=8 peak_recovery=1 reclaimed_bytes=16007
+protocol=Quic phase=automatic-checkpoint
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+protocol=Quic phase=reopen
+protocol=Quic phase=arm-recovery
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=Quic groups=8 snapshot_installs=10 peak_recovery=1 reclaimed_bytes=16369
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 6.23s
+

@@ -37,6 +37,7 @@ mod peers;
 mod read_requests;
 mod reads;
 mod replica;
+mod snapshot_send;
 mod snapshots;
 mod timed;
 pub use administration::*;

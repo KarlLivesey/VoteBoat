@@ -1,0 +1,152 @@
+1 scenario quic=true checkpoint=true
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="ERR NOT_LEADER\n"
+17 invoke Read
+18 complete call=8 raw="ERR NOT_LEADER\n"
+19 invoke Read
+20 complete call=9 raw="ERR NOT_LEADER\n"
+21 invoke Read
+22 complete call=10 raw="ERR NOT_LEADER\n"
+23 invoke Read
+24 complete call=11 raw="ERR NOT_LEADER\n"
+25 invoke Read
+26 complete call=12 raw="ERR NOT_LEADER\n"
+27 invoke Read
+28 complete call=13 raw="ERR NOT_LEADER\n"
+29 invoke Read
+30 complete call=14 raw="ERR NOT_LEADER\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 0,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 17,
+        completed: 18,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 23,
+        completed: 24,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 25,
+        completed: 26,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 27,
+        completed: 28,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 29,
+        completed: 30,
+        action: Read,
+        reply: NotAdmitted,
+    },
+]

@@ -120,12 +120,10 @@ fn finish(cluster: &Cluster, leader: usize, joint: &str) {
         assert!(Instant::now() < deadline, "final record did not replicate");
         std::thread::park_timeout(Duration::from_millis(5));
     }
-    assert!(cluster
-        .ok(leader, &["add", "18003", "1"])
-        .contains("Value(43)"));
-    let original = cluster.ok(leader, &["add", "18000", "42"]);
+    assert!(authenticated_write(cluster, &["add", "18003", "1"]).contains("Value(43)"));
+    let original = authenticated_write(cluster, &["add", "18000", "42"]);
     assert!(original.contains("duplicate=true") && original.contains("Value(42)"));
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=43\n");
+    assert_eq!(cluster.routed(&["read"]), "OK value=43\n");
     wait_committed(cluster, leader);
 }
 
@@ -216,10 +214,8 @@ fn history(quic: bool, checkpoint: bool) {
         replacement, leader,
         "demoted learner cannot win an election"
     );
-    assert!(cluster
-        .ok(replacement, &["add", "18003", "1"])
-        .contains("duplicate=true"));
-    assert_eq!(cluster.ok(replacement, &["read"]), "OK value=43\n");
+    assert!(authenticated_write(&cluster, &["add", "18003", "1"]).contains("duplicate=true"));
+    assert_eq!(cluster.routed(&["read"]), "OK value=43\n");
     cluster.stop();
     verify_files(&cluster, leader);
     fs::remove_dir_all(&cluster.root).unwrap();

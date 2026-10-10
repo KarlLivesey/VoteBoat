@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 12.56s
+

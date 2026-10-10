@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0425]: cannot find function `validate` in this scope
+  --> examples/benchmark/maintenance.rs:34:5
+   |
+34 |     validate(count, rate)?;
+   |     ^^^^^^^^ not found in this scope
+   |
+help: consider importing this function
+   |
+16 + use crate::offered::validate;
+   |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `voteboat` (example "native_benchmark" test) due to 1 previous error

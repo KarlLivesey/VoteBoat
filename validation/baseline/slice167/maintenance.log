@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+maintenance recovery files: /tmp/voteboat-shared-repair-564527-Quic-1791599976962992678
+maintenance recovery files: /tmp/voteboat-shared-repair-564527-TcpTls-1791599976962993339
+held_recovery=1 foreground_index=5 checkpointed=true post_checkpoint_reclaim=true
+protocol=TcpTls groups=8 snapshot_installs=12 peak_recovery=1 reclaimed_bytes=17549
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+
+thread 'shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery' (564528) panicked at examples/benchmark/shared_recovery/maintenance.rs:211:9:
+held recovery blocked foreground maintenance
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... FAILED
+
+failures:
+
+failures:
+    shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 35.31s
+
+error: test failed, to rerun pass `--example native_benchmark`

@@ -230,6 +230,7 @@ struct PollTotals {
     application_deliveries: usize,
     snapshot_events: usize,
     snapshot_installs: [usize; 3],
+    snapshot_send_refusals: [usize; 3],
     snapshot_supplies: usize,
 }
 fn poll<L: LogStore + Send + 'static>(
@@ -260,6 +261,7 @@ fn poll_selected<L: LogStore + Send + 'static>(
             totals.application_deliveries += p.applications;
             totals.snapshot_events += p.snapshot_events;
             totals.snapshot_installs[i] += p.snapshot_installs;
+            totals.snapshot_send_refusals[i] += p.snapshot_send_refusals;
             totals.snapshot_supplies += p.snapshot_supplies;
             for step in p.steps {
                 if let Some(e) = step.error {

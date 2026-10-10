@@ -15,6 +15,8 @@
 //! Clear transport buffers, then require each stale group's own snapshot repair.
 use super::*;
 const GROUPS: usize = 8;
+#[path = "shared_recovery/maintenance.rs"]
+mod maintenance;
 struct Harness {
     root: std::path::PathBuf,
     clock: Instant,

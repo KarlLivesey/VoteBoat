@@ -1,4 +1,4 @@
-# Baseline acceptance map — review159, updated166
+# Baseline acceptance map — review159, updated167
 
 Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
@@ -6,9 +6,14 @@ completion certificate**. Selected tests do not prove all schedules. Detailed
 historical results remain in IMPLEMENTATION.md, BASELINE_AUDIT.md and
 validation/REPORT.md; validation/baseline/slice159-160 retains fresh results and
 any failures. The old full all-feature sweeps have incomplete logs and their
-process handles are absent; they do not establish full completion. Slices162–166
+process handles are absent; they do not establish full completion. Slices162–167
 add recovery-budget, provider-lifetime, Counter client-history, automatic physical
-reclamation and automatic checkpoint evidence.
+reclamation, automatic checkpoints and maintenance under held recovery pressure.
+Slice167 composes both maintenance policies with actual eight-group snapshot
+recovery over TCP/TLS and QUIC. Selected histories require foreground apply,
+durable checkpoint and later physical reclaim while a recovery receipt remains
+held; then all stale groups recover and original retries survive another reopen.
+This covers the selected composition, not general fairness or a latency bound.
 The full P0–P7 objective stays active. RPL-1.5; Linux and macOS targets.
 
 ## Roadmap exits

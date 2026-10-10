@@ -5086,3 +5086,25 @@ formatting and91-record metadata validation pass.
 New policies bound scan/admission work and preserve existing checkpoint/retention
 semantics. They do not establish bandwidth or latency guarantees, incremental
 cleaning, general backup/retention policy or complete macOS validation.
+
+### Slice167 — maintenance and recovery composition
+
+Eight-group native TCP/TLS and QUIC histories now hold one real recovery receipt
+while requiring foreground apply, a durable automatic checkpoint and a later
+physical WAL reclaim. After resuming, every stale group must install a snapshot;
+another reopen verifies original operations and duplicate receipts. All22 native
+benchmark tests pass. The finite history found and now covers speculative
+snapshot-reservation deadlock and visits pinned behind unaccepted snapshot
+sends. Reservations retain actual payloads; ordinary sends receive a bounded
+50ms default retry grace before local discard, without acknowledgements or
+changes to accepted work or learner repair.
+
+All152 all-feature and146 core-only owner tests pass, plus2 exact retry-ledger
+unit tests. Both corrected configuration and joint-retirement protocol pairs
+pass, followed by the complete45-test service target in43.52s. Strict Clippy in both profiles, formatting, warnings-denied docs and
+91-record inventory metadata validation pass. [Slice167 evidence](baseline/slice167/README.md)
+retains commands, unsuccessful development runs and scope limits. The earlier
+commit's Linux CI checkpoint timeout remains a failed remote observation;
+current local success does not prove its remote resolution or macOS execution.
+No universal fairness, throughput or latency bound, wider device coverage or
+complete P0–P7 result is claimed. Bounded operational events are next.

@@ -1,0 +1,856 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.53s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+history "/tmp/voteboat-service-681124-1791600379411455037-1/history.txt"
+1 scenario quic=false checkpoint=false
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+20 complete call=8 raw="OK value=26\n"
+21 invoke Write { operation: 4, delta: 11 }
+22 complete call=9 raw="OK outcome=Value(26) duplicate=true\n"
+23 kill node=1
+24 kill node=3
+25 invoke Write { operation: 5, delta: 13 }
+26 complete call=10 client disconnected; no reply observed
+27 kill node=2
+28 invoke Read
+29 complete call=11 raw="OK value=26\n"
+30 invoke Write { operation: 5, delta: 13 }
+31 complete call=12 raw="OK outcome=Value(39) duplicate=false\n"
+32 invoke Read
+33 complete call=13 raw="OK value=39\n"
+34 stop all; reopen original files
+35 invoke Write { operation: 1, delta: 7 }
+36 complete call=14 raw="OK outcome=Value(7) duplicate=true\n"
+37 invoke Write { operation: 4, delta: 11 }
+38 complete call=15 raw="OK outcome=Value(26) duplicate=true\n"
+39 invoke Read
+40 complete call=16 raw="OK value=39\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 25,
+        completed: 26,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 28,
+        completed: 29,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 30,
+        completed: 31,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 32,
+        completed: 33,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 35,
+        completed: 36,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 37,
+        completed: 38,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 39,
+        completed: 40,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+]
+witness=Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 12, 13, 14, 15, 16])
+history "/tmp/voteboat-service-681124-1791600379411451320-0/history.txt"
+1 scenario quic=true checkpoint=false
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+20 complete call=8 raw="OK value=26\n"
+21 invoke Write { operation: 4, delta: 11 }
+22 complete call=9 raw="OK outcome=Value(26) duplicate=true\n"
+23 kill node=2
+24 kill node=3
+25 invoke Write { operation: 5, delta: 13 }
+26 complete call=10 client disconnected; no reply observed
+27 kill node=1
+28 invoke Read
+29 complete call=11 raw="OK value=26\n"
+30 invoke Write { operation: 5, delta: 13 }
+31 complete call=12 raw="OK outcome=Value(39) duplicate=false\n"
+32 invoke Read
+33 complete call=13 raw="OK value=39\n"
+34 stop all; reopen original files
+35 invoke Write { operation: 1, delta: 7 }
+36 complete call=14 raw="OK outcome=Value(7) duplicate=true\n"
+37 invoke Write { operation: 4, delta: 11 }
+38 complete call=15 raw="OK outcome=Value(26) duplicate=true\n"
+39 invoke Read
+40 complete call=16 raw="OK value=39\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 25,
+        completed: 26,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 28,
+        completed: 29,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 30,
+        completed: 31,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 32,
+        completed: 33,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 35,
+        completed: 36,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 37,
+        completed: 38,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 39,
+        completed: 40,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+]
+witness=Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 12, 13, 14, 15, 16])
+history "/tmp/voteboat-service-681124-1791600380709492183-2/history.txt"
+1 scenario quic=false checkpoint=true
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+20 complete call=8 raw="ERR NotRead(ReadNotReady)\n"
+21 invoke Read
+22 complete call=9 raw="OK value=26\n"
+23 invoke Write { operation: 4, delta: 11 }
+24 complete call=10 raw="OK outcome=Value(26) duplicate=true\n"
+25 kill node=1
+26 kill node=3
+27 invoke Write { operation: 5, delta: 13 }
+28 complete call=11 client disconnected; no reply observed
+29 kill node=2
+30 invoke Read
+31 complete call=12 raw="OK value=26\n"
+32 invoke Write { operation: 5, delta: 13 }
+33 complete call=13 raw="OK outcome=Value(39) duplicate=false\n"
+34 invoke Read
+35 complete call=14 raw="OK value=39\n"
+36 checkpoint node=2
+37 stop all; reopen original files
+38 invoke Write { operation: 1, delta: 7 }
+39 complete call=15 raw="OK outcome=Value(7) duplicate=true\n"
+40 invoke Write { operation: 4, delta: 11 }
+41 complete call=16 raw="OK outcome=Value(26) duplicate=true\n"
+42 invoke Read
+43 complete call=17 raw="OK value=39\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: NotAdmitted,
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 23,
+        completed: 24,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 27,
+        completed: 28,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 30,
+        completed: 31,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 32,
+        completed: 33,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 34,
+        completed: 35,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 38,
+        completed: 39,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 40,
+        completed: 41,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 42,
+        completed: 43,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+]
+witness=Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11, 13, 14, 15, 16, 17])
+test history::tcp_faulted_client_histories_are_linearizable ... ok
+history "/tmp/voteboat-service-681124-1791600381061366709-3/history.txt"
+1 scenario quic=true checkpoint=true
+2 invoke Write { operation: 1, delta: 7 }
+3 complete call=0 raw="OK outcome=Value(7) duplicate=false\n"
+4 invoke Write { operation: 2, delta: 3 }
+5 invoke Write { operation: 3, delta: 5 }
+6 complete call=1 raw="OK outcome=Value(10) duplicate=false\n"
+7 complete call=2 raw="OK outcome=Value(15) duplicate=false\n"
+8 invoke Write { operation: 2, delta: 3 }
+9 complete call=3 raw="OK outcome=Value(10) duplicate=true\n"
+10 invoke Write { operation: 3, delta: 5 }
+11 complete call=4 raw="OK outcome=Value(15) duplicate=true\n"
+12 invoke Read
+13 complete call=5 raw="OK value=15\n"
+14 invoke Write { operation: 4, delta: 11 }
+15 invoke Read
+16 complete call=7 raw="OK value=26\n"
+17 complete call=6 client disconnected; no reply observed
+18 kill node=3
+19 invoke Read
+20 complete call=8 raw="OK value=26\n"
+21 invoke Write { operation: 4, delta: 11 }
+22 complete call=9 raw="OK outcome=Value(26) duplicate=true\n"
+23 kill node=1
+24 kill node=3
+25 invoke Write { operation: 5, delta: 13 }
+26 complete call=10 client disconnected; no reply observed
+27 kill node=2
+28 invoke Read
+29 complete call=11 raw="OK value=26\n"
+30 invoke Write { operation: 5, delta: 13 }
+31 complete call=12 raw="OK outcome=Value(39) duplicate=false\n"
+32 invoke Read
+33 complete call=13 raw="OK value=39\n"
+34 checkpoint node=2
+35 stop all; reopen original files
+36 invoke Write { operation: 1, delta: 7 }
+37 complete call=14 raw="OK outcome=Value(7) duplicate=true\n"
+38 invoke Write { operation: 4, delta: 11 }
+39 complete call=15 raw="OK outcome=Value(26) duplicate=true\n"
+40 invoke Read
+41 complete call=16 raw="OK value=39\n"
+[
+    Call {
+        invoked: 2,
+        completed: 3,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 4,
+        completed: 6,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 5,
+        completed: 7,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 8,
+        completed: 9,
+        action: Write {
+            operation: 2,
+            delta: 3,
+        },
+        reply: Value(
+            10,
+        ),
+    },
+    Call {
+        invoked: 10,
+        completed: 11,
+        action: Write {
+            operation: 3,
+            delta: 5,
+        },
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 12,
+        completed: 13,
+        action: Read,
+        reply: Value(
+            15,
+        ),
+    },
+    Call {
+        invoked: 14,
+        completed: 17,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 15,
+        completed: 16,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 19,
+        completed: 20,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 21,
+        completed: 22,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 25,
+        completed: 26,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Unknown,
+    },
+    Call {
+        invoked: 28,
+        completed: 29,
+        action: Read,
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 30,
+        completed: 31,
+        action: Write {
+            operation: 5,
+            delta: 13,
+        },
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 32,
+        completed: 33,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+    Call {
+        invoked: 36,
+        completed: 37,
+        action: Write {
+            operation: 1,
+            delta: 7,
+        },
+        reply: Value(
+            7,
+        ),
+    },
+    Call {
+        invoked: 38,
+        completed: 39,
+        action: Write {
+            operation: 4,
+            delta: 11,
+        },
+        reply: Value(
+            26,
+        ),
+    },
+    Call {
+        invoked: 40,
+        completed: 41,
+        action: Read,
+        reply: Value(
+            39,
+        ),
+    },
+]
+witness=Ok([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 10, 12, 13, 14, 15, 16])
+test history::quic_faulted_client_histories_are_linearizable ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 3.22s
+

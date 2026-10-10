@@ -214,27 +214,36 @@ fn overlapping(cluster: &mut Cluster, tape: &mut Tape) {
     assert_eq!(tape.retry(cluster, Action::Read), 15);
 }
 fn lost_reply(cluster: &mut Cluster, tape: &mut Tape) {
-    let leader = cluster.leader();
-    let (index, stream) = unknown(cluster, leader, tape, 4, 11);
-    let mut committed = false;
+    let mut pending = Vec::new();
+    let mut last_leader = None;
+    let mut committed = None;
     for _ in 0..8 {
+        let leader = cluster.leader();
+        // Status can race a term change. Preserve the original operation ID
+        // and leave every attempted reply unread when following a new leader.
+        if last_leader != Some(leader) {
+            pending.push(unknown(cluster, leader, tape, 4, 11));
+            last_leader = Some(leader);
+        }
         if tape.invoke(cluster, leader, Action::Read) == Reply::Value(26) {
-            committed = true;
+            committed = Some(leader);
             break;
         }
         std::thread::park_timeout(Duration::from_millis(10));
     }
     assert!(
-        committed,
+        committed.is_some(),
         "unread operation did not become observable: {:?}",
         tape.path
     );
-    drop(stream);
-    tape.unobserved(index);
-    kill(cluster, leader, tape);
+    for (index, stream) in pending {
+        drop(stream);
+        tape.unobserved(index);
+    }
+    kill(cluster, committed.unwrap(), tape);
     assert_eq!(tape.retry(cluster, Action::Read), 26);
     assert_eq!(tape.retry(cluster, write(4, 11)), 26);
-    cluster.start(leader, "recover");
+    cluster.start(committed.unwrap(), "recover");
 }
 fn quorum_loss(cluster: &mut Cluster, tape: &mut Tape) {
     let leader = cluster.leader();

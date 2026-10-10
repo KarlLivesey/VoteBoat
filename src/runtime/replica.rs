@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Bounded caller-driven local replica assembly over selected public providers.
+use super::snapshot_send::SnapshotSendRetries;
 use super::*;
 use crate::{application::*, outbound::*, snapshot_worker::*, worker::*};
 
@@ -47,6 +48,9 @@ pub struct ReplicaDriverLimits {
     pub leases: usize,
     pub metadata_bytes: usize,
     pub persistence_batch_units: usize,
+    /// Retry an unaccepted ordinary snapshot for this host-clock interval before
+    /// treating it as packet loss. Heartbeats can regenerate the image.
+    pub snapshot_send_retry_ms: u64,
 }
 impl Default for ReplicaDriverLimits {
     fn default() -> Self {
@@ -54,6 +58,7 @@ impl Default for ReplicaDriverLimits {
             leases: 256,
             metadata_bytes: 1024 * 1024,
             persistence_batch_units: 128,
+            snapshot_send_retry_ms: 50,
         }
     }
 }
@@ -136,6 +141,9 @@ pub struct ReplicaProgress {
     pub retries: usize,
     pub persistence_batches: usize,
     pub sends: usize,
+    /// Ordinary snapshot packets refused before outbound admission. They are
+    /// retried by Raft's heartbeat path; this is never remote/durable success.
+    pub snapshot_send_refusals: usize,
     pub applications: usize,
     pub reads: usize,
 }
@@ -158,6 +166,7 @@ pub struct ReplicaDriver<R> {
     control: VecDeque<EffectLease>,
     data: VecDeque<EffectLease>,
     retries: VecDeque<EffectLease>,
+    snapshot_sends: SnapshotSendRetries,
     failed_result: Option<ApplicationResults<R>>,
     now: MonoTime,
     failed: Option<ReplicaError>,
@@ -225,6 +234,13 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             .checked_mul(3)
             .and_then(|n| n.checked_add(limits.persistence_batch_units))
             .and_then(|n| n.checked_mul(size_of::<EffectLease>()))
+            .and_then(|n| {
+                n.checked_add(
+                    limits
+                        .leases
+                        .checked_mul(size_of::<(EffectTicket, MonoTime)>())?,
+                )
+            })
             .and_then(|n| n.checked_add(size_of::<ApplicationResults<R>>()))
             .and_then(|n| {
                 n.checked_add(2 * size_of::<ReclaimEvent>() + size_of::<(ReclaimTicket, usize)>())
@@ -235,6 +251,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             || limits.persistence_batch_units == 0
             || limits.persistence_batch_units > 4096
             || limits.persistence_batch_units > limits.leases
+            || limits.snapshot_send_retry_ms > 60_000
             || limits.metadata_bytes > 64 * 1024 * 1024
             || metadata.is_none_or(|n| n > limits.metadata_bytes)
         {
@@ -289,6 +306,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             control: VecDeque::with_capacity(limits.leases),
             data: VecDeque::with_capacity(limits.leases),
             retries: VecDeque::with_capacity(limits.leases),
+            snapshot_sends: SnapshotSendRetries::new(limits.leases, limits.snapshot_send_retry_ms),
             failed_result: None,
             now,
             failed: None,
@@ -598,6 +616,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         &mut self,
         p: &mut ReplicaParts<'_, S, T, E, A, W, O>,
         lease: EffectLease,
+        now: MonoTime,
         out: &mut ReplicaProgress,
     ) -> Result<(), ReplicaError> {
         let EffectLease {
@@ -610,6 +629,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         let peer = message.to;
         match p.outbound.submit(vec![message]) {
             Ok(accepted) => {
+                self.snapshot_sends.complete(ticket);
                 if accepted.binding != self.binding.outbound
                     || accepted.peer != peer
                     || accepted.sequence == 0
@@ -635,10 +655,31 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
                         .map_err(ReplicaError::Owner)?;
                     return Err(ReplicaError::ProviderContract);
                 }
-                self.retries.push_back(EffectLease {
+                let refused = EffectLease {
                     ticket,
                     effect: Effect::Send(rejected.messages.remove(0)),
-                });
+                };
+                if rejected.reason == OutboundError::Overloaded
+                    && matches!(
+                        &refused.effect,
+                        Effect::Send(Message {
+                            rpc: Rpc::Snapshot { .. },
+                            ..
+                        })
+                    )
+                    && self.snapshot_sends.expired(ticket, now)?
+                {
+                    // Keeping a rejected background image would pin this group
+                    // behind one slow voter. No queue accepted it; ordinary Raft
+                    // heartbeats request another image until a valid ack arrives.
+                    p.owner
+                        .release(refused, 0, now)
+                        .map_err(|e| ReplicaError::Owner(e.reason))?;
+                    out.snapshot_send_refusals += 1;
+                    self.snapshot_sends.complete(ticket);
+                    return Ok(());
+                }
+                self.retries.push_back(refused);
                 if rejected.reason != OutboundError::Overloaded {
                     return Err(ReplicaError::Outbound(rejected.reason));
                 }
@@ -780,7 +821,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             let lease = self.retries.pop_front().unwrap();
             out.retries += 1;
             match &lease.effect {
-                Effect::Send(_) => self.retry_send(p, lease, out)?,
+                Effect::Send(_) => self.retry_send(p, lease, now, out)?,
                 Effect::Committed(_) => self.retry_committed(p, lease, now, out)?,
                 Effect::ReadReady(_) => self.retry_read(p, lease, now, out)?,
                 _ => self.retry_snapshot(p, lease)?,
@@ -896,6 +937,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
                     .map_err(|e| ReplicaError::Owner(e.reason))?;
             }
         }
+        self.snapshot_sends.clear();
         if let Some(output) = self.failed_result.take() {
             p.results
                 .complete(output)

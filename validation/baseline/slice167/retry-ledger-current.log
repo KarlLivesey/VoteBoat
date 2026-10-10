@@ -1,0 +1,11 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.61s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-fe71f711338ed6a8)
+
+running 2 tests
+test runtime::snapshot_send::tests::exact_retry_window_capacity_and_cleanup ... ok
+test runtime::snapshot_send::tests::zero_delay_and_clock_exhaustion_do_not_wrap ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.00s
+

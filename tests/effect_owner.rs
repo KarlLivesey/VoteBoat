@@ -2940,6 +2940,7 @@ mod snapshot_routes {
     use super::*;
     use voteboat::{contracts::StorageError, snapshot::*, snapshot_worker::*};
     mod recovery_budget;
+    mod reservation;
     pub(super) struct Worker {
         binding: SnapshotWorkerBinding,
         sequence: u64,

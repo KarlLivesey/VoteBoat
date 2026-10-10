@@ -1,0 +1,2 @@
+ready node=3 peer=127.0.0.1:14227 transport=Quic command=127.0.0.1:14327
+administration operation=17010 outcome=Unknown(LeadershipChanged)

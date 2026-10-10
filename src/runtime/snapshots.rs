@@ -286,22 +286,32 @@ impl SnapshotRouter {
         application: &A,
     ) -> Result<SnapshotWorkTicket, SnapshotRouteRejected> {
         let checked = self.prepare_work(owner, worker, &lease, application);
+        let reject = |owner: &mut EffectOwner<Q, T, E>, lease: EffectLease, mut reason| {
+            if matches!(
+                reason,
+                SnapshotRouteError::Overloaded
+                    | SnapshotRouteError::Owner(EffectOwnerError::Overloaded)
+                    | SnapshotRouteError::Worker(SnapshotWorkError::Overloaded)
+            ) {
+                if let Err(error) = owner.defer_snapshot(&lease) {
+                    reason = SnapshotRouteError::Owner(error);
+                }
+            }
+            SnapshotRouteRejected {
+                reason,
+                lease: Box::new(lease),
+            }
+        };
         let (allowance, work) = match checked {
             Ok(v) => v,
-            Err(reason) => {
-                return Err(SnapshotRouteRejected {
-                    reason,
-                    lease: Box::new(lease),
-                })
-            }
+            Err(reason) => return Err(reject(owner, lease, reason)),
         };
         let request = match worker.submit(work) {
             Ok(t) => t,
             Err(rejected) => {
-                return Err(SnapshotRouteRejected {
-                    reason: SnapshotRouteError::Worker(rejected.reason),
-                    lease: Box::new(lease),
-                })
+                let reason = SnapshotRouteError::Worker(rejected.reason);
+                drop(rejected.work);
+                return Err(reject(owner, lease, reason));
             }
         };
         if request.binding != self.worker || request.sequence <= self.last_admission {

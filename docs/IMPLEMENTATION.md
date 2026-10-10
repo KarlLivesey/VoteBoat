@@ -93,13 +93,93 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Completed: automatic checkpoint progression166 | Keep long-running service replay/log retention bounded; advances the same service/tuning milestones. | Current reclaim scheduling plus existing verified checkpoint/apply boundaries. | Bounded fair group selection, explicit checkpoint threshold, no repeated pending checkpoints, real service writes/checkpoint/reclaim/reopen with original retries intact. |
-| Current: maintenance under recovery pressure | Validate maintenance alongside recovering replicas and shared-group work; advances broader P1/P2/P7 validation. | Both automatic policies, recovery quotas162 and existing snapshot catch-up. | Selected TCP/QUIC lag/restart and pressure histories preserve known operations, source/checkpoint dependencies and bounded admission; no unsupported latency guarantee. |
-| Next: bounded operational event reporting | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded event cardinality/retention, overflow reporting and failing-sink isolation with no consensus dependency. |
-| Following: unresolved group-creation cancellation | Close the remaining pre-activation lifecycle gap; advances recursive responsibilities and split/merge. | Existing creation intents, assigned bootstrap identities and irreversible activation boundary. | Bounded recorded cancellation and recovery reject late readiness/publication without canceling any active owner; no-dual-owner and receipt-loss histories. |
+| Completed: maintenance under recovery pressure167 | Validate maintenance alongside recovering replicas and shared-group work; advances broader P1/P2/P7 validation. | Both automatic policies, recovery quotas162 and existing snapshot catch-up. | Selected TCP/QUIC lag/restart histories preserve known operations, bounded admission, foreground apply/checkpoint/reclaim and original retries; detailed evidence below. |
+| Current: bounded operational event reporting | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded event cardinality/retention, overflow reporting and failing-sink isolation with no consensus dependency. |
+| Next: unresolved group-creation cancellation | Close the remaining pre-activation lifecycle gap; advances recursive responsibilities and split/merge. | Existing creation intents, assigned bootstrap identities and irreversible activation boundary. | Bounded recorded cancellation and recovery reject late readiness/publication without canceling any active owner; no-dual-owner and receipt-loss histories. |
+| Following: recorded lifecycle fault schedules | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, completed cancellation semantics and deterministic fault fixtures. | Recorded bounded crash/restart cuts preserve exact operation identities, prevent dual active owners and retain reproducible failed schedules; keep unexplored combinations explicit. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
+
+#### 167 schema sketch (planned, before implementation)
+
+Compose the existing eight-group native recovery fixture with both automatic
+maintenance policies and a one-request recovery quota. Test-owned observations
+track actual durable group bases, exact reclaim tickets, successful reclaimed
+bytes and snapshot installs; none are new production watermarks or durability
+tokens. Retain the same native WAL/snapshot workers and TCP/TLS or QUIC endpoints.
+
+Create -> write -> abort one follower and join its workers -> write on the
+surviving majority -> automatically checkpoint beyond the stale durable suffix
+and reclaim -> close all transports -> reopen all three. After a real snapshot
+recovery request exists, briefly withhold the stale replica's polls while the
+healthy majority admits/applies a foreground zero-delta write and completes
+automatic checkpoint/reclaim work. Resume all polls and require every stale
+group to install its own snapshot. This finite host schedule deliberately holds
+recovery, rather than inferring concurrent work from enabled policy flags.
+
+Keep automatic checkpoint admissions within the configured two-slot cap and
+snapshot recovery within one request/its byte quota on every observation. Match
+reclaim receipts by exact ticket before counting them. No manual checkpoint,
+second store or replacement worker is introduced. Failed histories retain their
+native files; successful histories drain/join/reopen, verify application values
+and original deduplicated retries, then remove their temporary directories.
+Acceptance: both real protocols preserve the known operations, complete
+foreground maintenance with recovery outstanding, subsequently catch up all
+eight groups and survive another reopen. This advances P1/P2/P7 composition
+evidence, not universal fault coverage or a latency/throughput guarantee.
+
+167 schema revision after the failed QUIC schedule: the source owner retains
+five visits and256MB of speculative reservations while all five snapshot attempts
+wait for additional image capacity. No snapshot worker request is active there;
+WAL maintenance progresses but foreground and heartbeats cannot acquire space.
+This is a runtime reservation deadlock, not a reason to relax the history.
+Retain each visit's original continuation budget separately from its current
+charge. A retryable snapshot rejection releases only unused speculation, keeping
+all owned effect payload/capacity charged. Before any snapshot allocation or
+worker submission, reacquire at least the original continuation budget and the
+complete image allowance. Accepted work keeps its full charge; failed provider
+contracts keep existing fencing/recovery. The exact lease and core dependencies
+remain intact. Add deterministic competing-lease/foreground regression evidence,
+then rerun both real protocols and existing owner/snapshot suites.
+
+The next native run exposes a second pressure path: ordinary outbound snapshot
+images rejected before queue admission retain their entire group visits. A paused
+QUIC peer fills its bounded background queue, eventually retaining every group's
+visit even though the other voter is reachable. Ordinary Raft snapshot sends are
+retransmittable by the existing heartbeat/request path. On pre-admission overload,
+release that refused ordinary snapshot effect as local packet loss and count the
+refusal separately from successful sends. Do not manufacture an acknowledgement,
+drop already accepted queue work, alter durable state, or change learner-repair
+and non-snapshot retry ownership. Verify renewed snapshots after resume and
+foreground commitment with the stale peer still paused.
+
+The full native owner target then exposes why refusal should not immediately
+discard a transiently congested image: fixed-time host histories have no next
+heartbeat until their current work drains. Retain an unaccepted ordinary snapshot
+for a bounded construction-selected host-clock interval (default50ms, allowed
+0..60000), then apply the packet-loss rule if it is still refused. Track exact
+effect tickets in a preallocated, lease-count-bounded ledger; include that storage
+in constructor metadata checks and clear entries on admission/refusal/failure
+cleanup. A small internal ledger is needed to test time boundaries, replacement
+tickets and capacity without depending on real socket timing. No sleeping,
+hidden timer, deadline-overflow arithmetic or clock substitution is added.
+
+The full service suite also finds a setup-only status/term race before the
+configuration interruption schedule: the initial joint request receives
+`UNKNOWN LeadershipChanged`. Preserve both exact initial configuration records
+and retry through a freshly observed leader with a bounded deadline; do not
+change the cancellation or unread-commit phase. The automatic read/write client
+does not support configuration records (the first focused attempt confirms
+this), so a small fixture helper must use the explicit-node request path and
+accept only the known leadership race. Unexpected failures still fail the test.
+
+The next service run exposes the same cached-leader assumption for a client
+write in the joint-retirement history. Route post-transition writes and reads
+through the existing automatic client retry path, preserving exact operation
+IDs and payloads. The intentional leader-demotion request remains explicitly
+addressed, and the saved joint/final membership, duplicate receipts and all-node
+durable checks remain required. Routing a client does not establish authority.
 
 #### 166 schema sketch (planned, before implementation)
 
@@ -15451,3 +15531,58 @@ combined recovery-pressure schedules remain next. General retention, incremental
 cleaning, unlimited application growth, fixed disk occupancy and latency/SLO
 claims remain outside this implementation. CI for the previous325b887 commit was
 still running when inspected; no new macOS execution is inferred.
+
+### Slice167 — automatic maintenance under snapshot recovery pressure
+
+Two actual TCP/TLS and QUIC histories compose automatic checkpoints and WAL
+reclamation with eight forcibly stale groups and a one-request recovery quota.
+All transports are closed before reopening, so buffered Append traffic cannot
+replace required snapshot recovery. With one accepted recovery receipt held,
+the healthy majority must apply a foreground operation, durably checkpoint it
+and complete a later physical reclaim. Resuming must install every stale
+group's snapshot; a further full reopen preserves values and original retries.
+Checkpoint and recovery admission bounds are checked throughout.
+
+This exposed two runtime pressure bugs. Snapshot preparation failures could
+retain every visit's speculative output reservation and prevent any attempt
+from acquiring its image budget. Retryable refusal now retains only actual
+queued/leased payload charges; later preparation restores the original
+continuation floor and complete image allowance before allocation or provider
+submission. Exact effect identity, core dependency and accepted-work ownership
+remain unchanged. Two direct host regressions cover capacity competition and
+worker rejection/retry with final cleanup.
+
+Second, an ordinary snapshot rejected by a paused peer's full outbound queue
+could pin its group indefinitely. ReplicaDriver now retries it for a bounded
+construction-selected host-clock interval, default50ms and allowed0..60000,
+then discards that unaccepted packet and lets normal Raft heartbeats retry.
+`snapshot_send_refusals` reports these discards separately from successful
+sends. No remote acknowledgement or durable fact is produced, and accepted
+packets, learner repair and other messages retain their original ownership.
+The exact-ticket retry ledger is preallocated, lease-count-bounded and included
+in metadata validation. Unit tests cover expiry/capacity/cleanup, and constructor
+tests reject invalid policy without mutating the owner.
+
+All152 all-feature and146 core-only owner tests pass, including the native
+hundred-group histories. Both retry-ledger unit tests and all22 native benchmark
+tests pass. The new native histories observe9 TCP and11 QUIC snapshot installs,
+peak recovery1 and positive physical reclaim; QUIC explicitly exercises23
+ordinary-snapshot send discards while foreground maintenance progresses. These
+are finite test observations, not performance or universal liveness claims.
+Both strict Clippy profiles, formatting, warnings-denied API documentation and
+91-record inventory metadata validation pass.
+
+Broader service validation found cached-leader assumptions in the faulted
+Counter recorder, initial configuration setup and joint-retirement client
+writes. Fixtures now refresh/reroute while preserving exact operation identities,
+unread replies, independent history checks and durable membership assertions.
+The final complete service target passes45/45 in43.52s after these fixes.
+All earlier failed runs are retained under `validation/baseline/slice167`, with
+commands and detailed boundaries in its README. The previous4063f19 Linux CI
+failed a hundred-group checkpoint timeout; the current local target passes,
+but no remote resolution or macOS success is inferred.
+
+This completes the selected maintenance/recovery composition and advances
+P1/P2/P7; it does not finish the full roadmap. The macro milestones remain open.
+The next deliverable is bounded operational event reporting, followed by
+unresolved-creation cancellation and broader recorded lifecycle fault schedules.

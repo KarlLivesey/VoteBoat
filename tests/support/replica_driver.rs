@@ -346,6 +346,43 @@ fn wrong_binding_clock_and_budget_reject_before_provider_poll_and_can_resume() {
     f.settle();
 }
 #[test]
+fn snapshot_retry_policy_is_bounded_and_rejects_without_mutation() {
+    let mut f = Fixture::new(1);
+    f.settle();
+    let before = f.owner.usage();
+    f.parts(|_, p| {
+        assert!(matches!(
+            ReplicaDriver::<CounterReceipt>::new(
+                p,
+                ReplicaDriverLimits {
+                    snapshot_send_retry_ms: 60_001,
+                    ..Default::default()
+                },
+                MonoTime(400),
+            ),
+            Err(ReplicaError::InvalidLimits)
+        ));
+        for delay in [0, 60_000] {
+            let driver = ReplicaDriver::<CounterReceipt>::new(
+                p,
+                ReplicaDriverLimits {
+                    snapshot_send_retry_ms: delay,
+                    ..Default::default()
+                },
+                MonoTime(400),
+            )
+            .unwrap();
+            assert_eq!(driver.limits().snapshot_send_retry_ms, delay);
+            assert!(driver.is_drained());
+        }
+    });
+    assert_eq!(f.owner.usage(), before);
+    assert!(!f.owner.is_failed());
+    f.propose(1);
+    f.settle();
+    assert!(f.clients.poll().is_some());
+}
+#[test]
 fn assembly_rejects_missing_or_lagging_application_and_held_work() {
     let mut f = Fixture::new(1);
     let app = f.apps.remove(&group(1)).unwrap();

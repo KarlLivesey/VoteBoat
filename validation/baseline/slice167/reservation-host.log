@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0308]: `match` arms have incompatible types
+  --> tests/snapshot_routes/reservation.rs:95:36
+   |
+91 |               match lease.effect {
+   |               ------------------ `match` arms have incompatible types
+92 |                   Effect::Persist(_) => owner
+   |  _______________________________________-
+93 | |                     .submit_persists(wal, vec![lease], MonoTime(0))
+94 | |                     .unwrap(),
+   | |_____________________________- this is found to be of type `voteboat::worker::WorkerTicket`
+95 |                   Effect::Send(_) => owner
+   |  ____________________________________^
+96 | |                     .release(lease, app.applied_index(), MonoTime(0))
+97 | |                     .unwrap(),
+   | |_____________________________^ expected `WorkerTicket`, found `()`
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (test "effect_owner") due to 1 previous error

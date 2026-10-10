@@ -1,0 +1,47 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.62s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 1 test
+maintenance recovery files: /tmp/voteboat-shared-repair-578311-Quic-1791600022471752185
+replica=0 checkpoints=CheckpointStatus { policy: Some(CheckpointPolicy { min_entries: 1, interval_ms: 1, scan_groups: 2, max_in_flight: 2 }), next_scan: Some(MonoTime(35331)), cursor: Some(GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(1) }), pending: {}, last_result: Some(Completed { group: GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(1) }, index: 4 }), last_admission_error: None } wal=WalMaintenanceStatus { policy: Some(WalMaintenancePolicy { interval_ms: 1, retry_ms: 1, max_bytes: 67108864 }), next_deadline: Some(MonoTime(35331)), pending: None, last_completion: Some(ReclaimEvent { request: ReclaimTicket { binding: WorkerBinding { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, generation: StorageWorkerGeneration(1) }, sequence: 16038 }, result: Ok(LogReclaimed { before_bytes: 3365, after_bytes: 3365 }) }), last_admission_error: None } recovery=SnapshotRouterUsage { requests: 0, image_bytes: 0 }
+replica=0 group=1 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=2 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=3 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=4 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=5 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=6 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=7 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=0 group=8 role=Leader term=2 base=4 commit=4 applied=4 dependency=false
+replica=1 checkpoints=CheckpointStatus { policy: Some(CheckpointPolicy { min_entries: 1, interval_ms: 1, scan_groups: 2, max_in_flight: 2 }), next_scan: Some(MonoTime(35331)), cursor: Some(GroupIdentity { id: GroupId(7), incarnation: GroupIncarnation(1) }), pending: {}, last_result: Some(Completed { group: GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(1) }, index: 4 }), last_admission_error: None } wal=WalMaintenanceStatus { policy: Some(WalMaintenancePolicy { interval_ms: 1, retry_ms: 1, max_bytes: 67108864 }), next_deadline: None, pending: Some(ReclaimTicket { binding: WorkerBinding { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, generation: StorageWorkerGeneration(1) }, sequence: 21966 }), last_completion: Some(ReclaimEvent { request: ReclaimTicket { binding: WorkerBinding { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, generation: StorageWorkerGeneration(1) }, sequence: 21965 }, result: Ok(LogReclaimed { before_bytes: 3365, after_bytes: 3365 }) }), last_admission_error: None } recovery=SnapshotRouterUsage { requests: 0, image_bytes: 0 }
+replica=1 group=1 role=Candidate term=4 base=4 commit=4 applied=4 dependency=false
+replica=1 group=2 role=Candidate term=4 base=4 commit=4 applied=4 dependency=false
+replica=1 group=3 role=Candidate term=3 base=4 commit=4 applied=4 dependency=false
+replica=1 group=4 role=Candidate term=3 base=4 commit=4 applied=4 dependency=false
+replica=1 group=5 role=Candidate term=4 base=4 commit=4 applied=4 dependency=false
+replica=1 group=6 role=Candidate term=4 base=4 commit=4 applied=4 dependency=false
+replica=1 group=7 role=Candidate term=3 base=4 commit=4 applied=4 dependency=false
+replica=1 group=8 role=Candidate term=3 base=4 commit=4 applied=4 dependency=false
+replica=2 checkpoints=CheckpointStatus { policy: Some(CheckpointPolicy { min_entries: 1, interval_ms: 1, scan_groups: 2, max_in_flight: 2 }), next_scan: Some(MonoTime(5331)), cursor: Some(GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }), pending: {}, last_result: Some(Completed { group: GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(1) }, index: 2 }), last_admission_error: None } wal=WalMaintenanceStatus { policy: Some(WalMaintenancePolicy { interval_ms: 1, retry_ms: 1, max_bytes: 67108864 }), next_deadline: Some(MonoTime(5331)), pending: None, last_completion: Some(ReclaimEvent { request: ReclaimTicket { binding: WorkerBinding { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, generation: StorageWorkerGeneration(1) }, sequence: 38 }, result: Ok(LogReclaimed { before_bytes: 3320, after_bytes: 3320 }) }), last_admission_error: None } recovery=SnapshotRouterUsage { requests: 1, image_bytes: 75501568 }
+replica=2 group=1 role=Follower term=2 base=2 commit=2 applied=2 dependency=true
+replica=2 group=2 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+replica=2 group=3 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+replica=2 group=4 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+replica=2 group=5 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+replica=2 group=6 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+replica=2 group=7 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+replica=2 group=8 role=Follower term=2 base=2 commit=2 applied=2 dependency=false
+
+thread 'shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery' (578318) panicked at examples/benchmark/shared_recovery/maintenance.rs:213:13:
+held recovery blocked foreground maintenance: pending=Some((0, ClientTicket { binding: ClientRouterBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ClientRouterGeneration(1) }, sequence: 1, group: GroupIdentity { id: GroupId(8), incarnation: GroupIncarnation(1) }, operation: OperationId(900001) })) applied=None reclaim_count_at_checkpoint=None
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... FAILED
+
+failures:
+
+failures:
+    shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 21 filtered out; finished in 35.33s
+
+error: test failed, to rerun pass `--example native_benchmark`

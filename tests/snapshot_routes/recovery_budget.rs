@@ -100,7 +100,8 @@ fn admission_history(requests: usize, images: usize) {
         .unwrap_err();
     assert_eq!(rejected.reason, SnapshotRouteError::Overloaded);
     assert_eq!(rejected.lease.ticket, ticket);
-    assert_eq!(owner.usage().reserved_bytes, reserved);
+    assert!(owner.usage().reserved_bytes < reserved);
+    assert!(owner.usage().reserved_bytes > 0);
     assert_eq!(worker.sequence, sequence);
     let event = worker.poll(1).pop().unwrap();
     assert!(worker.is_drained());

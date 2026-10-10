@@ -89,6 +89,7 @@ pub struct OwnerStep {
 struct Active {
     visit: VisitTicket,
     reserved: usize,
+    continuation_bytes: usize,
     effects: VecDeque<Effect>,
     leased: Option<EffectTicket>,
     kind: Option<LeaseKind>,
@@ -124,8 +125,9 @@ struct Request {
 /// remain runnable. Mechanism providers and application/snapshot workers stay
 /// host-owned; the owner creates no thread, store, listener or hidden queue.
 ///
-/// A lease transfers the effect but retains its reservation. Release Send only
-/// after a bounded outbound queue accepts it; acknowledge committed work only
+/// A lease transfers the effect but retains its reservation. Release Send after
+/// a bounded outbound queue accepts it, or when deliberately discarding a
+/// retransmittable ordinary snapshot as local packet loss; acknowledge committed work only
 /// after ordered application. ReadReady is consumed on the core before its
 /// completion callback. Persist leases use submit_persists, never generic release.
 /// Callbacks run on the serialized owner and must not perform blocking I/O.
@@ -249,7 +251,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         let needed = effect_bytes(a.effects.make_contiguous(), capacity)
             .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
             .and_then(|n| n.checked_add(extra))
-            .ok_or(EffectOwnerError::ReservationTooLarge)?;
+            .ok_or(EffectOwnerError::ReservationTooLarge)?
+            .max(a.continuation_bytes);
         let ceiling = if a.control {
             self.limits.reserved_bytes
         } else {
@@ -260,6 +263,23 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         }
         let additional = needed.saturating_sub(a.reserved);
         self.extend_reservation(lease.ticket, additional)
+    }
+    /// A rejected snapshot attempt owns no prepared image or worker request.
+    /// Keep its actual queued/leased payload charged, and reacquire the original
+    /// continuation budget plus image allowance before any later preparation.
+    pub(super) fn defer_snapshot(&mut self, lease: &EffectLease) -> Result<(), EffectOwnerError> {
+        self.validate_lease(lease)?;
+        let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+        let capacity = a.effects.capacity();
+        let retained = effect_bytes(a.effects.make_contiguous(), capacity)
+            .and_then(|n| n.checked_add(effect_bytes(std::slice::from_ref(&lease.effect), 1)?))
+            .ok_or(EffectOwnerError::ReservationTooLarge)?;
+        if retained > a.reserved {
+            return self.fail(EffectOwnerError::ProviderContract);
+        }
+        self.reserved -= a.reserved - retained;
+        a.reserved = retained;
+        Ok(())
     }
     pub fn core(&self, group: GroupIdentity) -> Option<&Raft> {
         self.runtime.core(group)
@@ -526,6 +546,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 Active {
                     visit,
                     reserved,
+                    continuation_bytes: reserved,
                     effects: VecDeque::new(),
                     leased: None,
                     kind: None,

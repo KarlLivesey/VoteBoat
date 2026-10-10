@@ -1,0 +1,30 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.47s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... FAILED
+test native_configuration_close_deadline_and_unread_commit_recover_quic ... FAILED
+
+failures:
+
+---- native_configuration_close_deadline_and_unread_commit_recover_tcp stdout ----
+
+thread 'native_configuration_close_deadline_and_unread_commit_recover_tcp' (743396) panicked at tests/counter_service.rs:1867:9:
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native_configuration_close_deadline_and_unread_commit_recover_quic stdout ----
+
+thread 'native_configuration_close_deadline_and_unread_commit_recover_quic' (743395) panicked at tests/counter_service.rs:1867:9:
+
+
+
+failures:
+    native_configuration_close_deadline_and_unread_commit_recover_quic
+    native_configuration_close_deadline_and_unread_commit_recover_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 43 filtered out; finished in 1.00s
+
+error: test failed, to rerun pass `--test counter_service`
