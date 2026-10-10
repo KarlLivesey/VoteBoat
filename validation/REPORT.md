@@ -5178,3 +5178,24 @@ These Linux results do not prove the earlier macOS shutdown failure fixed.
 Base-commit test jobs remained in progress at inspection; their lint job passed.
 Broader recorded lifecycle faults, discovery refresh and full P0–P7 acceptance
 remain open. No new power-loss, multi-host or complete protocol proof is claimed.
+
+### Slice171 — native cancellation/publication race schedules
+
+Sixteen recorded schedules cover publication/cancellation first, unpolled versus
+quorum-applied/unread owner loss, and WAL versus checkpoint recovery on TCP/TLS
+and QUIC. They require the exact winning operation/duplicate outcome, absence
+of unpolled commands, permanent refusal of the losing decision, unchanged
+parent metadata, non-serving canceled targets and original data retries on
+activated targets while metadata stays stopped. Actual native stores are
+reopened; no protocol changes or physical power-loss claim is made.
+
+Both matrix test entry points pass in12.98s; the final16 schedules with exact
+original status comparisons pass in12.68s. The complete14-test native creation/
+created-source regression selection passes in210.16s. Formatting, both strict Clippy
+profiles, warning-denied docs and92-record inventory validation pass.
+[Slice171 evidence](baseline/slice171/README.md) retains the schedules, initial
+test compile failures and a reproduced QUIC read-authority fixture failure.
+Its pre-activation read now uses the existing bounded explicit-refusal retry
+helper; the expected quorum read result and all durability assertions remain.
+Broader lifecycle interleavings and macOS execution remain open. Prior CI was
+cancelled; current base tests were still running at inspection.

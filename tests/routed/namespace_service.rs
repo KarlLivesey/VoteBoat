@@ -17,6 +17,9 @@ type Namespace = CreatedNamespace<Counter, HostPolicy>;
 #[path = "namespace_cancellation.rs"]
 mod cancellation;
 pub(super) use cancellation::run as run_cancellation;
+#[path = "namespace_race.rs"]
+mod race;
+pub(super) use race::run as run_race;
 struct Service {
     root: std::path::PathBuf,
     clock: Instant,
@@ -409,7 +412,7 @@ impl Service {
     fn activate(&mut self, status: &NamespacePublicationStatus) -> Vec<u8> {
         campaign(&mut self.nodes, &self.clock, 100);
         assert_eq!(
-            read(&mut self.nodes, &self.clock, 100, query()),
+            read_recovering(&mut self.nodes, &self.clock, 100, query()),
             NamespaceRead::NotActive
         );
         let activation = self.nodes[0].local().applications[&group(100)]

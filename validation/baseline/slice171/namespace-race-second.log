@@ -1,0 +1,32 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.93s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 2 tests
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: false }
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: true }
+namespace race Quic: Schedule { first: Publish, committed: true, checkpoint: false }
+namespace race Quic: Schedule { first: Publish, committed: true, checkpoint: true }
+
+thread 'native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules' (1151927) panicked at tests/routed/native.rs:331:42:
+read lost leadership
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+namespace race TcpTls: Schedule { first: Publish, committed: false, checkpoint: false }
+test native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules ... FAILED
+namespace race TcpTls: Schedule { first: Publish, committed: false, checkpoint: true }
+namespace race TcpTls: Schedule { first: Publish, committed: true, checkpoint: false }
+namespace race TcpTls: Schedule { first: Publish, committed: true, checkpoint: true }
+namespace race TcpTls: Schedule { first: Cancel, committed: false, checkpoint: false }
+namespace race TcpTls: Schedule { first: Cancel, committed: false, checkpoint: true }
+namespace race TcpTls: Schedule { first: Cancel, committed: true, checkpoint: false }
+namespace race TcpTls: Schedule { first: Cancel, committed: true, checkpoint: true }
+test native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+
+failures:
+
+failures:
+    native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 151 filtered out; finished in 9.45s
+
+error: test failed, to rerun pass `--test routed`

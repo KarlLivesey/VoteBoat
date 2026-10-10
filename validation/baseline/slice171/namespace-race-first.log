@@ -1,0 +1,82 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0364]: `run` is private, and cannot be re-exported
+  --> tests/routed/namespace_service.rs:22:16
+   |
+22 | pub(super) use race::run as run_race;
+   |                ^^^^^^^^^^^^^^^^^^^^^
+   |
+note: consider marking `run` as `pub` in the imported module
+  --> tests/routed/namespace_service.rs:22:16
+   |
+22 | pub(super) use race::run as run_race;
+   |                ^^^^^^^^^^^^^^^^^^^^^
+
+error[E0603]: function import `run_race` is private
+   --> tests/routed/creation.rs:118:24
+    |
+118 |     namespace_service::run_race(NativePeerProtocol::TcpTls);
+    |                        ^^^^^^^^ private function import
+    |
+note: the function import `run_race` is defined here...
+   --> tests/routed/namespace_service.rs:22:16
+    |
+ 22 | pub(super) use race::run as run_race;
+    |                ^^^^^^^^^^^^^^^^^^^^^
+note: ...and refers to the function `run` which is defined here
+   --> tests/routed/namespace_race.rs:234:1
+    |
+234 | pub(super) fn run(protocol: NativePeerProtocol) {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: import `run_race` directly
+    |
+118 -     namespace_service::run_race(NativePeerProtocol::TcpTls);
+118 +     race::run_race(NativePeerProtocol::TcpTls);
+    |
+
+error[E0603]: function import `run_race` is private
+   --> tests/routed/creation.rs:123:24
+    |
+123 |     namespace_service::run_race(NativePeerProtocol::Quic);
+    |                        ^^^^^^^^ private function import
+    |
+note: the function import `run_race` is defined here...
+   --> tests/routed/namespace_service.rs:22:16
+    |
+ 22 | pub(super) use race::run as run_race;
+    |                ^^^^^^^^^^^^^^^^^^^^^
+note: ...and refers to the function `run` which is defined here
+   --> tests/routed/namespace_race.rs:234:1
+    |
+234 | pub(super) fn run(protocol: NativePeerProtocol) {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: import `run_race` directly
+    |
+123 -     namespace_service::run_race(NativePeerProtocol::Quic);
+123 +     race::run_race(NativePeerProtocol::Quic);
+    |
+
+error[E0502]: cannot borrow `*s` as immutable because it is also borrowed as mutable
+  --> tests/routed/namespace_race.rs:86:37
+   |
+82 |     s.parents[0]
+   |     --------- mutable borrow occurs here
+83 |         .propose(ClientRequest {
+   |          ------- mutable borrow later used by call
+...
+86 |             bytes: plan.first.bytes(s, ready),
+   |                                     ^ immutable borrow occurs here
+
+error[E0502]: cannot borrow `s` as immutable because it is also borrowed as mutable
+   --> tests/routed/namespace_race.rs:193:26
+    |
+188 |         propose(
+    |         ------- mutable borrow later used by call
+189 |             &mut s.parents,
+    |             -------------- mutable borrow occurs here
+...
+193 |             winner.bytes(&s, ready)
+    |                          ^^ immutable borrow occurs here
+
+Some errors have detailed explanations: E0364, E0502, E0603.
+For more information about an error, try `rustc --explain E0364`.
+error: could not compile `voteboat` (test "routed") due to 5 previous errors

@@ -1,0 +1,49 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 1 test
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: false }
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: true }
+namespace race Quic: Schedule { first: Publish, committed: true, checkpoint: false }
+namespace race Quic: Schedule { first: Publish, committed: true, checkpoint: true }
+
+thread 'native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules' (1155879) panicked at tests/routed/native.rs:331:42:
+read lost leadership
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic_display::<&str>
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:259:5
+   3: core::option::expect_failed
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/option.rs:2260:5
+   4: <core::option::Option<voteboat::namespace_creation::application::NamespaceOwnerRead<voteboat::routed::RoutedRead<i64>>>>::expect
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/option.rs:969:21
+   5: routed::native::read::<voteboat::namespace_creation::application::CreatedNamespace<voteboat::application::Counter, routed::HostPolicy>>
+             at ./tests/routed/native.rs:331:42
+   6: <routed::native::creation::namespace_service::Service>::activate
+             at ./tests/routed/namespace_service.rs:415:13
+   7: routed::native::creation::namespace_service::race::finish
+             at ./tests/routed/namespace_race.rs:205:28
+   8: routed::native::creation::namespace_service::race::run
+             at ./tests/routed/namespace_race.rs:248:17
+   9: routed::native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules
+             at ./tests/routed/creation.rs:123:5
+  10: routed::native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules::{closure#0}
+             at ./tests/routed/creation.rs:122:68
+  11: <routed::native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+  12: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+test native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules ... FAILED
+
+failures:
+
+failures:
+    native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 152 filtered out; finished in 6.34s
+
+error: test failed, to rerun pass `--test routed`

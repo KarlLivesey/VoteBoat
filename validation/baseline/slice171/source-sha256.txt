@@ -1,0 +1,3 @@
+9acc10102e26a5dbd6fab67bea528dd7220192f02547d0be037905bcc59e33e6  tests/routed/namespace_race.rs
+518b20833e1f0207af7ec1a448c5e1fa034b5b88a88d001476d96ef01ca62fac  tests/routed/namespace_service.rs
+53974d00078cd823146e29606f239223eecaf549147f16d5de21b7ceb8e76f02  tests/routed/creation.rs

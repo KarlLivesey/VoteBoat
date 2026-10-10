@@ -1,0 +1,90 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 14 tests
+test native::creation::quic_created_group_resumes_partial_assignment_and_runs_with_metadata_offline ... ok
+test native::creation::quic_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: false }
+test native::creation::quic_namespace_partial_publication_activation_unread_receipts_owner_abort ... ok
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: true }
+namespace race Quic: Schedule { first: Publish, committed: true, checkpoint: false }
+namespace race Quic: Schedule { first: Publish, committed: true, checkpoint: true }
+namespace race Quic: Schedule { first: Cancel, committed: false, checkpoint: false }
+namespace race Quic: Schedule { first: Cancel, committed: false, checkpoint: true }
+namespace race Quic: Schedule { first: Cancel, committed: true, checkpoint: false }
+namespace race Quic: Schedule { first: Cancel, committed: true, checkpoint: true }
+test native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+test native::creation::quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage ... ok
+test native::creation::tcp_created_group_resumes_partial_assignment_and_runs_with_metadata_offline ... ok
+test native::creation::tcp_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+test native::creation::tcp_namespace_partial_publication_activation_unread_receipts_owner_abort ... ok
+test native::creation::tcp_namespace_ready_publish_activate_survives_reopen_and_metadata_outage ... ok
+created source Quic checkpoint=true phase=Ready
+created source Quic checkpoint=true phase=NamespacePublish
+created source Quic checkpoint=true phase=NamespaceActivate
+created source Quic checkpoint=true phase=Data(1)
+created source Quic checkpoint=true phase=Data(2)
+created source Quic checkpoint=true phase=Intent
+created source Quic checkpoint=true phase=Stage(21)
+created source Quic checkpoint=true phase=Stage(22)
+created source Quic checkpoint=true phase=Fence
+created source Quic checkpoint=true phase=Import(21)
+created source Quic checkpoint=true phase=Import(22)
+test native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules has been running for over 60 seconds
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_checkpoint has been running for over 60 seconds
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal has been running for over 60 seconds
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_checkpoint has been running for over 60 seconds
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_wal has been running for over 60 seconds
+created source Quic checkpoint=true phase=Publish
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_checkpoint ... ok
+created source TcpTls checkpoint=true phase=Ready
+created source TcpTls checkpoint=true phase=NamespacePublish
+created source TcpTls checkpoint=true phase=NamespaceActivate
+created source TcpTls checkpoint=true phase=Data(1)
+created source TcpTls checkpoint=true phase=Data(2)
+created source TcpTls checkpoint=true phase=Intent
+created source TcpTls checkpoint=true phase=Stage(21)
+created source TcpTls checkpoint=true phase=Stage(22)
+created source TcpTls checkpoint=true phase=Fence
+created source TcpTls checkpoint=true phase=Import(21)
+created source TcpTls checkpoint=true phase=Import(22)
+created source TcpTls checkpoint=true phase=Publish
+namespace race TcpTls: Schedule { first: Publish, committed: false, checkpoint: false }
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_checkpoint ... ok
+namespace race TcpTls: Schedule { first: Publish, committed: false, checkpoint: true }
+namespace race TcpTls: Schedule { first: Publish, committed: true, checkpoint: false }
+namespace race TcpTls: Schedule { first: Publish, committed: true, checkpoint: true }
+namespace race TcpTls: Schedule { first: Cancel, committed: false, checkpoint: false }
+namespace race TcpTls: Schedule { first: Cancel, committed: false, checkpoint: true }
+namespace race TcpTls: Schedule { first: Cancel, committed: true, checkpoint: false }
+namespace race TcpTls: Schedule { first: Cancel, committed: true, checkpoint: true }
+test native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+created source Quic checkpoint=false phase=Ready
+created source Quic checkpoint=false phase=NamespacePublish
+created source Quic checkpoint=false phase=NamespaceActivate
+created source Quic checkpoint=false phase=Data(1)
+created source Quic checkpoint=false phase=Data(2)
+created source Quic checkpoint=false phase=Intent
+created source Quic checkpoint=false phase=Stage(21)
+created source Quic checkpoint=false phase=Stage(22)
+created source Quic checkpoint=false phase=Fence
+created source Quic checkpoint=false phase=Import(21)
+created source Quic checkpoint=false phase=Import(22)
+created source Quic checkpoint=false phase=Publish
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal ... ok
+created source TcpTls checkpoint=false phase=Ready
+created source TcpTls checkpoint=false phase=NamespacePublish
+created source TcpTls checkpoint=false phase=NamespaceActivate
+created source TcpTls checkpoint=false phase=Data(1)
+created source TcpTls checkpoint=false phase=Data(2)
+created source TcpTls checkpoint=false phase=Intent
+created source TcpTls checkpoint=false phase=Stage(21)
+created source TcpTls checkpoint=false phase=Stage(22)
+created source TcpTls checkpoint=false phase=Fence
+created source TcpTls checkpoint=false phase=Import(21)
+created source TcpTls checkpoint=false phase=Import(22)
+created source TcpTls checkpoint=false phase=Publish
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_wal ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 139 filtered out; finished in 210.16s
+

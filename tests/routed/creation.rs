@@ -113,6 +113,15 @@ fn tcp_namespace_partial_publication_activation_unread_receipts_owner_abort() {
 fn tcp_namespace_cancellation_unread_receipt_and_late_readiness() {
     namespace_service::run_cancellation(NativePeerProtocol::TcpTls);
 }
+#[test]
+fn tcp_namespace_race_recorded_owner_loss_and_recovery_schedules() {
+    namespace_service::run_race(NativePeerProtocol::TcpTls);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_namespace_race_recorded_owner_loss_and_recovery_schedules() {
+    namespace_service::run_race(NativePeerProtocol::Quic);
+}
 #[cfg(feature = "quic")]
 #[test]
 fn quic_namespace_cancellation_unread_receipt_and_late_readiness() {

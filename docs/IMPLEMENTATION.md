@@ -93,10 +93,50 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Completed: bounded operational event reporting168 | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded aggregate event retention, cursor-gap reporting, failing-sink isolation and TCP/QUIC service export/restart checks; detailed evidence below. |
-| Current: recorded lifecycle fault schedules and remaining platform regressions | Extend direct recovery evidence across cancellation and ownership changes; advances P0/P4/P6 validation. | Existing lifecycle journals, schema16 cancellation semantics, deterministic fault fixtures and slice170 service fixes. | Recorded crash/restart cuts preserve exact IDs and prevent dual active owners; diagnose any repeated macOS shutdown failure using the new child-process logs; keep unexplored combinations explicit. |
-| Next: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
-| Following: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, discovery refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
+| Completed: recorded cancellation/publication race schedules171 | Exercise competing creation decisions under owner loss; advances P0/P5/P6 validation. | Schema16 cancellation, native owner/file recovery and slice170 service fixes. | Sixteen recorded TCP/QUIC schedules preserve the winning decision, reject the loser, retain retry identity and keep canceled targets non-serving; broader lifecycle faults remain open. |
+| Current: bounded remote discovery refresh | Keep routed services usable as host endpoints and metadata observations expire; advances P5/C17. | Existing discovery/read-source contracts, checked provenance and owner-independent child routing. | Bounded pending refreshes and retry, stale-observation refusal, exact cancellation/response ownership and child progress during source failure; hints never reactivate retired owners. |
+| Next: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, discovery refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
+| Following: bounded credential refresh and session revocation | Preserve authenticated service operation when credentials change; advances C09/C21 and usable deployment. | Existing SecureSession/ServiceAuthorizer contracts and the preceding audit of supported identity/trust transitions. | Explicit refresh ownership, bounded pending work, fail-closed old credential/session behavior, recovery and independent host-resource lifetime; never infer membership from credentials. |
+
+### Slice171 schema plan — recorded cancellation/publication race cuts
+
+Purpose: close a concrete combined creation-lifecycle fault gap before moving to
+remote discovery refresh. Advances current P0/P5/P6 validation; the next two
+deliverables remain remote discovery and the baseline evidence audit. Existing
+native tests cover cancellation first and publication alone, but not both
+competing commands with owner loss before versus after durable commitment.
+
+Shape: a finite test schedule records first decision (cancel or publish), owner
+cut (accepted/unpolled versus quorum-applied/unread), and recovery mode (WAL or
+checkpoint). Reuse the same production Node, public clients, schema16 Directory,
+CreatedNamespace, native stores and TCP/TLS or QUIC; add no production protocol.
+Each command retains a distinct stable operation ID and original bytes.
+
+Transitions/ownership: queue the first decision, optionally poll exactly two
+metadata replicas until applied while leaving the client receipt unread, then
+abort owners and reopen actual files. An unpolled command must be absent from
+every log; a quorum-applied decision must survive leader replacement. Resolve
+with the original ID or opposite decision, checkpoint when selected, then reject
+the losing command and stale publication/readiness. A published target activates
+only using recovered publication evidence and must preserve an original data
+retry; a canceled target remains non-serving. No timeout revokes an active owner.
+
+Checks: all16 matrix histories (two decisions, two cuts, two recovery modes,
+two transports), explicit log/receipt assertions, duplicate identity, metadata
+and target reopen, unchanged parent manifest and publication/cancellation
+exclusion. Retain the selected schedule in test output and preserve failed
+native directories. This is a finite combined-fault family, not arbitrary
+message generation or a full lifecycle proof. Keep both strict lint profiles
+and formatting at zero; macOS confirmation stays a separate background check.
+
+Observed fixture correction: the QUIC publication-first/quorum-applied/checkpoint
+schedule reproducibly reached a retryable refusal at the target's pre-activation
+read after target polling was paused for metadata recovery. Its backtrace points
+to Service::activate, whose one-shot read treated NotLeader/ReadNotReady/changed
+leadership as fatal. Use the existing four-attempt quorum-read recovery helper;
+it retries only those explicit outcomes and still requires the same NotActive
+value. Reopen canceled targets after the metadata decision before their negative
+read/data-admission check. No production behavior or assertion is weakened.
 
 ### Slice170 schema plan — observed service retries and shutdown evidence
 
@@ -15839,3 +15879,42 @@ milestone and C07 conformance; no whole milestone completes. The linked current
 work remains recorded lifecycle schedules and unresolved platform evidence;
 bounded discovery refresh and the full baseline audit follow. Full P0–P7 remains
 active, with P8/Windows deferred and RPL-1.5 unchanged.
+
+### Slice171 — recorded native creation decision races
+
+Added a finite16-schedule native family that races namespace publication and
+creation cancellation across owner loss. Each transport runs both first-decision
+orders, before-poll versus quorum-applied/unread interruption, and WAL versus
+checkpoint recovery. The original command is demonstrably absent from every log
+in the unpolled cut; at least two durable logs contain the applied winner in the
+unread cut. Recovery starts with a different freshest candidate and observes
+exact original publication/cancellation status, not just a matching Boolean.
+
+The winning operation retries with its original bytes and identity, preserves
+its original status through checkpoint/reopen, and permanently excludes the
+competing decision. Parent manifests and reserved control accounting remain
+consistent. Canceled targets reopen and refuse service; published targets activate
+from recovered evidence, preserve original data retries after checkpoint/reopen,
+and serve with metadata stopped. Original metadata logs remain unchanged during
+that independent target service. No new protocol or production schema is added.
+
+The initial QUIC schedule failed at the pre-activation read after target polling
+was paused during metadata recovery. A focused backtrace reproduced that exact
+fixture call. It now uses the existing bounded quorum-read recovery helper,
+retaining its NotActive assertion and rejecting other errors. Raw compile/failure
+logs, final16-schedule checks and source hashes are in
+`validation/baseline/slice171`. The final matrix with exact status comparisons
+passes in12.68s. Both strict Clippy profiles, formatting, warning-denied docs
+and92-record inventory validation pass.
+The complete14-test native creation/created-source selection also passes in
+210.16s, retaining its original TCP/QUIC split and unread phase-recovery checks.
+
+Macro review: closes this selected combined creation-decision fault family,
+advancing P0/P5/P6 evidence. Written/local-durable-before-quorum cuts, broader
+recursive/membership interleavings, physical power loss and platform coverage
+remain open. The acceptance ledger no longer lists implemented cancellation as
+missing. The current mini plan advances to bounded remote discovery refresh,
+then the baseline audit and bounded credential/session refresh. The prior CI
+run was cancelled; the base commit's lint passed while both platform test jobs
+were still running at inspection. No macOS completion is inferred. The full
+P0–P7 goal remains active; P8/Windows remain deferred.

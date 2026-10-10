@@ -34,7 +34,9 @@ This is not file reclamation, owner revocation, rollback of a fenced transfer,
 or revocation of a directly embedded group's independent service authority.
 
 Conformance and selected native recovery evidence are in
-`validation/baseline/slice169/README.md`.
+`validation/baseline/slice169/README.md`. The recorded TCP/QUIC race schedules in
+`validation/baseline/slice171/README.md` additionally cover cancellation versus
+publication with an unread receipt, owner loss and WAL/checkpoint recovery.
 
 Creation is opt-in through `Directory::with_group_creation()` before bootstrap or
 application. It selects application schema2, initialization `VBDINIT2` and
