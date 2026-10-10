@@ -1,6 +1,13 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Transfer access replacement: [slice202b](baseline/slice202b/README.md). The old
+executable fails the new regression on unsupported reload; the shared credential
+mechanism now supports revocation and original split recovery over TCP/QUIC.
+All16 all-feature and10 default transfer tests pass, as do2 existing counter
+reload histories and2 worker ownership/uncertainty checks. Formatting and four
+strict Clippy configurations remain clean. Command credentials are separate
+from Raft peer rotation, which remains open.
 Directory initialization evidence: [slice199i](baseline/slice199i/README.md).
 Four new original-operation recovery/policy checks pass, as do the complete
 17-test all-feature and14-test default directory/recursive-route targets.

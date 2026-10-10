@@ -3,8 +3,9 @@
 use super::{
     app::{self, App},
     connection::Connection,
+    credential_reload::Credentials,
     profile::{Binding, Profile, Role},
-    service_access::{self, Access, ActiveAccess},
+    service_access,
     setup::{self, checked, Failure},
 };
 use std::{
@@ -54,9 +55,25 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
     if let Some(record) = &source_binding {
         record.check(create)?;
     }
-    let access = Access::load(Path::new(access), Path::new(tls), id)?;
-    println!("credential_digest={:02x?}", access.digest);
-    let access = ActiveAccess::new(access.policy.generation(), access);
+    let access = Credentials::load(
+        Path::new(root),
+        Some(Path::new(access)),
+        Path::new(tls),
+        id,
+        voteboat::secure::PeerIdentity {
+            node: config.startup.node,
+            store: config.startup.store,
+        },
+    )?;
+    println!(
+        "credential_digest={:02x?}",
+        access
+            .access
+            .as_ref()
+            .and_then(|a| a.material())
+            .ok_or("authenticated transfer credentials unavailable")?
+            .digest
+    );
     let listener = TcpListener::bind(super::command_endpoints::listener(None, true, base, id)?)?;
     listener.set_nonblocking(true)?;
     match binding.role {
@@ -115,12 +132,15 @@ fn run<A: App>(
     listener: TcpListener,
     p: Profile,
     b: Binding,
-    access: ActiveAccess,
+    access: Credentials,
     id: u64,
 ) -> Result<(), Failure>
 where
     A::Receipt: Debug,
 {
+    // Join accepted credential publication before releasing the node's exclusive
+    // directory ownership, including when drive or connection cleanup fails.
+    let mut credentials = access;
     let local = service_access::server_local(id, node.local().owner.identity().store.session);
     println!(
         "ready transfer group={} node={id} role={:?} command={}",
@@ -134,7 +154,7 @@ where
         listener: &listener,
         p: &p,
         b,
-        access: &access,
+        credentials: &mut credentials,
         local,
         start,
         sequence: 0,
@@ -146,6 +166,8 @@ where
     if let Some(mut c) = host.connection.take() {
         let _ = c.cancel(host.node);
     }
+    let finished = credentials.finish();
+    let result = result.and(finished);
     if result.is_err() {
         recover(node, start)?;
     } else {
@@ -160,7 +182,7 @@ struct Host<'a, A: App> {
     listener: &'a TcpListener,
     p: &'a Profile,
     b: Binding,
-    access: &'a ActiveAccess,
+    credentials: &'a mut Credentials,
     local: LocalIdentity,
     start: Instant,
     sequence: u64,
@@ -172,6 +194,10 @@ impl<A: App> Host<'_, A> {
     fn drive(&mut self) -> Result<(), Failure> {
         loop {
             let now = MonoTime(self.start.elapsed().as_millis().min(u64::MAX as u128) as u64);
+            if self.credentials.poll() {
+                eprintln!("credential reload has uncertain durable state; stopping");
+                self.quit = true;
+            }
             if !self.quit && self.connection.is_none() {
                 match self.listener.accept() {
                     Ok((stream, _)) => {
@@ -189,14 +215,17 @@ impl<A: App> Host<'_, A> {
                 }
             }
             if let Some(c) = self.connection.as_mut() {
+                let (access, mut commands) = self.credentials.split();
                 let context = super::connection::Context {
                     profile: self.p,
                     binding: self.b,
-                    access: self.access,
+                    access: access.ok_or("authenticated transfer credentials unavailable")?,
                     local: self.local,
                     now,
                 };
-                if c.poll(self.node, &context, &mut self.quit).unwrap_or(true) {
+                if c.poll(self.node, &context, &mut self.quit, &mut commands)
+                    .unwrap_or(true)
+                {
                     c.cancel(self.node)?;
                     self.connection = None;
                 }

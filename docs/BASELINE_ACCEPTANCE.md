@@ -1,5 +1,14 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice202b exposes the existing durable credential reload implementation through
+the transfer service. Two TCP/QUIC histories recover an interrupted source fence,
+revoke the original administrator, resume the identical split under replacement
+authority and retain data/retries after restart; stale/altered credential bundles
+are refused. All16 all-feature and10 default transfer tests,2 existing counter
+reload histories and2 shared worker checks pass. Formatting/four strict Clippy
+profiles are clean. This covers command-policy replacement, not Raft peer key
+rotation, full audit history or general lifecycle/platform acceptance.
+
 Slice199i resolves the recorded directory initialization test assumption using
 bounded retries of original plan operations100/101 on exact leadership outcomes.
 Four new checks cover receipt validation and admitted-work/client/leader loss

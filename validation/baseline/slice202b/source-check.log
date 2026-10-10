@@ -1,0 +1,13 @@
+src/bin/transfer_service.rs: OK
+src/bin/support/transfer_server.rs: OK
+src/bin/support/transfer_connection.rs: OK
+src/bin/support/credential_reload.rs: OK
+tests/transfer_service.rs: OK
+tests/transfer_service/cuts_support.rs: OK
+tests/transfer_service/revocation.rs: OK
+docs/IMPLEMENTATION.md: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+docs/TRANSFER_SERVICE.md: OK
+docs/CREDENTIAL_REFRESH.md: OK
+validation/REPORT.md: OK
+validation/baseline/slice202b/README.md: OK

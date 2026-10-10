@@ -52,6 +52,7 @@ impl Connection {
         node: &mut Node<A>,
         context: &Context<'_>,
         quit: &mut bool,
+        credentials: &mut super::credential_reload::Commands<'_>,
     ) -> Result<bool, Failure>
     where
         A::Receipt: Debug,
@@ -79,7 +80,7 @@ impl Connection {
                         input.extend_from_slice(&bytes[..n]);
                         if input.contains(&b'\n') {
                             let text = String::from_utf8(input.clone())?;
-                            if let Err(e) = self.execute(node, context, quit, &text) {
+                            if let Err(e) = self.execute(node, context, quit, credentials, &text) {
                                 self.reply(format!("ERR {e}"));
                             }
                         }
@@ -114,6 +115,7 @@ impl Connection {
         node: &mut Node<A>,
         context: &Context<'_>,
         quit: &mut bool,
+        credentials: &mut super::credential_reload::Commands<'_>,
         text: &str,
     ) -> Result<(), Failure> {
         if !text.ends_with('\n') || text.trim_end_matches('\n').contains('\n') {
@@ -124,6 +126,9 @@ impl Connection {
             .authorize(Some(context.access), b.group, text, context.now)?;
         let words = text.split_whitespace().collect::<Vec<_>>();
         match words.as_slice() {
+            ["credential-status" | "reload-access", ..] => {
+                self.reply(credentials.command(&words)?);
+            }
             ["status"] => {
                 let core = node.local().owner.core(b.group).ok_or("missing group")?;
                 self.reply(format!(

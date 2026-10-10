@@ -61,6 +61,10 @@ credential-status REQUEST
 ```
 
 Use the existing `client ... --service-tls DIRECTORY --principal ID` options.
+The transfer executable exposes the same commands through its authenticated
+`command PROFILE ENDPOINTS TLS PRINCIPAL GROUP ...` interface; see
+[transfer access replacement](TRANSFER_SERVICE.md#replacing-command-access).
+It shares the same preparation, publication, shutdown and restart implementation.
 First stage the intended files at the fixed startup access/TLS paths. The access
 file header must name NEXT, which must exceed EXPECTED. REQUEST is a nonzero
 local sequence, greater than the last recorded request. Apply the operation to

@@ -26,6 +26,8 @@ mod merge;
 mod profiles;
 #[path = "transfer_service/retirement.rs"]
 mod retirement;
+#[path = "transfer_service/revocation.rs"]
+mod revocation;
 const BIN: &str = env!("CARGO_BIN_EXE_voteboat-transfer");
 static NEXT: AtomicU16 = AtomicU16::new(14000);
 // A concurrent fork can briefly inherit another fixture's reserved listeners.
@@ -49,6 +51,7 @@ struct Cluster {
     root: PathBuf,
     base: u16,
     quic: bool,
+    admin: u64,
     children: Vec<(u128, u16, Child)>,
 }
 impl Cluster {
@@ -144,6 +147,7 @@ impl Cluster {
             root,
             base,
             quic,
+            admin: 3,
             children: Vec::new(),
         };
         rig.start("create");
@@ -215,7 +219,7 @@ impl Cluster {
             .args(words))
     }
     fn ok(&self, g: u128, words: &[&str]) -> String {
-        let out = self.request(0, 3, g, words);
+        let out = self.request(0, self.admin, g, words);
         assert!(
             out.status.success(),
             "{g} {words:?}: {} {}",
@@ -225,7 +229,7 @@ impl Cluster {
         String::from_utf8(out.stdout).unwrap()
     }
     fn operate(&self, verb: &str) -> String {
-        let out = run(self.client(0, 3, "client").arg(verb));
+        let out = run(self.client(0, self.admin, "client").arg(verb));
         assert!(
             out.status.success(),
             "{verb}: {} {}",
@@ -243,7 +247,7 @@ impl Cluster {
     }
     fn stop_group(&mut self, g: u128) {
         for node in 1..=3 {
-            let out = self.request(node, 3, g, &["quit"]);
+            let out = self.request(node, self.admin, g, &["quit"]);
             assert!(
                 out.status.success(),
                 "shutdown: {}",

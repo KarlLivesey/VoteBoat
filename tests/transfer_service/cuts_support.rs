@@ -9,7 +9,7 @@ fn field(text: &str, name: &str) -> u64 {
         .unwrap()
 }
 fn status(rig: &Cluster, g: u128, node: u16) -> String {
-    let out = rig.request(node, 3, g, &["status"]);
+    let out = rig.request(node, rig.admin, g, &["status"]);
     assert!(
         out.status.success(),
         "{}",
@@ -40,7 +40,7 @@ pub(in super::super) fn checkpoint(rig: &Cluster) {
         assert!(prefix > 0);
         for n in 1..=3 {
             wait_prefix(rig, g, n, "committed=", prefix);
-            let out = rig.request(n, 3, g, &["checkpoint"]);
+            let out = rig.request(n, rig.admin, g, &["checkpoint"]);
             assert!(
                 out.status.success(),
                 "{}",

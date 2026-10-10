@@ -175,6 +175,30 @@ This is not an upgrade of existing v1/v2 stores or automatic conversion of
 an existing split deployment. Imported retry histories must be compatible;
 conflicting records or an oversized combined image are refused by the target.
 
+## Replacing command access
+
+Transfer services use the same durable [command credential reload](CREDENTIAL_REFRESH.md#executable-command-channel-reload)
+as the counter service. Stage the replacement access/TLS files at the existing
+startup paths, then address each group replica explicitly:
+
+```sh
+voteboat-transfer command PROFILE ONE_REPLICA_ENDPOINTS TLS ADMIN GROUP reload-access REQUEST EXPECTED NEXT
+voteboat-transfer command PROFILE ONE_REPLICA_ENDPOINTS TLS NEW_ADMIN GROUP credential-status REQUEST
+```
+
+`ONE_REPLICA_ENDPOINTS` contains the profile's groups with one selected replica
+per group, as in the endpoint-file format above. Repeat for the other replicas.
+`queued=true` means accepted preparation. Reconnect using an identity authorized
+by the new policy and require the intended generation and `state=recorded`.
+An unread reply does not cancel preparation; retry the same reload request.
+
+Rotation changes command access, not ownership, operation IDs or peer membership.
+A replacement administrator resumes the original split/merge profile. An old
+administrator changed to a reader can still read its authorized scopes but
+cannot advance the lifecycle or submit another reload. Restart rejects files
+older than, or inconsistent with, the durable credential record. Rollouts are
+explicit per replica; there is no atomic cluster-wide credential switch.
+
 ## Contracts and limits
 
 Read replies originate from `Node::complete_read`. The transient observation

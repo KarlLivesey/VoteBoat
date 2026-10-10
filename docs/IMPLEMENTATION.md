@@ -96,20 +96,88 @@ assumption with target-loss and actual checkpoint recovery tests. These advance
 the usable Linux/macOS service milestone without closing platform acceptance.
 Completed199i corrects five recorded Linux directory-setup failures on explicit
 unknown initialization outcomes, with original-ID recovery, exact receipt
-validation and passing directory/recursive-routing tests. Current202b selects
-the next combined lifecycle/revocation schedule from the acceptance ledger;
-it depends on existing original-ID lifecycle and credential contracts and must
-preserve authoritative ownership plus retry state across the selected restart.
-Next201d extends the unreviewed provider obligations; it depends on the
-existing inventory and shared conformance harness, and must connect each selected
-obligation to actual host/native assertions. This advances replaceable Rust
-embedding without treating a metadata count as provider certification.
-Following the provider slice, review the remaining peer credential rotation
+validation and passing directory/recursive-routing tests. Completed202b exposes
+durable command-access reload to the transfer service and verifies an interrupted
+split under revoked/replacement administrators, preserving ownership and retries.
+Current201d extends provider obligations for the credential journal/record-I/O
+contracts just reused by both executables. It depends on their existing public
+contracts, host/native fixtures and the inventory; completion requires shared
+assertions for ownership, monotonic publication, uncertain outcomes and reopen,
+with actual runtime checks. This advances replaceable Rust embedding without
+treating a metadata count as provider certification.
+Next, review the remaining peer credential rotation
 contract against the existing session/journal mechanism. Its purpose is safe
 operational key replacement; dependencies are authenticated peer identity,
 session revocation and restart reconstruction. Completion requires a concrete
 replacement API and TCP/QUIC rotation/restart checks, advancing the secure
 networked service milestone; do not claim completion from command-channel reload.
+Following peer rotation, address receive/connection admission and fairness from
+the remaining resource ledger. Its purpose is progress under competing peer and
+client load; dependencies are existing hard admission limits and control reserve.
+Completion requires bounded acceptance/rejection and demonstrated control/recovery
+progress under the chosen overload schedule, advancing P2/P7 resource isolation.
+
+### Slice202b implemented — transfer access replacement during split recovery
+
+The transfer executable now uses the same bounded Credentials owner and durable
+reload/status implementation as the counter executable. Authorization precedes
+reload submission. One off-thread preparation records the local owner, original
+request and exact material digest before publishing the new generation. Existing
+session guards reject old leases; uncertain publication stops command service.
+Normal and error drive exits finish accepted credential work before releasing
+the node's exclusive directory ownership. No Raft or application storage format,
+peer credential or ownership protocol is changed.
+
+Two actual TCP/QUIC histories interrupt an admitted source fence without a live
+quorum, recover all services, demote administrator3 to reader and promote reader2
+to administrator across every replica. The original reload request is idempotent;
+wrong expected generations and the revoked administrator's mutations are refused.
+Scoped inspection remains allowed. The replacement resumes the original immutable
+split profile; data, deduplication and source fencing survive all-node restart.
+QUIC checkpoints the committed prefixes first. Startup refuses both the old
+generation and altered material at the recorded generation for all four groups.
+These are selected admitted-work/restart histories, not proof of pre-cut commit
+or physical power-loss safety.
+
+The regression first fails against07b9796 with an unsupported reload command.
+An initial post-change run exposes the new test's incorrect stdout assumption;
+the CLI puts refusals on stderr, and only that assertion is corrected. Final
+results:16 all-feature transfer tests,10 default-feature transfer tests,2 existing
+counter reload histories and2 shared credential-worker checks pass. Formatting
+and all four strict Clippy configurations pass with zero diagnostics. Evidence
+and commands are retained in validation/baseline/slice202b.
+
+Macro review: this advances usable lifecycle security and combined revocation
+coverage. Peer rotation, full audit history, broader lifecycle/platform acceptance
+and P7 remain open. Current201d reviews the reused credential-provider obligations;
+the next two deliverables are linked above. Full P0–P7 remains active.
+
+### Slice202b schema plan — credential revocation during split recovery
+
+The transfer executable currently loads static command access and does not expose
+the existing durable credential reload mechanism. This prevents testing an
+operator's revoked authority against an interrupted split without stopping all
+services. Reuse the same bounded Credentials owner, journal and authenticated
+reload/status commands used by the counter service; no parallel credential
+implementation, peer rotation, consensus or storage-format change is needed.
+
+API/state: stage a higher-generation access bundle at the existing paths, submit
+the original local reload sequence with expected/replacement generations,
+prepare and persist off-thread, then publish and invalidate old session leases.
+Keep the credential worker owned until completion before releasing the node's
+data-directory lock, including error exits. An uncertain durable result closes
+command access and stops; invalid preparation preserves the old generation.
+Startup reconciles the existing owner-bound journal and refuses stale bundles.
+
+Acceptance: TCP/WAL and QUIC/checkpoint split histories interrupted after source
+fence admission; change old administrator3 to reader and reader2 to administrator,
+confirm old writes are refused on every replica while scoped reads remain valid,
+resume the identical profile/operation as administrator2, and verify no dual
+owner, exact retry data and restart continuity. Check original reload retries,
+generation mismatch and stale restart refusal. Run the complete transfer target,
+existing credential-reload cases, formatting and all strict Clippy profiles.
+This advances P4/P6 lifecycle/revocation and usable operator security; peer
+credential rotation and a general administrative audit remain separate work.
 
 ### Slice199i implemented — original directory initialization recovery
 

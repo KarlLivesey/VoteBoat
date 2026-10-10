@@ -13,6 +13,8 @@ mod command_client;
 mod command_endpoints;
 #[path = "support/transfer_connection.rs"]
 mod connection;
+#[path = "support/credential_reload.rs"]
+mod credential_reload;
 #[path = "support/transfer_profile.rs"]
 mod profile;
 #[path = "support/transfer_retirement.rs"]
