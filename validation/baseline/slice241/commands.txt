@@ -1,0 +1,22 @@
+Before retry changes, after the focused missing-checkpoint-helper correction:
+cargo +stable test --locked --offline --all-features --test counter_service planned_configuration_recovers_unread_proposal_and_sampled_follower
+before.log:0 pass/2 fail,exit101,explicit ERR NOT_LEADER on sampled followers.
+compile-failed.log retains the initial inaccessible fixture checkpoint helper;
+the existing checkpoint_after helper replaces it before native evidence.
+
+Final all-feature checks:
+cargo +stable test --locked --offline --all-features --test counter_service drain_replacement::configuration_recovery
+cargo +stable test --locked --offline --all-features --test counter_service drain_replacement
+cargo +stable test --locked --offline --all-features --test counter_service
+
+Final sequential default check:
+cargo +stable test --locked --offline --test counter_service
+
+cargo +stable fmt --all -- --check
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+gh run view 38071895206 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114270824821/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114270825119/logs

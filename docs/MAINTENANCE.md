@@ -259,7 +259,10 @@ recovery. This is a single-group workflow using explicit operator steps:
 2. If needed, use the existing `move-leader` workflow on the current leader to
    reach the plan's exact handoff target. Then issue `configure 19751`; inspect
    `configuration-status 19751`. Resume the same operation to finalize once the
-   joint configuration has committed. Every request requires live Admin authority.
+   joint configuration has committed. A Joint receipt is not final completion.
+   After `ERR NOT_LEADER` or the documented unknown leadership/read outcome,
+   preserve the unchanged provisioned plan and operation ID, select current
+   authority and repeat that same request. Every request requires live Admin authority.
 3. On the source, inspect `drain-status 1 19701`. Only `ready=true` permits
    `drain-stop 1 19701`, which rechecks final membership and joins workers.
 

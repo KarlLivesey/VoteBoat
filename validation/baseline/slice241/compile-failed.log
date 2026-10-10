@@ -1,0 +1,25 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+error[E0425]: cannot find function `checkpoint_stop` in this scope
+   --> tests/counter_service/drain_replacement/configuration_recovery.rs:84:9
+    |
+ 84 |         checkpoint_stop(&mut c);
+    |         ^^^^^^^^^^^^^^^
+    |
+   ::: tests/counter_service/drain_replacement.rs:111:1
+    |
+111 | fn checkpoint_after(c: &Cluster, id: usize, minimum: u64) {
+    | --------------------------------------------------------- similarly named function `checkpoint_after` defined here
+    |
+note: function `crate::peer_discovery::checkpoint_stop` exists but is inaccessible
+   --> tests/counter_service/peer_discovery.rs:211:1
+    |
+211 | fn checkpoint_stop(c: &mut Cluster) {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not accessible
+help: a function with a similar name exists
+    |
+ 84 -         checkpoint_stop(&mut c);
+ 84 +         checkpoint_after(&mut c);
+    |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `voteboat` (test "counter_service") due to 1 previous error

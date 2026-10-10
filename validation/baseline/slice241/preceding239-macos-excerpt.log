@@ -1,0 +1,8 @@
+2026-10-10T17:35:41.0541190Z thread 'assignments::assignment_pages_quic_bind_permissions_membership_and_reopen' (25223) panicked at tests/counter_service/write_recovery.rs:40:29:
+2026-10-10T17:35:41.0543280Z original write ["group", "7", "3", "add", "42", "5"]: "UNKNOWN authentication deadline expired; retry the same operation ID and delta\n" Error: "request interrupted after connection; automatic routing stopped"
+2026-10-10T17:35:41.0544160Z
+2026-10-10T17:35:41.0544380Z diagnostics nodes=3 omitted=0 evidence=local_volatile
+2026-10-10T17:35:41.0625100Z test result: FAILED. 189 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 327.89s
+2026-10-10T17:35:41.0625400Z
+2026-10-10T17:35:41.0625590Z error: test failed, to rerun pass `--test counter_service`
+2026-10-10T17:35:41.0802400Z ##[error]Process completed with exit code 101.

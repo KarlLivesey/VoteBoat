@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.54s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test drain_replacement::configuration_recovery::planned_configuration_classification_keeps_unrelated_replies_terminal ... ok
+test drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_tcp ... ok
+test drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_quic ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 191 filtered out; finished in 9.71s

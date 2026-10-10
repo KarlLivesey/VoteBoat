@@ -1080,24 +1080,51 @@ functional service verification. Original configuration/write/status-wait
 uncertainty and broader P0–P7 exits remain open. Keep feature integration and
 functional Linux/macOS acceptance first; no performance/security work is added.
 
-Current241: recover original planned configuration after sampled authority loss.
-Purpose: advance P4/service Linux/macOS operator acceptance. Depend on retained
-source237/238 configure19770 UNKNOWN LeadershipChanged/read failures, the unchanged
-trusted plan, configuration journal and current exact-record admission contracts.
-The fixture currently samples c.leader then asserts one configure reply. Sketch
-original-ID/record retry ownership before editing; use existing bounded retry/
-observation paths rather than another orchestrator. Completion requires a native
-unread/election history that fails the one-shot assumption, exact original Joint/
-Final receipts and data/restart cleanup, terminal refusal checks and zero strict
-formatting/four Clippy diagnostics. Never turn an unknown reply into success.
+Implemented241: the replacement caller preserves the original provisioned plan
+and configure operation through exact authority/known uncertain replies. Successful
+replies identify that original operation. Current local finalize_requires_authorization
+selects another explicit request for the original trusted Final; a Joint receipt
+alone cannot satisfy completion. All replicas must report actual durable completed
+status. CLI auto stays data-only; no production/provider/core/format/deadline change.
 
-Next242: close sampled write/status-wait recovery assumptions. Purpose: advance
-functional Linux/macOS operator acceptance. Depend on source237 write91001 and
-source23619901 role loss, source238 macOS96301 wait admission, plus original data
-and cancellation/read-ticket ownership contracts. Select one retained cause before
-editing. Completion requires bounded unchanged-ID recovery or exact owned-ticket
-release, original receipts/data and cleanup evidence without widened deadlines
-or swallowed errors. Current241 does not imply these separate cases are complete.
+Native TCP/QUIC send configure unread without a quorum, observe accepted uncommitted
+Joint and verify its native stopped-store entry above the committed prefix. After
+leader loss and another eligible voter election, the first endpoint is the sampled,
+now gated follower. Old path fails2 NOT_LEADER; corrected path passes both histories
+plus exact classification refusals. Original plan, Final membership on all replicas,
+value10, data retries and historical handoff survive cold WAL/checked-prefix QUIC
+checkpoint recovery with child/client close and worker joins. Initial inaccessible
+checkpoint-helper compilation is retained; the existing helper fixes it. Focused3,
+replacement8 and full all-feature counter194 pass. The full default counter136 passes sequentially afterward. Formatting/four strict profiles are zero, inventory108/conformance
+metadata unchanged. See [slice241](../validation/baseline/slice241/README.md).
+
+Macro review241 closes this selected sampled-configuration recovery dependency
+for P4/service operator integration. It does not certify the whole milestone.
+Preceding239 Ubuntu114270825119 passes counter190/directory22/transfer33; macOS
+114270824821 ends counter189/1 on group7/inc3 add42 delta5 authentication deadline.
+The existing write caller excludes that exact interruption from its recovery set.
+Later macOS targets are unrun. These are earlier source-bound outcomes, not241
+platform acceptance. Broader provider, lifecycle/fault and P0–P7 exits remain;
+feature/Linux/macOS functional work precedes tuning/security.
+
+Current242: recover the original write through authentication-phase timeout.
+Purpose: advance usable Linux/macOS service acceptance. Depend on preceding239
+macOS original group7/inc3/op42/delta5 failure, write_recovery::repeatable, command
+phase/error contracts and the existing unchanged-argument absolute-deadline loop.
+Inspect actual phase/byte ownership before editing. Use the same scoped operation,
+payload and budget; terminal authorization/conflict/malformed replies stay specific.
+Completion requires a reproduced authentication stall, unchanged original write
+receipt/data recovery and owned connection cleanup, exact refusal classification,
+bounded deadline checks and zero formatting/four strict profiles. Do not infer
+consensus liveness from a successful retry classifier or widen timing budgets.
+
+Next243: close status-wait admission/cleanup assumptions. Purpose: advance functional
+Linux/macOS operator acceptance. Depend on source238 macOS96301 missing admission,
+source237 read-release observations and public read/cancellation ticket ownership.
+Select and reproduce one actual failure before adding helpers. Completion requires
+exact original ticket release and next bounded admission, historical records/data,
+child cleanup and zero strict diagnostics. Current242 cannot certify this separate
+case. Broader transport progress remains explicit if the original write still fails.
 
 Following: close one required operator/deployment integration gap. Purpose:
 complete usable service, membership and split/merge feature integration. Depend
@@ -1106,6 +1133,49 @@ actual missing end-to-end capability before adding helpers. Completion requires
 public executable/Rust usage, original-operation recovery/cleanup evidence and
 Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
 security, optional global orchestration, P8 and Windows stay separate.
+
+### Slice241 schema plan — retain planned configuration through sampled role loss
+
+Previous goal turn progressed:240 is committed/pushed672cc11. The late fixture
+allocation regression, full all-feature191/default134 counter tests and four
+strict profiles pass. Current worktree is clean. Source238 retained three
+configure19770 unknown leadership/read outcomes. drain_replacement::configure
+samples a leader, then calls c.ok once. Production already supports unchanged
+trusted-plan recovery and typed current-authority refusal; CLI auto stays data-only.
+
+Shape/state: reuse the existing leader_request for configure OP, classifying only
+exact known non-authority/uncertain configuration replies. Freeze provisioned plan
+bytes and operation IDs across retries. Permit the fixture's first sampled endpoint
+as an optional argument solely to reproduce the role-loss window; normal setup
+still selects a leader. A successful reply must identify the original operation.
+A committed Joint receipt requires another explicitly authorized request for the
+original trusted Final record. Reobserve current authority and the exact
+finalize_requires_authorization action before that request. Completion remains
+actual local durable Final/completed status on all replicas,
+not acceptance, local absence, a role hint or an unknown response. Wrong operations,
+malformed commands, conflicting records and unrelated failures remain terminal.
+No production/provider/core/format or timeout change is justified by this evidence.
+
+Ownership/failure: test actual TCP/QUIC maintenance services with original drain
+handoff and campaign gate, immutable provisioned Joint/Final plan and data7. Lose
+both followers, send configure unread, observe configuration_queued without a
+quorum, then kill the leader. Reopen survivors so another eligible voter leads;
+restore the old leader and first attempt the original command at the sampled,
+now gated follower. The old one-shot path must fail NOT_LEADER. The corrected path
+reselects under existing bounds, resumes the original record, and observes actual
+Final on all three replicas. Original accepted state may survive or roll back;
+do not claim which prefix wins without inspection. Cold WAL/checkpoint recovery
+must preserve exact operation/plan, duplicate data and committed membership.
+Child/client sockets are owned and explicitly closed/joined; no new orchestrator.
+
+Acceptance: both native histories reproduce before and pass after; reject exact
+classification confusions and changed request shapes. Assert original configuration
+operation in replies and all-node durable Final, unchanged plan bytes, historical
+handoff/data retries, fresh write and cold recovery. Run focused replacement,
+relevant full/default executable checks sequentially and formatting/four strict
+profiles, inventory/conformance metadata. Source239/240 CI remains background,
+not current241 macOS acceptance. This advances P4/service operator integration;
+write/status-wait recovery and actual deployment gaps follow, tuning/security later.
 
 ### Slice240 schema plan — keep fixture listeners out of automatic client ports
 

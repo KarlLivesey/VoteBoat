@@ -3,6 +3,8 @@
 use super::*;
 use voteboat::{identity::*, log::*, native::log_store::*};
 
+#[path = "drain_replacement/configuration_recovery.rs"]
+mod configuration_recovery;
 #[path = "drain_replacement/setup_recovery.rs"]
 mod setup_recovery;
 
@@ -26,9 +28,24 @@ fn store(id: usize) -> StoreIdentity {
         incarnation: StoreIncarnation::new(if id == 4 { 7 } else { 1 }).unwrap(),
     }
 }
-fn configure(c: &mut Cluster, operation: &str) {
-    let leader = c.leader();
-    c.ok(leader, &["configure", operation]);
+fn configure(c: &mut Cluster, operation: &str, sampled: Option<usize>) {
+    let leader = sampled.unwrap_or_else(|| c.leader());
+    let args = ["configure", operation];
+    let output = c.request(leader, &args);
+    let mut reply = String::from_utf8(output.stdout).unwrap();
+    if !output.status.success() {
+        assert!(
+            retryable_leader_response(&args, &reply),
+            "{args:?}: {reply}"
+        );
+        reply = leader_request(c, &args);
+    }
+    assert!(
+        reply
+            .split_whitespace()
+            .any(|word| word.strip_prefix("operation=") == Some(operation)),
+        "{reply}"
+    );
     let until = Instant::now() + Duration::from_secs(15);
     loop {
         if (1..=3).all(|id| {
@@ -38,6 +55,20 @@ fn configure(c: &mut Cluster, operation: &str) {
             return;
         }
         assert!(Instant::now() < until, "configuration {operation}");
+        // A Joint receipt is not Final. The original trusted plan must authorize
+        // its exact Final record; repeat the same operation only for that phase.
+        let current = c.leader();
+        if c.wait_configuration_status(current, operation)
+            .contains("action=finalize_requires_authorization")
+        {
+            let final_reply = leader_request(c, &args);
+            assert!(
+                final_reply
+                    .split_whitespace()
+                    .any(|word| word.strip_prefix("operation=") == Some(operation)),
+                "{final_reply}"
+            );
+        }
         std::thread::park_timeout(Duration::from_millis(10));
     }
 }
@@ -171,7 +202,7 @@ fn prepare(quic: bool, lost_reply: bool) -> (Cluster, Option<String>) {
     for id in 1..=3 {
         c.start(id, "recover-member");
     }
-    configure(&mut c, "19770");
+    configure(&mut c, "19770", None);
     // An older image is real setup state, not proof a later checkpoint finished.
     c.ok(1, &["checkpoint"]);
     drain::wait_manual_checkpoint(&c, 1);

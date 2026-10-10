@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "base_revision": "672cc11502eefd4cbb6503ba955f72b627ec4f13",
+  "scope": "Original planned configuration after unread accepted Joint, leader loss and sampled follower refusal",
+  "production_behavior_change": false,
+  "caller_behavior_change": "Exact planned configure uncertainty classification, original-operation verification and explicit authorized Final continuation",
+  "new_public_seam": false,
+  "core_or_persistent_format_change": false,
+  "validation": {
+    "initial_compile": "Inaccessible fixture checkpoint helper; replaced with existing checked-prefix helper",
+    "before": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101,
+      "cause": "ERR NOT_LEADER on previously sampled endpoint"
+    },
+    "focused_all": 3,
+    "replacement_all": 8,
+    "counter_all": 194,
+    "counter_default": 136,
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "preceding_ci": {
+    "run": 38071895206,
+    "source": "19e4fb57cc110055fc0d963439bf9a3ed3befc45",
+    "linux": {
+      "job": 114270825119,
+      "conclusion": "success",
+      "counter": 190,
+      "directory": 22,
+      "transfer": 33
+    },
+    "macos": {
+      "job": 114270824821,
+      "conclusion": "failure",
+      "counter_pass": 189,
+      "counter_fail": 1,
+      "cause": "Original group7/inc3 add42 delta5 authentication deadline expired",
+      "later_targets": "unrun"
+    },
+    "current_source_acceptance": false
+  },
+  "source_manifest_sha256": "f72c24bc300fd23eb93fcd890a4d7f715745d8ad2e17951394b0c855d766d6ca",
+  "publication": {
+    "redacted_workspace_logs": 5,
+    "private_logs": "target/slice241-unpublished-logs",
+    "normalization": "Trailing whitespace and final blank lines removed"
+  },
+  "limits": "Finite Linux TCP/QUIC native accepted-prefix election and cold WAL/checkpoint operator histories. No current macOS, general rollback/liveness, full P4/P0-P7, performance or security completion."
+}

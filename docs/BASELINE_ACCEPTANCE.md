@@ -1,5 +1,21 @@
 # Baseline acceptance map
 
+Original planned configuration recovery: [slice241](../validation/baseline/slice241/README.md).
+The replacement caller preserves its plan/operation across exact known authority
+or uncertainty replies and explicitly requests the original trusted Final only
+after observed finalization authorization. A Joint receipt is not completion.
+Actual TCP/QUIC unread accepted-Joint/leader-loss histories fail the old one-shot
+follower request and pass after, retaining native Final membership, data retries,
+original handoff and cold WAL/checkpoint recovery. Focused3/replacement8 and full
+all-feature counter194 pass; the full default counter136 passes sequentially afterward.
+Formatting/four strict profiles are zero; inventory108/conformance metadata
+unchanged. Initial fixture-helper compilation and the two before failures remain.
+No production/provider/core/format/deadline change. Preceding239 Ubuntu passes190/
+22/33 operator targets, macOS189/1 fails original group7/inc3 write42 on authentication
+deadline; later targets unrun. Those preceding-source results are not241 macOS
+acceptance. Original write/status-wait and broader P0–P7 work remain; features and
+functional Linux/macOS acceptance stay ahead of tuning/security.
+
 Counter fixture listener allocation: [slice240](../validation/baseline/slice240/README.md).
 Retained239 peer33426 falls inside this Linux host's automatic client range.
 The actual late-allocation check fails the old pool and passes after fixture

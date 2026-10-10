@@ -2375,7 +2375,7 @@ fn retryable_leader_response(args: &[&str], text: &str) -> bool {
             | "UNKNOWN authenticated read failed; retry the same operation ID and delta\n"
             | "UNKNOWN reply deadline expired; retry the same operation ID and delta\n"
         ),
-        ["configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n" | "UNKNOWN exact record locally durable but not committed; preserve original record\n" | "UNKNOWN authenticated read failed; retry the same configuration operation ID and record\n"),
+        ["configure" | "configure-record", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n" | "UNKNOWN exact record locally durable but not committed; preserve original record\n" | "UNKNOWN authenticated read failed; retry the same configuration operation ID and record\n"),
         ["cancel-leadership", _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n" | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n" | "ERR Unavailable(LeadershipChanged)\n"),
         _ => false,
     }

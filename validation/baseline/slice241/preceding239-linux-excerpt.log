@@ -1,0 +1,12 @@
+2026-10-10T17:32:39.3801149Z test result: ok. 190 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 183.16s
+2026-10-10T17:32:39.3801769Z
+2026-10-10T17:32:39.3805970Z      Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+2026-10-10T17:32:39.3818375Z
+2026-10-10T17:33:14.9820993Z test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.60s
+2026-10-10T17:33:14.9821662Z
+2026-10-10T17:33:14.9823428Z      Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+2026-10-10T17:33:14.9836286Z
+2026-10-10T17:37:16.3022476Z test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 241.32s
+2026-10-10T17:37:16.3022868Z
+2026-10-10T17:37:16.3131902Z ##[group]Run actions/upload-artifact@v4
+2026-10-10T17:37:16.3132223Z with:
