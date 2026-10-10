@@ -756,7 +756,16 @@ impl BoundedReadableStateMachine for MetadataServingTarget {
         let (q, old) = match q {
             MetadataServingQuery::Status => return Ok(size_of::<Self::ReadResult>()),
             MetadataServingQuery::Creation(_) => {
-                return Ok(size_of::<Self::ReadResult>() + MAX_GROUP_CREATION_BYTES)
+                // Creations use ordinary directory history, whose immutable
+                // capacity bounds every current and future encoded record.
+                let history = self
+                    .target
+                    .source
+                    .initial
+                    .directory()
+                    .limits()
+                    .history_bytes;
+                return Ok(size_of::<Self::ReadResult>() + history.min(MAX_GROUP_CREATION_BYTES));
             }
             MetadataServingQuery::Directory(q) if self.active.is_none() => {
                 let _ = q;

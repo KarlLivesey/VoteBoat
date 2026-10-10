@@ -78,6 +78,12 @@ serve current manifests after activation. Inherited operation queries/receipts
 are explicitly marked historical with the source identity; `Creation` queries
 likewise name the original authority and return bounded encoded intents.
 
+The creation-read budget includes the fixed result envelope plus the smaller of
+the directory's immutable history capacity and the global creation-command
+maximum. Reserve that full bound in the host read runtime. The bound is stable
+across new reservations and metadata moves; it does not depend on current
+history occupancy or the size of the currently selected record.
+
 The source remains fenced after publication. New metadata writes and namespace
 creation after activation are covered, as are original retries, checkpoint
 truncation and native journal interruption of publication, activation and a later
@@ -197,5 +203,11 @@ checkpoint recovery, and ordinary/partial-delegation-capable imported profiles
 preserve initial activation, transfer publication provenance, frozen exports,
 data retries and outbox counts. Both data owners recover and write with A and B
 offline; their metadata files and logs remain unchanged. Later native handoffs
-and retirement from these moved profiles, repeated moves for these families,
+for imported owners, their retirement, repeated moves for these families,
 wider faults and macOS validation remain separate work.
+
+Selected native histories additionally complete a second retained-range handoff
+under the moved authority. They preserve the original and new exports, adopt
+the remaining source grant, activate the new child, and recover independent
+writes/retries at all three owners with both metadata services offline. This
+path is covered over TCP/TLS and QUIC with WAL and checkpoint recovery.

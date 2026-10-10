@@ -388,6 +388,34 @@ pub(super) fn ready_namespace(
     NamespacePublication::from_status(target.plan(), target.status()).unwrap()
 }
 #[test]
+fn creation_read_bound_survives_larger_future_records_within_the_directory_capacity() {
+    let (mut t, _, _, _) = inherited_creation_target();
+    let query = MetadataServingQuery::Creation(group(40));
+    let reserved = t.read_result_bound(&query).unwrap();
+    assert_eq!(
+        reserved,
+        100000 + std::mem::size_of::<MetadataServingRead>()
+    );
+    assert!(reserved < voteboat::runtime::ReadInvocationLimits::default().result_bytes);
+    let mut new = create_intent(group(9), 40, 2);
+    new.bootstrap = support::bootstrap(40, 8);
+    assert!(matches!(
+        target_apply(&mut t, 91, new.encode(100000).unwrap()),
+        MetadataServingOutcome::Directory(DirectoryReceipt {
+            outcome: DirectoryOutcome::CreationReserved,
+            ..
+        })
+    ));
+    let result = t.read_at(t.applied_index(), query).unwrap();
+    let MetadataServingRead::Creation(Some(created)) = &result else {
+        panic!("new creation")
+    };
+    assert_eq!(created.decode().unwrap().intent, new);
+    assert_eq!(t.read_result_bound(&query).unwrap(), reserved);
+    assert!(t.read_result_bytes(&result, reserved).unwrap() <= reserved);
+}
+
+#[test]
 fn inherited_creation_reservations_survive_and_new_namespace_publication_works() {
     let (mut t, image, old, old_status) = inherited_creation_target();
     let MetadataServingRead::Creation(Some(inherited)) = t

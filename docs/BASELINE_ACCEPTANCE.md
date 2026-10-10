@@ -321,3 +321,11 @@ Both owners write/recover while all metadata services are stopped; metadata
 files and recovered logs remain unchanged. Ordinary and partial-delegation-capable
 imported profiles are covered, but later native partial handoff/retirement and
 repeated moves for these families remain open, alongside broader roadmap exits.
+
+Slice156c6a adds4 native later-retained-handoff histories after metadata movement.
+TCP/TLS/QUIC and WAL/checkpoint recovery preserve both exports, original metadata
+adoptions and publication provenance. The source and both children recover and
+serve retries/writes with both metadata groups offline, without changing their
+files/logs. A discovered creation-read overreservation now respects the immutable
+directory history capacity; the full42-test metadata-transfer suite passes.
+Imported-owner later handoff and retirement156c6b remain open.

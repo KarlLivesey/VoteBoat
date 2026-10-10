@@ -76,6 +76,7 @@ mod setup;
 
 struct MovedMetadata {
     nodes: Vec<Node<MetadataServingTarget>>,
+    template: MetadataServingTarget,
     plan: MetadataMovePlan,
     activation: MetadataActivationStatus,
 }
@@ -202,6 +203,7 @@ fn move_metadata(env: &Environment<'_>, family: &mut Family) -> MovedMetadata {
     };
     MovedMetadata {
         nodes,
+        template,
         plan,
         activation: status.activation.unwrap(),
     }
@@ -502,3 +504,6 @@ fn quic_retained_and_imported_metadata_move_checkpoint() {
         history(NativePeerProtocol::Quic, true, partial);
     }
 }
+
+#[path = "metadata_retained_handoff.rs"]
+mod retained_handoff;
