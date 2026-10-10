@@ -32,6 +32,13 @@ fn configuration_reply(reply: &str, operation: u128) -> Result<ConfigurationRepl
     if reply.trim() == "ERR not_proposed=Busy" {
         return Ok(ConfigurationReply::ObserveSource);
     }
+    // Leadership loss leaves the original operation unresolved. The bound
+    // source journal decides whether another phase is needed; this is not a
+    // committed receipt and must not skip the readiness/stop checks.
+    if reply == "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n"
+    {
+        return Ok(ConfigurationReply::ObserveSource);
+    }
     if reply.starts_with("OK ") {
         if field(reply, "operation")?.parse::<u128>()? != operation {
             return Err("configuration replied with a different operation".into());
@@ -270,6 +277,14 @@ mod tests {
     #[test]
     fn configuration_busy_reobserves_but_does_not_mask_other_rejections() {
         assert_eq!(
+            configuration_reply(
+                "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\n",
+                3,
+            )
+            .unwrap(),
+            ConfigurationReply::ObserveSource
+        );
+        assert_eq!(
             configuration_reply("ERR not_proposed=Busy\n", 3).unwrap(),
             ConfigurationReply::ObserveSource
         );
@@ -286,6 +301,8 @@ mod tests {
             "ERR not_proposed=WrongIdentity\n",
             "ERR Unauthorized\n",
             "UNKNOWN configuration\n",
+            "UNKNOWN LeadershipChanged; changed record\n",
+            "UNKNOWN LeadershipChanged; retry the same configuration operation ID and record\nextra\n",
             "OK operation=4 action=completed\n",
             "OK action=completed\n",
         ] {

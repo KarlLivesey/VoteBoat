@@ -45,7 +45,7 @@ pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
 }
 fn data(c: &mut Cluster, duplicate: bool) {
     for (group, incarnation, value) in [("1", "1", "3"), ("7", "3", "5"), ("8", "2", "9")] {
-        let text = c.routed(&["group", group, incarnation, "add", "42", value]);
+        let text = authenticated_write(c, &["group", group, incarnation, "add", "42", value]);
         assert!(text.contains(&format!("Value({value})")), "{text}");
         assert!(text.contains(&format!("duplicate={duplicate}")), "{text}");
         assert_eq!(
@@ -72,9 +72,7 @@ fn authorization(c: &mut Cluster) {
         assert!(String::from_utf8_lossy(&output.stdout).contains("AUTHORIZATION"));
     }
     c.command_principal = Some(2);
-    assert!(c
-        .routed(&["group", "7", "3", "add", "43", "0"])
-        .contains("Value(5)"));
+    assert!(authenticated_write(c, &["group", "7", "3", "add", "43", "0"]).contains("Value(5)"));
     c.command_principal = Some(3);
     let missing = c.request(n, &["group", "99", "1", "status"]);
     assert!(!missing.status.success());
@@ -118,9 +116,7 @@ fn history(quic: bool) {
     let mut child = c.children[lost - 1].take().unwrap();
     child.kill().unwrap();
     child.wait().unwrap();
-    assert!(c
-        .routed(&["group", "7", "3", "add", "45", "0"])
-        .contains("Value(5)"));
+    assert!(authenticated_write(&c, &["group", "7", "3", "add", "45", "0"]).contains("Value(5)"));
     c.start(lost, "recover");
     leader(&mut c, "7", "3");
     c.stop();

@@ -89,6 +89,20 @@ pub(super) fn configure(c: &mut Cluster, group: &str, incarnation: &str) {
         assert!(Instant::now() < deadline, "{text}");
     }
 }
+pub(super) fn joint(c: &mut Cluster, group: &str, incarnation: &str) {
+    let leader = groups::leader(c, group, incarnation);
+    let unread = UnobservedCommand::send(
+        c,
+        leader,
+        &format!("group {group} {incarnation} configure {OP}"),
+    );
+    // Reissuing configure after an unknown reply can advance to Final. Keep
+    // this single admission until every replica proves the desired Joint cut.
+    for node in 1..=3 {
+        status(c, node, group, incarnation, "committed=Joint");
+    }
+    unread.disconnect();
+}
 fn durable_joint(c: &Cluster, checkpoint: bool) {
     use voteboat::{identity::*, log::*, native::log_store::*};
     let _guard = fixture_gate();
@@ -130,24 +144,13 @@ fn histories(quic: bool) {
     for n in 1..=3 {
         c.start(n, "create");
     }
-    assert!(c
-        .routed(&["group", "1", "1", "add", "42", "3"])
-        .contains("Value(3)"));
-    assert!(c
-        .routed(&["group", "7", "3", "add", "42", "5"])
-        .contains("Value(5)"));
+    assert!(authenticated_write(&c, &["group", "1", "1", "add", "42", "3"]).contains("Value(3)"));
+    assert!(authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("Value(5)"));
     let leader = groups::leader(&mut c, "7", "3");
     authorization(&mut c, leader);
-    let unread = UnobservedCommand::send(&c, leader, "group 7 3 configure 7001");
-    for n in 1..=3 {
-        status(&c, n, "7", "3", "committed=Joint");
-    }
-    unread.disconnect();
+    joint(&mut c, "7", "3");
     status(&c, 1, "8", "2", "action=inconclusive_local_absence");
-    configure(&mut c, "8", "2");
-    for n in 1..=3 {
-        status(&c, n, "8", "2", "committed=Joint");
-    }
+    joint(&mut c, "8", "2");
     status(&c, 1, "1", "1", "action=inconclusive_local_absence");
     if quic {
         for n in 1..=3 {
@@ -172,12 +175,10 @@ fn histories(quic: bool) {
         }
         configure(&mut c, g, inc);
     }
-    assert!(c
-        .routed(&["group", "7", "3", "add", "42", "5"])
-        .contains("duplicate=true"));
-    assert!(c
-        .routed(&["group", "7", "3", "add", "43", "2"])
-        .contains("Value(7)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+    );
+    assert!(authenticated_write(&c, &["group", "7", "3", "add", "43", "2"]).contains("Value(7)"));
     assert_eq!(c.routed(&["group", "1", "1", "read"]), "OK value=3\n");
     status(&c, 1, "1", "1", "action=inconclusive_local_absence");
     c.stop();

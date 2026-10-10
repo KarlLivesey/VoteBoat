@@ -82,19 +82,10 @@ fn handoff(c: &mut Cluster, group: &str, incarnation: &str, config: &str, target
     let leader = groups::leader(c, group, incarnation);
     if leader != target {
         let n = target.to_string();
-        c.ok(
-            leader,
-            &[
-                "group",
-                group,
-                incarnation,
-                "move-leader",
-                OP,
-                config,
-                &n,
-                &n,
-                "1",
-            ],
+        group_leadership::command(
+            c,
+            (group, incarnation),
+            &["move-leader", OP, config, &n, &n, "1"],
         );
     }
     let deadline = Instant::now() + Duration::from_secs(15);
@@ -143,7 +134,7 @@ fn history(quic: bool) {
     }
     denied(&c, &["drain-group", "1", OP, "3"]);
     handoff(&mut c, "7", "3", "9", 1);
-    group_admin::configure(&mut c, "7", "3");
+    group_admin::joint(&mut c, "7", "3");
     configured(&c, "7", "3", "committed=Joint");
     denied(&c, &["drain-stop", "1", OP]);
     if quic {
@@ -177,12 +168,10 @@ fn history(quic: bool) {
     }
     c.ok(SOURCE, &["drain-stop", "1", OP]);
     drain::joined(&mut c, SOURCE);
-    assert!(c
-        .routed(&["group", "7", "3", "add", "42", "5"])
-        .contains("duplicate=true"));
-    assert!(c
-        .routed(&["group", "8", "2", "add", "43", "1"])
-        .contains("Value(9)"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+    );
+    assert!(authenticated_write(&c, &["group", "8", "2", "add", "43", "1"]).contains("Value(9)"));
     c.stop();
 }
 #[test]

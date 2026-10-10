@@ -37,7 +37,12 @@ fn original_retry(c: &Cluster) {
             text.starts_with("UNKNOWN LeadershipChanged;")
                 || text
                     == "UNKNOWN authenticated read failed; retry the same operation ID and delta\n",
-            "{text}"
+            "original retry status={} stdout={text:?} stderr={}\nnode1={}\nnode2={}\nnode3={}",
+            output.status,
+            String::from_utf8_lossy(&output.stderr),
+            c.service_log(1),
+            c.service_log(2),
+            c.service_log(3),
         );
         assert!(Instant::now() < deadline, "{text}");
     }

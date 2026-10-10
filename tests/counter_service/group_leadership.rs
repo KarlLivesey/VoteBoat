@@ -4,6 +4,30 @@ use super::*;
 
 const OP: &str = "40001";
 const NEXT: &str = "40002";
+pub(super) fn command(c: &mut Cluster, scope: (&str, &str), words: &[&str]) -> String {
+    let mut args = vec!["group", scope.0, scope.1];
+    args.extend_from_slice(words);
+    let deadline = Instant::now() + Duration::from_secs(15);
+    loop {
+        let leader = groups::leader(c, scope.0, scope.1);
+        let output = c.request(leader, &args);
+        let text = String::from_utf8(output.stdout).unwrap();
+        if output.status.success() {
+            return text;
+        }
+        assert!(
+            matches!(text.as_str(), "ERR NOT_LEADER\n"
+                | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"
+                | "UNKNOWN LeadershipChanged; retry the same administrative operation ID and record\n"
+                | "ERR Unavailable(LeadershipChanged)\n"
+                | "ERR NotRead(ReadNotReady)\n"),
+            "{args:?}: {text:?} {}; {}",
+            String::from_utf8_lossy(&output.stderr), c.service_log(leader)
+        );
+        assert!(Instant::now() < deadline, "{args:?}: {text}");
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
 fn status(c: &mut Cluster, scope: (&str, &str), op: &str, phase: &str) -> (usize, String) {
     let deadline = Instant::now() + Duration::from_secs(20);
     loop {
@@ -25,25 +49,14 @@ fn status(c: &mut Cluster, scope: (&str, &str), op: &str, phase: &str) -> (usize
         std::thread::sleep(Duration::from_millis(10));
     }
 }
-fn begin(c: &mut Cluster, scope: (&str, &str, &str), op: &str, target: usize) -> usize {
-    let leader = groups::leader(c, scope.0, scope.1);
+fn begin(c: &mut Cluster, scope: (&str, &str, &str), op: &str, target: usize) {
     let target = target.to_string();
-    let output = c.ok(
-        leader,
-        &[
-            "group",
-            scope.0,
-            scope.1,
-            "move-leader",
-            op,
-            scope.2,
-            &target,
-            &target,
-            "1",
-        ],
+    let output = command(
+        c,
+        (scope.0, scope.1),
+        &["move-leader", op, scope.2, &target, &target, "1"],
     );
     assert!(output.contains("phase=Pending"), "{output}");
-    leader
 }
 fn permissions(c: &mut Cluster, leader: usize) {
     c.command_principal = Some(2); // Administrator for group7 only.
@@ -161,22 +174,16 @@ fn history(quic: bool) {
     for node in 1..=3 {
         c.start(node, "create");
     }
-    assert!(c
-        .routed(&["group", "7", "3", "add", "42", "5"])
-        .contains("Value(5)"));
-    assert!(c
-        .routed(&["group", "8", "2", "add", "42", "8"])
-        .contains("Value(8)"));
+    assert!(authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("Value(5)"));
+    assert!(authenticated_write(&c, &["group", "8", "2", "add", "42", "8"]).contains("Value(8)"));
     let leader = groups::leader(&mut c, "7", "3");
     permissions(&mut c, leader);
     let target = leader % 3 + 1;
     drain::kill(&mut c, target);
-    let source = begin(&mut c, ("7", "3", "9"), OP, target);
+    begin(&mut c, ("7", "3", "9"), OP, target);
     begin(&mut c, ("8", "2", "11"), OP, target);
     status(&mut c, ("8", "2"), OP, "phase=Pending");
-    assert!(c
-        .ok(source, &["group", "7", "3", "cancel-leadership", OP])
-        .contains("phase=Cancelled"));
+    assert!(command(&mut c, ("7", "3"), &["cancel-leadership", OP]).contains("phase=Cancelled"));
     status(&mut c, ("8", "2"), OP, "phase=Pending");
     begin(&mut c, ("7", "3", "9"), NEXT, target);
     checkpoint_and_stop(&mut c, target, quic);
@@ -215,15 +222,13 @@ fn history(quic: bool) {
     }
     status(&mut c, ("7", "3"), OP, "phase=Cancelled");
     status(&mut c, ("1", "1"), OP, "phase=Absent");
-    assert!(c
-        .routed(&["group", "7", "3", "add", "42", "5"])
-        .contains("duplicate=true"));
+    assert!(
+        authenticated_write(&c, &["group", "7", "3", "add", "42", "5"]).contains("duplicate=true")
+    );
     assert_eq!(c.routed(&["group", "8", "2", "read"]), "OK value=8\n");
     group_admin::configure(&mut c, "7", "3");
     group_admin::configure(&mut c, "7", "3");
-    assert!(c
-        .routed(&["group", "7", "3", "add", "43", "1"])
-        .contains("Value(6)"));
+    assert!(authenticated_write(&c, &["group", "7", "3", "add", "43", "1"]).contains("Value(6)"));
     c.stop();
     for node in 1..=3 {
         c.start(node, "recover");

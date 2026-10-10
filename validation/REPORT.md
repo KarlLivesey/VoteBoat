@@ -5533,3 +5533,22 @@ three strict Clippy profiles and formatting pass with zero diagnostics;96
 inventory records pass metadata validation only. See
 [commands and evidence](baseline/slice193/README.md). These selected tests do not
 establish full baseline/platform acceptance or actual target import readiness.
+
+## Slice199d — exact authority retries and Joint recovery cuts
+
+The foreground drain runner now reobserves source progress for the exact
+configuration LeadershipChanged response. A regression fails before the fix;
+seven runner unit tests pass after it, with other unknown/error responses still
+rejected. Grouped Joint-recovery fixtures submit once rather than retrying into
+Final, and retain offline WAL/checkpoint Joint assertions. Grouped leadership
+callers reselect the leader without changing commands; data callers preserve
+original IDs/payloads using the existing explicit retry helper. Assignment
+failures now include exit status, stderr and service diagnostics.
+
+Local evidence:122 counter-service histories pass before final grouped caller
+edits;24 group and3 assignment histories pass afterward. Formatting and all four
+strict Clippy profiles pass. See [commands, hashes and logs](baseline/slice199d/README.md).
+The completed Ubuntu job114159916794 at01d5190 passes122 counter tests but fails
+one of13 directory tests at an authentication/lookup deadline boundary. Its
+log is retained for diagnosis. Mac job114159916607 remains in progress at the
+last observation; these local fixes are not a macOS or full-baseline certificate.

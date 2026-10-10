@@ -276,6 +276,11 @@ An interrupted configuration or shutdown request is an unknown outcome.
 An exact `ERR not_proposed=Busy` configuration reply causes another source
 status check and a retry of the original operation within the same budget.
 It is not reported as commitment or success; other error replies still stop.
+The exact configuration `UNKNOWN LeadershipChanged` reply also returns to
+source-status observation within the original budget. The source still decides
+whether its bound operation needs progress and whether stopping is safe; an
+interrupted connection or any other unknown result still ends the runner with
+the original identities preserved for an explicit rerun.
 
 Success says `shutdown_requested=true`: the source accepted shutdown after its
 local readiness check. It does not certify that remote worker joining finished

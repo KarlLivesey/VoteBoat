@@ -137,11 +137,75 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2b3: multi-group source drain controls | Bind node maintenance to every actual assignment; advances P4/P2 and chapter09. |197b4b2b1/2 group membership/leadership, mixed-role plans, native journal and Node readiness. | Bounded complete original manifest, all-group permission checks, durable start/cancel/recovery, one-row inspection and authoritative stop refusal. TCP/WAL and QUIC/checkpoint partial-progress histories plus bounds and publication-failure tests pass; full evidence below. |
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
-| Current199c: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+| Current199c–d: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d are recorded below; platform acceptance remains open. CI stays background feedback. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Next201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Retained203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. |
+
+### Slice199d implemented evidence and remaining platform work
+
+The foreground drain now reobserves its source journal after the exact
+configuration LeadershipChanged response. The regression fails before the fix
+and passes afterward; malformed/other unknown responses still fail. Seven runner
+unit tests pass. The Joint fixture now sends once and waits for every replica's
+Joint evidence before disconnecting; offline WAL/checkpoint assertions remain.
+Grouped leadership test callers reselect authority for unchanged commands, and
+grouped data uses the existing explicit same-ID retry caller. Assignment failure
+diagnostics now retain exit status, stderr and all three service logs; the old
+empty-output cause is not assumed fixed.
+
+All122 local counter-service histories pass at the intermediate revision. After
+the final grouped caller/diagnostic edits, all24 matching group histories and
+all3 assignment histories pass. Formatting, all four strict Clippy profiles and
+diff whitespace checks pass. Commands, raw outputs and final source hashes are
+in validation/baseline/slice199d. These results do not claim a full-repository or
+macOS pass.
+
+The Ubuntu job114159916794 for01d5190 completed during this work: all122 counter
+histories pass, then12 directory histories pass and the root observation-floor
+history fails. It receives an authentication deadline error where the assertion
+expects recursive-lookup exhaustion. The exact log is preserved; no retry,
+deadline or assertion is changed for that unexamined boundary. Mac job114159916607
+is still in progress at the last observation. Next in199 is to diagnose that
+deadline boundary and the remaining macOS outcomes, retaining201 conformance,
+202 combined recovery and203 executable merge in the linked plan.
+
+### Slice199d schema plan — configuration uncertainty and exact joint cuts
+
+The recorded macOS failures expose two distinct causes. The foreground drain
+runner rejects the exact documented configuration `LeadershipChanged` reply,
+although its original immutable drain/configuration identities remain valid.
+Reobserve source progress for that exact reply under the existing request/time
+budgets; do not accept arbitrary UNKNOWN text, declare commitment, retry a changed
+record, or hide interrupted connections. No core, storage or wire change is needed.
+Add a regression that fails with the current reply classifier before changing it.
+
+The membership checkpoint fixture calls the phase-advancing `configure OP`
+command repeatedly after uncertainty, then demands the intermediate Joint state.
+A retry can correctly advance to Final. For the exact Joint cut, submit once
+through the existing unread-command helper, require every replica to report
+committed Joint, then disconnect the original wait. Reuse that cut in the drain
+checkpoint history. Keep the offline Joint WAL/checkpoint assertions and original
+operation IDs; do not relax them to accept Final. A failed admission/commit must
+still fail this test, rather than being counted as recovery coverage.
+
+The recorded grouped-write and leadership-cancel failures also use a leader
+observation as if it guaranteed the next command's authority. Reuse the existing
+explicit write-retry caller for grouped data. Add a bounded test caller for
+unchanged leadership commands that reselects the leader only after exact known
+leadership-change/non-leader replies. Keep IDs, group/incarnation and targets
+unchanged; arbitrary errors remain failures. Use it for the drain handoff and
+pending/cancelled leadership histories. Add status/stderr/service logs to the
+previously empty assignment-retry failure, without accepting that unknown cause.
+
+These changes advance current199 operator/platform acceptance. The next two
+deliverables remain201 provider conformance and202 combined membership/checkpoint
+recovery, followed by retained203 executable merge. Run the classifier regression,
+affected TCP/QUIC membership and drain histories, formatting and all four strict
+Clippy profiles. Preserve old failures; local Linux results do not establish
+macOS success. The active01d5190 operator run38033786328 remains in progress on
+both platforms at inspection;1beab3f feedback is pending.
 
 ### Slice199c platform evidence and revised validation priority
 
