@@ -93,7 +93,7 @@ use voteboat::worker::PersistenceWorker;
 use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
@@ -453,6 +453,7 @@ fn prepare_service(
     let mut service = peer_discovery::open(
         prepared,
         protocol,
+        options.timing_profile.timers(),
         mode == "recover-member",
         options.leadership_maintenance,
         rotation,
@@ -957,6 +958,7 @@ fn finish_connection(
 }
 struct StartupOptions {
     protocol: NativePeerProtocol,
+    timing_profile: voteboat::native::startup::NativeTimingProfile,
     deployment: Option<std::path::PathBuf>,
     admin_plan: Option<std::path::PathBuf>,
     service_access: Option<std::path::PathBuf>,
@@ -975,6 +977,28 @@ struct StartupOptions {
     group_drain_plan: Option<std::path::PathBuf>,
 }
 impl StartupOptions {
+    fn new() -> Self {
+        Self {
+            protocol: NativePeerProtocol::TcpTls,
+            deployment: None,
+            admin_plan: None,
+            service_access: None,
+            peer_credentials: None,
+            command_listen: None,
+            discovery_peers: None,
+            peer_discovery: None,
+            remote_admin: administration::Mode::Automatic,
+            wal_reclaim_ms: None,
+            checkpoint_entries: None,
+            membership_drain: None,
+            groups: None,
+            group_admin_plans: None,
+            group_drain_plan: None,
+            timing_profile: Default::default(),
+            leadership_maintenance: false,
+            node_drain: false,
+        }
+    }
     fn checked_mode(&self, mode: &str, input: &setup::PeerInput<'_>) -> Result<bool, Failure> {
         checked_service_mode(
             mode,
@@ -1139,6 +1163,7 @@ fn is_startup_option(flag: &str) -> bool {
     matches!(
         flag,
         "--transport"
+            | "--timing-profile"
             | "--deployment"
             | "--admin-plan"
             | "--remote-admin-plan"
@@ -1169,24 +1194,11 @@ fn parse_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
     }
 }
 fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
-    let mut protocol = NativePeerProtocol::TcpTls;
+    let mut options = StartupOptions::new();
     let mut transport_selected = false;
-    let mut deployment = None;
-    let mut admin_plan = None;
-    let mut service_access = None;
-    let mut peer_credentials = None;
-    let mut command_listen = None;
-    let mut discovery_peers = None;
-    let mut peer_discovery = None;
-    let mut remote_admin = administration::Mode::Automatic;
-    let mut wal_reclaim_ms = None;
-    let mut checkpoint_entries = None;
+    let mut timing_profile_selected = false;
     let mut leadership_maintenance = None;
     let mut node_drain = None;
-    let mut membership_drain = None;
-    let mut groups = None;
-    let mut group_admin_plans = None;
-    let mut group_drain_plan = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !is_startup_option(flag) {
@@ -1194,45 +1206,49 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         }
         let value = args.pop().unwrap();
         match args.pop().unwrap().as_str() {
-            "--group-drain-plan" if group_drain_plan.is_none() && args[0] == "serve" => {
-                group_drain_plan = Some(std::path::PathBuf::from(value));
+            "--group-drain-plan" if options.group_drain_plan.is_none() && args[0] == "serve" => {
+                options.group_drain_plan = Some(std::path::PathBuf::from(value));
             }
-            "--group-admin-plans" if group_admin_plans.is_none() && args[0] == "serve" => {
-                group_admin_plans = Some(std::path::PathBuf::from(value));
+            "--group-admin-plans" if options.group_admin_plans.is_none() && args[0] == "serve" => {
+                options.group_admin_plans = Some(std::path::PathBuf::from(value));
             }
-            "--groups" if groups.is_none() && args[0] == "serve" => {
-                groups = Some(std::path::PathBuf::from(value));
+            "--groups" if options.groups.is_none() && args[0] == "serve" => {
+                options.groups = Some(std::path::PathBuf::from(value));
+            }
+            "--timing-profile" if !timing_profile_selected && args[0] == "serve" => {
+                timing_profile_selected = true;
+                options.timing_profile = value.parse()?;
             }
             "--transport" if !transport_selected && args[0] == "serve" => {
                 transport_selected = true;
-                protocol = parse_protocol(&value)?;
+                options.protocol = parse_protocol(&value)?;
             }
-            "--deployment" if deployment.is_none() => {
-                deployment = Some(std::path::PathBuf::from(value))
+            "--deployment" if options.deployment.is_none() => {
+                options.deployment = Some(std::path::PathBuf::from(value))
             }
             flag @ ("--admin-plan" | "--remote-admin-plan" | "--remote-admin-policy")
-                if admin_plan.is_none() && args[0] == "serve" =>
+                if options.admin_plan.is_none() && args[0] == "serve" =>
             {
-                remote_admin = administration_mode(flag);
-                admin_plan = Some(std::path::PathBuf::from(value))
+                options.remote_admin = administration_mode(flag);
+                options.admin_plan = Some(std::path::PathBuf::from(value))
             }
-            "--service-access" if service_access.is_none() && args[0] == "serve" => {
-                service_access = Some(std::path::PathBuf::from(value));
+            "--service-access" if options.service_access.is_none() && args[0] == "serve" => {
+                options.service_access = Some(std::path::PathBuf::from(value));
             }
-            "--peer-credentials" if peer_credentials.is_none() && args[0] == "serve" => {
-                peer_credentials = Some(std::path::PathBuf::from(value));
+            "--peer-credentials" if options.peer_credentials.is_none() && args[0] == "serve" => {
+                options.peer_credentials = Some(std::path::PathBuf::from(value));
             }
-            "--discovery-peers" if discovery_peers.is_none() && args[0] == "serve" => {
-                discovery_peers = Some(std::path::PathBuf::from(value));
+            "--discovery-peers" if options.discovery_peers.is_none() && args[0] == "serve" => {
+                options.discovery_peers = Some(std::path::PathBuf::from(value));
             }
-            "--peer-discovery" if peer_discovery.is_none() && args[0] == "serve" => {
-                peer_discovery = Some(std::path::PathBuf::from(value));
+            "--peer-discovery" if options.peer_discovery.is_none() && args[0] == "serve" => {
+                options.peer_discovery = Some(std::path::PathBuf::from(value));
             }
-            "--command-listen" if command_listen.is_none() && args[0] == "serve" => {
-                command_listen = Some(value.parse()?);
+            "--command-listen" if options.command_listen.is_none() && args[0] == "serve" => {
+                options.command_listen = Some(value.parse()?);
             }
-            "--wal-reclaim-ms" if wal_reclaim_ms.is_none() && args[0] == "serve" => {
-                wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
+            "--wal-reclaim-ms" if options.wal_reclaim_ms.is_none() && args[0] == "serve" => {
+                options.wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
             }
             "--leadership-maintenance" if leadership_maintenance.is_none() => {
                 leadership_maintenance = Some(enabled_option(&value, "--leadership-maintenance")?);
@@ -1240,34 +1256,21 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--node-drain" if node_drain.is_none() && args[0] == "serve" => {
                 node_drain = Some(enabled_option(&value, "--node-drain")?);
             }
-            "--membership-drain" if membership_drain.is_none() && args[0] == "serve" => {
-                membership_drain = Some(std::path::PathBuf::from(value));
+            "--membership-drain" if options.membership_drain.is_none() && args[0] == "serve" => {
+                options.membership_drain = Some(std::path::PathBuf::from(value));
             }
-            "--checkpoint-entries" if checkpoint_entries.is_none() && args[0] == "serve" => {
-                checkpoint_entries = Some(positive_option(&value, "checkpoint entry threshold")?);
+            "--checkpoint-entries"
+                if options.checkpoint_entries.is_none() && args[0] == "serve" =>
+            {
+                options.checkpoint_entries =
+                    Some(positive_option(&value, "checkpoint entry threshold")?);
             }
             _ => return Err("duplicate or unsupported startup option".into()),
         }
     }
-    Ok(StartupOptions {
-        protocol,
-        deployment,
-        admin_plan,
-        service_access,
-        peer_credentials,
-        command_listen,
-        discovery_peers,
-        peer_discovery,
-        remote_admin,
-        wal_reclaim_ms,
-        checkpoint_entries,
-        leadership_maintenance: leadership_maintenance.unwrap_or(false),
-        node_drain: node_drain.unwrap_or(false),
-        membership_drain,
-        groups,
-        group_admin_plans,
-        group_drain_plan,
-    })
+    options.leadership_maintenance = leadership_maintenance.unwrap_or(false);
+    options.node_drain = node_drain.unwrap_or(false);
+    Ok(options)
 }
 
 fn administration_mode(flag: &str) -> administration::Mode {

@@ -1829,13 +1829,16 @@ fn reply_peer(
 }
 #[test]
 fn automatic_client_reuses_original_command_after_only_proven_non_acceptance() {
-    for first_available in [false, true] {
+    for refusal in [
+        None,
+        Some(b"ERR NOT_LEADER\n".as_slice()),
+        Some(b"ERR Draining\n".as_slice()),
+    ] {
         let mut cluster = Cluster::new();
-        if !first_available {
+        if refusal.is_none() {
             cluster.listeners.remove(&101);
         }
-        let first = first_available
-            .then(|| reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n")));
+        let first = refusal.map(|reply| reply_peer(cluster.take_listener(101), Some(reply)));
         let second = reply_peer(
             cluster.take_listener(102),
             Some(b"OK outcome=Value(7) duplicate=false\n"),
@@ -1864,7 +1867,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
         Some(b"ERR Overloaded\n".as_slice()),
         Some(b"ERR NotRead(ReadNotReady)\n".as_slice()),
         Some(b"ERR Unavailable(LeadershipChanged)\n".as_slice()),
-        Some(b"ERR Draining\n".as_slice()),
+        Some(b"ERR Draining trailing\n".as_slice()),
     ] {
         let mut cluster = Cluster::new();
         let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));

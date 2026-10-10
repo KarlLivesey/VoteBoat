@@ -1,0 +1,76 @@
+    Checking voteboat v0.1.0 (<workspace>)
+error[E0308]: mismatched types
+   --> examples/embedded_counter.rs:105:11
+    |
+105 |     drive(&mut node, start, |n| {
+    |     ----- ^^^^^^^^^ expected `NativePeerConnector`, found `NativeServiceConnector`
+    |     |
+    |     arguments to this function are incorrect
+    |
+    = note: expected mutable reference `&mut Node<_, _, _, _, _, _, _, NativePeerConnector, _>`
+               found mutable reference `&mut Node<_, _, _, _, _, _, _, NativeServiceConnector, _>`
+note: function defined here
+   --> examples/embedded_counter.rs:46:4
+    |
+ 46 | fn drive(
+    |    ^^^^^
+ 47 |     n: &mut NativeNode<Counter>,
+    |     ---------------------------
+
+error[E0308]: mismatched types
+   --> examples/embedded_counter.rs:116:11
+    |
+116 |     drive(&mut node, start, |n| {
+    |     ----- ^^^^^^^^^ expected `NativePeerConnector`, found `NativeServiceConnector`
+    |     |
+    |     arguments to this function are incorrect
+    |
+    = note: expected mutable reference `&mut Node<_, _, _, _, _, _, _, NativePeerConnector, _>`
+               found mutable reference `&mut Node<_, _, _, _, _, _, _, NativeServiceConnector, _>`
+note: function defined here
+   --> examples/embedded_counter.rs:46:4
+    |
+ 46 | fn drive(
+    |    ^^^^^
+ 47 |     n: &mut NativeNode<Counter>,
+    |     ---------------------------
+
+error[E0308]: mismatched types
+   --> examples/embedded_counter.rs:134:11
+    |
+134 |     drive(&mut node, start, |n| {
+    |     ----- ^^^^^^^^^ expected `NativePeerConnector`, found `NativeServiceConnector`
+    |     |
+    |     arguments to this function are incorrect
+    |
+    = note: expected mutable reference `&mut Node<_, _, _, _, _, _, _, NativePeerConnector, _>`
+               found mutable reference `&mut Node<_, _, _, _, _, _, _, NativeServiceConnector, _>`
+note: function defined here
+   --> examples/embedded_counter.rs:46:4
+    |
+ 46 | fn drive(
+    |    ^^^^^
+ 47 |     n: &mut NativeNode<Counter>,
+    |     ---------------------------
+
+error[E0308]: mismatched types
+   --> examples/embedded_counter.rs:149:11
+    |
+149 |     close(node, group, start)
+    |     ----- ^^^^ expected `NativePeerConnector`, found `NativeServiceConnector`
+    |     |
+    |     arguments to this function are incorrect
+    |
+    = note: expected struct `Node<_, _, _, _, _, _, _, NativePeerConnector, _>`
+               found struct `Node<_, _, _, _, _, _, _, NativeServiceConnector, _>`
+note: function defined here
+   --> examples/embedded_counter.rs:184:4
+    |
+184 | fn close(
+    |    ^^^^^
+185 |     mut node: NativeNode<Counter>,
+    |     -----------------------------
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (example "embedded_counter") due to 4 previous errors
+warning: build failed, waiting for other jobs to finish...

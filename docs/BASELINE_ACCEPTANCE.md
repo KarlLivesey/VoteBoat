@@ -1,5 +1,17 @@
 # Baseline acceptance map
 
+Native election profiles and drained-follower routing: [slice245](../validation/baseline/slice245/README.md).
+Construction-time throughput/edge/legacy profiles reach static/member/multi/
+discovery/rotation services; Rust host injection/defaults remain explicit. Exact
+pre-admission Draining data refusal can route the original command without changing
+bytes or deadline; unknown/error outcomes still stop. Linux counter197/default138,
+startup47, directory22/transfer33 and embedding recovery pass. Mac directory22/
+transfer33 and embedding pass; counter191/5, default135/2 and startup34/13 still
+fail (passed/failed). Final formatting/four strict profiles are zero on both.
+All18 changed-source hashes bind Mac evidence; original failures remain. Next is
+monotonic native cleanup and configuration/runner observation progress. Full P0–P7
+stays active; features/macOS/Linux first, tuning/security later.
+
 Durable self-vote election fencing: [slice244](../validation/baseline/slice244/README.md).
 Exact completion refreshes the candidate response window and rejects the old queued
 expiration; old-code regression fails and final Raft/runtime contracts pass on

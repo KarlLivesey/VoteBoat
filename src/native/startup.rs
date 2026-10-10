@@ -34,8 +34,10 @@ use crate::{
 use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
 mod multi;
 mod peer_rotation;
+mod timing_profile;
 pub use multi::*;
 pub use peer_rotation::NativePeerRotationStartup;
+pub use timing_profile::NativeTimingProfile;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum NativeOpenMode {

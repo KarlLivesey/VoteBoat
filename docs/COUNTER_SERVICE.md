@@ -1,5 +1,13 @@
 # Native counter service and Rust embedding
 
+Serve accepts `--timing-profile throughput|edge|legacy`. Default `throughput`
+uses a 100 ms heartbeat and elections in [1000,2000) ms; `edge` uses 250 ms and
+[1500,3000) ms; `legacy` uses 50 ms and [150,300) ms. Select once at startup, including
+recovery. This changes election/heartbeat scheduling, not quorum, synchronization
+or caller deadlines. These design-pack proposals are not performance guarantees.
+Rust hosts can use `NativeTimingProfile::Throughput.timers()` or supply their own
+validated `TimerConfig`; low-level startup defaults remain unchanged.
+
 `voteboat-counter` runs one independent node per process, using the library's
 `native::node::NativeNode<Counter, NativeServiceConnector>`. Three nodes communicate
 over mutually authenticated TCP/TLS or optional QUIC, elect leaders using native

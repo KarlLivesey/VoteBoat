@@ -1,0 +1,527 @@
+   Compiling voteboat v0.1.0 (<mac-task>/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.70s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-4a7126c9b497a5c5)
+
+running 196 tests
+test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+test automatic_read_retries_only_exact_unavailable_replica_replies ... ok
+test assignments::single_group_inventory_does_not_require_a_leader ... ok
+test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+test command_discovery::peer_source::invalid_peer_source_refuses_before_opening_store ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+test command_discovery::updates::versioned_source_rejects_zero_generation_before_storage_is_opened ... ok
+test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_quic ... ok
+test command_discovery::peer_source::executable_peer_source_uses_exact_identities_and_explicit_restart_tcp ... ok
+test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_quic ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... ok
+test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_tcp ... ok
+test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+test drain_replacement::configuration_recovery::planned_configuration_classification_keeps_unrelated_replies_terminal ... ok
+test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+test drain_replacement::setup_recovery::fixed_handoff_classification_keeps_conflicts_and_unrelated_failures_terminal ... ok
+test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+test drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_tcp ... FAILED
+test drain_runner::confirmation::caller_bounds_unknown_invocations_and_preserves_terminal_refusals ... ok
+test drain_runner::confirmation::caller_refuses_wrong_duplicate_and_unconfirmed_success_fields ... ok
+test drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record ... ok
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+test drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_quic ... FAILED
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... FAILED
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic ... FAILED
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+test drain_runner::killed_quic_runner_and_source_resume_original_durable_plan ... FAILED
+test drain_runner::killed_runner_and_source_resume_original_durable_plan ... FAILED
+test drain_runner::follower::planned_runner_drains_original_source_after_leader_change_quic ... ok
+test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+test drain_runner::follower::planned_runner_drains_original_source_after_leader_change_tcp ... ok
+test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+test drain_runner::historical::original_planned_drain_survives_another_election_tcp ... ok
+test drain_runner::historical::original_planned_drain_survives_another_election_quic ... ok
+test failure_diagnostics::failure_diagnostics_preserve_scope_and_never_reissue_the_failed_write ... ok
+test failure_diagnostics::failure_diagnostics_stop_at_fixture_gate_deadline_without_spawning ... ok
+test failure_diagnostics::failure_diagnostics_stop_at_shared_deadline_and_bound_node_count ... ok
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+test failure_diagnostics::failure_diagnostics_terminate_a_waiting_native_caller ... ok
+test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp ... ok
+test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... ok
+test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic ... ok
+test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... ok
+test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... ok
+test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... ok
+test groups::group_routing_preserves_exact_request_and_stops_after_uncertainty ... ok
+test groups::invalid_group_commands_are_rejected_before_connecting ... ok
+test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic ... ok
+test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp ... ok
+test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+test invalid_administration_is_rejected_before_store_open ... ok
+test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+test invalid_deployment_is_rejected_before_store_creation ... ok
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic ... ok
+test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... ok
+test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+test groups::authenticated_group_commands_quic_recover_independent_histories ... ok
+test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_tcp ... ok
+test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic ... ok
+test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+test leadership::follower::explicit_resume_follower_and_read_refusals_allow_original_endpoint_selection ... ok
+test leadership::binding::explicit_original_handoff_survives_prior_target_election_quic_checkpoint ... ok
+test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+test leadership::follower::resume_modified_or_unrelated_failures_remain_terminal ... ok
+test leadership::binding::explicit_original_handoff_survives_prior_target_election_tcp ... ok
+test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_tcp ... ok
+test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_quic ... ok
+test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+test leadership::follower::original_source_follower_resume_preserves_historical_intent_quic ... ok
+test leadership::follower::original_source_follower_resume_preserves_historical_intent_tcp ... ok
+test history::quic_faulted_client_histories_are_linearizable ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+test history::tcp_faulted_client_histories_are_linearizable ... ok
+test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test membership_drain::preparation::prepared_source_completes_previous_handoff_before_new_drain_quic ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+test peer_credentials::peer_administration_uses_actual_local_scopes_without_requiring_group_one ... ok
+test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test membership_drain::preparation::prepared_source_completes_previous_handoff_before_new_drain_tcp ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+test peer_credentials::quic_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+test peer_credentials::quic_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+test peer_credentials::quic_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+test peer_credentials::tcp_member_peer_rollout_retains_wire_profile_and_durable_generation ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+test peer_credentials::tcp_peer_key_rollout_recovers_unobserved_request_and_data ... ok
+test peer_discovery::malformed_peer_discovery_client_refuses_before_store_creation ... ok
+test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+test peer_discovery::unavailable_peer_source_does_not_block_commands_or_shutdown ... ok
+test peer_discovery::discovered_member_recovery_and_peer_rotation_quic ... ok
+test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+test peer_discovery::discovered_member_recovery_and_peer_rotation_tcp ... ok
+test peer_credentials::tcp_multigroup_peer_rollout_requires_all_scope_permissions ... ok
+test peer_discovery::executable_consumes_peer_discovery_and_recovers_tcp ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+test preparing_command::committed_reply_is_not_preparing_evidence_and_does_not_reroute ... ok
+test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+test peer_discovery::executable_consumes_peer_discovery_and_recovers_quic ... ok
+test peer_discovery::discovered_shared_groups_and_peer_rotation_tcp ... ok
+test preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting ... FAILED
+test read_failover::automatic_read_repeats_an_empty_disconnect_but_not_a_partial_reply ... ok
+test read_failover::automatic_authenticated_read_escapes_stalled_handshake_quic ... ok
+test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... ok
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_tcp ... ok
+test read_failover::automatic_read_escapes_silent_replica_with_original_scope ... ok
+test peer_discovery::discovered_shared_groups_and_peer_rotation_quic ... ok
+test preparing_command::unread_preparation_reroutes_only_explicit_follower_refusal_quic ... ok
+test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+test placement::generated_placement_executes_and_recovers_tcp ... ok
+test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test read_failover::automatic_read_stalls_cannot_renew_the_absolute_deadline ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+test write_recovery::tests::authentication_timeout_repeats_only_the_original_scoped_write ... ok
+test write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success ... ok
+test write_recovery::tests::existing_leadership_and_read_interruptions_retain_original_identity ... ok
+test write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt ... ok
+test write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt ... ok
+test write_recovery::tests::unrelated_or_modified_failures_remain_terminal ... ok
+test placement::generated_placement_executes_and_recovers_quic ... ok
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+test trusted_startup_plan_promotes_and_restarts_quic ... ok
+test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint has been running for over 60 seconds
+test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint has been running for over 60 seconds
+test write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_tcp ... ok
+test write_recovery::authentication::original_scoped_write_recovers_authentication_timeout_quic_checkpoint ... ok
+test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+
+failures:
+
+---- drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_tcp stdout ----
+
+thread 'drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_tcp' (16402806) panicked at tests/counter_service/write_recovery.rs:44:29:
+original write ["add", "19700", "7"]: "ERR Draining\n" Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+
+diagnostics nodes=3 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Follower term=4 committed=9\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=2363 failed_polls=0 owner_steps=20 step_errors=0 worker_events=14 snapshot_events=0 snapshot_installs=0 persistence_batches=7 applications=3 peer_sends=19 peer_received=19 ingress_blocked=0 connection_failures=5 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=2374,sum:157082490,min:40125,max:1002750,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=50,sum:465587087,min:6872875,max:12215000,p99_upper:16777215 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=2 command=status exit=Some(0) stdout="OK role=Follower term=4 committed=9\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=4 polls=769 failed_polls=0 owner_steps=20 step_errors=0 worker_events=12 snapshot_events=0 snapshot_installs=0 persistence_batches=6 applications=3 peer_sends=20 peer_received=20 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=4 rejected=0 percentile=bucket_upper_bound PollCompleted=781,sum:70080516,min:50708,max:1144667,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=9,sum:90460249,min:8503542,max:12563292,p99_upper:16777215 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=3 command=status exit=Some(0) stdout="OK role=Leader term=4 committed=9\n" stderr=""
+node=3 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=2383 failed_polls=0 owner_steps=54 step_errors=7 worker_events=14 snapshot_events=0 snapshot_installs=0 persistence_batches=7 applications=3 peer_sends=40 peer_received=40 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0\n" stderr=""
+node=3 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=2394,sum:169716037,min:42166,max:986916,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=51,sum:1050906538,min:7694333,max:354332625,p99_upper:536870911 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_quic stdout ----
+
+thread 'drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_quic' (16402787) panicked at tests/counter_service/write_recovery.rs:44:29:
+original write ["add", "19700", "7"]: "ERR Draining\n" Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+
+diagnostics nodes=3 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Follower term=4 committed=9\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=2289 failed_polls=0 owner_steps=20 step_errors=0 worker_events=14 snapshot_events=0 snapshot_installs=0 persistence_batches=7 applications=3 peer_sends=19 peer_received=19 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=2299,sum:195243108,min:54000,max:1324625,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=49,sum:476611625,min:6688667,max:11939375,p99_upper:16777215 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=2 command=status exit=Some(0) stdout="OK role=Follower term=4 committed=9\n" stderr=""
+node=2 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=4 polls=662 failed_polls=0 owner_steps=20 step_errors=0 worker_events=12 snapshot_events=0 snapshot_installs=0 persistence_batches=6 applications=3 peer_sends=20 peer_received=20 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_3_bound=1 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=2 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=4 rejected=0 percentile=bucket_upper_bound PollCompleted=672,sum:72355118,min:61625,max:1726750,p99_upper:524287 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=9,sum:84473418,min:8539000,max:10045459,p99_upper:16777215 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+node=3 command=status exit=Some(0) stdout="OK role=Leader term=4 committed=9\n" stderr=""
+node=3 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=3 polls=2340 failed_polls=0 owner_steps=54 step_errors=8 worker_events=14 snapshot_events=0 snapshot_installs=0 persistence_batches=7 applications=3 peer_sends=40 peer_received=40 ingress_blocked=0 connection_failures=0 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=0 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=2 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_1_bound=1 peer_1_batches=0 peer_1_messages=0 peer_1_bytes=0 peer_2_bound=1 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0\n" stderr=""
+node=3 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=3 rejected=0 percentile=bucket_upper_bound PollCompleted=2352,sum:200197533,min:50000,max:1538833,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=51,sum:924240749,min:7639250,max:229424958,p99_upper:268435455 ConnectionInterrupted=0,sum:0,min:NA,max:NA,p99_upper:NA\n" stderr=""
+
+
+---- configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp stdout ----
+
+thread 'configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp' (16399022) panicked at tests/counter_service.rs:2621:9:
+missing phase=configuration_queued; logs at "<mac-task>/test-roots/voteboat-service-98356-1791657566947025000-49/1-recover-member.log": ready node=1 peer=127.0.0.1:7297 transport=TcpTls command=127.0.0.1:7397
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(21101)) reason=deadline
+administration observation_cancelled operation=21101 phase=preparing reason=deadline
+
+diagnostics nodes=1 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Leader term=2 committed=2\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=2 polls=13507 failed_polls=0 owner_steps=173 step_errors=0 worker_events=4 snapshot_events=0 snapshot_installs=0 persistence_batches=2 applications=0 peer_sends=2 peer_received=2 ingress_blocked=0 connection_failures=14 peer_driver=1 peer_attempts=0 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=0 peer_connecting=0 peer_reserved_bytes=0 peer_authorized=2 peer_bound=0 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=0 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=0 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=2 rejected=0 percentile=bucket_upper_bound PollCompleted=13519,sum:818845394,min:35042,max:3813291,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=23,sum:271174168,min:8217375,max:27711708,p99_upper:33554431 ConnectionInterrupted=1,sum:5000951708,min:5000951708,max:5000951708,p99_upper:8589934591\n" stderr=""
+
+
+---- configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic stdout ----
+
+thread 'configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic' (16399002) panicked at tests/counter_service.rs:2621:9:
+missing phase=configuration_queued; logs at "<mac-task>/test-roots/voteboat-service-98356-1791657566905649000-48/1-recover-member.log": ready node=1 peer=127.0.0.1:7169 transport=Quic command=127.0.0.1:7269
+command observation_cancelled pending=Configure(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, OperationId(21101)) reason=deadline
+administration observation_cancelled operation=21101 phase=preparing reason=deadline
+
+diagnostics nodes=1 omitted=0 evidence=local_volatile
+node=1 command=status exit=Some(0) stdout="OK role=Leader term=2 committed=2\n" stderr=""
+node=1 command=metrics exit=Some(0) stdout="OK evidence=local_volatile store_session=2 polls=13247 failed_polls=0 owner_steps=174 step_errors=0 worker_events=4 snapshot_events=0 snapshot_installs=0 persistence_batches=2 applications=0 peer_sends=4 peer_received=3 ingress_blocked=0 connection_failures=4 peer_driver=1 peer_attempts=2 peer_staged_batches=0 peer_quarantined_batches=0 peer_send_failed=0 peer_receive_failed=0 peer_connections=2 peer_connecting=2 peer_reserved_bytes=12582912 peer_authorized=2 peer_bound=0 peer_tracked=2 outbound_batches=0 outbound_messages=0 outbound_bytes=0 peer_details=2 peer_omitted=0 peer_2_bound=0 peer_2_batches=0 peer_2_messages=0 peer_2_bytes=0 peer_3_bound=0 peer_3_batches=0 peer_3_messages=0 peer_3_bytes=0\n" stderr=""
+node=1 command=timings exit=Some(0) stdout="OK evidence=local_volatile unit=ns store_session=2 rejected=0 percentile=bucket_upper_bound PollCompleted=13257,sum:1133268857,min:37000,max:3321625,p99_upper:262143 PollFailed=0,sum:0,min:NA,max:NA,p99_upper:NA ConnectionCompleted=24,sum:298928005,min:9126792,max:40290458,p99_upper:67108863 ConnectionInterrupted=1,sum:5000633083,min:5000633083,max:5000633083,p99_upper:8589934591\n" stderr=""
+
+
+---- drain_runner::killed_quic_runner_and_source_resume_original_durable_plan stdout ----
+
+thread 'drain_runner::killed_quic_runner_and_source_resume_original_durable_plan' (16406323) panicked at tests/counter_service/drain_runner/confirmation.rs:63:9:
+drain source=1 sequence=1 operation=19701:  drain_runner_budget evidence=local_volatile source=1 sequence=1 operation=19701 target=1 command=drain-group requests_exhausted=true deadline_exhausted=false remaining=0 elapsed_ms=2312
+Error: "UNKNOWN drain runner budget expired; rerun the same sequence and operation"
+
+
+---- drain_runner::killed_runner_and_source_resume_original_durable_plan stdout ----
+
+thread 'drain_runner::killed_runner_and_source_resume_original_durable_plan' (16406402) panicked at tests/counter_service/drain_runner/confirmation.rs:63:9:
+drain source=1 sequence=1 operation=19701:  drain_runner_budget evidence=local_volatile source=1 sequence=1 operation=19701 target=2 command=group requests_exhausted=true deadline_exhausted=false remaining=0 elapsed_ms=2643
+Error: "UNKNOWN drain runner budget expired; rerun the same sequence and operation"
+
+
+---- preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting stdout ----
+
+thread 'preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting' (16429625) panicked at tests/counter_service/preparing_command.rs:199:5:
+OK evidence=local_durable operation=17920 committed_prefix=2 durable_last=3 committed=NotFoundLocally accepted=NotFoundLocally action=inconclusive_local_absence
+
+
+
+failures:
+    configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic
+    configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp
+    drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_quic
+    drain_replacement::configuration_recovery::planned_configuration_recovers_unread_proposal_and_sampled_follower_tcp
+    drain_runner::killed_quic_runner_and_source_resume_original_durable_plan
+    drain_runner::killed_runner_and_source_resume_original_durable_plan
+    preparing_command::unknown_configuration_reply_keeps_original_durable_record_without_rerouting
+
+test result: FAILED. 189 passed; 7 failed; 0 ignored; 0 measured; 0 filtered out; finished in 187.86s
+
+error: test failed, to rerun pass `--test counter_service`
+     Running tests/directory_service.rs (target/debug/deps/directory_service-7ee3cae999bedfc5)
+
+running 22 tests
+test initialization::setup_retries_exact_leadership_loss_and_requires_original_applied_receipt ... ok
+test initialization::setup_is_bounded_and_rejects_unrelated_errors_or_changed_receipts ... ok
+test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_quic ... ok
+test routes::recursive_route_rejects_invalid_maps_and_options_before_connections ... ok
+test routes::recursive_route_interrupted_leaf_never_returns_a_hint ... ok
+test lookup_auto::automatic_lookup_never_returns_a_hint_without_a_live_authority ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_tcp ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_tcp ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_quic ... ok
+test routes::recursive_route_missing_leaf_is_not_a_partial_success ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_quic ... ok
+test routes::recursive_route_quic_and_known_child_without_ancestors ... ok
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_tcp ... ok
+test lookup_auto::automatic_lookup_preserves_original_manifest_after_sampled_leader_loss_quic ... ok
+test routes::recursive_route_rejects_wrong_authority_and_tls_identity ... ok
+test routes::recursive_route_enforces_root_observation_floors ... ok
+test routes::recursive_route_tcp_and_known_child_without_ancestors ... ok
+test routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss ... ok
+test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 34.67s
+
+     Running tests/service_profiles.rs (target/debug/deps/service_profiles-5920b0aa57b3595c)
+
+running 1 test
+test invalid_service_profile_is_refused_before_files_or_listener_ownership ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.51s
+
+     Running tests/startup.rs (target/debug/deps/startup-a1ac3465d4e8f43e)
+
+running 47 tests
+test discovery::prepared_member_rejects_create_before_creating_files ... ok
+test discovery::prepared_shared_groups_reject_missing_application_before_creating_files ... ok
+test discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application ... ok
+test invalid_startup_is_side_effect_free_and_returns_the_host_application ... ok
+test discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts ... ok
+test discovery::abandoned_prepared_startup_closes_workers_and_releases_listener ... ok
+test explicit_startup_timers_validate_before_files_and_use_host_deadlines ... ok
+test late_constructor_failure_returns_application_and_joins_every_started_worker ... ok
+test host_application_and_non_demo_identities_write_and_recover_through_startup ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints ... FAILED
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... FAILED
+test discovery::tcp_prepared_member_recovers_with_host_discovery ... ok
+test discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test discovery::quic_prepared_member_recovers_with_host_discovery ... ok
+test discovery::quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... FAILED
+test multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... FAILED
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic ... FAILED
+test native_administration_receipts_commit_joint_and_final_and_reopen_exact_history ... ok
+test peer_rotation::material_digest_binds_local_tls_and_every_peer_field ... ok
+test peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application ... ok
+test peer_rotation::rejected_rotating_quic_owner_releases_socket_and_workers ... ok
+test peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers ... ok
+test peer_rotation::static_and_member_startup_install_the_recorded_generation ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... FAILED
+test quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers ... ok
+test discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test discovery::quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints ... FAILED
+test startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines ... ok
+test timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection ... ok
+test timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application ... FAILED
+test multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group ... FAILED
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... FAILED
+test quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... FAILED
+test stopping_one_startup_does_not_stop_another_or_the_shared_host_wake ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp ... FAILED
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint ... FAILED
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+test tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups ... ok
+test multi::peer_rotation::quic_peer_rotation_checkpoint_and_unobserved_rollout_recover_all_groups ... ok
+
+failures:
+
+---- maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints stdout ----
+
+thread 'maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints' (16448512) panicked at tests/startup/maintenance.rs:240:22:
+unexpected maintenance outcome: Unknown(LeadershipChanged)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp stdout ----
+
+thread 'maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp' (16448432) panicked at tests/startup/maintenance.rs:240:22:
+unexpected maintenance outcome: Unknown(LeadershipChanged)
+
+---- maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal stdout ----
+
+thread 'maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal' (16449180) panicked at tests/startup/maintenance.rs:240:22:
+unexpected maintenance outcome: Unknown(LeadershipChanged)
+
+---- maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic stdout ----
+
+thread 'maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic' (16449283) panicked at tests/startup/maintenance.rs:240:22:
+unexpected maintenance outcome: Unknown(LeadershipChanged)
+
+---- maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic stdout ----
+
+thread 'maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic' (16448214) panicked at tests/startup.rs:913:14:
+called `Result::unwrap()` on an `Err` value: TimeWentBack
+
+---- maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp stdout ----
+
+thread 'maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp' (16449354) panicked at tests/startup/maintenance/membership_drain.rs:182:9:
+expected handoff
+
+---- maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints stdout ----
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 153 }, operation: None, read: None, error: Some(WrongIdentity) }
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 154 }, operation: None, read: None, error: Some(WrongIdentity) }
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 155 }, operation: None, read: None, error: Some(WrongIdentity) }
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 157 }, operation: None, read: None, error: Some(WrongIdentity) }
+
+thread 'maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints' (16449351) panicked at tests/startup.rs:913:14:
+called `Result::unwrap()` on an `Err` value: TimeWentBack
+
+---- timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application stdout ----
+
+thread 'timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application' (16449781) panicked at tests/startup/timing_profile.rs:71:13:
+assertion `left == right` failed
+  left: "native startup"
+ right: "timers"
+
+---- multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group stdout ----
+
+thread 'multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group' (16449420) panicked at tests/startup.rs:913:14:
+called `Result::unwrap()` on an `Err` value: TimeWentBack
+
+---- multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group stdout ----
+
+thread 'multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group' (16449438) panicked at tests/startup.rs:913:14:
+called `Result::unwrap()` on an `Err` value: TimeWentBack
+
+---- quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four stdout ----
+
+thread 'quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four' (16449669) panicked at tests/startup.rs:589:5:
+assertion `left == right` failed
+  left: Follower
+ right: Leader
+
+---- maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp stdout ----
+
+thread 'maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp' (16447579) panicked at tests/startup/maintenance.rs:119:13:
+native maintenance timeout at election: [(Follower, 20, 9, 0, 9, None), (Follower, 20, 9, 0, 9, None), (Leader, 20, 9, 0, 9, None)]
+
+---- maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint stdout ----
+
+thread 'maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint' (16447475) panicked at tests/startup.rs:918:9:
+assertion failed: clock.elapsed() < Duration::from_secs(10)
+
+
+failures:
+    maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint
+    maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp
+    maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic
+    maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp
+    maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints
+    maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal
+    maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic
+    maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints
+    maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp
+    multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group
+    multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group
+    quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four
+    timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application
+
+test result: FAILED. 34 passed; 13 failed; 0 ignored; 0 measured; 0 filtered out; finished in 28.85s
+
+error: test failed, to rerun pass `--test startup`
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-2d6b92747d4c6151)
+
+running 33 tests
+test interrupt::recovery::disconnected_wait_observes_usage_until_actual_release ... ok
+test interrupt::recovery::cleanup_deadline_and_invalid_status_cannot_become_release ... ok
+test interrupt::recovery::readiness_retries_only_exact_unavailability_and_rejects_invalid_observations ... ok
+test initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt ... ok
+test initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal ... ok
+test profiles::invalid_profiles_fail_before_opening_replica_files ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp ... ok
+test initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts ... ok
+test quic_authenticated_operator_resumes_original_split_after_process_crash ... ok
+test retirement_retry::retirement_confirmation_bounds_attempts_and_preserves_terminal_failures ... ok
+test retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss ... ok
+test retirement_retry::retirement_confirmation_requires_original_quorum_status_and_stable_record ... ok
+test merge::tcp_operator_collects_both_images_before_importing_a_merge ... ok
+test interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_tcp ... ok
+test startup_data::original_source_write_bounds_retries_and_preserves_other_failures ... ok
+test startup_data::original_source_write_repeats_exact_record_after_leadership_loss ... ok
+test startup_data::original_source_write_requires_exact_applied_value_identity_index_and_wrapper ... ok
+test startup_discovery::delayed_election_is_observed_after_the_initial_no_leader_scan ... ok
+test startup_discovery::discovery_deadline_is_not_renewed_and_other_probe_failures_are_terminal ... ok
+test interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic ... ok
+test initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic ... ok
+test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts has been running for over 60 seconds
+test cuts::tcp_wal_recovery_at_every_split_phase_and_lost_fence_publication_receipts has been running for over 60 seconds
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement has been running for over 60 seconds
+test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement has been running for over 60 seconds
+test retirement::tcp_retirement_recovers_unread_proposal_and_original_release_from_wal ... ok
+test retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint ... ok
+test revocation::interrupted_split_resumes_under_replacement_administrator_tcp ... ok
+test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... ok
+test startup_recovery::tcp_original_source_unknown_and_delayed_metadata_election_recover ... ok
+test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement ... ok
+test cuts::tcp_wal_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+test startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover ... ok
+test revocation::interrupted_split_resumes_under_replacement_administrator_quic ... ok
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement ... ok
+test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 108.16s
+
+error: 2 targets failed:
+    `--test counter_service`
+    `--test startup`

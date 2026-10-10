@@ -1,0 +1,16 @@
+examples/embedded_counter.rs: OK
+src/bin/counter_service.rs: OK
+src/bin/directory_service.rs: OK
+src/bin/support/counter_setup.rs: OK
+src/bin/support/group_setup.rs: OK
+src/bin/support/peer_discovery/assembly.rs: OK
+src/bin/support/service_setup.rs: OK
+src/bin/support/transfer_server.rs: OK
+src/bin/transfer_service.rs: OK
+src/native/startup.rs: OK
+src/native/startup/peer_rotation.rs: OK
+src/native/startup/timing_profile.rs: OK
+tests/service_profiles.rs: OK
+tests/startup.rs: OK
+tests/startup/peer_rotation.rs: OK
+tests/startup/timing_profile.rs: OK

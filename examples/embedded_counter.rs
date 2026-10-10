@@ -25,7 +25,13 @@ use voteboat::{
     application::*,
     identity::*,
     log::*,
-    native::{node::*, startup::*, tls::*, worker::*},
+    native::{
+        connect::{NativePeerProtocol, NativeServiceConnector},
+        node::*,
+        startup::*,
+        tls::*,
+        worker::*,
+    },
     quorum::*,
     runtime::*,
 };
@@ -44,9 +50,9 @@ fn material(path: &Path) -> Result<Vec<u8>, Failure> {
     Ok(bytes)
 }
 fn drive(
-    n: &mut NativeNode<Counter>,
+    n: &mut NativeNode<Counter, NativeServiceConnector>,
     start: Instant,
-    mut done: impl FnMut(&mut NativeNode<Counter>) -> Result<bool, Failure>,
+    mut done: impl FnMut(&mut NativeNode<Counter, NativeServiceConnector>) -> Result<bool, Failure>,
 ) -> Result<(), Failure> {
     let deadline = Instant::now() + Duration::from_secs(10);
     loop {
@@ -81,7 +87,9 @@ fn main() -> Result<(), Failure> {
     let tls = Path::new(tls);
     let config = startup(root, tls, mode)?;
     let group = config.bootstrap.group;
-    let mut node = match config.open(
+    let mut node = match config.open_with_protocol_and_timers(
+        NativePeerProtocol::TcpTls,
+        NativeTimingProfile::Throughput.timers(),
         check(Counter::new(10000))?,
         Arc::new(ThreadWake::current()),
         MonoTime(0),
@@ -180,7 +188,7 @@ fn startup(root: &str, tls: &Path, mode: NativeOpenMode) -> Result<NativeStartup
     })
 }
 fn close(
-    mut node: NativeNode<Counter>,
+    mut node: NativeNode<Counter, NativeServiceConnector>,
     group: GroupIdentity,
     start: Instant,
 ) -> Result<(), Failure> {
@@ -194,7 +202,8 @@ fn close(
         .ok_or("missing peers")?
         .connector
         .into_dialer()
-        .map_err(|_| "connector not drained")?;
+        .map_err(|_| "connector not drained")?
+        .ok_or("missing TCP dialer")?;
     let mut snapshots = parts.local.snapshots.take().ok_or("missing snapshots")?;
     let deadline = Instant::now() + Duration::from_secs(10);
     let (mut log, mut snap) = (false, false);

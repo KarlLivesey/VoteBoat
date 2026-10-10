@@ -42,6 +42,7 @@ pub(super) fn exchange(
 fn retryable_reply(command: &[String], response: &str) -> bool {
     let command = super::group_command::payload(command);
     response == NOT_LEADER
+        || matches!(command, [add, _, _] if add == "add") && response == "ERR Draining\n"
         || command == ["read"]
             && matches!(
                 response,
@@ -50,6 +51,7 @@ fn retryable_reply(command: &[String], response: &str) -> bool {
                     | "ERR Draining\n"
             )
 }
+
 fn terminal(response: String) -> Result<(), Failure> {
     print!("{response}");
     if response.starts_with("OK ") {
@@ -251,4 +253,32 @@ fn route(
         std::thread::park_timeout(remaining.min(Duration::from_millis(50)));
     }
     Err("no eligible configured leader found within the routing attempt limit".into())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn draining_reroutes_only_exact_unaccepted_data_commands() {
+        for words in [
+            vec!["add", "42", "5"],
+            vec!["group", "7", "3", "add", "42", "5"],
+            vec!["read"],
+        ] {
+            let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
+            assert!(retryable_reply(&command, "ERR Draining\n"));
+            for terminal in [
+                "ERR Draining\nextra\n",
+                "UNKNOWN Draining\n",
+                "ERR AUTHORIZATION\n",
+                "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n",
+            ] {
+                assert!(!retryable_reply(&command, terminal));
+            }
+        }
+        for words in [vec!["configure", "42"], vec!["add", "42"], vec!["quit"]] {
+            let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
+            assert!(!retryable_reply(&command, "ERR Draining\n"));
+        }
+    }
 }

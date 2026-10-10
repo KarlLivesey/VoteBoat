@@ -1,0 +1,100 @@
+diff --git a/src/bin/support/local_client.rs b/src/bin/support/local_client.rs
+index 90352e8..e201e79 100644
+--- a/src/bin/support/local_client.rs
++++ b/src/bin/support/local_client.rs
+@@ -42,6 +42,7 @@ pub(super) fn exchange(
+ fn retryable_reply(command: &[String], response: &str) -> bool {
+     let command = super::group_command::payload(command);
+     response == NOT_LEADER
++        || matches!(command, [add, _, _] if add == "add") && response == "ERR Draining\n"
+         || command == ["read"]
+             && matches!(
+                 response,
+@@ -50,6 +51,7 @@ fn retryable_reply(command: &[String], response: &str) -> bool {
+                     | "ERR Draining\n"
+             )
+ }
++
+ fn terminal(response: String) -> Result<(), Failure> {
+     print!("{response}");
+     if response.starts_with("OK ") {
+@@ -252,3 +254,31 @@ fn route(
+     }
+     Err("no eligible configured leader found within the routing attempt limit".into())
+ }
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn draining_reroutes_only_exact_unaccepted_data_commands() {
++        for words in [
++            vec!["add", "42", "5"],
++            vec!["group", "7", "3", "add", "42", "5"],
++            vec!["read"],
++        ] {
++            let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
++            assert!(retryable_reply(&command, "ERR Draining\n"));
++            for terminal in [
++                "ERR Draining\nextra\n",
++                "UNKNOWN Draining\n",
++                "ERR AUTHORIZATION\n",
++                "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n",
++            ] {
++                assert!(!retryable_reply(&command, terminal));
++            }
++        }
++        for words in [vec!["configure", "42"], vec!["add", "42"], vec!["quit"]] {
++            let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
++            assert!(!retryable_reply(&command, "ERR Draining\n"));
++        }
++    }
++}
+diff --git a/tests/startup/timing_profile.rs b/tests/startup/timing_profile.rs
+index 3d97337..085e327 100644
+--- a/tests/startup/timing_profile.rs
++++ b/tests/startup/timing_profile.rs
+@@ -68,7 +68,8 @@ fn rotated_static_and_member_timers_reject_before_io_and_return_application() {
+                 )
+             };
+             let mut rejected = rejected.err().unwrap();
+-            assert_eq!(rejected.reason.stage, "timers");
++            assert_eq!(rejected.reason.stage, "native startup");
++            assert_eq!(rejected.reason.detail, "InvalidLimits");
+             assert!(rejected.application.is_some());
+             assert!(rejected.try_cleanup().unwrap());
+             assert!(!directory.exists());
+diff --git a/tests/counter_service.rs b/tests/counter_service.rs
+index 09b843d..b973d1e 100644
+--- a/tests/counter_service.rs
++++ b/tests/counter_service.rs
+@@ -1829,13 +1829,16 @@ fn reply_peer(
+ }
+ #[test]
+ fn automatic_client_reuses_original_command_after_only_proven_non_acceptance() {
+-    for first_available in [false, true] {
++    for refusal in [
++        None,
++        Some(b"ERR NOT_LEADER\n".as_slice()),
++        Some(b"ERR Draining\n".as_slice()),
++    ] {
+         let mut cluster = Cluster::new();
+-        if !first_available {
++        if refusal.is_none() {
+             cluster.listeners.remove(&101);
+         }
+-        let first = first_available
+-            .then(|| reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n")));
++        let first = refusal.map(|reply| reply_peer(cluster.take_listener(101), Some(reply)));
+         let second = reply_peer(
+             cluster.take_listener(102),
+             Some(b"OK outcome=Value(7) duplicate=false\n"),
+@@ -1864,7 +1867,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
+         Some(b"ERR Overloaded\n".as_slice()),
+         Some(b"ERR NotRead(ReadNotReady)\n".as_slice()),
+         Some(b"ERR Unavailable(LeadershipChanged)\n".as_slice()),
+-        Some(b"ERR Draining\n".as_slice()),
++        Some(b"ERR Draining trailing\n".as_slice()),
+     ] {
+         let mut cluster = Cluster::new();
+         let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));

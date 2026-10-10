@@ -149,12 +149,13 @@ fn static_and_member_startup_install_the_recorded_generation() {
     let mut initial = config(root.clone(), NativeOpenMode::Create);
     initial.tls = initial.tls.with_wire_version(7).unwrap();
     let node = initial
-        .open_with_peer_rotation(
+        .open_with_peer_rotation_and_timers(
             NativePeerRotationStartup {
                 protocol: NativePeerProtocol::TcpTls,
                 generation: generation(1),
                 latest: None,
             },
+            NativeTimingProfile::Edge.timers(),
             app(),
             Arc::new(ThreadWake::current()),
             MonoTime(0),
@@ -164,6 +165,8 @@ fn static_and_member_startup_install_the_recorded_generation() {
         node.peers().unwrap().credential_generation(),
         Some(generation(1))
     );
+    let token = node.local().owner.deadline(group()).unwrap();
+    assert!((1500..3000).contains(&token.deadline.0));
     drain_wire_nodes(vec![node]);
     let mut recovered = config(root.clone(), NativeOpenMode::Recover);
     recovered.tls = recovered.tls.with_wire_version(7).unwrap();
@@ -173,12 +176,13 @@ fn static_and_member_startup_install_the_recorded_generation() {
         startup: recovered,
     };
     let node = member
-        .open_with_peer_rotation(
+        .open_with_peer_rotation_and_timers(
             NativePeerRotationStartup {
                 protocol: NativePeerProtocol::TcpTls,
                 generation: generation(2),
                 latest: Some(record),
             },
+            NativeTimingProfile::Edge.timers(),
             app(),
             Arc::new(ThreadWake::current()),
             MonoTime(0),
@@ -188,6 +192,8 @@ fn static_and_member_startup_install_the_recorded_generation() {
         node.peers().unwrap().credential_generation(),
         Some(generation(2))
     );
+    let token = node.local().owner.deadline(group()).unwrap();
+    assert!((1500..3000).contains(&token.deadline.0));
     drain_wire_nodes(vec![node]);
     std::fs::remove_dir_all(root).unwrap();
 }

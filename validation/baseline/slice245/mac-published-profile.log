@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (<mac-task>/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.70s
+     Running tests/startup.rs (target/debug/deps/startup-a1ac3465d4e8f43e)
+
+running 2 tests
+test timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection ... ok
+test timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 45 filtered out; finished in 0.01s

@@ -1139,7 +1139,7 @@ and cleanup checks in the failing schedule, plus zero formatting/four strict pro
 Keep the broad failures; reduced-concurrency passes cannot replace them. No security
 review, performance claim or weaker synchronization/quorum is needed here.
 
-Current244b: compose explicit operator timing profiles through existing native
+Implemented245: compose explicit operator timing profiles through existing native
 startup contracts. Purpose: make supported Mac/Linux services usable under their
 declared durable-node profile, without assuming the current150–300ms default
 election window fits all storage/runtime combinations. Depend on244a,
@@ -1156,21 +1156,34 @@ diagnostics. Explicit election settings must not be confused with widened client
 deadlines or reduced synchronization. Keep remaining failures; full acceptance
 must be supported by the actual selected assembly.
 
-Next245: close status-wait admission/cleanup assumptions. Purpose: advance functional
+Current246: repair demonstrated native host-clock/cleanup assumptions, then close
+status-wait admission/cleanup assumptions. Purpose: advance functional
 Linux/macOS operator acceptance. Depend on source238 macOS96301 missing admission,
 source237 read-release observations and public read/cancellation ticket ownership.
-Select and reproduce one actual failure before adding helpers. Completion requires
+Mac245 first broad startup run reveals TimeWentBack in the shutdown helper,
+which uses a fixed10000ms epoch despite earlier host progress beyond that time.
+Inspect each caller-owned clock before changing the helper; keep monotonic-time
+validation strict. Also retain maintenance unknown outcomes and election-assumed
+identity failures separately. Select and reproduce one actual failure before
+adding helpers. Completion requires monotonic host shutdown, worker joins,
 exact original ticket release and next bounded admission, historical records/data,
 child cleanup and zero strict diagnostics. Current242 cannot certify this separate
 case. Broader transport progress remains explicit if the original write still fails.
 
-Following: close one required operator/deployment integration gap. Purpose:
+Next247: close one required operator/deployment integration gap. Purpose:
 complete usable service, membership and split/merge feature integration. Depend
 on chapter09/public-workflow reconciliation and the acceptance map; select an
 actual missing end-to-end capability before adding helpers. Completion requires
 public executable/Rust usage, original-operation recovery/cleanup evidence and
 Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
 security, optional global orchestration, P8 and Windows stay separate.
+
+Following248: complete the functional requirement/platform reconciliation. Purpose:
+make the feature-completion boundary explicit across public service and embedding
+workflows. Depend on246/247 and chapter12/acceptance map. Completion requires
+source-bound evidence or an explicit remaining item for each required baseline
+feature and supported Mac/Linux workflow; selected suites cannot certify full
+coverage. No performance/security detour or automatic full-goal completion.
 
 Implemented242 evidence: the exact authentication deadline/interrupted pair is
 repeatable in the original-write caller. Invalid credentials, malformed replies,
@@ -1224,6 +1237,120 @@ or optional integration work. Keep selected embedding/static service passes and
 the broad failures distinct. The next deliverables are244 election progress,
 245 status-wait cleanup and one required operator gap. Full P0–P7 remains active;
 features/macOS/Linux functional acceptance remain first, tuning/security later.
+
+### Slice245 schema plan — explicit native service election profiles
+
+Previous turn is progress: durable self-vote fencing26484eb is committed/pushed
+with exact-source Linux/Mac evidence. Broad Mac operators remain failing. The
+existing native timer contract supports explicit construction, but executables
+hard-code150–300ms elections, including discovery/rotation paths. Pack throughput
+and edge proposals are100/1000–2000ms and250/1500–3000ms. Existing bounded native
+journal diagnostic on the same Mac source completes64 warmup plus8 operations,
+recovers72/verifies retries and joins workers using explicit1000–2000ms elections;
+its isolated schedule is not proof of the concurrent failure's cause.
+
+Shape: public NativeTimingProfile produces ordinary TimerConfig, so Rust hosts
+can still inject arbitrary validated timers through existing seams. CLI selects
+--timing-profile throughput|edge|legacy once at construction. Throughput is the
+explicit default for durable service executables; legacy retains existing50/
+150–300ms values when explicitly selected. Rust low-level defaults stay unchanged.
+Rotation constructors gain the same explicit timer path as nonrotation startup.
+All static/member/multi/discovery/rotation assembly branches receive the same
+selection; do not silently fall back. No wire/stored-state, quorum, policy, barrier
+or client-budget change; this is liveness configuration, not hot policy reload.
+
+Transitions/ownership: parse/refuse unknown/duplicate profile before binding or
+opening stores; selected constants pass TimerConfig validation. Native constructors
+retain invalid-timer/overflow preflight, exact rejected app ownership and bounded
+cleanup. Profile is not authority or persistent state. Restart explicitly selects
+a profile again; existing WAL/checkpoint recovery and operation IDs are untouched.
+No new owner, worker, dependency, clock in core or provider trait is required.
+
+Acceptance: exercise typed Rust profile choice and invalid rotated timer refusal
+before files/bind, static/member/multi/discovery/rotation timer forwarding, CLI
+unknown/duplicate refusal and exact election deadlines. Run real TCP/QUIC durable
+operator/recovery suites at their original concurrency on Mac/Linux under the
+declared default, retaining all failures. Strict formatting/four Clippy profiles
+must remain zero. This advances functional service/embedding acceptance; separate
+status-wait cleanup and required feature integration remain next. Full P0–P7 stays
+active; broader tuning/security are later and Windows/P8 deferred.
+
+245 focused implementation corrections: explicit protocol startup returns the
+service connector rather than the old TCP-only connector. The Rust embedding
+now declares that concrete native assembly and checks its required TCP dialer
+before join. Initial compilation logs retain those mismatches. Profile additions
+also expose already-large option/serve functions; a default-field constructor
+separates configuration from parsing and a command-listener helper owns the
+credential/bind transition. They are needed to keep these assembly stages bounded
+without lint suppression, new providers or extra workers. Exact test error fields
+use the existing NativeStartupError.stage contract. Initial invalid-timer assertion
+incorrectly expected the overflow-specific timers stage; the existing validate
+path returns native startup/InvalidLimits. The corrected check keeps exact error,
+returned application, no files and held listener refusal. No production error
+contract changes. The local routing test module is moved after production items
+to satisfy strict Clippy without suppression.
+
+245b schema amendment from actual failed checks: profile-only Linux counter
+finishes195/2. Both original planned-configuration histories complete finalization
+but stop the subsequent original write on an exact ERR Draining from the old
+follower. Node::propose returns ClientRejected with the owned request before
+any ticket/append when draining. Automatic CLI routing previously permits this
+known refusal only for reads. Permit the exact refusal for a complete add payload
+(single/group scope), preserving identical request bytes/operation and the original
+routing deadline. No accepted/unknown reply is reclassified or replayed. Each
+attempt closes its owned socket before advancing. Test unrelated/changed replies
+and incomplete/admin commands remain terminal, then rerun both actual histories
+and full native suites. Keep the already-running exact profile-only Mac schedule
+separate; its patch/hash manifest excludes this focused subsequent fix.
+
+245 final refusal-contract correction: the first post-routing full Linux counter
+run finishes196/1. Its old negative test still classifies exact Draining as
+terminal. Move that exact pre-admission refusal into the original-command positive
+socket history; modified Draining remains terminal, and uncertain/malformed/error
+replies still stop without touching the next listener. This updates the test to
+the proven Node admission contract rather than hiding an unknown outcome. The
+first Mac four-profile lint run exposes a literal single-element protocol loop
+when QUIC is absent; use the same configured protocol array pattern as existing
+startup tests. Preserve the diagnostic; no lint suppression or production change.
+
+Implemented245 evidence: public NativeTimingProfile and --timing-profile select
+throughput/edge/legacy once at native construction. The explicit CLI default follows
+the pack's durable throughput proposal; low-level Rust TimerConfig defaults stay
+unchanged. Static/member/multi/discovery/rotation paths forward the selection.
+Rotated static/member constructors retain early timing/overflow refusal, returned
+application ownership and existing cleanup. Unknown/duplicate CLI profiles create
+no store/listener. Host injection remains available; no quorum, wire/persistent
+format, synchronization or caller-deadline change.
+
+Profile-only Linux counter195/2 and Mac189/7 expose exact Draining refusal on the
+original post-configuration write. Automatic data routing now skips that known
+pre-admission refusal, preserving the exact request bytes and absolute deadline.
+Old negative-socket assertion becomes the positive original-command history;
+modified/unknown/authorization/other responses still stop. Final Linux counter197/
+default138, startup47, refusal1, binary44, selected profile2 and embedding7/duplicate7/
+fresh10 pass; all workers join. Directory22/transfer33 pass in the initial run; their
+production assembly is unchanged by the later counter-only routing/test correction.
+Formatting/four strict profiles are zero; inventory108 and conformance metadata
+9 partial reviews/68 operations remain limited metadata evidence.
+
+Mac final counter191/5, default135/2 and startup34/13 remain failing (passed/failed);
+binary44, refusal1, profile2, directory22 and transfer33 pass. Published source
+verification binds all18 changed files to immutable26484eb plus retained exact
+profile/follow-up/test-loop patches. Final formatting/four strict profiles are zero
+and actual embedding7/duplicate7/fresh10 joins workers. Installed Rust1.98.0,
+arm64/macOS27.0, original concurrency, host settings and caller budgets remain
+recorded. These are finite checks, not statistical timing attribution or full
+platform acceptance. Original errors, raw logs and failed stores remain. See
+[slice245](../validation/baseline/slice245/README.md).
+
+Macro review245: declared native timing configuration and known drained-follower
+routing advance usable service/embedding. Functional Mac acceptance still requires
+configuration preparation/observation, bounded runner progress and native harness
+clock/election assumptions. The startup helper's fixed10000ms cleanup epoch can
+move time backwards after longer host progress; preserve caller-owned monotonic
+time rather than weaken Node checks. Next246 addresses this demonstrated cleanup
+and status-wait dependency, then247 closes a required operator integration gap.
+Full P0–P7 stays active; features/Linux/macOS first, broader tuning/security later.
 
 ### Slice244 schema plan — durable self-vote starts the response window
 

@@ -1,0 +1,71 @@
+Checking formatting and strict Clippy before push...
+    Checking voteboat v0.1.0 (<mac-task>/repo)
+error: for loop over a single element
+  --> tests/startup/timing_profile.rs:32:9
+   |
+32 | /         for protocol in [
+33 | |             NativePeerProtocol::TcpTls,
+34 | |             #[cfg(feature = "quic")]
+35 | |             NativePeerProtocol::Quic,
+...  |
+81 | |             );
+82 | |         }
+   | |_________^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#single_element_loop
+   = note: `-D clippy::single-element-loop` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::single_element_loop)]`
+help: try
+   |
+32 ~         {
+33 +             let protocol = NativePeerProtocol::TcpTls;
+34 +             let directory = root();
+35 +             let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+36 +             let mut config = config(directory.clone(), NativeOpenMode::Recover);
+37 +             config.tls = config.tls.with_wire_version(7).unwrap();
+38 +             config.listen = socket.local_addr().unwrap();
+39 +             let rotation = NativePeerRotationStartup {
+40 +                 protocol,
+41 +                 generation: CredentialGeneration::new(1).unwrap(),
+42 +                 latest: None,
+43 +             };
+44 +             let mut invalid = NativeTimingProfile::Edge.timers();
+45 +             invalid.election_spread_ms = 0;
+46 +             let rejected = if member {
+47 +                 NativeMemberStartup {
+48 +                     provisioned_stores: config.bootstrap.voter_stores.clone(),
+49 +                     startup: config,
+50 +                 }
+51 +                 .open_with_peer_rotation_and_timers(
+52 +                     rotation,
+53 +                     invalid,
+54 +                     app(),
+55 +                     Arc::new(ThreadWake::current()),
+56 +                     MonoTime(0),
+57 +                 )
+58 +             } else {
+59 +                 config.open_with_peer_rotation_and_timers(
+60 +                     rotation,
+61 +                     invalid,
+62 +                     app(),
+63 +                     Arc::new(ThreadWake::current()),
+64 +                     MonoTime(0),
+65 +                 )
+66 +             };
+67 +             let mut rejected = rejected.err().unwrap();
+68 +             assert_eq!(rejected.reason.stage, "native startup");
+69 +             assert_eq!(rejected.reason.detail, "InvalidLimits");
+70 +             assert!(rejected.application.is_some());
+71 +             assert!(rejected.try_cleanup().unwrap());
+72 +             assert!(!directory.exists());
+73 +             assert_eq!(
+74 +                 std::net::TcpListener::bind(socket.local_addr().unwrap())
+75 +                     .unwrap_err()
+76 +                     .kind(),
+77 +                 std::io::ErrorKind::AddrInUse
+78 +             );
+79 +         }
+   |
+
+error: could not compile `voteboat` (test "startup") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

@@ -66,7 +66,7 @@ use voteboat::{
     runtime::*,
 };
 type Node = NativeNode<Directory, NativeServiceConnector>;
-const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--peer-credentials FILE]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE|auto TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
+const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--peer-credentials FILE]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE|auto TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
 fn ids(base: &str, id: &str) -> Result<(u16, u64), Failure> {
     let base: u16 = base.parse()?;
     let id: u64 = id.parse()?;
@@ -84,6 +84,7 @@ struct Options {
     deployment: Option<PathBuf>,
     peer_credentials: Option<PathBuf>,
     protocol: NativePeerProtocol,
+    timing_profile: voteboat::native::startup::NativeTimingProfile,
 }
 fn options(args: &[String]) -> Result<Options, Failure> {
     let mut o = Options {
@@ -92,8 +93,10 @@ fn options(args: &[String]) -> Result<Options, Failure> {
         deployment: None,
         peer_credentials: None,
         protocol: NativePeerProtocol::TcpTls,
+        timing_profile: Default::default(),
     };
     let mut transport = false;
+    let mut profile_selected = false;
     if !args.len().is_multiple_of(2) {
         return Err(HELP.into());
     }
@@ -106,6 +109,10 @@ fn options(args: &[String]) -> Result<Options, Failure> {
             "--peers" if o.peers.is_none() => o.peers = Some(PathBuf::from(&pair[1])),
             "--peer-credentials" if o.peer_credentials.is_none() => {
                 o.peer_credentials = Some(PathBuf::from(&pair[1]));
+            }
+            "--timing-profile" if !profile_selected => {
+                profile_selected = true;
+                o.timing_profile = pair[1].parse()?;
             }
             "--transport" if !transport => {
                 transport = true;
@@ -182,11 +189,18 @@ fn serve(args: &[String]) -> Result<(), Failure> {
         Some(p) => setup::open_application_with_rotation(
             config,
             options.protocol,
+            options.timing_profile.timers(),
             false,
             plan.app.clone(),
             Some(p.startup(options.protocol)),
         )?,
-        None => setup::open_application(config, options.protocol, false, plan.app.clone())?,
+        None => setup::open_application(
+            config,
+            options.protocol,
+            options.timing_profile.timers(),
+            false,
+            plan.app.clone(),
+        )?,
     };
     println!("credential_digest={digest:02x?}");
     run(node, plan, listener, access, peers, id)

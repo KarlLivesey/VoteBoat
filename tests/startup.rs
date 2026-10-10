@@ -35,6 +35,8 @@ mod maintenance;
 mod multi;
 #[path = "startup/peer_rotation.rs"]
 mod peer_rotation;
+#[path = "startup/timing_profile.rs"]
+mod timing_profile;
 #[derive(Clone)]
 struct HostApplication(Counter);
 impl StateMachine for HostApplication {

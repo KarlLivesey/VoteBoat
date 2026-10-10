@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "base_revision": "26484eb",
+  "production_changes": [
+    "Construction-time declared native service election profiles forwarded through all native service assembly branches",
+    "Automatic exact Draining refusal routing for complete original data writes before admission"
+  ],
+  "persistent_or_wire_change": false,
+  "new_replaceable_provider": false,
+  "low_level_timer_defaults_changed": false,
+  "service_default": "Throughput100ms heartbeat/[1000,2000)ms elections, explicit construction",
+  "client_deadlines_changed": false,
+  "quorum_or_sync_weakened": false,
+  "host_settings_changed": false,
+  "mac_environment": {
+    "architecture": "arm64",
+    "os": "macOS27.0 build26A428",
+    "rust": "installed stable1.98.0; CI pins1.98.1",
+    "test_concurrency": "libtest default12 on12 logical CPUs; RUST_TEST_THREADS unset"
+  },
+  "source_hashes": {
+    "profile_patch": "37d4b3fd98573736eb4a4bbfdcc06f3447211bca1144275b0a45a219863f81f2",
+    "followup_patch": "0e2b456d20b3c5325539bfd5ddc6af5ea59122310a94026411d1e26d33f2b9dc",
+    "test_only_loop_patch": "a9f21611d2da443de6bb83274cbc7e71576cad793e5fa98bc56285a87309033b",
+    "published_patch": "7482163c9d99eff8e895d357508660e481645975a85f7eeb8b28861921d10611",
+    "published_manifest": "f4e2694c0734ccb7d00fefd7c27709541ed051ab2b489cf3a47f613769b8605d"
+  },
+  "validation": {
+    "linux": {
+      "profile_only": {
+        "counter": {
+          "pass": 195,
+          "fail": 2
+        },
+        "directory": {
+          "pass": 22,
+          "fail": 0
+        },
+        "transfer": {
+          "pass": 33,
+          "fail": 0
+        },
+        "startup": {
+          "pass": 46,
+          "fail": 1
+        },
+        "refusal": {
+          "pass": 1,
+          "fail": 0
+        },
+        "exit": 101
+      },
+      "followup_initial": {
+        "binary": {
+          "pass": 44,
+          "fail": 0
+        },
+        "counter": {
+          "pass": 196,
+          "fail": 1
+        },
+        "startup": {
+          "pass": 47,
+          "fail": 0
+        },
+        "refusal": {
+          "pass": 1,
+          "fail": 0
+        },
+        "exit": 101
+      },
+      "final_counter": {
+        "pass": 197,
+        "fail": 0,
+        "exit": 0
+      },
+      "default_counter": {
+        "pass": 138,
+        "fail": 0,
+        "exit": 0
+      },
+      "final_selected_profile": {
+        "pass": 2,
+        "fail": 0,
+        "exit": 0
+      },
+      "format_and_four_strict_profiles": "zero diagnostics",
+      "embedding": {
+        "values": [
+          7,
+          7,
+          10
+        ],
+        "duplicate": [
+          false,
+          true,
+          false
+        ],
+        "workers_joined": "all3",
+        "exit": 0
+      },
+      "inventory": 108,
+      "conformance": "9 partial reviews/68 operations"
+    },
+    "mac": {
+      "profile_only": {
+        "counter": {
+          "pass": 189,
+          "fail": 7
+        },
+        "directory": {
+          "pass": 22,
+          "fail": 0
+        },
+        "transfer": {
+          "pass": 33,
+          "fail": 0
+        },
+        "startup": {
+          "pass": 34,
+          "fail": 13
+        },
+        "refusal": {
+          "pass": 1,
+          "fail": 0
+        },
+        "exit": 101
+      },
+      "followup": {
+        "binary": {
+          "pass": 44,
+          "fail": 0
+        },
+        "counter": {
+          "pass": 191,
+          "fail": 5
+        },
+        "startup": {
+          "pass": 34,
+          "fail": 13
+        },
+        "refusal": {
+          "pass": 1,
+          "fail": 0
+        },
+        "exit": 101
+      },
+      "default_counter": {
+        "pass": 135,
+        "fail": 2,
+        "exit": 101
+      },
+      "published_source_hashes": "all18 pass",
+      "published_selected_profile": {
+        "pass": 2,
+        "fail": 0,
+        "exit": 0
+      },
+      "published_format_and_four_strict_profiles": "zero diagnostics",
+      "embedding": {
+        "values": [
+          7,
+          7,
+          10
+        ],
+        "duplicate": [
+          false,
+          true,
+          false
+        ],
+        "workers_joined": "all3",
+        "exit": 0
+      },
+      "initial_strict": "single_element_loop in new fixture without QUIC; fixed without suppression",
+      "pre_edit_journal": {
+        "warmup": 64,
+        "operations": 8,
+        "recovered_value": 72,
+        "retry_verified": true,
+        "workers_joined": true,
+        "exit": 0,
+        "interpretation": "Instrumented selected diagnostic, not performance or whole-concurrent-cause proof"
+      }
+    },
+    "feature_configurations": "sequential per independent host"
+  },
+  "publication": {
+    "original_linux_logs": "target/slice245-raw-local",
+    "original_mac_logs": "target/slice245-macos-published",
+    "failed_mac_stores": "retained task temporary roots",
+    "normalization": "Workspace/task paths replaced; trailing whitespace/final blanks removed; patch context whitespace is normalized but reverse-apply verifies the published complete patch against the final tree; raw applied patch digests recorded separately"
+  },
+  "limits": "Broad Mac counter and native startup failures remain. No full platform/P0-P7 or performance/security completion. Next: exact host-clock cleanup and configuration/runner progress; Windows/P8 deferred.",
+  "applied_patch_sha256": {
+    "profile": "5728d92b9ebc55343ff4ebd24b409553e69e44390e4ba002cd163abdba0e7d01",
+    "followup": "0e2b456d20b3c5325539bfd5ddc6af5ea59122310a94026411d1e26d33f2b9dc",
+    "test_loop": "6c8645840f16d2bd687dc19c819d61b527e00e5049abb7a6edb4857a7688fdbb"
+  }
+}

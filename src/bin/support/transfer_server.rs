@@ -29,6 +29,8 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
     let [mode, root, id, base, tls, profile, group, access, transport, rest @ ..] = args else {
         return Err(super::HELP.into());
     };
+    let (peers, peer_path, timing_profile) = options(rest)?;
+    let timers = timing_profile.timers();
     let profile = Profile::load(Path::new(profile))?;
     let binding = profile.binding(group)?;
     let id = id.parse::<u64>()?;
@@ -44,7 +46,6 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
         "recover" => false,
         _ => return Err("expected create or recover".into()),
     };
-    let (peers, peer_path) = options(rest)?;
     Peers::validate_profile(Path::new(root), peer_path, true)?;
     let mut config =
         setup::configuration(Path::new(root), id, base, Path::new(tls), create, peers)?;
@@ -67,20 +68,16 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             store: config.startup.store,
         },
     )?;
-    println!(
-        "credential_digest={:02x?}",
-        access
-            .access
-            .as_ref()
-            .and_then(|a| a.material())
-            .ok_or("authenticated transfer credentials unavailable")?
-            .digest
-    );
-    let listener = TcpListener::bind(super::command_endpoints::listener(None, true, base, id)?)?;
-    listener.set_nonblocking(true)?;
+    let listener = command_listener(base, id, &access)?;
     match binding.role {
         Role::Metadata => run(
-            open(config, protocol, app::metadata(&profile)?, peers.as_ref())?,
+            open(
+                config,
+                protocol,
+                timers,
+                app::metadata(&profile)?,
+                peers.as_ref(),
+            )?,
             listener,
             profile,
             binding,
@@ -94,6 +91,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
                 let node = open_source(
                     config,
                     protocol,
+                    timers,
                     app,
                     source_binding,
                     create,
@@ -104,6 +102,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             let node = open_source(
                 config,
                 protocol,
+                timers,
                 app::source(&profile, binding)?,
                 source_binding,
                 create,
@@ -115,6 +114,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
             open(
                 config,
                 protocol,
+                timers,
                 app::target(&profile, binding)?,
                 peers.as_ref(),
             )?,
@@ -127,13 +127,40 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
         ),
     }
 }
-fn options(args: &[String]) -> Result<(setup::PeerInput<'_>, Option<&Path>), Failure> {
+fn command_listener(base: u16, id: u64, access: &Credentials) -> Result<TcpListener, Failure> {
+    println!(
+        "credential_digest={:02x?}",
+        access
+            .access
+            .as_ref()
+            .and_then(|a| a.material())
+            .ok_or("authenticated transfer credentials unavailable")?
+            .digest
+    );
+    let listener = TcpListener::bind(super::command_endpoints::listener(None, true, base, id)?)?;
+    listener.set_nonblocking(true)?;
+    Ok(listener)
+}
+fn options(
+    args: &[String],
+) -> Result<
+    (
+        setup::PeerInput<'_>,
+        Option<&Path>,
+        voteboat::native::startup::NativeTimingProfile,
+    ),
+    Failure,
+> {
     if !args.len().is_multiple_of(2) {
         return Err("expected --deployment FILE or --peer-credentials FILE".into());
     }
     let (mut deployment, mut credentials) = (None, None);
+    let mut timing_profile = None;
     for pair in args.as_chunks::<2>().0 {
         match pair[0].as_str() {
+            "--timing-profile" if timing_profile.is_none() => {
+                timing_profile = Some(pair[1].parse()?)
+            }
             "--deployment" if deployment.is_none() => deployment = Some(Path::new(&pair[1])),
             "--peer-credentials" if credentials.is_none() => {
                 credentials = Some(Path::new(&pair[1]))
@@ -144,11 +171,13 @@ fn options(args: &[String]) -> Result<(setup::PeerInput<'_>, Option<&Path>), Fai
     Ok((
         deployment.map_or(setup::PeerInput::Legacy(None), setup::PeerInput::Deployment),
         credentials,
+        timing_profile.unwrap_or_default(),
     ))
 }
 fn open<A: App>(
     config: voteboat::native::startup::NativeMemberStartup,
     protocol: NativePeerProtocol,
+    timers: TimerConfig,
     app: A,
     peers: Option<&Peers>,
 ) -> Result<Node<A>, Failure> {
@@ -156,22 +185,24 @@ fn open<A: App>(
         Some(p) => setup::open_application_with_rotation(
             config,
             protocol,
+            timers,
             false,
             app,
             Some(p.startup(protocol)),
         ),
-        None => setup::open_application(config, protocol, false, app),
+        None => setup::open_application(config, protocol, timers, false, app),
     }
 }
 fn open_source<A: App>(
     config: voteboat::native::startup::NativeMemberStartup,
     protocol: NativePeerProtocol,
+    timers: TimerConfig,
     app: A,
     record: Option<super::binding::SourceBinding>,
     create: bool,
     peers: Option<&Peers>,
 ) -> Result<Node<A>, Failure> {
-    let node = open(config, protocol, app, peers)?;
+    let node = open(config, protocol, timers, app, peers)?;
     if let Some(record) = record {
         if let Err(error) = record.finish(create) {
             recover(node, Instant::now())?;

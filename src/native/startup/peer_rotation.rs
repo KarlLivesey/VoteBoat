@@ -111,17 +111,27 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        self.open_with_peer_rotation_and_timers(rotation, TimerConfig::default(), app, wake, now)
+    }
+    /// Explicit liveness timing with the same durable credential binding and cleanup.
+    pub fn open_with_peer_rotation_and_timers<A>(
+        self,
+        rotation: NativePeerRotationStartup,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
         self.open_with_protocol_as(
             rotation.protocol,
             app,
             wake,
             now,
-            (
-                StartupAuthorization::Static,
-                TimerConfig::default(),
-                None,
-                Some(rotation),
-            ),
+            (StartupAuthorization::Static, timers, None, Some(rotation)),
         )
     }
 }
@@ -166,6 +176,21 @@ impl NativeMemberStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        self.open_with_peer_rotation_and_timers(rotation, TimerConfig::default(), app, wake, now)
+    }
+    /// Explicit liveness timing with the same durable credential binding and cleanup.
+    pub fn open_with_peer_rotation_and_timers<A>(
+        self,
+        rotation: NativePeerRotationStartup,
+        timers: TimerConfig,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
         self.startup.open_with_protocol_as(
             rotation.protocol,
             app,
@@ -173,7 +198,7 @@ impl NativeMemberStartup {
             now,
             (
                 StartupAuthorization::Member(self.provisioned_stores),
-                TimerConfig::default(),
+                timers,
                 None,
                 Some(rotation),
             ),

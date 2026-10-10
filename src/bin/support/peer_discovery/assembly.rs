@@ -14,15 +14,15 @@ use voteboat::{
 pub(crate) fn open(
     prepared: group_setup::Prepared,
     protocol: NativePeerProtocol,
+    timers: TimerConfig,
     member: bool,
     maintenance: bool,
     rotation: Option<NativePeerRotationStartup>,
     source: Option<Prepared>,
 ) -> Result<Service, Failure> {
     let Some(source) = source else {
-        return prepared.open(protocol, member, maintenance, rotation);
+        return prepared.open(protocol, timers, member, maintenance, rotation);
     };
-    let timers = TimerConfig::default();
     let wake = Arc::new(ThreadWake::current());
     let (parts, limits) = match prepared {
         group_setup::Prepared::Single(mut config) => {

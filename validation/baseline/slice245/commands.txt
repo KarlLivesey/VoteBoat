@@ -1,0 +1,40 @@
+Source base26484eb; profile-only patch/source manifest retained separately from focused follow-up and test-loop correction. Native source hashes are checked before every changed-source Mac execution. Rust1.98.0 arm64/macOS27.0; original default libtest concurrency and caller budgets retained. Low-level Rust defaults remain unchanged; service CLI explicitly defaults to throughput.
+
+Mac pre-edit diagnostic on244 source:
+cargo +stable run --locked --offline --all-features --example native_benchmark -- <mac-task>/journal245 tcp 8 1 --journal-timings
+64 warmup +8 measured; actual recovery72/retry verification/worker joins. Instrumented single run, no performance acceptance claim.
+
+Initial Linux/Mac profile-only:
+cargo +stable test --locked --offline --all-features --no-fail-fast --test startup --test service_profiles --test counter_service --test directory_service --test transfer_service
+Retain exact known Draining caller failures and incorrect invalid-timer stage expectation.
+
+Focused follow-up Linux/Mac:
+cargo +stable test --locked --offline --all-features --no-fail-fast --bin voteboat-counter --test startup --test service_profiles --test counter_service
+Original planned-configuration histories pass locally; retain old negative Draining contract test failure before correcting it to the proven admission contract.
+
+Final Linux:
+cargo +stable test --locked --offline --all-features --test counter_service
+cargo +stable test --locked --offline --test counter_service
+.githooks/pre-push
+cargo +stable test --locked --offline --all-features --test startup timing_profile
+cargo +stable run --locked --offline --all-features --example embedded_counter -- create <workspace>/target/slice245-embedding/node tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <workspace>/target/slice245-embedding/node tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <workspace>/target/slice245-embedding/node tests/fixtures/tls 2 3
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+Final Mac before the test-only loop correction:
+cargo +stable test --locked --offline --all-features --no-fail-fast --bin voteboat-counter --test startup --test service_profiles --test counter_service
+cargo +stable test --locked --offline --test counter_service
+.githooks/pre-push
+Wait for terminal completion before applying source-test-loop.patch. The loop correction preserves the same protocol cases and fixes single_element_loop in builds without QUIC; no production behavior changes. Verify published manifest, then selected profile contracts, embedding and four strict configurations.
+
+All configurations that spawn target/debug executables run sequentially per host; Linux and Mac are independent. No repeated command starts because an observation timed out. Failed stores remain in the task-owned Mac roots. Git pre-push stays enabled.
+
+Published Mac after the previous command is terminal:
+cargo +stable test --locked --offline --all-features --test startup timing_profile
+.githooks/pre-push
+cargo +stable run --locked --offline --all-features --example embedded_counter -- create <mac-task>/embedded245 tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <mac-task>/embedded245 tests/fixtures/tls 1 7
+cargo +stable run --locked --offline --all-features --example embedded_counter -- recover <mac-task>/embedded245 tests/fixtures/tls 2 3
+All selected steps exit0; full source verification all18 passes.

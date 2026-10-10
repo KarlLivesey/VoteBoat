@@ -1,0 +1,23 @@
+diff --git a/tests/startup/timing_profile.rs b/tests/startup/timing_profile.rs
+index 085e327..14f7f20 100644
+--- a/tests/startup/timing_profile.rs
++++ b/tests/startup/timing_profile.rs
+@@ -28,12 +28,13 @@ fn profiles_keep_host_timer_contract_and_refuse_unknown_selection() {
+
+ #[test]
+ fn rotated_static_and_member_timers_reject_before_io_and_return_application() {
++    let protocols = [
++        NativePeerProtocol::TcpTls,
++        #[cfg(feature = "quic")]
++        NativePeerProtocol::Quic,
++    ];
+     for member in [false, true] {
+-        for protocol in [
+-            NativePeerProtocol::TcpTls,
+-            #[cfg(feature = "quic")]
+-            NativePeerProtocol::Quic,
+-        ] {
++        for protocol in protocols {
+             let directory = root();
+             let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+             let mut config = config(directory.clone(), NativeOpenMode::Recover);

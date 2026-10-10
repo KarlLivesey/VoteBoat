@@ -1,0 +1,3 @@
+counter-all 0
+counter-default 0
+strict 0

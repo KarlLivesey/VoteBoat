@@ -131,6 +131,7 @@ pub fn enroll(
 pub fn open(
     config: NativeMemberStartup,
     protocol: NativePeerProtocol,
+    timers: voteboat::runtime::TimerConfig,
     member: bool,
     maintenance: bool,
     rotation: Option<NativePeerRotationStartup>,
@@ -144,10 +145,11 @@ pub fn open(
         Some(rotation) => super::service_setup::open_application_with_rotation(
             config,
             protocol,
+            timers,
             member,
             app,
             Some(rotation),
         ),
-        None => super::service_setup::open_application(config, protocol, member, app),
+        None => super::service_setup::open_application(config, protocol, timers, member, app),
     }
 }

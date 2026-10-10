@@ -1,0 +1,1088 @@
+diff --git a/examples/embedded_counter.rs b/examples/embedded_counter.rs
+index 7f02bf6..a3b76f2 100644
+--- a/examples/embedded_counter.rs
++++ b/examples/embedded_counter.rs
+@@ -25,7 +25,13 @@ use voteboat::{
+     application::*,
+     identity::*,
+     log::*,
+-    native::{node::*, startup::*, tls::*, worker::*},
++    native::{
++        connect::{NativePeerProtocol, NativeServiceConnector},
++        node::*,
++        startup::*,
++        tls::*,
++        worker::*,
++    },
+     quorum::*,
+     runtime::*,
+ };
+@@ -44,9 +50,9 @@ fn material(path: &Path) -> Result<Vec<u8>, Failure> {
+     Ok(bytes)
+ }
+ fn drive(
+-    n: &mut NativeNode<Counter>,
++    n: &mut NativeNode<Counter, NativeServiceConnector>,
+     start: Instant,
+-    mut done: impl FnMut(&mut NativeNode<Counter>) -> Result<bool, Failure>,
++    mut done: impl FnMut(&mut NativeNode<Counter, NativeServiceConnector>) -> Result<bool, Failure>,
+ ) -> Result<(), Failure> {
+     let deadline = Instant::now() + Duration::from_secs(10);
+     loop {
+@@ -81,7 +87,9 @@ fn main() -> Result<(), Failure> {
+     let tls = Path::new(tls);
+     let config = startup(root, tls, mode)?;
+     let group = config.bootstrap.group;
+-    let mut node = match config.open(
++    let mut node = match config.open_with_protocol_and_timers(
++        NativePeerProtocol::TcpTls,
++        NativeTimingProfile::Throughput.timers(),
+         check(Counter::new(10000))?,
+         Arc::new(ThreadWake::current()),
+         MonoTime(0),
+@@ -180,7 +188,7 @@ fn startup(root: &str, tls: &Path, mode: NativeOpenMode) -> Result<NativeStartup
+     })
+ }
+ fn close(
+-    mut node: NativeNode<Counter>,
++    mut node: NativeNode<Counter, NativeServiceConnector>,
+     group: GroupIdentity,
+     start: Instant,
+ ) -> Result<(), Failure> {
+@@ -194,7 +202,8 @@ fn close(
+         .ok_or("missing peers")?
+         .connector
+         .into_dialer()
+-        .map_err(|_| "connector not drained")?;
++        .map_err(|_| "connector not drained")?
++        .ok_or("missing TCP dialer")?;
+     let mut snapshots = parts.local.snapshots.take().ok_or("missing snapshots")?;
+     let deadline = Instant::now() + Duration::from_secs(10);
+     let (mut log, mut snap) = (false, false);
+diff --git a/src/bin/counter_service.rs b/src/bin/counter_service.rs
+index 5c8ade1..f613783 100644
+--- a/src/bin/counter_service.rs
++++ b/src/bin/counter_service.rs
+@@ -93,7 +93,7 @@ use voteboat::worker::PersistenceWorker;
+ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError, runtime::*};
+
+ const HELP: &str =
+-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
++    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
+ voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
+ voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
+ voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
+@@ -453,6 +453,7 @@ fn prepare_service(
+     let mut service = peer_discovery::open(
+         prepared,
+         protocol,
++        options.timing_profile.timers(),
+         mode == "recover-member",
+         options.leadership_maintenance,
+         rotation,
+@@ -957,6 +958,7 @@ fn finish_connection(
+ }
+ struct StartupOptions {
+     protocol: NativePeerProtocol,
++    timing_profile: voteboat::native::startup::NativeTimingProfile,
+     deployment: Option<std::path::PathBuf>,
+     admin_plan: Option<std::path::PathBuf>,
+     service_access: Option<std::path::PathBuf>,
+@@ -975,6 +977,28 @@ struct StartupOptions {
+     group_drain_plan: Option<std::path::PathBuf>,
+ }
+ impl StartupOptions {
++    fn new() -> Self {
++        Self {
++            protocol: NativePeerProtocol::TcpTls,
++            deployment: None,
++            admin_plan: None,
++            service_access: None,
++            peer_credentials: None,
++            command_listen: None,
++            discovery_peers: None,
++            peer_discovery: None,
++            remote_admin: administration::Mode::Automatic,
++            wal_reclaim_ms: None,
++            checkpoint_entries: None,
++            membership_drain: None,
++            groups: None,
++            group_admin_plans: None,
++            group_drain_plan: None,
++            timing_profile: Default::default(),
++            leadership_maintenance: false,
++            node_drain: false,
++        }
++    }
+     fn checked_mode(&self, mode: &str, input: &setup::PeerInput<'_>) -> Result<bool, Failure> {
+         checked_service_mode(
+             mode,
+@@ -1139,6 +1163,7 @@ fn is_startup_option(flag: &str) -> bool {
+     matches!(
+         flag,
+         "--transport"
++            | "--timing-profile"
+             | "--deployment"
+             | "--admin-plan"
+             | "--remote-admin-plan"
+@@ -1169,24 +1194,11 @@ fn parse_protocol(value: &str) -> Result<NativePeerProtocol, Failure> {
+     }
+ }
+ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
+-    let mut protocol = NativePeerProtocol::TcpTls;
++    let mut options = StartupOptions::new();
+     let mut transport_selected = false;
+-    let mut deployment = None;
+-    let mut admin_plan = None;
+-    let mut service_access = None;
+-    let mut peer_credentials = None;
+-    let mut command_listen = None;
+-    let mut discovery_peers = None;
+-    let mut peer_discovery = None;
+-    let mut remote_admin = administration::Mode::Automatic;
+-    let mut wal_reclaim_ms = None;
+-    let mut checkpoint_entries = None;
++    let mut timing_profile_selected = false;
+     let mut leadership_maintenance = None;
+     let mut node_drain = None;
+-    let mut membership_drain = None;
+-    let mut groups = None;
+-    let mut group_admin_plans = None;
+-    let mut group_drain_plan = None;
+     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
+         let flag = args[args.len() - 2].as_str();
+         if !is_startup_option(flag) {
+@@ -1194,45 +1206,49 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
+         }
+         let value = args.pop().unwrap();
+         match args.pop().unwrap().as_str() {
+-            "--group-drain-plan" if group_drain_plan.is_none() && args[0] == "serve" => {
+-                group_drain_plan = Some(std::path::PathBuf::from(value));
++            "--group-drain-plan" if options.group_drain_plan.is_none() && args[0] == "serve" => {
++                options.group_drain_plan = Some(std::path::PathBuf::from(value));
++            }
++            "--group-admin-plans" if options.group_admin_plans.is_none() && args[0] == "serve" => {
++                options.group_admin_plans = Some(std::path::PathBuf::from(value));
+             }
+-            "--group-admin-plans" if group_admin_plans.is_none() && args[0] == "serve" => {
+-                group_admin_plans = Some(std::path::PathBuf::from(value));
++            "--groups" if options.groups.is_none() && args[0] == "serve" => {
++                options.groups = Some(std::path::PathBuf::from(value));
+             }
+-            "--groups" if groups.is_none() && args[0] == "serve" => {
+-                groups = Some(std::path::PathBuf::from(value));
++            "--timing-profile" if !timing_profile_selected && args[0] == "serve" => {
++                timing_profile_selected = true;
++                options.timing_profile = value.parse()?;
+             }
+             "--transport" if !transport_selected && args[0] == "serve" => {
+                 transport_selected = true;
+-                protocol = parse_protocol(&value)?;
++                options.protocol = parse_protocol(&value)?;
+             }
+-            "--deployment" if deployment.is_none() => {
+-                deployment = Some(std::path::PathBuf::from(value))
++            "--deployment" if options.deployment.is_none() => {
++                options.deployment = Some(std::path::PathBuf::from(value))
+             }
+             flag @ ("--admin-plan" | "--remote-admin-plan" | "--remote-admin-policy")
+-                if admin_plan.is_none() && args[0] == "serve" =>
++                if options.admin_plan.is_none() && args[0] == "serve" =>
+             {
+-                remote_admin = administration_mode(flag);
+-                admin_plan = Some(std::path::PathBuf::from(value))
++                options.remote_admin = administration_mode(flag);
++                options.admin_plan = Some(std::path::PathBuf::from(value))
+             }
+-            "--service-access" if service_access.is_none() && args[0] == "serve" => {
+-                service_access = Some(std::path::PathBuf::from(value));
++            "--service-access" if options.service_access.is_none() && args[0] == "serve" => {
++                options.service_access = Some(std::path::PathBuf::from(value));
+             }
+-            "--peer-credentials" if peer_credentials.is_none() && args[0] == "serve" => {
+-                peer_credentials = Some(std::path::PathBuf::from(value));
++            "--peer-credentials" if options.peer_credentials.is_none() && args[0] == "serve" => {
++                options.peer_credentials = Some(std::path::PathBuf::from(value));
+             }
+-            "--discovery-peers" if discovery_peers.is_none() && args[0] == "serve" => {
+-                discovery_peers = Some(std::path::PathBuf::from(value));
++            "--discovery-peers" if options.discovery_peers.is_none() && args[0] == "serve" => {
++                options.discovery_peers = Some(std::path::PathBuf::from(value));
+             }
+-            "--peer-discovery" if peer_discovery.is_none() && args[0] == "serve" => {
+-                peer_discovery = Some(std::path::PathBuf::from(value));
++            "--peer-discovery" if options.peer_discovery.is_none() && args[0] == "serve" => {
++                options.peer_discovery = Some(std::path::PathBuf::from(value));
+             }
+-            "--command-listen" if command_listen.is_none() && args[0] == "serve" => {
+-                command_listen = Some(value.parse()?);
++            "--command-listen" if options.command_listen.is_none() && args[0] == "serve" => {
++                options.command_listen = Some(value.parse()?);
+             }
+-            "--wal-reclaim-ms" if wal_reclaim_ms.is_none() && args[0] == "serve" => {
+-                wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
++            "--wal-reclaim-ms" if options.wal_reclaim_ms.is_none() && args[0] == "serve" => {
++                options.wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
+             }
+             "--leadership-maintenance" if leadership_maintenance.is_none() => {
+                 leadership_maintenance = Some(enabled_option(&value, "--leadership-maintenance")?);
+@@ -1240,34 +1256,21 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
+             "--node-drain" if node_drain.is_none() && args[0] == "serve" => {
+                 node_drain = Some(enabled_option(&value, "--node-drain")?);
+             }
+-            "--membership-drain" if membership_drain.is_none() && args[0] == "serve" => {
+-                membership_drain = Some(std::path::PathBuf::from(value));
++            "--membership-drain" if options.membership_drain.is_none() && args[0] == "serve" => {
++                options.membership_drain = Some(std::path::PathBuf::from(value));
+             }
+-            "--checkpoint-entries" if checkpoint_entries.is_none() && args[0] == "serve" => {
+-                checkpoint_entries = Some(positive_option(&value, "checkpoint entry threshold")?);
++            "--checkpoint-entries"
++                if options.checkpoint_entries.is_none() && args[0] == "serve" =>
++            {
++                options.checkpoint_entries =
++                    Some(positive_option(&value, "checkpoint entry threshold")?);
+             }
+             _ => return Err("duplicate or unsupported startup option".into()),
+         }
+     }
+-    Ok(StartupOptions {
+-        protocol,
+-        deployment,
+-        admin_plan,
+-        service_access,
+-        peer_credentials,
+-        command_listen,
+-        discovery_peers,
+-        peer_discovery,
+-        remote_admin,
+-        wal_reclaim_ms,
+-        checkpoint_entries,
+-        leadership_maintenance: leadership_maintenance.unwrap_or(false),
+-        node_drain: node_drain.unwrap_or(false),
+-        membership_drain,
+-        groups,
+-        group_admin_plans,
+-        group_drain_plan,
+-    })
++    options.leadership_maintenance = leadership_maintenance.unwrap_or(false);
++    options.node_drain = node_drain.unwrap_or(false);
++    Ok(options)
+ }
+
+ fn administration_mode(flag: &str) -> administration::Mode {
+diff --git a/src/bin/directory_service.rs b/src/bin/directory_service.rs
+index d2e1ad0..31e61dd 100644
+--- a/src/bin/directory_service.rs
++++ b/src/bin/directory_service.rs
+@@ -66,7 +66,7 @@ use voteboat::{
+     runtime::*,
+ };
+ type Node = NativeNode<Directory, NativeServiceConnector>;
+-const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--peer-credentials FILE]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE|auto TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
++const HELP: &str = "voteboat-directory split-preview PROFILE\nvoteboat-directory plan AUTHORITY INCARNATION RESPONSIBILITY INCARNATION EXECUTION_GROUP INCARNATION\nvoteboat-directory serve create|recover DIRECTORY NODE BASE TLS PLAN ACCESS [--command-listen ADDRESS] [--peers FILE | --deployment FILE] [--transport tcp|quic] [--timing-profile throughput|edge|legacy] [--peer-credentials FILE]\nvoteboat-directory client BASE NODE TLS PRINCIPAL status|initialize|publish OPERATION|checkpoint|quit|reload-peers REQUEST EXPECTED NEXT|peer-credential-status REQUEST|reload-access REQUEST EXPECTED NEXT|credential-status REQUEST [--command-peers FILE]\nvoteboat-directory lookup BASE NODE|auto TLS PRINCIPAL GROUP INCARNATION RESPONSIBILITY INCARNATION [--command-peers FILE]\nvoteboat-directory route TLS PRINCIPAL AUTHORITY INCARNATION RESPONSIBILITY INCARNATION KEY_BYTE AUTHORITIES_FILE [--max-hops N] [--min-epoch N] [--min-generation N]";
+ fn ids(base: &str, id: &str) -> Result<(u16, u64), Failure> {
+     let base: u16 = base.parse()?;
+     let id: u64 = id.parse()?;
+@@ -84,6 +84,7 @@ struct Options {
+     deployment: Option<PathBuf>,
+     peer_credentials: Option<PathBuf>,
+     protocol: NativePeerProtocol,
++    timing_profile: voteboat::native::startup::NativeTimingProfile,
+ }
+ fn options(args: &[String]) -> Result<Options, Failure> {
+     let mut o = Options {
+@@ -92,8 +93,10 @@ fn options(args: &[String]) -> Result<Options, Failure> {
+         deployment: None,
+         peer_credentials: None,
+         protocol: NativePeerProtocol::TcpTls,
++        timing_profile: Default::default(),
+     };
+     let mut transport = false;
++    let mut profile_selected = false;
+     if !args.len().is_multiple_of(2) {
+         return Err(HELP.into());
+     }
+@@ -107,6 +110,10 @@ fn options(args: &[String]) -> Result<Options, Failure> {
+             "--peer-credentials" if o.peer_credentials.is_none() => {
+                 o.peer_credentials = Some(PathBuf::from(&pair[1]));
+             }
++            "--timing-profile" if !profile_selected => {
++                profile_selected = true;
++                o.timing_profile = pair[1].parse()?;
++            }
+             "--transport" if !transport => {
+                 transport = true;
+                 o.protocol = match pair[1].as_str() {
+@@ -182,11 +189,18 @@ fn serve(args: &[String]) -> Result<(), Failure> {
+         Some(p) => setup::open_application_with_rotation(
+             config,
+             options.protocol,
++            options.timing_profile.timers(),
+             false,
+             plan.app.clone(),
+             Some(p.startup(options.protocol)),
+         )?,
+-        None => setup::open_application(config, options.protocol, false, plan.app.clone())?,
++        None => setup::open_application(
++            config,
++            options.protocol,
++            options.timing_profile.timers(),
++            false,
++            plan.app.clone(),
++        )?,
+     };
+     println!("credential_digest={digest:02x?}");
+     run(node, plan, listener, access, peers, id)
+diff --git a/src/bin/support/counter_setup.rs b/src/bin/support/counter_setup.rs
+index 64ff9db..c028731 100644
+--- a/src/bin/support/counter_setup.rs
++++ b/src/bin/support/counter_setup.rs
+@@ -131,6 +131,7 @@ pub fn enroll(
+ pub fn open(
+     config: NativeMemberStartup,
+     protocol: NativePeerProtocol,
++    timers: voteboat::runtime::TimerConfig,
+     member: bool,
+     maintenance: bool,
+     rotation: Option<NativePeerRotationStartup>,
+@@ -144,10 +145,11 @@ pub fn open(
+         Some(rotation) => super::service_setup::open_application_with_rotation(
+             config,
+             protocol,
++            timers,
+             member,
+             app,
+             Some(rotation),
+         ),
+-        None => super::service_setup::open_application(config, protocol, member, app),
++        None => super::service_setup::open_application(config, protocol, timers, member, app),
+     }
+ }
+diff --git a/src/bin/support/group_setup.rs b/src/bin/support/group_setup.rs
+index 32b3304..2c20ec2 100644
+--- a/src/bin/support/group_setup.rs
++++ b/src/bin/support/group_setup.rs
+@@ -119,33 +119,22 @@ impl Prepared {
+     pub fn open(
+         self,
+         protocol: NativePeerProtocol,
++        timers: TimerConfig,
+         member: bool,
+         maintenance: bool,
+         rotation: Option<NativePeerRotationStartup>,
+     ) -> Result<Service, Failure> {
+         let (config, applications) = match self {
+             Self::Single(config) => {
+-                return setup::open(*config, protocol, member, maintenance, rotation)
++                return setup::open(*config, protocol, timers, member, maintenance, rotation)
+             }
+             Self::Multi(config, applications) => (config, applications),
+         };
+         let wake = Arc::new(ThreadWake::current());
+         let opened = if let Some(rotation) = rotation {
+-            config.open_with_peer_rotation(
+-                rotation,
+-                TimerConfig::default(),
+-                applications,
+-                wake,
+-                MonoTime(0),
+-            )
++            config.open_with_peer_rotation(rotation, timers, applications, wake, MonoTime(0))
+         } else {
+-            config.open(
+-                protocol,
+-                TimerConfig::default(),
+-                applications,
+-                wake,
+-                MonoTime(0),
+-            )
++            config.open(protocol, timers, applications, wake, MonoTime(0))
+         };
+         match opened {
+             Ok(service) => Ok(service),
+diff --git a/src/bin/support/local_client.rs b/src/bin/support/local_client.rs
+index 90352e8..e201e79 100644
+--- a/src/bin/support/local_client.rs
++++ b/src/bin/support/local_client.rs
+@@ -42,6 +42,7 @@ pub(super) fn exchange(
+ fn retryable_reply(command: &[String], response: &str) -> bool {
+     let command = super::group_command::payload(command);
+     response == NOT_LEADER
++        || matches!(command, [add, _, _] if add == "add") && response == "ERR Draining\n"
+         || command == ["read"]
+             && matches!(
+                 response,
+@@ -50,6 +51,7 @@ fn retryable_reply(command: &[String], response: &str) -> bool {
+                     | "ERR Draining\n"
+             )
+ }
++
+ fn terminal(response: String) -> Result<(), Failure> {
+     print!("{response}");
+     if response.starts_with("OK ") {
+@@ -252,3 +254,31 @@ fn route(
+     }
+     Err("no eligible configured leader found within the routing attempt limit".into())
+ }
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn draining_reroutes_only_exact_unaccepted_data_commands() {
++        for words in [
++            vec!["add", "42", "5"],
++            vec!["group", "7", "3", "add", "42", "5"],
++            vec!["read"],
++        ] {
++            let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
++            assert!(retryable_reply(&command, "ERR Draining\n"));
++            for terminal in [
++                "ERR Draining\nextra\n",
++                "UNKNOWN Draining\n",
++                "ERR AUTHORIZATION\n",
++                "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n",
++            ] {
++                assert!(!retryable_reply(&command, terminal));
++            }
++        }
++        for words in [vec!["configure", "42"], vec!["add", "42"], vec!["quit"]] {
++            let command = words.into_iter().map(str::to_owned).collect::<Vec<_>>();
++            assert!(!retryable_reply(&command, "ERR Draining\n"));
++        }
++    }
++}
+diff --git a/src/bin/support/peer_discovery/assembly.rs b/src/bin/support/peer_discovery/assembly.rs
+index 5b8b281..ae74dc3 100644
+--- a/src/bin/support/peer_discovery/assembly.rs
++++ b/src/bin/support/peer_discovery/assembly.rs
+@@ -14,15 +14,15 @@ use voteboat::{
+ pub(crate) fn open(
+     prepared: group_setup::Prepared,
+     protocol: NativePeerProtocol,
++    timers: TimerConfig,
+     member: bool,
+     maintenance: bool,
+     rotation: Option<NativePeerRotationStartup>,
+     source: Option<Prepared>,
+ ) -> Result<Service, Failure> {
+     let Some(source) = source else {
+-        return prepared.open(protocol, member, maintenance, rotation);
++        return prepared.open(protocol, timers, member, maintenance, rotation);
+     };
+-    let timers = TimerConfig::default();
+     let wake = Arc::new(ThreadWake::current());
+     let (parts, limits) = match prepared {
+         group_setup::Prepared::Single(mut config) => {
+diff --git a/src/bin/support/service_setup.rs b/src/bin/support/service_setup.rs
+index 2eb8a23..79e955c 100644
+--- a/src/bin/support/service_setup.rs
++++ b/src/bin/support/service_setup.rs
+@@ -165,6 +165,7 @@ pub fn configuration(
+ pub fn open_application<A>(
+     config: NativeMemberStartup,
+     protocol: NativePeerProtocol,
++    timers: TimerConfig,
+     member: bool,
+     app: A,
+ ) -> Result<NativeNode<A, NativeServiceConnector>, Failure>
+@@ -172,11 +173,12 @@ where
+     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+     A::Receipt: ApplicationReceipt,
+ {
+-    open_application_with_rotation(config, protocol, member, app, None)
++    open_application_with_rotation(config, protocol, timers, member, app, None)
+ }
+ pub fn open_application_with_rotation<A>(
+     mut config: NativeMemberStartup,
+     protocol: NativePeerProtocol,
++    timers: TimerConfig,
+     member: bool,
+     app: A,
+     rotation: Option<NativePeerRotationStartup>,
+@@ -193,19 +195,27 @@ where
+             config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
+         }
+         match rotation {
+-            Some(rotation) => config.open_with_peer_rotation(rotation, app, wake, MonoTime(0)),
+-            None => config.open_with_protocol(protocol, app, wake, MonoTime(0)),
++            Some(rotation) => {
++                config.open_with_peer_rotation_and_timers(rotation, timers, app, wake, MonoTime(0))
++            }
++            None => config.open_with_protocol_and_timers(protocol, timers, app, wake, MonoTime(0)),
+         }
+     } else {
+         match rotation {
+-            Some(rotation) => {
+-                config
+-                    .startup
+-                    .open_with_peer_rotation(rotation, app, wake, MonoTime(0))
+-            }
+-            None => config
+-                .startup
+-                .open_with_protocol(protocol, app, wake, MonoTime(0)),
++            Some(rotation) => config.startup.open_with_peer_rotation_and_timers(
++                rotation,
++                timers,
++                app,
++                wake,
++                MonoTime(0),
++            ),
++            None => config.startup.open_with_protocol_and_timers(
++                protocol,
++                timers,
++                app,
++                wake,
++                MonoTime(0),
++            ),
+         }
+     };
+     match opened {
+diff --git a/src/bin/support/transfer_server.rs b/src/bin/support/transfer_server.rs
+index 9a3ee99..24bcbc1 100644
+--- a/src/bin/support/transfer_server.rs
++++ b/src/bin/support/transfer_server.rs
+@@ -29,6 +29,8 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+     let [mode, root, id, base, tls, profile, group, access, transport, rest @ ..] = args else {
+         return Err(super::HELP.into());
+     };
++    let (peers, peer_path, timing_profile) = options(rest)?;
++    let timers = timing_profile.timers();
+     let profile = Profile::load(Path::new(profile))?;
+     let binding = profile.binding(group)?;
+     let id = id.parse::<u64>()?;
+@@ -44,7 +46,6 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+         "recover" => false,
+         _ => return Err("expected create or recover".into()),
+     };
+-    let (peers, peer_path) = options(rest)?;
+     Peers::validate_profile(Path::new(root), peer_path, true)?;
+     let mut config =
+         setup::configuration(Path::new(root), id, base, Path::new(tls), create, peers)?;
+@@ -67,20 +68,16 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+             store: config.startup.store,
+         },
+     )?;
+-    println!(
+-        "credential_digest={:02x?}",
+-        access
+-            .access
+-            .as_ref()
+-            .and_then(|a| a.material())
+-            .ok_or("authenticated transfer credentials unavailable")?
+-            .digest
+-    );
+-    let listener = TcpListener::bind(super::command_endpoints::listener(None, true, base, id)?)?;
+-    listener.set_nonblocking(true)?;
++    let listener = command_listener(base, id, &access)?;
+     match binding.role {
+         Role::Metadata => run(
+-            open(config, protocol, app::metadata(&profile)?, peers.as_ref())?,
++            open(
++                config,
++                protocol,
++                timers,
++                app::metadata(&profile)?,
++                peers.as_ref(),
++            )?,
+             listener,
+             profile,
+             binding,
+@@ -94,6 +91,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+                 let node = open_source(
+                     config,
+                     protocol,
++                    timers,
+                     app,
+                     source_binding,
+                     create,
+@@ -104,6 +102,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+             let node = open_source(
+                 config,
+                 protocol,
++                timers,
+                 app::source(&profile, binding)?,
+                 source_binding,
+                 create,
+@@ -115,6 +114,7 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+             open(
+                 config,
+                 protocol,
++                timers,
+                 app::target(&profile, binding)?,
+                 peers.as_ref(),
+             )?,
+@@ -127,13 +127,40 @@ pub fn serve(args: &[String]) -> Result<(), Failure> {
+         ),
+     }
+ }
+-fn options(args: &[String]) -> Result<(setup::PeerInput<'_>, Option<&Path>), Failure> {
++fn command_listener(base: u16, id: u64, access: &Credentials) -> Result<TcpListener, Failure> {
++    println!(
++        "credential_digest={:02x?}",
++        access
++            .access
++            .as_ref()
++            .and_then(|a| a.material())
++            .ok_or("authenticated transfer credentials unavailable")?
++            .digest
++    );
++    let listener = TcpListener::bind(super::command_endpoints::listener(None, true, base, id)?)?;
++    listener.set_nonblocking(true)?;
++    Ok(listener)
++}
++fn options(
++    args: &[String],
++) -> Result<
++    (
++        setup::PeerInput<'_>,
++        Option<&Path>,
++        voteboat::native::startup::NativeTimingProfile,
++    ),
++    Failure,
++> {
+     if !args.len().is_multiple_of(2) {
+         return Err("expected --deployment FILE or --peer-credentials FILE".into());
+     }
+     let (mut deployment, mut credentials) = (None, None);
++    let mut timing_profile = None;
+     for pair in args.as_chunks::<2>().0 {
+         match pair[0].as_str() {
++            "--timing-profile" if timing_profile.is_none() => {
++                timing_profile = Some(pair[1].parse()?)
++            }
+             "--deployment" if deployment.is_none() => deployment = Some(Path::new(&pair[1])),
+             "--peer-credentials" if credentials.is_none() => {
+                 credentials = Some(Path::new(&pair[1]))
+@@ -144,11 +171,13 @@ fn options(args: &[String]) -> Result<(setup::PeerInput<'_>, Option<&Path>), Fai
+     Ok((
+         deployment.map_or(setup::PeerInput::Legacy(None), setup::PeerInput::Deployment),
+         credentials,
++        timing_profile.unwrap_or_default(),
+     ))
+ }
+ fn open<A: App>(
+     config: voteboat::native::startup::NativeMemberStartup,
+     protocol: NativePeerProtocol,
++    timers: TimerConfig,
+     app: A,
+     peers: Option<&Peers>,
+ ) -> Result<Node<A>, Failure> {
+@@ -156,22 +185,24 @@ fn open<A: App>(
+         Some(p) => setup::open_application_with_rotation(
+             config,
+             protocol,
++            timers,
+             false,
+             app,
+             Some(p.startup(protocol)),
+         ),
+-        None => setup::open_application(config, protocol, false, app),
++        None => setup::open_application(config, protocol, timers, false, app),
+     }
+ }
+ fn open_source<A: App>(
+     config: voteboat::native::startup::NativeMemberStartup,
+     protocol: NativePeerProtocol,
++    timers: TimerConfig,
+     app: A,
+     record: Option<super::binding::SourceBinding>,
+     create: bool,
+     peers: Option<&Peers>,
+ ) -> Result<Node<A>, Failure> {
+-    let node = open(config, protocol, app, peers)?;
++    let node = open(config, protocol, timers, app, peers)?;
+     if let Some(record) = record {
+         if let Err(error) = record.finish(create) {
+             recover(node, Instant::now())?;
+diff --git a/src/bin/transfer_service.rs b/src/bin/transfer_service.rs
+index 26d79a3..88cd993 100644
+--- a/src/bin/transfer_service.rs
++++ b/src/bin/transfer_service.rs
+@@ -33,7 +33,7 @@ use service_setup as setup;
+ #[path = "support/transfer_wire.rs"]
+ mod wire;
+ use setup::Failure;
+-const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--deployment FILE] [--peer-credentials FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...\nPeer commands: reload-peers REQUEST EXPECTED NEXT; peer-credential-status REQUEST";
++const HELP: &str = "voteboat-transfer plan AUTHORITY SOURCE LEFT RIGHT RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION [--retirement]\nvoteboat-transfer plan-merge AUTHORITY LEFT RIGHT TARGET RESPONSIBILITY SPLIT LIFECYCLE PUBLICATION\nvoteboat-transfer serve create|recover ROOT NODE BASE TLS PROFILE GROUP ACCESS tcp|quic [--timing-profile throughput|edge|legacy] [--deployment FILE] [--peer-credentials FILE]\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL status|start|resume|step\nvoteboat-transfer client PROFILE ENDPOINTS TLS PRINCIPAL retire SOURCE RELEASE_ID\nvoteboat-transfer command PROFILE ENDPOINTS TLS PRINCIPAL GROUP COMMAND...\nPeer commands: reload-peers REQUEST EXPECTED NEXT; peer-credential-status REQUEST";
+ fn main() -> Result<(), Failure> {
+     let args = std::env::args().skip(1).collect::<Vec<_>>();
+     match args.as_slice() {
+diff --git a/src/native/startup.rs b/src/native/startup.rs
+index e30cd04..f343bc3 100644
+--- a/src/native/startup.rs
++++ b/src/native/startup.rs
+@@ -34,8 +34,10 @@ use crate::{
+ use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
+ mod multi;
+ mod peer_rotation;
++mod timing_profile;
+ pub use multi::*;
+ pub use peer_rotation::NativePeerRotationStartup;
++pub use timing_profile::NativeTimingProfile;
+
+ #[derive(Clone, Copy, Debug, Eq, PartialEq)]
+ pub enum NativeOpenMode {
+diff --git a/src/native/startup/peer_rotation.rs b/src/native/startup/peer_rotation.rs
+index 114567b..d8424e9 100644
+--- a/src/native/startup/peer_rotation.rs
++++ b/src/native/startup/peer_rotation.rs
+@@ -107,6 +107,21 @@ impl NativeStartup {
+         wake: Arc<dyn WorkerWake>,
+         now: MonoTime,
+     ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
++    where
++        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++        A::Receipt: ApplicationReceipt,
++    {
++        self.open_with_peer_rotation_and_timers(rotation, TimerConfig::default(), app, wake, now)
++    }
++    /// Explicit liveness timing with the same durable credential binding and cleanup.
++    pub fn open_with_peer_rotation_and_timers<A>(
++        self,
++        rotation: NativePeerRotationStartup,
++        timers: TimerConfig,
++        app: A,
++        wake: Arc<dyn WorkerWake>,
++        now: MonoTime,
++    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+     where
+         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+         A::Receipt: ApplicationReceipt,
+@@ -116,12 +131,7 @@ impl NativeStartup {
+             app,
+             wake,
+             now,
+-            (
+-                StartupAuthorization::Static,
+-                TimerConfig::default(),
+-                None,
+-                Some(rotation),
+-            ),
++            (StartupAuthorization::Static, timers, None, Some(rotation)),
+         )
+     }
+ }
+@@ -162,6 +172,21 @@ impl NativeMemberStartup {
+         wake: Arc<dyn WorkerWake>,
+         now: MonoTime,
+     ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
++    where
++        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++        A::Receipt: ApplicationReceipt,
++    {
++        self.open_with_peer_rotation_and_timers(rotation, TimerConfig::default(), app, wake, now)
++    }
++    /// Explicit liveness timing with the same durable credential binding and cleanup.
++    pub fn open_with_peer_rotation_and_timers<A>(
++        self,
++        rotation: NativePeerRotationStartup,
++        timers: TimerConfig,
++        app: A,
++        wake: Arc<dyn WorkerWake>,
++        now: MonoTime,
++    ) -> Result<NativeNode<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+     where
+         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+         A::Receipt: ApplicationReceipt,
+@@ -173,7 +198,7 @@ impl NativeMemberStartup {
+             now,
+             (
+                 StartupAuthorization::Member(self.provisioned_stores),
+-                TimerConfig::default(),
++                timers,
+                 None,
+                 Some(rotation),
+             ),
+diff --git a/src/native/startup/timing_profile.rs b/src/native/startup/timing_profile.rs
+new file mode 100644
+index 0000000..cfd1679
+--- /dev/null
++++ b/src/native/startup/timing_profile.rs
+@@ -0,0 +1,46 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::{error, NativeStartupError, TimerConfig};
++
++/// Construction-time liveness settings, independent of quorum and durability.
++/// Throughput/edge follow the design pack proposals; they are not measured guarantees.
++/// Hosts may instead supply their own validated `TimerConfig` to startup.
++#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
++pub enum NativeTimingProfile {
++    /// The original runtime settings: 50ms heartbeat and 150–300ms elections.
++    Legacy,
++    /// Durable-node service default: 100ms heartbeat and 1000–2000ms elections.
++    #[default]
++    Throughput,
++    /// Edge-node proposal: 250ms heartbeat and 1500–3000ms elections.
++    Edge,
++}
++impl NativeTimingProfile {
++    pub fn timers(self) -> TimerConfig {
++        let (heartbeat_ms, election_min_ms, election_spread_ms) = match self {
++            Self::Legacy => (50, 150, 150),
++            Self::Throughput => (100, 1000, 1000),
++            Self::Edge => (250, 1500, 1500),
++        };
++        TimerConfig {
++            heartbeat_ms,
++            election_min_ms,
++            election_spread_ms,
++            expirations_per_poll: 32,
++        }
++    }
++}
++impl std::str::FromStr for NativeTimingProfile {
++    type Err = NativeStartupError;
++    fn from_str(value: &str) -> Result<Self, Self::Err> {
++        match value {
++            "legacy" => Ok(Self::Legacy),
++            "throughput" => Ok(Self::Throughput),
++            "edge" => Ok(Self::Edge),
++            _ => Err(error(
++                "timing profile",
++                "expected throughput, edge or legacy",
++            )),
++        }
++    }
++}
+diff --git a/tests/counter_service.rs b/tests/counter_service.rs
+index 09b843d..b973d1e 100644
+--- a/tests/counter_service.rs
++++ b/tests/counter_service.rs
+@@ -1829,13 +1829,16 @@ fn reply_peer(
+ }
+ #[test]
+ fn automatic_client_reuses_original_command_after_only_proven_non_acceptance() {
+-    for first_available in [false, true] {
++    for refusal in [
++        None,
++        Some(b"ERR NOT_LEADER\n".as_slice()),
++        Some(b"ERR Draining\n".as_slice()),
++    ] {
+         let mut cluster = Cluster::new();
+-        if !first_available {
++        if refusal.is_none() {
+             cluster.listeners.remove(&101);
+         }
+-        let first = first_available
+-            .then(|| reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n")));
++        let first = refusal.map(|reply| reply_peer(cluster.take_listener(101), Some(reply)));
+         let second = reply_peer(
+             cluster.take_listener(102),
+             Some(b"OK outcome=Value(7) duplicate=false\n"),
+@@ -1864,7 +1867,7 @@ fn automatic_client_never_reroutes_uncertain_writes_or_other_errors() {
+         Some(b"ERR Overloaded\n".as_slice()),
+         Some(b"ERR NotRead(ReadNotReady)\n".as_slice()),
+         Some(b"ERR Unavailable(LeadershipChanged)\n".as_slice()),
+-        Some(b"ERR Draining\n".as_slice()),
++        Some(b"ERR Draining trailing\n".as_slice()),
+     ] {
+         let mut cluster = Cluster::new();
+         let first = reply_peer(cluster.take_listener(101), Some(b"ERR NOT_LEADER\n"));
+diff --git a/tests/service_profiles.rs b/tests/service_profiles.rs
+new file mode 100644
+index 0000000..30af2d3
+--- /dev/null
++++ b/tests/service_profiles.rs
+@@ -0,0 +1,43 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++#![cfg(feature = "tls")]
++use std::process::Command;
++
++#[test]
++fn invalid_service_profile_is_refused_before_files_or_listener_ownership() {
++    let root =
++        std::env::temp_dir().join(format!("voteboat-profile-refusal-{}", std::process::id()));
++    assert!(!root.exists());
++    for (binary, suffix) in [
++        (env!("CARGO_BIN_EXE_voteboat-counter"), vec![]),
++        (
++            env!("CARGO_BIN_EXE_voteboat-directory"),
++            vec!["missing-plan", "missing-access"],
++        ),
++        (
++            env!("CARGO_BIN_EXE_voteboat-transfer"),
++            vec!["missing-profile", "source", "missing-access", "tcp"],
++        ),
++    ] {
++        for (options, expected) in [
++            (vec!["--timing-profile", "auto"], "timing profile"),
++            (
++                vec!["--timing-profile", "edge", "--timing-profile", "edge"],
++                "duplicate",
++            ),
++        ] {
++            let output = Command::new(binary)
++                .args(["serve", "create"])
++                .arg(&root)
++                .args(["1", "19000", "missing-tls"])
++                .args(&suffix)
++                .args(options)
++                .output()
++                .unwrap();
++            assert!(!output.status.success());
++            assert!(output.stdout.is_empty(), "{output:?}");
++            assert!(String::from_utf8(output.stderr).unwrap().contains(expected));
++            assert!(!root.exists());
++        }
++    }
++}
+diff --git a/tests/startup.rs b/tests/startup.rs
+index b4f4798..aad55db 100644
+--- a/tests/startup.rs
++++ b/tests/startup.rs
+@@ -35,6 +35,8 @@ mod maintenance;
+ mod multi;
+ #[path = "startup/peer_rotation.rs"]
+ mod peer_rotation;
++#[path = "startup/timing_profile.rs"]
++mod timing_profile;
+ #[derive(Clone)]
+ struct HostApplication(Counter);
+ impl StateMachine for HostApplication {
+diff --git a/tests/startup/peer_rotation.rs b/tests/startup/peer_rotation.rs
+index 7123407..fd77edf 100644
+--- a/tests/startup/peer_rotation.rs
++++ b/tests/startup/peer_rotation.rs
+@@ -149,12 +149,13 @@ fn static_and_member_startup_install_the_recorded_generation() {
+     let mut initial = config(root.clone(), NativeOpenMode::Create);
+     initial.tls = initial.tls.with_wire_version(7).unwrap();
+     let node = initial
+-        .open_with_peer_rotation(
++        .open_with_peer_rotation_and_timers(
+             NativePeerRotationStartup {
+                 protocol: NativePeerProtocol::TcpTls,
+                 generation: generation(1),
+                 latest: None,
+             },
++            NativeTimingProfile::Edge.timers(),
+             app(),
+             Arc::new(ThreadWake::current()),
+             MonoTime(0),
+@@ -164,6 +165,8 @@ fn static_and_member_startup_install_the_recorded_generation() {
+         node.peers().unwrap().credential_generation(),
+         Some(generation(1))
+     );
++    let token = node.local().owner.deadline(group()).unwrap();
++    assert!((1500..3000).contains(&token.deadline.0));
+     drain_wire_nodes(vec![node]);
+     let mut recovered = config(root.clone(), NativeOpenMode::Recover);
+     recovered.tls = recovered.tls.with_wire_version(7).unwrap();
+@@ -173,12 +176,13 @@ fn static_and_member_startup_install_the_recorded_generation() {
+         startup: recovered,
+     };
+     let node = member
+-        .open_with_peer_rotation(
++        .open_with_peer_rotation_and_timers(
+             NativePeerRotationStartup {
+                 protocol: NativePeerProtocol::TcpTls,
+                 generation: generation(2),
+                 latest: Some(record),
+             },
++            NativeTimingProfile::Edge.timers(),
+             app(),
+             Arc::new(ThreadWake::current()),
+             MonoTime(0),
+@@ -188,6 +192,8 @@ fn static_and_member_startup_install_the_recorded_generation() {
+         node.peers().unwrap().credential_generation(),
+         Some(generation(2))
+     );
++    let token = node.local().owner.deadline(group()).unwrap();
++    assert!((1500..3000).contains(&token.deadline.0));
+     drain_wire_nodes(vec![node]);
+     std::fs::remove_dir_all(root).unwrap();
+ }
+diff --git a/tests/startup/timing_profile.rs b/tests/startup/timing_profile.rs
+new file mode 100644
+index 0000000..14f7f20
+--- /dev/null
++++ b/tests/startup/timing_profile.rs
+@@ -0,0 +1,85 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::{authorization::CredentialGeneration, native::connect::NativePeerProtocol};
++
++#[test]
++fn profiles_keep_host_timer_contract_and_refuse_unknown_selection() {
++    for (name, min, max, heartbeat) in [
++        ("legacy", 150, 300, 50),
++        ("throughput", 1000, 2000, 100),
++        ("edge", 1500, 3000, 250),
++    ] {
++        let profile: NativeTimingProfile = name.parse().unwrap();
++        let timers = profile.timers();
++        timers.validate().unwrap();
++        assert_eq!(timers.heartbeat_ms, heartbeat);
++        assert_eq!(timers.election_min_ms, min);
++        assert_eq!(min + timers.election_spread_ms, max);
++    }
++    for unknown in ["", "auto", "Throughput", "edge "] {
++        assert!(unknown.parse::<NativeTimingProfile>().is_err());
++    }
++    assert_eq!(
++        NativeTimingProfile::default(),
++        NativeTimingProfile::Throughput
++    );
++}
++
++#[test]
++fn rotated_static_and_member_timers_reject_before_io_and_return_application() {
++    let protocols = [
++        NativePeerProtocol::TcpTls,
++        #[cfg(feature = "quic")]
++        NativePeerProtocol::Quic,
++    ];
++    for member in [false, true] {
++        for protocol in protocols {
++            let directory = root();
++            let socket = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
++            let mut config = config(directory.clone(), NativeOpenMode::Recover);
++            config.tls = config.tls.with_wire_version(7).unwrap();
++            config.listen = socket.local_addr().unwrap();
++            let rotation = NativePeerRotationStartup {
++                protocol,
++                generation: CredentialGeneration::new(1).unwrap(),
++                latest: None,
++            };
++            let mut invalid = NativeTimingProfile::Edge.timers();
++            invalid.election_spread_ms = 0;
++            let rejected = if member {
++                NativeMemberStartup {
++                    provisioned_stores: config.bootstrap.voter_stores.clone(),
++                    startup: config,
++                }
++                .open_with_peer_rotation_and_timers(
++                    rotation,
++                    invalid,
++                    app(),
++                    Arc::new(ThreadWake::current()),
++                    MonoTime(0),
++                )
++            } else {
++                config.open_with_peer_rotation_and_timers(
++                    rotation,
++                    invalid,
++                    app(),
++                    Arc::new(ThreadWake::current()),
++                    MonoTime(0),
++                )
++            };
++            let mut rejected = rejected.err().unwrap();
++            assert_eq!(rejected.reason.stage, "native startup");
++            assert_eq!(rejected.reason.detail, "InvalidLimits");
++            assert!(rejected.application.is_some());
++            assert!(rejected.try_cleanup().unwrap());
++            assert!(!directory.exists());
++            assert_eq!(
++                std::net::TcpListener::bind(socket.local_addr().unwrap())
++                    .unwrap_err()
++                    .kind(),
++                std::io::ErrorKind::AddrInUse
++            );
++        }
++    }
++}
