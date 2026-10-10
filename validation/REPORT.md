@@ -1,5 +1,16 @@
 # Validation report — slice 35
 
+Sampled-authority recovery: [slice210f](baseline/slice210f/README.md). Forced
+acknowledged-leader loss fails the old TCP fixture observation path. Existing
+caller-owned retries retain exact original write receipts, cold recovery and
+fresh quorum reads. The sequential full all-feature counter suite passes158;
+formatting/all four strict lint profiles pass. An accidentally overlapped feature
+run is retained and excluded from acceptance. The new56245bb Ubuntu operator run
+has156 passes/2 failures, on authenticated configuration interruption and
+unresolved drain admission. The prior fe6d5ff macOS run has143 passes/13 failures;
+its QUIC failures are not reproduced by the passing33-test local group sweep.
+Supported-platform and full P0–P7 acceptance remain open.
+
 Pending configuration replay: [slice210e](baseline/slice210e/README.md). Both real
 TCP/QUIC quorum-loss histories fail with the old unknown-response classifier.
 The corrected fixtures preserve original records, refuse conflicting targets

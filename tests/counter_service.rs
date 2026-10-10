@@ -1703,7 +1703,7 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
         .request(leader, &["add", "1", "not-a-number"])
         .status
         .success());
-    assert!(cluster.ok(leader, &["add", "1", "7"]).contains("Value(7)"));
+    assert!(leader_request(&mut cluster, &["add", "1", "7"]).contains("Value(7)"));
     for id in 1..=3 {
         if id != leader {
             let mut child = cluster.children[id - 1].take().unwrap();
@@ -1742,10 +1742,25 @@ fn bounded_commands_and_quorum_loss_preserve_retry_identity() {
         );
         std::thread::sleep(Duration::from_millis(20));
     };
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=10\n");
-    assert!(cluster
-        .ok(leader, &["add", "2", "3"])
-        .contains("duplicate=true"));
+    // A receipt does not lease this leader for the next observation.
+    drain::kill(&mut cluster, leader);
+    assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=10\n");
+    assert_eq!(
+        leader_request(&mut cluster, &["add", "2", "3"]),
+        "OK outcome=Value(10) duplicate=true\n"
+    );
+    cluster.start(leader, "recover");
+    cluster.stop();
+    for id in 1..=3 {
+        cluster.start(id, "recover");
+    }
+    for (operation, delta, value) in [("1", "7", "7"), ("2", "3", "10")] {
+        assert_eq!(
+            leader_request(&mut cluster, &["add", operation, delta]),
+            format!("OK outcome=Value({value}) duplicate=true\n")
+        );
+    }
+    assert_eq!(leader_request(&mut cluster, &["read"]), "OK value=10\n");
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();
 }

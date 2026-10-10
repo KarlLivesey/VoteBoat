@@ -196,6 +196,15 @@ The preceding fe6d5ff Ubuntu
 operator job has155 passes/1 failure on that exact response (now covered); its
 macOS job is still running. No production behavior or deadline change. Existing
 operator concurrency already preserves active runs; no workflow edit is needed.
+Implemented210f corrects a sampled-authority assumption in the TCP quorum-loss
+fixture. Forced loss of the acknowledged leader fails the old observation path;
+existing bounded caller retries preserve the original operation, exact duplicate
+receipts and both values through cold recovery. Focused all-feature/default TCP
+histories pass; matching macOS evidence remains open. The newly completed56245bb
+Ubuntu run has156 passes/2 failures: an exact authenticated configuration read
+interruption and unresolved original drain admission. Neither is a successful
+operation. The source response behind the latter needs cause-specific evidence;
+do not infer a changed identity from the runner's generic parser error.
 Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
@@ -217,6 +226,35 @@ explicit byte/count limits and unchanged rejected-state assertions. This
 advances P0/P1 defensive recovery and depends on existing native/host codecs,
 not a replacement serialization system. Select an uncovered codec family from
 the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice210f schema plan — original receipts after sampled authority loss
+
+The completed fe6d5ff macOS counter run has143 passes/13 failures. Its TCP
+quorum-loss history resolves the original write, then assumes the sampled leader
+still owns the subsequent read and duplicate request. The duplicate instead
+returns Unknown(LeadershipChanged). A positive receipt does not lease future
+leadership. The other twelve failures are QUIC histories, including sustained
+campaigns and authenticated-command interruption; their causes remain open.
+The unchanged current Linux CI-directory group sweep passes33 histories, so
+do not claim those macOS failures reproduced or fixed by this fixture correction.
+
+For the TCP history, keep the original operation2/delta3 and existing uncertain
+write/explicit caller retry boundary. Force the acknowledged leader offline before
+the final read/replay to reproduce the invalid sampled-authority assumption.
+Use the existing leader_request helper for these caller-owned requests, accepting
+only its exact documented read/write transitions under its existing10s deadline.
+The CLI still returns uncertainty immediately. The positive duplicate must retain
+Value(10), and cold recovery must preserve both original receipts and the value.
+No production API, format, timer, quorum or automatic uncertain-write rerouting
+changes. Cluster owns processes and original directory; all live children are
+stopped/joined before reopening, and failure logs remain available through Drop.
+
+Acceptance: fail the forced old-leader observation before correction; pass the
+corrected actual TCP/quorum-loss/cold-recovery history, CLI no-reroute checks and
+affected counter suite; retain zero formatting/all-four Clippy diagnostics.
+This advances usable-service/platform acceptance. Matching macOS confirmation
+and the unexplained QUIC failures remain open. The next two linked deliverables
+remain combined membership/lifecycle recovery and bounded malformed decoding.
 
 ### Slice210e schema plan — original configuration replay after local persistence
 

@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice210f corrects the TCP quorum-loss fixture's sampled-authority assumption.
+Forced acknowledged-leader loss fails its old direct observation; existing
+bounded caller retries preserve original operations and exact duplicate receipts
+through leader replacement and full cold recovery. The sequential full local
+counter suite passes158, with formatting/four strict lint profiles clean. An
+overlapped feature run is retained separately and excluded. The current56245bb
+Ubuntu job has156 passes/2 failures, while the completed prior fe6d5ff macOS run
+has143 passes/13 failures. The remaining QUIC/administrative failures and matching
+platform acceptance stay open; no production protocol or deadline changes.
+
 Slice210e adds real TCP/QUIC quorum-loss histories for an exact locally durable,
 uncommitted configuration record. The old fixture rejects its documented unknown
 result; corrected helpers repeat only the original record, preserving deadlines.

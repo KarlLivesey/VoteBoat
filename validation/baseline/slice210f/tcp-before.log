@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.01s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 1 test
+test bounded_commands_and_quorum_loss_preserve_retry_identity ... FAILED
+
+failures:
+
+---- bounded_commands_and_quorum_loss_preserve_retry_identity stdout ----
+
+thread 'bounded_commands_and_quorum_loss_preserve_retry_identity' (404345) panicked at tests/counter_service.rs:370:9:
+node 3 ["read"]:  Error: "node unavailable before connection"
+
+service log: ready node=3 peer=127.0.0.1:10013 transport=TcpTls command=127.0.0.1:10103
+command observation_cancelled pending=Read(ReadInvocationTicket { binding: ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, sequence: 1, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, request: ReadRequestId(1) }) reason=deadline
+command observation_cancelled pending=Write(ClientTicket { binding: ClientRouterBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ClientRouterGeneration(1) }, sequence: 2, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, operation: OperationId(2) }) reason=deadline
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    bounded_commands_and_quorum_loss_preserve_retry_identity
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 157 filtered out; finished in 10.30s
+
+error: test failed, to rerun pass `--test counter_service`
