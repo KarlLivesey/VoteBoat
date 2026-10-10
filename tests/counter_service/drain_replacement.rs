@@ -179,14 +179,9 @@ fn prepare(quic: bool, lost_reply: bool) -> (Cluster, Option<String>) {
     let target = leader % 3 + 1;
     leader_request(
         &mut c,
-        &[
-            "move-leader",
-            "19769",
-            "2",
-            &target.to_string(),
-            &target.to_string(),
-            "1",
-        ],
+        &leadership::words("19769", "2", leader, target)
+            .each_ref()
+            .map(String::as_str),
     );
     let (_, completed) = leadership::status(&mut c, "19769", "phase=Completed");
     let minimum = completed

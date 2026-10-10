@@ -58,11 +58,13 @@ fn status(c: &mut Cluster, scope: (&str, &str), op: &str, phase: &str) -> (usize
     }
 }
 fn begin(c: &mut Cluster, scope: (&str, &str, &str), op: &str, target: usize) {
-    let target = target.to_string();
+    let source = groups::leader(c, scope.0, scope.1);
     let output = command(
         c,
         (scope.0, scope.1),
-        &["move-leader", op, scope.2, &target, &target, "1"],
+        &leadership::words(op, scope.2, source, target)
+            .each_ref()
+            .map(String::as_str),
     );
     assert!(output.contains("phase=Pending"), "{output}");
 }
@@ -79,7 +81,20 @@ fn permissions(c: &mut Cluster, leader: usize) {
     c.command_principal = Some(3);
     let invalid = c.request(
         leader,
-        &["group", "7", "3", "move-leader", OP, "9", "2", "999", "1"],
+        &[
+            "group",
+            "7",
+            "3",
+            "move-leader",
+            OP,
+            "9",
+            "1",
+            "1",
+            "1",
+            "2",
+            "999",
+            "1",
+        ],
     );
     assert!(!invalid.status.success());
 }
@@ -209,10 +224,24 @@ fn history(quic: bool) {
                 .contains("phase=Completed")
         );
         let target = target.to_string();
+        let source = text
+            .split_whitespace()
+            .find_map(|w| w.strip_prefix("source="))
+            .unwrap();
         assert!(command(
             &mut c,
             (group, incarnation),
-            &["move-leader", op, config, &target, &target, "1"]
+            &[
+                "move-leader",
+                op,
+                config,
+                source,
+                source,
+                "1",
+                &target,
+                &target,
+                "1"
+            ]
         )
         .contains("phase=Completed"));
         completed.push(text);

@@ -18,10 +18,11 @@ fn history(quic: bool) {
     let (mut c, source, target) = membership_drain::prepare(quic);
     let plan = c.membership_drain.as_ref().unwrap().1.clone();
     let original = fs::read(&plan).unwrap();
-    let target_text = target.to_string();
     let moved = c.ok(
         source,
-        &["move-leader", "19761", "1", &target_text, &target_text, "1"],
+        &leadership::words("19761", "1", source, target)
+            .each_ref()
+            .map(String::as_str),
     );
     assert!(moved.contains("operation=19761"), "{moved}");
     let (leader, receipt) = leadership::status(&mut c, "19761", "phase=Completed");

@@ -19,16 +19,19 @@ fn history(quic: bool) {
     let plan = fs::read(&path).unwrap();
     c.ok(source, &["drain-node", "1", "19701"]);
     drain::wait_status(&c, source, "phase=Active");
-    let command = format!("move-leader 19701 1 {target} {target} 1");
+    let third = (1..=3).find(|id| *id != source && *id != target).unwrap();
+    // A separately admitted original intent can name another voter. The runner
+    // must recover that record instead of rebinding it to the drain owner.
+    let command = leadership::words("19701", "1", third, target).join(" ");
     let unread = UnobservedCommand::send(&c, source, &command);
     let (leader, completed) = leadership::status(&mut c, "19701", "phase=Completed");
     unread.disconnect();
     assert_eq!(leader, target, "{completed}");
-    let third = (1..=3).find(|id| *id != source && *id != target).unwrap();
-    let third_text = third.to_string();
     leader_request(
         &mut c,
-        &["move-leader", "19762", "1", &third_text, &third_text, "1"],
+        &leadership::words("19762", "1", target, third)
+            .each_ref()
+            .map(String::as_str),
     );
     let (leader, _) = leadership::status(&mut c, "19762", "phase=Completed");
     assert_eq!(leader, third);

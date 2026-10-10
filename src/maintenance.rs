@@ -15,12 +15,15 @@ pub const MAX_MAINTENANCE_RECORDS: usize = 1024;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LeadershipIntent {
     pub request: LeadershipTransferRequest,
+    /// Original caller-bound voter, preserved across admission/election/retry.
+    /// This identity does not assert current leadership at admission.
     pub source: PeerIdentity,
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum LeadershipPhase {
     Pending,
-    /// Historical successful handoff, not current leadership authority.
+    /// Historical achievement of target leadership, not current authority.
+    /// The target may already lead when the original intent is admitted.
     Completed {
         index: u64,
         term: u64,
@@ -185,17 +188,21 @@ impl<A: StateMachine> Maintenance<A> {
         }
         let intent = command.intent();
         let original = self.record(intent.request.operation);
+        if original.is_some_and(|r| r.intent != intent) {
+            return Err(ApplicationError::OperationConflict);
+        }
         if original.is_some_and(|r| r.intent == intent && r.phase != LeadershipPhase::Pending) {
             return Ok(());
         }
         match command {
             LeadershipCommand::Begin(_) if original.is_some_and(|r| r.intent == intent) => Ok(()),
             LeadershipCommand::Begin(_) => {
-                if local(core) != intent.source
-                    || core.membership().id() != intent.request.configuration
+                if core.membership().id() != intent.request.configuration
                     || core.membership().joint().is_some()
                     || core.membership().last_configuration_index() > core.state().commit_index
                     || intent.source == intent.request.target
+                    || core.membership().voter_store(intent.source.node)
+                        != Some(intent.source.store)
                     || core.membership().voter_store(intent.request.target.node)
                         != Some(intent.request.target.store)
                 {
@@ -210,7 +217,7 @@ impl<A: StateMachine> Maintenance<A> {
                     || core.membership().id() != intent.request.configuration
                     || core.membership().joint().is_some()
                     || term != log.hard_state.term
-                    || original.is_some_and(|r| term <= r.term)
+                    || original.is_some_and(|r| term < r.term)
                     || log.commit_index < index
                     || log.term_at(log.commit_index) != Some(term)
                 {

@@ -2362,7 +2362,7 @@ fn retryable_leader_response(args: &[&str], text: &str) -> bool {
         ["read"] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["resume-leadership" | "leadership-status", _] => matches!(text, "ERR NOT_LEADER\n" | "ERR NotRead(ReadNotReady)\n" | "ERR Unavailable(LeadershipChanged)\n"),
         ["add", _, _] => matches!(text, "ERR NOT_LEADER\n" | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"),
-        ["move-leader", _, _, _, _, _] => matches!(text,
+        ["move-leader", _, _, _, _, _, _, _, _] => matches!(text,
             "ERR NOT_LEADER\n"
             | "UNKNOWN LeadershipChanged; retry the same operation ID and delta\n"
             | "UNKNOWN authenticated read failed; retry the same operation ID and delta\n"

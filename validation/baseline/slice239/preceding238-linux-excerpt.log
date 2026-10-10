@@ -1,0 +1,35 @@
+2026-10-10T17:03:42.0288165Z ---- drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp stdout ----
+2026-10-10T17:03:42.0288484Z
+2026-10-10T17:03:42.0288798Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp' (6228) panicked at tests/counter_service.rs:379:9:
+2026-10-10T17:03:42.0289473Z node 1 ["configure", "19770"]: UNKNOWN LeadershipChanged; retry the same configuration operation ID and record
+2026-10-10T17:03:42.0289847Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:03:42.0288798Z thread 'drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp' (6228) panicked at tests/counter_service.rs:379:9:
+2026-10-10T17:03:42.0289473Z node 1 ["configure", "19770"]: UNKNOWN LeadershipChanged; retry the same configuration operation ID and record
+2026-10-10T17:03:42.0289847Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:03:42.0290167Z
+2026-10-10T17:03:42.0290346Z service log: ready node=1 peer=127.0.0.1:17809 transport=TcpTls command=127.0.0.1:17909
+2026-10-10T17:03:42.0317023Z ---- drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic stdout ----
+2026-10-10T17:03:42.0317240Z
+2026-10-10T17:03:42.0317479Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic' (6276) panicked at tests/counter_service.rs:379:9:
+2026-10-10T17:03:42.0318094Z node 1 ["configure", "19770"]: UNKNOWN LeadershipChanged; retry the same configuration operation ID and record
+2026-10-10T17:03:42.0318450Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:03:42.0317479Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic' (6276) panicked at tests/counter_service.rs:379:9:
+2026-10-10T17:03:42.0318094Z node 1 ["configure", "19770"]: UNKNOWN LeadershipChanged; retry the same configuration operation ID and record
+2026-10-10T17:03:42.0318450Z  Error: "request unsuccessful; preserve the operation ID and payload when retrying a write"
+2026-10-10T17:03:42.0318636Z
+2026-10-10T17:03:42.0318757Z service log: ready node=1 peer=127.0.0.1:17937 transport=Quic command=127.0.0.1:18037
+2026-10-10T17:03:42.0340943Z ---- drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp stdout ----
+2026-10-10T17:03:42.0341156Z
+2026-10-10T17:03:42.0341390Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp' (6305) panicked at tests/counter_service.rs:379:9:
+2026-10-10T17:03:42.0341945Z node 3 ["configure", "19770"]: UNKNOWN authenticated read failed; retry the same configuration operation ID and record
+2026-10-10T17:03:42.0342278Z  Error: "request interrupted after connection; automatic routing stopped"
+2026-10-10T17:03:42.0341390Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_tcp' (6305) panicked at tests/counter_service.rs:379:9:
+2026-10-10T17:03:42.0341945Z node 3 ["configure", "19770"]: UNKNOWN authenticated read failed; retry the same configuration operation ID and record
+2026-10-10T17:03:42.0342278Z  Error: "request interrupted after connection; automatic routing stopped"
+2026-10-10T17:03:42.0342431Z
+2026-10-10T17:03:42.0342552Z service log: ready node=3 peer=127.0.0.1:18067 transport=TcpTls command=127.0.0.1:18167
+2026-10-10T17:03:42.0363950Z test result: FAILED. 185 passed; 3 failed; 0 ignored; 0 measured; 0 filtered out; finished in 168.77s
+2026-10-10T17:03:42.0364145Z
+2026-10-10T17:03:42.0364244Z error: test failed, to rerun pass `--test counter_service`
+2026-10-10T17:03:42.0385775Z ##[error]Process completed with exit code 101.
+2026-10-10T17:03:42.0449168Z ##[group]Run actions/upload-artifact@v4

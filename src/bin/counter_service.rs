@@ -116,7 +116,7 @@ Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECT
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
 Maintenance profile: serve ... --service-access FILE --leadership-maintenance enabled; all peers use schema2/wire8.\n\
-Commands: move-leader OP CONFIG TARGET STORE INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
+Commands: move-leader OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET TARGET_STORE TARGET_INC; leadership-status OP; resume-leadership OP; cancel-leadership OP.\n\
 Retained-replica drain: --node-drain enabled requires the maintenance profile.\n\
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
 Membership drain: source uses --membership-drain FILE and all peers use --remote-admin-plan FILE; see docs/MAINTENANCE.md.\n\

@@ -154,7 +154,7 @@ pub(super) fn restore<A: CheckpointStateMachine>(
         let end_term = r.u64()?;
         let phase = match kind {
             0 if end == 0 && end_term == 0 => LeadershipPhase::Pending,
-            1 if end > index && end <= applied && end_term > term => LeadershipPhase::Completed {
+            1 if end > index && end <= applied && end_term >= term => LeadershipPhase::Completed {
                 index: end,
                 term: end_term,
             },

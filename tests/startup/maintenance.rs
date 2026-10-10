@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use voteboat::{maintenance::*, native::connect::*, raft::*, secure::PeerIdentity};
+#[path = "maintenance/binding.rs"]
+mod binding;
 #[path = "maintenance/drain.rs"]
 mod drain;
 #[path = "maintenance/drain_recovery.rs"]

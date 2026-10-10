@@ -36,6 +36,9 @@ impl Runner {
         let mut assignments = Vec::with_capacity(count);
         for offset in 0..count {
             let row = self.multi_row(offset, count)?;
+            if row.assignment.source.node.get() != self.endpoints[self.source].node {
+                return Err("group row belongs to a different drain source".into());
+            }
             if assignments
                 .last()
                 .is_some_and(|old: &Assignment| old.group >= row.assignment.group)

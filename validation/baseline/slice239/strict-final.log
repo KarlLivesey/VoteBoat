@@ -1,0 +1,7 @@
+Checking formatting and strict Clippy before push...
+    Checking voteboat v0.1.0 (<workspace>)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+    Checking voteboat v0.1.0 (<workspace>)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.33s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s

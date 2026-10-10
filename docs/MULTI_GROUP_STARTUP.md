@@ -177,7 +177,7 @@ checkpoints. The profile uses the existing wire8 transport.
 The [leadership commands](MAINTENANCE.md) accept an exact group prefix:
 
 ```sh
-voteboat-counter client 40000 1 group 7 3 move-leader 40001 9 2 2 1 --service-tls ./tls --principal 3
+voteboat-counter client 40000 1 group 7 3 move-leader 40001 9 1 1 1 2 2 1 --service-tls ./tls --principal 3
 voteboat-counter client 40000 2 group 7 3 leadership-status 40001 --service-tls ./tls --principal 3
 ```
 

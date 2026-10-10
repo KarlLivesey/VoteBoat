@@ -53,27 +53,40 @@ impl Runner {
         }
     }
     fn handoff(&mut self, peer: usize, row: &Assignment, voter: Voter) -> Result<bool, Failure> {
+        let Some(mut text) =
+            self.group_exchange(peer, row, &format!("leadership-status {}", self.operation))?
+        else {
+            return Ok(false);
+        };
         let command = format!(
-            "move-leader {} {} {} {} {}",
+            "move-leader {} {} {} {} {} {} {} {}",
             self.operation,
             row.configuration.get(),
+            row.source.node.get(),
+            row.source.store.id.get(),
+            row.source.store.incarnation.get(),
             voter.target,
             voter.store.id.get(),
             voter.store.incarnation.get()
         );
+        if text == "OK phase=Absent evidence=quorum_read\n" {
+            let Some(begun) = self.group_exchange(peer, row, &command)? else {
+                return Ok(false);
+            };
+            text = begun;
+        } else if field(&text, "evidence")? != "quorum_read" {
+            return Err("original handoff observation lacks quorum evidence".into());
+        }
+        self.check_handoff(&text, row, voter)?;
+        if field(&text, "phase")? == "Completed" {
+            // Completion preserves the original intent, not current leadership.
+            // The bound configuration proposal checks actual authority again.
+            return Ok(true);
+        }
+        let command = format!("resume-leadership {}", self.operation);
         if let Some(text) = self.group_exchange(peer, row, &command)? {
             self.check_handoff(&text, row, voter)?;
-            if field(&text, "phase")? == "Completed" {
-                // Completion preserves the original intent, not current leadership.
-                // The bound configuration proposal checks actual authority again.
-                return Ok(true);
-            }
-            if field(&text, "phase")? == "Pending" {
-                let command = format!("resume-leadership {}", self.operation);
-                if let Some(text) = self.group_exchange(peer, row, &command)? {
-                    self.check_handoff(&text, row, voter)?;
-                }
-            }
+            return Ok(field(&text, "phase")? == "Completed");
         }
         Ok(false)
     }
@@ -108,7 +121,6 @@ impl Runner {
             "completed" | "wait_for_commit" => Ok(()),
             "inconclusive_local_absence" | "finalize_requires_authorization" => {
                 if field(&text, "action")? == "inconclusive_local_absence"
-                    && self.endpoints[peer].node != voter.target
                     && !self.handoff(peer, row, voter)?
                 {
                     return Ok(());
@@ -137,7 +149,7 @@ mod tests {
         ]
         .map(str::to_owned);
         let runner = configured(10000, 3, &args).unwrap();
-        let row = Row::parse("OK sequence=1 operation=2 offset=0 groups=1 group=7 incarnation=3 configuration=9 done=false kind=voter target=1 store=1 store_incarnation=1 configuration_operation=7001", 1, 2, 0, 1).unwrap().assignment;
+        let row = Row::parse("OK sequence=1 operation=2 offset=0 groups=1 group=7 incarnation=3 configuration=9 done=false source=3 source_store=3 source_incarnation=1 kind=voter target=1 store=1 store_incarnation=1 configuration_operation=7001", 1, 2, 0, 1).unwrap().assignment;
         let voter = row.voter.unwrap();
         let receipt = "OK operation=2 source=3 configuration=9 target=1 target_store=1 target_incarnation=1 phase=Pending";
         runner.check_handoff(receipt, &row, voter).unwrap();

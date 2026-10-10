@@ -5,6 +5,8 @@ use support::*;
 use voteboat::{
     application::*, identity::*, log::*, maintenance::*, raft::*, secure::PeerIdentity,
 };
+#[path = "leadership_maintenance/binding.rs"]
+mod binding;
 fn intent(op: u128, target: u64) -> LeadershipIntent {
     LeadershipIntent {
         request: LeadershipTransferRequest {
@@ -261,7 +263,7 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
 fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
     use std::{cell::RefCell, rc::Rc};
     use voteboat::native::log_store::NativeLogStore;
-    for completing in [false, true] {
+    for (completing, completion_term) in [(false, 2), (true, 2), (true, 1)] {
         let io = ModelIo::default();
         let mut log =
             NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
@@ -290,11 +292,11 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
         let entry = if completing {
             command(
                 3,
-                2,
+                completion_term,
                 LeadershipCommand::Complete {
                     intent: intent(10, 2),
                     index: 2,
-                    term: 2,
+                    term: completion_term,
                 },
             )
         } else {
@@ -344,7 +346,7 @@ fn every_torn_native_record_recovers_old_or_complete_administrative_state() {
                 }
                 (true, true) => assert!(matches!(
                     record.unwrap().phase,
-                    LeadershipPhase::Completed { index: 3, term: 2 }
+                    LeadershipPhase::Completed { index: 3, term } if term == completion_term
                 )),
             }
         }

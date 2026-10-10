@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.77s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+
+thread 'maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp' (654800) panicked at tests/startup/maintenance.rs:205:10:
+called `Result::unwrap()` on an `Err` value: ClientRejected { reason: Application(InvalidCommand), request: ClientRequest { group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, operation: OperationId(23901), bytes: [86, 66, 77, 78, 84, 48, 48, 49, 1, 93, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0] } }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp ... FAILED
+
+thread 'maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint' (654799) panicked at tests/startup/maintenance.rs:205:10:
+called `Result::unwrap()` on an `Err` value: ClientRejected { reason: Application(InvalidCommand), request: ClientRequest { group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, operation: OperationId(23901), bytes: [86, 66, 77, 78, 84, 48, 48, 49, 1, 93, 93, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0] } }
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint ... FAILED
+
+failures:
+
+failures:
+    maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint
+    maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.24s
+
+error: test failed, to rerun pass `--test startup`

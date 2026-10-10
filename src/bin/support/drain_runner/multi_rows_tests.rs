@@ -50,7 +50,7 @@ fn progress_binds_identity_active_phase_count_and_plan_digest() {
     }
 }
 fn voter() -> &'static str {
-    "OK sequence=1 operation=2 offset=0 groups=2 group=7 incarnation=3 configuration=9 done=false kind=voter target=1 store=1 store_incarnation=1 configuration_operation=7001"
+    "OK sequence=1 operation=2 offset=0 groups=2 group=7 incarnation=3 configuration=9 done=false source=3 source_store=3 source_incarnation=1 kind=voter target=1 store=1 store_incarnation=1 configuration_operation=7001"
 }
 #[test]
 fn assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields() {
@@ -62,6 +62,11 @@ fn assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields() {
         voter().replace("group=7", "group=0"),
         voter().replace("incarnation=3", "incarnation=0"),
         voter().replace("configuration=9", "configuration=0"),
+        voter().replace("source=3", "source=0"),
+        voter().replace("source_store=3", "source_store=0"),
+        voter().replace("source_incarnation=1", "source_incarnation=0"),
+        voter().replace(" source_store=3", ""),
+        format!("{} source=3", voter()),
         voter().replace("kind=voter", "kind=unknown"),
         voter().replace("target=1", "target=0"),
         voter().replace("store=1", "store=0"),
@@ -84,7 +89,7 @@ fn assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields() {
             Row::parse(&changed, 1, 2, 0, 2).unwrap().assignment
         );
     }
-    let retained = "OK sequence=1 operation=2 offset=0 groups=2 group=1 incarnation=1 configuration=3 done=true kind=retained";
+    let retained = "OK sequence=1 operation=2 offset=0 groups=2 group=1 incarnation=1 configuration=3 done=true source=3 source_store=3 source_incarnation=1 kind=retained";
     assert!(Row::parse(retained, 1, 2, 0, 2)
         .unwrap()
         .assignment

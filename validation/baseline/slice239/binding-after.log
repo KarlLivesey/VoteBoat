@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.02s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp ... ok
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.55s

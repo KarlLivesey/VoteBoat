@@ -143,7 +143,7 @@ impl Driver {
             plan.next(journal, core).map_err(|e| format!("{e:?}"))?,
             MembershipDrainAction::Completed
         );
-        let mut text = format!("OK sequence={} operation={} offset={offset} groups={} group={} incarnation={} configuration={} done={done}", record.sequence, record.request.operation.get(), plan.assignments().len(), entry.group.id.get(), entry.group.incarnation.get(), entry.configuration.get());
+        let mut text = format!("OK sequence={} operation={} offset={offset} groups={} group={} incarnation={} configuration={} done={done} source={} source_store={} source_incarnation={}", record.sequence, record.request.operation.get(), plan.assignments().len(), entry.group.id.get(), entry.group.incarnation.get(), entry.configuration.get(), record.owner.node.get(), record.owner.store.id.get(), record.owner.store.incarnation.get());
         if let Some(voter) = plan.groups().iter().find(|g| g.group == entry.group) {
             text.push_str(&format!(
                 " kind=voter target={} store={} store_incarnation={} configuration_operation={}",

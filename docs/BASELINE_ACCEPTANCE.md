@@ -1,5 +1,25 @@
 # Baseline acceptance map
 
+Explicit original handoff binding: [slice239](../validation/baseline/slice239/README.md).
+The executable and Rust maintenance path retain the full source/target identity
+before admission. Any current leader may admit that bound request under its
+original stable configuration; an already-leading target can complete in the
+same term after current-term commitment. Conflicting applied or accepted intents
+are refused before proposal. Planned drains quorum-observe an existing original
+intent rather than rebuilding its source from the drain owner. Native TCP/QUIC
+WAL/checkpoint, unread replies, differing origins, same-term frame cuts and modeled
+accepted-suffix rollback cover this contract. Final maintenance9/startup45/unit43/
+drain44/leadership22 pass; default9/31/41/31/15 and core-only7 pass. Formatting and
+four strict Clippy profiles are zero; inventory108/conformance metadata unchanged.
+The final broad counter suite is189 pass/1 fail: peer-discovery startup reports
+AddrInUse. Earlier190/0 predates final runner composition and is not final acceptance.
+The next slice investigates listener reservations. Preceding238 Ubuntu185/3 fails
+three configure19770 uncertainty histories; macOS187/1 fails status-wait
+admission. These are preceding-source results, not current platform acceptance.
+The CLI shape and same-term completion semantics intentionally change; older
+records remain valid, but mixed-version/downgrade use is not supported. Functional
+Linux/macOS features remain ahead of performance/security; the full goal stays open.
+
 Planned drain after a later election: [slice238](../validation/baseline/slice238/README.md).
 Native TCP/QUIC preserve the original plan/journal, Completed handoff and data
 retries through a third-voter election, bound Joint/Final configuration, source

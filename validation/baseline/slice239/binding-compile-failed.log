@@ -1,0 +1,25 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+error[E0599]: no variant, associated function, or constant named `OperationConflict` found for enum `application::ApplicationError` in the current scope
+   --> src/maintenance/state.rs:209:54
+    |
+209 |                         return Err(ApplicationError::OperationConflict);
+    |                                                      ^^^^^^^^^^^^^^^^^ variant, associated function, or constant not found in `application::ApplicationError`
+    |
+   ::: src/application.rs:73:1
+    |
+ 73 | pub enum ApplicationError {
+    | ------------------------- variant, associated function, or constant `OperationConflict` not found for this enum
+
+error[E0599]: no variant, associated function, or constant named `OperationConflict` found for enum `application::ApplicationError` in the current scope
+   --> src/maintenance.rs:192:42
+    |
+192 |             return Err(ApplicationError::OperationConflict);
+    |                                          ^^^^^^^^^^^^^^^^^ variant, associated function, or constant not found in `application::ApplicationError`
+    |
+   ::: src/application.rs:73:1
+    |
+ 73 | pub enum ApplicationError {
+    | ------------------------- variant, associated function, or constant `OperationConflict` not found for this enum
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (lib) due to 2 previous errors

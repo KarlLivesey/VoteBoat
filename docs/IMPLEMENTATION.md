@@ -1032,25 +1032,50 @@ UNKNOWN LeadershipChanged; directory/transfer are unrun. Its Linux job1142632679
 is still live at observation. These are source-bound earlier results, not238
 platform acceptance. Feature/Linux/macOS work stays ahead of tuning/security.
 
-Current: close original handoff source binding before the record applies.
-Purpose: advance P4/service Linux/macOS feature completion. Depend on exact source236
-Linux114261132503 fresh19769 rejection, durable LeadershipIntent, proposal-context
-and accepted/applied recovery contracts. Before editing, define the complete
-request identity rather than reconstructing its source from the current leader.
-LeadershipIntent.source and DrainRecord.owner remain distinct. Interface changes
-are authorized; prefer an explicit bound request to compatibility scaffolding.
-Completion requires unchanged original intent through unknown reply, election,
-rollback/replay, exact conflict refusal, native TCP/QUIC/default checks and zero
-strict diagnostics. A role hint or invalid changed intent cannot imply success.
+Explicit original handoff binding: [slice239](../validation/baseline/slice239/README.md).
+The executable and Rust maintenance path retain the full source/target identity
+before admission. Any current leader may admit that bound request under its
+original stable configuration; an already-leading target can complete in the
+same term after current-term commitment. Conflicting applied or accepted intents
+are refused before proposal. Planned drains quorum-observe an existing original
+intent rather than rebuilding its source from the drain owner. Native TCP/QUIC
+WAL/checkpoint, unread replies, differing origins, same-term frame cuts and modeled
+accepted-suffix rollback cover this contract. Final maintenance9/startup45/unit43/
+drain44/leadership22 pass; default9/31/41/31/15 and core-only7 pass. Formatting and
+four strict Clippy profiles are zero; inventory108/conformance metadata unchanged.
+The final broad counter suite is189 pass/1 fail: peer-discovery startup reports
+AddrInUse. Earlier190/0 predates final runner composition and is not final acceptance.
+The next slice investigates listener reservations. Preceding238 Ubuntu185/3 fails
+three configure19770 uncertainty histories; macOS187/1 fails status-wait
+admission. These are preceding-source results, not current platform acceptance.
+The CLI shape and same-term completion semantics intentionally change; older
+records remain valid, but mixed-version/downgrade use is not supported. Functional
+Linux/macOS features remain ahead of performance/security; the full goal stays open.
 
-Next: close concrete startup reservation and sampled data/read assumptions.
-Purpose: advance functional Linux/macOS operator acceptance. Depend on retained
-source235 AddrInUse, source23619901 NOT_LEADER and source23719770/91001 uncertainty
-evidence and existing listener, original-write/configuration and cancellation
-contracts. Select one cause before editing;
-completion requires a reproducible reservation/ownership or role-change history,
-correct bounded original request recovery and cleanup, with zero strict diagnostics.
-Do not widen deadlines or accept unrelated errors; CI remains background.
+Macro review239: closes the selected before-admission source-binding dependency
+for P4/service usability. It does not close full operator/platform acceptance:
+the final broad suite exposes startup AddrInUse, and preceding-source CI retains
+configuration/read-wait uncertainty cases. No new provider or Raft protocol; the
+existing public maintenance contract gains an explicit OperationConflict refusal.
+Serialized fields are unchanged, with an expanded same-term completion grammar.
+
+Current240: diagnose and correct listener-startup reservation failure.
+Purpose: advance functional Linux/macOS service acceptance. Depend on final239
+peer-discovery node2 AddrInUse, retained native logs and the existing fixture port
+reservation/child ownership contracts. Inspect actual failing addresses, local
+port allocation and reservation release before selecting a fix; do not assume
+an older macOS directory failure has the same cause. Completion requires a
+reproduced ownership/allocation history, a focused fix and child/socket cleanup,
+relevant executable checks and zero formatting/four strict Clippy diagnostics.
+A helper is justified only to expose or preserve the actual reserved resource.
+
+Next: close original configuration/write and status-wait recovery assumptions.
+Purpose: advance P4 and functional Linux/macOS operator acceptance. Depend on
+source237/238 configure19770 and write91001 uncertainty, source23619901 role loss,
+source238 macOS96301 wait admission, and original-operation/cancellation contracts.
+Select one retained failure and identify its cause before editing. Completion
+requires bounded unchanged-ID recovery or exact owned-ticket release, original
+receipts/data and cleanup evidence without widened deadlines or swallowed errors.
 
 Following: close one required operator/deployment integration gap. Purpose:
 complete usable service, membership and split/merge feature integration. Depend
@@ -1059,6 +1084,56 @@ actual missing end-to-end capability before adding helpers. Completion requires
 public executable/Rust usage, original-operation recovery/cleanup evidence and
 Linux/macOS checks with aligned contracts. Full roadmap remains active; tuning,
 security, optional global orchestration, P8 and Windows stay separate.
+
+### Slice239 schema plan — explicitly bind a handoff before admission
+
+Previous goal turn progressed:238 implements and pushes01a19ef, with native
+later-election drain/cold recovery, all-feature counter188/unit43/drain44,
+default drain31/unit41 and zero strict diagnostics. The worktree is clean.
+Current source23619769 failure follows a sampled source changing before Begin:
+the receiving target infers source==target and rejects the original request.
+
+Shape/API: move-leader takes OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET
+TARGET_STORE TARGET_INC. Parse both exact PeerIdentity values; never reconstruct
+source from the receiver or an applied-record lookup. Keep the typed
+LeadershipIntent and serialized fields. Its source is an original caller-bound
+voter identity, not evidence that it still leads. First Begin may be admitted by
+any current leader under the original stable, committed configuration, with both
+exact voter identities validated and source!=target. Existing terminal/Pending
+retries preserve the full original intent; changed bindings are conflicts.
+
+State/effects: if the target already leads, commit Begin and then Complete in its
+current term. Completion still requires that exact target's current-term committed
+prefix, original applied index/intent, current stable configuration and a committed/
+applied completion result. The completion term may equal the Begin term; it cannot
+precede it. Align proposal, state-machine apply and checkpoint validation. This
+changes administrative completion semantics, not core Raft transfer/quorum rules.
+Accepted/queued Begins with the same operation and different intent must be refused
+before proposal, preserving the immutable binding during partial progress.
+Runner composition first observes the original handoff with a quorum read. Resume
+an existing intent without rebuilding its source from the drain owner; only exact
+quorum absence permits a new Begin using the plan row's full identity. An existing
+origin can differ from the node being evacuated. A target role hint cannot skip
+original completion before configuration.
+
+Ownership/restart: no new runtime or provider. CLI callers retain all fields across
+unknown replies; original plan rows expose their source store identity for runner
+requests. Term/role changes cannot silently rebind. WAL/checkpoint recovery must
+retain same-term terminal evidence, deduplication and source/target identities.
+Existing older records remain valid; older implementations cannot consume the new
+same-term outcome, so mixed-version/downgrade compatibility is not claimed. Native
+test owners close/join services and preserve failed evidence.
+
+Acceptance: native TCP/QUIC Rust and CLI histories capture an original source,
+elect the intended target before first admission, then submit/retry the exact
+binding without another election. Require same-term completion and original
+receipt/data through WAL/checkpoint reopen. Changed source/store/incarnation/target,
+pending conflicting bindings, malformed fields and wrong completion authority/
+term must fail. Old implementation must reject the remote-source Begin. Update
+executable callers, operator docs and the existing contract inventory together;
+run relevant full/default tests and formatting/four strict profiles. This advances
+P4/service Linux/macOS usability; concrete original configuration/write recovery
+and remaining operator/deployment requirements follow. Performance/security later.
 
 ### Slice238 schema plan — continue a completed handoff after another election
 

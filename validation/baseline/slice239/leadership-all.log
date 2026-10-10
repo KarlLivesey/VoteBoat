@@ -1,0 +1,28 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 22 tests
+test leadership::follower::explicit_resume_follower_and_read_refusals_allow_original_endpoint_selection ... ok
+test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+test leadership::follower::resume_modified_or_unrelated_failures_remain_terminal ... ok
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+test leadership::binding::explicit_original_handoff_survives_prior_target_election_tcp ... ok
+test write_recovery::tests::existing_leadership_and_read_interruptions_retain_original_identity ... ok
+test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_tcp ... ok
+test leadership::follower::original_source_follower_resume_preserves_historical_intent_quic ... ok
+test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+test leadership::cancellation::admitted_cancel_survives_source_loss_and_original_retry_quic ... ok
+test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+test leadership::binding::explicit_original_handoff_survives_prior_target_election_quic_checkpoint ... ok
+test leadership::follower::original_source_follower_resume_preserves_historical_intent_tcp ... ok
+test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic ... ok
+test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_tcp ... ok
+test group_leadership::busy::original_handoff_replay_after_busy_preserves_cancelled_record_quic ... ok
+test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 168 filtered out; finished in 16.33s

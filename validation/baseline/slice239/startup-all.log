@@ -1,0 +1,53 @@
+    Blocking waiting for file lock on build directory
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.67s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 45 tests
+test discovery::prepared_member_rejects_create_before_creating_files ... ok
+test discovery::prepared_shared_groups_reject_missing_application_before_creating_files ... ok
+test discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application ... ok
+test invalid_startup_is_side_effect_free_and_returns_the_host_application ... ok
+test discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts ... ok
+test discovery::abandoned_prepared_startup_closes_workers_and_releases_listener ... ok
+test host_application_and_non_demo_identities_write_and_recover_through_startup ... ok
+test explicit_startup_timers_validate_before_files_and_use_host_deadlines ... ok
+test late_constructor_failure_returns_application_and_joins_every_started_worker ... ok
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test discovery::tcp_prepared_member_recovers_with_host_discovery ... ok
+test multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers ... ok
+test discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic ... ok
+test native_administration_receipts_commit_joint_and_final_and_reopen_exact_history ... ok
+test peer_rotation::material_digest_binds_local_tls_and_every_peer_field ... ok
+test peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application ... ok
+test peer_rotation::rejected_rotating_quic_owner_releases_socket_and_workers ... ok
+test peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers ... ok
+test peer_rotation::static_and_member_startup_install_the_recorded_generation ... ok
+test quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers ... ok
+test quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test discovery::quic_prepared_member_recovers_with_host_discovery ... ok
+test startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines ... ok
+test discovery::quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts ... ok
+test stopping_one_startup_does_not_stop_another_or_the_shared_host_wake ... ok
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp ... ok
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+test maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint ... ok
+test tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test discovery::quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints ... ok
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... ok
+test multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group ... ok
+test multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups ... ok
+test multi::peer_rotation::quic_peer_rotation_checkpoint_and_unobserved_rollout_recover_all_groups ... ok
+
+test result: ok. 45 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.57s

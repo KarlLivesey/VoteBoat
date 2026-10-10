@@ -34,7 +34,8 @@ fn history(quic: bool) {
     begin(&mut c, ("7", "3", "9"), OP, target);
     let (_, pending) = status(&mut c, ("7", "3"), OP, "phase=Pending");
     let target_text = target.to_string();
-    let words = ["move-leader", OP, "9", &target_text, &target_text, "1"];
+    let bound = leadership::words(OP, "9", source, target);
+    let words = bound.each_ref().map(String::as_str);
     let mut scoped = vec!["group", "7", "3"];
     scoped.extend_from_slice(&words);
     observe_busy(&mut c, &scoped);
@@ -56,6 +57,9 @@ fn history(quic: bool) {
             "move-leader",
             OP,
             "9",
+            &source.to_string(),
+            &source.to_string(),
+            "1",
             &target_text,
             "999",
             "1",
@@ -64,7 +68,7 @@ fn history(quic: bool) {
     assert!(!conflict.status.success());
     assert!(String::from_utf8(conflict.stdout)
         .unwrap()
-        .contains("InvalidCommand"));
+        .contains("OperationConflict"));
     assert_eq!(status(&mut c, ("7", "3"), OP, "phase=Cancelled").1, saved);
     status(&mut c, ("8", "2"), OP, "phase=Absent");
     let checkpoint = quic.then(|| historical::checkpoint(&mut c));

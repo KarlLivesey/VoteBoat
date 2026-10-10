@@ -34,7 +34,7 @@ impl<A: StateMachine> Maintenance<A> {
                 if r.phase != LeadershipPhase::Pending {
                     r
                 } else {
-                    if term != entry.term || term <= r.term {
+                    if term != entry.term || term < r.term {
                         return Err(ApplicationError::InvalidCommand);
                     }
                     LeadershipRecord {
@@ -196,18 +196,31 @@ where
     ) -> Result<usize, ApplicationError> {
         let mut data = Vec::new();
         let mut reserved = BTreeSet::new();
+        let requested = decode(bytes)?;
+        let requested_intent = match &requested {
+            Envelope::Control(c) => Some(c.intent()),
+            Envelope::Data(_) => None,
+        };
+        if requested_intent.is_some_and(|i| {
+            self.record(i.request.operation)
+                .is_some_and(|r| r.intent != i)
+        }) {
+            return Err(ApplicationError::OperationConflict);
+        }
         for (id, bytes) in pending {
             match decode(bytes)? {
                 Envelope::Data(bytes) => data.push((id, bytes)),
-                Envelope::Control(LeadershipCommand::Begin(i))
-                    if !self.records.contains_key(&i.request.operation) =>
-                {
-                    reserved.insert(i.request.operation);
+                Envelope::Control(c) => {
+                    if id == operation && requested_intent.is_some_and(|i| i != c.intent()) {
+                        return Err(ApplicationError::OperationConflict);
+                    }
+                    if matches!(c, LeadershipCommand::Begin(_)) && !self.records.contains_key(&id) {
+                        reserved.insert(id);
+                    }
                 }
-                _ => (),
             }
         }
-        let nested = match decode(bytes)? {
+        let nested = match requested {
             Envelope::Data(bytes) => {
                 self.inner
                     .validate_proposal(operation, bytes, data.into_iter())?

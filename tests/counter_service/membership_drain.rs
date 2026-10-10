@@ -18,7 +18,6 @@ fn preparation_identity(text: &str, original: usize, target: usize) {
 }
 
 fn prepare_source_leader(c: &mut Cluster, source: usize) {
-    let target = source.to_string();
     let end = Instant::now() + Duration::from_secs(15);
     let mut original = None;
     loop {
@@ -50,7 +49,9 @@ fn prepare_source_leader(c: &mut Cluster, source: usize) {
         }
         let output = c.request(
             leader,
-            &["move-leader", "19750", "1", &target, &target, "1"],
+            &leadership::words("19750", "1", leader, source)
+                .each_ref()
+                .map(String::as_str),
         );
         let text = String::from_utf8(output.stdout).unwrap();
         if output.status.success() {

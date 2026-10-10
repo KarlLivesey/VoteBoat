@@ -1,0 +1,31 @@
+Before production changes (binding-before.log,0/2,exit101):
+cargo +stable test --locked --offline --all-features --test startup original_handoff_binding
+
+Intermediate differing-origin runner (runner-binding-before.log,0/2,exit101):
+cargo +stable test --locked --offline --all-features --test counter_service original_planned_drain_survives_another_election -- --nocapture
+
+Final all-feature checks:
+cargo +stable test --locked --offline --all-features --test leadership_maintenance
+cargo +stable test --locked --offline --all-features --test startup
+cargo +stable test --locked --offline --all-features --bin voteboat-counter
+cargo +stable test --locked --offline --all-features --test counter_service
+Final broad counter-final.log is189/1,exit101 AddrInUse; counter-all.log190/0 is earlier source.
+cargo +stable test --locked --offline --all-features --test counter_service drain
+cargo +stable test --locked --offline --all-features --test counter_service leadership
+
+Sequential default/core checks:
+cargo +stable test --locked --offline --test leadership_maintenance
+cargo +stable test --locked --offline --test startup
+cargo +stable test --locked --offline --bin voteboat-counter
+cargo +stable test --locked --offline --test counter_service drain
+cargo +stable test --locked --offline --test counter_service leadership
+cargo +stable test --locked --offline --no-default-features --test leadership_maintenance
+
+cargo +stable fmt --all -- --check
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+
+gh run view 38069931677 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114265100046/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114265100183/logs

@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.21s
+     Running tests/leadership_maintenance.rs (target/debug/deps/leadership_maintenance-f76a011072fa2e47)
+
+running 7 tests
+test binding::pending_and_applied_bindings_refuse_changed_identity_before_admission ... ok
+test binding::same_term_completion_recovers_and_older_completion_cannot_escape ... ok
+test conflicting_intent_and_second_pending_request_cannot_replace_original ... ok
+test capacity_reserves_terminal_updates_and_inner_exhaustion_cannot_block_them ... ok
+test data_and_administration_retries_remain_independent_and_survive_checkpoint ... ok
+test command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles ... ok
+test malformed_batches_and_checkpoint_refusals_leave_the_original_state_unchanged ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

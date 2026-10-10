@@ -95,20 +95,31 @@ enrolled store still requires an explicit migration.
 Use the ordinary authenticated client flags, selecting a current leader node:
 
 ```text
-client BASE NODE move-leader OP CONFIG TARGET STORE INC --service-tls TLS_DIR --principal ADMIN
+client BASE NODE move-leader OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET TARGET_STORE TARGET_INC --service-tls TLS_DIR --principal ADMIN
 client BASE NODE leadership-status OP --service-tls TLS_DIR --principal READER
 client BASE NODE resume-leadership OP --service-tls TLS_DIR --principal ADMIN
 client BASE NODE cancel-leadership OP --service-tls TLS_DIR --principal ADMIN
 ```
 
-`OP` is a nonzero u128. `CONFIG` is the expected stable configuration; `TARGET`,
-`STORE` and `INC` are the exact target identity, not an endpoint. For the initial
-demo configuration, CONFIG and INC are 1 and STORE equals TARGET. New intent
-binds the current source; retries preserve its original recorded source.
+`OP` is a nonzero u128. `CONFIG` is the expected stable configuration. Source and
+target each bind an exact node/store/incarnation, not an endpoint. Capture both
+identities before the first request and repeat all fields after an unknown result.
+For the initial demo, CONFIG and both incarnations are1 and each store equals its
+node. Source is the original caller-bound voter; it need not still lead when the
+request arrives. Both peers must belong to that exact configuration at first
+admission. The command's receiver must be the current leader.
 The automatic `client ... auto` route still accepts only data read/add commands.
 
-Start returns the applied Pending record, not handoff success. All replicas can
-resume that durable intent after restart. Each local leader gets one attempt per
+Start returns the applied Pending record, not completion. If the bound target
+already leads, it commits/applies completion in its current term without another
+election. Completion still requires the exact target and a current-term committed
+prefix; its term cannot precede Begin. Original source/target/configuration fields
+remain immutable. A changed applied or pending binding reports OperationConflict
+before admission. Serialized fields are unchanged, but older implementations
+cannot consume the new same-term completion outcome; mixed-version operation and
+downgrades are not supported by this development profile.
+
+All replicas can resume that durable intent after restart. Each local leader gets one attempt per
 intent/term, bounded to five seconds, including an internal completion wait.
 Timeout releases local quiescence and request ownership, preserving Pending.
 Resume authorizes another local attempt and returns a fresh status read. Status
@@ -279,8 +290,11 @@ to stop only after `ready=true` and the source rechecks its own stop conditions.
 If the original handoff is Completed but another voter now leads, the runner
 preserves that receipt and submits the bound configuration to the current leader.
 Configuration admission checks actual authority again. Historical completion
-alone does not authorize source shutdown. The handoff's initiating leader can
-differ from the node being drained after restart.
+alone does not authorize source shutdown. The handoff's original source identity can
+differ from the node being drained. The runner quorum-observes an existing
+original intent and resumes it without reconstructing that source. Only exact
+quorum absence permits a new Begin using the full plan-row identity; a target
+role hint cannot skip original handoff completion.
 
 The runner makes at most128 requests within45 seconds, with five-second request
 deadlines and one owned connection at a time. It is a foreground process; no
@@ -456,7 +470,8 @@ Send these commands with authenticated `client BASE SOURCE ...`:
    acknowledging it and gating new local work. All original configurations
    must be committed and stable at first acceptance.
 2. `drain-group SEQUENCE OP OFFSET` returns one original assignment, its target
-   and configuration operation where applicable, and its currently observed
+   and configuration operation where applicable, the original source's exact
+   node/store/incarnation, and its currently observed
    completion. Offsets are zero-based; iterate the reported group count.
 3. For each voter group, use the existing group-prefixed `move-leader`,
    `leadership-status`, `configure` and `configuration-status` commands at

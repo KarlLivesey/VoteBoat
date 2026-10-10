@@ -39,11 +39,11 @@ fn history(quic: bool) {
     let (leader, recovered) = status(&mut c, ("7", "3"), OP, "phase=Completed");
     assert_ne!(leader, target, "the handoff target has no live process");
     assert_eq!(recovered, completed);
-    let target_text = target.to_string();
+    let bound = leadership::words(OP, "9", source, target);
     for words in [
         vec!["resume-leadership", OP],
         vec!["cancel-leadership", OP],
-        vec!["move-leader", OP, "9", &target_text, &target_text, "1"],
+        bound.iter().map(String::as_str).collect(),
     ] {
         let reply = command(&mut c, ("7", "3"), &words);
         assert_eq!(

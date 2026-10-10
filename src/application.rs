@@ -73,6 +73,8 @@ pub struct CounterReceipt {
 pub enum ApplicationError {
     IndexGap,
     InvalidCommand,
+    /// A retained or pending operation has a different immutable binding.
+    OperationConflict,
     DedupCapacity,
     ReceiptBudget,
     NotApplied,

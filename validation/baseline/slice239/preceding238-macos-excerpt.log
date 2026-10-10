@@ -1,0 +1,15 @@
+2026-10-10T17:06:09.9434040Z ---- leadership::disconnected_and_expired_status_waits_release_original_tickets stdout ----
+2026-10-10T17:06:09.9442950Z
+2026-10-10T17:06:09.9444820Z thread 'leadership::disconnected_and_expired_status_waits_release_original_tickets' (28621) panicked at tests/counter_service/leadership.rs:340:9:
+2026-10-10T17:06:09.9447290Z missing leadership status admitted operation=96301: ready node=2 peer=127.0.0.1:27154 transport=TcpTls command=127.0.0.1:27254
+2026-10-10T17:06:09.9448800Z leadership status admitted operation=96300
+2026-10-10T17:06:09.9444820Z thread 'leadership::disconnected_and_expired_status_waits_release_original_tickets' (28621) panicked at tests/counter_service/leadership.rs:340:9:
+2026-10-10T17:06:09.9447290Z missing leadership status admitted operation=96301: ready node=2 peer=127.0.0.1:27154 transport=TcpTls command=127.0.0.1:27254
+2026-10-10T17:06:09.9448800Z leadership status admitted operation=96300
+2026-10-10T17:06:09.9454070Z command observation_cancelled pending=Read(ReadInvocationTicket { binding: ReadInvocationBinding { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, generation: ReadInvocationGeneration(1) }, sequence: 1, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, request: ReadRequestId(1) }) reason=channel
+2026-10-10T17:06:09.9458540Z
+2026-10-10T17:06:09.9582950Z test result: FAILED. 187 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 288.73s
+2026-10-10T17:06:09.9583330Z
+2026-10-10T17:06:09.9583450Z error: test failed, to rerun pass `--test counter_service`
+2026-10-10T17:06:09.9629810Z ##[error]Process completed with exit code 101.
+2026-10-10T17:06:09.9856700Z ##[group]Run actions/upload-artifact@v4

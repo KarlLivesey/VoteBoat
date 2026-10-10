@@ -86,47 +86,44 @@ fn propose_for(
             e => format!("{e:?}"),
         })
 }
-fn begin(service: &mut Service, group: GroupIdentity, words: &[&str]) -> Result<Phase, String> {
-    let ["move-leader", op, config, target, store, incarnation] = words else {
-        return Err("expected move-leader OP CONFIG TARGET STORE INC".into());
-    };
-    let op = operation(op)?;
-    let core = core(service, group)?;
-    let source = application_for(service, group)?.record(op).map_or(
-        PeerIdentity {
-            node: core.local_node(),
-            store: core.storage_binding().identity,
+fn peer(node: &str, store: &str, incarnation: &str) -> Result<PeerIdentity, String> {
+    Ok(PeerIdentity {
+        node: node
+            .parse()
+            .ok()
+            .and_then(NodeId::new)
+            .ok_or("invalid peer node")?,
+        store: StoreIdentity {
+            id: store
+                .parse()
+                .ok()
+                .and_then(StoreId::new)
+                .ok_or("invalid peer store")?,
+            incarnation: incarnation
+                .parse()
+                .ok()
+                .and_then(StoreIncarnation::new)
+                .ok_or("invalid peer incarnation")?,
         },
-        |r| r.intent.source,
-    );
+    })
+}
+fn begin(service: &mut Service, group: GroupIdentity, words: &[&str]) -> Result<Phase, String> {
+    let ["move-leader", op, config, source, source_store, source_inc, target, store, incarnation] =
+        words
+    else {
+        return Err("expected move-leader OP CONFIG SOURCE SOURCE_STORE SOURCE_INC TARGET TARGET_STORE TARGET_INC".into());
+    };
+    core(service, group)?;
     let intent = LeadershipIntent {
-        source,
+        source: peer(source, source_store, source_inc)?,
         request: LeadershipTransferRequest {
-            operation: op,
+            operation: operation(op)?,
             configuration: config
                 .parse()
                 .ok()
                 .and_then(ConfigurationId::new)
                 .ok_or("invalid configuration")?,
-            target: PeerIdentity {
-                node: target
-                    .parse()
-                    .ok()
-                    .and_then(NodeId::new)
-                    .ok_or("invalid target")?,
-                store: StoreIdentity {
-                    id: store
-                        .parse()
-                        .ok()
-                        .and_then(StoreId::new)
-                        .ok_or("invalid store")?,
-                    incarnation: incarnation
-                        .parse()
-                        .ok()
-                        .and_then(StoreIncarnation::new)
-                        .ok_or("invalid incarnation")?,
-                },
-            },
+            target: peer(target, store, incarnation)?,
         },
     };
     submit(service, group, LeadershipCommand::Begin(intent))

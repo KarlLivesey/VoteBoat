@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+#[path = "leadership/binding.rs"]
+mod binding;
 #[path = "leadership/cancellation.rs"]
 mod cancellation;
 #[path = "leadership/follower.rs"]
@@ -34,15 +36,25 @@ fn stop_one(c: &mut Cluster, id: usize) {
 fn begin(c: &Cluster, source: usize, target: usize, op: &str) -> String {
     c.ok(
         source,
-        &[
-            "move-leader",
-            op,
-            "1",
-            &target.to_string(),
-            &target.to_string(),
-            "1",
-        ],
+        &words(op, "1", source, target)
+            .each_ref()
+            .map(String::as_str),
     )
+}
+pub(super) fn words(op: &str, config: &str, source: usize, target: usize) -> [String; 9] {
+    // These fixture voters have store=node and incarnation1. Freeze both peers
+    // before routing/retry; the selected receiver is not the intent's source.
+    [
+        "move-leader".into(),
+        op.into(),
+        config.into(),
+        source.to_string(),
+        source.to_string(),
+        "1".into(),
+        target.to_string(),
+        target.to_string(),
+        "1".into(),
+    ]
 }
 pub(super) fn status(c: &mut Cluster, op: &str, phase: &str) -> (usize, String) {
     let end = Instant::now() + Duration::from_secs(15);
@@ -129,7 +141,12 @@ fn history(quic: bool) {
     let (leader, completed) = status(&mut c, op, "phase=Completed");
     check_identity(&completed, op, source, target);
     assert!(completed.contains("historical=true"));
-    let retry = begin(&c, leader, target, op);
+    let retry = leader_request(
+        &mut c,
+        &words(op, "1", source, target)
+            .each_ref()
+            .map(String::as_str),
+    );
     assert_eq!(retry.trim(), completed.split(" evidence=").next().unwrap());
     assert!(c
         .ok(leader, &["resume-leadership", op])
@@ -158,7 +175,7 @@ fn authenticated_cancel_deadline_and_permission_boundaries() {
     for principal in [1, 2] {
         c.command_principal = Some(principal);
         for command in [
-            vec!["move-leader", "96100", "1", "2", "2", "1"],
+            vec!["move-leader", "96100", "1", "1", "1", "1", "2", "2", "1"],
             vec!["resume-leadership", "96100"],
             vec!["cancel-leadership", "96100"],
         ] {
@@ -224,7 +241,8 @@ fn lost_begin_reply_retains_exact_intent_and_data() {
     let mut c = cluster(false);
     let source = c.leader();
     let target = source % 3 + 1;
-    let command = format!("move-leader 96200 1 {target} {target} 1");
+    let original = words("96200", "1", source, target);
+    let command = original.join(" ");
     let lost = UnobservedCommand::send(&c, source, &command);
     // Never consume the application reply. Closing the socket releases the wait;
     // accepted work may still commit, so the exact original command is retried.
@@ -232,17 +250,7 @@ fn lost_begin_reply_retains_exact_intent_and_data() {
     let end = Instant::now() + Duration::from_secs(15);
     loop {
         let leader = c.leader();
-        let reply = c.request(
-            leader,
-            &[
-                "move-leader",
-                "96200",
-                "1",
-                &target.to_string(),
-                &target.to_string(),
-                "1",
-            ],
-        );
+        let reply = c.request(leader, &original.each_ref().map(String::as_str));
         if reply.status.success() {
             break;
         }

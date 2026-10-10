@@ -48,6 +48,7 @@ pub(super) struct Voter {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(super) struct Assignment {
     pub group: GroupIdentity,
+    pub source: voteboat::secure::PeerIdentity,
     pub configuration: ConfigurationId,
     pub voter: Option<Voter>,
 }
@@ -105,6 +106,18 @@ impl Row {
         Ok(Self {
             assignment: Assignment {
                 group,
+                source: voteboat::secure::PeerIdentity {
+                    node: NodeId::new(field(text, "source")?.parse()?)
+                        .ok_or("invalid row source")?,
+                    store: StoreIdentity {
+                        id: StoreId::new(field(text, "source_store")?.parse()?)
+                            .ok_or("invalid row source store")?,
+                        incarnation: StoreIncarnation::new(
+                            field(text, "source_incarnation")?.parse()?,
+                        )
+                        .ok_or("invalid row source incarnation")?,
+                    },
+                },
                 configuration,
                 voter,
             },

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "base_revision": "01a19eff02efd8338148996d84b09b566c7fe095",
+  "scope": "Immutable original handoff before admission and existing-origin drain composition",
+  "production_behavior_change": true,
+  "new_public_seam": false,
+  "public_contract_change": "Explicit ApplicationError::OperationConflict and full source CLI binding",
+  "core_protocol_change": false,
+  "persistent_grammar_change": "Same-term completion allowed; field layout unchanged; mixed-version/downgrade unsupported",
+  "validation": {
+    "before": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101
+    },
+    "intermediate_runner": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101,
+      "cause": "Reconstructed drain-owner source conflicts with retained original"
+    },
+    "earlier_counter": {
+      "pass": 190,
+      "fail": 0,
+      "limit": "Before final runner composition"
+    },
+    "final_counter": {
+      "pass": 189,
+      "fail": 1,
+      "exit": 101,
+      "cause": "peer-discovery node2 AddrInUse at filesystem/listener startup"
+    },
+    "maintenance_all": 9,
+    "startup_all": 45,
+    "unit_all": 43,
+    "drain_all": 44,
+    "leadership_all": 22,
+    "maintenance_default": 9,
+    "startup_default": 31,
+    "unit_default": 41,
+    "drain_default": 31,
+    "leadership_default": 15,
+    "maintenance_core": 7,
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "preceding_ci": {
+    "run": 38069931677,
+    "source": "01a19eff02efd8338148996d84b09b566c7fe095",
+    "linux_job": 114265100046,
+    "macos_job": 114265100183,
+    "current_source_acceptance": false
+  },
+  "source_manifest_sha256": "df961975d0222241f23c5c9bcfb231bf458b3b1bfe8a9a73bfd1c06854148f9a",
+  "publication": {
+    "redacted_workspace_logs": 20,
+    "private_logs": "target/slice239-unpublished-logs",
+    "public_log_normalization": "Workspace redaction, trailing whitespace and final blank lines removed; original captures retained privately"
+  },
+  "limits": "Finite local Linux histories and modeled native file I/O; final broad startup failure open, no current macOS, general rollback/power failure, full P0-P7, performance or security completion"
+}

@@ -81,11 +81,12 @@ pub(super) fn status(c: &Cluster, expected: &str) -> String {
 fn handoff(c: &mut Cluster, group: &str, incarnation: &str, config: &str, target: usize) {
     let leader = groups::leader(c, group, incarnation);
     if leader != target {
-        let n = target.to_string();
         group_leadership::command(
             c,
             (group, incarnation),
-            &["move-leader", OP, config, &n, &n, "1"],
+            &leadership::words(OP, config, leader, target)
+                .each_ref()
+                .map(String::as_str),
         );
     }
     let deadline = Instant::now() + Duration::from_secs(15);
