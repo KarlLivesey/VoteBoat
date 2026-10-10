@@ -294,3 +294,12 @@ original split, retained handoff, imported merge and retirement. Missing origina
 locator history fails retirement, and native modeled journal cuts cover all four
 owner profiles plus both imported retirement formats. Repeated metadata exports
 and native TCP/QUIC authority-move composition remain open.
+
+Slice156c3 adds explicit repeated metadata source/import/serving profiles. Selected
+embedding histories move A->B->C->D, preserve original A/B/C operations and creation
+provenance, retain older rejected/control IDs and permit fresh destination writes.
+The current-domain fence may numerically coincide with an older-domain command.
+Complete checkpoint restore keeps those domains separate. Selected native journal
+cuts cover repeat freeze/import/publication/activation and original retries. Profile,
+export and nesting bounds refuse before ownership transfer. Native TCP/QUIC
+metadata-move composition and the wider roadmap exits remain open.

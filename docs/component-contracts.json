@@ -1971,6 +1971,8 @@
       "public_contract": "MetadataAuthoritySource / MetadataMovePlan / MetadataSourceStatus / MetadataImage",
       "operations": [
         "new",
+        "from_serving",
+        "active_directory",
         "bootstrap_command",
         "plan",
         "updated_manifests",
@@ -1990,9 +1992,10 @@
       ],
       "native": "Deterministic source guard over the existing LifecycleDirectory and selected native/host log, snapshot and runtime contracts; no additional resource owner.",
       "conformance": [
-        "tests/metadata_transfer.rs"
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/repeated.rs"
       ],
-      "scope": "Slice156a implements only the source half of metadata authority movement. Select before bootstrap with an immutable export bound. Complete settled manifest views bind destination identity, local ancestry and generation updates; concrete data groups and ownership epochs remain unchanged. A committed source fence preserves the original authority/index-domain checkpoint and digest, refuses directory service and retains exact retries. Source control reserve survives exhausted ordinary history. A separate bounded rejected-control ID ledger survives checkpoint/export with its own digest and does not consume the successful-fence reserve. Snapshot recovery binds profile/bootstrap/F/digest; downstream tests cover stale and pending views, atomic refusal, checkpoint corruption and native journal every-byte/sync/publication interruptions reaching old or complete state. Foreign quorum provenance remains authenticated host input. No target activation, live-owner grant refresh, networked movement, arbitrary fault or platform claim."
+      "scope": "Slice156a implements only the source half of metadata authority movement. Select before bootstrap with an immutable export bound. Complete settled manifest views bind destination identity, local ancestry and generation updates; concrete data groups and ownership epochs remain unchanged. A committed source fence preserves the original authority/index-domain checkpoint and digest, refuses directory service and retains exact retries. Source control reserve survives exhausted ordinary history. A separate bounded rejected-control ID ledger survives checkpoint/export with its own digest and does not consume the successful-fence reserve. Snapshot recovery binds profile/bootstrap/F/digest; downstream tests cover stale and pending views, atomic refusal, checkpoint corruption and native journal every-byte/sync/publication interruptions reaching old or complete state. Foreign quorum provenance remains authenticated host input. No target activation, live-owner grant refresh, networked movement, arbitrary fault or platform claim. Slice156c3 adds explicit from_serving selection before the previous target bootstrap, using source schema3 and publication schema4. A complete prior serving checkpoint, immutable construction profile and current-domain rejected IDs accompany the next move. active_directory supplies current local command builders; MetadataSourceQuery::Serving retains provenance-aware creation/history reads until freeze. Numeric authority reuse, excessive lineage depth and insufficient or excessive export budgets refuse before ownership transfer. MAX_METADATA_MOVES bounds retained nesting independently of the 64MiB image ceiling, which may reject earlier. Immutable construction templates are shared; no runtime, I/O owner or second log is introduced."
     },
     {
       "design_id": "C05/C15/C23",
@@ -2014,9 +2017,10 @@
       "native": "Non-serving deterministic target over existing application, checkpoint and native/host journal contracts; no second storage or runtime owner.",
       "conformance": [
         "tests/metadata_transfer.rs",
-        "tests/metadata_transfer/target.rs"
+        "tests/metadata_transfer/target.rs",
+        "tests/metadata_transfer/repeated.rs"
       ],
-      "scope": "Slice156b1 binds a pristine source profile, canonical complete plan, transfer operation and source configuration before staging. Bounded import verifies the original checkpoint and rejection ledger without relabelling source authority or indices. Target-local stage/import indices remain separate from source F and historical command outcomes. Exact retries preserve original results; changed imports, malformed/truncated checkpoints, wrong bindings and rehashed invalid provenance refuse atomically. Pending admission uses the same transition path. Native ModelIo every-byte/sync/publication interruptions recover staged or complete imported history. Historical inspection is not active directory service. This profile has no activation or mutation service. Source publication, writable destination base, live-owner/locator refresh, native socket composition and broader platform/fault evidence remain open."
+      "scope": "Slice156b1 binds a pristine source profile, canonical complete plan, transfer operation and source configuration before staging. Bounded import verifies the original checkpoint and rejection ledger without relabelling source authority or indices. Target-local stage/import indices remain separate from source F and historical command outcomes. Exact retries preserve original results; changed imports, malformed/truncated checkpoints, wrong bindings and rehashed invalid provenance refuse atomically. Pending admission uses the same transition path. Native ModelIo every-byte/sync/publication interruptions recover staged or complete imported history. Historical inspection is not active directory service. This profile has no activation or mutation service. Source publication, writable destination base, live-owner/locator refresh, native socket composition and broader platform/fault evidence remain open. Slice156c3 adds selected schema3 imports from a prior serving target. Restore reconstructs the full construction-bound checkpoint and verifies the current source-domain fence independently of older histories at the same numerical index. Original-profile schema1 stays unchanged. This basic import target remains non-serving; historical_directory returns the oldest original directory, while the serving profile supplies provenance-aware history queries."
     },
     {
       "design_id": "C05/C15/C23",
@@ -2038,9 +2042,10 @@
       "native": "Explicit source publication profile over the existing source guard, journal, checkpoint and runtime contracts.",
       "conformance": [
         "tests/metadata_transfer.rs",
-        "tests/metadata_transfer/activation.rs"
+        "tests/metadata_transfer/activation.rs",
+        "tests/metadata_transfer/repeated.rs"
       ],
-      "scope": "Slice156b2 selects a publishing source before bootstrap. A bounded committed publication binds the exact frozen source status, imported destination status, source profile, configuration observations and original source publication index. The source remains fenced, preserves the original export and replays exact publication outcomes. Checkpoint reconstruction validates the source image and publication binding. Admission simulates pending operations; invalid batches restore atomically. Original foreign quorum observations require host authentication. Downstream tests include complete activation, mismatched/truncated evidence and every-byte native journal publication faults with old-or-complete recovery. This source profile does not implement repeated metadata moves or owner/locator refresh."
+      "scope": "Slice156b2 selects a publishing source before bootstrap. A bounded committed publication binds the exact frozen source status, imported destination status, source profile, configuration observations and original source publication index. The source remains fenced, preserves the original export and replays exact publication outcomes. Checkpoint reconstruction validates the source image and publication binding. Admission simulates pending operations; invalid batches restore atomically. Original foreign quorum observations require host authentication. Downstream tests include complete activation, mismatched/truncated evidence and every-byte native journal publication faults with old-or-complete recovery. The original schema2 remains unchanged. Slice156c3 adds schema4 publication when the source guard wraps a previous serving target; the same source freeze/import/publication contract applies to successive moves. Owner and locator adoption remain separate committed controls."
     },
     {
       "design_id": "C05/C15/C23",
@@ -2051,6 +2056,7 @@
         "import_command",
         "activation_command",
         "status",
+        "active_directory",
         "historical_directory",
         "imported_image",
         "decode",
@@ -2064,9 +2070,10 @@
       "native": "Explicit destination activation profile over the existing target import, directory, application and native/host persistence contracts.",
       "conformance": [
         "tests/metadata_transfer.rs",
-        "tests/metadata_transfer/activation.rs"
+        "tests/metadata_transfer/activation.rs",
+        "tests/metadata_transfer/repeated.rs"
       ],
-      "scope": "Slice156b2 binds the publishing source profile and both configurations before target staging. Only a matching committed source publication permits activation. The original source image/history remains immutable. A private writable Directory base preserves inherited allocation reservations and operation outcomes while applying checked authority/reference/generation changes; a bounded local command tail is replayed separately during checkpoint recovery. Historical results explicitly name source authority/index; creation observations carry bounded canonical intent bytes. New writes and actual namespace readiness/publication after activation, inherited identity refusal, exact retries, malformed checkpoints, pending order, atomic batches and native every-byte activation/later-write journal faults are tested. No live-owner/locator adoption, second metadata export, TCP/QUIC composition, arbitrary failure or platform completion is claimed."
+      "scope": "Slice156b2 binds the publishing source profile and both configurations before target staging. Only a matching committed source publication permits activation. The original source image/history remains immutable. A private writable Directory base preserves inherited allocation reservations and operation outcomes while applying checked authority/reference/generation changes; a bounded local command tail is replayed separately during checkpoint recovery. Historical results explicitly name source authority/index; creation observations carry bounded canonical intent bytes. New writes and actual namespace readiness/publication after activation, inherited identity refusal, exact retries, malformed checkpoints, pending order, atomic batches and native every-byte activation/later-write journal faults are tested. Slice156c3 adds selected schema4 for targets imported from a previous serving checkpoint. Recursive history lookup returns the actual original authority and index for each operation and creation; the current directory base is derived from the immediate predecessor. All earlier control and rejected IDs remain reserved. Three successive moves, writes between moves, distinct-domain indices, checkpoint/profile refusal and every-byte native journal faults for repeat freeze/import/publication/activation are tested. Earlier first-move schema2 bytes remain selected unchanged. Native TCP/QUIC authority-move composition, arbitrary failure and platform completion remain unclaimed."
     },
     {
       "design_id": "C05/C15/C16",

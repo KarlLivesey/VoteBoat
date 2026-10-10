@@ -4840,3 +4840,30 @@ Fixture repairs retained original schema/configuration/operation-ID contracts.
 Merge continued to refuse conflicting data-operation histories. Repeated
 metadata exports and native TCP/QUIC authority-move composition remain open,
 alongside the other documented P0–P7 work. README is unchanged.
+
+## Slice156c3 — repeated metadata moves, 10 October 2026
+
+Five downstream tests exercise A->B->C and A->B->C->D with intermediate writes,
+original receipt/creation identities, old rejected/control IDs, distinct log
+indices, fixed profiles, bounded nesting and export declarations, stale/pending
+freeze rejection, malformed import and checkpoint recovery. B's source fence at
+index7 coexists with an A-domain creation command at7. ModelIo cuts every repeat
+freeze/publication/import/activation frame byte, sync and publication boundary;
+old-or-complete recovery resumes the original operation.
+
+Executed locally with cargo +stable --locked --offline:
+- Related all-feature suites:4/40/18/14/38/7/9,130 pass.
+- Final core-only same suites:3/31/14/11/28/5/9,101 pass.
+- Final changed repeated subset:5 all-feature tests pass.
+- All-feature/core-only all-target Clippy with -D warnings: pass.
+- Formatting, diff whitespace and inventory shape/conformance paths: pass,88.
+
+An initial test incorrectly expected a committed conflicting retry not to advance
+the log prefix. It now mutates the first staged import to test atomic rejection.
+Earlier schemas and first-move tests remain exercised. These results do not cover
+native socket composition, hardware power-loss or macOS; the next planned step
+is the TCP/QUIC service path. The broader P0–P7 goal remains active.
+
+Final admission checks include a wrong repeated-profile bootstrap operation ID;
+outer source/publication wrappers reject nested target conflicts/non-serving
+outcomes. Final metadata suite reruns cover all40/all31 cases after this change.

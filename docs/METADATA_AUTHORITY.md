@@ -2,8 +2,8 @@
 
 Source fencing, import, publication and destination activation are implemented
 for Rust embedding, including original/retained/imported owner metadata adoption
-and foreign directory/cache locator refresh and owner adoption. Repeated moves
-and native socket composition remain; an imported image alone does not authorize a new metadata group.
+and foreign directory/cache locator refresh, owner adoption and selected repeated
+moves. Native socket composition remains; an imported image alone does not authorize a new metadata group.
 
 `MetadataAuthoritySource` wraps a `LifecycleDirectory` before its first bootstrap
 and shares its existing Raft log, storage and runtime contracts. Construction
@@ -158,3 +158,26 @@ retries, checkpoints and later fencing. Scoped retained changes interleave in th
 same history. Imported full/partial retirement uses new lineage tags VBTPLRL1 and
 VBTPRTL3, reconstructs the entire grant history and checks the exact final grant.
 A missing adoption cannot be replaced by simply normalizing metadata fields.
+
+For another move, select `MetadataAuthoritySource::from_serving(target, budget)`
+with a **pristine** `MetadataServingTarget`, then wrap it in
+`MetadataPublishingSource` before the target's bootstrap. This is a construction
+choice, not a live profile upgrade. The repeated source/publication schemas are
+3/4; the next import/serving schemas are 3/4. The original schemas remain unchanged.
+The complete previous serving checkpoint becomes the next source image, including
+older histories. Follow the same freeze, import, publish and activate sequence.
+
+Use `source().active_directory()` for current local command builders. The repeat
+source's `MetadataSourceQuery::Serving` forwards provenance-aware reads, including
+creation observations; all directory service is fenced after the next freeze.
+On the next destination, inherited reads/receipts name the actual original
+authority and index, including histories older than its immediate predecessor.
+`historical_directory()` is only the oldest original directory diagnostic;
+`MetadataServingQuery` supplies the provenance-aware history view.
+
+Construction refuses previously used numeric authority identities, even with a
+new incarnation. Retained lineage permits at most `MAX_METADATA_MOVES` successive
+moves and keeps the separate 64 MiB image ceiling; declared snapshot budgets may
+refuse another move earlier. There is no implicit history pruning or source thaw.
+Selected embedding tests cover three consecutive moves and native journal cuts.
+TCP/QUIC authority-move service composition remains outstanding.

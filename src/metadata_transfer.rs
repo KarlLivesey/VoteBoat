@@ -16,7 +16,10 @@
 //!
 //! Select before bootstrap. Exports preserve the original authority/index
 //! domain; an image is not permission to activate another metadata group.
+mod history;
 mod locators;
+use history::AuthorityHistory;
+pub use history::MAX_METADATA_MOVES;
 mod publication;
 mod serving;
 mod target;
@@ -36,6 +39,7 @@ use std::{collections::BTreeMap, mem::size_of};
 pub use target::*;
 
 pub const METADATA_SOURCE_SCHEMA: u64 = 1;
+pub const REPEATED_METADATA_SOURCE_SCHEMA: u64 = 3;
 pub const MAX_METADATA_IMAGE_BYTES: usize = 64 * 1024 * 1024;
 pub const MAX_METADATA_PLAN_BYTES: usize = 58 + MAX_DIRECTORY_MANIFESTS * (4 + MAX_MANIFEST_BYTES);
 
@@ -287,11 +291,33 @@ impl MetadataImage {
     }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[allow(clippy::large_enum_variant)]
 pub enum MetadataSourceOutcome {
     Directory(DirectoryReceipt),
+    Serving(MetadataServingOutcome),
     Frozen(MetadataSourceStatus),
     Conflict,
     Fenced,
+}
+impl MetadataSourceOutcome {
+    pub(super) fn rejects_admission(&self) -> bool {
+        matches!(
+            self,
+            Self::Conflict
+                | Self::Fenced
+                | Self::Serving(
+                    MetadataServingOutcome::Conflict
+                        | MetadataServingOutcome::NotActive
+                        | MetadataServingOutcome::Target(
+                            MetadataTargetOutcome::Conflict | MetadataTargetOutcome::NotActive
+                        )
+                        | MetadataServingOutcome::Historical {
+                            outcome: DirectoryOutcome::OperationConflict,
+                            ..
+                        }
+                )
+        )
+    }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MetadataSourceReceipt {
@@ -313,12 +339,16 @@ impl ApplicationReceipt for MetadataSourceReceipt {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum MetadataSourceQuery {
     Directory(DirectoryQuery),
+    /// Preserve the previous serving profile's provenance-aware read API when
+    /// `from_serving` was selected. Unavailable on plain-directory sources.
+    Serving(MetadataServingQuery),
     Status,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)]
 pub enum MetadataSourceRead {
     Directory(DirectoryRead),
+    Serving(MetadataServingRead),
     Status(Option<MetadataSourceStatus>),
     Fenced,
 }
@@ -332,8 +362,8 @@ struct Frozen {
 /// Selection is immutable and mandatory before bootstrap; no target is activated.
 #[derive(Clone)]
 pub struct MetadataAuthoritySource {
-    initial: LifecycleDirectory,
-    directory: LifecycleDirectory,
+    initial: std::sync::Arc<AuthorityHistory>,
+    directory: AuthorityHistory,
     export_bytes: usize,
     anchor: ContentDigest,
     applied: u64,
@@ -364,7 +394,38 @@ impl MetadataAuthoritySource {
         };
         Ok(Self {
             anchor: ContentDigest::sha256(&checkpoint),
-            initial: directory.clone(),
+            initial: std::sync::Arc::new(AuthorityHistory::Directory(directory.clone())),
+            directory: AuthorityHistory::Directory(directory),
+            export_bytes,
+            applied: 0,
+            bootstrap: None,
+            frozen: None,
+            rejected: BTreeMap::new(),
+        })
+    }
+    /// Select before the serving target's bootstrap to permit its next move.
+    /// The complete prior checkpoint is retained; no histories are flattened.
+    #[allow(clippy::result_large_err)]
+    pub fn from_serving(
+        target: MetadataServingTarget,
+        export_bytes: usize,
+    ) -> Result<Self, (ApplicationError, MetadataServingTarget)> {
+        if target.applied_index() != 0
+            || target.target.source.initial.depth() + 1 >= MAX_METADATA_MOVES
+            || export_bytes == 0
+            || export_bytes > MAX_METADATA_IMAGE_BYTES
+            || target.readiness_requirements().snapshot_bytes > export_bytes
+        {
+            return Err((ApplicationError::InvalidCommand, target));
+        }
+        let checkpoint = match target.checkpoint(export_bytes) {
+            Ok(b) => b,
+            Err(e) => return Err((e, target)),
+        };
+        let directory = AuthorityHistory::Serving(Box::new(target));
+        Ok(Self {
+            anchor: ContentDigest::sha256(&checkpoint),
+            initial: std::sync::Arc::new(directory.clone()),
             directory,
             export_bytes,
             applied: 0,
@@ -373,14 +434,26 @@ impl MetadataAuthoritySource {
             rejected: BTreeMap::new(),
         })
     }
-    pub fn plan(&self, target: GroupIdentity) -> Result<MetadataMovePlan, ApplicationError> {
+    /// Current authority's directory, available only before this source freezes
+    /// and after any earlier move's activation. Local diagnostics need a quorum
+    /// observation before use as foreign authority.
+    pub fn active_directory(&self) -> Option<&Directory> {
         if self.frozen.is_some() {
+            None
+        } else {
+            self.directory.active_directory()
+        }
+    }
+    pub fn plan(&self, target: GroupIdentity) -> Result<MetadataMovePlan, ApplicationError> {
+        if self.frozen.is_some() || self.directory.contains_authority(target) {
             return Err(ApplicationError::NotApplied);
         }
         MetadataMovePlan::new(
-            self.directory.directory().plan().authority(),
+            self.directory.authority(),
             target,
-            self.directory.directory().authority_move_view()?,
+            self.active_directory()
+                .ok_or(ApplicationError::NotApplied)?
+                .authority_move_view()?,
         )
     }
     pub fn status(&self) -> Option<MetadataSourceStatus> {
@@ -390,13 +463,15 @@ impl MetadataAuthoritySource {
     /// matching quorum observation before treating these facts as authoritative.
     /// After fencing, use the immutable export in its original source domain.
     pub fn directory(&self) -> Option<&LifecycleDirectory> {
-        self.frozen.is_none().then_some(&self.directory)
+        match &self.directory {
+            AuthorityHistory::Directory(d) if self.frozen.is_none() => Some(d),
+            _ => None,
+        }
     }
     pub fn bootstrap_command(&self, maximum: usize) -> Result<Vec<u8>, ApplicationError> {
         let body = self
             .initial
-            .directory()
-            .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)?;
+            .bootstrap_command(self.initial.readiness_requirements().command_bytes)?;
         let mut b = Vec::with_capacity(52 + body.len());
         b.extend(b"VBMASB01");
         b.extend(self.anchor.0);
@@ -440,8 +515,11 @@ impl MetadataAuthoritySource {
         Ok(plan)
     }
     fn matches(&self, plan: &MetadataMovePlan) -> bool {
-        self.directory.directory().plan().authority() == plan.source
-            && self.directory.directory().authority_move_view().as_ref() == Ok(&plan.manifests)
+        self.directory.authority() == plan.source
+            && !self.directory.contains_authority(plan.target)
+            && self
+                .active_directory()
+                .is_some_and(|d| d.authority_move_view().as_ref() == Ok(&plan.manifests))
     }
     fn status_for(
         &self,
@@ -490,9 +568,9 @@ impl MetadataAuthoritySource {
         })
     }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
-        let inner = self.initial.directory().readiness_requirements();
+        let inner = self.initial.readiness_requirements();
         ReadinessRequirements {
-            application_schema: METADATA_SOURCE_SCHEMA,
+            application_schema: self.schema_version(),
             command_bytes: inner
                 .command_bytes
                 .max(44 + MAX_METADATA_PLAN_BYTES)
@@ -536,7 +614,7 @@ impl MetadataAuthoritySource {
         } else if bytes.starts_with(b"VBMASF01") {
             let plan = self.parse_freeze(bytes)?;
             let available = self.bootstrap.is_some()
-                && !self.directory.directory().contains_operation(*operation)
+                && !self.directory.contains_operation(*operation)
                 && self.matches(&plan);
             self.directory.apply_batch(&[LogEntry {
                 index: entry.index,
@@ -552,7 +630,7 @@ impl MetadataAuthoritySource {
                 });
                 MetadataSourceOutcome::Frozen(status)
             } else {
-                if !self.directory.directory().contains_operation(*operation) {
+                if !self.directory.contains_operation(*operation) {
                     if self.rejected.len() >= self.initial.directory().limits().operations {
                         return Err(ApplicationError::DedupCapacity);
                     }
@@ -566,8 +644,7 @@ impl MetadataAuthoritySource {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 self.initial
-                    .directory()
-                    .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)?
+                    .bootstrap_command(self.initial.readiness_requirements().command_bytes)?
             } else {
                 if self.bootstrap.is_none() {
                     return Err(ApplicationError::NotApplied);
@@ -585,10 +662,10 @@ impl MetadataAuthoritySource {
                     },
                 }])?
                 .remove(0);
-            if matches!(receipt.outcome, DirectoryOutcome::Initialized) {
+            if self.directory.is_bootstrap_operation(*operation) {
                 self.bootstrap = Some(*operation);
             }
-            MetadataSourceOutcome::Directory(receipt)
+            receipt
         };
         self.applied = entry.index;
         Ok(Some(MetadataSourceReceipt {
@@ -673,10 +750,7 @@ impl ProposalAdmission for MetadataAuthoritySource {
                     },
                 })?
                 .unwrap();
-            if matches!(
-                receipt.outcome,
-                MetadataSourceOutcome::Conflict | MetadataSourceOutcome::Fenced
-            ) {
+            if receipt.outcome.rejects_admission() {
                 return Err(ApplicationError::InvalidCommand);
             }
             Ok(())
@@ -690,7 +764,11 @@ impl ProposalAdmission for MetadataAuthoritySource {
 }
 impl CheckpointStateMachine for MetadataAuthoritySource {
     fn schema_version(&self) -> u64 {
-        METADATA_SOURCE_SCHEMA
+        if self.initial.depth() == 0 {
+            METADATA_SOURCE_SCHEMA
+        } else {
+            REPEATED_METADATA_SOURCE_SCHEMA
+        }
     }
     fn checkpoint(&self, maximum: usize) -> Result<Vec<u8>, ApplicationError> {
         let body = self.directory.checkpoint(self.export_bytes)?;
@@ -744,7 +822,7 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != METADATA_SOURCE_SCHEMA {
+        if schema != self.schema_version() {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if bytes.len() > self.readiness_requirements().snapshot_bytes {
@@ -794,16 +872,16 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut next = self.clone();
-        next.directory = next.initial.clone();
+        next.directory = next.initial.as_ref().clone();
         next.directory
             .restore_checkpoint(inner_schema, index, body)?;
         next.bootstrap = OperationId::new(boot);
         if rejected
             .keys()
-            .any(|op| next.directory.directory().contains_operation(*op))
+            .any(|op| next.directory.contains_operation(*op))
             || rejected
                 .values()
-                .any(|index| next.directory.directory().contains_command_at(*index))
+                .any(|index| next.directory.contains_command_at(*index))
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -812,7 +890,7 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
         next.frozen = None;
         if next
             .bootstrap
-            .is_some_and(|op| !next.directory.directory().is_bootstrap_operation(op))
+            .is_some_and(|op| !next.directory.is_bootstrap_operation(op))
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -829,8 +907,8 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
             let plan = next.parse_freeze(command)?;
             if next.bootstrap.is_none()
                 || index == 0
-                || next.directory.directory().contains_operation(operation)
-                || next.directory.directory().contains_command_at(index)
+                || next.directory.contains_operation(operation)
+                || next.directory.contains_command_at(index)
                 || next.rejected.contains_key(&operation)
                 || !next.matches(&plan)
             {
@@ -846,7 +924,7 @@ impl CheckpointStateMachine for MetadataAuthoritySource {
                 command: command.to_vec(),
             });
         }
-        if next.bootstrap.is_some() != next.directory.directory().has_bootstrap() {
+        if next.bootstrap.is_some() != next.directory.has_bootstrap() {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         *self = next;
@@ -866,13 +944,22 @@ impl ReadableStateMachine for MetadataAuthoritySource {
         }
         match query {
             MetadataSourceQuery::Status => Ok(MetadataSourceRead::Status(self.status())),
+            MetadataSourceQuery::Serving(q) => {
+                if self.frozen.is_some() {
+                    return Ok(MetadataSourceRead::Fenced);
+                }
+                match &self.directory {
+                    AuthorityHistory::Serving(s) => {
+                        s.read_at(required, q).map(MetadataSourceRead::Serving)
+                    }
+                    _ => Err(ApplicationError::UnsupportedSchema),
+                }
+            }
             MetadataSourceQuery::Directory(q) => {
                 if self.frozen.is_some() {
                     Ok(MetadataSourceRead::Fenced)
                 } else {
-                    self.directory
-                        .read_at(required, q)
-                        .map(MetadataSourceRead::Directory)
+                    self.directory.read_at(required, q)
                 }
             }
         }
@@ -882,7 +969,10 @@ impl BoundedReadableStateMachine for MetadataAuthoritySource {
     fn query_bytes(&self, q: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match q {
             MetadataSourceQuery::Status => Ok(0),
-            MetadataSourceQuery::Directory(q) => self.directory.query_bytes(q, limit),
+            MetadataSourceQuery::Directory(_) | MetadataSourceQuery::Serving(_) => {
+                let _ = limit;
+                Ok(0)
+            }
         }
     }
     fn read_result_bound(&self, q: &Self::Query) -> Result<usize, ApplicationError> {
@@ -891,6 +981,10 @@ impl BoundedReadableStateMachine for MetadataAuthoritySource {
                 MetadataSourceQuery::Directory(q) if self.frozen.is_none() => {
                     self.directory.read_result_bound(q)?
                 }
+                MetadataSourceQuery::Serving(q) if self.frozen.is_none() => match &self.directory {
+                    AuthorityHistory::Serving(s) => s.read_result_bound(q)?,
+                    _ => return Err(ApplicationError::UnsupportedSchema),
+                },
                 _ => 0,
             })
     }
@@ -900,7 +994,9 @@ impl BoundedReadableStateMachine for MetadataAuthoritySource {
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         match r {
-            MetadataSourceRead::Directory(r) => self.directory.read_result_bytes(r, limit),
+            MetadataSourceRead::Directory(_) | MetadataSourceRead::Serving(_) => {
+                self.directory.read_result_bytes(r, limit)
+            }
             _ => Ok(0),
         }
     }

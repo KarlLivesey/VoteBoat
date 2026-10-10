@@ -17,6 +17,7 @@ use super::publication::{put_publication, read_publication};
 use super::*;
 
 pub const METADATA_SERVING_SCHEMA: u64 = 2;
+pub const REPEATED_METADATA_SERVING_SCHEMA: u64 = 4;
 const ACTIVATION_BYTES: usize = 288;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct MetadataActivationStatus {
@@ -136,21 +137,21 @@ impl MetadataCreationRead {
     }
 }
 #[derive(Clone)]
-struct Active {
-    status: MetadataActivationStatus,
+pub(super) struct Active {
+    pub(super) status: MetadataActivationStatus,
     command: Vec<u8>,
-    directory: Directory,
-    tail: BTreeMap<OperationId, LogEntry>,
+    pub(super) directory: Directory,
+    pub(super) tail: BTreeMap<OperationId, LogEntry>,
 }
 /// Owns the existing target application and, after activation, a derived
 /// writable directory. The historical image is never overwritten or relabelled.
 #[derive(Clone)]
 pub struct MetadataServingTarget {
-    target: MetadataAuthorityTarget,
+    pub(super) target: MetadataAuthorityTarget,
     source_profile: ContentDigest,
     target_configuration: ConfigurationId,
     profile: ContentDigest,
-    active: Option<Active>,
+    pub(super) active: Option<Active>,
     directory_bound: ReadinessRequirements,
 }
 impl MetadataServingTarget {
@@ -254,10 +255,7 @@ impl MetadataServingTarget {
             .target
             .imported_image()
             .ok_or(ApplicationError::NotApplied)?;
-        let history = self
-            .target
-            .historical_directory()
-            .ok_or(ApplicationError::NotApplied)?;
+        let history = self.target.history().ok_or(ApplicationError::NotApplied)?;
         let directory = history.directory().metadata_base(image.plan(), index)?;
         Ok(Active {
             status: MetadataActivationStatus { index, publication },
@@ -269,7 +267,7 @@ impl MetadataServingTarget {
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         let inner = self.target.readiness_requirements();
         ReadinessRequirements {
-            application_schema: METADATA_SERVING_SCHEMA,
+            application_schema: self.schema_version(),
             command_bytes: inner
                 .command_bytes
                 .max(ACTIVATION_BYTES)
@@ -336,23 +334,16 @@ impl MetadataServingTarget {
             outcome = MetadataServingOutcome::NotActive;
             self.inner_noop(entry.index, entry.term)?;
         } else {
-            let image = self.target.imported_image().expect("active import");
             let inherited = self
                 .target
-                .historical_directory()
+                .history()
                 .unwrap()
-                .directory()
                 .historical_outcome(*operation, bytes);
-            if *operation == image.status().operation
-                || image
-                    .rejected_operations()
-                    .iter()
-                    .any(|(op, _)| op == operation)
-            {
+            if self.reserved_operation(*operation) {
                 outcome = MetadataServingOutcome::Conflict;
-            } else if let Some((index, result)) = inherited {
+            } else if let Some((source, index, result)) = inherited {
                 outcome = MetadataServingOutcome::Historical {
-                    source: image.status().source,
+                    source,
                     index,
                     outcome: result,
                 };
@@ -387,21 +378,52 @@ impl MetadataServingTarget {
             outcome,
         }))
     }
-    fn query_view(
+    pub(super) fn reserved_operation(&self, op: OperationId) -> bool {
+        op == self.target.operation
+            || self
+                .imported_image()
+                .is_some_and(|i| i.rejected_operations().iter().any(|(id, _)| *id == op))
+            || self.target.history().is_some_and(|h| match h {
+                AuthorityHistory::Directory(_) => false,
+                AuthorityHistory::Serving(s) => s.reserved_operation(op),
+            })
+    }
+    pub(super) fn historical_outcome(
+        &self,
+        op: OperationId,
+        bytes: &[u8],
+    ) -> Option<(GroupIdentity, u64, DirectoryOutcome)> {
+        self.target
+            .history()
+            .and_then(|h| h.historical_outcome(op, bytes))
+            .or_else(|| {
+                self.active
+                    .as_ref()?
+                    .directory
+                    .historical_outcome(op, bytes)
+                    .map(|(index, outcome)| (self.target.plan.target(), index, outcome))
+            })
+    }
+    /// Live local command builders, never a replacement for a quorum read.
+    pub fn active_directory(&self) -> Option<&Directory> {
+        self.active.as_ref().map(|a| &a.directory)
+    }
+    pub(super) fn query_view(
         &self,
         q: DirectoryQuery,
         explicit_history: bool,
-    ) -> Result<(LifecycleDirectory, bool), ApplicationError> {
-        let history = self
-            .historical_directory()
-            .ok_or(ApplicationError::NotApplied)?;
-        let inherited =
-            query_operation(q).is_some_and(|op| history.directory().contains_operation(op));
+    ) -> Result<(LifecycleDirectory, GroupIdentity, u64), ApplicationError> {
+        let history = self.target.history().ok_or(ApplicationError::NotApplied)?;
+        let inherited = query_operation(q).is_some_and(|op| history.contains_operation(op));
         if explicit_history || inherited {
-            return Ok((history.clone(), true));
+            return history.query_view(q);
         }
         let active = self.active.as_ref().ok_or(ApplicationError::NotApplied)?;
-        Ok((LifecycleDirectory::new(active.directory.clone()), false))
+        Ok((
+            LifecycleDirectory::new(active.directory.clone()),
+            self.target.plan.target(),
+            self.applied_index(),
+        ))
     }
 }
 fn query_operation(q: DirectoryQuery) -> Option<OperationId> {
@@ -477,12 +499,7 @@ impl ProposalAdmission for MetadataServingTarget {
                 return Err(ApplicationError::ReceiptBudget);
             }
             if let Some(a) = &next.active {
-                if !b.starts_with(b"VBMT")
-                    && !next
-                        .historical_directory()
-                        .unwrap()
-                        .directory()
-                        .contains_operation(op)
+                if !b.starts_with(b"VBMT") && !next.target.history().unwrap().contains_operation(op)
                 {
                     a.directory.validate_proposal(op, b, std::iter::empty())?;
                 }
@@ -526,7 +543,11 @@ impl ProposalAdmission for MetadataServingTarget {
 }
 impl CheckpointStateMachine for MetadataServingTarget {
     fn schema_version(&self) -> u64 {
-        METADATA_SERVING_SCHEMA
+        if self.target.source.initial.depth() == 0 {
+            METADATA_SERVING_SCHEMA
+        } else {
+            REPEATED_METADATA_SERVING_SCHEMA
+        }
     }
     fn checkpoint(&self, maximum: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self
@@ -618,11 +639,10 @@ impl CheckpointStateMachine for MetadataServingTarget {
         let mut next = self.clone();
         next.active = None;
         next.target
-            .restore_checkpoint(METADATA_TARGET_SCHEMA, applied, body)?;
+            .restore_checkpoint(next.target.schema_version(), applied, body)?;
         if index != 0 {
             let mut active = next.parse_activation(command, index)?;
-            let history = next.target.historical_directory().unwrap().directory();
-            let image = next.target.imported_image().unwrap();
+            let history = next.target.history().unwrap();
             let mut previous = index;
             for _ in 0..count {
                 let at = r.u64()?;
@@ -631,12 +651,8 @@ impl CheckpointStateMachine for MetadataServingTarget {
                 if at <= previous
                     || at > applied
                     || len > self.directory_bound.command_bytes
-                    || operation == image.status().operation
+                    || next.reserved_operation(operation)
                     || history.contains_operation(operation)
-                    || image
-                        .rejected_operations()
-                        .iter()
-                        .any(|(op, _)| *op == operation)
                     || active.tail.contains_key(&operation)
                 {
                     return Err(ApplicationError::InvalidCheckpoint);
@@ -690,17 +706,12 @@ impl ReadableStateMachine for MetadataServingTarget {
                     .group_creation_at(active.directory.applied_index(), group)?;
                 let status = status
                     .map(|s| {
-                        let source = self.imported_image().unwrap().status().source;
-                        let authority = if self
-                            .historical_directory()
+                        let authority = self
+                            .target
+                            .history()
                             .unwrap()
-                            .directory()
-                            .contains_operation(s.operation)
-                        {
-                            source
-                        } else {
-                            self.target.status().target
-                        };
+                            .operation_authority(s.operation)
+                            .unwrap_or(self.target.plan.target());
                         Ok(MetadataCreationRead {
                             authority,
                             operation: s.operation,
@@ -719,13 +730,12 @@ impl ReadableStateMachine for MetadataServingTarget {
             }
             MetadataServingQuery::Historical(q) => (q, true),
         };
-        let (view, old) = self.query_view(q, explicit_history)?;
+        let (view, source, through) = self.query_view(q, explicit_history)?;
         let value = view.read_at(view.applied_index(), q)?;
-        Ok(if old {
-            let source = self.imported_image().unwrap().status();
+        Ok(if source != self.target.plan.target() {
             MetadataServingRead::Historical {
-                source: source.source,
-                through: source.index,
+                source,
+                through,
                 value,
             }
         } else {
@@ -750,7 +760,7 @@ impl BoundedReadableStateMachine for MetadataServingTarget {
             MetadataServingQuery::Directory(q) => (*q, false),
             MetadataServingQuery::Historical(q) => (*q, true),
         };
-        let (view, _) = self.query_view(q, old)?;
+        let (view, _, _) = self.query_view(q, old)?;
         Ok(size_of::<Self::ReadResult>() + view.read_result_bound(&q)?)
     }
     fn read_result_bytes(

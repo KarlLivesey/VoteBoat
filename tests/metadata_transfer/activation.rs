@@ -370,7 +370,11 @@ fn checkpoints_refuse_truncation_profile_changes_and_replay_history_collisions()
         .restore_checkpoint(METADATA_SOURCE_SCHEMA, s.applied_index(), &cp)
         .is_err());
 }
-fn create_intent(authority: GroupIdentity, id: u128, generation: u64) -> GroupCreationIntent {
+pub(super) fn create_intent(
+    authority: GroupIdentity,
+    id: u128,
+    generation: u64,
+) -> GroupCreationIntent {
     GroupCreationIntent {
         authority,
         parent: grant().input().responsibility,
@@ -384,7 +388,7 @@ fn create_intent(authority: GroupIdentity, id: u128, generation: u64) -> GroupCr
         mode: GroupCreationMode::Empty,
     }
 }
-fn ready_namespace(
+pub(super) fn ready_namespace(
     creation: GroupCreationStatus,
 ) -> voteboat::namespace_creation::NamespacePublication {
     use voteboat::{namespace_creation::*, routed::*};

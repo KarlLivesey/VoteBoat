@@ -16,6 +16,7 @@
 use super::*;
 
 pub const METADATA_PUBLISHING_SCHEMA: u64 = 2;
+pub const REPEATED_METADATA_PUBLISHING_SCHEMA: u64 = 4;
 const PUBLICATION_BYTES: usize = 256;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -149,7 +150,7 @@ impl MetadataPublishingSource {
     }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         let mut r = self.inner.readiness_requirements();
-        r.application_schema = METADATA_PUBLISHING_SCHEMA;
+        r.application_schema = self.schema_version();
         r.command_bytes = r.command_bytes.max(PUBLICATION_BYTES);
         r.snapshot_bytes += 56 + PUBLICATION_BYTES;
         r
@@ -281,13 +282,11 @@ impl ProposalAdmission for MetadataPublishingSource {
                     },
                 })?
                 .unwrap();
-            if matches!(
-                r.outcome,
-                MetadataPublishingOutcome::Conflict
-                    | MetadataPublishingOutcome::Source(
-                        MetadataSourceOutcome::Conflict | MetadataSourceOutcome::Fenced
-                    )
-            ) {
+            if match &r.outcome {
+                MetadataPublishingOutcome::Conflict => true,
+                MetadataPublishingOutcome::Source(source) => source.rejects_admission(),
+                _ => false,
+            } {
                 return Err(ApplicationError::InvalidCommand);
             }
             Ok(())
@@ -301,7 +300,11 @@ impl ProposalAdmission for MetadataPublishingSource {
 }
 impl CheckpointStateMachine for MetadataPublishingSource {
     fn schema_version(&self) -> u64 {
-        METADATA_PUBLISHING_SCHEMA
+        if self.inner.initial.depth() == 0 {
+            METADATA_PUBLISHING_SCHEMA
+        } else {
+            REPEATED_METADATA_PUBLISHING_SCHEMA
+        }
     }
     fn checkpoint(&self, maximum: usize) -> Result<Vec<u8>, ApplicationError> {
         let inner = self
@@ -356,7 +359,7 @@ impl CheckpointStateMachine for MetadataPublishingSource {
         let mut next = self.clone();
         next.publication = None;
         next.inner
-            .restore_checkpoint(METADATA_SOURCE_SCHEMA, applied, body)?;
+            .restore_checkpoint(next.inner.schema_version(), applied, body)?;
         if index != 0 {
             next.publication = Some((next.parse(command, index)?, command.to_vec()));
         }

@@ -16,6 +16,7 @@
 use super::*;
 
 pub const METADATA_TARGET_SCHEMA: u64 = 1;
+pub const REPEATED_METADATA_TARGET_SCHEMA: u64 = 3;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct MetadataImportStatus {
     /// Index in the destination group's log, distinct from source.index.
@@ -61,10 +62,10 @@ pub enum MetadataTargetQuery {
     Status,
 }
 #[derive(Clone)]
-struct Imported {
-    status: MetadataImportStatus,
+pub(super) struct Imported {
+    pub(super) status: MetadataImportStatus,
     image: MetadataImage,
-    history: LifecycleDirectory,
+    history: AuthorityHistory,
     command: Vec<u8>,
 }
 /// A new metadata group with an immutable source profile and transfer binding.
@@ -72,14 +73,14 @@ struct Imported {
 /// retains the source authority/index domain, never the destination's identity.
 #[derive(Clone)]
 pub struct MetadataAuthorityTarget {
-    source: MetadataAuthoritySource,
-    plan: MetadataMovePlan,
-    operation: OperationId,
+    pub(super) source: std::sync::Arc<MetadataAuthoritySource>,
+    pub(super) plan: MetadataMovePlan,
+    pub(super) operation: OperationId,
     source_configuration: ConfigurationId,
     anchor: ContentDigest,
     applied: u64,
-    staged: Option<u64>,
-    imported: Option<Imported>,
+    pub(super) staged: Option<u64>,
+    pub(super) imported: Option<Imported>,
 }
 impl MetadataAuthorityTarget {
     pub fn new(
@@ -91,7 +92,8 @@ impl MetadataAuthorityTarget {
         if source.applied_index() != 0
             || source.bootstrap.is_some()
             || source.frozen.is_some()
-            || source.initial.directory().plan().authority() != plan.source()
+            || source.initial.authority() != plan.source()
+            || source.initial.contains_authority(plan.target())
         {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -101,7 +103,7 @@ impl MetadataAuthorityTarget {
         binding.extend(operation.get().to_le_bytes());
         binding.extend(source_configuration.get().to_le_bytes());
         Ok(Self {
-            source,
+            source: std::sync::Arc::new(source),
             plan,
             operation,
             source_configuration,
@@ -137,6 +139,9 @@ impl MetadataAuthorityTarget {
     /// This is original source history for inspection, not an active directory
     /// under the target group. Use the source identity and original indices.
     pub fn historical_directory(&self) -> Option<&LifecycleDirectory> {
+        self.imported.as_ref().map(|i| i.history.original())
+    }
+    pub(super) fn history(&self) -> Option<&AuthorityHistory> {
         self.imported.as_ref().map(|i| &i.history)
     }
     pub fn imported_image(&self) -> Option<&MetadataImage> {
@@ -144,7 +149,7 @@ impl MetadataAuthorityTarget {
     }
     pub fn readiness_requirements(&self) -> ReadinessRequirements {
         ReadinessRequirements {
-            application_schema: METADATA_TARGET_SCHEMA,
+            application_schema: self.schema_version(),
             command_bytes: 244
                 + MAX_METADATA_PLAN_BYTES
                 + self.source.export_bytes
@@ -160,7 +165,7 @@ impl MetadataAuthorityTarget {
         &self,
         image: &MetadataImage,
         configuration: ConfigurationId,
-    ) -> Result<LifecycleDirectory, ApplicationError> {
+    ) -> Result<AuthorityHistory, ApplicationError> {
         let status = image.status;
         if configuration != self.source_configuration
             || image.plan != self.plan
@@ -180,12 +185,14 @@ impl MetadataAuthorityTarget {
         {
             return Err(ApplicationError::InvalidCommand);
         }
-        let mut history = self.source.initial.clone();
+        let mut history = self.source.initial.as_ref().clone();
         history.restore_checkpoint(status.directory_schema, status.index, &image.bytes)?;
-        let directory = history.directory();
-        if !directory.has_bootstrap()
-            || directory.contains_operation(self.operation)
-            || directory.contains_command_at(status.index)
+        let directory = history
+            .active_directory()
+            .ok_or(ApplicationError::InvalidCommand)?;
+        if !history.has_bootstrap()
+            || history.contains_operation(self.operation)
+            || history.contains_command_at(status.index)
             || directory.authority_move_view()? != self.plan.manifests
         {
             return Err(ApplicationError::InvalidCommand);
@@ -198,8 +205,8 @@ impl MetadataAuthorityTarget {
             if *index == 0
                 || *index >= status.index
                 || *op == self.operation
-                || directory.contains_operation(*op)
-                || directory.contains_command_at(*index)
+                || history.contains_operation(*op)
+                || history.contains_command_at(*index)
                 || previous.is_some_and(|p| p >= *op)
                 || !indices.insert(*index)
             {
@@ -247,7 +254,7 @@ impl MetadataAuthorityTarget {
     fn request(
         &self,
         bytes: &[u8],
-    ) -> Result<(ConfigurationId, MetadataImage, LifecycleDirectory), ApplicationError> {
+    ) -> Result<(ConfigurationId, MetadataImage, AuthorityHistory), ApplicationError> {
         if bytes.len() > self.readiness_requirements().command_bytes {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -453,7 +460,11 @@ impl ProposalAdmission for MetadataAuthorityTarget {
 }
 impl CheckpointStateMachine for MetadataAuthorityTarget {
     fn schema_version(&self) -> u64 {
-        METADATA_TARGET_SCHEMA
+        if self.source.initial.depth() == 0 {
+            METADATA_TARGET_SCHEMA
+        } else {
+            REPEATED_METADATA_TARGET_SCHEMA
+        }
     }
     fn checkpoint(&self, maximum: usize) -> Result<Vec<u8>, ApplicationError> {
         let command = self
@@ -486,7 +497,7 @@ impl CheckpointStateMachine for MetadataAuthorityTarget {
         applied: u64,
         bytes: &[u8],
     ) -> Result<(), ApplicationError> {
-        if schema != METADATA_TARGET_SCHEMA {
+        if schema != self.schema_version() {
             return Err(ApplicationError::UnsupportedSchema);
         }
         if bytes.len() > self.readiness_requirements().snapshot_bytes {

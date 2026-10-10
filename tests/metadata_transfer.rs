@@ -504,3 +504,6 @@ mod locators;
 
 #[path = "metadata_transfer/owner_locators.rs"]
 mod owner_locators;
+
+#[path = "metadata_transfer/repeated.rs"]
+mod repeated;

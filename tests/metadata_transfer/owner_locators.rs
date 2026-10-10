@@ -849,7 +849,7 @@ fn locator_observation_profiles_pending_and_checkpoint_corruption_refuse_atomica
 }
 
 #[cfg(feature = "native")]
-fn journal_cuts<A: CheckpointStateMachine>(
+pub(super) fn journal_cuts<A: CheckpointStateMachine>(
     g: GroupIdentity,
     make: impl Fn() -> A,
     entries: &[LogEntry],
