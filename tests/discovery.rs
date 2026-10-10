@@ -16,6 +16,8 @@ use std::{cell::RefCell, net::SocketAddr, rc::Rc};
 use voteboat::{
     connect::*, discovery::*, identity::*, runtime::MonoTime, secure::*, transport::ConnectTicket,
 };
+#[path = "discovery/driven.rs"]
+mod driven;
 fn peer(n: u64) -> PeerIdentity {
     PeerIdentity {
         node: NodeId::new(n).unwrap(),

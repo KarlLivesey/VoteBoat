@@ -297,3 +297,40 @@ impl<S: SecureSession> PeerDiscovery for NativeRemotePeerDiscovery<S> {
         self.channel.close();
     }
 }
+
+impl<S: SecureSession> DiscoveryDriver for NativeRemotePeerDiscovery<S> {
+    fn poll_discovery(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+    ) -> Result<(), DiscoveryError> {
+        budget
+            .validate()
+            .map_err(|_| DiscoveryError::InvalidLimits)?;
+        if now < self.now {
+            return Err(DiscoveryError::TimeWentBack);
+        }
+        // poll records negative replies and fences failed sources itself. Such
+        // failures must not fence the owning Node or discard unrelated hints.
+        let _ = self.poll(now, budget);
+        Ok(())
+    }
+    fn discovery_pending(&self) -> bool {
+        self.pending.is_some()
+    }
+    fn discovery_deadline(&self) -> Option<MonoTime> {
+        let pending = self.pending.map(|request| {
+            if self.closed {
+                self.now
+            } else {
+                request.deadline
+            }
+        });
+        let retry = if self.closed || self.failed {
+            None
+        } else {
+            self.negative.map(|(_, _, deadline)| deadline)
+        };
+        pending.or(retry)
+    }
+}

@@ -1,5 +1,12 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209b adds opt-in owned discovery progress through the existing connector and
+Node poll. Bounded waiting requests avoid the reproduced50ms-lease/100ms-backoff
+starvation. Host checks preserve request/terminal ownership, and native TCP Node
+reconnect/reopen plus QUIC pinned-target connection are exercised. Manual mode
+stays explicit. Source-session reconnection and recursive parent-offline
+integration remain209; cache floors are still volatile.
+
 Slice209a fixes renewal of unchanged authenticated endpoint leases in long-lived
 client instances. Shared host/TCP/TLS/QUIC histories cover expiry, invalidation,
 stale/conflicting responses and cancellation; host checks also cover positive

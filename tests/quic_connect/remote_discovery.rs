@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 use super::*;
 use voteboat::{discovery::*, native::remote_discovery::*};
+#[path = "driven_discovery.rs"]
+mod driven;
 #[path = "../remote_discovery/renewal.rs"]
 mod renewal;
 #[path = "../remote_discovery/scenario.rs"]

@@ -1,0 +1,30 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.16s
+     Running tests/discovery.rs (target/debug/deps/discovery-d744bfdcbb0ef202)
+
+running 7 tests
+test checked_discovery_refuses_wrong_identity_expiry_and_duplicate_completions ... ok
+test construction_returns_live_parts_and_shared_host_views_close_independently ... ok
+test driven::pending_construction_returns_owners_and_manual_mode_does_not_drive ... ok
+test driven::driven_lookup_progresses_without_separate_poll_and_drains_on_close ... ok
+test driven::single_visit_alternates_and_zero_io_preserves_the_next_discovery_turn ... ok
+test downstream_discovery_substitutes_only_address_and_preserves_rejection_and_attempt_ownership ... ok
+test driven::waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure ... FAILED
+
+failures:
+
+---- driven::waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure stdout ----
+
+thread 'driven::waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure' (395) panicked at tests/discovery/driven.rs:264:9:
+assertion `left == right` failed
+  left: Overloaded
+ right: InvalidRequest
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    driven::waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure
+
+test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test discovery`

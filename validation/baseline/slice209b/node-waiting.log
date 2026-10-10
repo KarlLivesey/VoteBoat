@@ -1,0 +1,20 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.89s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-3639936cb54e2253)
+
+running 1 test
+
+thread 'native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data' (3008607) panicked at tests/native/driven_discovery.rs:232:17:
+assertion failed: matches!(c.nodes[0].complete_client(reply).unwrap(), ClientOutcome::Applied
+    { .. })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data ... FAILED
+
+failures:
+
+failures:
+    native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 175 filtered out; finished in 1.70s
+
+error: test failed, to rerun pass `--test effect_owner`

@@ -121,13 +121,15 @@ histories with three receive frames, actual refusal, sixteen foreground writes
 and reads, all-eight-group forced snapshot recovery, full restart and original
 operation retries. These advance P2/P7 isolation without a general latency claim.
 
-Completed209a fixes authenticated unchanged-endpoint lease renewal in persistent
-client instances, with host/TCP/QUIC expiry, invalidation, cancellation and stale
-response checks. Current209 continues integrating persistent discovery refresh against the existing
-authenticated endpoint/manifest source and bounded cache. Its purpose is usable
-reconnect after discovery changes; dependencies are existing discovery, exact
-peer pins and the fair reactor. Completion requires refreshed hints, stale
-generation refusal and parent-offline child continuity across restart. This
+Completed209a fixes authenticated unchanged-endpoint lease renewal. Completed209b
+adds opt-in connector-owned discovery progress and bounded waiting admission,
+including native Node reconnect/reopen and QUIC connection evidence. Current209
+continues source-session reconnection and recursive restart/parent-offline
+composition against the existing authenticated endpoint/manifest source and
+bounded cache. Its purpose is usable reconnect after discovery changes;
+dependencies are existing discovery, exact peer pins and the fair reactor.
+Completion requires refreshed hints, stale generation refusal and parent-offline
+child continuity across restart. This
 advances P5 discovery without granting ownership from a cached endpoint.
 Next, extend the next unreviewed public-provider obligations selected from the
 contract ledger. Reuse host/native implementations and their injected failures;
@@ -141,6 +143,84 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209b implemented — connector-owned discovery progress
+
+The opt-in driven constructor uses the public DiscoveryDriver extension to own
+bounded resolver progress through ordinary PeerConnector/Node polling. Transient
+misses retain original requests within the shared request ceiling, so freshly
+resolved short leases reach the underlying connector without waiting for roster
+backoff. Manual construction still rejects lookup misses. A rotating waiting
+queue and alternating one-visit schedule preserve bounded progress. Deadlines
+include source retries and original requests. Local terminal outcomes retain
+their capacity and exact ticket if the underlying connector poll fails.
+
+Host-provider tests cover original admission, limits, cancellation, deadline,
+zero-I/O priority, constructor ownership, close and failure/drain behavior.
+The native Node history uses50ms leases, a stale caller address, actual TCP/TLS
+and three durable stores; it refreshes after disconnect, verifies a new session,
+reopens and checks original operation IDs. The shared hundred-group fixture uses
+explicit long election timers and100 replica steps to keep this discovery check
+separate from unrelated election-load stress; default profiles are unchanged.
+The first fixed-time test stalled at roster backoff; the advancing-clock version
+then exposed the real short-lease rejection loop. Keeping the admitted request
+fixes that loop. QUIC connector polling also resolves and authenticates a real
+target without a separate client polling call. The final Node history commits a
+new write with expired hints and offline discovery, drains an accepted lookup
+during shutdown, and preserves all three original operation IDs on reopen.
+The broad all-feature selection passes235 tests. Final focused checks pass59
+discovery/connector tests plus the strengthened Node history; default checks
+pass45 tests plus its Node history, native-only24 and core-only7. Formatting and
+all four strict Clippy profiles pass with zero diagnostics;107 inventory paths
+and13 metadata checks pass. Evidence, including failures, is retained in
+validation/baseline/slice209b. The inventory addition is an implemented seam,
+not an additional completed provider-obligation review. Source-session reconnection and
+recursive parent-offline composition remain open; full P0–P7 stays active.
+
+### Slice209b schema plan — drive discovery through the owning connector
+
+The existing DiscoveryConnector resolves synchronously but does not poll an
+asynchronous resolver. Once owned by a Node its immutable peer view cannot drive
+that resolver. Add an opt-in `new_driven` constructor backed by a public
+DiscoveryDriver extension: bounded progress, pending ownership and next deadline.
+The existing manual constructor and PeerDiscovery contract stay unchanged.
+The extension uses the existing SessionPollBudget for one bounded discovery I/O
+visit; host providers must remain nonblocking and own their actual shared resources.
+
+The connector stores the selected progress operations at construction, so the
+same concrete connector type and Node/PeerDriver contract continue to work.
+One pending discovery visit consumes one connector visit and its per-visit I/O
+budget. With one visit, alternate discovery and connection work; zero-I/O turns
+must not rotate this priority. Reject driven construction with pending discovery,
+returning both providers intact. Include discovery deadlines and pending work
+in wake/drain checks. Close suppresses lookup publication but retains its exact
+accepted request until the next bounded terminal poll. Source failures are
+handled inside the resolver; they cannot invalidate unrelated cached hints or
+fence the Raft owner. Provider-contract failures remain errors.
+
+Implement the extension for NativeRemotePeerDiscovery. Its existing authenticated
+request checks, original completion and lease publication remain authoritative;
+the connector owns consumption of discovery completions in driven mode. Test
+downstream host providers for budgets/fairness, unchanged rejected ownership,
+deadline and close/drain behavior. Exercise real TCP/TLS and QUIC progress without
+manual client polling, then the owning Node path. No consensus, storage or wire
+change is planned. This advances209/P5's long-lived integration; discovery-source
+reconnection and restart/parent-offline composition remain explicit work, followed
+by the already-planned provider obligations and platform/operator acceptance.
+
+The first owning-Node history held time fixed and never reached the roster retry
+deadline; the corrected clock then reproduced short-lease starvation:50ms hints
+expired during the roster's minimum100ms post-rejection delay, causing repeated
+discovery calls without a socket attempt. Revise driven admission to retain
+transiently unresolved requests in the connector's bounded request slots. Only
+driven mode changes: manual misses still reject. Waiting requests keep their
+exact ticket, original direction and deadline. One discovery visit polls the
+source and advances at most one queued request, rotating the bounded queue.
+Success submits to the original connector; terminal errors/cancel/close/deadline
+emit exactly one completion under the caller completion budget. Waiting and
+in-flight work share the declared capacity. This is needed to use short-lived
+hints without bypassing roster backoff after real connection failure. Extend
+host tests for accepted waiting ownership and retain the50ms native regression.
 
 ### Slice209a implemented — authenticated endpoint lease renewal
 

@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-95ac16d5a239c80e)
+
+running 1 test
+test remote_discovery::driven::quic_connector_poll_drives_remote_lookup_and_authenticates_target ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.01s
+

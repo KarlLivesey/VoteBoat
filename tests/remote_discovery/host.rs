@@ -181,6 +181,7 @@ fn remote_negative_backoff_and_server_source_lifetime_are_bounded() {
     client.resolve(peer(3), MonoTime(0)).unwrap_err();
     let (done, now) = scenario::drive(&mut client, &mut server, MonoTime(0));
     assert_eq!(done.result, Err(DiscoveryError::Missing.into()));
+    assert_eq!(client.discovery_deadline(), Some(MonoTime(now.0 + 10)));
     for _ in 0..100 {
         assert_eq!(client.resolve(peer(3), now), Err(DiscoveryError::Missing));
     }

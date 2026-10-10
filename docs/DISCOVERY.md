@@ -224,8 +224,54 @@ While retaining the typed wrapper, drive
 `connector.discovery_mut().poll(now, budget)` alongside the responder and
 `connector.poll`. The remote client is the sole consumer of its dedicated
 session's plaintext. Hosts embedding a type-erased connector in Node must retain
-an explicit polling arrangement; the executable does not automatically create
-or drive this provider. There is no implicit background progress.
+an explicit polling arrangement when using the manual constructor. The driven
+constructor below lets Node own that progress. The executable does not yet
+automatically provision discovery sessions. There is no hidden background worker.
+
+### Driven connector mode
+
+`DiscoveryConnector::new_driven(connector, resolver, now)` selects the public
+`DiscoveryDriver` extension. `NativeRemotePeerDiscovery` implements it; downstream
+hosts can implement the same bounded progress, pending-work and deadline contract.
+Construction requires an idle resolver and connector and returns both unchanged
+on refusal. Use the resulting connector in ordinary `PeerParts`/`NodeParts`.
+The same Node poll then drives lookup and connection establishment. The manual
+constructor and explicit remote-client completion interface remain available.
+
+In driven mode, a transient lookup miss accepts the original connection request
+into a bounded waiting slot. This avoids making a short-lived refreshed hint
+wait through a second roster retry delay before it can be used. Waiting requests
+retain their exact tickets, original deadlines and caller directions; resolution
+substitutes only a validated address before ordinary authenticated submission.
+Waiting, terminal and submitted requests share the connector's declared request
+limit, including one request per peer. Identity, deadline and capacity refusals
+still return the original request synchronously. There is no stale-address fallback.
+
+One discovery visit uses one connector visit and its existing per-visit session
+I/O budget, then advances at most one waiting request. The waiting queue rotates.
+With one visit, discovery and connection work alternate; zero-I/O turns do not
+consume the next scheduling priority. Completion counts remain bounded. Wake
+deadlines include pending lookups, negative retry delays and original requests.
+
+Cancel suppresses a waiting connection attempt and retains its terminal slot until
+polling; it does not revoke cached hints shared by other requests. Close also
+closes the resolver view and suppresses pending lookup publication. Draining must
+finish both request kinds before parts can be recovered. An already determined
+local outcome stays retained if the underlying connector poll fails. Source
+timeouts, malformed replies or unavailable endpoints remain resolver outcomes,
+so a source outage cannot fence unrelated connected peers or live cached hints.
+The host owns source-session provisioning/replacement and readiness wakes.
+After selecting driven mode, it must not independently consume resolver progress.
+
+Slice209b checks downstream host budgets, exact request/terminal ownership,
+construction refusal, cancellation, deadline, underlying poll failure and close.
+A native three-node history uses ordinary Node polling,50ms leases, real TCP/TLS,
+forced disconnect/reconnect, original retries, file reopen and worker joining.
+It uses explicit long election timers to separate discovery from unrelated
+hundred-group election pressure. A QUIC history uses connector polling alone to
+fetch a hint and authenticate/exchange data with the pinned target. These checks
+do not establish automatic source reconnection or the remaining recursive
+parent-outage integration.
 
 Cancellation takes the exact `RefreshRequest`, suppresses publication and retains
 the slot until the reply or original deadline. It never extends the deadline.

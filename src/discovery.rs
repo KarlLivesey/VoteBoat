@@ -13,9 +13,13 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Non-authoritative, bounded peer endpoint hints.
-use crate::{runtime::MonoTime, secure::PeerIdentity};
+use crate::{
+    runtime::MonoTime,
+    secure::{PeerIdentity, SessionPollBudget},
+};
 use std::{net::SocketAddr, num::NonZeroU64};
 pub const PEER_DISCOVERY_CONTRACT_VERSION: u32 = 1;
+pub const DISCOVERY_DRIVER_CONTRACT_VERSION: u32 = 1;
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct HintGeneration(NonZeroU64);
 impl HintGeneration {
@@ -85,4 +89,23 @@ pub trait PeerDiscovery {
     ) -> Result<PeerEndpointHint, DiscoveryError>;
     fn invalidate(&mut self, peer: PeerIdentity, generation: HintGeneration) -> bool;
     fn close(&mut self);
+}
+
+/// Optional owned progress for asynchronous endpoint lookup. A driven connector
+/// is the sole progress/completion consumer; resolve still only admits bounded
+/// work. One poll is one visit with the supplied I/O budget, never blocking.
+/// Lookup/source failures stay in the provider's per-request/cache state so
+/// unrelated live hints remain usable. Errors here mean a progress-contract
+/// failure (for example invalid budget/time), not an ordinary failed lookup.
+/// Close must suppress publication and retain pending work until terminal poll.
+/// Deadlines and pending state remain accurate while closing; no hidden worker
+/// or infrastructure owner is created by selecting this extension.
+pub trait DiscoveryDriver: PeerDiscovery {
+    fn poll_discovery(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+    ) -> Result<(), DiscoveryError>;
+    fn discovery_pending(&self) -> bool;
+    fn discovery_deadline(&self) -> Option<MonoTime>;
 }

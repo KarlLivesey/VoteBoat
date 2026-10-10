@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0599]: no method named `next_deadline` found for reference `&Node<FairScheduler, DeadlineQueue, ..., ..., ..., ..., ..., ..., ...>` in the current scope
+   --> tests/support/native_discovery.rs:111:147
+    |
+111 | ...usage(), n.next_deadline(), app.read_applied(app.applied_index()))
+    |               ^^^^^^^^^^^^^ method not found in `&Node<FairScheduler, DeadlineQueue, ..., ..., ..., ..., ..., ..., ...>`
+    |
+    = note: the full name for the type has been written to '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/effect_owner-3639936cb54e2253.long-type-17539420165068284265.txt'
+    = note: consider using `--verbose` to print the full type name to the console
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "effect_owner") due to 1 previous error

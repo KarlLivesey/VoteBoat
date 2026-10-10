@@ -1,0 +1,85 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.27s
+     Running tests/connect.rs (target/debug/deps/connect-15e3e52abff43830)
+
+running 19 tests
+test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... ok
+test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call ... ok
+test fairness::exhausted_budget_does_not_skip_later_anonymous_slots ... ok
+test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface ... ok
+test fairness::zero_socket_budget_polls_do_not_consume_a_fairness_turn ... ok
+test native::remote_discovery_drives_real_pinned_target_dial ... ok
+test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/discovery.rs (target/debug/deps/discovery-6f4d5d5d2404c4cd)
+
+running 9 tests
+test checked_discovery_refuses_wrong_identity_expiry_and_duplicate_completions ... ok
+test downstream_discovery_substitutes_only_address_and_preserves_rejection_and_attempt_ownership ... ok
+test construction_returns_live_parts_and_shared_host_views_close_independently ... ok
+test driven::pending_construction_returns_owners_and_manual_mode_does_not_drive ... ok
+test local_publication_cannot_extend_or_revive_an_unchanged_generation ... ok
+test driven::single_visit_alternates_and_zero_io_preserves_the_next_discovery_turn ... ok
+test driven::driven_lookup_progresses_without_separate_poll_and_drains_on_close ... ok
+test native_cache_retains_generation_floors_and_bounds_even_after_expiry_and_close ... ok
+test driven::waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-95ac16d5a239c80e)
+
+running 14 tests
+test credential_refresh::native::native_replace_is_monotonic_returns_material_and_close_is_scoped ... ok
+test failed_construction_returns_socket_without_starting_protocol_work ... ok
+test cancellation_and_expiry_keep_exact_terminal_slots_and_reject_stale_or_wrong_requests ... ok
+test discovered::discovered_quic_dial_validates_endpoint_and_cannot_replace_peer_pin ... ok
+test discovered::downstream_hint_provider_selects_actual_authenticated_quic_endpoint ... ok
+test discovered::refreshed_quic_hint_selects_new_address_and_retained_peer_lease_bounds_reconnect ... ok
+test credential_refresh::native::native_transport_returns_exact_accepted_batch_as_failed_after_revocation ... ok
+test one_socket_per_node_establishes_multiple_peers_and_close_preserves_transferred_sessions ... ok
+test remote_discovery::quic_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test remote_discovery::driven::quic_connector_poll_drives_remote_lookup_and_authenticates_target ... ok
+test credential_refresh::quic_rotation_revokes_old_io_and_reconnect_preserves_identity ... ok
+test retired_leases_release_socket_routes_for_fresh_generations ... ok
+test shared_quic_connector_preserves_selected_versions_and_rejects_mismatches ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/remote_discovery.rs (target/debug/deps/remote_discovery-ef7c79810918c6ff)
+
+running 17 tests
+test host::construction_refusal_returns_both_owners_without_closing_them ... ok
+test host::close_completes_pending_once_and_returns_original_session ... ok
+test host::cancellation_retains_exact_slot_and_suppresses_late_positive ... ok
+test host::clock_skew_and_delayed_delivery_cannot_extend_remote_lifetime ... ok
+test host::ipv6_scope_and_flow_round_trip_without_address_substitution ... ok
+test host::cache_capacity_includes_invalidated_generation_floors ... ok
+test host::remote_negative_backoff_and_server_source_lifetime_are_bounded ... ok
+test host::reconnect_retains_floors_and_rejects_old_session_generations ... ok
+test host::malformed_or_mismatched_reply_closes_without_publishing ... ok
+test host::replayed_positive_cannot_renew_an_invalidated_lease ... ok
+test host::responder_rejects_replayed_request_before_calling_source_again ... ok
+test host::stale_generation_cannot_revive_an_invalidated_endpoint ... ok
+test host::zero_budget_and_backwards_time_leave_accepted_request_unchanged ... ok
+test short_io_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test short_io_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test tcp_tls_authenticated_endpoint_leases_renew_without_changing_generation ... ok
+test tcp_tls_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

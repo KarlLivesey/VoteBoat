@@ -1952,6 +1952,24 @@
     },
     {
       "design_id": "C17",
+      "public_contract": "DiscoveryDriver / DiscoveryConnector::new_driven",
+      "operations": [
+        "poll_discovery",
+        "discovery_pending",
+        "discovery_deadline",
+        "new_driven"
+      ],
+      "native": "NativeRemotePeerDiscovery progress through the existing DiscoveryConnector and Node poll",
+      "conformance": [
+        "tests/discovery/driven.rs",
+        "tests/native/driven_discovery.rs",
+        "tests/quic_connect/driven_discovery.rs",
+        "tests/remote_discovery/host.rs"
+      ],
+      "scope": "Optional explicit progress ownership for asynchronous endpoint lookup. Idle construction returns both providers on rejection. Transient misses retain exact connection tickets and deadlines in shared bounded request slots; rotating lookup visits share the existing connector/session budget and preserve priority on zero-I/O turns. Negative retry and request deadlines compose with existing wakes. Cancellation, close and local terminal outcomes retain ownership through bounded completion, including an underlying poll failure. Host and native TCP/TLS/QUIC checks exercise original admission, short-lived hint renewal, real pinned-target connection, Node reconnect, native file reopen and original data retries. No background runtime, trust provisioning, source-session auto-reconnect, recursive ownership authority or durable endpoint cache is added."
+    },
+    {
+      "design_id": "C17",
       "public_contract": "PeerDiscovery / PeerEndpointHint / DiscoveryConnector",
       "operations": [
         "resolve",

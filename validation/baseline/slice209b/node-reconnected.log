@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.01s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-3639936cb54e2253)
+
+running 1 test
+
+thread 'native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data' (3020418) panicked at tests/native/driven_discovery.rs:303:13:
+discovered Node stalled at 3244, calls [3, 1, 0], state [(Candidate, PeerRosterUsage { connections: 2, connecting: 0, reserved_bytes: 12582912 }, ConnectUsage { requests: 0, dialing: 0, anonymous: 0, handshaking: 0 }, None, Ok(7)), (Candidate, PeerRosterUsage { connections: 2, connecting: 0, reserved_bytes: 12582912 }, ConnectUsage { requests: 0, dialing: 0, anonymous: 0, handshaking: 0 }, None, Ok(7)), (Candidate, PeerRosterUsage { connections: 2, connecting: 0, reserved_bytes: 12582912 }, ConnectUsage { requests: 0, dialing: 0, anonymous: 0, handshaking: 0 }, None, Ok(7))]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data ... FAILED
+
+failures:
+
+failures:
+    native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 175 filtered out; finished in 15.98s
+
+error: test failed, to rerun pass `--test effect_owner`

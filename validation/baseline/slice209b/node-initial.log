@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0616]: field `ticket` of struct `ClientCompletion` is private
+   --> tests/support/native_discovery.rs:113:34
+    |
+113 |                 assert_eq!(reply.ticket, ticket);
+    |                                  ^^^^^^ private field
+    |
+help: a method `ticket` also exists, call it with parentheses
+    |
+113 |                 assert_eq!(reply.ticket(), ticket);
+    |                                        ++
+
+For more information about this error, try `rustc --explain E0616`.
+error: could not compile `voteboat` (test "effect_owner") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

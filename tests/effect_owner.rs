@@ -1697,6 +1697,8 @@ fn bulk_leases_leave_a_reserved_visit_for_control() {
 mod native {
     use super::*;
     #[cfg(feature = "tls")]
+    mod driven_discovery;
+    #[cfg(feature = "tls")]
     include!("support/native_node.rs");
     use std::{
         sync::Arc,
@@ -1796,6 +1798,15 @@ mod native {
         recover: bool,
         with_snapshots: bool,
     ) -> Node {
+        make_snapshots_with_timers(id, path, recover, with_snapshots, TimerConfig::default())
+    }
+    fn make_snapshots_with_timers(
+        id: u64,
+        path: &std::path::Path,
+        recover: bool,
+        with_snapshots: bool,
+        timers: TimerConfig,
+    ) -> Node {
         let mut store = open_owner_store(id, path, recover);
         let runtime_owner = RuntimeOwner {
             store: store.binding(),
@@ -1819,7 +1830,7 @@ mod native {
             shard,
             DeadlineQueue::new(runtime_owner, 100).unwrap(),
             JitterEntropy::new(id * 17),
-            TimerConfig::default(),
+            timers,
             MonoTime(0),
         )
         .unwrap();
