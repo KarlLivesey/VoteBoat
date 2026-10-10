@@ -1,0 +1,43 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.62s
+     Running tests/transport.rs (target/debug/deps/transport-13ef8df91ec05a1c)
+
+running 4 tests
+test native::poll_progress::exhausted_and_zero_session_budgets_do_not_add_follow_through_polls ... ok
+test native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch ... FAILED
+test native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget ... FAILED
+test native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget ... FAILED
+
+failures:
+
+---- native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch stdout ----
+
+thread 'native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch' (190) panicked at tests/native/poll_progress.rs:185:5:
+assertion `left == right` failed
+  left: Ok(TransportProgress { session: SessionProgress { io_calls: 1, read_bytes: 3, written_bytes: 0, became_ready: false }, plaintext_calls: 3, read_bytes: 161, written_bytes: 161, received: true, sent: false })
+ right: Err(Session(Io(BrokenPipe)))
+
+---- native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget stdout ----
+
+thread 'native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget' (192) panicked at tests/native/poll_progress.rs:131:5:
+assertion `left == right` failed
+  left: SessionProgress { io_calls: 1, read_bytes: 3, written_bytes: 0, became_ready: false }
+ right: SessionProgress { io_calls: 2, read_bytes: 3, written_bytes: 7, became_ready: false }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget stdout ----
+
+thread 'native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget' (191) panicked at tests/native/poll_progress.rs:213:13:
+assertion `left == right` failed
+  left: Ok(TransportProgress { session: SessionProgress { io_calls: 4, read_bytes: 3, written_bytes: 0, became_ready: false }, plaintext_calls: 1, read_bytes: 0, written_bytes: 7, received: false, sent: false })
+ right: Err(ProviderViolation)
+
+
+failures:
+    native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch
+    native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget
+    native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test transport`

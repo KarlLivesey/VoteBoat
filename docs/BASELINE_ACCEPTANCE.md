@@ -1,5 +1,16 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice219 fixes plaintext-to-session owner-cycle deferral within the unchanged
+I/O budget. Actual default-limit separate-group QUIC frames deliver3 but complete
+only2/3 by48ms in the original selected6ms/50ms profile; the same profile now
+completes3/3 by30ms. Independent host budget/cleanup checks fail before and pass4
+afterward. Transport35 all-feature/default, native-only34, QUIC15, connector15,
+counter166 and transfer21 pass locally. Directory18/1 has an unresolved TCP
+post-reload lookup deadline; no full local operator pass. Preceding d5244df CI
+passes Ubuntu166/19/21 and fails macOS counter162/4 before later targets run.
+This advances P2 progress while retaining platform/routing/fault/P7 gaps; no new
+batching seam, timeout, ACK rule, ownership or security expansion.
+
 Slice218 reviews PeerTransport's twelve operations through selected shared
 independent-host/native ownership and mixed-group progress checks. All-feature/
 default transport31 and core-only1 pass; the checker detects early completion

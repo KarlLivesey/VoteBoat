@@ -35,14 +35,19 @@
         },
         {
           "names": ["poll"],
-          "obligation": "Validate poll budgets before progress. Bound reported plaintext calls/read/write bytes separately, retain accepted work across zero budgets and reject invalid budgets without mutation. A held flush prevents terminal completion even after complete remote decode.",
+          "obligation": "Validate poll budgets before progress. Bound reported plaintext calls/read/write bytes separately, retain accepted work across zero budgets and reject invalid budgets without mutation. All session polls in one transport visit share the original session call/read/write budget. Reject overreported progress before reusing a remainder; native follow-through advances plaintext-triggered work only within the remaining allowance. A held flush prevents terminal completion even after complete remote decode.",
           "assertions": [
             {"file": "tests/native/shared_contract.rs", "symbol": "bounded_poll"},
             {"file": "tests/native/shared_contract.rs", "symbol": "shared_groups"},
             {"file": "tests/native/shared_contract.rs", "symbol": "invalid_admission"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "plaintext_follow_through_uses_only_remaining_independent_session_budget"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "exhausted_and_zero_session_budgets_do_not_add_follow_through_polls"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "follow_through_failure_preserves_validated_receive_and_original_failed_batch"},
+            {"file": "tests/native/poll_progress.rs", "symbol": "overreported_session_progress_on_either_poll_fails_before_reusing_budget"},
+            {"file": "tests/quic/frame_progress.rs", "symbol": "separate_group_frames_complete_with_coarse_owner_cadence"},
             {"file": "tests/transport.rs", "symbol": "zero_and_single_call_budgets_preserve_bidirectional_progress"}
           ],
-          "remaining": ["Shared histories use zero/three-call budgets and seven-byte progress; the separate one-call bidirectional check covers native transport only. Session syscall budgets, wall-clock responsiveness, real TCP/QUIC cadence and the cause of macOS stalls require separate evidence. Poll counts need not match providers."]
+          "remaining": ["Shared histories use zero/three-call plaintext budgets and seven-byte progress; the separate one-call bidirectional check covers native transport only. Independent buffered HostSession and native QUIC framed traces cover selected whole-visit session budgets and failure on either poll. These do not prove wall-clock responsiveness, arbitrary callback bounds, every byte-pressure combination or the cause of macOS stalls. Poll counts need not match providers."]
         },
         {
           "names": ["received_info", "take_received"],

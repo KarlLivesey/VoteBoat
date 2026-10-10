@@ -440,37 +440,103 @@ durations still do not measure owner inter-poll intervals. Raw logs/state remain
 in slice218. These are previous-source platform results, not validation of new
 test/provider code or evidence that all five failures have the same cause.
 
-Current: diagnose macOS remaining group liveness/preparation failures using
-the actual0d80216 run above and its queued-peer/timing observations. Later targets on
-failing counter jobs were not run. Depend on retained logs, new
-failure-only queue/binding/timing observations and shared-group session/owner
-contracts. Identify the earliest failed
-transition, add bounded diagnostic evidence if necessary and reproduce a focused
-cause before fixing. Completion requires affected original operation/history
-checks locally plus the supported platform run, rather than increasing timeouts
-or accepting all unknown outcomes. This advances the usable service and P2/P4
-platform recovery; CI continues in the background.
+Implemented219 reproduces framed QUIC owner-cycle deferral with production
+limits: at the selected6ms cadence all three separate heartbeat messages arrive,
+but only2/3 original frames complete by48ms inside the50ms profile. The1ms
+separate and6ms multiplexed comparisons already pass. After plaintext progress,
+native transport now polls session I/O once with only the original remaining
+budget; both progress results are validated/summed before reuse. Same profiles
+pass3, with coarse separate completion at30ms. No overall budget, stream/ACK rule,
+Raft timer, original ticket, public seam or batching format changes.
 
-Next: exercise actual mixed-group framed QUIC progress under a controlled owner
-cadence, building on218's original-ticket/terminal-slot checks and216's session
-FIN trace. Compare separately submitted original group batches with one existing
-multiplexed batch before choosing a production batching change. This is needed
-to distinguish frame/flush serialization from timer or ownership defects in the
-P2 queued-group milestone. Preserve fixed budgets, stream/ACK ownership and
-ordinary Raft timers; keep virtual-cadence results distinct from measured macOS
-scheduling. Completion requires a retained cause-specific failure and focused
-correction if demonstrated, plus original shared-group service checks. It
-advances usable-service/P2/P7 progress; full platform acceptance still follows.
+Independent buffered HostSession checks fail before correction1/3, then pass4:
+exact remaining budgets, zero/exhausted calls, each overreported dimension on
+either poll, and follow-through failure retaining validated receive plus original
+Failed ownership. All-feature/default transport35, native-only34, QUIC15 and
+shared connector15 pass. All166 counter and21 transfer histories pass locally.
+The sequential directory sweep has18 passes/1 TCP peer-reload lookup deadline
+failure, retained unresolved. Its fixture samples a leader and pins one explicit
+lookup endpoint; source inspection does not prove whether that sample was stale
+or which of its four lookup phases expired. No full local operator pass is claimed.
+Formatting and all four strict all-target Clippy profiles pass with zero
+diagnostics through the unchanged enabled hook;21 ledger metadata cases and
+the108-contract inventory path check pass. No lint allowance or threshold changes.
+Macro review219 closes the selected P2 owner-cycle progress defect while keeping
+whole-platform, routing/fault and original P7 acceptance open. The existing shared
+frame option already passes the profile, so another batching seam is unnecessary
+for this correction. Security expansion stays with Daybreak.
 
-Following: complete the next supported-platform operational acceptance profile
-once the reproduced liveness defect is corrected. Depend on the actual operator
-job, checked deployment bindings and existing TCP/QUIC service commands. Verify
-write/read/retry, leader loss, cold restart and clean shutdown on Linux/macOS;
-keep separate-host deployment evidence distinct from runner loopback. Completion
-requires terminal observed outcomes under the original deadlines and recorded
-identities, not an enlarged timeout or omitted failing history. This advances
-the usable service macro milestone; separate-host provisioning and broader faults
-remain explicit rather than silently counted as complete.
+Preceding-source d5244df run38052027362 is terminal: Ubuntu166/19/21 pass; macOS
+counter162/4 fails before later targets run. Assignment lookup has no eligible
+leader within its routing deadline; configuration preparing expires before
+configuration_queued; TCP replacement setup returns NOT_LEADER for original19770;
+TCP membership drain has no matching durable local record at its expected Active
+observation. These results do not contain219's production change. Raw logs,
+observations and terminal state remain in slice219, separate from local evidence.
+
+Current: verify the corrected219 progress path on supported platforms and locate
+the retained directory lookup failure's earliest transition. Depend on the actual
+matching-source operator run, original endpoint/query/phase identities and
+bounded read-only diagnostics if needed. Completion requires original write/read/
+retry/leader-loss/cold-restart/clean-stop histories under their existing budgets;
+retain failures and fix a demonstrated cause rather than repeating unchanged
+sweeps or accepting unknown success. This advances usable-service/P2/P5 acceptance;
+CI remains background feedback, and separate-host evidence stays distinct.
+
+Next: address the demonstrated administrative caller/preparation gaps that remain
+after matching-source platform feedback. Depend on original19770/21101/drain
+plans, exact local/quorum observations and the existing P4 continuation contracts.
+Reproduce the specific lost-leadership or absent-record transition before selecting
+a caller or production fix. Completion requires unchanged original operation and
+payload, positive durable/quorum evidence, refusal of changed identities and
+actual TCP/QUIC recovery checks under the original command budgets. This advances
+the online-membership/usable-service milestone without expanding security review.
+
+Following: repeat the original P7 committed/applied latency profile with the
+corrected transport after its functional checks, while platform feedback runs.
+Depend on the recorded benchmark workload, durability, offered load and hardware
+details; keep the fixed250ms serial TCP p99 gate unchanged. Completion requires
+reproducible committed/applied results and a cause-specific correction if the
+original gate still fails, plus contract/recovery checks for any changed path.
+This advances measured tuning; broader fault/provider and deployment obligations
+remain explicit in the full P0–P7 acceptance ledger.
+
+### Slice219 schema plan — framed QUIC progress within one owner budget
+
+Purpose/dependencies: execute the framed progress comparison selected above,
+using218's ownership checks and216's FIN correction. The existing transport polls
+session I/O only before plaintext; newly written bytes and credit released by a
+read wait for another owner visit. Determine whether that extra visit causes a
+finite three-group burst to exceed the default50ms heartbeat interval. This
+advances usable-service/P2 progress; selected virtual cadence is not measured
+macOS scheduling or the fixed P7 latency benchmark.
+
+Data/API: test actual NativePeerTransport/NativeQuicSession over loopback UDP,
+default production session/transport limits, three exact original group messages
+and original NativeOutbound tickets. Compare three separate frames against the
+existing one-frame multiplexing option at1ms and6ms owner cadence. Bound the
+profile to50ms, record admitted/delivered/completed counts and exact messages,
+retain failures and verify all original queue credits until exact completion.
+Keep the original256-byte session fixtures unchanged through an explicit test
+limits parameter; no new provider, timer, protocol or public batching seam.
+
+Candidate only after evidence: if plaintext-to-I/O deferral causes the selected
+failure, follow plaintext progress with one session poll using the remaining
+call/read/write budget. Sum both results, preserve zero-budget behavior and reject
+provider progress beyond its supplied budget before computing a remainder.
+Continue to require actual local flush/QUIC ACK before exact terminal completion.
+No additional overall budget, thread, stream, hidden I/O or timeout is allowed.
+
+Transitions/cleanup: accepted batch -> partial plaintext -> same-visit bounded
+session output -> acknowledged flush -> original terminal slot; decoded input
+still occupies one immutable slot. Failure on either session poll follows existing
+drop-frame-before-Failed ownership, retaining previously validated input. Repeated
+same-time polls are non-regressing observations, not a new timer generation.
+Close/abort and queue replacement retain218's contracts; volatile tickets are
+not reconstructed after restart. Completion checks require before/after actual
+framed evidence, independent host session follow-through/budget/failure checks,
+transport/QUIC/connector tests, original shared-group service histories and
+formatting/four strict Clippy profiles at zero. Keep platform failures separate.
 
 ### Slice218 schema plan — shared-group transport ownership and bounded progress
 

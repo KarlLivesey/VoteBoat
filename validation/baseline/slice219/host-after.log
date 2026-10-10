@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.14s
+     Running tests/transport.rs (target/debug/deps/transport-13ef8df91ec05a1c)
+
+running 4 tests
+test native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget ... ok
+test native::poll_progress::exhausted_and_zero_session_budgets_do_not_add_follow_through_polls ... ok
+test native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch ... ok
+test native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.00s
+

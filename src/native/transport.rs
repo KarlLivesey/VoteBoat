@@ -241,6 +241,54 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
         }
         Ok(())
     }
+    fn poll_session(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+    ) -> Result<SessionProgress, TransportError> {
+        let progress = match self.session.as_mut().unwrap().poll(now, budget) {
+            Ok(progress) => progress,
+            Err(error) => return self.fail(TransportError::Session(error)),
+        };
+        if progress.io_calls > budget.io_calls
+            || progress.read_bytes > budget.read_bytes
+            || progress.written_bytes > budget.write_bytes
+        {
+            return self.fail(TransportError::ProviderViolation);
+        }
+        if let Err(error) = self.validate_session() {
+            return self.fail(error);
+        }
+        Ok(progress)
+    }
+    fn follow_plaintext(
+        &mut self,
+        now: MonoTime,
+        budget: SessionPollBudget,
+        progress: &mut TransportProgress,
+    ) -> Result<(), TransportError> {
+        if self.state == TransportState::Closed
+            || (progress.read_bytes == 0 && progress.written_bytes == 0)
+            || progress.session.io_calls == budget.io_calls
+        {
+            return Ok(());
+        }
+        // Plaintext can queue output or release channel receive/stream credit.
+        // Make that work eligible in this owner visit, without a fresh budget.
+        // poll_session validated every counter before these subtractions.
+        let remaining = SessionPollBudget {
+            io_calls: budget.io_calls - progress.session.io_calls,
+            read_bytes: budget.read_bytes - progress.session.read_bytes,
+            write_bytes: budget.write_bytes - progress.session.written_bytes,
+        };
+        let next = self.poll_session(now, remaining)?;
+        progress.session.io_calls += next.io_calls;
+        progress.session.read_bytes += next.read_bytes;
+        progress.session.written_bytes += next.written_bytes;
+        progress.session.became_ready |= next.became_ready;
+        progress.sent |= self.finish_send();
+        Ok(())
+    }
     fn clear_partial(&mut self) {
         self.incoming = None;
         self.read = 0;
@@ -506,13 +554,7 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeer
             return self.fail(e);
         }
         self.start_close();
-        let session = match self.session.as_mut().unwrap().poll(now, budget.session) {
-            Ok(p) => p,
-            Err(e) => return self.fail(TransportError::Session(e)),
-        };
-        if let Err(e) = self.validate_session() {
-            return self.fail(e);
-        }
+        let session = self.poll_session(now, budget.session)?;
         let mut progress = TransportProgress {
             session,
             sent: self.finish_send(),
@@ -566,6 +608,7 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeer
             }
             progress.sent |= self.finish_send();
         }
+        self.follow_plaintext(now, budget.session, &mut progress)?;
         if self.state != TransportState::Closed {
             self.start_close();
             if self.close_started && self.session.as_ref().unwrap().state() == SessionState::Closed

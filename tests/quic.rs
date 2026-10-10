@@ -15,6 +15,8 @@
 #![cfg(feature = "quic")]
 #[path = "quic/chunk_progress.rs"]
 mod chunk_progress;
+#[path = "quic/frame_progress.rs"]
+mod frame_progress;
 mod support;
 use std::net::UdpSocket;
 use support::*;
@@ -32,6 +34,20 @@ fn pair() -> (NativeQuicSession, NativeQuicSession) {
     versioned_pair(1, 1)
 }
 fn versioned_pair(a_version: u16, b_version: u16) -> (NativeQuicSession, NativeQuicSession) {
+    configured_pair(
+        a_version,
+        b_version,
+        SessionLimits {
+            write_buffer_bytes: 256,
+            ..SessionLimits::default()
+        },
+    )
+}
+fn configured_pair(
+    a_version: u16,
+    b_version: u16,
+    limits: SessionLimits,
+) -> (NativeQuicSession, NativeQuicSession) {
     let a = UdpSocket::bind("127.0.0.1:0").unwrap();
     let b = UdpSocket::bind("127.0.0.1:0").unwrap();
     let aa = a.local_addr().unwrap();
@@ -41,10 +57,7 @@ fn versioned_pair(a_version: u16, b_version: u16) -> (NativeQuicSession, NativeQ
         peer: support::tls::peer(local(peer)),
         remote,
         generation: SecureSessionGeneration::new(n).unwrap(),
-        limits: SessionLimits {
-            write_buffer_bytes: 256,
-            ..SessionLimits::default()
-        },
+        limits,
     };
     (
         NativeQuicSession::client(

@@ -223,7 +223,9 @@ impl ReceivedBatch {
 /// remain available after a later failure; partial frames never escape. Tagged
 /// bindings let the owner reject obsolete connections before ingress admission.
 ///
-/// Poll separately bounds session I/O and plaintext work. Close rejects new
+/// Poll separately bounds session I/O and plaintext work. All session progress
+/// within one transport poll shares its supplied session budget, including any
+/// session polls interleaved with plaintext work. Close rejects new
 /// sends, drains the accepted send, then closes this channel and discards partial
 /// receive work; completed receive/send slots remain observable. Abort releases
 /// the channel immediately and fails accepted sends. Dropping a handle abandons

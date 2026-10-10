@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests/quic.rs (target/debug/deps/quic-08ec27dd5beb7107)
+
+running 3 tests
+cadence=6 multiplexed=true elapsed=6 completed=1/1 delivered=3 sending=false completion=false waiting=0
+test frame_progress::multiplexed_group_frame_completes_with_coarse_owner_cadence ... ok
+cadence=1 multiplexed=false elapsed=5 completed=3/3 delivered=3 sending=false completion=false waiting=0
+cadence=6 multiplexed=false elapsed=30 completed=3/3 delivered=3 sending=false completion=false waiting=0
+test frame_progress::separate_group_frames_complete_with_fine_owner_cadence ... ok
+test frame_progress::separate_group_frames_complete_with_coarse_owner_cadence ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+

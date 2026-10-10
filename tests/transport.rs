@@ -108,6 +108,7 @@ fn binding(from: u64, to: u64) -> voteboat::secure::SessionBinding {
 #[cfg(feature = "native")]
 mod native {
     use super::*;
+    mod poll_progress;
     mod shared_contract;
     mod shared_lifetimes;
     use std::{

@@ -1,5 +1,25 @@
 # Validation report — slice 35
 
+Framed progress correction: [slice219](baseline/slice219/README.md). Native
+transport spends only unused original session budget after plaintext progress.
+Actual production-limit three-group QUIC frames at selected6ms cadence deliver
+all3 but complete2/3 by48ms before correction, then complete3/3 by30ms afterward.
+Fine-cadence and existing one-frame multiplexing comparisons also pass. This is
+virtual-cadence loopback evidence, not a macOS or P7 wall-clock latency claim.
+Four independent buffered-host checks validate remaining/summed budgets, zero/
+exhausted calls, overreport refusal on either call and failure preserving original
+Failed ownership plus validated input. Three fail before correction; all4 pass
+afterward. Transport35 all-feature/default, native-only34, QUIC15 and shared
+connector15 pass. Local counter166/transfer21 pass; sequential directory18/1
+fails a TCP peer-reload lookup deadline, with phase/endpoint cause unresolved.
+Do not claim a full local operator pass. Preceding-source d5244df CI completes
+Ubuntu166/19/21 successfully and macOS counter162/4 failed; later macOS targets
+are unrun. Raw failures/state, source hashes and strict results are retained.
+Formatting and all four strict all-target Clippy profiles pass with zero
+diagnostics through the enabled hook;21 ledger metadata checks pass.
+The original budgets, stream/ACK ownership, Raft timers and full P0–P7/P7 gates
+remain; no additional public seam or security review scope.
+
 PeerTransport ownership review: [slice218](baseline/slice218/README.md). Shared
 bounded mixed-group histories run against an independent logical-frame downstream
 transport and the native provider over controlled host sessions. They preserve

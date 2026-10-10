@@ -66,6 +66,16 @@ extra caller cycle before the next chunk can start. The outgoing ACK/flush gate
 and single-stream limit remain. Selected coarse-poll checks exercise this path;
 they do not guarantee host responsiveness or a network latency bound.
 
+Framed transport219 also spends unused session I/O budget after plaintext
+progress, so newly written chunks and released receive credit can advance in
+the same owner visit. It sums both session results within the original budget;
+it does not add another allowance or bypass acknowledged flush. With production
+limits and a selected6ms virtual cadence, three separate group heartbeat frames
+previously delivered all messages but completed only2/3 by48ms; the same profile
+now completes3/3 by30ms. One multiplexed frame also passes. This is finite
+encrypted loopback/frame evidence, not measured macOS cadence or the P7 fixed-
+latency benchmark. See [slice219](../validation/baseline/slice219/README.md).
+
 Each poll bounds socket calls and bytes. The fixed UDP payload/initial MTU is
 1200 bytes, with MTU discovery and segmentation offload disabled. One pending
 encrypted datagram survives socket backpressure without being overwritten by

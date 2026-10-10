@@ -85,7 +85,14 @@ Poll defaults to 16 plaintext calls and 64 KiB per direction, plus the independe
 session I/O budget. Zero budgets are valid. Alternating read/write preference
 preserves progress even with a one-call visit. Invalid poll budgets reject
 without channel progress or discarding accepted work. WouldBlock stops that
-direction for the visit. Bounded frame encoding/decoding is indivisible work
+direction for the visit. After actual plaintext progress, native transport can
+poll the session once more with only the original budget's remaining call/read/
+write allowance. This lets newly queued output and released receive/stream credit
+advance in the same owner visit. Both results are summed; either result exceeding
+its supplied budget fails the channel before a remainder is reused. Exhausted
+or zero session call budgets add no follow-through poll. Completion still requires
+all original frame bytes and actual local flush, including native QUIC stream ACK.
+Bounded frame encoding/decoding is indivisible work
 within these finite codec limits; plaintext budgets do not promise CPU
 nanoseconds. The host
 fairly visits connections and uses the outbound queue's reserved control space

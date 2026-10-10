@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.48s
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 21 tests
+test initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt ... ok
+test retirement_retry::retirement_confirmation_repeats_original_identity_after_explicit_leadership_loss ... ok
+test retirement_retry::retirement_confirmation_requires_original_quorum_status_and_stable_record ... ok
+test retirement_retry::retirement_confirmation_bounds_attempts_and_preserves_terminal_failures ... ok
+test initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal ... ok
+test profiles::invalid_profiles_fail_before_opening_replica_files ... ok
+test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp ... ok
+test merge::tcp_operator_collects_both_images_before_importing_a_merge ... ok
+test retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint ... ok
+test initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts ... ok
+test retirement::tcp_retirement_recovers_unread_proposal_and_original_release_from_wal ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic ... ok
+test quic_authenticated_operator_resumes_original_split_after_process_crash ... ok
+test initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data ... ok
+test revocation::interrupted_split_resumes_under_replacement_administrator_tcp ... ok
+test revocation::interrupted_split_resumes_under_replacement_administrator_quic ... ok
+test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement ... ok
+test cuts::tcp_wal_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts has been running for over 60 seconds
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement has been running for over 60 seconds
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement ... ok
+test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 73.17s
+

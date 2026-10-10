@@ -1,0 +1,42 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/transport.rs (target/debug/deps/transport-13ef8df91ec05a1c)
+
+running 35 tests
+test native::construction_and_submission_reject_insecure_incompatible_and_stale_bindings ... ok
+test native::exhausted_pool_returns_original_send_and_retries_receive_without_reading ... ok
+test native::close_drains_send_abort_fails_it_and_completed_input_survives_failure ... ok
+test native::downstream_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::downstream_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::malformed_encoding_returns_original_batch_and_pool_credits ... ok
+test native::malformed_or_partial_frame_never_leaks_a_message ... ok
+test native::policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release ... ok
+test native::explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing ... ok
+test native::malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session ... ok
+test native::excessive_original_vector_capacity_is_returned_before_encoding ... ok
+test native::poll_progress::exhausted_and_zero_session_budgets_do_not_add_follow_through_polls ... ok
+test native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch ... ok
+test native::native_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::send_completion_waits_for_channel_flush_and_failure_releases_buffers ... ok
+test native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget ... ok
+test native::send_failure_and_transport_drop_release_pool_without_destroying_other_view ... ok
+test native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget ... ok
+test native::receive_growth_failure_releases_partial_frame_and_closes_channel ... ok
+test native::public_host_queue_and_single_fixture_codec_compose_with_native_driver ... ok
+test native::shared_contract::independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership ... ok
+test native::shared_contract::shared_checker_detects_completion_before_local_flush ... ok
+test transport_limits_are_available_without_native_dependencies ... ok
+test native::zero_and_single_call_budgets_preserve_bidirectional_progress ... ok
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::shared_contract::native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership ... ok
+test native::owner_factory_refuses_insufficient_full_duplex_quota_without_leasing ... ok
+test native::shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing ... ok
+test native::invalid_header_is_rejected_before_large_frame_allocation ... ok
+test native::shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits ... ok
+test native::native_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::unread_batch_stops_next_frame_and_does_not_starve_opposite_direction ... ok
+test native::short_io_preserves_batch_and_queue_credits_until_terminal_consumption ... ok
+test native::actual_tcp_tls_driver_transfers_both_directions_under_backpressure ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
