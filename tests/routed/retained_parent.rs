@@ -455,6 +455,348 @@ impl Moves {
         );
     }
 }
+struct ParentRefresh {
+    bytes: Vec<u8>,
+    status: ParentGrantStatus,
+    hint: RouteHint,
+}
+struct OfflineMetadata {
+    group: u128,
+    facts: Vec<DirectoryRead>,
+    logs: BTreeMap<NodeId, GroupLog>,
+    files: BTreeMap<std::path::PathBuf, Vec<u8>>,
+}
+impl Moves {
+    fn prepare_parent_move(&mut self, authorities: &[u128]) -> Vec<ReparentGuardEvidence> {
+        self.phase(
+            1,
+            5000,
+            PrepareReparent {
+                plan: self.plan.clone(),
+                coordinator: None,
+            }
+            .encode(MAX_REPARENT_PREPARE_BYTES)
+            .unwrap(),
+            DirectoryOutcome::ReparentGuarded,
+        );
+        let DirectoryRead::ReparentGuard(Some(guard)) =
+            self.query(1, DirectoryQuery::ReparentGuard(op(5000)))
+        else {
+            panic!("guard")
+        };
+        let proof = ReparentGuardEvidence::from_status(self.config(1), &guard).unwrap();
+        for &g in &authorities[1..] {
+            self.phase(
+                g,
+                5000,
+                PrepareReparent {
+                    plan: self.plan.clone(),
+                    coordinator: Some(proof),
+                }
+                .encode(MAX_REPARENT_PREPARE_BYTES)
+                .unwrap(),
+                DirectoryOutcome::ReparentGuarded,
+            );
+        }
+        let mut guards = Vec::new();
+        for &g in authorities {
+            let DirectoryRead::ReparentGuard(Some(s)) =
+                self.query(g, DirectoryQuery::ReparentGuard(op(5000)))
+            else {
+                panic!("guard")
+            };
+            guards.push(ReparentGuardEvidence::from_status(self.config(g), &s).unwrap());
+        }
+        guards
+    }
+    fn publish_parent_move(
+        &mut self,
+        authorities: &[u128],
+        guards: Vec<ReparentGuardEvidence>,
+    ) -> PublishReparent {
+        self.phase(
+            1,
+            5001,
+            CommitReparent::new(op(5000), guards)
+                .unwrap()
+                .encode(MAX_REPARENT_COMPLETION_BYTES)
+                .unwrap(),
+            DirectoryOutcome::ReparentCommitted,
+        );
+        let DirectoryRead::ReparentDecision(Some(decision)) =
+            self.query(1, DirectoryQuery::ReparentDecision(op(5000)))
+        else {
+            panic!("decision")
+        };
+        let publish = PublishReparent {
+            configuration: self.config(1),
+            decision,
+        };
+        self.refresh(1);
+        assert!(self.hint(fixture::id(500)).is_err());
+        assert_eq!(self.hint(fixture::id(700)), Err(RoutingError::Vacant));
+        for &g in &authorities[1..] {
+            self.phase(
+                g,
+                5002,
+                publish.encode(MAX_REPARENT_COMPLETION_BYTES).unwrap(),
+                DirectoryOutcome::ReparentPublished,
+            );
+        }
+        publish
+    }
+    fn finish_parent_move(
+        &mut self,
+        authorities: &[u128],
+        publish: PublishReparent,
+    ) -> CrossOwnerParentAdoption {
+        let mut publications = Vec::new();
+        let mut child_publication = None;
+        for &g in authorities {
+            let DirectoryRead::ReparentPublication(Some(s)) =
+                self.query(g, DirectoryQuery::ReparentPublication(op(5000)))
+            else {
+                panic!("publication")
+            };
+            if g == 1 {
+                child_publication = Some(s);
+            }
+            publications.push(ReparentPublicationEvidence::from_status(self.config(g), s).unwrap());
+        }
+        self.phase(
+            1,
+            5003,
+            FinishReparent::new(op(5000), publications)
+                .unwrap()
+                .encode(MAX_REPARENT_COMPLETION_BYTES)
+                .unwrap(),
+            DirectoryOutcome::ReparentCompleted,
+        );
+        let DirectoryRead::ReparentCompletion(Some(completion)) =
+            self.query(1, DirectoryQuery::ReparentCompletion(op(5000)))
+        else {
+            panic!("completion")
+        };
+        let release = ReleaseCommittedReparent {
+            configuration: self.config(1),
+            completion,
+        };
+        for &g in &authorities[1..] {
+            self.phase(
+                g,
+                5004,
+                release.encode().unwrap(),
+                DirectoryOutcome::ReparentReleased,
+            );
+        }
+        CrossOwnerParentAdoption {
+            plan: self.plan.clone(),
+            decision: publish,
+            child_configuration: self.config(1),
+            child_publication: child_publication.unwrap(),
+            completion: release,
+        }
+    }
+    fn refresh_imported_parent(
+        &mut self,
+        command: &CrossOwnerParentAdoption,
+    ) -> Option<ParentRefresh> {
+        if matches!(self.family, Family::Imported) {
+            // Moving the imported child must leave the old parent's retained
+            // data path usable through refreshed routing (same epoch and scope).
+            let h = resolve(
+                &self.cache,
+                &source_fixture::Policy,
+                fixture::id(500),
+                &[200],
+                4,
+            )
+            .unwrap();
+            assert_eq!(
+                source_read(&mut self.base.source, &self.base.clock, h, 200),
+                ScopedSourceRead::Data(RoutedRead::Served(11))
+            );
+            campaign(&mut self.base.source, &self.base.clock, 20);
+            assert!(
+                matches!(propose_recovering(&mut self.base.source,&self.base.clock,20,6200,data(h,200,2)).outcome,
+            RoutedOutcome::Applied(receipt) if receipt.outcome == BucketOutcome::Value(13))
+            );
+            // The original grant precedes the removed child slot. Adopt only the
+            // original quorum's checked parent publication, then lose the receipt.
+            assert_ne!(
+                self.base.source[0].local().applications[&group(20)].grant(),
+                self.cache
+                    .get(self.original.manifest.input().responsibility)
+                    .unwrap()
+            );
+            let refresh = CrossParentSlotAdoption {
+                side: ReparentSide::Old,
+                observation: command.clone(),
+                parent_configuration: self.config(1),
+                parent_publication: command.child_publication,
+            }
+            .encode(MAX_PARENT_SLOT_ADOPTION_BYTES)
+            .unwrap();
+            phase_write(
+                true,
+                &mut self.base.source,
+                &self.base.clock,
+                20,
+                6300,
+                refresh.clone(),
+            );
+            self.reopen_remaining_parent();
+            let ScopedSourceRead::ParentAdoption(Some(status)) = observe(
+                &mut self.base.source,
+                &self.base.clock,
+                20,
+                ScopedSourceQuery::ParentAdoption(op(6300)),
+            ) else {
+                panic!("parent refresh")
+            };
+            campaign(&mut self.base.source, &self.base.clock, 20);
+            assert_eq!(
+                propose_recovering(
+                    &mut self.base.source,
+                    &self.base.clock,
+                    20,
+                    6300,
+                    refresh.clone()
+                )
+                .outcome,
+                RoutedOutcome::ParentAdopted(status)
+            );
+            assert_eq!(
+                self.base.source[0].local().applications[&group(20)].grant(),
+                self.cache
+                    .get(self.original.manifest.input().responsibility)
+                    .unwrap()
+            );
+            return Some(ParentRefresh {
+                bytes: refresh,
+                status,
+                hint: h,
+            });
+        }
+        None
+    }
+    fn continue_imported_parent(&mut self, parent_refresh: Option<ParentRefresh>) {
+        if let Some(ParentRefresh {
+            bytes: refresh,
+            status,
+            hint: h,
+        }) = parent_refresh
+        {
+            campaign(&mut self.base.source, &self.base.clock, 20);
+            assert!(
+                matches!(propose_recovering(&mut self.base.source, &self.base.clock, 20, 6201, data(h, 200, 4)).outcome,
+            RoutedOutcome::Applied(receipt) if receipt.outcome == BucketOutcome::Value(17))
+            );
+            self.reopen_remaining_parent();
+            assert_eq!(
+                source_read(&mut self.base.source, &self.base.clock, h, 200),
+                ScopedSourceRead::Data(RoutedRead::Served(17))
+            );
+            campaign(&mut self.base.source, &self.base.clock, 20);
+            assert_eq!(
+                propose_recovering(&mut self.base.source, &self.base.clock, 20, 6300, refresh)
+                    .outcome,
+                RoutedOutcome::ParentAdopted(status)
+            );
+        }
+    }
+    fn verify_offline_owner(
+        &mut self,
+        hint: RouteHint,
+        original_value: i64,
+        adopted: ParentGrantStatus,
+        bytes: Vec<u8>,
+        command: &CrossOwnerParentAdoption,
+    ) {
+        self.write(hint, 6101, 3, false);
+        self.reopen_owner();
+        assert_eq!(self.adoption(), Some(adopted));
+        assert_eq!(self.value(hint), original_value + 4);
+        self.write(
+            hint,
+            if matches!(self.family, Family::Retained) {
+                2
+            } else {
+                1
+            },
+            original_value,
+            true,
+        );
+        self.write(hint, 6100, 1, true);
+        self.write(hint, 6101, 3, true);
+        assert_eq!(self.value(hint), original_value + 4);
+        assert_eq!(self.adopt(bytes, false), Some(adopted));
+        self.preserved();
+        match self.family {
+            Family::Retained => {
+                for node in &self.base.source {
+                    let app = &node.local().applications[&group(20)];
+                    assert_eq!(app.grant(), &command.after());
+                    assert_eq!(app.routed().application().outbox().count(), 4);
+                }
+            }
+            Family::Imported => {
+                for node in &self.base.target {
+                    let app = &node.local().applications[&group(21)];
+                    assert_eq!(app.grant(), &command.after());
+                    assert_eq!(app.application().outbox().count(), 3);
+                }
+            }
+        }
+    }
+    fn pause_metadata(&mut self) -> Vec<OfflineMetadata> {
+        let facts = [1, 100, 200].map(|g| self.facts(g));
+        let logs = [1, 100, 200].map(|g| creation::abandon(std::mem::take(self.nodes(g)), g));
+        let files = [1, 100, 200].map(|g| durable_files(&self.base.root.join(g.to_string())));
+        [1, 100, 200]
+            .into_iter()
+            .zip(facts)
+            .zip(logs)
+            .zip(files)
+            .map(|(((group, facts), logs), files)| OfflineMetadata {
+                group,
+                facts,
+                logs,
+                files,
+            })
+            .collect()
+    }
+    fn verify_metadata_recovery(&mut self, records: Vec<OfflineMetadata>) {
+        for record in records {
+            let OfflineMetadata {
+                group: g,
+                facts,
+                logs,
+                files,
+            } = record;
+            assert_eq!(durable_files(&self.base.root.join(g.to_string())), files);
+            for config in configuration(&self.base.root, g, &[1, 2, 3], NativeOpenMode::Recover) {
+                let log = NativeLogStore::recover(
+                    FileLogIo::open(&config.directory).unwrap(),
+                    config.store,
+                    LogLimits::default(),
+                )
+                .unwrap();
+                assert_eq!(log.state(group(g)).unwrap(), logs[&config.node]);
+            }
+            self.reopen_metadata(g);
+            assert_eq!(self.facts(g), facts);
+        }
+    }
+    fn close(mut self) {
+        for g in [1, 100, 200] {
+            creation::abandon(std::mem::take(self.nodes(g)), g);
+        }
+        creation::abandon(std::mem::take(&mut self.base.source), 20);
+        creation::abandon(std::mem::take(&mut self.base.target), 21);
+        std::fs::remove_dir_all(&self.base.root).unwrap();
+    }
+}
 fn run(protocol: NativePeerProtocol, checkpoint: bool, family: Family) {
     let _guard = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let mut r = Moves::new(protocol, checkpoint, family);
@@ -471,121 +813,10 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool, family: Family) {
         .iter()
         .map(|g| g.id.get())
         .collect::<Vec<_>>();
-    r.phase(
-        1,
-        5000,
-        PrepareReparent {
-            plan: r.plan.clone(),
-            coordinator: None,
-        }
-        .encode(MAX_REPARENT_PREPARE_BYTES)
-        .unwrap(),
-        DirectoryOutcome::ReparentGuarded,
-    );
-    let DirectoryRead::ReparentGuard(Some(guard)) =
-        r.query(1, DirectoryQuery::ReparentGuard(op(5000)))
-    else {
-        panic!("guard")
-    };
-    let proof = ReparentGuardEvidence::from_status(r.config(1), &guard).unwrap();
-    for &g in &authorities[1..] {
-        r.phase(
-            g,
-            5000,
-            PrepareReparent {
-                plan: r.plan.clone(),
-                coordinator: Some(proof),
-            }
-            .encode(MAX_REPARENT_PREPARE_BYTES)
-            .unwrap(),
-            DirectoryOutcome::ReparentGuarded,
-        );
-    }
-    let mut guards = Vec::new();
-    for &g in &authorities {
-        let DirectoryRead::ReparentGuard(Some(s)) =
-            r.query(g, DirectoryQuery::ReparentGuard(op(5000)))
-        else {
-            panic!("guard")
-        };
-        guards.push(ReparentGuardEvidence::from_status(r.config(g), &s).unwrap());
-    }
+    let guards = r.prepare_parent_move(&authorities);
     r.write(original_hint, 6100, 1, false);
-    r.phase(
-        1,
-        5001,
-        CommitReparent::new(op(5000), guards)
-            .unwrap()
-            .encode(MAX_REPARENT_COMPLETION_BYTES)
-            .unwrap(),
-        DirectoryOutcome::ReparentCommitted,
-    );
-    let DirectoryRead::ReparentDecision(Some(decision)) =
-        r.query(1, DirectoryQuery::ReparentDecision(op(5000)))
-    else {
-        panic!("decision")
-    };
-    let publish = PublishReparent {
-        configuration: r.config(1),
-        decision,
-    };
-    r.refresh(1);
-    assert!(r.hint(fixture::id(500)).is_err());
-    assert_eq!(r.hint(fixture::id(700)), Err(RoutingError::Vacant));
-    for &g in &authorities[1..] {
-        r.phase(
-            g,
-            5002,
-            publish.encode(MAX_REPARENT_COMPLETION_BYTES).unwrap(),
-            DirectoryOutcome::ReparentPublished,
-        );
-    }
-    let mut publications = Vec::new();
-    let mut child_publication = None;
-    for &g in &authorities {
-        let DirectoryRead::ReparentPublication(Some(s)) =
-            r.query(g, DirectoryQuery::ReparentPublication(op(5000)))
-        else {
-            panic!("publication")
-        };
-        if g == 1 {
-            child_publication = Some(s);
-        }
-        publications.push(ReparentPublicationEvidence::from_status(r.config(g), s).unwrap());
-    }
-    r.phase(
-        1,
-        5003,
-        FinishReparent::new(op(5000), publications)
-            .unwrap()
-            .encode(MAX_REPARENT_COMPLETION_BYTES)
-            .unwrap(),
-        DirectoryOutcome::ReparentCompleted,
-    );
-    let DirectoryRead::ReparentCompletion(Some(completion)) =
-        r.query(1, DirectoryQuery::ReparentCompletion(op(5000)))
-    else {
-        panic!("completion")
-    };
-    let release = ReleaseCommittedReparent {
-        configuration: r.config(1),
-        completion,
-    };
-    for &g in &authorities[1..] {
-        r.phase(
-            g,
-            5004,
-            release.encode().unwrap(),
-            DirectoryOutcome::ReparentReleased,
-        );
-    }
-    let command = CrossOwnerParentAdoption {
-        plan: r.plan.clone(),
-        decision: publish,
-        child_configuration: r.config(1),
-        child_publication: child_publication.unwrap(),
-        completion: release,
-    };
+    let publish = r.publish_parent_move(&authorities, guards);
+    let command = r.finish_parent_move(&authorities, publish);
     let bytes = command.encode(MAX_CROSS_PARENT_ADOPTION_BYTES).unwrap();
     r.adopt(bytes.clone(), true);
     let adopted = r.adoption().unwrap();
@@ -599,150 +830,13 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool, family: Family) {
     assert_eq!(hint.group, group(family.group()));
     assert_eq!(r.value(hint), original_value + 1);
     assert!(r.hint(fixture::id(500)).is_err());
-    let mut parent_refresh = None;
-    if matches!(family, Family::Imported) {
-        // Moving the imported child must leave the old parent's retained
-        // data path usable through refreshed routing (same epoch and scope).
-        let h = resolve(
-            &r.cache,
-            &source_fixture::Policy,
-            fixture::id(500),
-            &[200],
-            4,
-        )
-        .unwrap();
-        assert_eq!(
-            source_read(&mut r.base.source, &r.base.clock, h, 200),
-            ScopedSourceRead::Data(RoutedRead::Served(11))
-        );
-        campaign(&mut r.base.source, &r.base.clock, 20);
-        assert!(
-            matches!(propose_recovering(&mut r.base.source,&r.base.clock,20,6200,data(h,200,2)).outcome,
-            RoutedOutcome::Applied(receipt) if receipt.outcome == BucketOutcome::Value(13))
-        );
-        // The original grant precedes the removed child slot. Adopt only the
-        // original quorum's checked parent publication, then lose the receipt.
-        assert_ne!(
-            r.base.source[0].local().applications[&group(20)].grant(),
-            r.cache
-                .get(r.original.manifest.input().responsibility)
-                .unwrap()
-        );
-        let refresh = CrossParentSlotAdoption {
-            side: ReparentSide::Old,
-            observation: command.clone(),
-            parent_configuration: r.config(1),
-            parent_publication: command.child_publication,
-        }
-        .encode(MAX_PARENT_SLOT_ADOPTION_BYTES)
-        .unwrap();
-        phase_write(
-            true,
-            &mut r.base.source,
-            &r.base.clock,
-            20,
-            6300,
-            refresh.clone(),
-        );
-        r.reopen_remaining_parent();
-        let ScopedSourceRead::ParentAdoption(Some(status)) = observe(
-            &mut r.base.source,
-            &r.base.clock,
-            20,
-            ScopedSourceQuery::ParentAdoption(op(6300)),
-        ) else {
-            panic!("parent refresh")
-        };
-        campaign(&mut r.base.source, &r.base.clock, 20);
-        assert_eq!(
-            propose_recovering(&mut r.base.source, &r.base.clock, 20, 6300, refresh.clone())
-                .outcome,
-            RoutedOutcome::ParentAdopted(status)
-        );
-        assert_eq!(
-            r.base.source[0].local().applications[&group(20)].grant(),
-            r.cache
-                .get(r.original.manifest.input().responsibility)
-                .unwrap()
-        );
-        parent_refresh = Some((refresh, status, h));
-    }
+    let parent_refresh = r.refresh_imported_parent(&command);
     r.preserved();
-    let facts = [1, 100, 200].map(|g| r.facts(g));
-    let logs = [1, 100, 200].map(|g| creation::abandon(std::mem::take(r.nodes(g)), g));
-    let files = [1, 100, 200].map(|g| durable_files(&r.base.root.join(g.to_string())));
-    if let Some((refresh, status, h)) = parent_refresh {
-        campaign(&mut r.base.source, &r.base.clock, 20);
-        assert!(
-            matches!(propose_recovering(&mut r.base.source, &r.base.clock, 20, 6201, data(h, 200, 4)).outcome,
-            RoutedOutcome::Applied(receipt) if receipt.outcome == BucketOutcome::Value(17))
-        );
-        r.reopen_remaining_parent();
-        assert_eq!(
-            source_read(&mut r.base.source, &r.base.clock, h, 200),
-            ScopedSourceRead::Data(RoutedRead::Served(17))
-        );
-        campaign(&mut r.base.source, &r.base.clock, 20);
-        assert_eq!(
-            propose_recovering(&mut r.base.source, &r.base.clock, 20, 6300, refresh).outcome,
-            RoutedOutcome::ParentAdopted(status)
-        );
-    }
-    r.write(hint, 6101, 3, false);
-    r.reopen_owner();
-    assert_eq!(r.adoption(), Some(adopted));
-    assert_eq!(r.value(hint), original_value + 4);
-    r.write(
-        hint,
-        if matches!(family, Family::Retained) {
-            2
-        } else {
-            1
-        },
-        original_value,
-        true,
-    );
-    r.write(hint, 6100, 1, true);
-    r.write(hint, 6101, 3, true);
-    assert_eq!(r.value(hint), original_value + 4);
-    assert_eq!(r.adopt(bytes, false), Some(adopted));
-    r.preserved();
-    match family {
-        Family::Retained => {
-            for node in &r.base.source {
-                let app = &node.local().applications[&group(20)];
-                assert_eq!(app.grant(), &command.after());
-                assert_eq!(app.routed().application().outbox().count(), 4);
-            }
-        }
-        Family::Imported => {
-            for node in &r.base.target {
-                let app = &node.local().applications[&group(21)];
-                assert_eq!(app.grant(), &command.after());
-                assert_eq!(app.application().outbox().count(), 3);
-            }
-        }
-    }
-    for (i, g) in [1, 100, 200].into_iter().enumerate() {
-        assert_eq!(durable_files(&r.base.root.join(g.to_string())), files[i]);
-        for config in configuration(&r.base.root, g, &[1, 2, 3], NativeOpenMode::Recover) {
-            let log = NativeLogStore::recover(
-                FileLogIo::open(&config.directory).unwrap(),
-                config.store,
-                LogLimits::default(),
-            )
-            .unwrap();
-            assert_eq!(log.state(group(g)).unwrap(), logs[i][&config.node]);
-        }
-        r.reopen_metadata(g);
-        assert_eq!(r.facts(g), facts[i]);
-    }
-    for g in [1, 100, 200] {
-        creation::abandon(std::mem::take(r.nodes(g)), g);
-    }
-    creation::abandon(std::mem::take(&mut r.base.source), 20);
-    creation::abandon(std::mem::take(&mut r.base.target), 21);
-    std::fs::remove_dir_all(&r.base.root).unwrap();
+    let metadata = r.pause_metadata();
+    r.continue_imported_parent(parent_refresh);
+    r.verify_offline_owner(hint, original_value, adopted, bytes, &command);
+    r.verify_metadata_recovery(metadata);
+    r.close();
 }
 #[test]
 fn tcp_retained_parent_move_wal() {

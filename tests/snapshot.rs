@@ -709,6 +709,50 @@ mod native {
         assert_eq!(io.0.borrow().manifest, before);
     }
 
+    fn append_initial_counter_history<L: LogStore>(log: &mut L) {
+        append(log, vec![LogMutation::Create(bootstrap(1, 1))]);
+        let state = log.state(group(1)).unwrap();
+        append(
+            log,
+            vec![update(
+                &state,
+                1,
+                2,
+                Some(Suffix {
+                    from: 1,
+                    entries: vec![command(1, 1, 7), command(2, 2, 3)],
+                }),
+            )],
+        );
+    }
+    fn verify_recovered_counter_retry<L: LogStore>(log: &mut L, app: &mut Counter) {
+        let state = log.state(group(1)).unwrap();
+        append(
+            log,
+            vec![update(
+                &state,
+                1,
+                5,
+                Some(Suffix {
+                    from: 5,
+                    entries: vec![command(5, 1, 7)],
+                }),
+            )],
+        );
+        let core = Raft::recover(
+            node(1),
+            log.binding(),
+            log.state(group(1)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        let retry = app.apply_batch(&core.replay_committed()[4..]).unwrap();
+        assert!(retry[0].duplicate);
+        assert_eq!(retry[0].outcome, CounterOutcome::Value(7));
+        assert_eq!(app.read_applied(5), Ok(8));
+        assert_eq!(core.state().commit_index, 5);
+        assert_eq!(core.state().hard_state.term, 1);
+    }
     #[test]
     fn native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries() {
         use voteboat::native::log_store::NativeLogStore;
@@ -721,20 +765,7 @@ mod native {
             let log_io = ModelIo::default();
             let mut log =
                 NativeLogStore::create(log_io.clone(), identity(1), LogLimits::default()).unwrap();
-            append(&mut log, vec![LogMutation::Create(bootstrap(1, 1))]);
-            let state = log.state(group(1)).unwrap();
-            append(
-                &mut log,
-                vec![update(
-                    &state,
-                    1,
-                    2,
-                    Some(Suffix {
-                        from: 1,
-                        entries: vec![command(1, 1, 7), command(2, 2, 3)],
-                    }),
-                )],
-            );
+            append_initial_counter_history(&mut log);
             let core = Raft::recover(
                 node(1),
                 log.binding(),
@@ -798,32 +829,7 @@ mod native {
             );
             assert_eq!(app.read_applied(4), Ok(8));
             assert_eq!(core.state().commit_index, 4);
-            let state = log.state(group(1)).unwrap();
-            append(
-                &mut log,
-                vec![update(
-                    &state,
-                    1,
-                    5,
-                    Some(Suffix {
-                        from: 5,
-                        entries: vec![command(5, 1, 7)],
-                    }),
-                )],
-            );
-            let core = Raft::recover(
-                node(1),
-                log.binding(),
-                log.state(group(1)).unwrap(),
-                log.limits(),
-            )
-            .unwrap();
-            let retry = app.apply_batch(&core.replay_committed()[4..]).unwrap();
-            assert!(retry[0].duplicate);
-            assert_eq!(retry[0].outcome, CounterOutcome::Value(7));
-            assert_eq!(app.read_applied(5), Ok(8));
-            assert_eq!(core.state().commit_index, 5);
-            assert_eq!(core.state().hard_state.term, 1);
+            verify_recovered_counter_retry(&mut log, &mut app);
         }
     }
     #[test]
@@ -909,12 +915,107 @@ mod native {
         assert_eq!(store.load().unwrap().unwrap().application, [7; 4]);
         assert_eq!(&io.0.borrow().manifest.as_ref().unwrap()[..8], b"VBSSTR02");
     }
+    fn snapshot_install_fault(fault: Option<Fault>) {
+        use voteboat::{native::log_store::NativeLogStore, raft::*};
+
+        let logs: BTreeMap<_, _> = (1..=3).map(|id| (id, ModelIo::default())).collect();
+        let images: BTreeMap<_, _> = (1..=3).map(|id| (id, MemoryIo::default())).collect();
+        let mut cluster = SnapshotCluster::new(bootstrap(1, 3), |id| {
+            (
+                NativeLogStore::create(
+                    logs[&id].clone(),
+                    identity(id as u128),
+                    LogLimits::default(),
+                )
+                .unwrap(),
+                NativeSnapshotStore::create(
+                    images[&id].clone(),
+                    SnapshotIdentity {
+                        store: identity(id as u128),
+                        group: group(1),
+                    },
+                    SnapshotLimits::default(),
+                )
+                .unwrap(),
+            )
+        });
+        cluster.act(1, Event::Campaign);
+        cluster.pump();
+        cluster.isolate(3);
+        cluster.propose(1, 1, 7);
+        cluster.compact(1);
+        cluster.pump();
+        cluster.propose(1, 2, 3);
+        cluster.blocked.clear();
+        cluster.act(1, Event::Heartbeat);
+        let pos = cluster
+            .messages
+            .iter()
+            .position(|m| m.to == node(3) && matches!(m.rpc, Rpc::Snapshot { .. }))
+            .unwrap();
+        let message = cluster.messages.remove(pos).unwrap();
+        let r = cluster.replicas.get_mut(&3).unwrap();
+        let effects = r.core.step(Event::Receive(message.clone())).unwrap();
+        assert!(matches!(effects.as_slice(), [Effect::StageSnapshot(_)]));
+        if let Some(fault) = fault {
+            logs[&3].0.borrow_mut().fault = fault;
+        }
+        let result = stage_snapshot_effect(
+            &mut r.core,
+            &mut r.log,
+            &mut r.snapshots,
+            &r.application,
+            message,
+        );
+        if fault.is_some() {
+            assert!(result.is_err());
+            assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Fenced));
+        } else {
+            let effects = result.unwrap();
+            assert!(matches!(effects.as_slice(), [Effect::SnapshotInstalled(_)]));
+            assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Busy));
+            assert_eq!(r.application.applied_index(), 1);
+        }
+        drop(cluster.replicas.remove(&3).unwrap());
+        logs[&3].0.borrow_mut().power_loss();
+        images[&3].0.borrow_mut().power_loss();
+        let log =
+            NativeLogStore::recover(logs[&3].clone(), identity(3), LogLimits::default()).unwrap();
+        let mut snapshots = NativeSnapshotStore::recover(
+            images[&3].clone(),
+            SnapshotIdentity {
+                store: identity(3),
+                group: group(1),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+        let mut application = Counter::new(100).unwrap();
+        let (core, _) =
+            recover_replica(node(3), group(1), &log, &mut snapshots, &mut application).unwrap();
+        cluster.replicas.insert(
+            3,
+            SnapshotReplica {
+                core,
+                log,
+                snapshots,
+                application,
+                receipts: Vec::new(),
+            },
+        );
+        cluster.act(1, Event::Heartbeat);
+        cluster.pump();
+        assert_eq!(cluster.replicas[&3].application.read_applied(3), Ok(10));
+        cluster.propose(1, 1, 7);
+        assert_eq!(
+            cluster.replicas[&3].receipts.last().unwrap().outcome,
+            CounterOutcome::Value(7)
+        );
+        assert_eq!(cluster.replicas[&3].application.read_applied(4), Ok(10));
+    }
     #[test]
     fn snapshot_log_failure_and_lost_application_completion_recover_without_false_ack() {
-        use voteboat::{
-            native::log_store::{LogCodec, NativeLogCodec, NativeLogStore},
-            raft::*,
-        };
+        use voteboat::native::log_store::{LogCodec, NativeLogCodec};
         let reference = publish(&mut HostSnapshots::new(), metadata(4), &[7; 4]).reference();
         let state = committed_core().state().clone();
         let frame = NativeLogCodec
@@ -943,100 +1044,7 @@ mod native {
                 None,
             ]);
         for fault in faults {
-            let logs: BTreeMap<_, _> = (1..=3).map(|id| (id, ModelIo::default())).collect();
-            let images: BTreeMap<_, _> = (1..=3).map(|id| (id, MemoryIo::default())).collect();
-            let mut cluster = SnapshotCluster::new(bootstrap(1, 3), |id| {
-                (
-                    NativeLogStore::create(
-                        logs[&id].clone(),
-                        identity(id as u128),
-                        LogLimits::default(),
-                    )
-                    .unwrap(),
-                    NativeSnapshotStore::create(
-                        images[&id].clone(),
-                        SnapshotIdentity {
-                            store: identity(id as u128),
-                            group: group(1),
-                        },
-                        SnapshotLimits::default(),
-                    )
-                    .unwrap(),
-                )
-            });
-            cluster.act(1, Event::Campaign);
-            cluster.pump();
-            cluster.isolate(3);
-            cluster.propose(1, 1, 7);
-            cluster.compact(1);
-            cluster.pump();
-            cluster.propose(1, 2, 3);
-            cluster.blocked.clear();
-            cluster.act(1, Event::Heartbeat);
-            let pos = cluster
-                .messages
-                .iter()
-                .position(|m| m.to == node(3) && matches!(m.rpc, Rpc::Snapshot { .. }))
-                .unwrap();
-            let message = cluster.messages.remove(pos).unwrap();
-            let r = cluster.replicas.get_mut(&3).unwrap();
-            let effects = r.core.step(Event::Receive(message.clone())).unwrap();
-            assert!(matches!(effects.as_slice(), [Effect::StageSnapshot(_)]));
-            if let Some(fault) = fault {
-                logs[&3].0.borrow_mut().fault = fault;
-            }
-            let result = stage_snapshot_effect(
-                &mut r.core,
-                &mut r.log,
-                &mut r.snapshots,
-                &r.application,
-                message,
-            );
-            if fault.is_some() {
-                assert!(result.is_err());
-                assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Fenced));
-            } else {
-                let effects = result.unwrap();
-                assert!(matches!(effects.as_slice(), [Effect::SnapshotInstalled(_)]));
-                assert_eq!(r.core.step(Event::Heartbeat), Err(RaftError::Busy));
-                assert_eq!(r.application.applied_index(), 1);
-            }
-            drop(cluster.replicas.remove(&3).unwrap());
-            logs[&3].0.borrow_mut().power_loss();
-            images[&3].0.borrow_mut().power_loss();
-            let log = NativeLogStore::recover(logs[&3].clone(), identity(3), LogLimits::default())
-                .unwrap();
-            let mut snapshots = NativeSnapshotStore::recover(
-                images[&3].clone(),
-                SnapshotIdentity {
-                    store: identity(3),
-                    group: group(1),
-                },
-                SnapshotLimits::default(),
-            )
-            .unwrap();
-            let mut application = Counter::new(100).unwrap();
-            let (core, _) =
-                recover_replica(node(3), group(1), &log, &mut snapshots, &mut application).unwrap();
-            cluster.replicas.insert(
-                3,
-                SnapshotReplica {
-                    core,
-                    log,
-                    snapshots,
-                    application,
-                    receipts: Vec::new(),
-                },
-            );
-            cluster.act(1, Event::Heartbeat);
-            cluster.pump();
-            assert_eq!(cluster.replicas[&3].application.read_applied(3), Ok(10));
-            cluster.propose(1, 1, 7);
-            assert_eq!(
-                cluster.replicas[&3].receipts.last().unwrap().outcome,
-                CounterOutcome::Value(7)
-            );
-            assert_eq!(cluster.replicas[&3].application.read_applied(4), Ok(10));
+            snapshot_install_fault(fault);
         }
     }
 }
@@ -1218,12 +1226,9 @@ fn host_snapshots(id: u64) -> HostSnapshots {
     s.binding.identity = s.identity.store;
     s
 }
-// A host-poll stall retains transport data; a dropped-message partition does not.
-// Exercise both schedules before interpreting a snapshot-install counter.
-fn buffered_compaction_history<L: LogStore, S: SnapshotRetention>(
+fn capture_buffered_appends<L: LogStore, S: SnapshotRetention>(
     cluster: &mut SnapshotCluster<L, S>,
-    retain_append: bool,
-) {
+) -> Vec<voteboat::raft::Message> {
     use voteboat::raft::*;
     cluster.act(1, Event::Campaign);
     cluster.pump();
@@ -1262,6 +1267,16 @@ fn buffered_compaction_history<L: LogStore, S: SnapshotRetention>(
     assert!(
         matches!(&buffered[1].rpc, Rpc::Append { entries, leader_commit: 2, .. } if entries.len() == 1 && entries[0].index == 2)
     );
+    buffered
+}
+// A host-poll stall retains transport data; a dropped-message partition does not.
+// Exercise both schedules before interpreting a snapshot-install counter.
+fn buffered_compaction_history<L: LogStore, S: SnapshotRetention>(
+    cluster: &mut SnapshotCluster<L, S>,
+    retain_append: bool,
+) {
+    use voteboat::raft::*;
+    let buffered = capture_buffered_appends(cluster);
     cluster.compact(1);
     cluster.pump();
     assert_eq!(cluster.replicas[&1].core.state().base_index(), 2);

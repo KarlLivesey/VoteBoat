@@ -129,114 +129,120 @@ fn invariant(state: &State) -> Result<(), &'static str> {
     }
     Ok(())
 }
+fn pending_successors(s: State, p: Pending, variant: Variant, out: &mut Vec<(String, State)>) {
+    if !p.written {
+        let mut next = s;
+        next.pending.as_mut().unwrap().written = true;
+        if variant == Variant::ReplyAtWrite && p.kind == Kind::Vote {
+            next.receipt = Some((p.next.term, p.next.ballot, s.generation));
+        }
+        out.push(("Write".into(), next));
+    }
+    if p.written && !p.synced {
+        let mut next = s;
+        next.disk = p.next;
+        next.pending.as_mut().unwrap().synced = true;
+        remember(&mut next);
+        out.push(("Synchronize".into(), next));
+    }
+    if p.synced {
+        let mut next = s;
+        next.core = p.next;
+        next.pending = None;
+        if p.kind == Kind::Vote {
+            next.receipt = Some((p.next.term, p.next.ballot, s.generation));
+        }
+        out.push(("CompleteExact".into(), next));
+    }
+    // A foreign/previous incarnation or duplicate receipt cannot consume
+    // the pending transition, even after the disk has synchronized it.
+    out.push(("CompleteStale (ignored)".into(), s));
+}
+fn ready_successors(s: State, variant: Variant, out: &mut Vec<(String, State)>) {
+    let mut begin = |name: String, image: Image, kind: Kind| {
+        let mut next = s;
+        next.receipt = None;
+        next.pending = Some(Pending {
+            next: image,
+            kind,
+            written: false,
+            synced: false,
+        });
+        out.push((name, next));
+    };
+    if s.core.phase < LAST_PHASE && s.core.commit == s.core.phase {
+        let mut image = s.core;
+        image.phase += 1;
+        begin(
+            format!("AcceptConfiguration {}", image.phase),
+            image,
+            Kind::Configuration,
+        );
+    }
+    for head in s.core.commit..s.core.phase {
+        if head < s.core.base {
+            continue;
+        }
+        let mut image = s.core;
+        image.phase = head;
+        if variant == Variant::EraseRollback
+            && image.ballot != 0
+            && !voter(head, identity(image.ballot))
+        {
+            image.ballot = 0;
+        }
+        begin(format!("Rollback {head}"), image, Kind::Configuration);
+    }
+    if s.core.commit < s.core.phase {
+        let mut image = s.core;
+        image.commit = image.phase;
+        begin("ObserveCommittedPrefix".into(), image, Kind::Commit);
+    }
+    if s.core.base < s.core.commit {
+        let mut image = s.core;
+        image.base = image.commit;
+        begin("CompactVerifiedPrefix".into(), image, Kind::Compact);
+    }
+    if s.core.term < LAST_TERM {
+        let mut image = s.core;
+        image.term += 1;
+        image.ballot = 0;
+        begin("ObserveHigherTerm".into(), image, Kind::Term);
+    }
+    if voter(s.core.phase, s.local) {
+        for term in s.core.term.max(1)..=LAST_TERM {
+            for candidate in 0..4 {
+                if !voter(s.core.phase, candidate) {
+                    continue;
+                }
+                let mut image = s.core;
+                image.term = term;
+                if term > s.core.term || s.core.ballot == 0 {
+                    image.ballot = ballot(candidate, s.core.phase);
+                } else if identity(s.core.ballot) == candidate {
+                    image.ballot = s.core.ballot;
+                } else if variant == Variant::IgnoreStore
+                    && node(identity(s.core.ballot)) == node(candidate)
+                {
+                    image.ballot = ballot(candidate, s.core.phase);
+                } else {
+                    continue;
+                }
+                begin(
+                    format!("AcceptVote term {term} identity {candidate}"),
+                    image,
+                    Kind::Vote,
+                );
+            }
+        }
+    }
+}
 fn successors(s: State, variant: Variant) -> Vec<(String, State)> {
     let mut out = Vec::new();
     if let Some(p) = s.pending {
-        if !p.written {
-            let mut next = s;
-            next.pending.as_mut().unwrap().written = true;
-            if variant == Variant::ReplyAtWrite && p.kind == Kind::Vote {
-                next.receipt = Some((p.next.term, p.next.ballot, s.generation));
-            }
-            out.push(("Write".into(), next));
-        }
-        if p.written && !p.synced {
-            let mut next = s;
-            next.disk = p.next;
-            next.pending.as_mut().unwrap().synced = true;
-            remember(&mut next);
-            out.push(("Synchronize".into(), next));
-        }
-        if p.synced {
-            let mut next = s;
-            next.core = p.next;
-            next.pending = None;
-            if p.kind == Kind::Vote {
-                next.receipt = Some((p.next.term, p.next.ballot, s.generation));
-            }
-            out.push(("CompleteExact".into(), next));
-        }
-        // A foreign/previous incarnation or duplicate receipt cannot consume
-        // the pending transition, even after the disk has synchronized it.
-        out.push(("CompleteStale (ignored)".into(), s));
+        pending_successors(s, p, variant, &mut out);
     } else {
-        let mut begin = |name: String, image: Image, kind: Kind| {
-            let mut next = s;
-            next.receipt = None;
-            next.pending = Some(Pending {
-                next: image,
-                kind,
-                written: false,
-                synced: false,
-            });
-            out.push((name, next));
-        };
-        if s.core.phase < LAST_PHASE && s.core.commit == s.core.phase {
-            let mut image = s.core;
-            image.phase += 1;
-            begin(
-                format!("AcceptConfiguration {}", image.phase),
-                image,
-                Kind::Configuration,
-            );
-        }
-        for head in s.core.commit..s.core.phase {
-            if head < s.core.base {
-                continue;
-            }
-            let mut image = s.core;
-            image.phase = head;
-            if variant == Variant::EraseRollback
-                && image.ballot != 0
-                && !voter(head, identity(image.ballot))
-            {
-                image.ballot = 0;
-            }
-            begin(format!("Rollback {head}"), image, Kind::Configuration);
-        }
-        if s.core.commit < s.core.phase {
-            let mut image = s.core;
-            image.commit = image.phase;
-            begin("ObserveCommittedPrefix".into(), image, Kind::Commit);
-        }
-        if s.core.base < s.core.commit {
-            let mut image = s.core;
-            image.base = image.commit;
-            begin("CompactVerifiedPrefix".into(), image, Kind::Compact);
-        }
-        if s.core.term < LAST_TERM {
-            let mut image = s.core;
-            image.term += 1;
-            image.ballot = 0;
-            begin("ObserveHigherTerm".into(), image, Kind::Term);
-        }
-        if voter(s.core.phase, s.local) {
-            for term in s.core.term.max(1)..=LAST_TERM {
-                for candidate in 0..4 {
-                    if !voter(s.core.phase, candidate) {
-                        continue;
-                    }
-                    let mut image = s.core;
-                    image.term = term;
-                    if term > s.core.term || s.core.ballot == 0 {
-                        image.ballot = ballot(candidate, s.core.phase);
-                    } else if identity(s.core.ballot) == candidate {
-                        image.ballot = s.core.ballot;
-                    } else if variant == Variant::IgnoreStore
-                        && node(identity(s.core.ballot)) == node(candidate)
-                    {
-                        image.ballot = ballot(candidate, s.core.phase);
-                    } else {
-                        continue;
-                    }
-                    begin(
-                        format!("AcceptVote term {term} identity {candidate}"),
-                        image,
-                        Kind::Vote,
-                    );
-                }
-            }
-        }
+        ready_successors(s, variant, &mut out);
     }
     // At most one restart in this bounded instance. A written complete tail may
     // be recovered without an observed sync completion; neither branch emits a

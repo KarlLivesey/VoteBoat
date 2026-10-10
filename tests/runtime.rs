@@ -817,10 +817,10 @@ fn pump_multi<L: LogStore, Q: ReadyScheduler>(nodes: &mut [MultiNode<L, Q>], now
     panic!("shared runtime did not converge");
 }
 
-fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
+fn campaign_hundred_groups<L: LogStore, Q: ReadyScheduler, T: TimerService>(
     nodes: &mut [MultiNode<L, Q>],
     mut timers: T,
-) {
+) -> MonoTime {
     let clock = VirtualClock(Rc::new(Cell::new(0)));
     let mut expected = BTreeMap::new();
     for g in 1..=100 {
@@ -860,11 +860,18 @@ fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
         }
     }
     assert_eq!(nodes[0].largest_batch, 100); // one shared WAL batch, not 100 stores
+    clock.now()
+}
+fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
+    nodes: &mut [MultiNode<L, Q>],
+    timers: T,
+) {
+    let now = campaign_hundred_groups(nodes, timers);
     nodes[0].delayed.insert(group(1));
     for g in 1..=100 {
         nodes[0].shard.admit(group(g), proposal(1)).unwrap();
     }
-    pump_multi(nodes, clock.now());
+    pump_multi(nodes, now);
     assert_eq!(
         nodes[0].shard.core(group(1)).unwrap().state().commit_index,
         1
@@ -893,15 +900,15 @@ fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
             },
         )
         .unwrap();
-    pump_multi(nodes, clock.now());
+    pump_multi(nodes, now);
     assert_eq!(nodes[0].reads, [7]);
     nodes[0].release(group(1));
-    pump_multi(nodes, clock.now());
+    pump_multi(nodes, now);
     assert_eq!(nodes[0].apps[&group(1)].read_applied(7), Ok(7));
     for g in 1..=100 {
         nodes[0].shard.admit(group(g), proposal(1)).unwrap();
     }
-    pump_multi(nodes, clock.now());
+    pump_multi(nodes, now);
     for g in 1..=100 {
         nodes[0]
             .shard
@@ -914,7 +921,7 @@ fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
             )
             .unwrap();
     }
-    pump_multi(nodes, clock.now());
+    pump_multi(nodes, now);
     for n in nodes.iter() {
         for (g, app) in &n.apps {
             assert_eq!(
@@ -939,7 +946,7 @@ fn hundred_group_history<L: LogStore, Q: ReadyScheduler, T: TimerService>(
             )
             .unwrap();
     }
-    pump_multi(nodes, clock.now());
+    pump_multi(nodes, now);
     assert_eq!(nodes[0].reads.len(), 101);
     assert!(nodes[0].reads[1..].iter().all(|v| *v == 10));
 }
@@ -1624,13 +1631,12 @@ fn pump_auto<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy
     }
     panic!("automatic timer history failed to converge");
 }
-fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
-    nodes: &mut Vec<AutoNode<L, Q, T, E>>,
-    restart: impl FnOnce(usize, AutoNode<L, Q, T, E>, MonoTime) -> AutoNode<L, Q, T, E>,
-) {
-    let mut delayed = Vec::new();
+fn partition_auto_leader<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+    nodes: &mut [AutoNode<L, Q, T, E>],
+    delayed: &mut Vec<Message>,
+) -> usize {
     for ms in 0..=100 {
-        pump_auto(nodes, MonoTime(ms), None, &mut delayed);
+        pump_auto(nodes, MonoTime(ms), None, delayed);
     }
     let leader = nodes
         .iter()
@@ -1655,12 +1661,12 @@ fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Electio
         .hard_state
         .term;
     nodes[leader].runtime.admit(group(1), proposal(1)).unwrap();
-    pump_auto(nodes, MonoTime(100), None, &mut delayed);
+    pump_auto(nodes, MonoTime(100), None, delayed);
     for n in nodes.iter() {
         assert_eq!(n.apps[&group(1)].read_applied(2), Ok(7));
     }
     for ms in 101..=250 {
-        pump_auto(nodes, MonoTime(ms), Some(leader), &mut delayed);
+        pump_auto(nodes, MonoTime(ms), Some(leader), delayed);
     }
     let replacement = nodes
         .iter()
@@ -1713,7 +1719,7 @@ fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Electio
         )
         .unwrap();
     nodes[other].runtime.admit(group(2), proposal(1)).unwrap();
-    pump_auto(nodes, MonoTime(250), Some(leader), &mut delayed);
+    pump_auto(nodes, MonoTime(250), Some(leader), delayed);
     assert!(nodes[leader].reads.is_empty());
     for (i, n) in nodes.iter().enumerate() {
         if i != leader {
@@ -1728,6 +1734,14 @@ fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: Electio
             Ok(7)
         );
     }
+    leader
+}
+fn automatic_history<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+    nodes: &mut Vec<AutoNode<L, Q, T, E>>,
+    restart: impl FnOnce(usize, AutoNode<L, Q, T, E>, MonoTime) -> AutoNode<L, Q, T, E>,
+) {
+    let mut delayed = Vec::new();
+    let leader = partition_auto_leader(nodes, &mut delayed);
     let old = nodes.remove(leader);
     nodes.insert(leader, restart(leader, old, MonoTime(250)));
     // Delayed old requests and replies cross recovery; some refer to the old
@@ -2096,8 +2110,7 @@ fn native_timer_replication_progress_survives_multiple_heartbeat_retries() {
     delayed_auto_history(&mut nodes);
 }
 
-#[test]
-fn enrolled_learner_has_no_election_timer_and_still_processes_durable_replication() {
+fn enrolled_learner_log() -> HostLogStore {
     use voteboat::membership::*;
     let mut log = HostLogStore::new(4);
     let b = bootstrap(1, 3);
@@ -2131,6 +2144,12 @@ fn enrolled_learner_has_no_election_timer_and_still_processes_durable_replicatio
             }),
         )],
     );
+    log
+}
+
+#[test]
+fn enrolled_learner_has_no_election_timer_and_still_processes_durable_replication() {
+    let mut log = enrolled_learner_log();
     let core = Raft::recover_learner(
         node(4),
         log.binding(),

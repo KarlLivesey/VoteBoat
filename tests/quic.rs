@@ -426,8 +426,8 @@ fn lost_initial_and_application_datagrams_retransmit_without_changing_bytes() {
     assert!(a.is_flushed());
 }
 
-#[test]
-fn three_raft_replicas_commit_through_quic_framing_and_exact_log_completions() {
+mod raft_cluster {
+    use super::*;
     use std::collections::{BTreeMap, VecDeque};
     use voteboat::{
         application::*,
@@ -504,115 +504,131 @@ fn three_raft_replicas_commit_through_quic_framing_and_exact_log_completions() {
             }
         }
     }
-    let mut replicas: Vec<_> = (1..=3)
-        .map(|n| {
-            let mut log = HostLogStore::new(n);
-            append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
-            let core = Raft::recover(
-                node(n as u64),
-                log.binding(),
-                log.state(group(1)).unwrap(),
-                log.limits(),
-            )
-            .unwrap();
-            let queue = NativeOutbound::new(
-                OutboundBinding {
-                    node: node(n as u64),
-                    store: log.binding(),
-                    generation: OutboundGeneration::new(1).unwrap(),
-                },
-                OutboundLimits::default(),
-            )
-            .unwrap();
-            Replica {
-                core,
-                log,
-                application: Counter::new(16).unwrap(),
-                queue,
-                channels: BTreeMap::new(),
-                pending: VecDeque::new(),
+
+    fn create_replicas() -> Vec<Replica> {
+        let replicas: Vec<_> = (1..=3)
+            .map(|n| {
+                let mut log = HostLogStore::new(n);
+                append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
+                let core = Raft::recover(
+                    node(n as u64),
+                    log.binding(),
+                    log.state(group(1)).unwrap(),
+                    log.limits(),
+                )
+                .unwrap();
+                let queue = NativeOutbound::new(
+                    OutboundBinding {
+                        node: node(n as u64),
+                        store: log.binding(),
+                        generation: OutboundGeneration::new(1).unwrap(),
+                    },
+                    OutboundLimits::default(),
+                )
+                .unwrap();
+                Replica {
+                    core,
+                    log,
+                    application: Counter::new(16).unwrap(),
+                    queue,
+                    channels: BTreeMap::new(),
+                    pending: VecDeque::new(),
+                }
+            })
+            .collect();
+        replicas
+    }
+    fn connect(replicas: &mut [Replica]) -> u64 {
+        let mut now = 0;
+        for i in 0..3 {
+            for j in i + 1..3 {
+                let sa = UdpSocket::bind("127.0.0.1:0").unwrap();
+                let sb = UdpSocket::bind("127.0.0.1:0").unwrap();
+                let aa = sa.local_addr().unwrap();
+                let ba = sb.local_addr().unwrap();
+                let a = LocalIdentity {
+                    node: node(i as u64 + 1),
+                    store: replicas[i].log.binding(),
+                };
+                let b = LocalIdentity {
+                    node: node(j as u64 + 1),
+                    store: replicas[j].log.binding(),
+                };
+                let options = |local, remote, addr| QuicSessionOptions {
+                    local,
+                    peer: support::tls::peer(remote),
+                    remote: addr,
+                    generation: SecureSessionGeneration::new(1).unwrap(),
+                    limits: SessionLimits::default(),
+                };
+                let mut qa = NativeQuicSession::client(
+                    sa,
+                    &support::tls::configuration(a.node.get()),
+                    options(a, b, ba),
+                    MonoTime(0),
+                )
+                .unwrap();
+                let mut qb = NativeQuicSession::server(
+                    sb,
+                    &support::tls::configuration(b.node.get()),
+                    options(b, a, aa),
+                    MonoTime(0),
+                )
+                .unwrap();
+                now = now.max(ready(&mut qa, &mut qb));
+                let ca = NativePeerTransport::new(
+                    qa,
+                    NativeWireCodec::new(WireLimits::default()).unwrap(),
+                    &replicas[i].queue,
+                    TransportLimits::default(),
+                )
+                .unwrap();
+                let cb = NativePeerTransport::new(
+                    qb,
+                    NativeWireCodec::new(WireLimits::default()).unwrap(),
+                    &replicas[j].queue,
+                    TransportLimits::default(),
+                )
+                .unwrap();
+                replicas[i].channels.insert(b.node, ca);
+                replicas[j].channels.insert(a.node, cb);
             }
-        })
-        .collect();
-    let mut now = 0;
-    for i in 0..3 {
-        for j in i + 1..3 {
-            let sa = UdpSocket::bind("127.0.0.1:0").unwrap();
-            let sb = UdpSocket::bind("127.0.0.1:0").unwrap();
-            let aa = sa.local_addr().unwrap();
-            let ba = sb.local_addr().unwrap();
-            let a = LocalIdentity {
-                node: node(i as u64 + 1),
-                store: replicas[i].log.binding(),
-            };
-            let b = LocalIdentity {
-                node: node(j as u64 + 1),
-                store: replicas[j].log.binding(),
-            };
-            let options = |local, remote, addr| QuicSessionOptions {
-                local,
-                peer: support::tls::peer(remote),
-                remote: addr,
-                generation: SecureSessionGeneration::new(1).unwrap(),
-                limits: SessionLimits::default(),
-            };
-            let mut qa = NativeQuicSession::client(
-                sa,
-                &support::tls::configuration(a.node.get()),
-                options(a, b, ba),
-                MonoTime(0),
-            )
-            .unwrap();
-            let mut qb = NativeQuicSession::server(
-                sb,
-                &support::tls::configuration(b.node.get()),
-                options(b, a, aa),
-                MonoTime(0),
-            )
-            .unwrap();
-            now = now.max(ready(&mut qa, &mut qb));
-            let ca = NativePeerTransport::new(
-                qa,
-                NativeWireCodec::new(WireLimits::default()).unwrap(),
-                &replicas[i].queue,
-                TransportLimits::default(),
-            )
-            .unwrap();
-            let cb = NativePeerTransport::new(
-                qb,
-                NativeWireCodec::new(WireLimits::default()).unwrap(),
-                &replicas[j].queue,
-                TransportLimits::default(),
-            )
-            .unwrap();
-            replicas[i].channels.insert(b.node, ca);
-            replicas[j].channels.insert(a.node, cb);
+        }
+        now
+    }
+    pub(super) fn run() {
+        let mut replicas = create_replicas();
+        let now = connect(&mut replicas);
+        replicas[0].input(raft::Event::Campaign);
+        let mut proposed = false;
+        for time in now..now + 10000 {
+            for replica in &mut replicas {
+                replica.tick(time);
+            }
+            if !proposed && replicas.iter().all(|r| r.application.applied_index() >= 1) {
+                assert_eq!(replicas[0].core.role(), Role::Leader);
+                replicas[0].input(raft::Event::Propose {
+                    operation: OperationId::new(70).unwrap(),
+                    bytes: 7i64.to_le_bytes().to_vec(),
+                });
+                proposed = true;
+            }
+            if proposed && replicas.iter().all(|r| r.application.applied_index() >= 2) {
+                break;
+            }
+        }
+        assert!(proposed);
+        for replica in &replicas {
+            assert_eq!(replica.core.state().commit_index, 2);
+            assert_eq!(replica.application.read_applied(2).unwrap(), 7);
+            assert_eq!(replica.log.state(group(1)).unwrap(), *replica.core.state());
         }
     }
-    replicas[0].input(raft::Event::Campaign);
-    let mut proposed = false;
-    for time in now..now + 10000 {
-        for replica in &mut replicas {
-            replica.tick(time);
-        }
-        if !proposed && replicas.iter().all(|r| r.application.applied_index() >= 1) {
-            assert_eq!(replicas[0].core.role(), Role::Leader);
-            replicas[0].input(raft::Event::Propose {
-                operation: OperationId::new(70).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
-            });
-            proposed = true;
-        }
-        if proposed && replicas.iter().all(|r| r.application.applied_index() >= 2) {
-            break;
-        }
-    }
-    assert!(proposed);
-    for replica in &replicas {
-        assert_eq!(replica.core.state().commit_index, 2);
-        assert_eq!(replica.application.read_applied(2).unwrap(), 7);
-        assert_eq!(replica.log.state(group(1)).unwrap(), *replica.core.state());
-    }
+}
+
+#[test]
+fn three_raft_replicas_commit_through_quic_framing_and_exact_log_completions() {
+    raft_cluster::run();
 }
 
 #[test]

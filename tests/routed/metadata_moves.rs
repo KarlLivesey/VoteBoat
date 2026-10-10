@@ -341,77 +341,85 @@ fn owner_adopt(
     }
     status
 }
-fn run(protocol: NativePeerProtocol, checkpoint: bool) {
-    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
-    let root = std::env::temp_dir().join(format!(
-        "voteboat-metadata-move-{}-{protocol:?}-{checkpoint}",
-        std::process::id()
-    ));
-    std::fs::create_dir_all(&root).unwrap();
-    let clock = Instant::now();
-    let env = Environment {
-        root: &root,
-        clock: &clock,
-        protocol,
-        checkpoint,
-    };
+struct FirstMove {
+    nodes: Vec<Node<MetadataPublishingSource>>,
+    template: MetadataPublishingSource,
+    plan: MetadataMovePlan,
+    activation: MetadataActivationStatus,
+}
+struct SecondMove {
+    nodes: Vec<Node<MetadataServingTarget>>,
+    plan: MetadataMovePlan,
+    activation: MetadataActivationStatus,
+}
+struct OfflineMetadata {
+    group: u128,
+    files: BTreeMap<std::path::PathBuf, Vec<u8>>,
+    logs: BTreeMap<NodeId, GroupLog>,
+}
+fn initialize_source(
+    env: &Environment<'_>,
+) -> (Vec<Node<MetadataPublishingSource>>, DirectoryReceipt) {
     let mut a = open(
-        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
+        configuration(env.root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        env.clock,
+        env.protocol,
         original,
     );
-    campaign(&mut a, &clock, 1);
+    campaign(&mut a, env.clock, 1);
     propose_recovering(
         &mut a,
-        &clock,
+        env.clock,
         1,
         1000,
         original().bootstrap_command(1000000).unwrap(),
     );
-    let original_receipt = publish(&mut a, &clock, 1, 1001, root_manifest());
+    let original_receipt = publish(&mut a, env.clock, 1, 1001, root_manifest());
     let MetadataPublishingOutcome::Source(MetadataSourceOutcome::Directory(original_receipt)) =
         original_receipt.outcome
     else {
         panic!("original manifest")
     };
-    let original_command = DirectoryCommand {
-        expected: None,
-        manifest: root_manifest(),
-    }
-    .encode(1000000)
-    .unwrap();
+    (a, original_receipt)
+}
+fn initialize_parent(env: &Environment<'_>) -> Vec<Node<LifecycleDirectory>> {
     let mut parent = open(
-        configuration(&root, 100, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
+        configuration(env.root, 100, &[1, 2, 3], NativeOpenMode::Create),
+        env.clock,
+        env.protocol,
         || LifecycleDirectory::new(directory(parent_manifest())),
     );
-    campaign(&mut parent, &clock, 100);
+    campaign(&mut parent, env.clock, 100);
     propose_recovering(
         &mut parent,
-        &clock,
+        env.clock,
         100,
         1000,
         directory(parent_manifest())
             .bootstrap_command(1000000)
             .unwrap(),
     );
-    publish(&mut parent, &clock, 100, 1001, parent_manifest());
+    publish(&mut parent, env.clock, 100, 1001, parent_manifest());
+    parent
+}
+fn initialize_owner(env: &Environment<'_>) -> Vec<Node<Owner>> {
     let mut owners = open(
-        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
+        configuration(env.root, 20, &[1, 2, 3], NativeOpenMode::Create),
+        env.clock,
+        env.protocol,
         owner,
     );
-    campaign(&mut owners, &clock, 20);
+    campaign(&mut owners, env.clock, 20);
     propose_recovering(
         &mut owners,
-        &clock,
+        env.clock,
         20,
         100,
         owner().bootstrap_command(1000000).unwrap(),
     );
+    owners
+}
+fn initialize_cache() -> NativeManifestCache {
     let mut cache = NativeManifestCache::new(ManifestCacheLimits {
         manifests: 4,
         bytes: 1000000,
@@ -423,8 +431,12 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
     .unwrap_or_else(|_| panic!("locator cache"));
     cache.admit(root_manifest()).unwrap();
     cache.admit(parent_manifest()).unwrap();
-    write(&mut owners, &clock, &cache, 1, 7);
-    assert_eq!(value(&mut owners, &clock, &cache), 7);
+    cache
+}
+fn freeze_initial(
+    env: &Environment<'_>,
+    a: &mut Vec<Node<MetadataPublishingSource>>,
+) -> (MetadataMovePlan, MetadataImage) {
     let first_plan = a[0].local().applications[&group(1)]
         .source()
         .plan(group(9))
@@ -434,19 +446,19 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .freeze_command(&first_plan, 1000000)
         .unwrap();
     phase(
-        &env,
-        &mut a,
+        env,
+        a,
         1,
         200,
         freeze,
         MetadataPublishingQuery::Source(MetadataSourceQuery::Status),
         original,
     );
-    let first_image = source_image(&mut a, &clock, 1);
+    let first_image = source_image(a, env.clock, 1);
     assert_eq!(
         observe(
-            &mut a,
-            &clock,
+            a,
+            env.clock,
             1,
             MetadataPublishingQuery::Source(MetadataSourceQuery::Directory(
                 DirectoryQuery::Manifest(root_manifest().input().responsibility)
@@ -454,21 +466,32 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         ),
         MetadataPublishingRead::Source(MetadataSourceRead::Fenced)
     );
-    let a_cfg = config(&a, 1);
+    (first_plan, first_image)
+}
+fn import_first(
+    env: &Environment<'_>,
+    a: &[Node<MetadataPublishingSource>],
+    first_plan: &MetadataMovePlan,
+    first_image: &MetadataImage,
+) -> (
+    Vec<Node<MetadataPublishingSource>>,
+    MetadataPublishingSource,
+) {
+    let a_cfg = config(a, 1);
     // All selected groups have their explicit original bootstrap configuration.
     let b_cfg = ConfigurationId::new(1).unwrap();
     let b_template = repeated(first_plan.clone(), a_cfg, b_cfg);
     let mut b = open(
-        configuration(&root, 9, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
+        configuration(env.root, 9, &[1, 2, 3], NativeOpenMode::Create),
+        env.clock,
+        env.protocol,
         || b_template.clone(),
     );
     assert_eq!(config(&b, 9), b_cfg);
     let b_query =
         MetadataPublishingQuery::Source(MetadataSourceQuery::Serving(MetadataServingQuery::Status));
     phase(
-        &env,
+        env,
         &mut b,
         9,
         200,
@@ -477,7 +500,7 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         || b_template.clone(),
     );
     phase(
-        &env,
+        env,
         &mut b,
         9,
         200,
@@ -485,18 +508,29 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
             .source()
             .serving_target()
             .unwrap()
-            .import_command(&first_image, a_cfg, 1000000)
+            .import_command(first_image, a_cfg, 1000000)
             .unwrap(),
         b_query.clone(),
         || b_template.clone(),
     );
-    let imported = active_b(&mut b, &clock).target.imported.unwrap();
+    (b, b_template)
+}
+fn activate_first(
+    env: &Environment<'_>,
+    a: &mut Vec<Node<MetadataPublishingSource>>,
+    b: &mut Vec<Node<MetadataPublishingSource>>,
+    b_template: &MetadataPublishingSource,
+) -> MetadataActivationStatus {
+    let b_cfg = config(b, 9);
+    let b_query =
+        MetadataPublishingQuery::Source(MetadataSourceQuery::Serving(MetadataServingQuery::Status));
+    let imported = active_b(b, env.clock).target.imported.unwrap();
     let publication = a[0].local().applications[&group(1)]
         .publication_command(imported, b_cfg, 1000000)
         .unwrap();
     let observed = phase(
-        &env,
-        &mut a,
+        env,
+        a,
         1,
         200,
         publication,
@@ -512,15 +546,32 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .unwrap()
         .activation_command(first_publication, 1000000)
         .unwrap();
-    phase(&env, &mut b, 9, 200, activation_command, b_query, || {
+    phase(env, b, 9, 200, activation_command, b_query, || {
         b_template.clone()
     });
-    let first_activation = active_b(&mut b, &clock).activation.unwrap();
+    active_b(b, env.clock).activation.unwrap()
+}
+fn first_move(env: &Environment<'_>, a: &mut Vec<Node<MetadataPublishingSource>>) -> FirstMove {
+    let (first_plan, first_image) = freeze_initial(env, a);
+    let (mut b, b_template) = import_first(env, a, &first_plan, &first_image);
+    let first_activation = activate_first(env, a, &mut b, &b_template);
+    FirstMove {
+        nodes: b,
+        template: b_template,
+        plan: first_plan,
+        activation: first_activation,
+    }
+}
+fn cache_first(
+    env: &Environment<'_>,
+    b: &mut [Node<MetadataPublishingSource>],
+    cache: &mut NativeManifestCache,
+) {
     let MetadataPublishingRead::Source(MetadataSourceRead::Serving(
         MetadataServingRead::Directory(DirectoryRead::Manifest(Some(m))),
     )) = observe(
-        &mut b,
-        &clock,
+        b,
+        env.clock,
         9,
         MetadataPublishingQuery::Source(MetadataSourceQuery::Directory(DirectoryQuery::Manifest(
             root_manifest().input().responsibility,
@@ -530,21 +581,13 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         panic!("B manifest")
     };
     cache.admit(m).unwrap();
-    assert!(resolve(&cache, &source_fixture::Policy, fixture::id(50), &[1], 3).is_err());
-    parent_refresh(
-        &env,
-        &mut parent,
-        &mut cache,
-        first_plan.clone(),
-        first_activation,
-        400,
-    );
-    owner_adopt(&env, &mut owners, first_plan, first_activation, 300);
-    write(&mut owners, &clock, &cache, 2, 3);
-    assert_eq!(value(&mut owners, &clock, &cache), 10);
-    let a_logs = creation::abandon(std::mem::take(&mut a), 1);
-    let a_files = durable_files(&root.join("1"));
-
+    assert!(resolve(cache, &source_fixture::Policy, fixture::id(50), &[1], 3).is_err());
+}
+fn freeze_repeated(
+    env: &Environment<'_>,
+    b: &mut Vec<Node<MetadataPublishingSource>>,
+    b_template: &MetadataPublishingSource,
+) -> (MetadataMovePlan, MetadataImage) {
     let second_plan = b[0].local().applications[&group(9)]
         .source()
         .plan(group(11))
@@ -554,15 +597,24 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .freeze_command(&second_plan, 1000000)
         .unwrap();
     phase(
-        &env,
-        &mut b,
+        env,
+        b,
         9,
         201,
         freeze,
         MetadataPublishingQuery::Source(MetadataSourceQuery::Status),
         || b_template.clone(),
     );
-    let second_image = source_image(&mut b, &clock, 9);
+    let second_image = source_image(b, env.clock, 9);
+    (second_plan, second_image)
+}
+fn import_second(
+    env: &Environment<'_>,
+    b_template: &MetadataPublishingSource,
+    b_cfg: ConfigurationId,
+    second_plan: &MetadataMovePlan,
+    second_image: &MetadataImage,
+) -> (Vec<Node<MetadataServingTarget>>, MetadataServingTarget) {
     let c_cfg = ConfigurationId::new(1).unwrap();
     let c_template = MetadataServingTarget::new(
         b_template.clone(),
@@ -573,14 +625,14 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
     )
     .unwrap();
     let mut c = open(
-        configuration(&root, 11, &[1, 2, 3], NativeOpenMode::Create),
-        &clock,
-        protocol,
+        configuration(env.root, 11, &[1, 2, 3], NativeOpenMode::Create),
+        env.clock,
+        env.protocol,
         || c_template.clone(),
     );
     assert_eq!(config(&c, 11), c_cfg);
     phase(
-        &env,
+        env,
         &mut c,
         11,
         201,
@@ -589,12 +641,12 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         || c_template.clone(),
     );
     phase(
-        &env,
+        env,
         &mut c,
         11,
         201,
         c_template
-            .import_command(&second_image, b_cfg, 1000000)
+            .import_command(second_image, b_cfg, 1000000)
             .unwrap(),
         MetadataServingQuery::Status,
         || c_template.clone(),
@@ -602,7 +654,7 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
     assert_eq!(
         observe(
             &mut c,
-            &clock,
+            env.clock,
             11,
             MetadataServingQuery::Directory(DirectoryQuery::Manifest(
                 root_manifest().input().responsibility
@@ -610,8 +662,18 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         ),
         MetadataServingRead::NotActive
     );
+    (c, c_template)
+}
+fn activate_second(
+    env: &Environment<'_>,
+    b: &mut Vec<Node<MetadataPublishingSource>>,
+    b_template: &MetadataPublishingSource,
+    c: &mut Vec<Node<MetadataServingTarget>>,
+    c_template: &MetadataServingTarget,
+) -> MetadataActivationStatus {
+    let c_cfg = config(c, 11);
     let MetadataServingRead::Status(c_status) =
-        observe(&mut c, &clock, 11, MetadataServingQuery::Status)
+        observe(c, env.clock, 11, MetadataServingQuery::Status)
     else {
         panic!()
     };
@@ -619,8 +681,8 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .publication_command(c_status.target.imported.unwrap(), c_cfg, 1000000)
         .unwrap();
     let MetadataPublishingRead::Publication(Some(second_publication)) = phase(
-        &env,
-        &mut b,
+        env,
+        b,
         9,
         201,
         publication,
@@ -633,8 +695,8 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         .activation_command(second_publication, 1000000)
         .unwrap();
     let MetadataServingRead::Status(status) = phase(
-        &env,
-        &mut c,
+        env,
+        c,
         11,
         201,
         activate,
@@ -643,10 +705,32 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
     ) else {
         panic!()
     };
-    let second_activation = status.activation.unwrap();
+    status.activation.unwrap()
+}
+fn second_move(env: &Environment<'_>, b: &mut FirstMove) -> SecondMove {
+    let (second_plan, second_image) = freeze_repeated(env, &mut b.nodes, &b.template);
+    let (mut c, c_template) = import_second(
+        env,
+        &b.template,
+        config(&b.nodes, 9),
+        &second_plan,
+        &second_image,
+    );
+    let second_activation = activate_second(env, &mut b.nodes, &b.template, &mut c, &c_template);
+    SecondMove {
+        nodes: c,
+        plan: second_plan,
+        activation: second_activation,
+    }
+}
+fn cache_second(
+    env: &Environment<'_>,
+    c: &mut [Node<MetadataServingTarget>],
+    cache: &mut NativeManifestCache,
+) {
     let MetadataServingRead::Directory(DirectoryRead::Manifest(Some(m))) = observe(
-        &mut c,
-        &clock,
+        c,
+        env.clock,
         11,
         MetadataServingQuery::Directory(DirectoryQuery::Manifest(
             root_manifest().input().responsibility,
@@ -655,21 +739,17 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         panic!()
     };
     cache.admit(m).unwrap();
-    assert!(resolve(&cache, &source_fixture::Policy, fixture::id(50), &[1], 3).is_err());
-    parent_refresh(
-        &env,
-        &mut parent,
-        &mut cache,
-        second_plan.clone(),
-        second_activation,
-        401,
-    );
-    let owner_status = owner_adopt(&env, &mut owners, second_plan, second_activation, 301);
-    write(&mut owners, &clock, &cache, 3, 5);
-    assert_eq!(value(&mut owners, &clock, &cache), 15);
-    campaign(&mut c, &clock, 11);
+    assert!(resolve(cache, &source_fixture::Policy, fixture::id(50), &[1], 3).is_err());
+}
+fn verify_historical(
+    env: &Environment<'_>,
+    c: &mut [Node<MetadataServingTarget>],
+    original_command: Vec<u8>,
+    original_receipt: DirectoryReceipt,
+) {
+    campaign(c, env.clock, 11);
     assert_eq!(
-        propose_recovering(&mut c, &clock, 11, 1001, original_command).outcome,
+        propose_recovering(c, env.clock, 11, 1001, original_command).outcome,
         MetadataServingOutcome::Historical {
             source: group(1),
             index: original_receipt.index,
@@ -677,61 +757,135 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool) {
         }
     );
     assert!(
-        matches!(observe(&mut c,&clock,11,MetadataServingQuery::Historical(DirectoryQuery::Manifest(root_manifest().input().responsibility))),MetadataServingRead::Historical{source,value:DirectoryRead::Manifest(Some(m)),..} if source==group(9) && m.input().authority==group(9))
+        matches!(observe(c,env.clock,11,MetadataServingQuery::Historical(DirectoryQuery::Manifest(root_manifest().input().responsibility))),MetadataServingRead::Historical{source,value:DirectoryRead::Manifest(Some(m)),..} if source==group(9) && m.input().authority==group(9))
     );
-    let b_logs = creation::abandon(std::mem::take(&mut b), 9);
-    let b_files = durable_files(&root.join("9"));
-    let c_logs = creation::abandon(std::mem::take(&mut c), 11);
-    let c_files = durable_files(&root.join("11"));
-    let parent_logs = creation::abandon(std::mem::take(&mut parent), 100);
-    let parent_files = durable_files(&root.join("100"));
-    write(&mut owners, &clock, &cache, 4, 2);
-    assert_eq!(value(&mut owners, &clock, &cache), 17);
-    if checkpoint {
-        compact(&mut owners, &clock, 20);
+}
+fn recover_owner(
+    env: &Environment<'_>,
+    owners: &mut Vec<Node<Owner>>,
+    cache: &NativeManifestCache,
+    owner_status: MetadataGrantStatus,
+) {
+    write(owners, env.clock, cache, 4, 2);
+    assert_eq!(value(owners, env.clock, cache), 17);
+    if env.checkpoint {
+        compact(owners, env.clock, 20);
     }
-    creation::abandon(std::mem::take(&mut owners), 20);
-    owners = open(
-        configuration(&root, 20, &[1, 2, 3], NativeOpenMode::Recover),
-        &clock,
-        protocol,
+    creation::abandon(std::mem::take(owners), 20);
+    *owners = open(
+        configuration(env.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
+        env.clock,
+        env.protocol,
         owner,
     );
     assert_eq!(
         observe(
-            &mut owners,
-            &clock,
+            owners,
+            env.clock,
             20,
             SourceQuery::MetadataAdoption(source_fixture::op(301))
         ),
         SourceRead::MetadataAdoption(Some(owner_status))
     );
     for (id, delta) in [(1, 7), (2, 3), (3, 5), (4, 2)] {
-        write(&mut owners, &clock, &cache, id, delta);
+        write(owners, env.clock, cache, id, delta);
     }
-    assert_eq!(value(&mut owners, &clock, &cache), 17);
-    for node in &owners {
+    assert_eq!(value(owners, env.clock, cache), 17);
+    for node in owners {
         let app = node.local().applications[&group(20)].routed();
         assert_eq!(app.grant().input().authority, group(11));
         assert_eq!(app.grant().input().epoch, root_manifest().input().epoch);
         assert_eq!(app.application().outbox().count(), 4);
     }
-    for (g, files, logs) in [
-        (1, a_files, a_logs),
-        (9, b_files, b_logs),
-        (11, c_files, c_logs),
-        (100, parent_files, parent_logs),
-    ] {
-        assert_eq!(durable_files(&root.join(g.to_string())), files);
-        for cfg in configuration(&root, g, &[1, 2, 3], NativeOpenMode::Recover) {
+}
+impl OfflineMetadata {
+    fn capture<A>(env: &Environment<'_>, nodes: &mut Vec<Node<A>>, g: u128) -> Self
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        let logs = creation::abandon(std::mem::take(nodes), g);
+        let files = durable_files(&env.root.join(g.to_string()));
+        Self {
+            group: g,
+            logs,
+            files,
+        }
+    }
+    fn verify(self, env: &Environment<'_>) {
+        let g = self.group;
+        assert_eq!(durable_files(&env.root.join(g.to_string())), self.files);
+        for cfg in configuration(env.root, g, &[1, 2, 3], NativeOpenMode::Recover) {
             let log = NativeLogStore::recover(
                 FileLogIo::open(&cfg.directory).unwrap(),
                 cfg.store,
                 LogLimits::default(),
             )
             .unwrap();
-            assert_eq!(log.state(group(g)).unwrap(), logs[&cfg.node]);
+            assert_eq!(log.state(group(g)).unwrap(), self.logs[&cfg.node]);
         }
+    }
+}
+fn run(protocol: NativePeerProtocol, checkpoint: bool) {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let root = std::env::temp_dir().join(format!(
+        "voteboat-metadata-move-{}-{protocol:?}-{checkpoint}",
+        std::process::id()
+    ));
+    std::fs::create_dir_all(&root).unwrap();
+    let clock = Instant::now();
+    let env = Environment {
+        root: &root,
+        clock: &clock,
+        protocol,
+        checkpoint,
+    };
+    let (mut a, original_receipt) = initialize_source(&env);
+    let original_command = DirectoryCommand {
+        expected: None,
+        manifest: root_manifest(),
+    }
+    .encode(1000000)
+    .unwrap();
+    let mut parent = initialize_parent(&env);
+    let mut owners = initialize_owner(&env);
+    let mut cache = initialize_cache();
+    write(&mut owners, &clock, &cache, 1, 7);
+    assert_eq!(value(&mut owners, &clock, &cache), 7);
+    let mut b = first_move(&env, &mut a);
+    cache_first(&env, &mut b.nodes, &mut cache);
+    parent_refresh(
+        &env,
+        &mut parent,
+        &mut cache,
+        b.plan.clone(),
+        b.activation,
+        400,
+    );
+    owner_adopt(&env, &mut owners, b.plan.clone(), b.activation, 300);
+    write(&mut owners, &clock, &cache, 2, 3);
+    assert_eq!(value(&mut owners, &clock, &cache), 10);
+    let a_record = OfflineMetadata::capture(&env, &mut a, 1);
+    let mut c = second_move(&env, &mut b);
+    cache_second(&env, &mut c.nodes, &mut cache);
+    parent_refresh(
+        &env,
+        &mut parent,
+        &mut cache,
+        c.plan.clone(),
+        c.activation,
+        401,
+    );
+    let owner_status = owner_adopt(&env, &mut owners, c.plan, c.activation, 301);
+    write(&mut owners, &clock, &cache, 3, 5);
+    assert_eq!(value(&mut owners, &clock, &cache), 15);
+    verify_historical(&env, &mut c.nodes, original_command, original_receipt);
+    let b_record = OfflineMetadata::capture(&env, &mut b.nodes, 9);
+    let c_record = OfflineMetadata::capture(&env, &mut c.nodes, 11);
+    let parent_record = OfflineMetadata::capture(&env, &mut parent, 100);
+    recover_owner(&env, &mut owners, &cache, owner_status);
+    for record in [a_record, b_record, c_record, parent_record] {
+        record.verify(&env);
     }
     creation::abandon(owners, 20);
     std::fs::remove_dir_all(root).unwrap();

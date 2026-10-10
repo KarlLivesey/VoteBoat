@@ -481,6 +481,29 @@ mod native {
             Err(WireError::TooLarge)
         );
     }
+    fn verify_command_byte_limit(c: &NativeWireCodec, input: &Message) {
+        let short_command = NativeWireCodec::new(WireLimits {
+            max_command_bytes: 1,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        let mut larger = input.clone();
+        let Rpc::Append { entries, .. } = &mut larger.rpc else {
+            panic!()
+        };
+        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+            panic!()
+        };
+        bytes.extend([1, 2, 3]);
+        assert_eq!(
+            short_command.encode_batch(scope(), &[larger.clone()]),
+            Err(WireError::TooLarge)
+        );
+        assert_eq!(
+            short_command.decode_batch(scope(), &c.encode_batch(scope(), &[larger]).unwrap()),
+            Err(WireError::TooLarge)
+        );
+    }
     #[test]
     fn frame_command_entry_count_and_decoded_memory_limits_are_symmetric() {
         let c = codec();
@@ -551,27 +574,7 @@ mod native {
             one_entry.decode_batch(scope(), &c.encode_batch(scope(), &[entries]).unwrap()),
             Err(WireError::TooLarge)
         );
-        let short_command = NativeWireCodec::new(WireLimits {
-            max_command_bytes: 1,
-            ..WireLimits::default()
-        })
-        .unwrap();
-        let mut larger = input.clone();
-        let Rpc::Append { entries, .. } = &mut larger.rpc else {
-            panic!()
-        };
-        let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
-            panic!()
-        };
-        bytes.extend([1, 2, 3]);
-        assert_eq!(
-            short_command.encode_batch(scope(), &[larger.clone()]),
-            Err(WireError::TooLarge)
-        );
-        assert_eq!(
-            short_command.decode_batch(scope(), &c.encode_batch(scope(), &[larger]).unwrap()),
-            Err(WireError::TooLarge)
-        );
+        verify_command_byte_limit(&c, &input);
         let mut invalid = input.clone();
         invalid.context.sequence = 0;
         assert!(c.encode_batch(scope(), &[invalid]).is_err());
@@ -965,6 +968,82 @@ mod native {
         fixture_roundtrip(membership_codec(), input);
     }
 
+    fn verify_readiness_versions(
+        codec: NativeWireCodec,
+        query: &Message,
+        reply: &Message,
+        reply_request: LearnerReadinessRequest,
+    ) {
+        for input in [
+            query.clone(),
+            reply.clone(),
+            Message {
+                rpc: Rpc::LearnerReadinessReply {
+                    request: Box::new(reply_request),
+                    ready: false,
+                },
+                ..reply.clone()
+            },
+        ] {
+            fixture_roundtrip(codec, input.clone());
+            fixture_roundtrip(
+                NativeWireCodec::with_learner_repair(WireLimits::default()).unwrap(),
+                input.clone(),
+            );
+            let frame = codec
+                .encode_batch(scope(), std::slice::from_ref(&input))
+                .unwrap();
+            for old in [
+                super::native::codec(),
+                membership_codec(),
+                NativeWireCodec::with_authority(WireLimits::default()).unwrap(),
+            ] {
+                assert!(old
+                    .encode_batch(scope(), std::slice::from_ref(&input))
+                    .is_err());
+                assert!(old.decode_batch(scope(), &frame).is_err());
+                assert!(old
+                    .decode_batch(
+                        scope(),
+                        &change(&frame, 8, &old.format_version().to_le_bytes())
+                    )
+                    .is_err());
+            }
+            for cut in 0..frame.len() {
+                assert!(codec.decode_batch(scope(), &frame[..cut]).is_err());
+            }
+        }
+    }
+    fn verify_readiness_memory(codec: NativeWireCodec, reply: &Message) {
+        let frame = codec
+            .encode_batch(scope(), std::slice::from_ref(reply))
+            .unwrap();
+        let retained =
+            std::mem::size_of::<Message>() + std::mem::size_of::<LearnerReadinessRequest>();
+        assert_eq!(
+            voteboat::outbound::message_cost(reply, retained).unwrap().1,
+            retained
+        );
+        assert!(voteboat::outbound::message_cost(reply, retained - 1).is_err());
+        let exact = NativeWireCodec::with_readiness(WireLimits {
+            max_decoded_bytes: retained,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        fixture_roundtrip(exact, reply.clone());
+        let narrow = NativeWireCodec::with_readiness(WireLimits {
+            max_decoded_bytes: retained - 1,
+            ..WireLimits::default()
+        })
+        .unwrap();
+        assert!(narrow
+            .encode_batch(scope(), std::slice::from_ref(reply))
+            .is_err());
+        assert!(narrow.decode_batch(scope(), &frame).is_err());
+        assert!(codec
+            .decode_batch(scope(), &change(&frame, frame.len() - 5, &[2]))
+            .is_err());
+    }
     #[test]
     fn readiness_format_checks_envelope_capabilities_and_explicit_version() {
         let codec = NativeWireCodec::with_readiness(WireLimits::default()).unwrap();
@@ -1014,75 +1093,8 @@ mod native {
             },
             ..query.clone()
         };
-        for input in [
-            query.clone(),
-            reply.clone(),
-            Message {
-                rpc: Rpc::LearnerReadinessReply {
-                    request: Box::new(reply_request),
-                    ready: false,
-                },
-                ..reply.clone()
-            },
-        ] {
-            fixture_roundtrip(codec, input.clone());
-            fixture_roundtrip(
-                NativeWireCodec::with_learner_repair(WireLimits::default()).unwrap(),
-                input.clone(),
-            );
-            let frame = codec
-                .encode_batch(scope(), std::slice::from_ref(&input))
-                .unwrap();
-            for old in [
-                super::native::codec(),
-                membership_codec(),
-                NativeWireCodec::with_authority(WireLimits::default()).unwrap(),
-            ] {
-                assert!(old
-                    .encode_batch(scope(), std::slice::from_ref(&input))
-                    .is_err());
-                assert!(old.decode_batch(scope(), &frame).is_err());
-                assert!(old
-                    .decode_batch(
-                        scope(),
-                        &change(&frame, 8, &old.format_version().to_le_bytes())
-                    )
-                    .is_err());
-            }
-            for cut in 0..frame.len() {
-                assert!(codec.decode_batch(scope(), &frame[..cut]).is_err());
-            }
-        }
-        let frame = codec
-            .encode_batch(scope(), std::slice::from_ref(&reply))
-            .unwrap();
-        let retained =
-            std::mem::size_of::<Message>() + std::mem::size_of::<LearnerReadinessRequest>();
-        assert_eq!(
-            voteboat::outbound::message_cost(&reply, retained)
-                .unwrap()
-                .1,
-            retained
-        );
-        assert!(voteboat::outbound::message_cost(&reply, retained - 1).is_err());
-        let exact = NativeWireCodec::with_readiness(WireLimits {
-            max_decoded_bytes: retained,
-            ..WireLimits::default()
-        })
-        .unwrap();
-        fixture_roundtrip(exact, reply.clone());
-        let narrow = NativeWireCodec::with_readiness(WireLimits {
-            max_decoded_bytes: retained - 1,
-            ..WireLimits::default()
-        })
-        .unwrap();
-        assert!(narrow
-            .encode_batch(scope(), std::slice::from_ref(&reply))
-            .is_err());
-        assert!(narrow.decode_batch(scope(), &frame).is_err());
-        assert!(codec
-            .decode_batch(scope(), &change(&frame, frame.len() - 5, &[2]))
-            .is_err());
+        verify_readiness_versions(codec, &query, &reply, reply_request);
+        verify_readiness_memory(codec, &reply);
         for bad in [
             LearnerReadinessRequest {
                 index: 0,

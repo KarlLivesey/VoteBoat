@@ -14074,3 +14074,117 @@ The user's follow-up requires a pre-push hook once zero is reached. No hook has
 been activated while this backlog remains. The planned hook will fail a normal
 push on formatting or strict all-target/all-feature Clippy failure, retaining
 background CI checks as well. Continue the existing lint cleanup mini item.
+
+### Native parent independence cleanup — schema plan
+
+Separate directory initialization and discovery validation from the independent
+child lifecycle. A private discovered-route fixture owns the bounded cache and
+closed discovery source; a private child scenario holds its group, voters,
+manifest, route and counter input. Preserve read tickets, wrong-authority
+ownership return, expiry and generation checks. Each child still bootstraps,
+serves and deduplicates with the parent offline, optionally checkpoints, rejects
+changed recovery bindings, then reopens and verifies its original result.
+Keep explicit polling during shutdown and the final unchanged-parent-log check.
+Acceptance: both TCP/QUIC histories (WAL and checkpoint), unchanged assertion
+coverage, formatting and complete strict lint inventory. This advances mini
+item1; it adds no production interface or behavior.
+
+### Native publication recovery cleanup — schema plan
+
+Use a private environment value for root, clock, protocol and checkpoint mode.
+Keep cluster ownership explicit at phase boundaries: bootstrap metadata/targets,
+freeze and import, shut the source down, publish/reopen metadata, then either
+reopen the inactive publication or activate/recover the left target. Separate
+activation and old-source refusal assertions without changing operation bytes,
+quorum evidence, checkpoint predicates or background polling during shutdown.
+Acceptance is the eight publication/activation TCP/QUIC WAL/checkpoint histories,
+retained assertion coverage, formatting and the complete strict lint inventory.
+This remains the current lint cleanup mini item, not a protocol change.
+
+### Retained/imported parent move cleanup — schema plan
+
+Keep the existing Moves fixture. Name the guard, publication/completion, imported
+parent refresh, offline-owner service and metadata recovery phases. Retain the
+write between guard preparation and commit. Capture original metadata facts,
+files and logs before abandoning its roles; verify those exact snapshots after
+independent owner writes. Carry the original adoption bytes/status explicitly
+through restart and retries. No changes to protocol, expectations or topology.
+Acceptance: all eight retained/imported parent TCP/QUIC WAL/checkpoint cases,
+assertion inventory, formatting and full strict lint scan. Advances mini item1.
+
+### Repeated metadata move cleanup — schema plan
+
+Preserve the A-to-B-to-C transfer sequence, each lost-observation/reopen phase,
+foreign parent locator refresh and owner adoption. Extract each hop's import
+and publication/activation boundaries into typed private results. Snapshot file
+and log evidence before metadata goes offline; owner writes and retries must
+remain independent, then compare the same metadata evidence after owner reopen.
+Keep original command replay and historical-source assertions. Acceptance:
+four TCP/QUIC WAL/checkpoint histories, unchanged assertion inventory, formatting
+and complete strict lint. Continues mini item1 without production changes.
+
+### Runtime history cleanup — schema plan
+
+Separate the hundred-group timer/election setup from overload and independent
+commit checks. Separate the automatic-leader partition phase from the exact
+restart and delayed-message replay phase. Extract the enrolled learner's durable
+configuration fixture, retaining the same log and binding. Keep virtual times,
+provider parameterization, bounded batches and every assertion unchanged.
+Acceptance: full runtime integration target, assertion inventory, formatting and
+complete strict scans. This is test structure for the existing runtime milestone.
+
+### Snapshot and scoped-source history cleanup — schema plan
+
+Separate immutable-export recovery from live scoped-source writes, initial WAL
+fixture construction from checkpoint fault recovery, each snapshot-install fault
+schedule from fault enumeration, and buffered append capture from catch-up.
+Preserve every crash point, original retry, retained snapshot and prefix check.
+Helpers take the same stores/images or return the captured original messages;
+no fault is skipped and no durability ordering changes. Acceptance: scoped-source
+and snapshot integration suites, assertion inventories, formatting and strict
+full scans. Continues the lint cleanup mini item.
+
+### Wire, QUIC and finite-model cleanup — schema plan
+
+Separate wire frame/entry limits from command limits and readiness round-trips
+from retained-memory checks. Keep all malformed frames and legacy versions.
+Move the QUIC cluster fixture and connection setup out of the test body while
+preserving exact send completion, socket identity and polling times. Extract
+multi-source image construction and the finite ballot model's pending-I/O
+transitions without altering collision cases or model state-space transitions.
+Acceptance: wire, QUIC, transfer-target and ballot-model integration suites plus
+full strict lint and unchanged assertion inventories. Advances mini item1.
+
+## Native recovery and remaining test phases — implemented evidence
+
+Separated parent-independent discovery/child restart, transfer publication and
+activation, retained/imported parent movement, and repeated metadata movement.
+Private fixtures keep original operation IDs, read tickets, quorum observations,
+store ownership, background polling and cleanup order. Also separated runtime
+virtual-time setup/failover, snapshot crash/catch-up schedules, scoped-export
+recovery, wire resource checks, native QUIC setup and finite-model transitions.
+No production code, lint thresholds or allowances changed.
+
+The completed strict all-target/all-feature scan now reports164 distinct
+remaining diagnostics (17 routed), down from185 at the start of this batch.
+The completed core-only scan reports86, down from94. All remaining diagnostics
+are outside the changed files/functions. Both full lint commands still fail;
+the repository is not lint-clean. The pre-push hook is still pending zero.
+
+Local validation passed100 affected test cases: parent-independent service2;
+publication4; activation4; repeated metadata movement4; runtime25; scoped
+source5; snapshots21; finite ballot model2; QUIC10; target import9; wire14.
+The final snapshot retry helper change also passed its affected test again.
+Formatting, whitespace and the88-contract inventory check pass. Assertion-site
+counts are preserved for each refactored history (parent27, publication21,
+retained parent file38, metadata26, runtime186, scoped source67, snapshots159,
+ballot model5, QUIC66, target import83, wire104).
+
+The previous nested-merge retirement run completed with all4 cases passing.
+The current8-case retained/imported parent-move run remains active: both QUIC
+imported-parent cases passed, and the QUIC retained-parent checkpoint case is
+running. The older broad routed run remains active and predates these final
+refactors; it is not evidence for every current change. Continue mini item1
+with the17 remaining routed diagnostics and the other integration-test targets.
+Do not activate the requested hook or claim zero before both strict profiles
+and formatting pass on the final tree.

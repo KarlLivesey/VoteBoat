@@ -49,6 +49,35 @@ fn read(s: &Scoped, key: u8) -> ScopedSourceRead<i64> {
     )
     .unwrap()
 }
+fn verify_export_recovery(s: &Scoped, image: ScopeImage, remaining: usize) {
+    let bytes = s.checkpoint(100000).unwrap();
+    let mut recovered = selected(65536);
+    recovered.restore_checkpoint(1, 9, &bytes).unwrap();
+    assert_eq!(recovered.checkpoint(100000).unwrap(), bytes);
+    assert_eq!(recovered.remaining_export_bytes(), remaining);
+    assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
+    recovered
+        .apply_batch(&[entry(10, 5, data(200, 3))])
+        .unwrap();
+    assert_eq!(
+        read(&recovered, 200),
+        ScopedSourceRead::Data(RoutedRead::Served(16))
+    );
+    assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
+    recovered
+        .apply_batch(&[entry(11, 300, encode_fence(grant().input().epoch))])
+        .unwrap();
+    assert_eq!(
+        read(&recovered, 200),
+        ScopedSourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
+    );
+    assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
+    let whole = recovered.checkpoint(100000).unwrap();
+    let mut retired = selected(65536);
+    retired.restore_checkpoint(1, 11, &whole).unwrap();
+    assert_eq!(retired.checkpoint(100000).unwrap(), whole);
+    assert_eq!(retired.export(op(200), 65536).unwrap(), image);
+}
 #[test]
 fn immutable_export_stays_at_original_f_while_retained_data_and_retries_advance() {
     let mut s = ready_scoped(65536);
@@ -110,33 +139,7 @@ fn immutable_export_stays_at_original_f_while_retained_data_and_retries_advance(
     assert!(retry.duplicate);
     assert_eq!(imported.value(&[1]), Ok(7));
     assert_eq!(imported.outbox().count(), 1);
-    let bytes = s.checkpoint(100000).unwrap();
-    let mut recovered = selected(65536);
-    recovered.restore_checkpoint(1, 9, &bytes).unwrap();
-    assert_eq!(recovered.checkpoint(100000).unwrap(), bytes);
-    assert_eq!(recovered.remaining_export_bytes(), remaining);
-    assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
-    recovered
-        .apply_batch(&[entry(10, 5, data(200, 3))])
-        .unwrap();
-    assert_eq!(
-        read(&recovered, 200),
-        ScopedSourceRead::Data(RoutedRead::Served(16))
-    );
-    assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
-    recovered
-        .apply_batch(&[entry(11, 300, encode_fence(grant().input().epoch))])
-        .unwrap();
-    assert_eq!(
-        read(&recovered, 200),
-        ScopedSourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
-    );
-    assert_eq!(recovered.export(op(200), 65536).unwrap(), image);
-    let whole = recovered.checkpoint(100000).unwrap();
-    let mut retired = selected(65536);
-    retired.restore_checkpoint(1, 11, &whole).unwrap();
-    assert_eq!(retired.checkpoint(100000).unwrap(), whole);
-    assert_eq!(retired.export(op(200), 65536).unwrap(), image);
+    verify_export_recovery(&s, image, remaining);
 }
 #[test]
 fn bounded_export_reservations_and_pending_conflicts_reject_without_fencing() {

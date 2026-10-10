@@ -406,9 +406,75 @@ fn expected_source_commitment_refuses_altered_image_content_or_metadata() {
     assert_eq!(expected.scope, original.sources()[0].image.scope());
 }
 
+fn multi_source_images(
+    before: &ResponsibilityManifest,
+    intent: &voteboat::transfer::TransferIntent,
+    collision: bool,
+) -> Vec<SourceImport> {
+    use voteboat::transfer_source::*;
+    let mut images = Vec::new();
+    for (g, scope, key, id, delta) in [
+        (21, range(0, 128), 1u8, 1u128, 7i64),
+        (
+            22,
+            range(128, 256),
+            200u8,
+            if collision { 1 } else { 2 },
+            11i64,
+        ),
+    ] {
+        let routed = RoutedApplication::new(
+            group(g),
+            before.clone(),
+            BucketCounter::new(scope, source::Policy, source::bucket_limits()).unwrap(),
+            source::Policy,
+            RoutedLimits {
+                operations: 32,
+                semantic_bytes: 8192,
+                payload_bytes: 1024,
+                inner_checkpoint_bytes: source::bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.error));
+        let mut source = TransferSource::new(routed, 65536).unwrap_or_else(|e| panic!("{:?}", e.0));
+        let mut hint = source::hint(key);
+        hint.group = group(g);
+        hint.scope = scope;
+        let bytes = encode_routed(
+            hint,
+            &[key],
+            &encode_add(&[key], delta, b"merge-effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        source
+            .apply_batch(&[
+                entry(1, 100, source.bootstrap_command(65536).unwrap()),
+                entry(2, id, bytes),
+                entry(
+                    3,
+                    200,
+                    source::Source::freeze_command(intent, 32776).unwrap(),
+                ),
+            ])
+            .unwrap();
+        let image = source.export_target(group(23), 65536).unwrap();
+        let SourceRead::Freeze(Some(status)) = source.read_at(3, SourceQuery::Freeze).unwrap()
+        else {
+            panic!("freeze status")
+        };
+        images.push(SourceImport {
+            fence: status.fence,
+            configuration: ConfigurationId::new(1).unwrap(),
+            image,
+            digest: status.exports[0].digest,
+        });
+    }
+    images
+}
 #[test]
 fn multi_source_import_requires_ordered_complete_coverage_and_refuses_id_collisions() {
-    use voteboat::{transfer::*, transfer_source::*};
+    use voteboat::transfer::*;
     let mut before = source::grant().into_input();
     before.execution = ExecutionMode::Partitioned(vec![
         RouteEntry {
@@ -428,65 +494,7 @@ fn multi_source_import_requires_ordered_complete_coverage_and_refuses_id_collisi
     let intent =
         TransferIntent::new(before.clone(), ResponsibilityManifest::new(after).unwrap()).unwrap();
     for collision in [false, true] {
-        let mut images = Vec::new();
-        for (g, scope, key, id, delta) in [
-            (21, range(0, 128), 1u8, 1u128, 7i64),
-            (
-                22,
-                range(128, 256),
-                200u8,
-                if collision { 1 } else { 2 },
-                11i64,
-            ),
-        ] {
-            let routed = RoutedApplication::new(
-                group(g),
-                before.clone(),
-                BucketCounter::new(scope, source::Policy, source::bucket_limits()).unwrap(),
-                source::Policy,
-                RoutedLimits {
-                    operations: 32,
-                    semantic_bytes: 8192,
-                    payload_bytes: 1024,
-                    inner_checkpoint_bytes: source::bucket_limits().checkpoint_bound().unwrap(),
-                },
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.error));
-            let mut source =
-                TransferSource::new(routed, 65536).unwrap_or_else(|e| panic!("{:?}", e.0));
-            let mut hint = source::hint(key);
-            hint.group = group(g);
-            hint.scope = scope;
-            let bytes = encode_routed(
-                hint,
-                &[key],
-                &encode_add(&[key], delta, b"merge-effect", 1024).unwrap(),
-                4096,
-            )
-            .unwrap();
-            source
-                .apply_batch(&[
-                    entry(1, 100, source.bootstrap_command(65536).unwrap()),
-                    entry(2, id, bytes),
-                    entry(
-                        3,
-                        200,
-                        source::Source::freeze_command(&intent, 32776).unwrap(),
-                    ),
-                ])
-                .unwrap();
-            let image = source.export_target(group(23), 65536).unwrap();
-            let SourceRead::Freeze(Some(status)) = source.read_at(3, SourceQuery::Freeze).unwrap()
-            else {
-                panic!("freeze status")
-            };
-            images.push(SourceImport {
-                fence: status.fence,
-                configuration: ConfigurationId::new(1).unwrap(),
-                image,
-                digest: status.exports[0].digest,
-            });
-        }
+        let images = multi_source_images(&before, &intent, collision);
         assert!(
             TargetImport::new(op(200), intent.clone(), group(23), images[..1].to_vec()).is_err()
         );
