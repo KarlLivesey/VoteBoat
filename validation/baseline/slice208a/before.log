@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.38s
+     Running tests/connect.rs (target/debug/deps/connect-15e3e52abff43830)
+
+running 3 tests
+test fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface ... ok
+
+thread 'fairness::exhausted_budget_does_not_skip_later_anonymous_slots' (2756989) panicked at tests/connect/fairness.rs:85:9:
+stalled anonymous stream starved incoming peer: ConnectUsage { requests: 1, dialing: 0, anonymous: 2, handshaking: 0 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test fairness::exhausted_budget_does_not_skip_later_anonymous_slots ... FAILED
+
+failures:
+
+failures:
+    fairness::exhausted_budget_does_not_skip_later_anonymous_slots
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 15 filtered out; finished in 3.00s
+
+error: test failed, to rerun pass `--test connect`

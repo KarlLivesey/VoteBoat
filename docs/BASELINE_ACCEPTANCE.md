@@ -1,5 +1,12 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice208a fixes selected TCP connection-phase starvation under one-call
+budgets and preserves scheduling turns through zero-I/O polls. Four fixed-time
+regressions exercise live stalled anonymous streams and exact authenticated
+completion; final126 all-feature and19 default connector/runtime-related tests
+pass, with formatting and all strict lint profiles clean. Shared receive/control
+fairness, broader admission pressure and platform acceptance remain open.
+
 Slice207b3 extends the existing durable peer credential command path to transfer
 metadata/source/target and directory authority executables. Selected TCP/QUIC
 histories preserve split data/retries and committed manifests across key changes,

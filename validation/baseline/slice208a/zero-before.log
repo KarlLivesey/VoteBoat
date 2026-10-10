@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.32s
+     Running tests/connect.rs (target/debug/deps/connect-15e3e52abff43830)
+
+running 1 test
+
+thread 'fairness::zero_socket_budget_polls_do_not_consume_a_fairness_turn' (2794020) panicked at tests/connect/fairness.rs:163:9:
+stalled anonymous stream starved outbound peer: ConnectUsage { requests: 1, dialing: 0, anonymous: 1, handshaking: 0 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test fairness::zero_socket_budget_polls_do_not_consume_a_fairness_turn ... FAILED
+
+failures:
+
+failures:
+    fairness::zero_socket_budget_polls_do_not_consume_a_fairness_turn
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 18 filtered out; finished in 3.00s
+
+error: test failed, to rerun pass `--test connect`

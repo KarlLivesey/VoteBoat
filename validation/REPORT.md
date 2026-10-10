@@ -1,5 +1,12 @@
 # Validation report — slice 35
 
+TCP connection fairness: [slice208a](baseline/slice208a/README.md). Three
+stalled-stream regressions fail before the phase/cursor fix; a fourth exposes
+zero-budget turn consumption and passes after the positive-credit guard.
+Final126 all-feature connector/runtime-related tests and19 default tests pass;
+formatting and all four strict Clippy profiles pass. Shared receive/control
+fairness and full platform/fault acceptance remain open.
+
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
 Remaining executable peer rollout: [slice207b3](baseline/slice207b3/README.md).
 The transfer and directory services now use the same bounded worker and native

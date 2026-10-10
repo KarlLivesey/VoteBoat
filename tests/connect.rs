@@ -12,6 +12,9 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[cfg(feature = "tls")]
+#[path = "connect/fairness.rs"]
+mod fairness;
 mod support;
 use voteboat::{connect::*, identity::*, runtime::MonoTime, secure::*, transport::ConnectTicket};
 fn local(id: u64) -> LocalIdentity {
@@ -282,7 +285,7 @@ mod native {
         dial::*,
         native::{connect::*, dial::NativeTcpDialer, tls::NativeTlsSession, worker::ThreadWake},
     };
-    fn make(id: u64, peers: &[u64], limit: usize) -> NativePeerConnector {
+    pub(super) fn make(id: u64, peers: &[u64], limit: usize) -> NativePeerConnector {
         versioned_make(id, peers, limit, 1)
     }
     fn versioned_make(id: u64, peers: &[u64], limit: usize, version: u16) -> NativePeerConnector {
@@ -323,7 +326,7 @@ mod native {
         )
         .unwrap_or_else(|r| panic!("construct: {:?}", r.reason))
     }
-    fn req(
+    pub(super) fn req(
         t: ConnectTicket,
         direction: ConnectDirection<SocketAddr>,
     ) -> ConnectRequest<SocketAddr> {
@@ -333,7 +336,7 @@ mod native {
             deadline: MonoTime(100),
         }
     }
-    fn step(
+    pub(super) fn step(
         c: &mut NativePeerConnector,
         now: u64,
     ) -> Vec<ConnectCompletion<NativeTlsSession<TcpStream>>> {
@@ -352,7 +355,7 @@ mod native {
         )
         .unwrap()
     }
-    fn finish(mut c: NativePeerConnector, now: u64) {
+    pub(super) fn finish(mut c: NativePeerConnector, now: u64) {
         c.close();
         let deadline = Instant::now() + Duration::from_secs(5);
         while !c.is_drained() {

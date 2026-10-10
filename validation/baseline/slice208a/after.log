@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.71s
+     Running tests/connect.rs (target/debug/deps/connect-15e3e52abff43830)
+
+running 3 tests
+test fairness::exhausted_budget_does_not_skip_later_anonymous_slots ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+

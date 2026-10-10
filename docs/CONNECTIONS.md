@@ -64,9 +64,13 @@ service availability. No unbounded retry or accept loop is hidden in the provide
 `poll(now, budget)` rejects invalid budgets or reversed time before I/O. Attempt
 and anonymous expiry scans have fixed construction-time capacities. I/O visits
 rotate over peers and anonymous slots. Accept/preface read/write calls share one
-socket-call budget; TLS has a per-visited-handshake call/byte budget. The maximum
-TLS work per poll is visits times that session budget. Dial receipt ingestion and
-terminal output each obey the completion budget. Zero budgets cannot transfer
+socket-call budget; TLS has a per-visited-handshake call/byte budget.
+First access to that shared socket budget rotates between anonymous prefaces,
+authorized attempts and accepts. Exhausted credit preserves unserved socket
+cursors; polls without socket credit do not consume a scheduling turn. Thus an
+incomplete anonymous stream cannot monopolize every positive-budget poll.
+The maximum TLS work per poll is visits times that session budget. Dial receipt
+ingestion and terminal output each obey the completion budget. Zero budgets cannot transfer
 completions or perform the corresponding I/O. Socket option setup has constant
 work per accepted socket. Scheduling readiness/deadline wakeups remains the
 host's responsibility; dial completions use the supplied dialer's wake handle.
@@ -135,11 +139,17 @@ resource return, and mis-scoped host receipts. The three-node/100-group native
 histories now use a long-lived connector per node for initial mesh and fresh
 peer reconnection, then continue actual WAL/snapshot/replication/read/recovery
 work. Shutdown closes/drains connectors and joins each dial worker explicitly.
+`tests/connect/fairness.rs` holds anonymous TCP streams open at fixed virtual
+time while authorized incoming/outgoing peers complete with one socket call per
+poll. It covers saturated anonymous slots, visits equal to capacity and
+interleaved zero-I/O polls. Completion retains the original authenticated ticket;
+returned sessions remain authenticated after connector shutdown.
 
 Bounded decoded ingress is now supplied by [IngressRouter](INGRESS.md), with
 connector/session/transport/ingress coordination in [PeerDriver](PEER_DRIVER.md).
 Client/read admission and local application/WAL driving use the service owners
-and ReplicaDriver. The full native node facade, physical WAL reclamation,
-membership/policy changes, recursive responsibilities and safe
-split/merge remain unfinished. These finite Linux tests are not a full kernel
+and ReplicaDriver. Node assembly, physical WAL reclamation, membership changes,
+recursive responsibilities and selected native split/merge paths now exist.
+Shared receive/control fairness, broader overload and recovery combinations,
+and platform acceptance remain open. These finite Linux tests are not a full kernel
 fault matrix, macOS execution, power-cut evidence or a liveness proof.

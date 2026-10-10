@@ -70,6 +70,21 @@ struct Anonymous {
     read: usize,
     deadline: MonoTime,
 }
+#[derive(Clone, Copy)]
+enum IoPhase {
+    Prefaces,
+    Attempts,
+    Accept,
+}
+impl IoPhase {
+    fn next(self) -> Self {
+        match self {
+            Self::Prefaces => Self::Attempts,
+            Self::Attempts => Self::Accept,
+            Self::Accept => Self::Prefaces,
+        }
+    }
+}
 pub struct NativePeerConnector<
     D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream> = NativeTcpDialer,
 > {
@@ -84,6 +99,7 @@ pub struct NativePeerConnector<
     cursor: Option<NodeId>,
     terminal_cursor: Option<NodeId>,
     anonymous_cursor: usize,
+    io_phase: IoPhase,
     now: MonoTime,
     closed: bool,
 }
@@ -166,6 +182,7 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
             cursor: None,
             terminal_cursor: None,
             anonymous_cursor: 0,
+            io_phase: IoPhase::Prefaces,
             now,
             closed: false,
         })
@@ -332,15 +349,14 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
     }
     fn read_prefaces(&mut self, visits: usize, calls: &mut usize) {
         for _ in 0..visits.min(self.anonymous.len()) {
+            if *calls == 0 {
+                break;
+            }
             let index = self.anonymous_cursor;
             self.anonymous_cursor = (index + 1) % self.anonymous.len();
             let Some(mut incoming) = self.anonymous[index].take() else {
                 continue;
             };
-            if *calls == 0 {
-                self.anonymous[index] = Some(incoming);
-                continue;
-            }
             *calls -= 1;
             match incoming.stream.read(&mut incoming.bytes[incoming.read..]) {
                 Ok(0) => continue,
@@ -391,6 +407,9 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
     fn drive(&mut self, visits: usize, calls: &mut usize, budget: SessionPollBudget) {
         for _ in 0..visits.min(self.attempts.len()) {
             let peer = next_key(&self.attempts, self.cursor).unwrap();
+            if *calls == 0 && matches!(self.attempts[&peer].stage, Stage::Preface { .. }) {
+                break;
+            }
             self.cursor = Some(peer);
             let attempt = self.attempts.get_mut(&peer).unwrap();
             match &mut attempt.stage {
@@ -469,6 +488,24 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> NativePeerConnec
                 _ => (),
             }
         }
+    }
+    fn poll_io(&mut self, budget: ConnectPollBudget) -> Result<(), ConnectError> {
+        let mut phase = self.io_phase;
+        if budget.socket_calls != 0 {
+            self.io_phase = phase.next();
+        }
+        let mut calls = budget.socket_calls;
+        // Rotate first access to shared socket credits. A blocked stream must
+        // not consume every poll before another phase gets a chance to run.
+        for _ in 0..3 {
+            match phase {
+                IoPhase::Prefaces => self.read_prefaces(budget.visits, &mut calls),
+                IoPhase::Attempts => self.drive(budget.visits, &mut calls, budget.session),
+                IoPhase::Accept => self.accept(&mut calls)?,
+            }
+            phase = phase.next();
+        }
+        Ok(())
     }
 }
 impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
@@ -600,12 +637,7 @@ impl<D: PeerDialer<Endpoint = SocketAddr, Channel = TcpStream>> PeerConnector
             }
         }
         self.ingest_dials(budget.completions)?;
-        let mut calls = budget.socket_calls;
-        // Read existing sockets before accept, so a stream of incoming sockets
-        // cannot spend every call on accept and starve already reserved sockets.
-        self.read_prefaces(budget.visits, &mut calls);
-        self.drive(budget.visits, &mut calls, budget.session);
-        self.accept(&mut calls)?;
+        self.poll_io(budget)?;
         let mut result = Vec::new();
         // Terminal scans also have fixed request capacity and a rotating cursor.
         for _ in 0..self.attempts.len() {

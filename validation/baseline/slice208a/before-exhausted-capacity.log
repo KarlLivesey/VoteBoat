@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running tests/connect.rs (target/debug/deps/connect-15e3e52abff43830)
+
+running 3 tests
+
+thread 'fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface' (2760528) panicked at tests/connect/fairness.rs:134:9:
+stalled anonymous stream starved outbound peer: ConnectUsage { requests: 1, dialing: 0, anonymous: 1, handshaking: 0 }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call' (2760529) panicked at tests/connect/fairness.rs:85:9:
+stalled anonymous stream starved incoming peer: ConnectUsage { requests: 1, dialing: 0, anonymous: 1, handshaking: 0 }
+test fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call ... FAILED
+test fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface ... FAILED
+
+thread 'fairness::exhausted_budget_does_not_skip_later_anonymous_slots' (2760527) panicked at tests/connect/fairness.rs:85:9:
+stalled anonymous stream starved incoming peer: ConnectUsage { requests: 1, dialing: 0, anonymous: 2, handshaking: 0 }
+test fairness::exhausted_budget_does_not_skip_later_anonymous_slots ... FAILED
+
+failures:
+
+failures:
+    fairness::exhausted_budget_does_not_skip_later_anonymous_slots
+    fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface
+    fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call
+
+test result: FAILED. 0 passed; 3 failed; 0 ignored; 0 measured; 15 filtered out; finished in 3.00s
+
+error: test failed, to rerun pass `--test connect`

@@ -114,11 +114,14 @@ existing credential journal and prepared peer bundle; acceptance requires
 original rollout-ID recovery, stale-file refusal, authenticated commands and
 replicated data/retry continuity through rotation and restart. This advances
 the secure networked service milestone;207a alone is not operational rollout.
-Current: address receive/connection admission and fairness from
-the remaining resource ledger. Its purpose is progress under competing peer and
-client load; dependencies are existing hard admission limits and control reserve.
-Completion requires bounded acceptance/rejection and demonstrated control/recovery
-progress under the chosen overload schedule, advancing P2/P7 resource isolation.
+Completed208a fixes the selected TCP connection-phase starvation cases under
+one-call budgets, including interleaved zero-I/O polls. Current208b audits shared
+receive and control/recovery progress under competing peer/group traffic using
+the existing hard limits. Its purpose is useful progress under overload;
+dependencies are the connector fix and existing ingress/frame leases.
+Completion requires a bounded overload history with independent useful progress,
+advancing P2/P7 resource isolation. Do not add another scheduler without a
+reproduced failure in the existing ownership path.
 Following that, integrate persistent discovery refresh against the existing
 authenticated endpoint/manifest source and bounded cache. Its purpose is usable
 reconnect after discovery changes; completion requires refreshed hints, stale
@@ -129,6 +132,62 @@ contract ledger. Reuse host/native implementations and their injected failures;
 completion requires executable shared assertions for ownership, rejection and
 shutdown, not just metadata entries. This advances composable Rust embedding
 under P0/P2 without making a particular external backend a prerequisite.
+
+### Slice208a implemented — fair bounded TCP connection work
+
+The connector now rotates first access to the existing shared socket budget
+across anonymous reads, authorized attempts and accepts. It preserves unserved
+socket cursors when credit is exhausted and preserves the phase on zero-I/O
+polls. Capacities, public API, timeout semantics and separate TLS budgets remain
+unchanged. No new queue or durable state is introduced.
+
+Three fixed-time real TCP regressions fail against the old scheduling order:
+stalled anonymous streams starve new accepts, later saturated anonymous slots
+and authorized outbound prefaces. All three pass after the change. A fourth
+regression then exposed rotation on zero-budget polls; it fails before the
+positive-credit guard and passes afterward. Each requires exact authenticated
+completion while the stalled stream remains present; transferred sessions stay
+authenticated after connector drain/join. These tests establish the selected
+schedules, not general receive fairness or a latency guarantee.
+
+Final all-feature connector/QUIC/peer-rotation/runtime/startup/transport tests
+pass126 cases. Default-feature connector tests pass19. Formatting and all four
+strict Clippy profiles pass with zero diagnostics. Inventory and13 obligation
+metadata checks pass; the106-entry inventory still has101 entries unreviewed
+by the five-contract operation ledger. Raw before/after failures and final
+results are retained in validation/baseline/slice208a. This advances P2/P7;
+shared receive/control fairness, persistent discovery and full platform/fault
+acceptance remain open. The full P0–P7 goal stays active.
+
+### Slice208a schema plan — fair connection phases under bounded socket work
+
+The existing public ConnectPollBudget separately bounds combined accept/preface
+socket calls, visits per anonymous/attempt class, and per-visit TLS work. Keep
+those contracts, capacities and timeout semantics. Native TCP currently always
+services anonymous prefaces first, then attempts, then accept. With a positive
+one-call budget an incomplete anonymous socket can consume every poll. Scanning
+past unserved slots after the budget is exhausted can also reset the cursor to
+the same first slot when visits equals capacity.
+
+Before changing scheduling, exercise an actual stalled anonymous stream with
+both an authorized incoming peer and an outbound dial under one-call budgets;
+also preload multiple anonymous slots with a larger accept-only poll, then use
+visits equal to capacity and one call. Keep supplied time fixed to exclude expiry
+as the reason progress occurs. Successful completion must carry the original
+ticket and authenticated identity while the stalled stream remains present.
+
+Use an ephemeral bounded phase cursor across anonymous prefaces, accepted
+attempts and accept. Rotate the first serviced phase when a poll supplies socket
+credit; timer/completion-only polls must not consume an I/O turn. Also test
+interleaved zero-I/O polls rather than only a constant nonzero budget. Visit
+each class no more than once, and share the original call budget. Preserve an
+anonymous/attempt cursor when remaining call credit prevents that socket's work;
+do not treat skipped I/O as served. TLS handshakes retain their separate budget.
+No new queue, runtime, callback, durable record or authority is introduced; restart
+resets ephemeral scheduling state. Cancellation, expiry and closed-provider drain
+must retain exact ticket ownership and reclaim all slots. Acceptance is failing
+pre-fix and passing post-fix native regressions, existing connector/TCP/QUIC and
+peer-driver/transport coverage, format and every strict lint profile.
 
 ### Slice207b3 implemented — peer rollout in transfer and directory services
 

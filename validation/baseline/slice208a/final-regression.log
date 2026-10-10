@@ -1,0 +1,164 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.04s
+     Running tests/connect.rs (target/debug/deps/connect-15e3e52abff43830)
+
+running 19 tests
+test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+test native::anonymous_prefaces_are_fixed_bounded_and_expire_without_granting_a_ticket ... ok
+test native::mis_scoped_host_dial_receipt_stops_admission_without_releasing_real_ticket ... ok
+test native::timeout_retains_dial_credits_until_host_provider_actual_terminal_receipt ... ok
+test native::rejected_construction_returns_live_caller_resources_for_cleanup ... ok
+test native::request_scope_budget_time_and_exact_cancellation_are_checked_before_progress ... ok
+test native::invalid_hint_drops_socket_without_consuming_authorized_attempt ... ok
+test native::fragmented_routing_then_stalled_handshake_closes_on_timeout_or_cancel ... ok
+test native::forged_authorized_hint_still_fails_tls_certificate_pin ... ok
+test native::cancellation_of_ready_unpolled_session_suppresses_transfer ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_new_accept_with_one_socket_call ... ok
+test fairness::exhausted_budget_does_not_skip_later_anonymous_slots ... ok
+test native::native_discovery_invalidates_failed_hint_then_dials_refreshed_address_and_authenticates ... ok
+test fairness::incomplete_anonymous_preface_cannot_starve_authorized_outbound_preface ... ok
+test fairness::zero_socket_budget_polls_do_not_consume_a_fairness_turn ... ok
+test native::remote_discovery_drives_real_pinned_target_dial ... ok
+test native::one_listener_establishes_multiple_peers_with_bounded_fair_polls ... ok
+test native::connector_transfers_selected_versions_and_rejects_mismatch_without_ready ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/peer_rotation.rs (target/debug/deps/peer_rotation-e526a3eef2e2826f)
+
+running 7 tests
+test host::wrapping_active_provider_returns_original_owner_without_consuming_its_attempt ... ok
+test host::rotation_retains_old_ticket_until_terminal_and_revokes_late_success ... ok
+test host::rejected_material_preserves_live_sessions_and_drop_revokes_them ... ok
+test tcp_stale_pin_refuses_changed_key_and_corrected_pin_reconnects ... ok
+test quic_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+test tcp_peer_keys_rotate_and_old_attempts_and_sessions_are_revoked ... ok
+test quic_stale_pin_refuses_changed_key_and_corrected_pin_reconnects ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.33s
+
+     Running tests/quic_connect.rs (target/debug/deps/quic_connect-95ac16d5a239c80e)
+
+running 12 tests
+test credential_refresh::native::native_replace_is_monotonic_returns_material_and_close_is_scoped ... ok
+test failed_construction_returns_socket_without_starting_protocol_work ... ok
+test cancellation_and_expiry_keep_exact_terminal_slots_and_reject_stale_or_wrong_requests ... ok
+test discovered::discovered_quic_dial_validates_endpoint_and_cannot_replace_peer_pin ... ok
+test discovered::downstream_hint_provider_selects_actual_authenticated_quic_endpoint ... ok
+test credential_refresh::native::native_transport_returns_exact_accepted_batch_as_failed_after_revocation ... ok
+test discovered::refreshed_quic_hint_selects_new_address_and_retained_peer_lease_bounds_reconnect ... ok
+test remote_discovery::quic_remote_refresh_keeps_unrelated_cached_peer_available ... ok
+test one_socket_per_node_establishes_multiple_peers_and_close_preserves_transferred_sessions ... ok
+test retired_leases_release_socket_routes_for_fresh_generations ... ok
+test credential_refresh::quic_rotation_revokes_old_io_and_reconnect_preserves_identity ... ok
+test shared_quic_connector_preserves_selected_versions_and_rejects_mismatches ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/runtime.rs (target/debug/deps/runtime-7749b7a87d1964a1)
+
+running 28 tests
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test failed_shared_barrier_fences_submitted_groups_without_votes_escaping ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test native_scheduler_deadline_clock_and_entropy_conformance ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test automatic_timer_history_reopens_three_actual_native_files ... ok
+test virtual_time_leader_loss_and_recovery_use_native_timers_and_wals ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test native_timer_replication_progress_survives_multiple_heartbeat_retries ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+test hundred_group_history_uses_actual_shared_files_on_three_nodes ... ok
+test hundred_groups_share_native_wals_and_recover_acknowledged_state ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 32 tests
+test multi::multi_startup_rejects_invalid_inventory_before_creating_files ... ok
+test invalid_startup_is_side_effect_free_and_returns_the_host_application ... ok
+test multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers ... ok
+test explicit_startup_timers_validate_before_files_and_use_host_deadlines ... ok
+test late_constructor_failure_returns_application_and_joins_every_started_worker ... ok
+test multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers ... ok
+test maintenance::leadership_node_control_refuses_old_wire_before_admitting_work ... ok
+test peer_rotation::material_digest_binds_local_tls_and_every_peer_field ... ok
+test host_application_and_non_demo_identities_write_and_recover_through_startup ... ok
+test peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application ... ok
+test peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers ... ok
+test peer_rotation::rejected_rotating_quic_owner_releases_socket_and_workers ... ok
+test native_administration_receipts_commit_joint_and_final_and_reopen_exact_history ... ok
+test quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers ... ok
+test peer_rotation::static_and_member_startup_install_the_recorded_generation ... ok
+test startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines ... ok
+test stopping_one_startup_does_not_stop_another_or_the_shared_host_wake ... ok
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+test quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal ... ok
+test maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp ... ok
+test maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp ... ok
+test maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints ... ok
+test multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group ... ok
+test multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group ... ok
+test multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups ... ok
+test multi::peer_rotation::quic_peer_rotation_checkpoint_and_unobserved_rollout_recover_all_groups ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.47s
+
+     Running tests/transport.rs (target/debug/deps/transport-13ef8df91ec05a1c)
+
+running 28 tests
+test native::construction_and_submission_reject_insecure_incompatible_and_stale_bindings ... ok
+test native::excessive_original_vector_capacity_is_returned_before_encoding ... ok
+test native::close_drains_send_abort_fails_it_and_completed_input_survives_failure ... ok
+test native::exhausted_pool_returns_original_send_and_retries_receive_without_reading ... ok
+test native::malformed_encoding_returns_original_batch_and_pool_credits ... ok
+test native::malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session ... ok
+test native::downstream_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::invalid_header_is_rejected_before_large_frame_allocation ... ok
+test native::owner_factory_refuses_insufficient_full_duplex_quota_without_leasing ... ok
+test native::malformed_or_partial_frame_never_leaks_a_message ... ok
+test native::public_host_queue_and_single_fixture_codec_compose_with_native_driver ... ok
+test native::native_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::receive_growth_failure_releases_partial_frame_and_closes_channel ... ok
+test native::downstream_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::send_failure_and_transport_drop_release_pool_without_destroying_other_view ... ok
+test native::native_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release ... ok
+test native::send_completion_waits_for_channel_flush_and_failure_releases_buffers ... ok
+test native::shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing ... ok
+test native::shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits ... ok
+test native::short_io_preserves_batch_and_queue_credits_until_terminal_consumption ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::unread_batch_stops_next_frame_and_does_not_starve_opposite_direction ... ok
+test native::zero_and_single_call_budgets_preserve_bidirectional_progress ... ok
+test transport_limits_are_available_without_native_dependencies ... ok
+test native::explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing ... ok
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::actual_tcp_tls_driver_transfers_both_directions_under_backpressure ... ok
+
+test result: ok. 28 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
