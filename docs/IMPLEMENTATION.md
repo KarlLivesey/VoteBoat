@@ -90,7 +90,8 @@ the count of remaining milestones.
 
 Completed202a covers the selected old-checkpoint/member recovery cases below.
 Completed199f corrects the recorded cancellation acceptance assumption and adds
-admitted-cancel/source-loss recovery over TCP and QUIC. Current199g addresses
+admitted-cancel/source-loss recovery over TCP and QUIC. Completed199g adds bounded
+automatic read failover. Current199h addresses
 the remaining recorded service command/QUIC failures: it depends on
 the retained exact platform logs and must reproduce the relevant local failure
 or distinguish an unresolved platform-only failure before changing behavior.
@@ -102,6 +103,82 @@ Following201d extends the unreviewed provider obligations; it depends on the
 existing inventory and shared conformance harness, and must connect each selected
 obligation to actual host/native assertions. This advances replaceable Rust
 embedding without treating a metadata count as provider certification.
+
+### Slice199g schema plan — bounded automatic read failover
+
+Completed older run38035784987 at54a73ad passes the Ubuntu operator job and
+fails five macOS counter histories. The distinct-target drain's final read
+reports a reply deadline; assignment retry reports no eligible leader; another
+write has no stdout, a configuration request reports an authenticated read
+failure, and the group-handoff fixture assumes the current leader must still be
+the target of a historical completed operation. Preserve these separate causes.
+The latter fixture assumption and unproven write/platform failures remain for
+199h; do not broaden write retries to make them pass.
+
+The concrete production gap selected here is automatic read routing: a silent
+first replica consumes the full ten-second deadline and prevents a healthy
+replica being tried. Each new read already requests its own quorum barrier.
+Data/API shape: retain existing command/endpoint types and the ten-second total
+deadline; cap each automatic read attempt at two seconds, including handshake.
+Explicit-node requests and mutations keep their existing behavior. Reuse the
+existing read-observation failure classification in the routing module
+instead of copying another policy table.
+
+Transitions: automatic read -> bounded attempt -> complete valid reply, terminal
+protocol/security/application error, or fresh attempt on the next replica for a
+recognized deadline/empty disconnect. A partial reply is a protocol failure,
+not an empty disconnect. Every attempt owns and drops its socket; the service's
+existing disconnect cleanup releases its read ticket. Retrying must not extend
+the total deadline or alter the group/incarnation command. Mutation uncertainty
+remains explicit and never gains automatic replay.
+
+Acceptance: a regression first demonstrates the silent-replica failure; plain
+and grouped reads then reach the next replica, authenticated reads move beyond
+a stalled handshake over TCP and QUIC service profiles, empty disconnects are
+recoverable, malformed/partial replies remain terminal, and all-stalled peers
+cannot extend the original deadline. Retain existing uncertain-write, explicit
+target, authorization and trickled-reply checks. Run relevant exchange/runner
+tests, the complete service target and all four strict lint profiles. This
+advances usable service availability; it is not macOS acceptance or a P7 claim.
+
+### Slice199g implemented — bounded read failover
+
+A new actual-CLI regression fails on the original client: an unresponsive first
+replica consumes the ten-second budget and reports `ERR reply deadline expired`
+without contacting the second replica. Automatic plain/grouped reads now cap
+each connection/authentication/reply attempt at two seconds, within the unchanged
+ten-second overall deadline. The next attempt sends the identical scoped read
+and requires a new server quorum barrier. The existing observation classifier
+is shared with the drain runner through local_client; it permits only documented
+deadlines and empty connection loss. A partial reply now has a distinct terminal
+reason, preserving refusal of malformed replies. Security failures, explicit-node
+requests and uncertain mutations retain their existing stop semantics.
+
+Five new tests cover a silent first replica, exact group/incarnation retention,
+empty versus partial/invalid replies, all-stalled total-budget exhaustion, and
+an unresponsive authentication handshake before real TCP/QUIC services. They
+pass locally. The first revised run exposed a test reservation-lifetime mistake
+and a helper placed in a module shared by unrelated binaries; both are corrected
+without changing lint levels. The failing regression and intermediate logs are
+retained in validation/baseline/slice199g. Final local results are27 binary
+command/runner tests,129 counter-service tests,13 directory-service tests,
+14 transfer-service tests and4 default-feature failover tests, all passing.
+Formatting and all four strict Clippy profiles pass.
+
+The first full operator attempt reaches the fixture's fixed157-block port pool;
+eight histories fail at allocation before starting services. The new tests
+increase per-process fixture allocations beyond that old finite bound. Expand
+to305 candidate blocks, retaining bind-based availability checks and the rule
+that an issued block is never recycled while its sockets may still close.
+The failed run is retained; this changes test capacity, not production limits.
+
+This directly resolves the demonstrated automatic-read availability gap; it does
+not prove the cause of every macOS timeout. Older run38035784987 at54a73ad passes
+Ubuntu operator recovery but fails five macOS counter histories. Its raw failure
+log remains separate from current Linux evidence. Current199h retains the
+historical-handoff/current-leader fixture mismatch and other platform/write
+failures; next202b remains lifecycle/revocation recovery, followed by201d provider
+conformance. Full P0–P7 and the original P7 performance criteria stay active.
 
 ### Slice199f schema plan — interrupted leadership cancellation
 

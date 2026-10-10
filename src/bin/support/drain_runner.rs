@@ -4,7 +4,7 @@
 use super::{
     command_client::Attempt,
     command_endpoints::{self, Endpoint},
-    local_client,
+    local_client::{self, repeat_observation},
     service_access::ClientAccess,
     setup::Failure,
 };
@@ -69,16 +69,6 @@ fn configuration_reply(reply: &str, operation: u128) -> Result<ConfigurationRepl
         return Ok(ConfigurationReply::ObserveSource);
     }
     Err(format!("{reply}preserve original drain and configuration identities").into())
-}
-fn repeat_observation(reason: &str) -> bool {
-    matches!(
-        reason,
-        "authentication deadline expired"
-            | "request deadline expired"
-            | "reply deadline expired"
-            | "connection closed during request"
-            | "connection closed without a complete reply"
-    )
 }
 fn field<'a>(text: &'a str, name: &str) -> Result<&'a str, Failure> {
     let prefix = format!("{name}=");

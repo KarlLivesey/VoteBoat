@@ -149,8 +149,9 @@ Each listed target pins `nodeN.der`; the principal uses its own `nodeP.der` and
 The retained server certificate/name budget is1MiB.
 
 Auto mode scans the supplied nodes in numeric order, with the existing ten-second
-deadline and exact non-acceptance retry rules. A connected TLS failure or unknown
-write stops routing. Addresses confer no permissions or leadership. The file is
+deadline and exact non-acceptance retry rules for writes. Automatic reads can
+retry a deadline or empty disconnect on another replica; certificate failures
+and unknown writes stop routing. Addresses confer no permissions or leadership. The file is
 reloaded for each CLI invocation. Optional endpoint discovery is described below;
 server listeners are selected at startup. Commands remain TCP/TLS even when Raft peers use QUIC.
 
@@ -342,15 +343,19 @@ command after a failed connection attempt or the explicit `ERR NOT_LEADER`
 reply (including an invocation rejected before proposal execution). For reads,
 it also retries the exact `ERR NotRead(ReadNotReady)` and
 `ERR Unavailable(LeadershipChanged)` and `ERR Draining` responses, obtaining a fresh quorum barrier
-on the next attempt. Explicit node selection returns either response directly. It stops on
-Unknown, incomplete/invalid replies, connected I/O failures, or other errors. It
-never automatically resends an uncertain write to another node. A lost write
+on the next attempt. Automatic reads also retry authentication/request/reply
+deadlines and connections closed before a complete request or any reply bytes.
+Partial/invalid replies, certificate failures and other errors remain terminal.
+Explicit node selection makes one attempt. Uncertain writes are never
+automatically resent to another node. A lost write
 reply prints Unknown; retry manually using the same operation ID and delta.
 
 Automatic mode scans three local command ports by default, or the configured
 command endpoint list, with one active socket, at
 most 100 rounds, a ten-second absolute observation deadline and bounded reply
-storage. Partial reply progress cannot reset that deadline. Each successful read
+storage. Each automatic read attempt has at most two seconds for connection,
+authentication and reply, capped by the remaining overall deadline. Partial
+reply progress cannot reset either deadline. Each successful read
 still obtains a fresh quorum barrier. Automatic mode accepts only add/read;
 status, checkpoint and quit require an explicit node ID. Explicit IDs remain
 available for writes/reads too. Remote addresses require the explicit authenticated

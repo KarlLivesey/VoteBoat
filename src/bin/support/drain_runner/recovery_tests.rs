@@ -38,6 +38,7 @@ fn invalid_configuration_transport_is_not_hidden_by_retry() {
         "invalid reply encoding",
         "multiple reply lines",
         "reply exceeds limit",
+        "connection closed with an incomplete reply",
     ] {
         assert!(configuration_attempt(Attempt::Interrupted(reason), 3).is_err());
     }

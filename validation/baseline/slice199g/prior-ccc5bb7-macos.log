@@ -1,0 +1,3 @@
+Log download unavailable: gh run view 38035651604 --job 114165760812 --log
+reported that run38035651604 was still in progress. The job metadata showed
+the macOS job terminal-failed, but this file is not its execution log.

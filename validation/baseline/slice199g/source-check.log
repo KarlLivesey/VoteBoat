@@ -1,0 +1,12 @@
+src/bin/support/command_client.rs: OK
+src/bin/support/local_client.rs: OK
+src/bin/support/drain_runner.rs: OK
+src/bin/support/drain_runner/observation_tests.rs: OK
+src/bin/support/drain_runner/recovery_tests.rs: OK
+tests/counter_service.rs: OK
+tests/counter_service/read_failover.rs: OK
+docs/COUNTER_SERVICE.md: OK
+docs/IMPLEMENTATION.md: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+validation/REPORT.md: OK
+validation/baseline/slice199g/README.md: OK

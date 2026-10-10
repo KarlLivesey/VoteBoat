@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice199g adds automatic read failover within the existing ten-second deadline:
+two-second attempts, fresh quorum reads, exact group scope and retries limited
+to known transient observation failures. Partial replies remain terminal;
+explicit targets and uncertain writes retain their stop behavior. Five new
+local socket/service tests pass, including TCP/QUIC authenticated service reads.
+The final Linux operator run passes129 counter,13 directory and14 transfer
+tests;27 binary command/runner tests and4 default-feature failover tests pass.
+Formatting and all four strict Clippy profiles remain clean.
+This is a reproduced client fix, not proof that all macOS failures are resolved.
+
 Slice199f corrects the lost-drain fixture's immediate cancellation assumption
 and adds TCP/WAL and QUIC/checkpoint admitted-cancel/source-loss histories.
 Original intent fields and data retries survive recovery; cancellation is

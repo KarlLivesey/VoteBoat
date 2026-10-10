@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.41s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-1be0e026107a32da)
+
+running 4 tests
+test read_failover::automatic_read_repeats_an_empty_disconnect_but_not_a_partial_reply ... ok
+test read_failover::automatic_authenticated_read_escapes_stalled_handshake_tcp ... ok
+test read_failover::automatic_read_escapes_silent_replica_with_original_scope ... ok
+test read_failover::automatic_read_stalls_cannot_renew_the_absolute_deadline ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 88 filtered out; finished in 10.00s
+

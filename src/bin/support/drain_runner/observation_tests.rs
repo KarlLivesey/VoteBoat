@@ -21,6 +21,7 @@ fn observation_retry_refuses_authentication_failure_and_invalid_transport_data()
         "invalid reply encoding",
         "multiple reply lines",
         "reply exceeds limit",
+        "connection closed with an incomplete reply",
     ] {
         assert!(!repeat_observation(reason));
     }

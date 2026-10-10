@@ -124,7 +124,13 @@ pub fn request_bounded(
             return Attempt::Interrupted("authenticated read failed");
         }
         match stream.read(&mut bytes[used..]) {
-            Ok(0) => return Attempt::Interrupted("connection closed without a complete reply"),
+            Ok(0) => {
+                return Attempt::Interrupted(if used == 0 {
+                    "connection closed without a complete reply"
+                } else {
+                    "connection closed with an incomplete reply"
+                });
+            }
             Ok(n) => {
                 used += n;
                 if let Some(end) = bytes[..used].iter().position(|b| *b == b'\n') {

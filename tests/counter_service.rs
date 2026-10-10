@@ -81,6 +81,8 @@ mod new_voter;
 mod placement;
 #[path = "counter_service/quorum.rs"]
 mod quorum;
+#[path = "counter_service/read_failover.rs"]
+mod read_failover;
 #[path = "counter_service/timing.rs"]
 mod timing;
 
@@ -141,10 +143,11 @@ impl Cluster {
         fs::create_dir(&root).unwrap();
         // Never recycle a fixture's block within this test process: accepted
         // TCP sockets can still be closing after its listeners/children drop.
-        // The finite suite stays within the available 157 blocks.
+        // The growing suite has 305 candidate blocks. Unavailable blocks are
+        // skipped by binding every reserved TCP/UDP endpoint.
         let (base, listeners, udp_sockets) = {
             let mut blocks = PORT_BLOCKS.lock().unwrap_or_else(|e| e.into_inner());
-            let (base, listeners, udp_sockets) = (10000u16..30000)
+            let (base, listeners, udp_sockets) = (10000u16..49000)
                 .step_by(128)
                 .find_map(|base| {
                     if blocks.contains(&base) {

@@ -25,6 +25,18 @@ use std::{
     time::{Duration, Instant},
 };
 const NOT_LEADER: &str = "ERR NOT_LEADER\n";
+/// These outcomes permit another read-only observation. They say nothing about
+/// whether a mutation was accepted and do not authorize replay.
+pub(super) fn repeat_observation(reason: &str) -> bool {
+    matches!(
+        reason,
+        "authentication deadline expired"
+            | "request deadline expired"
+            | "reply deadline expired"
+            | "connection closed during request"
+            | "connection closed without a complete reply"
+    )
+}
 pub(super) fn exchange(
     target: &Endpoint,
     text: &[u8],
@@ -206,18 +218,43 @@ pub fn run(base: u16, id: Option<u64>, input: &[String]) -> Result<(), Failure> 
             Attempt::Reply(response) => terminal(response),
         };
     }
-    // Each attempt owns one socket and the same bounded original command. No leader cache.
+    route(
+        &targets,
+        command,
+        text.as_bytes(),
+        deadline,
+        auth.as_ref(),
+        start,
+    )
+}
+fn route(
+    targets: &[Endpoint],
+    command: &[String],
+    text: &[u8],
+    deadline: Instant,
+    auth: Option<&ClientAccess>,
+    start: Instant,
+) -> Result<(), Failure> {
+    let read = super::group_command::payload(command) == ["read"];
+    // Each attempt owns one socket and sends the same command. A silent replica
+    // must leave time for another fresh quorum read within the original budget.
     for _ in 0..100 {
-        for target in &targets {
+        for target in targets {
             if Instant::now() >= deadline {
                 return Err(
                     "no eligible configured leader found within the routing deadline".into(),
                 );
             }
-            match exchange(target, text.as_bytes(), deadline, auth.as_ref(), start) {
+            let attempt_deadline = if read {
+                deadline.min(Instant::now() + Duration::from_secs(2))
+            } else {
+                deadline
+            };
+            match exchange(target, text, attempt_deadline, auth, start) {
                 Attempt::Unavailable => (),
                 Attempt::Reply(response) if retryable_reply(command, &response) => {}
                 Attempt::Reply(response) => return terminal(response),
+                Attempt::Interrupted(reason) if read && repeat_observation(reason) => (),
                 Attempt::Interrupted(reason) => return interrupted(command, reason),
             }
         }

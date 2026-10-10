@@ -1,6 +1,14 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Read-failover evidence: [slice199g](baseline/slice199g/README.md). A real CLI
+regression fails before the fix; five new socket/service checks pass afterward.
+Automatic reads can leave a silent replica or stalled handshake within the same
+total deadline, while partial replies and uncertain writes remain terminal.
+The final Linux runs pass156 operator tests,27 command/runner tests and4
+default-feature failover tests, with formatting and all strict lint profiles clean.
+Historical54a73ad macOS failures are retained separately; platform acceptance
+remains open.
 Cancellation recovery evidence: [slice199f](baseline/slice199f/README.md), with
 TCP/WAL and QUIC/checkpoint admitted-cancel/source-loss histories and124 passing
 local all-feature service tests. Final focused checks strengthen the checkpoint
