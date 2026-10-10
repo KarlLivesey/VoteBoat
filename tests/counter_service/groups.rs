@@ -2,6 +2,9 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+#[path = "groups/lost_reply.rs"]
+mod lost_reply;
+
 const GROUPS: &str = "voteboat-counter-groups-v1\ngroup 1 1 1 m:3 v:1 v:2 v:3\ngroup 7 3 9 m:3 v:1 v:2 v:3\ngroup 8 2 11 w:3 1 v:1 1 v:2 1 v:3\n";
 pub(super) fn setup(quic: bool) -> Cluster {
     let mut c = Cluster::new();
@@ -46,8 +49,19 @@ pub(super) fn leader(c: &mut Cluster, group: &str, incarnation: &str) -> usize {
 fn data(c: &mut Cluster, duplicate: bool) {
     for (group, incarnation, value) in [("1", "1", "3"), ("7", "3", "5"), ("8", "2", "9")] {
         let text = authenticated_write(c, &["group", group, incarnation, "add", "42", value]);
-        assert!(text.contains(&format!("Value({value})")), "{text}");
-        assert!(text.contains(&format!("duplicate={duplicate}")), "{text}");
+        let retained = format!("OK outcome=Value({value}) duplicate=true\n");
+        if duplicate {
+            assert_eq!(text, retained);
+        } else {
+            // The helper may have repeated an uncertain original attempt.
+            // First observed success does not establish first execution.
+            let first = format!("OK outcome=Value({value}) duplicate=false\n");
+            assert!(text == first || text == retained, "{text}");
+        }
+        assert_eq!(
+            authenticated_write(c, &["group", group, incarnation, "add", "42", value]),
+            retained
+        );
         assert_eq!(
             c.routed(&["group", group, incarnation, "read"]),
             format!("OK value={value}\n")

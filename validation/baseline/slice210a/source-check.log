@@ -1,0 +1,14 @@
+tests/counter_service/groups/lost_reply.rs: OK
+validation/baseline/slice210a/README.md: OK
+validation/baseline/slice210a/before-receipt.log: OK
+validation/baseline/slice210a/before.log: OK
+validation/baseline/slice210a/ci-prior-observed.json: OK
+validation/baseline/slice210a/counter-all.log: OK
+validation/baseline/slice210a/groups-all.log: OK
+validation/baseline/slice210a/groups-default.log: OK
+validation/baseline/slice210a/pre-push.log: OK
+validation/baseline/slice210a/prior-macos-failures.log: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+docs/IMPLEMENTATION.md: OK
+tests/counter_service/groups.rs: OK
+validation/REPORT.md: OK

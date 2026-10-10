@@ -149,6 +149,12 @@ Completed201e reviews the shared AdmissionPolicy/AdmissionLease obligations:
 identical host/native generated ownership traces, capacity refusal, independent
 view close and cross-thread final-owner release. Six contracts/39 operations
 now have selected reviewed assertions;102 inventory entries remain unreviewed.
+Implemented210a corrects the first-observation duplicate assumption in the
+multi-group operator fixture. Real authenticated unread writes reproduce the
+old failure over TCP and QUIC. Exact retained receipts, changed-payload refusal
+and cold recovery pass locally; the QUIC history checks installed checkpoint
+boundaries. The full local all-feature counter suite passes154 tests. Fresh
+macOS confirmation remains pending; this does not close other operator failures.
 Current: revisit the current Linux/macOS operator acceptance evidence.
 Select a reproduced remaining failure from the recorded platform runs, identify
 its underlying contract, fix it and run the affected histories locally plus the
@@ -170,6 +176,31 @@ explicit byte/count limits and unchanged rejected-state assertions. This
 advances P0/P1 defensive recovery and depends on existing native/host codecs,
 not a replacement serialization system. Select an uncovered codec family from
 the acceptance ledger after the preceding fault schedule is verified.
+
+### Slice210a schema plan — multi-group original receipt observations
+
+The recorded macOS group history received the correct Value(9) with
+duplicate=true after an uncertain initial attempt. The test's retry helper
+preserves the original operation and payload, so that first observed success
+cannot establish first execution. No production retry or consensus behavior
+changes. The setup check will accept either exact successful receipt on initial
+observation, immediately repeat the original request and require duplicate=true,
+and continue to require the exact duplicate receipt after cold recovery.
+
+Before changing that check, add real authenticated unread writes for all three
+groups, using operation42 with distinct payloads3/5/9. Observe each committed
+value through a separate quorum read before disconnecting its unread channel.
+The existing initial-data check must then fail on duplicate=true. The new check
+must pass, reject a changed payload as OperationConflict without changing data,
+and recover the exact original receipts after all processes stop and reopen.
+TCP and QUIC exercise the same commands; the QUIC history also records actual
+installed checkpoint boundaries. Bounded attempts preserve the same identities;
+test-owned channels and Cluster own cleanup. No timeout or lint threshold changes.
+
+This corrects one identified operator acceptance assumption and advances the
+usable Linux/macOS service milestone. Local regressions plus the next macOS job
+provide evidence; broader operator failures remain open. The next linked items
+remain combined membership/lifecycle recovery and bounded malformed codecs.
 
 ### Slice201e schema plan — reusable admission ownership histories
 

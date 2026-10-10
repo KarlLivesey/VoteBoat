@@ -1,5 +1,17 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice210a corrects one multi-group operator acceptance assumption: an initial
+observed success after uncertain original attempts can be a retained duplicate.
+Real authenticated unread writes in all three groups reproduce the old failure
+over TCP and QUIC. The fixture now checks exact outcomes, repeats original
+requests for duplicate receipts and retains strict post-recovery duplicate
+checks. Changed payloads conflict without changing data; cold recovery preserves
+all three independently scoped receipts. QUIC also checks installed checkpoint
+boundaries. All154 local all-feature counter tests pass. Supported-platform
+confirmation remains open. The newly completed priorcd54071 operator run passes
+Ubuntu but has6 macOS counter failures; the exact result/log is retained in
+validation/baseline/slice210a and is not acceptance of this change.
+
 Slice201e adds shared admission-provider ownership checks:32 seeded256-action
 histories per host/native provider, independent unique-reservation accounting,
 batch/message/byte refusal, view close/drop and cross-thread final lease release.

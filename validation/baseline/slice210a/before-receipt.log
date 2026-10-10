@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.77s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+
+thread 'groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_tcp' (3861218) panicked at tests/counter_service/groups.rs:53:9:
+OK outcome=Value(3) duplicate=true
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_tcp ... FAILED
+
+thread 'groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic' (3861217) panicked at tests/counter_service/groups.rs:53:9:
+OK outcome=Value(3) duplicate=true
+
+test groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic ... FAILED
+
+failures:
+
+failures:
+    groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_quic
+    groups::lost_reply::first_observation_after_unread_group_writes_recovers_original_receipts_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 152 filtered out; finished in 1.07s
+
+error: test failed, to rerun pass `--test counter_service`

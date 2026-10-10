@@ -5798,3 +5798,21 @@ not serialize service execution or process waits. The final concurrent transfer
 suite passes all14 tests in69.51s. Formatting and all four strict Clippy profiles
 pass. See [slice206](baseline/slice206/README.md); no macOS/full baseline
 acceptance or production behavior change is claimed.
+
+## Slice210a — exact original group receipts after uncertain first observation
+
+Real authenticated unread writes in three independent groups reproduce the
+incorrect duplicate=false acceptance assertion over TCP and QUIC. The corrected
+fixture checks exact values, explicitly repeats each original request for a
+retained duplicate receipt and preserves exact duplicate checks after cold
+recovery. Changed payloads conflict without changing quorum-read values. The
+QUIC history verifies installed checkpoint boundaries before reopen.
+
+All7 all-feature group tests, all154 local all-feature counter operator tests
+and all5 default TCP group tests pass (166 final test executions). Formatting
+and all four strict Clippy profiles pass with zero diagnostics. The initial
+identity-type compile failure and both before-change assertion failures remain
+in the evidence directory. No production behavior, retry policy, deadline or
+lint threshold changed. The newly completed priorcd54071 CI job passes Ubuntu
+and fails6 macOS counter tests; it is retained to select further platform work,
+not acceptance of this correction. See [slice210a](baseline/slice210a/README.md).
