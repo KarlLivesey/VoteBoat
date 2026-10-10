@@ -141,6 +141,57 @@ strict profiles clean while advancing the remaining capability work.
 | Next200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Following201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
 
+### Slice199 schema plan — independent operator platform evidence
+
+The current platform-feedback workflow serializes whole runs, including a
+long-lived older full-suite job. Keep that job and its results intact. Add an
+independent focused workflow for the existing counter, directory and transfer
+operator suites on Linux and macOS, with the pinned Rust toolchain. It has its
+own concurrency group, bounded20-minute jobs and retained stdout/stderr logs
+on either success or failure; it is background feedback, not a merge gate.
+No runtime API, data, state machine, storage or protocol changes are needed.
+
+The saved macOS failure at9e1e612 reopened fixed node1 after a write. That node
+could be a follower without the learned commit, so it might legitimately open
+without replaying incompatible bytes. Commit88b4719 already corrected the
+fixture to reopen the actual applied writer; confirm this exact difference and
+execute the corrected current suites. Do not increase timeouts or reinterpret
+an old failure as a current pass.
+
+Acceptance: actual operator-target exit status and logs for both platforms at
+the tested revision, including TCP/QUIC restart, split, maintenance, drain and
+assignment histories. Record failures and make focused fixes; the rest of P0–P7
+and the full-suite platform run remain separate. Continue retirement200 while
+the remote workflow runs; no platform claim until its actual jobs complete.
+
+### Slice199a — platform failure review and focused workflow
+
+Reviewed completed macOS job114146478974 in run38029044043 at9e1e612.
+It reports82 passing counter-service tests and one failure: the incompatible
+maintenance profile was not refused when the fixture reopened fixed node1.
+Current code already contains88b4719's correction: reopen the replica that
+applied the acknowledged write. The old failure is consistent with an
+uncommitted follower view; the log alone does not prove its exact local prefix.
+No new production fix or timeout increase is justified by this old result.
+Fresh macOS execution remains necessary.
+
+Added an independent Operator recovery workflow running counter, directory and
+transfer executable suites on Ubuntu and macOS with Rust1.98.1. It has a
+separate concurrency group,20-minute job bounds, failure-independent platforms
+and always-attempted log artifact retention. It does not cancel the existing
+full-suite run or require waiting before implementing later features.
+
+Local directory13 tests pass in20.73s; transfer5 tests pass in69.33s, including
+the ten-phase TCP/WAL and QUIC/checkpoint histories and lost fence/publication
+replies. Counter122 and command16 already pass at unchanged source1af1478
+(slice198); they were not rerun for this workflow-only change. Formatting,
+all four strict Clippy profiles and the105-contract inventory check pass.
+The shell invocation passes syntax checking; remote workflow acceptance and
+platform results remain pending. See [199a evidence](../validation/baseline/slice199a/README.md).
+
+This is execution preparation and failure triage, not completion of199. Full
+P0–P7, the broad platform sweep and retirement200 remain open.
+
 ### Slice198 schema plan — authenticated local assignment pages
 
 Use the existing ordered owner group iterator and `groups_after` cursor. A

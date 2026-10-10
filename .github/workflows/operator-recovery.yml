@@ -1,0 +1,46 @@
+name: Operator recovery
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: operator-recovery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  operators:
+    name: Operators on ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      CARGO_TERM_COLOR: never
+      RUST_BACKTRACE: 1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Rust toolchain
+        run: rustup toolchain install 1.98.1 --profile minimal
+      - run: cargo fetch --locked
+      - name: Exercise operator recovery
+        shell: bash
+        run: |
+          set -o pipefail
+          cargo test --locked --offline --all-features \
+            --test counter_service --test directory_service --test transfer_service \
+            2>&1 | tee operator-recovery.log
+      - name: Preserve operator results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operator-recovery-${{ matrix.os }}-${{ github.sha }}
+          path: operator-recovery.log
+          if-no-files-found: ignore
+          retention-days: 14

@@ -2,6 +2,7 @@
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
 Latest focused implementation evidence: [slice198 authenticated local assignment pages](baseline/slice198/README.md).
+Platform investigation and focused workflow: [slice199a](baseline/slice199a/README.md); fresh remote results pending.
 Entries below are historical and retain their original source/coverage limits.
 
 The independent Rust model in `tests/ballot_model.rs` explores the complete

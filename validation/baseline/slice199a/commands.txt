@@ -1,0 +1,14 @@
+# Local Linux execution; TCP/UDP sockets required for process tests.
+cargo +stable test --locked --offline --all-features --test directory_service --test transfer_service
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+node validation/check-inventory.mjs
+git diff --check
+# Read-only historical CI inspection:
+gh run view 38029044043 --json headSha,status,conclusion,jobs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114146478974/logs
+# Existing fixture correction:
+git show 88b4719 -- tests/counter_service/leadership.rs
