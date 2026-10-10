@@ -942,6 +942,7 @@ fn transport_factory(
         5 => NativeWireCodec::with_learner_repair(Default::default()),
         6 => NativeWireCodec::with_snapshot_repair(Default::default()),
         7 => NativeWireCodec::with_committed_snapshot_repair(Default::default()),
+        8 => NativeWireCodec::with_leadership_transfer(Default::default()),
         _ => return Err(error("wire version", "unsupported native format")),
     };
     let factory = checked(NativeTransportFactory::new(

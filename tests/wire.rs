@@ -12,6 +12,9 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[cfg(feature = "native")]
+#[path = "wire/leadership.rs"]
+mod leadership;
 mod support;
 use support::*;
 use voteboat::{identity::*, raft::*, wire::*};

@@ -16,6 +16,8 @@
 //! public ingress/recovery gates remain closed. This does not model the complete
 //! reconfiguration protocol or certify a storage provider's durability.
 use super::*;
+#[path = "leadership_membership_tests.rs"]
+mod leadership;
 use crate::{membership::*, quorum::*};
 
 fn node(n: u64) -> NodeId {

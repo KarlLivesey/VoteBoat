@@ -1,0 +1,134 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.06s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-fe71f711338ed6a8)
+
+running 56 tests
+test raft::membership_tests::connection_retention_includes_pending_and_rollback_views_until_exact_commit ... ok
+test raft::membership_tests::a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot ... ok
+test raft::membership_tests::accepted_final_clears_prior_authority_and_rollback_restores_joint_base ... ok
+test raft::membership_tests::batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority ... ok
+test raft::membership_tests::connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit ... ok
+test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+test raft::membership_tests::committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority ... ok
+test raft::membership_tests::in_flight_promotion_cannot_emit_witness_evidence_before_completion ... ok
+test raft::membership_tests::batched_repair_rejects_committed_divergence_and_accepted_configuration_work ... ok
+test raft::membership_tests::joint_commit_uses_old_and_new_and_never_counts_a_learner ... ok
+test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+test raft::membership_tests::historical_repair_requires_old_voter_source_and_retained_promotion_evidence ... ok
+test raft::membership_tests::configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix ... ok
+test raft::membership_tests::batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion ... ok
+test raft::membership_tests::leadership::uncommitted_configuration_and_in_flight_configuration_changes_cannot_overlap_transfer ... ok
+test raft::membership_tests::connection_retention_keeps_committed_joint_predecessor_until_final_is_durable ... ok
+test raft::membership_tests::learner_replication_is_separate_from_ballots_reads_and_identity_authority ... ok
+test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+test raft::membership_tests::lagging_follower_probes_and_joint_replication_echo_the_request_scope ... ok
+test raft::membership_tests::leadership::real_learner_and_joint_views_refuse_transfer_without_changing_membership ... ok
+test raft::membership_tests::historical_repair_higher_term_needs_exact_context_and_durable_observation ... ok
+test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+test raft::membership_tests::prospective_reservation_retains_intermediate_joint_fanout_after_final ... ok
+test raft::membership_tests::permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads ... ok
+test raft::membership_tests::partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation ... ok
+test raft::membership_tests::owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation ... ok
+test raft::membership_tests::prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation ... ok
+test raft::membership_tests::older_request_scope_can_roll_back_uncommitted_final_without_early_reply ... ok
+test raft::membership_tests::pending_configuration_view_precedes_durability_without_releasing_effects ... ok
+test raft::membership_tests::joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners ... ok
+test raft::membership_tests::reservation_covers_rollback_until_the_shrink_is_committed ... ok
+test raft::membership_tests::promoted_term_observation_waits_for_storage_and_retains_same_base_permit ... ok
+test raft::membership_tests::partially_delivered_final_can_elect_new_leader_after_old_leader_loss ... ok
+test raft::membership_tests::prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress ... ok
+test raft::membership_tests::joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation ... ok
+test raft::membership_tests::same_voter_policy_changes_use_joint_rules_for_elections_and_reads ... ok
+test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+test raft::membership_tests::request_scope_bridge_does_not_authorize_learners_or_reads ... ok
+test raft::membership_tests::retired_commit_exception_cannot_append_raise_terms_or_authorize_learners ... ok
+test raft::membership_tests::joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim ... ok
+test raft::membership_tests::partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes ... ok
+test raft::membership_tests::removed_or_demoted_local_replica_stops_service_and_campaigning ... ok
+test runtime::snapshot_send::tests::zero_delay_and_clock_exhaustion_do_not_wrap ... ok
+test raft::membership_tests::retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority ... ok
+test runtime::snapshot_send::tests::exact_retry_window_capacity_and_cleanup ... ok
+test raft::membership_tests::witnessed_promoted_leader_catches_up_only_after_exact_durability ... ok
+test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+test raft::membership_tests::recursive_joint_recovery_catches_up_old_voter_and_commits_after_election ... ok
+test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+test runtime::maintenance::tests::deadline_exhaustion_stops_instead_of_wrapping_or_spinning ... ok
+test raft::membership_tests::witness_reply_is_bound_to_exact_pending_request_and_local_restart_session ... ok
+test raft::membership_tests::witness_requires_authenticated_historical_assignment_and_surviving_history ... ok
+test raft::membership_tests::snapshot_reply_keeps_head_scope_through_log_and_application_dependencies ... ok
+test raft::membership_tests::witness_never_grants_from_accepted_uncommitted_promotion_or_future_head ... ok
+test raft::membership_tests::batched_repair_checks_authority_ranges_and_ack_context_before_progress ... ok
+test raft::membership_tests::stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot ... ok
+
+test result: ok. 56 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/membership.rs (target/debug/deps/membership-1d148cc12a00e6bc)
+
+running 18 tests
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test host_store_configuration_journal_conformance ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/quorum.rs (target/debug/deps/quorum-e66fae65c6109415)
+
+running 6 tests
+test explanation::maximum_weights_and_joint_policies_preserve_separate_thresholds ... ok
+test explanation::five_of_nine_ids_do_not_hide_two_unsatisfied_sites ... ok
+test validates_exact_membership_weights_depth_and_budgets ... ok
+test weighted_and_joint_predicates_are_strict ... ok
+test explanation::every_nine_voter_explanation_matches_reference_and_direct_branch_weights ... ok
+test every_nine_voter_quorum_intersects_and_frontier_matches_reference ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/raft.rs (target/debug/deps/raft-ef870167f3a6c747)
+
+running 21 tests
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test three_node_history_with_only_host_components ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/wire.rs (target/debug/deps/wire-b55f96139125af94)
+
+running 1 test
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

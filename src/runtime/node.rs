@@ -320,10 +320,14 @@ where
                 return Err(NodeError::IncompatiblePeerProtocol);
             }
             if core.learner_repair_wire_version().is_some_and(|version| {
-                parts
-                    .peers
-                    .as_ref()
-                    .is_none_or(|p| p.roster.wire_version() != version)
+                parts.peers.as_ref().is_none_or(|p| {
+                    // Wire8 retains wire7 repair semantics and adds only
+                    // the explicitly selected leadership handoff RPC.
+                    !matches!(
+                        (version, p.roster.wire_version()),
+                        (5, 5) | (6, 6) | (7, 7 | 8)
+                    )
+                })
             }) {
                 return Err(NodeError::IncompatiblePeerProtocol);
             }

@@ -613,6 +613,14 @@ fn quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two
 }
 
 #[test]
+fn startup_selects_exact_wire_eight_for_tcp_and_quic() {
+    use voteboat::native::connect::NativePeerProtocol;
+    selected_wire_cluster(NativePeerProtocol::TcpTls, 8);
+    #[cfg(feature = "quic")]
+    selected_wire_cluster(NativePeerProtocol::Quic, 8);
+}
+
+#[test]
 fn explicit_startup_timers_validate_before_files_and_use_host_deadlines() {
     use voteboat::native::connect::NativePeerProtocol;
     let protocols = [

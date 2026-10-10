@@ -720,13 +720,13 @@ fn handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate() {
 
 #[test]
 fn quic_authenticates_exact_selected_wire_version_without_downgrade() {
-    for version in [2, 3, 4] {
+    for version in [2, 3, 4, 8] {
         let (mut a, mut b) = versioned_pair(version, version);
         ready(&mut a, &mut b);
         assert_eq!(require_authenticated(&a).unwrap().wire_version, version);
         assert_eq!(require_authenticated(&b).unwrap().wire_version, version);
     }
-    for (av, bv) in [(1, 3), (2, 3), (3, 1), (4, 3), (3, 4)] {
+    for (av, bv) in [(1, 3), (2, 3), (3, 1), (4, 3), (3, 4), (7, 8), (8, 7)] {
         let (mut a, mut b) = versioned_pair(av, bv);
         let mut rejected = false;
         for now in 0..5000 {

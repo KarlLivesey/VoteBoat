@@ -25,8 +25,10 @@ use crate::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
+mod leadership;
 mod readiness;
 mod receive;
+pub use leadership::{LeadershipTransfer, LeadershipTransferRequest};
 pub use readiness::*;
 mod configuration;
 pub use authority::ReplicationAuthorizationStatus;
@@ -39,6 +41,12 @@ pub struct RequestContext {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Rpc {
+    /// Wire8: request a normal election after exact durable catch-up.
+    TimeoutNow {
+        operation: OperationId,
+        index: u64,
+        log_term: u64,
+    },
     /// Committed stable checkpoint from an authenticated old-view voter (wire7).
     CommittedLearnerRepairSnapshot {
         snapshot: Box<Snapshot>,
@@ -138,6 +146,10 @@ pub(crate) enum RecoveryMode {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Event {
+    TransferLeadership(LeadershipTransferRequest),
+    CancelLeadershipTransfer {
+        context: RequestContext,
+    },
     CheckLearnerReadiness {
         learner: PeerIdentity,
         session: StoreSession,
@@ -245,6 +257,7 @@ pub enum RaftError {
     ReadNotReady,
     ReadInFlight,
     StaleRead,
+    StaleTransfer,
     NotApplied,
     Storage(StorageError),
 }
@@ -321,6 +334,8 @@ pub struct Raft {
     learner_readiness: Option<LearnerReadinessRequest>,
     ready_learner: Option<ReadyLearner>,
     readiness_check: Option<Message>,
+    transfer: Option<LeadershipTransfer>,
+    leader_contact: Option<(StoreBinding, NodeId, u64)>,
 }
 
 impl Raft {
@@ -435,6 +450,8 @@ impl Raft {
             learner_readiness: None,
             ready_learner: None,
             readiness_check: None,
+            transfer: None,
+            leader_contact: None,
         })
     }
     fn validate_recovery(
@@ -740,6 +757,8 @@ impl Raft {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
+        self.transfer = None;
+        self.leader_contact = None;
         self.readiness_check = None;
         self.cancel_learner_readiness();
         self.clear_replication_authority();
@@ -859,7 +878,10 @@ impl Raft {
         if self.has_pending_dependency() {
             return Err(RaftError::Busy);
         }
-        match event {
+        self.refresh_transfer();
+        let mut effects = match event {
+            Event::TransferLeadership(request) => self.start_transfer(request),
+            Event::CancelLeadershipTransfer { context } => self.cancel_transfer(context),
             Event::CheckLearnerReadiness {
                 learner,
                 session,
@@ -869,6 +891,7 @@ impl Raft {
                 self.cancel_learner_readiness();
                 Ok(Vec::new())
             }
+            Event::Configure(_) if self.transfer.is_some() => Err(RaftError::Busy),
             Event::Configure(proposal) => self.configure(*proposal),
             Event::AuthorizeReplication {
                 witness,
@@ -887,8 +910,12 @@ impl Raft {
                 self.checkpoint_requested = Some(context);
                 Ok(vec![Effect::CheckpointRequired { context }])
             }
+            Event::Campaign if self.transfer.is_some() => Err(RaftError::Busy),
             Event::Campaign => self.campaign(),
             Event::Heartbeat => {
+                if let Some(transfer) = &mut self.transfer {
+                    transfer.signal_sent = false;
+                }
                 if self.role == Role::Leader {
                     let mut effects = self.broadcast()?;
                     effects.extend(self.read_probes());
@@ -913,13 +940,17 @@ impl Raft {
                     Err(RaftError::StaleRead)
                 }
             }
-        }
+        }?;
+        effects.extend(self.drive_transfer()?);
+        Ok(effects)
     }
     fn campaign(&mut self) -> Result<Vec<Effect>, RaftError> {
         if !self.local_voter() {
             return Err(RaftError::NotVoter);
         }
         self.reset_election()?;
+        self.transfer = None;
+        self.leader_contact = None;
         self.clear_reads();
         self.role = Role::Candidate;
         self.votes.clear();
@@ -950,6 +981,9 @@ impl Raft {
     ) -> Result<Vec<Effect>, RaftError> {
         if self.role != Role::Leader || !self.local_voter() {
             return Err(RaftError::NotLeader);
+        }
+        if self.transfer.is_some() {
+            return Err(RaftError::Busy);
         }
         if bytes.len() > self.limits.max_command_bytes {
             return Err(StorageError::Rejected("command byte budget").into());
@@ -1607,7 +1641,11 @@ impl Raft {
                 &m.rpc,
                 Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
             );
+        let leader = (m.sender, m.from, m.term);
         let effects = self.receive_inner(m)?;
+        if contact {
+            self.leader_contact = Some(leader);
+        }
         if contact
             || effects.iter().any(|e| {
                 matches!(

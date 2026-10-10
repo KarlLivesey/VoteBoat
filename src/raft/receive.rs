@@ -50,6 +50,12 @@ impl Raft {
             };
         }
         self.validate_replica_message(&m)?;
+        if let Rpc::TimeoutNow {
+            index, log_term, ..
+        } = m.rpc
+        {
+            return self.receive_timeout_now(&m, index, log_term);
+        }
         let old = self.durable.hard_state;
         let hard = if m.term > old.term {
             HardState {
@@ -67,6 +73,7 @@ impl Raft {
             self.repair_requests.clear();
         }
         match &m.rpc {
+            Rpc::TimeoutNow { .. } => unreachable!(),
             Rpc::LearnerRepair { .. }
             | Rpc::LearnerRepaired { .. }
             | Rpc::LearnerRepairSnapshot { .. }
@@ -140,7 +147,11 @@ impl Raft {
         }
         let request = matches!(
             &m.rpc,
-            Rpc::Vote { .. } | Rpc::Append { .. } | Rpc::ReadProbe | Rpc::Snapshot { .. }
+            Rpc::Vote { .. }
+                | Rpc::Append { .. }
+                | Rpc::ReadProbe
+                | Rpc::Snapshot { .. }
+                | Rpc::TimeoutNow { .. }
         );
         if request && m.context.origin != m.sender {
             return Err(RaftError::WrongIdentity);

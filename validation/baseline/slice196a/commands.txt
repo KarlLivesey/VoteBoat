@@ -1,0 +1,13 @@
+cargo +stable test --locked --offline --no-default-features --lib --test raft --test membership --test quorum --test wire
+cargo +stable test --locked --offline --all-features --lib --test raft --test wire --test membership --test member_recovery --test configuration_capacity --test effect_owner
+cargo +stable test --locked --offline --all-features --test secure explicit_wire_versions_are_exact_authenticated_and_do_not_mutate_shared_configs
+cargo +stable test --locked --offline --all-features --test quic quic_authenticates_exact_selected_wire_version_without_downgrade
+cargo +stable test --locked --offline --all-features --test startup startup_selects_exact_wire_eight_for_tcp_and_quic
+cargo +stable test --locked --offline --all-features --test counter_service authenticated_service_principals_scope_commands
+cargo +stable test --locked --offline --all-features --test transfer_service -- --skip cuts::
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+RUSTDOCFLAGS='-D warnings' cargo +stable doc --locked --offline --no-deps --all-features
+node validation/check-inventory.mjs

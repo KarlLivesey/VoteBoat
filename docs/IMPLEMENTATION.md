@@ -122,7 +122,8 @@ strict profiles clean while advancing the remaining capability work.
 | Completed194a: public transfer decisions | Reuse the existing recovery sequence in Rust hosts and the future command executor; advances P6 operator support. |193 preview, completed Node reads, source-fence/import/publication/activation contracts. | Six new decision tests and four native TCP/QUIC WAL/checkpoint phase histories pass; original IDs, ownership, data, retry/outbox and published configuration provenance remain checked. |
 | Completed194b: recoverable lifecycle administration | Make split execution/status/resumption usable through authenticated commands; advances P6 operator support. |194a decisions, existing guarded applications, TLS authorization and bounded service ownership. | Actual TCP/QUIC three-replica role services complete a split; QUIC resumes original IDs after all processes are killed following first import. Accepted-read disconnect cleanup, authorization, source refusal and independent child retries are checked. Whole-responsibility native counter profiles only. |
 | Completed195: operator-driven split recovery cuts | Validate the new operator path at durability boundaries; advances P4/P6 fault acceptance. |194 execution, original operation IDs and guarded native applications. | Both TCP/WAL and QUIC/checkpoint histories pass all10 phase boundaries plus lost fence/publication replies; source refusal, staged-target refusal and independent active-child retries/new writes are checked. Phase-internal power loss, combined membership and broader profiles remain open. |
-| Current196: maintenance leadership transfer | Provide the missing targeted move-leader operation; advances P4 and chapter09 maintenance. | Current quorum/membership/term contracts, authenticated administration and a protocol/schema review before edits. | Catch up an eligible target, preserve election/durability rules under loss/restart, return explicit unknown outcomes, and reject stale or non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
+| Completed196a: deterministic targeted handoff | Supply the protocol primitive needed for maintenance; advances P4 and chapter09. | Existing quorum, durable replication/election contracts and exact wire capability selection. | Host-driven stable/recursive elections, catch-up and ballot persistence boundaries, restart/cancellation/identity/membership refusals; wire8 encoding and exact TCP/QUIC session selection. This is not a durable administrative operation. |
+| Current196b: recoverable maintenance leadership transfer | Expose the targeted move-leader operation to Rust hosts and authenticated operators; advances P4 and chapter09 maintenance. |196a, bounded durable administrative operation identity/status, existing Node ownership and command authorization. | Catch up an eligible target, preserve election/durability rules under loss/restart, verify current target authority before completion, retain explicit unknown outcomes and reject stale/non-voting targets. Coordinated node drain then composes this operation with placement/membership. |
 | Next197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
 | Following198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. |
 
@@ -163,6 +164,85 @@ inventory checker validates95 contract records' shape and paths only. Source
 hashes, exact commands, quorum sites, logs and live background identities are in
 validation/baseline/slice192. Baseline175 remains running; current CI is pending
 at capture. Neither is recorded as a successful current full-suite/platform run.
+
+### Slice196a implemented evidence — deterministic leadership handoff
+
+The core now accepts one bounded exact-target request per group, quiesces new
+proposals/configuration changes and drives the existing replication path. A
+TimeoutNow is emitted only after a committed current-term tail and the target's
+durable matching-prefix acknowledgement. The target uses normal persisted
+self-vote, election and quorum commitment. Public attempt inspection and exact
+context cancellation are volatile; no signal or absence is reported as durable
+success. The core remains independent of sockets, clocks and concrete storage.
+
+Eleven downstream host-storage tests cover ordinary/recursive elections, lagging
+targets, uncommitted source tails, the target catch-up durability barrier, ballot
+durability, delayed/wrong signals, local cancellation, source/target restart,
+wrong identities and absent election quorum. Two private membership fixtures
+cover actual learner, joint and uncommitted configuration refusal. Wire8 checks
+cover full u128 operation IDs, exact scopes, truncation and older-codec refusal.
+These finite tests are not a distributed proof or native transfer fault history.
+
+Explicit native version8 retains version7 repair semantics. TLS/QUIC selected
+version tests reject mixed7/8 sessions, and the native startup test creates,
+writes, drains/joins and reopens both TCP/QUIC three-node assemblies. An initial
+startup failure exposed Node's exact version7 repair gate; the fix accepts only
+the specified7/8 compatibility pair while retaining5/6 checks. The original
+failure is saved. This does not change default service version selection.
+
+See [contracts](LEADERSHIP_TRANSFER.md) and
+[commands/results](../validation/baseline/slice196a/README.md). The evidence also
+retains an initial sandbox-denied UDP test, followed by its authorized rerun.
+Strict format/lint checks and affected core/owner/service regressions are recorded
+there. No application or Raft persistence format changes and no new dependencies.
+
+Macro review:196a advances maintenance P4 but does not complete196. The current
+mini item196b must add bounded durable administrative identity/status, Node result
+ownership, authorized command ingress and actual transfer/restart histories.
+Coordinated drain197 depends on that completed workflow; assignment listing198,
+remaining P0–P7 validation/platform/performance and P8 deferral are unchanged.
+
+### Slice196 schema plan — targeted leadership transfer
+
+Previous goal turn was progress:72e4aa2 validated native split recovery cuts.
+Inspection confirms only Campaign/Heartbeat controls exist. First implement196a,
+the deterministic targeted handoff and explicitly negotiated wire capability;
+then196b adds durable administrative operation identity/status and executable
+ingress. Both are required for196 completion; a sent RPC is not successful
+leadership transfer. No new application/log entry format or backend is needed
+for the core signal. Administrative durability must be designed before exposure.
+Native TLS and startup explicitly select version8 with matching codec/roster;
+versions1–7 and default selections retain their behavior. Session-version tests
+must reject mixed7/8 peers before any authenticated binding is exposed.
+
+196a data/API: one bounded volatile transfer per group, with original operation,
+exact target store/node, accepted configuration, source term, captured tail and
+request context. Reject self, learners, stale identities and unstable/uncommitted
+membership. While waiting, refuse new proposals/configuration changes and drive
+existing replication to the chosen target. Send a version8 TimeoutNow only after
+the captured complete tail is locally committed in this term and the target has
+acknowledged its durable matching prefix. Ordinary quorum predicates still
+decide the target election and its current-term commitment.
+
+Receiver checks authenticated sender/configuration, current term, last observed
+leader and exact durable tail before using the existing persist-then-campaign
+path. Duplicate/old signals cannot grant a ballot or bypass storage. Matching
+context cancellation releases local quiescence but cannot retract a delivered
+signal; host deadlines/unknown outcomes remain separate from consensus safety.
+Role, term/configuration change, storage failure and restart discard the volatile
+attempt. Public status is pending/signal-sent only, never a durable success.
+
+Acceptance: delayed target catch-up, no signal before local commit, no votes
+before target term/self-vote durability, duplicate/old/wrong-origin rejection,
+exact cancellation, restart and no-quorum outcomes, stable/recursive-policy
+elections, and old-codec refusal. Re-run affected core/read/membership/wire tests
+and all strict configurations.196b then uses this checked core primitive with
+durable operation records and authenticates completion through current target
+authority. Coordinated node drain197 depends on the completed196 workflow.
+
+Protocol reference reviewed: etcd-io/raft's targeted transfer and TimeoutNow
+paths (<https://github.com/etcd-io/raft/blob/main/raft.go>). This is a design
+precedent, not evidence that VoteBoat's new path is correct; no code is copied.
 
 ### Slice195 implemented evidence — executable split recovery cuts
 

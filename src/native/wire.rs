@@ -72,6 +72,10 @@ impl NativeWireCodec {
     pub fn with_committed_snapshot_repair(limits: WireLimits) -> Result<Self, WireError> {
         Self::versioned(limits, 7)
     }
+    /// Explicit format8 adds the bounded targeted leadership handoff signal.
+    pub fn with_leadership_transfer(limits: WireLimits) -> Result<Self, WireError> {
+        Self::versioned(limits, 8)
+    }
     fn versioned(limits: WireLimits, version: u16) -> Result<Self, WireError> {
         if limits.max_frame_bytes < OVERHEAD + MIN_MESSAGE + 4 {
             return Err(WireError::InvalidLimits);
@@ -121,6 +125,16 @@ fn validate_message(m: &Message, version: u16) -> Result<(), WireError> {
         return Err(WireError::InvalidMessage("message scope/term/context"));
     }
     match &m.rpc {
+        Rpc::TimeoutNow {
+            index, log_term, ..
+        } => {
+            if version < 8 {
+                return Err(WireError::UnsupportedVersion(version));
+            }
+            if *index == 0 || *log_term != m.term || m.context.origin != m.sender {
+                return Err(WireError::InvalidMessage("leadership transfer scope"));
+            }
+        }
         Rpc::LearnerRepair {
             joint,
             previous_index,
@@ -569,24 +583,22 @@ impl<'a> Encoder<'a> {
     }
     fn rpc(&mut self, m: &Message) -> Result<(), WireError> {
         match &m.rpc {
+            Rpc::TimeoutNow {
+                operation,
+                index,
+                log_term,
+            } => {
+                self.u8(18)?;
+                self.u128(operation.get())?;
+                self.u64(*index)?;
+                self.u64(*log_term)
+            }
             Rpc::LearnerRepair {
                 joint,
                 previous_index,
                 previous_term,
                 entries,
-            } => {
-                self.u8(14)?;
-                self.budget.charge(size_of::<LogEntry>())?;
-                self.entry(joint)?;
-                self.u64(*previous_index)?;
-                self.u64(*previous_term)?;
-                self.budget.array::<LogEntry>(entries.len())?;
-                self.u32(entries.len() as u32)?;
-                for entry in entries {
-                    self.entry(entry)?;
-                }
-                Ok(())
-            }
+            } => self.learner_repair_rpc(joint, *previous_index, *previous_term, entries),
             Rpc::LearnerRepaired {
                 success,
                 matching_index,
@@ -663,6 +675,25 @@ impl<'a> Encoder<'a> {
                 self.u8(u8::from(*granted))
             }
         }
+    }
+    fn learner_repair_rpc(
+        &mut self,
+        joint: &LogEntry,
+        previous_index: u64,
+        previous_term: u64,
+        entries: &[LogEntry],
+    ) -> Result<(), WireError> {
+        self.u8(14)?;
+        self.budget.charge(size_of::<LogEntry>())?;
+        self.entry(joint)?;
+        self.u64(previous_index)?;
+        self.u64(previous_term)?;
+        self.budget.array::<LogEntry>(entries.len())?;
+        self.u32(entries.len() as u32)?;
+        for entry in entries {
+            self.entry(entry)?;
+        }
+        Ok(())
     }
     fn append_rpc(
         &mut self,
@@ -1175,6 +1206,11 @@ impl<'a> Decoder<'a> {
             },
             4 => Rpc::ReadProbe,
             5 => Rpc::ReadAck,
+            18 if version >= 8 => Rpc::TimeoutNow {
+                operation: self.operation()?,
+                index: self.u64()?,
+                log_term: self.u64()?,
+            },
             kind @ (6 | 9 | 16 | 17) => {
                 self.snapshot_rpc(kind, envelope, limits, budget, version)?
             }

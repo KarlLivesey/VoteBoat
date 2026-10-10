@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.46s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 1 test
+test startup_selects_exact_wire_eight_for_tcp_and_quic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.11s
+

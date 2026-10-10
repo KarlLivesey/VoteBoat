@@ -1,9 +1,21 @@
 # Baseline audits
 
-Latest implementation: [slice195](#slice195--executable-split-recovery-cuts).
+Latest implementation: [slice196a](#slice196a--deterministic-leadership-handoff).
 Latest review: [slice192](#slice192--current-baseline-and-next-feature-boundary).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
+
+## Slice196a — deterministic leadership handoff
+
+An exact target may now receive a handoff signal after durable catch-up and
+local current-term commitment, then campaign through the ordinary persisted
+ballot and quorum rules. Host-storage histories cover restart, cancellation,
+quorum loss and recursive policy; explicit wire8 codec, TLS/QUIC selection and
+native startup/recovery checks pass. See
+[scope and validation](../validation/baseline/slice196a/README.md).
+This volatile primitive does not supply durable operation completion or the
+authenticated move-leader command. Those remain196b, followed by coordinated
+drain197. No full P0–P7 completion or native transfer fault coverage is claimed.
 
 ## Slice195 — executable split recovery cuts
 
