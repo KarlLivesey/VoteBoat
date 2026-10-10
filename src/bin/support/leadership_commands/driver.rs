@@ -13,6 +13,10 @@ pub struct Driver {
     pending: Option<ClientTicket>,
     suspended: Option<OperationId>,
 }
+
+#[cfg(test)]
+#[path = "terminal_tests.rs"]
+mod terminal_tests;
 impl Driver {
     pub fn new(group: GroupIdentity) -> Self {
         Self {
@@ -112,6 +116,9 @@ impl Driver {
             return Ok(());
         };
         let Some(record) = app.pending() else {
+            if let Some((operation, _, _)) = self.seen {
+                self.cancel_local(service, Some(operation))?;
+            }
             self.deadline = None;
             return Ok(());
         };

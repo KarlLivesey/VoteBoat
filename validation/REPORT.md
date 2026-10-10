@@ -1,5 +1,18 @@
 # Validation report
 
+Owned handoff cleanup after terminal intent: [slice236](baseline/slice236/README.md).
+Actual native Cancel-admitted-before-applied histories reproduce the orphaned
+proposal pause over TCP/QUIC. The driver cancels only its tracked operation through
+the core's current exact context. Final checks retain terminal/unrelated transfer
+state, apply original19703 Value(2) and drain/join workers. All-feature counter186/
+unit43, default unit41/drain30, formatting/four strict profiles and inventory108/
+conformance metadata pass. Initial compile/queued-observation failures are retained.
+No core, format, provider or timing-policy change. Source234 macOS183/22 passes
+counter/directory, then transfer26/2 fails read preparation/cleanup; Ubuntu182/1
+fails post-cancel data. Source235 Ubuntu181/5 retains distinct role/Joint uncertainty
+failures, with macOS still live. These are source-specific, not current acceptance.
+Functional feature completion remains ahead of tuning/security.
+
 Original learner-replacement setup recovery: [slice235](baseline/slice235/README.md).
 The fixture explicitly repeats unchanged handoff words through the existing
 administration caller; CLI auto stays data-only. Actual unread19750 TCP/QUIC

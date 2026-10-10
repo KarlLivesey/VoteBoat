@@ -24,6 +24,12 @@ completion contracts. On a transfer deadline, cancel the exact core request
 context to release local quiescence; this cannot undo a delivered signal.
 The durable intent remains pending for observation or resumption.
 
+When the applied intent becomes terminal, release the driver's matching local
+transfer through its current exact context. A cancellation can apply after the
+driver started an attempt from an earlier Pending view. Dropping its timer alone
+leaves normal proposals paused. A driver without an owned attempt must preserve
+unrelated host transfers; queued cancellation still needs normal owner processing.
+
 Completion proposals are checked at both admission and execution. Only the
 exact target, leading in the recorded current term and configuration after a
 current-term commit, can create a new completion. A configuration change can

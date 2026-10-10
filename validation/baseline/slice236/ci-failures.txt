@@ -1,0 +1,35 @@
+234 Linux: preceding source, not236 acceptance
+2026-10-10T16:24:07.1759475Z test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... FAILED
+2026-10-10T16:26:23.2467567Z thread 'drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable' (6144) panicked at tests/counter_service/write_recovery.rs:40:29:
+2026-10-10T16:26:23.2468342Z original write caller deadline expired: ["add", "19703", "2"]
+2026-10-10T16:26:23.2503875Z test result: FAILED. 182 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 171.57s
+234 macOS: preceding source, not236 acceptance
+2026-10-10T16:28:25.9862770Z test result: ok. 183 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 264.62s
+2026-10-10T16:29:13.5164360Z test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 47.53s
+2026-10-10T16:31:24.6446730Z test quic_authenticated_operator_resumes_original_split_after_process_crash ... FAILED
+2026-10-10T16:32:08.3505740Z test startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover ... FAILED
+2026-10-10T16:32:24.2565690Z thread 'quic_authenticated_operator_resumes_original_split_after_process_crash' (58890) panicked at tests/transfer_service/interrupt.rs:55:5:
+2026-10-10T16:32:24.2568690Z assertion failed: String::from_utf8_lossy(&out.stdout).contains("pending_reads=0")
+2026-10-10T16:32:24.2709570Z thread 'startup_recovery::quic_original_source_unknown_and_delayed_metadata_election_recover' (61480) panicked at tests/transfer_service/interrupt.rs:9:5:
+2026-10-10T16:32:24.2710350Z metadata preparation: Error: "group unavailable; original operation remains unresolved"
+2026-10-10T16:32:24.2929060Z test result: FAILED. 26 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 190.72s
+235 Linux: preceding source, not236 acceptance
+2026-10-10T16:34:20.7154614Z test drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic ... FAILED
+2026-10-10T16:34:46.9504273Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... FAILED
+2026-10-10T16:34:53.7377664Z test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... FAILED
+2026-10-10T16:34:53.7379321Z test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... FAILED
+2026-10-10T16:36:25.2355961Z test placement::generated_placement_executes_and_recovers_tcp ... FAILED
+2026-10-10T16:36:50.3195291Z thread 'drain_replacement::setup_recovery::original_replacement_setup_recovers_unread_handoff_quic' (6318) panicked at tests/counter_service/drain_replacement/setup_recovery.rs:42:9:
+2026-10-10T16:36:50.3196712Z source did not become leader
+2026-10-10T16:36:50.3212526Z thread 'executable_membership_add_enroll_promote_retire_and_restart_quic' (7834) panicked at tests/counter_service.rs:379:9:
+2026-10-10T16:36:50.3213358Z node 4 ["read"]: ERR NOT_LEADER
+2026-10-10T16:36:50.3245040Z thread 'group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope' (9007) panicked at tests/counter_service/group_admin.rs:68:9:
+2026-10-10T16:36:50.3246131Z group=7 node=1 expected=committed=Joint OK evidence=local_durable operation=7001 committed_prefix=3 durable_last=3 committed=NotFoundLocally accepted=NotFoundLocally action=inconclusive_local_absence
+2026-10-10T16:36:50.3258528Z thread 'group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope' (8931) panicked at tests/counter_service/group_admin.rs:68:9:
+2026-10-10T16:36:50.3259630Z group=7 node=1 expected=committed=Joint OK evidence=local_durable operation=7001 committed_prefix=3 durable_last=3 committed=NotFoundLocally accepted=NotFoundLocally action=inconclusive_local_absence
+2026-10-10T16:36:50.3271455Z thread 'placement::generated_placement_executes_and_recovers_tcp' (18210) panicked at tests/counter_service.rs:379:9:
+2026-10-10T16:36:50.3272072Z node 4 ["add", "700", "42"]: UNKNOWN LeadershipChanged; retry the same operation ID and delta
+2026-10-10T16:36:50.3328066Z test result: FAILED. 181 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 204.09s
+234 retained selected source service:
+ready node=2; leadership status admitted operation=19701
+ready node=3; drain observation cancelled reason=channel; leadership cancel admitted operation=19701 intent_index=3

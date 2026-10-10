@@ -1,0 +1,22 @@
+Initial native fixture compile (Cancelled variant carries index/term; exit101).
+Old-driver native TCP/QUIC histories fail2; first candidate one-poll cleanup fails2;
+second candidate unrelated-control setup fails2; final corrected observations pass2:
+cargo +stable test --locked --offline --all-features --bin voteboat-counter terminal_intent
+
+Final full all-feature suite (counter186/unit43), then default sequentially:
+cargo +stable test --locked --offline --all-features --test counter_service --bin voteboat-counter
+cargo +stable test --locked --offline --bin voteboat-counter
+cargo +stable test --locked --offline --test counter_service drain
+
+cargo +stable fmt --all
+.githooks/pre-push
+node validation/check-inventory.mjs
+node validation/check-provider-conformance.mjs
+cargo +stable build --locked --offline --all-features --bins
+
+gh run view 38067409575 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114257755705/logs
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114257755869/logs
+gh run download 38067409575 --repo KarlLivesey/VoteBoat --name operator-recovery-ubuntu-latest-f55d8fa41cf6ca6121cf51cde3dfd26c981baadf --dir target/slice236-ci234-linux-services
+gh run view 38067782454 --repo KarlLivesey/VoteBoat --json headSha,status,conclusion,jobs,url
+gh api --allow-escape-sequences repos/KarlLivesey/VoteBoat/actions/jobs/114259713867/logs

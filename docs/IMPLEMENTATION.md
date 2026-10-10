@@ -948,29 +948,158 @@ macOS counter183 passes but directory21/1 fails the generic upgrade path; source
 Linux182/1 fails setup UNKNOWN LeadershipChanged. Neither is current235 acceptance.
 Continue feature integration while source-bound feedback runs in the background.
 
-Current: reconcile matching macOS route/operator feedback and close one concrete
-functional failure. Purpose: advance P5/service and Linux/macOS acceptance. Depend
-on exact published source/job identities,234 detailed diagnostics and existing
-floor/quorum-read/operation contracts. Completion requires a cause-specific local
-regression, original floors/records/budgets and matching platform evidence when
-available. Do not assume older failures persist or wait for CI to develop features.
+Implemented236: the executable leadership driver now cancels its exact owned
+core transfer when applied maintenance has no Pending intent. It uses the current
+operation/context through queued NodeControl; clearing the timer alone no longer
+leaves data proposals paused. Unrelated host transfers and a fresh driver without
+owned state remain untouched. Core quorum/transfer rules, terminal records,
+provider seams, formats and the five-second Pending expiry remain unchanged.
 
-Next: close concrete baseline operator/deployment integration gaps. Purpose:
-advance usable service, online membership and split/merge completion. Depend on
-the existing Node/executable operations and acceptance map, not new subsystems.
-Reconcile required operations with actual public workflows; select one missing
-end-to-end capability and record its schema before editing. Completion requires
-executable/Rust usage, original-operation restart/retry/cleanup evidence, relevant
-Linux/macOS checks and aligned contracts after interface changes. Performance,
-security and optional global orchestration are separate subsequent work.
+Actual three-node native histories admit Cancel before it applies, then start a
+local attempt from the earlier Pending view with its target paused. Old TCP/QUIC
+retain the owned transfer and fail; final histories release it, preserve the
+Cancelled receipt, apply original19703 as Value(2), retain other-operation/no-owner
+transfers, and drain/join workers. Full all-feature counter186/unit43, default
+unit41/drain30, formatting/four strict profiles and inventory108/conformance
+metadata pass. Initial variant compilation and queued-control observation failures
+are retained with focused corrections in
+[slice236](../validation/baseline/slice236/README.md). This is a reproduced driver
+defect; prior CI logs alone do not prove their precise cancellation ordering.
 
-Following: close one required combined membership or lifecycle recovery gap.
-Purpose: finish feature reliability within P4/P6 and the Linux/macOS milestone.
-Depend on the preceding public-workflow reconciliation and existing durable
-operation/lineage contracts. Select an explicit failure or acceptance case;
-completion requires the original intent/receipt through interruption, restart,
-retry and cleanup with relevant native transports and zero strict diagnostics.
-A blanket provider audit is not a feature prerequisite; P8/Windows stay deferred.
+Macro review236 advances P4/service cancellation reliability. Source234 operator
+38067409575 completes: Ubuntu182/1 fails original19703 after cancellation;
+macOS183/22 pass counter/directory (including root floors), then transfer26/2 fails
+fresh metadata preparation and immediate pending-read cleanup. This supplies
+matching234 macOS route evidence, not236 platform acceptance or full P5 completion.
+Source235 run38067782454 has completed Ubuntu114259713867 counter181/5: replacement
+source leadership wait, learner read after role change, two group7001 Joint waits
+after UNKNOWN LeadershipChanged, and replacement-node write after role change.
+Later targets are unrun; macOS114259713970 remains live at observation. Feature
+and platform work continues; tuning/security remain later milestones.
+
+Current: close the macOS transfer preparation/read cleanup assumptions. Purpose:
+advance P6 and functional Linux/macOS workflow acceptance. Depend on exact source234
+macOS114257755869 failures, existing original transfer/query identities and read
+cancellation contracts. Completion requires actual quorum readiness before the
+fault cut and observed wait release after disconnect, with cause-specific native
+TCP/QUIC regressions, unchanged request/deadline scope and zero strict diagnostics.
+A sampled role or a successful control enqueue is not completed recovery.
+
+Next: close the source235 counter administration role/unknown-outcome assumptions.
+Purpose: advance P4/service functional acceptance. Depend on retained job114259713867
+and existing original7001 Joint, handoff, placement and data contracts. Select one
+cause before editing: historical completion is not current leadership, or exact
+UNKNOWN is not committed Joint. Completion requires unchanged original operation
+replay, actual receipt/current-quorum evidence, restart/data continuity and strict
+zero; do not widen budgets or accept arbitrary errors. CI stays background.
+
+Following: close one concrete required operator/deployment integration gap.
+Purpose: complete usable service, membership and split/merge feature integration.
+Depend on public workflow reconciliation against chapter09 and the acceptance map;
+select an actual missing end-to-end capability before adding helpers. Completion
+requires public executable/Rust usage, original-operation recovery/cleanup evidence
+and Linux/macOS validation with aligned contracts. Full roadmap remains active;
+performance/security, optional global orchestration, P8 and Windows are separate.
+
+### Slice236 schema plan — release owned handoff after terminal intent
+
+Previous turn progressed:234/235 are pushed at ef7ffc2 with strict zero and
+native regression evidence. Source234 Linux114257755705 finishes counter182/1:
+original add19703 times out after drain/cancel, while node2 leads and node3 follows
+at committed5. Retained logs show cancellation admitted on node3, and no bounded
+handoff-expiry log on node2. This suggests an orphaned local pause but does not
+by itself establish the exact event ordering. Matching macOS114257755869 is live.
+
+Existing contract: Driver::tick erases its deadline when app.pending() becomes
+None, without cancelling its owned core transfer. A durable cancellation can be
+accepted before another local driver observes the still-applied Pending record;
+that driver may start a volatile transfer before the cancellation applies. The
+terminal record then removes the deadline while core proposal quiescence remains.
+
+Shape/state: no new public API, persistent format, timer budget or core protocol.
+When no durable Pending intent remains, cancel only the original operation tracked
+by this driver's seen identity, using the core's current exact transfer context.
+A fresh driver with no owned attempt, or one tracking another operation, must
+leave host-owned unrelated transfers alone. Preserve internal completion tickets,
+terminal receipts and the existing five-second Pending expiry behavior.
+
+Ownership/failures: enqueue cancellation through existing NodeControl and wait
+for normal owner processing; never infer an effect from local deadline clearing.
+A role/configuration change already discards stale core transfers. A failed
+control remains an error; close/quit retains existing cancellation and join paths.
+
+Acceptance: new actual native three-node unit fixture commits Begin, admits
+Cancel, then starts the driver while Begin is still applied. With its target
+paused, require Cancelled applied plus an active owned transfer before testing
+terminal cleanup. Old code must retain the pause/refuse data; new code must clear
+it and apply the original data operation under the healthy quorum. Check unrelated
+operation/no-owner cases, exact terminal receipt and shutdown/join. Native TCP
+and optional QUIC, relevant full counter/drain/default tests, fmt/four strict
+profiles and source-bound platform feedback follow. Fixture helpers are needed
+only to control this accepted-before-applied ordering, unavailable from the CLI;
+no production test hook is added. Advances P4/service functional reliability;
+operator/deployment reconciliation follows, tuning/security remain later.
+
+236 fixture correction: Cancelled carries its applied index/term; the initial
+compile error is retained and the test matches the variant rather than inventing
+an equality value. Acceptance consumes actual typed client completions, including
+the data Value(2), instead of mistaking the original intent index for the later
+cancellation/data applied prefix. The no-owner/other-operation checks use actual
+core transfers, with no new provider seam or production test-only entry point.
+
+236 cleanup check correction: NodeControl is queued, not synchronously applied.
+The first candidate check samples after one poll and still sees the owned attempt.
+Retain it. Allow bounded normal owner processing (250ms fixture observation,
+unchanged production deadlines), then require absence and an actual data receipt.
+Do not equate successful enqueue with completed cancellation.
+The unrelated-transfer setup uses the same queued-control boundary: retain its
+initial one-poll unwrap failure and wait for the actual new core transfer before
+checking unchanged ownership. A fixture accessor removes repeated core lookups;
+it adds no production seam or new cancellation permission.
+
+### Slice235 schema plan — exact replacement-setup handoff continuation
+
+Previous turn progressed:234 adds bounded route observation recovery and passes
+all/default directory histories and strict checks; f55d8fa is pushed. Matching
+operator run38067409575 runs in the background. Source233 Linux job114255917500
+fails setup19750 with exact UNKNOWN LeadershipChanged after sampling source3;
+this is an unknown result for the original intent, not a terminal rejection.
+
+Shape/contracts: reuse the existing explicit leader_request administration caller for identical
+19769/19750 handoff requests; never add retries to the generic CLI exchange or
+invent a new operation. The caller retains its10s retry deadline, existing leader-observation/command
+bounds and exact recognized non-admission/interruption responses. No scan budget
+is renewed by a failed command. Source/target,
+configuration and terminal record remain Maintenance contracts; no production
+API, file format or provider seam changes are needed for this fixture correction.
+
+Transitions/ownership: setup samples leadership, submits the fixed handoff and
+requires actual Completed quorum-read evidence before learner/drain work. A new
+forced native history delivers19750 on an unread authenticated channel, waits for
+its Completed receipt and proves the sampled source is a follower before replay.
+Closing the unread channel releases its wait. Replay uses the original words on
+the current leader and compares the terminal record; changed target remains a
+terminal conflict. Carry the exact receipt through replacement/drain, cold reopen
+and retry checks, then stop/join the owned services. No local role or uncertainty
+is treated as success. One focused test helper is needed to force this setup cut
+without changing the ordinary replacement path or introducing a production layer.
+
+Acceptance: forced TCP/QUIC setup fails the old one-shot source call, then passes
+with the existing explicit original-write caller. Exercise all replacement/drain
+histories plus exact caller classification/deadline tests, retained terminal
+intent/receipt after cold recovery, data retries and joins. Default TCP and strict
+fmt/four profiles must pass sequentially. This advances P4/service and Linux/macOS
+functional acceptance;234 matching route feedback and concrete operator/deployment
+gaps follow. No performance or security work is added.
+
+235 focused correction: the initial helper selection was wrong: CLI auto accepts
+only data reads/adds, so all four replacement checks correctly refuse move-leader
+before the intended replay. Retain that failure. Use the existing explicit
+leader_request administration caller, extend only its exact move-leader response
+classification, and keep the generic CLI unchanged. Its10s between-attempt retry
+deadline and existing bounded leader/command calls are not a new end-to-end15s
+wall-clock guarantee. Add terminal/invalid-command classifier checks.
+
 
 ### Slice234 schema plan — bounded recursive-route connection recovery
 
@@ -23736,46 +23865,3 @@ run and uncertain benefit. Do not repeat the same tuning without new evidence.
 The next linked deliverables remain combined P4/P6 faults and the deployment/
 full-scope audit. The original baseline175 process remains live at observation,
 and CI stays background feedback. Full P0–P7 remains active.
-
-### Slice235 schema plan — exact replacement-setup handoff continuation
-
-Previous turn progressed:234 adds bounded route observation recovery and passes
-all/default directory histories and strict checks; f55d8fa is pushed. Matching
-operator run38067409575 runs in the background. Source233 Linux job114255917500
-fails setup19750 with exact UNKNOWN LeadershipChanged after sampling source3;
-this is an unknown result for the original intent, not a terminal rejection.
-
-Shape/contracts: reuse the existing explicit leader_request administration caller for identical
-19769/19750 handoff requests; never add retries to the generic CLI exchange or
-invent a new operation. The caller retains its10s retry deadline, existing leader-observation/command
-bounds and exact recognized non-admission/interruption responses. No scan budget
-is renewed by a failed command. Source/target,
-configuration and terminal record remain Maintenance contracts; no production
-API, file format or provider seam changes are needed for this fixture correction.
-
-Transitions/ownership: setup samples leadership, submits the fixed handoff and
-requires actual Completed quorum-read evidence before learner/drain work. A new
-forced native history delivers19750 on an unread authenticated channel, waits for
-its Completed receipt and proves the sampled source is a follower before replay.
-Closing the unread channel releases its wait. Replay uses the original words on
-the current leader and compares the terminal record; changed target remains a
-terminal conflict. Carry the exact receipt through replacement/drain, cold reopen
-and retry checks, then stop/join the owned services. No local role or uncertainty
-is treated as success. One focused test helper is needed to force this setup cut
-without changing the ordinary replacement path or introducing a production layer.
-
-Acceptance: forced TCP/QUIC setup fails the old one-shot source call, then passes
-with the existing explicit original-write caller. Exercise all replacement/drain
-histories plus exact caller classification/deadline tests, retained terminal
-intent/receipt after cold recovery, data retries and joins. Default TCP and strict
-fmt/four profiles must pass sequentially. This advances P4/service and Linux/macOS
-functional acceptance;234 matching route feedback and concrete operator/deployment
-gaps follow. No performance or security work is added.
-
-235 focused correction: the initial helper selection was wrong: CLI auto accepts
-only data reads/adds, so all four replacement checks correctly refuse move-leader
-before the intended replay. Retain that failure. Use the existing explicit
-leader_request administration caller, extend only its exact move-leader response
-classification, and keep the generic CLI unchanged. Its10s between-attempt retry
-deadline and existing bounded leader/command calls are not a new end-to-end15s
-wall-clock guarantee. Add terminal/invalid-command classifier checks.

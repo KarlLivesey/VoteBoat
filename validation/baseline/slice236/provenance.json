@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "base_revision": "ef7ffc22f59c76b3ea7c48674a7e45d7d92282a2",
+  "scope": "Exact owned leadership-transfer cancellation after terminal applied maintenance intent",
+  "validation": {
+    "compile_failure": {
+      "exit": 101,
+      "reason": "Cancelled is a struct variant"
+    },
+    "old_driver": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101
+    },
+    "initial_cleanup_observation": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101
+    },
+    "initial_unrelated_control_observation": {
+      "pass": 0,
+      "fail": 2,
+      "exit": 101
+    },
+    "final_native": 2,
+    "full_all": {
+      "counter": 186,
+      "unit": 43
+    },
+    "default": {
+      "unit": 41,
+      "drain": 30
+    },
+    "formatting_and_four_strict_profiles": "zero diagnostics",
+    "inventory": 108,
+    "conformance_metadata": {
+      "partial_reviews": 9,
+      "reviewed_operations": 68
+    }
+  },
+  "source_manifest_sha256": "788675e6f6a2074df32e942e78ed04a09fff3d30cc86da9452dbb5fb788d7c38",
+  "publication": {
+    "redacted_workspace_logs": 10,
+    "private_logs": "target/slice236-unpublished-logs",
+    "ci_service_logs": "ignored local target only; selected cause/count excerpts published"
+  },
+  "limits": "Finite Linux native histories; no identical CI event-order proof, current-source macOS, full P4/P0-P7, performance or security completion."
+}
