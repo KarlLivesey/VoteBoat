@@ -16,6 +16,8 @@
 //! security capability; simulator-only channels cannot enter production assembly.
 use crate::{identity::*, runtime::MonoTime, wire::WireScope};
 use std::io::ErrorKind;
+mod validity;
+pub use validity::{GuardedSession, SessionValidity, SESSION_VALIDITY_CONTRACT_VERSION};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct LocalIdentity {

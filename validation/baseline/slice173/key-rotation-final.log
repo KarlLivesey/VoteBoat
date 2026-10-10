@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.26s
+     Running tests/credential_refresh.rs (target/debug/deps/credential_refresh-b7556b095d48a24e)
+
+running 1 test
+test keys::replacement_certificate_requires_new_pin_but_preserves_stable_peer_identity ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+

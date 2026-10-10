@@ -107,3 +107,5 @@ Slice116 also consumes Configure for `configure-record` with `--remote-admin-pol
 The same group/session gate is rechecked at execution against one immutable full
 target and operator-provisioned placement. See [client target semantics](COUNTER_SERVICE.md#client-supplied-configuration-targets)
 for bounded parsing, exact retry comparison and compacted-history refusal.
+
+Slice173 adds [credential generations and session guards](CREDENTIAL_REFRESH.md) for Rust hosts. Prepared policy/TLS replacement can revoke existing guarded sessions without changing voter membership. The executable still loads its access file at startup; automatic live reload and durable rotation audit remain open.

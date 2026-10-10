@@ -814,6 +814,24 @@
       "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1\u20135; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1\u20136 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets. Direct encoded_length/encode_into provision caller-owned frame slices; native sizing is allocation-free and encoding preserves canonical bytes. Host compatibility defaults use separately bounded temporary Vec encoding. Slice170 roundtrips the actual core older-term SnapshotAck { index: 0 } refusal through sizing, provided-buffer encoding and decoding in every wire format 1–7. This is not durable replication credit: exact boundary matching and higher-term persistence remain in the core, and the deterministic history verifies unchanged commit/application state and restart."
     },
     {
+      "design_id": "C09/C21",
+      "public_contract": "SessionValidity / GuardedSession / NativeCredentialSet",
+      "operations": [
+        "SessionValidity::validate",
+        "GuardedSession::new/poll/read_plaintext/write_plaintext/into_revoked_parts",
+        "NativeCredentialSet::new/material/generation/lease/replace/close/into_material"
+      ],
+      "native": "NativeCredentialSet<P> owns one prepared bundle and shared atomic generation; immutable CredentialLease implements the same public SessionValidity contract as host providers",
+      "conformance": [
+        "tests/credential_refresh.rs",
+        "tests/credential_refresh/host.rs",
+        "tests/credential_refresh/native.rs",
+        "tests/credential_refresh/keys.rs",
+        "tests/quic_connect/credential_refresh.rs"
+      ],
+      "scope": "Contract version1. Bounded explicit prepared-material replacement rejects same/lower generations and returns original rejected or previous material; no implicit I/O, session list or runtime. GuardedSession requires authenticated Ready immutable binding, checks fixed-generation validity around I/O and returns construction inputs on refusal. Revocation suppresses success and clears a read buffer if discovered after provider progress, never rolls back external bytes or committed work. Native set close/drop revokes only its own leases; guard close affects only one connection, extraction revokes first. Host injection checks call suppression, during-I/O invalidation and cleanup ownership. Real TCP/TLS/QUIC old-session revocation and fresh stable-identity authorization, actual TLS certificate/key and pin replacement, and native transport exact failed-batch ownership. Host must capture lease before authentication, validate bundle consistency and own bounded sessions/restart configuration. No executable reload, durable rotation journal, external issuer, secret distribution or membership authority."
+    },
+    {
       "design_id": "C09",
       "public_contract": "SecureSession",
       "operations": [

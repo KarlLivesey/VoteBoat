@@ -1,0 +1,45 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0277]: `NativeServiceAccess` doesn't implement `Debug`
+   --> tests/quic_connect/../credential_refresh/native.rs:101:10
+    |
+101 |         .unwrap();
+    |          ^^^^^^ the trait `Debug` is not implemented for `NativeServiceAccess`
+    |
+    = help: the following other types implement trait `Debug`:
+              ()
+              (A, Z, Y, X, W, V, U, T)
+              (B, A, Z, Y, X, W, V, U, T)
+              (C, B, A, Z, Y, X, W, V, U, T)
+              (D, C, B, A, Z, Y, X, W, V, U, T)
+              (E, D, C, B, A, Z, Y, X, W, V, U, T)
+              (T,)
+              (U, T)
+            and 5 others
+    = note: required for `(voteboat::secure::SessionError, NativeServiceAccess)` to implement `Debug`
+note: required by a bound in `Result::<T, E>::unwrap`
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/result.rs:1225:4
+
+error[E0277]: `NativeServiceAccess` doesn't implement `Debug`
+   --> tests/credential_refresh/native.rs:101:10
+    |
+101 |         .unwrap();
+    |          ^^^^^^ the trait `Debug` is not implemented for `NativeServiceAccess`
+    |
+    = help: the following other types implement trait `Debug`:
+              ()
+              (A, Z, Y, X, W, V, U, T)
+              (B, A, Z, Y, X, W, V, U, T)
+              (C, B, A, Z, Y, X, W, V, U, T)
+              (D, C, B, A, Z, Y, X, W, V, U, T)
+              (E, D, C, B, A, Z, Y, X, W, V, U, T)
+              (T,)
+              (U, T)
+            and 5 others
+    = note: required for `(voteboat::secure::SessionError, NativeServiceAccess)` to implement `Debug`
+note: required by a bound in `Result::<T, E>::unwrap`
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/result.rs:1225:4
+
+For more information about this error, try `rustc --explain E0277`.
+error: could not compile `voteboat` (test "quic_connect") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (test "credential_refresh") due to 1 previous error

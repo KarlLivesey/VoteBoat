@@ -12,42 +12,19 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-pub mod administration;
-pub mod admission;
-pub mod authority_discovery;
-pub mod authorization;
-pub mod buffer;
-#[cfg(feature = "tls")]
-pub mod connect;
-pub mod credentials;
-pub mod dial;
-pub mod discovery;
-pub mod log_store;
-pub mod lookup_discovery;
-#[cfg(feature = "tls")]
-pub mod node;
-pub mod observability;
-pub mod outbound;
-pub mod placement;
-pub mod placement_planning;
-#[cfg(feature = "quic")]
-pub mod quic;
-#[cfg(feature = "quic")]
-pub mod quic_connect;
-#[cfg(feature = "quic")]
-mod quic_socket;
-pub mod remote_discovery;
-pub mod routing;
-pub mod runtime;
-pub mod snapshot_store;
-pub mod snapshot_worker;
-#[cfg(feature = "tls")]
-pub mod startup;
-#[cfg(feature = "tls")]
-pub mod tls;
-pub mod transport;
-pub mod vote_store;
-pub mod wire;
-pub mod worker;
-
-pub mod group_creation;
+use super::*;
+#[path = "../credential_refresh/native.rs"]
+mod native;
+#[test]
+fn quic_rotation_revokes_old_io_and_reconnect_preserves_identity() {
+    let mut old_connectors = connectors();
+    let (mut sessions, now) = establish(&mut old_connectors, 0, 1);
+    let a = sessions.remove(&(1, 2)).unwrap();
+    let b = sessions.remove(&(2, 1)).unwrap();
+    let credentials = native::exercise(a, b, MonoTime(now));
+    let mut fresh_connectors = connectors();
+    let (mut fresh, now) = establish(&mut fresh_connectors, 0, 2);
+    let a = fresh.remove(&(1, 2)).unwrap();
+    let b = fresh.remove(&(2, 1)).unwrap();
+    native::resume(a, b, &credentials, MonoTime(now));
+}

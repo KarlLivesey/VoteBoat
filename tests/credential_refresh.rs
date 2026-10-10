@@ -12,42 +12,30 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-pub mod administration;
-pub mod admission;
-pub mod authority_discovery;
-pub mod authorization;
-pub mod buffer;
+#[path = "credential_refresh/host.rs"]
+mod host;
 #[cfg(feature = "tls")]
-pub mod connect;
-pub mod credentials;
-pub mod dial;
-pub mod discovery;
-pub mod log_store;
-pub mod lookup_discovery;
+#[path = "credential_refresh/keys.rs"]
+mod keys;
+#[cfg(feature = "native")]
+#[path = "credential_refresh/native.rs"]
+mod native;
+mod support;
+use voteboat::{identity::*, runtime::MonoTime, secure::*};
+fn local(id: u64) -> LocalIdentity {
+    LocalIdentity {
+        node: support::node(id),
+        store: StoreBinding {
+            identity: support::identity(id.into()),
+            session: StoreSession::new(1).unwrap(),
+        },
+    }
+}
 #[cfg(feature = "tls")]
-pub mod node;
-pub mod observability;
-pub mod outbound;
-pub mod placement;
-pub mod placement_planning;
-#[cfg(feature = "quic")]
-pub mod quic;
-#[cfg(feature = "quic")]
-pub mod quic_connect;
-#[cfg(feature = "quic")]
-mod quic_socket;
-pub mod remote_discovery;
-pub mod routing;
-pub mod runtime;
-pub mod snapshot_store;
-pub mod snapshot_worker;
-#[cfg(feature = "tls")]
-pub mod startup;
-#[cfg(feature = "tls")]
-pub mod tls;
-pub mod transport;
-pub mod vote_store;
-pub mod wire;
-pub mod worker;
-
-pub mod group_creation;
+#[test]
+fn native_tls_rotation_revokes_old_io_and_new_session_is_usable() {
+    let (a, b) = support::tls::pair(local(1), local(2), 1);
+    let credentials = native::exercise(a, b, MonoTime(0));
+    let (a, b) = support::tls::pair(local(1), local(2), 2);
+    native::resume(a, b, &credentials, MonoTime(0));
+}

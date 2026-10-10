@@ -95,9 +95,43 @@ strict profiles clean while advancing the remaining capability work.
 | --- | --- | --- | --- |
 | Completed: recorded cancellation/publication race schedules171 | Exercise competing creation decisions under owner loss; advances P0/P5/P6 validation. | Schema16 cancellation, native owner/file recovery and slice170 service fixes. | Sixteen recorded TCP/QUIC schedules preserve the winning decision, reject the loser, retain retry identity and keep canceled targets non-serving; broader lifecycle faults remain open. |
 | Completed: bounded remote endpoint refresh172 | Fetch endpoint hints over authenticated TCP/TLS or QUIC; advances P5/C17. | Existing discovery/session contracts and owner-independent child routing. | Bounded single-flight refresh/retry, exact cancellation, stale refusal, explicit reconnect and cached-peer availability during source failure. External manifest fetching and executable integration remain open. |
-| Current: remaining baseline evidence audit | Identify and close uncovered P0–P7 requirements without reducing scope. | Recorded lifecycle schedules, endpoint refresh and current implementation/platform evidence. | Map each original requirement to direct evidence, implement missing behavior, and run relevant Linux/macOS checks; retain explicit research/Windows exclusions. |
-| Next: bounded credential refresh and session revocation | Preserve authenticated service operation when credentials change; advances C09/C21 and usable deployment. | Existing SecureSession/ServiceAuthorizer contracts and the preceding audit of supported identity/trust transitions. | Explicit refresh ownership, bounded pending work, fail-closed old credential/session behavior, recovery and independent host-resource lifetime; never infer membership from credentials. |
-| Following: remaining native deployment and fault gates | Close the audit's platform, network integration and combined-recovery gaps; advances usable service and P0–P7 validation. | Requirement-by-requirement audit, credential transition contracts and the existing native harness. | Direct evidence for each selected gap, with explicit Linux/macOS and separate-host boundaries; no broad completion claim from a narrow test. |
+| Completed: credential generation and session revocation173 | Revoke old authenticated connections when prepared credentials change; advances C09/C21 and Rust embedding. | Existing SecureSession/ServiceAuthorizer contracts and chapter09/17 audit. | Host/native ownership and callback checks, selected TCP/QUIC reauthentication, TLS key/pin replacement and exact failed native transport batches. Executable publication remains open. |
+| Current: staged executable credential publication | Make credential changes usable without restarting the service; advances C09/C21 and deployment. | GuardedSession/NativeCredentialSet and a bounded off-owner loading path. | Validate complete material before generation publication, reject stale generations, revoke old pending channels without revoking unrelated work, preserve admitted-operation recovery and restart configuration. |
+| Next: remaining baseline evidence audit and native deployment gates | Close the audit's platform, network integration and combined-recovery gaps without reducing P0–P7 scope. | Chapter09/11/12/17 requirement ledger, credential transition contracts and the native harness. | Direct evidence for selected gaps, with explicit Linux/macOS and separate-host boundaries; no broad completion claim from a narrow test. |
+| Following: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
+
+### Slice173 schema plan — credential generation and session revocation
+
+Audit finding: chapter09 requires key rotation to preserve stable identity while
+excluding stale credentials; chapter17 C09/C21 require renew/revoke and credential
+refresh. Current SecureSession has individual revoke, but NativeServiceAccess
+is an immutable snapshot and no common live generation invalidates old sessions.
+This remains an actual gap, independent of the wider fault/platform audit.
+
+Shape: public `SessionValidity` plus `GuardedSession<S,V>` compose around the
+existing SecureSession contract. A native `NativeCredentialSet<P>` owns one
+prepared credential/policy bundle and issues fixed-generation validity leases.
+Replacing with a strictly newer generation returns the old bundle, atomically
+invalidates all old leases and permits fresh leases. It creates no worker; file
+loading and cryptographic validation stay outside the poll path.
+
+Transitions/ownership: prepare -> publish generation -> establish/guard sessions
+-> replace/revoke -> old guarded sessions reject further plaintext and polling.
+Check validity before and after provider calls. Concurrent replacement cannot
+undo I/O already accepted, but suppresses a success result after revocation;
+subsequent I/O is refused and the underlying session is revoked. Construction
+refusal returns both inputs. Closing one guarded session leaves other sessions
+and the credential owner intact. Closing/dropping the owner invalidates its
+leases. Generations are operator-provided on restart, never durable Raft epochs.
+
+Checks: independent host validity provider, rejected construction ownership,
+replacement input ownership, same/lower generation refusal, no callbacks after
+revocation, replacement during I/O, shared lifetime isolation and actual native
+TCP/TLS and QUIC session revocation. Fresh authenticated sessions must resume
+with the same stable identities; old access contexts cannot regain permission.
+This advances C09/C21 and the usable service milestone; next is native executable
+credential loading/publication and broader deployment/fault gates. Do not claim
+that a generation guard alone implements key distribution or remote issuance.
 
 ### Slice172 schema plan — authenticated remote endpoint refresh
 
@@ -16006,3 +16040,44 @@ Rust hosts, not an external manifest proof, automatic executable integration,
 complete C17, macOS/separate-host validation or a full P0–P7 certificate. The
 linked plan advances to the remaining baseline audit, then credential refresh
 and the audit's outstanding native deployment/fault gates.
+
+### Slice173 progress — credential generations and guarded sessions
+
+The previous goal turn made concrete progress at7faf5a1; the clean worktree was
+revalidated. Reviewing the actual immutable NativeServiceAccess and individual
+SecureSession::revoke implementations against chapters09/17 identified the
+missing shared replacement/revocation mechanism. The full remaining-requirement
+ledger is still open; this finding selects a concrete C09/C21 capability gap.
+
+Implemented public `SessionValidity` contract version1 and `GuardedSession<S,V>`
+through the existing SecureSession interface. Construction checks authenticated
+Ready binding and returns both inputs on refusal. I/O checks the fixed binding
+and validity before/after provider calls; revocation suppresses success and clears
+read output when detected afterward. NativeCredentialSet owns one prepared
+bundle and issues immutable CredentialLeases; strictly increasing replacement
+returns the old bundle and invalidates all old leases. No poll-path file loading,
+background owner, session list or unbounded cancellation sweep is added.
+
+Host tests verify exact construction/input ownership, no I/O callbacks after
+revocation, invalidation within callbacks, extraction that revokes first, native
+replacement monotonicity and independent owners. Real TCP/TLS and QUIC tests
+revoke established sessions and reauthenticate with the same stable identities
+and reduced permissions. A real TLS certificate/key change rejects both retired
+trust and a retired certificate; the new pin transfers data. The native framed
+transport returns the exact accepted batch with Failed status after revocation,
+without turning it into successful delivery or durability evidence.
+
+Linux evidence in validation/baseline/slice173 records39 all-feature focused tests
+and9 core-only tests, plus the final key-rotation check. Formatting, both strict
+Clippy profiles and warnings-denied docs pass; the inventory records93 contracts
+and is metadata evidence only. An initial test compile failure required removing
+a Debug bound on an owned policy error; no production diagnostics or thresholds
+were suppressed. Source hashes identify the validated files.
+
+Credential generations remain host configuration, not durable voter epochs.
+Replacing a bundle does not recall previously transmitted bytes or undo admitted
+operations. Hosts must capture leases for the material used before authentication;
+no old session receives a fresh lease. Native file preparation/publication and
+executable integration are the next linked deliverable. Key distribution,
+durable rotation audit/recovery, broader fault/platform validation and remaining
+P0–P7 requirements are not declared complete.

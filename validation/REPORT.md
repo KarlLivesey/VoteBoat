@@ -5222,3 +5222,22 @@ retained; the passing logs refer to their focused fixes, not suppressed checks.
 This is not macOS/separate-host evidence, external manifest verification,
 executable integration or exhaustive network-fault validation. Hints remain
 non-authoritative and cannot reactivate retired groups or alter membership.
+
+## Slice173 — credential generation and session revocation
+
+Linux:39 focused all-feature tests pass across authorization, credential_refresh,
+quic_connect and secure. Nine core-only authorization/credential/secure tests pass.
+The separately recorded final key-rotation check also passes. See
+`validation/baseline/slice173` for commands, logs and tested source hashes.
+
+Coverage includes downstream SessionValidity injection, rejected input ownership,
+pre/post-I/O revocation, read-output suppression, native generation replacement,
+shared-owner isolation, TLS/QUIC reauthentication and updated authorization. A
+real TLS key/pin change rejects both a retired certificate and stale trust. Native
+PeerTransport returns the original accepted batch as Failed after revocation.
+Formatting, both strict Clippy configurations, warnings-denied docs and inventory
+validation pass. Inventory shape/path checking is not protocol conformance.
+
+No automatic executable reload, remote secret distribution, durable rotation
+journal, macOS/separate-host execution or complete C09/C21/P0–P7 claim follows.
+Accepted external progress cannot be undone by credential replacement.

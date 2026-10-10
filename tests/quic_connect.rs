@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![cfg(feature = "quic")]
+#[path = "quic_connect/credential_refresh.rs"]
+mod credential_refresh;
 #[path = "quic_connect/discovery.rs"]
 mod discovered;
 #[path = "quic_connect/remote_discovery.rs"]
