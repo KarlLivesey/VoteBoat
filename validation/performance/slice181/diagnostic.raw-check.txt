@@ -1,0 +1,1 @@
+target/bench-slice181-diagnostic: 256 receipts, group routing/history, windows and latency/rate arithmetic pass

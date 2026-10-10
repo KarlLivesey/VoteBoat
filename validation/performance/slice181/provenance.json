@@ -1,0 +1,50 @@
+{
+  "source_base": "1b460ef2b05110bd0dd38d18e8990c0f2b70c485",
+  "kernel": "Linux 7.2.9-2-cachyos x86_64 GNU/Linux",
+  "cpu": [
+    {
+      "field": "Architecture:",
+      "data": "x86_64"
+    },
+    {
+      "field": "CPU(s):",
+      "data": "16"
+    },
+    {
+      "field": "Model name:",
+      "data": "AMD Ryzen 7 9800X3D 8-Core Processor"
+    },
+    {
+      "field": "Thread(s) per core:",
+      "data": "2"
+    },
+    {
+      "field": "Core(s) per socket:",
+      "data": "8"
+    },
+    {
+      "field": "Socket(s):",
+      "data": "1"
+    }
+  ],
+  "memory_total": "MemTotal:       63434600 kB",
+  "device_model": "Sabrent SB-ROCKET-NVMe4-2TB",
+  "firmware": "RKT4B5.1",
+  "filesystem": "btrfs",
+  "mount_options": "rw,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2",
+  "replicas": 3,
+  "physical_hosts": 1,
+  "physical_devices": 1,
+  "protocol": "TcpTls",
+  "operations": 256,
+  "warmup": 64,
+  "window": 1,
+  "payload_bytes": 8,
+  "election_min_ms": 1000,
+  "election_spread_ms": 1000,
+  "heartbeat_ms": 50,
+  "synchronization": "File::sync_all; atomic manifest rename then directory synchronization",
+  "background_work": "Older full-suite routed process PID1580417 remains live on tmpfs; no CPU/device reservation. No build scheduled during measurement.",
+  "reference_root": "target/bench-slice181-reference",
+  "diagnostic_root": "target/bench-slice181-diagnostic"
+}

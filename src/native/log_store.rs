@@ -26,7 +26,9 @@ mod checkpoint;
 mod file;
 mod timing;
 pub use file::FileLogIo;
-pub use timing::{JournalCallTiming, JournalTimingSnapshot, JournalTimings};
+pub use timing::{
+    JournalCallTiming, JournalTimingSnapshot, JournalTimings, ManifestPublicationTiming,
+};
 
 const HEADER: usize = 32;
 const TRAILER: usize = 16;

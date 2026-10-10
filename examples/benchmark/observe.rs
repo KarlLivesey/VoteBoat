@@ -38,6 +38,7 @@ pub(super) struct Totals {
     publish_ns: u128,
     histogram: BTreeMap<usize, u64>,
     groups: BTreeMap<u128, u64>,
+    publication: Option<voteboat::native::log_store::JournalTimingSnapshot>,
 }
 #[derive(Clone, Default)]
 pub(super) struct Trace(
@@ -66,6 +67,7 @@ impl Trace {
                 .errors
                 .saturating_add(snapshot.log_sync.errors)
                 .saturating_add(snapshot.manifest.errors);
+            totals.publication = Some(snapshot);
         }
         totals
     }
@@ -239,12 +241,48 @@ pub(super) fn retain_journal(
         return;
     }
     capture(snapshots, stage, traces);
-    let result = (|| -> Result<(), Failure> {
-        write_csv(&mut exclusive(&root.join("journal.csv"))?, snapshots)
-    })();
+    let result = write_journal(root, snapshots);
     if let Err(error) = result {
         eprintln!("journal diagnostic retention failed: {error}");
     }
+}
+pub(super) fn write_journal(
+    root: &Path,
+    snapshots: &[(String, usize, Totals)],
+) -> Result<(), Failure> {
+    write_csv(&mut exclusive(&root.join("journal.csv"))?, snapshots)?;
+    write_publication(root, snapshots)
+}
+fn write_publication(root: &Path, snapshots: &[(String, usize, Totals)]) -> Result<(), Failure> {
+    let mut file = exclusive(&root.join("publication.csv"))?;
+    writeln!(file, "stage,replica,step,calls,errors,elapsed_ns,max_ns,manifest_calls,manifest_errors,manifest_ns")?;
+    for (stage, replica, totals) in snapshots {
+        let Some(snapshot) = totals.publication else {
+            return Err("publication diagnostics require native journal timings".into());
+        };
+        let p = snapshot.publication;
+        for (step, timing) in [
+            ("open", p.open),
+            ("write", p.write),
+            ("file_sync", p.file_sync),
+            ("rename", p.rename),
+            ("directory_sync", p.directory_sync),
+        ] {
+            writeln!(
+                file,
+                "{stage},{replica},{step},{},{},{},{},{},{},{}",
+                timing.calls,
+                timing.errors,
+                timing.elapsed_ns,
+                timing.max_ns,
+                snapshot.manifest.calls,
+                snapshot.manifest.errors,
+                snapshot.manifest.elapsed_ns
+            )?;
+        }
+    }
+    file.sync_all()?;
+    Ok(())
 }
 pub(super) fn capture(snapshots: &mut Vec<(String, usize, Totals)>, stage: &str, traces: &[Trace]) {
     for (i, trace) in traces.iter().enumerate() {

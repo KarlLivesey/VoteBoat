@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.16s
+     Running tests/journal_timings.rs (target/debug/deps/journal_timings-3c17cfef9d03cabf)
+
+running 3 tests
+test failed_rename_counts_only_invoked_steps_and_retains_staging_file ... ok
+test timing_selection_preserves_exact_barriers_default_recovery_and_reader_lifetime ... ok
+test failed_publication_is_counted_without_becoming_durable_evidence ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/log_store.rs (target/debug/deps/log_store-72f62db2ad36691e)
+
+running 9 tests
+test suffix_fence_invalidates_uncompleted_old_generation ... ok
+test valid_checksums_cannot_hide_unbounded_policy_or_command_lengths ... ok
+test user_commands_leave_control_reserve_and_admission_is_bounded ... ok
+test compacted_log_ranges_and_committed_prefix_protection_with_native_and_host ... ok
+test restart_recovers_policy_identity_hard_state_suffix_and_commit ... ok
+test failed_sync_or_publication_fences_without_acknowledging_the_transition ... ok
+test public_store_conformance_runs_against_native_and_host ... ok
+test every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix ... ok
+test codec_roundtrips_rejects_every_single_bit_mutation_and_unbounded_lengths ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

@@ -1,0 +1,12 @@
+✔ complete diagnostic has fifteen independent measured step deltas (2.194065ms)
+✔ partial, duplicate, unknown and error snapshots are refused (3.893621ms)
+✔ regression and inconsistent joined operation totals are refused (2.030639ms)
+✔ live snapshot can end inside a call without inventing an atomic observation (1.016131ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13.209931

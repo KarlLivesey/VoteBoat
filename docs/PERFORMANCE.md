@@ -429,6 +429,24 @@ checker rejects that diagnostic in place of the uninstrumented reference.
 Parallel worker time sums overlap; these timings attribute file work, not every
 client critical-path dependency or separate-host capacity.
 
+Instrumented startup runs also retain `publication.csv`, with separate counters
+for staging-file open/write, file synchronization, rename and directory
+synchronization. Each row records calls, errors, total/max duration and enclosing
+manifest totals. No synchronization or publication ordering is skipped. The
+directory step includes opening the directory. Physical WAL replacement has its
+own path and is not included in these publication-step counters.
+
+```sh
+node validation/check-publication-timings.mjs RUN_DIRECTORY/publication.csv
+```
+
+Live phase snapshots can fall inside a call; they are not atomic observations.
+Joined snapshots require all five successful step counts to agree with the
+enclosing call count. Failed runs retain partial diagnostics, which the complete
+result checker refuses. Per-replica durations overlap, and adding them does not
+reconstruct client latency. Keep `--journal-timings` off for the original fixed
+serial acceptance gate.
+
 Slice158 adds one successful60-second QUIC pause run with the original gate:
 group1's forced boundary11 is installed and retained across reopen, two new
 follower installs occur, and the source leader/term/binding is unchanged. All

@@ -104,9 +104,43 @@ strict profiles clean while advancing the remaining capability work.
 | Completed: static local lane composition178 | Exercise real independent local owners/stores using the public Node assembly; advances P2/P7. | Shared native benchmark, bounded static assignments, common phase boundaries. | Six lane tests and all28 benchmark tests; TCP/QUIC file reopen/retry checks; independent raw/window/storage checks. Finite release runs are not a sustainable improvement claim. |
 | Completed: service authority-race validation179 | Resolve the concrete Ubuntu177 failures; advances usable service/P4/platform evidence. | Saved failed job log, exact request identities and documented transient read/configuration results. | Deterministic read regression fails before the fix; all54 service histories and10 read-contract checks pass after it. Exact IDs/records are retained; unrelated errors remain terminal. |
 | Completed: placement replacement/removal plans180 | Close the learner-only C18 planning gap; advances P4/P5 composition and selective assignment. | Validated recursive policies, existing planner/authorizer, learner admission and joint/final records. | Host/native plans preserve tree structure, reject stale/unprepared/unauthorized targets and replay with correct joint/final timing; all54 service tests pass, including planner-produced TCP/QUIC demotion histories. No automatic activation. |
+| Completed: publication-step attribution181 | Identify the observed native storage cost before another optimization; advances P7. | Optional native timings, original reference workload and unchanged publication boundaries. | Native interruption/error/recovery tests pass; complete256-operation reference and instrumented runs pass raw/recovery checks. File and directory synchronization dominate publication means. Reference p99 remains above250ms; no improvement claimed. |
 | Current: measured baseline performance gates | Address the original unmet fixed-p99 and cost-attribution requirements; advances P7. | Revalidated workload/hardware settings and native deployment/failure evidence. | Repeatable committed/applied measurements meeting the original budget, with persistence and latency attribution; keep failed historical runs visible. |
 | Next: combined membership/lifecycle fault gates | Exercise remaining P4/P6 recovery obligations across configuration and ownership changes. | Audit-selected missing schedules and existing exact receipt/recovery contracts. | Recorded interruptions preserve one owner, committed configuration, request identity and recoverable application state; separate selected evidence from uncovered schedules. |
 | Following: remaining deployment and full-scope audit | Close explicit P0–P7 capability gaps while keeping the usable service; advances deployment/composition. | Current requirement ledger and verified platform/fault evidence. | Verify remote routing, placement orchestration and current platform outcomes against actual APIs; retain every unresolved baseline requirement. |
+
+### Slice181 schema plan — attribute the existing manifest publication cost
+
+P7's outstanding attribution gate needs the actual operations inside the largest
+observed file-call category. Slice138 grouped staging open/write/file-sync,
+rename and directory-sync together; slice139 changed file-sync speculatively
+and supplied no valid gain. Add fixed-size optional counters for those five
+existing operations before choosing another storage experiment. The native
+JournalIo contract, publication ordering and all sync_all calls stay unchanged.
+
+Shape: extend the host-owned JournalTimings snapshot with five named publication
+step counters. The already optional native observer records each invoked step's
+duration/result; a failure prevents later steps just as before. Aggregate
+publication timing includes the nested work and observer overhead. There is no
+new receipt, generation, authority, queue, worker or persistent format. Clones
+retain counters after file/worker drop; relaxed concurrent reads may observe a
+partially updated call, while joined snapshots have stable totals.
+
+Keep existing benchmark storage/journal CSV formats intact. Add a separate
+publication CSV for explicitly instrumented startup runs, including failed-run
+retention. Its independent checker accepts only complete joined successful
+diagnostics, checks stage progression/counts/error-free calls and monotonic
+counters, and reports measured deltas without labeling parallel sums as client
+critical-path time. Reject missing stages, negative deltas and partial runs.
+
+Acceptance: real publication success/open failure, every existing primitive
+interruption boundary and durable reopen behavior, counter saturation/lifetime,
+CSV negative controls and a same-device diagnostic with original workload and
+recorded host contention. Keep the original uninstrumented256-operation/250ms
+gate unchanged; no gain is inferred from instrumented timing. Current deliverable
+advances P7 attribution, next is evidence-selected tuning and fixed-budget
+measurement, then the existing combined P4/P6 failure work. Full P0–P7 remains
+active; macOS/separate-host and other ledger gaps remain open.
 
 ### Slice180 schema plan — replacement and removal without policy flattening
 
@@ -16577,3 +16611,46 @@ successful lint job and still-running Linux/macOS jobs at observation. The older
 baseline175 process remained live when inspected; it is not current-source
 validation. The linked mini plan returns to P7 measurement, then combined fault
 coverage and the full-scope deployment audit. The full P0–P7 goal remains active.
+
+### Slice181 implemented evidence — actual manifest publication steps
+
+The optional native JournalTimings reader now includes fixed-cardinality staging
+open/write/file-sync, rename and directory-sync timing. The same ordered native
+operations and error results remain; no synchronization, authority boundary or
+format changed. Failed open/rename calls suppress later work exactly as before.
+The directory duration includes its open. Concurrent snapshots remain explicitly
+non-atomic; stable joined totals preserve independent step counts and lifetimes.
+
+Instrumented startup benchmarks emit publication.csv separately from unchanged
+journal/storage CSV formats, including partial diagnostic retention on failure.
+The independent checker requires every replica/phase/step, validates stable
+joined counts/durations, rejects errors/regression/partial results and reports
+actual measured deltas. It cannot certify durability or reconstruct parallel
+client latency. Four checker positive/negative tests pass. Existing journal and
+serial-gate checker tests remain unchanged and pass.
+
+The original same-device reference and diagnostic both completed256 operations,
+recovered320 and verified original retries with all workers joined. Reference
+49.559878s/5.165ops/s/p99956.095274ms fails the original250ms gate. Diagnostic
+40.348833s/6.345ops/s/p99733.740841ms is not a comparable tuning gain: both finite
+runs shared host load with the older tmpfs baseline. The five actual per-step
+means show file sync15.357–18.378ms and directory sync16.445–19.158ms dominate
+publication; staging writes are about0.006ms. WAL sync is separately16.320–18.263ms.
+This rules out file-open caching as the dominant mean-cost explanation, not
+all possible p99 causes. Raw files, hashes, device/host settings and scope are
+in validation/performance/slice181.
+
+Three public journal/error tests,9 log-store conformance tests,8 selected native
+file/timing/codec tests and28 native benchmark tests pass. Publication interruption
+checks verify exactly the invoked step prefix. Initial test refusal incorrectly
+expected FileLogIo::open to reject a directory immediately; NativeLogStore recovery
+correctly refuses the invalid manifest, and the fixture now checks that layer.
+One new output line exceeded the size lint; shared journal writing was factored
+without suppression. Both strict Clippy profiles, formatting, warning-denied docs
+and95-contract inventory pass. No complete full-suite/platform claim is added.
+
+Macro review: P7 actual file-cost attribution advances; sustainable improvement
+and the fixed-p99 gate remain open. Next is an evidence-selected synchronization/
+barrier-count design preserving the authoritative recoverable boundary, before
+any benchmark acceptance claim; combined membership/lifecycle and deployment
+scope remain in the next linked deliverables. Full P0–P7 stays active.

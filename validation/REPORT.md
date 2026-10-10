@@ -5393,3 +5393,21 @@ all-target Clippy profiles, warning-denied docs and95-contract inventory pass.
 Evidence: [slice180](baseline/slice180/README.md). These checks do not complete
 P0–P7 or establish automatic relocation, remote manifest fetching, physical
 power-loss safety, current macOS/separate-host coverage or the unmet P7 p99 gate.
+
+## Slice181 — publication-step attribution, fixed gate still failing
+
+Optional fixed-size native counters now distinguish actual manifest staging
+open/write/file-sync, rename and directory-sync operations. Ordered publication,
+error propagation and all synchronization calls remain. Selected native primitive
+interruption and public real-file error/recovery tests pass. Both strict Clippy
+profiles, formatting, warning-denied docs, native benchmark tests and checker
+negative controls pass. Details and raw outputs: [slice181](performance/slice181/README.md).
+
+Both256-operation TCP runs recovered320, preserved retries and joined workers.
+Uninstrumented reference p99956.095274ms fails the unchanged250ms budget.
+Instrumented p99733.740841ms cannot establish a tuning gain. This was a shared
+host; the earlier full-suite run remained active on tmpfs. Actual publication
+means are dominated by file and directory synchronization, rather than staging
+open/write or rename. Parallel sums and live partial snapshots are not client
+critical-path measurements. P7 sustainable performance and other P0–P7 acceptance
+remain incomplete.

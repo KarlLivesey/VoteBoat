@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.52s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-354c68027e80b385)
+
+running 8 tests
+test native::log_store::timing::tests::publication_step_totals_saturate_independently ... ok
+test native::log_store::timing::tests::totals_saturate_and_reader_clone_has_no_close_effect ... ok
+test native::log_store::configuration_tests::configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members ... ok
+test native::log_store::configuration_tests::configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag ... ok
+test native::log_store::file::tests::initial_publication_never_selects_a_partial_manifest ... ok
+test native::log_store::configuration_tests::membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation ... ok
+test native::log_store::file::tests::every_manifest_publication_boundary_preserves_selected_state_and_lock ... ok
+test native::log_store::file::tests::every_file_replacement_boundary_recovers_selected_pair_without_dual_writer ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 61 filtered out; finished in 0.03s
+

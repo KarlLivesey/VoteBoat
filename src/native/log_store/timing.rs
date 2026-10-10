@@ -16,6 +16,16 @@ pub struct JournalCallTiming {
     pub elapsed_ns: u64,
     pub max_ns: u64,
 }
+/// Invoked steps of the existing atomic manifest publication, in order.
+/// Directory synchronization includes opening the containing directory.
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub struct ManifestPublicationTiming {
+    pub open: JournalCallTiming,
+    pub write: JournalCallTiming,
+    pub file_sync: JournalCallTiming,
+    pub rename: JournalCallTiming,
+    pub directory_sync: JournalCallTiming,
+}
 /// Concurrent fields may be sampled between updates. Read after worker join for
 /// stable totals. Durations overlap across workers and are not critical-path time.
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
@@ -23,6 +33,7 @@ pub struct JournalTimingSnapshot {
     pub append: JournalCallTiming,
     pub log_sync: JournalCallTiming,
     pub manifest: JournalCallTiming,
+    pub publication: ManifestPublicationTiming,
 }
 #[derive(Default)]
 struct Call {
@@ -56,13 +67,20 @@ impl Call {
 /// Host-owned reader for explicitly selected native file diagnostics. Cloning or
 /// dropping a reader never closes a file or worker. No callbacks, queues or I/O.
 #[derive(Clone, Default)]
-pub struct JournalTimings(Arc<[Call; 3]>);
+pub struct JournalTimings(Arc<[Call; 8]>);
 impl JournalTimings {
     pub fn snapshot(&self) -> JournalTimingSnapshot {
         JournalTimingSnapshot {
             append: self.0[0].snapshot(),
             log_sync: self.0[1].snapshot(),
             manifest: self.0[2].snapshot(),
+            publication: ManifestPublicationTiming {
+                open: self.0[3].snapshot(),
+                write: self.0[4].snapshot(),
+                file_sync: self.0[5].snapshot(),
+                rename: self.0[6].snapshot(),
+                directory_sync: self.0[7].snapshot(),
+            },
         }
     }
     pub(super) fn record(&self, operation: usize, elapsed: Duration, success: bool) {
@@ -89,5 +107,21 @@ mod tests {
             }
         );
         assert_eq!(reader.snapshot().append, JournalCallTiming::default());
+    }
+    #[test]
+    fn publication_step_totals_saturate_independently() {
+        let timing = JournalTimings::default();
+        for operation in 3..8 {
+            timing.record(operation, Duration::MAX, false);
+            timing.record(operation, Duration::from_nanos(1), true);
+        }
+        let p = timing.snapshot().publication;
+        for step in [p.open, p.write, p.file_sync, p.rename, p.directory_sync] {
+            assert_eq!(step.calls, 2);
+            assert_eq!(step.errors, 1);
+            assert_eq!(step.elapsed_ns, u64::MAX);
+            assert_eq!(step.max_ns, u64::MAX);
+        }
+        assert_eq!(timing.snapshot().manifest, JournalCallTiming::default());
     }
 }

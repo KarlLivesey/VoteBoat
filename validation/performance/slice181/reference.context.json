@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "mode": "disk_reference",
+  "filesystem": "btrfs",
+  "root": "target/bench-slice181-reference",
+  "root_path_kind": "workspace_relative",
+  "source_revision": "1b460ef2b05110bd0dd38d18e8990c0f2b70c485",
+  "executable_sha256": "397f5951599e20d74ccb21812c430ae545654216e307b97995d59a8bd40b4bd6",
+  "summary_sha256": "f6ae05706e8d2cab1ef5bc997a2689d649ec32e6925106a1c3f66b2e9decc334",
+  "samples_sha256": "341adb0f2f16b23324c84e389bbd8445ba78aea88b8da2af0cd0aaff3500ab4e",
+  "source_changes": "Source/binary hashes in validation/performance/slice181/source-binary.sha256; instrumentation only, disabled for reference."
+}

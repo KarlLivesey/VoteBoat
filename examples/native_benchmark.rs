@@ -850,7 +850,7 @@ fn run<L: LogStore + Send + 'static>(
     if shared {
         observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
     } else if !traces.is_empty() {
-        observe::write_csv(&mut exclusive(&root.join("journal.csv"))?, &storage)?;
+        observe::write_journal(root, &storage)?;
     }
     report_run(
         &config,

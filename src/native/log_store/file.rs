@@ -139,21 +139,25 @@ impl FileLogIo {
         mut after: impl FnMut() -> io::Result<()>,
     ) -> io::Result<()> {
         let staging = self.directory.join("MANIFEST.tmp");
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(&staging)?;
+        let mut file = self.timed(3, |_| {
+            OpenOptions::new()
+                .write(true)
+                .create(true)
+                .truncate(true)
+                .open(&staging)
+        })?;
         after()?;
-        file.write_all(bytes)?;
+        self.timed(4, |_| file.write_all(bytes))?;
         after()?;
         // File contents and metadata precede atomic name selection. The
         // containing directory is synchronized before publication succeeds.
-        file.sync_all()?;
+        self.timed(5, |_| file.sync_all())?;
         after()?;
-        fs::rename(staging, self.directory.join(manifest_name(self.generation)))?;
+        self.timed(6, |this| {
+            fs::rename(staging, this.directory.join(manifest_name(this.generation)))
+        })?;
         after()?;
-        sync_directory(&self.directory)?;
+        self.timed(7, |this| sync_directory(&this.directory))?;
         after()?;
         Ok(())
     }
@@ -380,6 +384,8 @@ mod tests {
                     ..store.binding()
                 };
                 let new = super::super::manifest(binding, store.length as u64);
+                let timing = JournalTimings::default();
+                store.io.timings = Some(timing.clone());
                 let mut step = 0;
                 assert!(store
                     .io
@@ -392,6 +398,7 @@ mod tests {
                         }
                     })
                     .is_err());
+                assert_publication_prefix(timing.snapshot().publication, cut);
                 assert!(
                     FileLogIo::open(&path).is_err(),
                     "failed publication retains exclusive ownership"
@@ -415,6 +422,21 @@ mod tests {
                 drop(recovered);
                 fs::remove_dir_all(path).unwrap();
             }
+        }
+    }
+    fn assert_publication_prefix(timing: ManifestPublicationTiming, cut: usize) {
+        for (index, step) in [
+            timing.open,
+            timing.write,
+            timing.file_sync,
+            timing.rename,
+            timing.directory_sync,
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            assert_eq!(step.calls, u64::from(index < cut));
+            assert_eq!(step.errors, 0, "injected callback is not a file-call error");
         }
     }
     #[test]
