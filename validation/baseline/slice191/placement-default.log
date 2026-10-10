@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.69s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-6a9742da2ab356bf)
+
+running 4 tests
+test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+test placement::generated_placement_executes_and_recovers_tcp ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 44 filtered out; finished in 3.02s
+

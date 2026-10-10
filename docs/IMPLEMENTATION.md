@@ -76,7 +76,7 @@ cause and revise this sketch before another material change.
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. |
-| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Placement orchestration and broader faults remain. |
+| Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Slice191 adds explicit offline placement plans consumed by the existing member executor. Automatic online orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
 
@@ -116,9 +116,94 @@ strict profiles clean while advancing the remaining capability work.
 | Completed188: executable endpoint discovery | Resolve current command addresses through the public authenticated protocol; advances P1/P5 deployment. | Independent command pins, bounded startup endpoint view and NativeRemotePeerDiscovery/Responder. | Full64-test service run plus all5 discovery tests pass; stale addresses, source identity, permissions, scope, startup refusal and checkpoint/retry recovery are exercised. Manifest authority remains separate. |
 | Completed189: executable metadata authority | Host a real Directory application and committed manifest publication; advances P5/C17. | NativeStartup with Directory, bounded authenticated administration, exact provisioned root and manifest schemas. | Three native processes publish through Raft, recover the same manifests, and answer the public remote manifest protocol using quorum-backed reads. No seeded hint may masquerade as committed authority. |
 | Completed190: cold executable recursive lookup | Let a client follow the deployed metadata hierarchy; advances P5 and usable embedding. |189 authority service, explicit authority-to-endpoint mapping, NativeRemoteManifestDiscovery, bounded cache/hop/deadline limits and independently provisioned credentials. | Cold lookup across actual authorities, stale/wrong scope refusal and source interruption; owner checks remain mandatory and endpoint discovery grants no ownership. |
-| Current191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
-| Next192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
-| Following193: measured durability performance | Address the remaining original P7 latency gate without weakening durability. |192 evidence audit;181 publication costs;183 failed overlap experiment; explicit eligible-append and barrier/heartbeat traces. | Reproduce original committed/applied workload, recovery/retries and fixed250ms p99 criteria; accept a change only with both safety and comparative evidence. |
+| Completed191: explicit placement execution | Connect existing policy plans to authorized recoverable operations; advances P4/P5. | Existing placement planner/authorizer, learner readiness, replicated joint/final records and metadata discovery. | Original operation IDs and records survive interruption; never activate on placement hints or bypass readiness and quorum checks. |
+| Current192: baseline acceptance review | Reconcile every P0–P7 requirement with current evidence; advances the full roadmap. | Combined fault results, deployed discovery/placement interfaces, platform runs and original performance criteria. | Record supported, contradicted and unverified requirements separately; select the next missing usable slice without lowering the acceptance criteria. |
+| Next193: measured durability performance | Address the remaining original P7 latency gate without weakening durability. |192 evidence audit;181 publication costs;183 failed overlap experiment; explicit eligible-append and barrier/heartbeat traces. | Reproduce original committed/applied workload, recovery/retries and fixed250ms p99 criteria; accept a change only with both safety and comparative evidence. |
+| Following194: combined recovery fault closure | Close the concrete membership/lifecycle failures or missing schedules selected by192; advances P4/P6 and deployment confidence. | Requirement-by-requirement audit, current platform results, original operation/receipt lineage and deterministic/native fault drivers. | Exercise the selected missing interleavings through restart, prove no duplicate active owner or lost retry state, and retain any failed histories instead of reducing scope. |
+
+### Slice191 implementation and acceptance record
+
+Added offline voteboat-counter placement-plan over the public planner and
+placement authorizer. Operator input includes exact candidate stores/domains,
+current stable membership/history and explicit bounded capacity/load samples.
+The command emits existing administration-file records for learner addition,
+recursive-policy-preserving replacement or an explicit voter-policy transition.
+It projects a learner result only to plan the subsequent joint/final records;
+that model is never submitted as a readiness or durability receipt. All runtime
+work still uses the existing member administration driver and live Node gates.
+
+Generated replica declarations carry exact store IDs and incarnations. The
+loader accepts these optional fields alongside existing two-field declarations,
+and rejects a mismatch with selected deployment provisioning before opening
+runtime files. Parsed records retain original IDs and targets across restart;
+there is no retry-time reselection, hidden runtime, new dependency, log format
+or weakened readiness rule. This is an explicit offline/operator workflow,
+not automatic online sample collection or plan publication.
+
+Five selected all-feature tests pass in3.77s; four default-feature cases pass
+in3.02s. TCP/QUIC histories generate and execute a voter removal, plan an exact
+replacement, stop while the new store is absent, verify no promotion, enroll
+that store, and finish/reopen the same plan after checkpoints. Other checks
+cover literal expected records, recursive policy/weight preservation, expiry,
+capacity, duplicate samples, operation reuse, unprepared voters, unsafe domain
+placement and exact-store refusal before runtime creation.
+
+The first broad run was invalidated by my concurrent default-feature build:
+it replaced the shared executable while the all-feature harness still spawned
+it. Nineteen QUIC failures explicitly report a build without QUIC; another
+could not reach its listener. No production workaround was applied. The failed
+log is retained, feature configurations now run sequentially, and root AGENTS
+records the executable-sharing rule. One compile check also caught a test-local
+name shadowing its fixture function; that local binding was renamed.
+
+Final sequential validation passes:70 counter executable cases in65.06s,
+8 placement/administration contract cases and13 planning cases. Formatting,
+strict all-target Clippy for default/all/core-only, and the95-contract inventory
+check pass. Three documented CLI examples were executed. Exact commands, failed
+or invalidated runs, successful logs and final source hashes are retained in
+validation/baseline/slice191.
+
+Macro review: explicit placement now has a usable artifact-to-execution path;
+automatic online sampling/publication, wider membership/lifecycle faults,
+current macOS/separate-host evidence and the original P7 performance gate stay
+open. Mini work advances to192 full-scope acceptance reconciliation,193 measured
+performance and194 audit-selected combined failures. Older baseline175 still
+runs on its earlier source; f5cc7c8 CI38025452785 is pending and older38022391223
+retains an active Ubuntu job and pre186 macOS failure. None certifies this source.
+The full P0–P7 goal remains active.
+
+### Slice191 schema plan — runnable explicit placement plans
+
+Data/API: add offline voteboat-counter placement-plan INPUT ACTION. A bounded
+operator snapshot declares group1/incarnation1, exact replica stores/domains,
+current stable configuration/tree/learners, used operation IDs and explicit
+sample generation/times/capacity/load. Actions select a learner, replace one
+voter or propose an explicit target voter policy through the public planner and
+placement authorizer. The result is an existing immutable administration plan.
+Generated replica declarations bind exact store IDs/incarnations; the loader
+compares those with deployment provisioning before opening storage.
+
+Transitions: planning performs no I/O except reading its bounded input and
+writing stdout. Replacement projects the learner result only to construct the
+future joint/final records; this hypothetical membership grants no readiness or
+durability. Runtime consumes the saved file through the existing authorized
+administration driver: original learner record, actual catch-up/readiness,
+joint commitment, then exact final record. Reuse the saved plan after failure;
+never rerun load-based selection to resolve an uncertain operation.
+
+Ownership/failure: reject duplicate/oversized/expired/inconsistent input, reused
+IDs, invalid target policies and store substitution before emitting a plan.
+No new background owner, network format, consensus rule or journal is needed.
+Missing/new stores require existing explicit enrollment and credentials; a plan
+cannot create them. Stale current configuration fails ordinary runtime admission.
+The output remains bounded by the current administration plan limits.
+
+Acceptance: independently compare generated records with public planning APIs;
+run generated learner/replacement/voter plans through real TCP/QUIC member
+services, preserve original retries through WAL/checkpoint recovery and refuse
+store mismatch/stale or unsafe input. Keep the full counter regression and
+all strict Clippy profiles clean. This advances P4/P5 selective placement and
+feeds192's full-scope audit;193 still needs original P7 performance evidence.
 
 ### Slice190 implementation and acceptance record
 

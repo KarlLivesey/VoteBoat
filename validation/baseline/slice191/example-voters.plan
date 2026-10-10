@@ -1,0 +1,7 @@
+voteboat-counter-admin-v1
+placement 2 false
+replica 1 1 1 1
+replica 2 2 2 1
+replica 4 4 404 7
+joint 1002 3 4 5 - w:2 1 v:1 1 v:2
+final 1002 4 5

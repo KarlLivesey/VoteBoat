@@ -1,0 +1,15 @@
+Base: f5cc7c8490aa248ee1d9dcc2dcf8b3c63ec63c7a
+
+cargo +stable test --locked --offline --all-features --test counter_service placement:: -- --test-threads=2
+cargo +stable test --locked --offline --test counter_service placement:: -- --test-threads=2
+cargo +stable test --locked --offline --all-features --test counter_service --test placement_planning --test placement -- --test-threads=4
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+
+Native tests use authorized host sockets/processes. Test pipelines check cargo's
+exit status after tee. Run feature configurations sequentially: the original
+all-feature broad run was invalidated by concurrent default-feature replacement
+of the shared executable; see feature-build-interference.log and initial-checks.txt.

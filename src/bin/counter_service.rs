@@ -27,6 +27,12 @@ mod credential_reload;
 mod diagnostics;
 #[path = "support/local_client.rs"]
 mod local_client;
+#[path = "support/placement_format.rs"]
+mod placement_format;
+#[path = "support/placement_input.rs"]
+mod placement_input;
+#[path = "support/placement_plan.rs"]
+mod placement_plan;
 #[path = "support/quorum_diagnostics.rs"]
 mod quorum_diagnostics;
 #[path = "support/service_access.rs"]
@@ -50,6 +56,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
+voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -484,6 +491,9 @@ fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
     let options = startup_options(&mut args)?;
     match args.as_slice() {
+        [verb, path, rest @ ..] if verb == "placement-plan" => {
+            placement_plan::run(Path::new(path), rest)
+        }
         [enroll_arg, mode, root, id, base, tls, source, source_id, rest @ ..]
             if enroll_arg == "enroll" && rest.len() <= 1 =>
         {

@@ -5464,3 +5464,16 @@ all three strict all-target Clippy profiles have zero diagnostics. Exact command
 failures, corrections, source hashes and limits are in
 [slice190](baseline/slice190/README.md). No current macOS/separate-host or complete
 P0–P7 validation is claimed; the original P7 latency requirement remains open.
+
+## Slice191 — explicit placement artifact and runtime execution
+
+The offline planner emits original learner/replacement/voter administration
+records with exact store bindings. Five selected all-feature cases and four
+default cases pass; the final sequential run passes70 counter,8 placement and
+13 planning tests. Native TCP/QUIC histories stop before enrollment, refuse
+premature promotion and recover the same plan after checkpoint restart. All
+three strict Clippy profiles and formatting are clean. An invalidated concurrent
+feature-build run is retained with its demonstrated cause, not counted as a
+pass. See [slice191](baseline/slice191/README.md) for commands, source hashes,
+raw results and the offline/operator scope. P0–P7 completion and current platform
+proof remain open.

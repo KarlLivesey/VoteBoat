@@ -1,0 +1,15 @@
+The first all-target compile caught a test-local String named plan shadowing the
+plan fixture function. Renamed the local binding; no production behavior changed.
+Before native execution, inspection also found that the four-node TLS fixture
+must be selected after the initial three-node stage. Moved fixture selection
+without changing production credentials or TLS checks.
+
+First selected native run: all5 placement tests passed,3.77s.
+
+The first broad run was invalidated by concurrent feature builds: the
+all-feature harness spawned target/debug/voteboat-counter while a default-feature
+cargo test replaced that executable. Fifty cases passed;20 QUIC cases failed.
+Nineteen report "QUIC support requires building with --features quic"; the
+remaining inspection test cannot reach its service. This is validation
+orchestration interference, not a reason to change transport behavior.
+Subsequent feature-build executions are sequential. Original output is retained.

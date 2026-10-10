@@ -40,3 +40,7 @@ it to push code with failing checks. The default-feature command is
 `cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings`.
 The no-default-features command is
 `cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings`.
+
+Run feature configurations that spawn `target/debug` executables sequentially,
+or give each configuration a distinct `CARGO_TARGET_DIR`. Cargo's build lock
+can be released while integration tests are still using those executables.

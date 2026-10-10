@@ -57,17 +57,17 @@ pub struct Administration {
     requested: Option<OperationId>,
     reply: Option<String>,
 }
-fn node(text: &str) -> Result<NodeId, Failure> {
+pub(super) fn node(text: &str) -> Result<NodeId, Failure> {
     let number: u64 = text.parse()?;
     if !(1..=MAX_NODE).contains(&number) {
         return Err("invalid administration node".into());
     }
     Ok(NodeId::new(number).unwrap())
 }
-fn cid(text: &str) -> Result<ConfigurationId, Failure> {
+pub(super) fn cid(text: &str) -> Result<ConfigurationId, Failure> {
     ConfigurationId::new(text.parse()?).ok_or_else(|| "invalid configuration ID".into())
 }
-fn tree<'a>(
+pub(super) fn tree<'a>(
     tokens: &mut impl Iterator<Item = &'a str>,
     depth: usize,
     remaining: &mut usize,
@@ -174,6 +174,34 @@ fn parse_record<'a>(
     })
 }
 
+fn replica<'a>(
+    tokens: &mut impl Iterator<Item = &'a str>,
+    stores: &BTreeMap<NodeId, StoreIdentity>,
+) -> Result<(NodeId, ReplicaPlacement), Failure> {
+    let id = node(tokens.next().ok_or("missing replica node")?)?;
+    let domain = FailureDomainId::new(tokens.next().ok_or("missing failure domain")?.parse()?)
+        .ok_or("invalid failure domain")?;
+    let store = *stores
+        .get(&id)
+        .ok_or("administration replica missing from deployment")?;
+    if let Some(exact) = tokens.next() {
+        let expected = StoreIdentity {
+            id: StoreId::new(exact.parse()?).ok_or("invalid exact store")?,
+            incarnation: StoreIncarnation::new(
+                tokens.next().ok_or("missing store incarnation")?.parse()?,
+            )
+            .ok_or("invalid store incarnation")?,
+        };
+        if expected != store {
+            return Err("administration store differs from exact planned store".into());
+        }
+    }
+    if tokens.next().is_some() {
+        return Err("trailing replica fields".into());
+    }
+    Ok((id, ReplicaPlacement { store, domain }))
+}
+
 impl Administration {
     pub fn load(
         path: &Path,
@@ -213,19 +241,9 @@ impl Administration {
                 if !records.is_empty() {
                     return Err("replica declarations must precede intents".into());
                 }
-                let id = node(tokens.next().ok_or("missing replica node")?)?;
-                let domain =
-                    FailureDomainId::new(tokens.next().ok_or("missing failure domain")?.parse()?)
-                        .ok_or("invalid failure domain")?;
-                let store = *stores
-                    .get(&id)
-                    .ok_or("administration replica missing from deployment")?;
-                if replicas
-                    .insert(id, ReplicaPlacement { store, domain })
-                    .is_some()
-                    || tokens.next().is_some()
-                {
-                    return Err("duplicate replica or trailing fields".into());
+                let (id, placement) = replica(&mut tokens, stores)?;
+                if replicas.insert(id, placement).is_some() {
+                    return Err("duplicate replica".into());
                 }
                 continue;
             }

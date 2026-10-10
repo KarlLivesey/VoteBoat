@@ -1,0 +1,8 @@
+voteboat-counter-admin-v1
+placement 2 false
+replica 1 1 1 1
+replica 2 2 2 1
+replica 4 4 404 7
+learners 1001 3 4 4 m:2 v:1 v:2
+joint 1002 4 5 6 1 m:2 v:4 v:2
+final 1002 5 6

@@ -51,6 +51,8 @@ mod joint_retirement;
 mod maintenance;
 #[path = "counter_service/new_voter.rs"]
 mod new_voter;
+#[path = "counter_service/placement.rs"]
+mod placement;
 #[path = "counter_service/quorum.rs"]
 mod quorum;
 #[path = "counter_service/timing.rs"]

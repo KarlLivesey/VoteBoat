@@ -1,0 +1,6 @@
+During final local validation, original baseline175 cargo PID1526695 remained
+live at1:21:54; its routed PID1580417 remained live at1:19:57, CPU18:42.
+They were not stopped or restarted and cannot certify the current source.
+Latest committed f5cc7c8 CI38025452785 was pending.
+Older CI38022391223: formatting/lint success, Ubuntu in progress, macOS failure.
+The macOS result predates186; no current macOS/separate-host claim is made.

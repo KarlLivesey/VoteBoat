@@ -627,6 +627,9 @@ service mutation endpoints and remote lifecycle release remain work.
 
 ## Trusted startup administration plan
 
+Generate learner/replacement/voter plans with the [placement CLI](PLACEMENT.md),
+or provide the explicit records below.
+
 `serve recover-member ... --admin-plan FILE` loads operator-owned intent once,
 **before opening the WAL, workers or sockets**. Supply the same immutable plan
 and deployment to participating processes. Only the current leader drives it;
@@ -665,7 +668,7 @@ Its grammar is:
 ```text
 voteboat-counter-admin-v1
 placement MINIMUM_VOTING_DOMAINS true|false
-replica NODE FAILURE_DOMAIN
+replica NODE FAILURE_DOMAIN [EXACT_STORE_ID EXACT_STORE_INCARNATION]
 ... replica declarations before all intents ...
 learners OPERATION EXPECTED NEXT LEARNERS POLICY
 joint OPERATION EXPECTED JOINT FINAL LEARNERS POLICY
