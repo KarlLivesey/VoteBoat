@@ -66,11 +66,11 @@ fn reserve(
         .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
         .unwrap();
     assert_eq!(
-        propose(parents, clock, 1, 10000, boot).outcome,
+        propose_recovering(parents, clock, 1, 10000, boot).outcome,
         DirectoryOutcome::Initialized
     );
     let parent_manifest = manifests()[0].clone();
-    propose(
+    propose_recovering(
         parents,
         clock,
         1,
@@ -83,7 +83,7 @@ fn reserve(
         .unwrap(),
     );
     assert_eq!(
-        propose(
+        propose_recovering(
             parents,
             clock,
             1,
@@ -196,7 +196,7 @@ impl Service {
             .validate_proposal(OperationId::new(20000).unwrap(), &bytes, std::iter::empty())
             .is_err());
         assert_eq!(
-            read(&mut self.nodes, &self.clock, 100, query()),
+            read_recovering(&mut self.nodes, &self.clock, 100, query()),
             NamespaceRead::NotActive
         );
         let init = fresh(&self.plan)
@@ -222,12 +222,12 @@ impl Service {
             assert_eq!(self.nodes[0].local().clients.usage().requests, 1);
         } else {
             assert_eq!(
-                propose(&mut self.nodes, &self.clock, 100, 10002, init).outcome,
+                propose_recovering(&mut self.nodes, &self.clock, 100, 10002, init).outcome,
                 NamespaceOutcome::Ready
             );
         }
         let NamespaceRead::Status(ready) =
-            read(&mut self.nodes, &self.clock, 100, NamespaceQuery::Status)
+            read_recovering(&mut self.nodes, &self.clock, 100, NamespaceQuery::Status)
         else {
             panic!("ready status")
         };
@@ -273,7 +273,7 @@ impl Service {
             .iter()
             .all(|n| n.local().applications[&group(100)].status() == ready));
         assert_eq!(
-            read(&mut self.nodes, &self.clock, 100, query()),
+            read_recovering(&mut self.nodes, &self.clock, 100, query()),
             NamespaceRead::NotActive
         );
     }
@@ -306,7 +306,8 @@ impl Service {
                 .is_none());
         } else {
             assert_eq!(
-                propose(&mut self.parents, &self.clock, 1, 10003, pub_bytes.clone()).outcome,
+                propose_recovering(&mut self.parents, &self.clock, 1, 10003, pub_bytes.clone())
+                    .outcome,
                 DirectoryOutcome::NamespacePublished(RouteGeneration::new(1).unwrap())
             );
         }
@@ -357,7 +358,7 @@ impl Service {
             namespace_directory,
         );
         campaign(&mut self.parents, &self.clock, 1);
-        assert!(propose(&mut self.parents, &self.clock, 1, 10003, pub_bytes).duplicate);
+        assert!(propose_recovering(&mut self.parents, &self.clock, 1, 10003, pub_bytes).duplicate);
         assert_eq!(
             self.parents[0].local().applications[&group(1)]
                 .namespace_publication_at(0, self.plan.creation.operation)
@@ -381,7 +382,8 @@ impl Service {
         );
     }
     fn stop_metadata(&mut self) -> BTreeMap<NodeId, GroupLog> {
-        let observed = read(&mut self.parents, &self.clock, 1, responsibility(50)).unwrap();
+        let observed =
+            read_recovering(&mut self.parents, &self.clock, 1, responsibility(50)).unwrap();
         let mut cache = NativeManifestCache::new(ManifestCacheLimits {
             manifests: 1,
             bytes: 4096,
@@ -474,7 +476,8 @@ impl Service {
             );
             campaign(&mut self.nodes, &self.clock, 100);
             assert_eq!(
-                propose(&mut self.nodes, &self.clock, 100, 10003, activation.clone()).outcome,
+                propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation.clone())
+                    .outcome,
                 NamespaceOutcome::Activated
             );
             assert!(self
@@ -483,7 +486,8 @@ impl Service {
                 .all(|n| n.local().applications[&group(100)].status() == original));
         } else {
             assert_eq!(
-                propose(&mut self.nodes, &self.clock, 100, 10003, activation.clone()).outcome,
+                propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation.clone())
+                    .outcome,
                 NamespaceOutcome::Activated
             );
         }
@@ -491,20 +495,22 @@ impl Service {
     }
     fn exercise(&mut self) {
         let bytes = data();
-        let original = propose(&mut self.nodes, &self.clock, 100, 20000, bytes.clone());
+        let (original, uncertain) =
+            propose_recovering_observed(&mut self.nodes, &self.clock, 100, 20000, bytes.clone());
+        assert_eq!(original.operation, OperationId::new(20000).unwrap());
         assert!(matches!(
             original.outcome,
             NamespaceOutcome::Data(RoutedReceipt {
                 outcome: RoutedOutcome::Applied(CounterReceipt {
                     outcome: CounterOutcome::Value(7),
-                    duplicate: false,
+                    duplicate,
                     ..
                 }),
                 ..
-            })
+            }) if !duplicate || uncertain
         ));
         assert_eq!(
-            read(&mut self.nodes, &self.clock, 100, query()),
+            read_recovering(&mut self.nodes, &self.clock, 100, query()),
             NamespaceRead::Data(RoutedRead::Served(7))
         );
         for n in &mut self.nodes {
@@ -533,10 +539,10 @@ impl Service {
         );
         campaign(&mut self.nodes, &self.clock, 100);
         assert_eq!(
-            propose(&mut self.nodes, &self.clock, 100, 10003, activation).outcome,
+            propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation).outcome,
             NamespaceOutcome::Activated
         );
-        let retry = propose(&mut self.nodes, &self.clock, 100, 20000, bytes);
+        let retry = propose_recovering(&mut self.nodes, &self.clock, 100, 20000, bytes);
         assert!(matches!(
             retry.outcome,
             NamespaceOutcome::Data(RoutedReceipt {
@@ -549,7 +555,7 @@ impl Service {
             })
         ));
         assert_eq!(
-            read(&mut self.nodes, &self.clock, 100, query()),
+            read_recovering(&mut self.nodes, &self.clock, 100, query()),
             NamespaceRead::Data(RoutedRead::Served(7))
         );
         close(std::mem::take(&mut self.nodes), &self.clock, 100, || {});

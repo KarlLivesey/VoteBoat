@@ -65,7 +65,7 @@ fn cancel_unread(s: &mut Service, bytes: &[u8]) -> GroupCreationCancellationStat
         directory,
     );
     campaign(&mut s.parents, &s.clock, 1);
-    assert!(propose(&mut s.parents, &s.clock, 1, 10003, bytes.to_vec()).duplicate);
+    assert!(propose_recovering(&mut s.parents, &s.clock, 1, 10003, bytes.to_vec()).duplicate);
     assert!(s.parents.iter().all(|n| n.local().applications[&group(1)]
         .group_creation_cancellation_at(0, creation)
         .unwrap()
@@ -131,7 +131,7 @@ pub(crate) fn run(protocol: NativePeerProtocol) {
     // before asking for a quorum read rather than trusting the old leader.
     campaign(&mut s.nodes, &s.clock, 100);
     assert_eq!(
-        read(&mut s.nodes, &s.clock, 100, query()),
+        read_recovering(&mut s.nodes, &s.clock, 100, query()),
         NamespaceRead::NotActive
     );
     assert!(s.nodes[0]

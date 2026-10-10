@@ -1,5 +1,14 @@
 # Validation report
 
+Namespace caller recovery: [254c-namespace](baseline/slice254c-namespace/README.md).
+Original typed NotLeader at positive reservation, manifest setup and duplicate
+retry exposes stale-leader caller assumptions. Existing bounded original-ID/content
+recovery retains uncertainty evidence, exact values/retries and intentional unread
+fault cuts. Final creation10/0 passes on Linux/Mac, formatting/four strict profiles
+zero and652 final inputs match. No production/timer/quota change. Linux additional
+delete4/0 and created-source4/0 pass; Mac checks remain pending and the unchanged
+original251 full run remains independent. This is selected namespace acceptance.
+
 Original parent-independent service retry/store ownership:
 [254c-parent](baseline/slice254c-parent/README.md). Mac0/2 first-child writes lose
 leadership; existing original-ID/content recovery then reaches1/1 with a frozen

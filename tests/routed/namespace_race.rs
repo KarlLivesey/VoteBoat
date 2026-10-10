@@ -207,7 +207,7 @@ fn finish(mut s: Service, ready: NamespaceStatus, winner: Decision, checkpoint: 
     assert_eq!(decision_state(&s), original);
     check_decision(&s, winner);
     let bytes = winner.bytes(&s, ready);
-    assert!(propose(&mut s.parents, &s.clock, 1, winner.operation(), bytes).duplicate);
+    assert!(propose_recovering(&mut s.parents, &s.clock, 1, winner.operation(), bytes).duplicate);
     assert_eq!(decision_state(&s), original);
     let rejected = ClientRequest {
         group: group(1),
@@ -267,8 +267,22 @@ pub(crate) fn run(protocol: NativePeerProtocol) {
                 }
                 let winner = if committed { first } else { first.other() };
                 let bytes = winner.bytes(&s, ready);
-                let receipt = propose(&mut s.parents, &s.clock, 1, winner.operation(), bytes);
-                assert_eq!(receipt.duplicate, committed);
+                let (receipt, uncertain) = propose_recovering_observed(
+                    &mut s.parents,
+                    &s.clock,
+                    1,
+                    winner.operation(),
+                    bytes,
+                );
+                assert_eq!(
+                    receipt.operation,
+                    OperationId::new(winner.operation()).unwrap()
+                );
+                if committed {
+                    assert!(receipt.duplicate);
+                } else {
+                    assert!(!receipt.duplicate || uncertain);
+                }
                 check_decision(&s, winner);
                 finish(s, ready, winner, plan.checkpoint);
             }

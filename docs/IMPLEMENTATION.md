@@ -25644,3 +25644,64 @@ offline lifecycle failures from actual typed bodies or exact-input reproductions
 Next255 functional release-gap audit and following256 separate-host usable service
 remain linked to their purposes, dependencies and completion checks above. Full
 goal stays active; do not substitute selected parent acceptance for those exits.
+
+254c namespace reservation schema: exact ee38796-source race reproductions pass
+Linux2/0 and fail Mac1/1. QUIC's second schedule (Publish, uncommitted, checkpoint)
+refuses positive GroupCreationIntent operation10002 with typed NotLeader at
+namespace_service::reserve86, before the intentional unread race submission.
+Reuse the existing bounded four-attempt original-ID/content admission recovery
+for this positive reservation only. There is no new data/API/generation or
+production change. Keep exact CreationReserved outcome, original namespace plan
+and authority checks, and preserve the later intentional unread receipt, two-voter
+commit/third-voter absence cut, owner abort, competing decision, exact duplicate
+retries, checkpoints, activation/fencing and frozen metadata checks. Unknown
+LeadershipChanged is retried with identical bytes; all other error classes remain
+fatal. Returned nodes remain caller-owned and successful schedules close/reclaim
+them. Failed roots remain diagnostic evidence, not claimed joined cleanup.
+Acceptance: original eight schedules per TCP/QUIC plus affected shared namespace
+service histories on both platforms, source-linked failures/results and fmt/four
+strict Clippy zero. This advances current254c P5/P6 functional platform acceptance;
+next255 and following256 retain their recorded dependencies/completion checks.
+
+254c namespace caller review: reservation-only correction passes Linux creation
+10/0 and all four strict profiles, but Mac race0/2 now exposes the same typed
+NotLeader at reserve's manifest operation10001 and finish's explicit duplicate
+retry. These are the same positive service contract, not intentional fault calls.
+Review all positive calls in the shared namespace service/race/cancellation fixture
+as one bounded correction: reuse existing propose_recovering/read_recovering,
+with no new helper or altered core policy/timers. Preserve all raw .propose calls
+that establish unread receipts and all negative admission checks. First data
+operation20000 and first winner submission need accepted-uncertainty witnesses;
+require original operation IDs/values, committed winner duplicate unconditionally,
+and a fresh winner/data duplicate only if accepted LeadershipChanged was observed.
+NotLeader alone never permits a duplicate. Explicit subsequent/cold retries still
+require duplicate, competing decisions remain rejected and original statuses/cuts
+and frozen files remain equal. Unread receipt state is owned by the fault fixture;
+no recovery helper consumes it. Check all10 creation histories plus original race
+schedules on Linux/Mac, formatting and four strict profiles; preserve earlier
+failures separately. This avoids repeating isolated fixes of the same caller
+assumption and remains current254c P5/P6 acceptance, not a production redesign.
+
+Completed254c-namespace: the reviewed positive namespace fixture callers pass
+all10 creation histories on Linux/Mac, including the eight original schedules
+per TCP/QUIC race. Exact IDs/bytes/value7, accepted-uncertainty witness for a first
+duplicate, unconditional committed/cold duplicate checks, competing decision
+refusal, original unread receipts/two-voter cuts, checkpoint/reopen/activation,
+metadata outage/frozen logs and explicit successful cleanup remain. No production/
+interface/protocol/persistence/timer/quota/dependency change. Before Mac1/1 and
+reservation-only0/2 remain source-linked in [namespace evidence](../validation/baseline/slice254c-namespace/README.md).
+Both hosts have zero formatting and all four strict profiles;652 final build
+inputs match, inventory108/partial reviews13/81 remain unchanged. Linux additional
+delete4/0 and created-source split4/0 pass; corresponding Mac runs are pending,
+not inferred from the creation family. Original251 Mac source/build stays live
+and unchanged. This advances P5/P6 finite functional platform evidence, not a
+complete platform/provider/performance certificate.
+
+Mini-plan update: current254c-remaining now focuses on the original deletion/
+created-source/offline failures, with exact reproductions and preserved original
+terminal bodies; retain IDs, unread cuts, fences, cold retry lineage and joined
+cleanup. Completion is affected named histories on both hosts and strict zero,
+not an isolated pass replacing a different-source failure. Next255 functional
+release-gap audit and following256 separate-host service acceptance retain their
+purposes/dependencies/checks above. Macro review keeps the existing usable service
+and embedding ahead of P7 tuning/security; no new helper prerequisite is added.

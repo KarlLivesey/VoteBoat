@@ -1,0 +1,11 @@
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed namespace_race_recorded_owner_loss_and_recovery_schedules
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed native::creation::
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed native::delegation::deletion::
+RUST_BACKTRACE=1 cargo +stable test --locked --offline --all-features --test routed native::creation_source::
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+
+Mac: stable1.98.0 arm64; PATH=$HOME/.cargo/bin:$PATH; TMPDIR=/tmp/voteboat-macos-CzK1if/test-roots; child-shell ulimit -n4096; isolated repo252 source/build. Preserved original251 source/build unchanged. Linux stable1.98.1.

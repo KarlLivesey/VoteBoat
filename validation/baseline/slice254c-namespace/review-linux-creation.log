@@ -1,0 +1,17 @@
+   Compiling voteboat v0.1.0 (<workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.74s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 10 tests
+test native::creation::quic_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+test native::creation::quic_created_group_resumes_partial_assignment_and_runs_with_metadata_offline ... ok
+test native::creation::quic_namespace_partial_publication_activation_unread_receipts_owner_abort ... ok
+test native::creation::quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage ... ok
+test native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+test native::creation::tcp_created_group_resumes_partial_assignment_and_runs_with_metadata_offline ... ok
+test native::creation::tcp_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+test native::creation::tcp_namespace_partial_publication_activation_unread_receipts_owner_abort ... ok
+test native::creation::tcp_namespace_ready_publish_activate_survives_reopen_and_metadata_outage ... ok
+test native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 21.76s

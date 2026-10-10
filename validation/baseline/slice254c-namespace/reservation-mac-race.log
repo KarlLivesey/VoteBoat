@@ -1,0 +1,82 @@
+   Compiling voteboat v0.1.0 (<mac-workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.04s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 2 tests
+test native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules ... FAILED
+test native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules ... FAILED
+
+failures:
+
+---- native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules stdout ----
+namespace race Quic: Schedule { first: Publish, committed: false, checkpoint: false }
+
+thread 'native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules' (17450180) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: NotLeader
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::result::unwrap_failed
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/result.rs:1870:5
+   3: <core::result::Result<voteboat::directory::DirectoryReceipt, routed::native::ProposalFailure>>::unwrap
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1231:23
+   4: routed::native::propose::<voteboat::directory::Directory>
+             at ./tests/routed/native.rs:248:56
+   5: routed::native::creation::namespace_service::reserve
+             at ./tests/routed/namespace_service.rs:73:5
+   6: <routed::native::creation::namespace_service::Service>::new_in
+             at ./tests/routed/namespace_service.rs:178:39
+   7: routed::native::creation::namespace_service::race::run
+             at ./tests/routed/namespace_race.rs:260:29
+   8: routed::native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules
+             at ./tests/routed/creation.rs:123:5
+   9: routed::native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules::{closure#0}
+             at ./tests/routed/creation.rs:122:68
+  10: <routed::native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  11: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+---- native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules stdout ----
+namespace race TcpTls: Schedule { first: Publish, committed: false, checkpoint: false }
+namespace race TcpTls: Schedule { first: Publish, committed: false, checkpoint: true }
+namespace race TcpTls: Schedule { first: Publish, committed: true, checkpoint: false }
+
+thread 'native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules' (17450181) panicked at tests/routed/native.rs:248:56:
+called `Result::unwrap()` on an `Err` value: NotLeader
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/panicking.rs:80:14
+   2: core::result::unwrap_failed
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/result.rs:1870:5
+   3: <core::result::Result<voteboat::directory::DirectoryReceipt, routed::native::ProposalFailure>>::unwrap
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/result.rs:1231:23
+   4: routed::native::propose::<voteboat::directory::Directory>
+             at ./tests/routed/native.rs:248:56
+   5: routed::native::creation::namespace_service::race::finish
+             at ./tests/routed/namespace_race.rs:210:13
+   6: routed::native::creation::namespace_service::race::run
+             at ./tests/routed/namespace_race.rs:273:17
+   7: routed::native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules
+             at ./tests/routed/creation.rs:118:5
+   8: routed::native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules::{closure#0}
+             at ./tests/routed/creation.rs:117:67
+   9: <routed::native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  10: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+
+
+failures:
+    native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules
+    native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 174 filtered out; finished in 22.17s
+
+error: test failed, to rerun pass `--test routed`

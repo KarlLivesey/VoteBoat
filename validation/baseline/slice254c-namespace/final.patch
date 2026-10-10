@@ -1,0 +1,103 @@
+diff --git a/tests/routed/namespace_cancellation.rs b/tests/routed/namespace_cancellation.rs
+index 146403d..0c00e69 100644
+--- a/tests/routed/namespace_cancellation.rs
++++ b/tests/routed/namespace_cancellation.rs
+@@ -68 +68 @@ fn cancel_unread(s: &mut Service, bytes: &[u8]) -> GroupCreationCancellationStat
+-    assert!(propose(&mut s.parents, &s.clock, 1, 10003, bytes.to_vec()).duplicate);
++    assert!(propose_recovering(&mut s.parents, &s.clock, 1, 10003, bytes.to_vec()).duplicate);
+@@ -134 +134 @@ pub(crate) fn run(protocol: NativePeerProtocol) {
+-        read(&mut s.nodes, &s.clock, 100, query()),
++        read_recovering(&mut s.nodes, &s.clock, 100, query()),
+diff --git a/tests/routed/namespace_race.rs b/tests/routed/namespace_race.rs
+index daaee79..ef3c9cf 100644
+--- a/tests/routed/namespace_race.rs
++++ b/tests/routed/namespace_race.rs
+@@ -210 +210 @@ fn finish(mut s: Service, ready: NamespaceStatus, winner: Decision, checkpoint:
+-    assert!(propose(&mut s.parents, &s.clock, 1, winner.operation(), bytes).duplicate);
++    assert!(propose_recovering(&mut s.parents, &s.clock, 1, winner.operation(), bytes).duplicate);
+@@ -270,2 +270,16 @@ pub(crate) fn run(protocol: NativePeerProtocol) {
+-                let receipt = propose(&mut s.parents, &s.clock, 1, winner.operation(), bytes);
+-                assert_eq!(receipt.duplicate, committed);
++                let (receipt, uncertain) = propose_recovering_observed(
++                    &mut s.parents,
++                    &s.clock,
++                    1,
++                    winner.operation(),
++                    bytes,
++                );
++                assert_eq!(
++                    receipt.operation,
++                    OperationId::new(winner.operation()).unwrap()
++                );
++                if committed {
++                    assert!(receipt.duplicate);
++                } else {
++                    assert!(!receipt.duplicate || uncertain);
++                }
+diff --git a/tests/routed/namespace_service.rs b/tests/routed/namespace_service.rs
+index 0f25254..0f04001 100644
+--- a/tests/routed/namespace_service.rs
++++ b/tests/routed/namespace_service.rs
+@@ -69 +69 @@ fn reserve(
+-        propose(parents, clock, 1, 10000, boot).outcome,
++        propose_recovering(parents, clock, 1, 10000, boot).outcome,
+@@ -73 +73 @@ fn reserve(
+-    propose(
++    propose_recovering(
+@@ -86 +86 @@ fn reserve(
+-        propose(
++        propose_recovering(
+@@ -199 +199 @@ impl Service {
+-            read(&mut self.nodes, &self.clock, 100, query()),
++            read_recovering(&mut self.nodes, &self.clock, 100, query()),
+@@ -225 +225 @@ impl Service {
+-                propose(&mut self.nodes, &self.clock, 100, 10002, init).outcome,
++                propose_recovering(&mut self.nodes, &self.clock, 100, 10002, init).outcome,
+@@ -230 +230 @@ impl Service {
+-            read(&mut self.nodes, &self.clock, 100, NamespaceQuery::Status)
++            read_recovering(&mut self.nodes, &self.clock, 100, NamespaceQuery::Status)
+@@ -276 +276 @@ impl Service {
+-            read(&mut self.nodes, &self.clock, 100, query()),
++            read_recovering(&mut self.nodes, &self.clock, 100, query()),
+@@ -309 +309,2 @@ impl Service {
+-                propose(&mut self.parents, &self.clock, 1, 10003, pub_bytes.clone()).outcome,
++                propose_recovering(&mut self.parents, &self.clock, 1, 10003, pub_bytes.clone())
++                    .outcome,
+@@ -360 +361 @@ impl Service {
+-        assert!(propose(&mut self.parents, &self.clock, 1, 10003, pub_bytes).duplicate);
++        assert!(propose_recovering(&mut self.parents, &self.clock, 1, 10003, pub_bytes).duplicate);
+@@ -384 +385,2 @@ impl Service {
+-        let observed = read(&mut self.parents, &self.clock, 1, responsibility(50)).unwrap();
++        let observed =
++            read_recovering(&mut self.parents, &self.clock, 1, responsibility(50)).unwrap();
+@@ -477 +479,2 @@ impl Service {
+-                propose(&mut self.nodes, &self.clock, 100, 10003, activation.clone()).outcome,
++                propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation.clone())
++                    .outcome,
+@@ -486 +489,2 @@ impl Service {
+-                propose(&mut self.nodes, &self.clock, 100, 10003, activation.clone()).outcome,
++                propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation.clone())
++                    .outcome,
+@@ -494 +498,3 @@ impl Service {
+-        let original = propose(&mut self.nodes, &self.clock, 100, 20000, bytes.clone());
++        let (original, uncertain) =
++            propose_recovering_observed(&mut self.nodes, &self.clock, 100, 20000, bytes.clone());
++        assert_eq!(original.operation, OperationId::new(20000).unwrap());
+@@ -500 +506 @@ impl Service {
+-                    duplicate: false,
++                    duplicate,
+@@ -504 +510 @@ impl Service {
+-            })
++            }) if !duplicate || uncertain
+@@ -507 +513 @@ impl Service {
+-            read(&mut self.nodes, &self.clock, 100, query()),
++            read_recovering(&mut self.nodes, &self.clock, 100, query()),
+@@ -536 +542 @@ impl Service {
+-            propose(&mut self.nodes, &self.clock, 100, 10003, activation).outcome,
++            propose_recovering(&mut self.nodes, &self.clock, 100, 10003, activation).outcome,
+@@ -539 +545 @@ impl Service {
+-        let retry = propose(&mut self.nodes, &self.clock, 100, 20000, bytes);
++        let retry = propose_recovering(&mut self.nodes, &self.clock, 100, 20000, bytes);
+@@ -552 +558 @@ impl Service {
+-            read(&mut self.nodes, &self.clock, 100, query()),
++            read_recovering(&mut self.nodes, &self.clock, 100, query()),
