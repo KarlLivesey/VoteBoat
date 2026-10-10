@@ -45,6 +45,7 @@ pub struct SourceExportCommitment {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SourceQuery<Q> {
     ParentAdoption(OperationId),
+    MetadataAdoption(OperationId),
     Data(RoutedQuery<Q>),
     Freeze,
 }
@@ -52,6 +53,7 @@ pub enum SourceQuery<Q> {
 #[allow(clippy::large_enum_variant)] // Inline layout is charged by read_result_bound.
 pub enum SourceRead<R> {
     ParentAdoption(Option<ParentGrantStatus>),
+    MetadataAdoption(Option<crate::routed::MetadataGrantStatus>),
     Data(RoutedRead<R>),
     Freeze(Option<SourceFreezeStatus>),
 }
@@ -560,6 +562,9 @@ where
             SourceQuery::ParentAdoption(op) => {
                 Ok(SourceRead::ParentAdoption(self.routed.parent_adoption(op)))
             }
+            SourceQuery::MetadataAdoption(op) => Ok(SourceRead::MetadataAdoption(
+                self.routed.metadata_adoption(op),
+            )),
             SourceQuery::Data(query) => self
                 .routed
                 .read_at(required.min(self.routed.applied_index()), query)
@@ -598,12 +603,14 @@ where
     fn query_bytes(&self, query: &Self::Query, limit: usize) -> Result<usize, ApplicationError> {
         match query {
             SourceQuery::Data(q) => self.routed.query_bytes(q, limit),
-            SourceQuery::Freeze | SourceQuery::ParentAdoption(_) => Ok(0),
+            SourceQuery::Freeze
+            | SourceQuery::ParentAdoption(_)
+            | SourceQuery::MetadataAdoption(_) => Ok(0),
         }
     }
     fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match query {
-            SourceQuery::ParentAdoption(_) => 0,
+            SourceQuery::ParentAdoption(_) | SourceQuery::MetadataAdoption(_) => 0,
             SourceQuery::Data(q) => self
                 .routed
                 .read_result_bound(q)?
@@ -628,7 +635,7 @@ where
         limit: usize,
     ) -> Result<usize, ApplicationError> {
         let bytes = match result {
-            SourceRead::ParentAdoption(_) => 0,
+            SourceRead::ParentAdoption(_) | SourceRead::MetadataAdoption(_) => 0,
             SourceRead::Data(r) => self.routed.read_result_bytes(r, limit)?,
             SourceRead::Freeze(s) => s.as_ref().map_or(0, |s| {
                 s.intent.retained_bytes() - size_of::<TransferIntent>()

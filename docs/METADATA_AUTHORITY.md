@@ -80,6 +80,20 @@ likewise name the original authority and return bounded encoded intents.
 The source remains fenced after publication. New metadata writes and namespace
 creation after activation are covered, as are original retries, checkpoint
 truncation and native journal interruption of publication, activation and a later
-write. These are selected embedding/modelled-journal tests; data-owner grants,
-parent/child locators, a second metadata move and TCP/QUIC service composition
-remain work for the next slice.
+write. These are selected embedding/modelled-journal tests.
+
+For an original full data owner, select
+`RoutedApplication::with_metadata_authority_adoption` before bootstrap. Build
+`OwnerMetadataAdoption` from the complete plan, selected responsibility and
+verified destination activation, then propose its encoding to the owner.
+The existing bounded grant ledger preserves data, retries, outbox and earlier
+parent changes. `MetadataAdoption` queries return the original owner receipt and
+activation together, keeping the source and destination index domains explicit.
+The same profile composes with `TransferSource` for later data splits.
+
+The native cache's opt-in `with_metadata_authority_moves` accepts only the exact
+metadata/reference/generation transformation through `ManifestCache`. Verify
+the move before supplying these hints. Partial parent/child refresh fails route
+resolution; cache contents do not authorize writes. Retained/imported owners,
+foreign parent/child locators, a second metadata move and TCP/QUIC service
+composition remain work.

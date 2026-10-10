@@ -495,3 +495,6 @@ mod target;
 
 #[path = "metadata_transfer/activation.rs"]
 mod activation;
+
+#[path = "metadata_transfer/adoption.rs"]
+mod adoption;

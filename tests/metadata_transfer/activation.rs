@@ -26,7 +26,11 @@ fn source_apply(
         .remove(0)
         .outcome
 }
-fn target_apply(a: &mut MetadataServingTarget, id: u128, bytes: Vec<u8>) -> MetadataServingOutcome {
+pub(super) fn target_apply(
+    a: &mut MetadataServingTarget,
+    id: u128,
+    bytes: Vec<u8>,
+) -> MetadataServingOutcome {
     a.apply_batch(&[entry(a.applied_index() + 1, id, bytes)])
         .unwrap()
         .remove(0)
@@ -42,7 +46,7 @@ fn make_target(plan: MetadataMovePlan) -> MetadataServingTarget {
     )
     .unwrap()
 }
-fn frozen() -> (MetadataPublishingSource, MetadataImage, Vec<LogEntry>) {
+pub(super) fn frozen() -> (MetadataPublishingSource, MetadataImage, Vec<LogEntry>) {
     let mut s = source();
     let boot = s.bootstrap_command(40).unwrap();
     let publish = DirectoryCommand {
@@ -80,7 +84,7 @@ fn frozen() -> (MetadataPublishingSource, MetadataImage, Vec<LogEntry>) {
     let image = s.source().export(100000).unwrap();
     (s, image, entries)
 }
-fn imported(image: &MetadataImage) -> (MetadataServingTarget, Vec<LogEntry>) {
+pub(super) fn imported(image: &MetadataImage) -> (MetadataServingTarget, Vec<LogEntry>) {
     let mut t = make_target(image.plan().clone());
     let entries = vec![
         entry(1, 7, t.bootstrap_command(40).unwrap()),
@@ -94,7 +98,7 @@ fn imported(image: &MetadataImage) -> (MetadataServingTarget, Vec<LogEntry>) {
     t.apply_batch(&entries).unwrap();
     (t, entries)
 }
-fn publication(
+pub(super) fn publication(
     s: &mut MetadataPublishingSource,
     t: &MetadataServingTarget,
 ) -> (MetadataPublicationStatus, Vec<u8>) {

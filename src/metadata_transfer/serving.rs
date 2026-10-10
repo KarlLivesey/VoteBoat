@@ -23,6 +23,45 @@ pub struct MetadataActivationStatus {
     pub index: u64,
     pub publication: MetadataPublicationStatus,
 }
+pub const METADATA_ACTIVATION_STATUS_BYTES: usize = 256;
+impl MetadataActivationStatus {
+    /// Canonical observation encoding; callers authenticate the originating quorum.
+    pub fn encode(&self) -> Result<Vec<u8>, ApplicationError> {
+        self.validate_indices()?;
+        let mut b = Vec::with_capacity(METADATA_ACTIVATION_STATUS_BYTES);
+        b.extend(self.index.to_le_bytes());
+        put_publication(&mut b, self.publication);
+        Ok(b)
+    }
+    pub fn decode(bytes: &[u8]) -> Result<Self, ApplicationError> {
+        let mut r = Reader::new(bytes);
+        let result = Self {
+            index: r.u64()?,
+            publication: read_publication(&mut r)?,
+        };
+        if !r.done() {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        result.validate_indices()?;
+        Ok(result)
+    }
+    fn validate_indices(&self) -> Result<(), ApplicationError> {
+        let p = self.publication;
+        let i = p.imported;
+        if i.source.index == 0
+            || i.index == 0
+            || i.source.directory_schema == 0
+            || i.source.image_bytes == 0
+            || i.source.image_bytes > MAX_METADATA_IMAGE_BYTES
+            || p.index <= i.source.index
+            || self.index <= i.index
+            || [i.source.index, i.index, p.index, self.index].contains(&u64::MAX)
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
+        Ok(())
+    }
+}
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct MetadataServingStatus {
     pub target: MetadataTargetStatus,

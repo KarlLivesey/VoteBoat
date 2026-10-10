@@ -14,7 +14,7 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules are exercised; general public mutation ingress and generic application envelopes remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; owner/locator refresh, repeated moves and native composition156c remain; dynamic ownership lifecycle remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; original full-owner/cache adoption156c1 implemented; retained/imported owners, foreign locators, repeated moves and native composition156c remain; dynamic ownership lifecycle remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; broader lifecycle recovery remains |
 | P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
@@ -163,8 +163,9 @@ Evidence and limits are recorded in the slice154f section below.
 two partial delegations, remaining ownership transfer, and retirement/reclamation.
 The full macro roadmap remains active; broader fault/platform cases are not implied.
 
-1. **156c, owner refresh and native authority-move composition (current; P5/P6).**
-   Connect activated metadata to live data-owner grants and parent/child locators.
+1. **156c2, remaining owner/locator and native authority-move composition (current; P5/P6).**
+   Original full-owner/cache adoption156c1 is implemented. Extend activated
+   metadata adoption to retained/imported owners and foreign parent/child locators.
    Depends on156b2's publication/activation and existing grant-adoption contracts.
    Add repeat-move lineage support for the migrated base as part of this path;
    the current target does not itself export a second authority move. Check stale
@@ -12946,3 +12947,74 @@ creation reservation. It was corrected to the existing bound operation contract;
 no production behavior was weakened. This is selected embedding/native-journal
 evidence. Live owner/locator adoption, repeated metadata movement, TCP/QUIC
 composition, macOS and broader faults remain. The full P0–P7 goal stays active.
+
+## Slice156c1 schema plan — owner and cache metadata adoption
+
+Reuse the ordered bounded parent/grant adoption ledger for an explicitly selected
+RoutedApplication schema5. A canonical OwnerMetadataAdoption carries the complete
+move plan, selected responsibility and original destination activation, including
+source publication/import/configuration facts. Recheck the plan digest, all
+authority/operation links and source/publication/import/activation boundaries.
+The host authenticates the original quorum observations. Exact active-grant
+matching prevents stale or out-of-order adoption; only metadata authority, local
+parent/child references and generation change. Data groups, epochs, payloads,
+deduplication/outbox and the original bootstrap stay unchanged.
+
+Select before bootstrap, reserve command/checkpoint capacity, preserve schemas1–4
+and reconstruct mixed parent/metadata changes from the original grant. Existing
+TransferSource and control-read wrappers should use the same new profile without
+new storage or runtime ownership. Exact retries remain valid after a later fence;
+new changes after fencing refuse. Invalid batches/checkpoints remain atomic.
+
+Add an explicit native cache option through the existing ManifestCache contract.
+It accepts only the exact metadata-reference transformation. Hosts verify the
+move observation before supplying hints; hints never become write authority.
+Partial parent/child refresh must fail resolution until compatible views exist.
+
+Checks: actual source fence/import/publication/activation -> owner adoption and
+cache route -> old data retry/new write -> checkpoint -> later data transfer;
+stale/conflicting evidence, capacity/old-profile refusal, mixed ledger replay and
+native adoption-frame cuts. Retained/imported owners, foreign parent/child locator
+updates, repeat metadata exports and TCP/QUIC composition remain156c work.
+
+Metadata-adoption status reads carry the original activation as well as the local
+owner receipt. This is needed because a bare metadata index is ambiguous after
+the authority changes or after a later parent move. Reconstruct this fixed-size
+read from the same retained command; no new persistent ledger is introduced.
+
+## Slice156c1 implemented — full-owner metadata adoption and cache refresh
+
+RoutedApplication schema5 binds metadata-adoption support before bootstrap and
+uses its existing bounded ordered parent/grant ledger. OwnerMetadataAdoption
+carries the full plan and original destination activation. It validates selected
+responsibility, plan digest, authority domains and phase-index relationships.
+Foreign configurations, profile/image digests and actual commitment still require
+host authentication. Old profiles do not admit the new command.
+
+The owner preserves its data group, epoch, application state, retry/outbox state
+and original bootstrap; only the plan-derived metadata references/generation
+change. Exact current-grant matching prevents stale changes. MetadataGrantStatus
+retains the local owner result and full original activation for bounded quorum
+reads, including through TransferSource. Snapshot replay rebuilds mixed local,
+cross-parent and metadata adoption records from the original grant. The larger
+profile explicitly reserves command/history space and refuses oversized budgets.
+
+NativeManifestCache offers an explicit metadata-move option over ManifestCache.
+The shared manifest predicate accepts only an exact generation step and
+metadata/local-reference changes while preserving ownership and selectors.
+Partial parent/child refresh cannot resolve a complete path. Cache hints still
+require authenticated committed manifests and never grant service authority.
+
+Six new tests pass: real metadata activation -> full-owner adoption with exhausted
+data history; original data/control retry and outbox preservation; codec/profile/
+capacity/checkpoint refusal; local parent -> metadata -> local parent replay;
+actual later data split/import/publication/activation through the migrated
+metadata directory; strict cache refresh; and native adoption journal faults.
+The native case cuts every append byte plus synchronization/publication boundaries,
+reaches old/complete grants and resumes exact retries without losing data.
+
+All-feature totals are68 across metadata_transfer23, reparenting14,
+reparent_guards18 and routing13; core-only totals are52 (18/11/14/9).
+All-target/all-feature Clippy with warnings denied passes. Retained/imported
+owners, foreign locators, repeat metadata moves and TCP/QUIC composition remain
+within156c. The full macro plan and P0–P7 goal remain active.

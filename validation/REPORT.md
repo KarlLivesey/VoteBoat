@@ -4703,3 +4703,32 @@ All-target/all-feature Clippy with warnings denied passes. Full live-owner and
 locator adoption, repeated metadata moves, TCP/QUIC composition, macOS and wider
 fault coverage remain; these tests do not complete P5/P6 or the overall goal.
 Formatting, whitespace and the85-contract inventory/path check pass.
+
+## Slice156c1 — full-owner metadata adoption and cache refresh
+
+All68 cases pass across all-feature metadata_transfer23, reparenting14,
+reparent_guards18 and routing13. The same core-only targets pass52 cases
+(18/11/14/9). All-target/all-feature Clippy with warnings denied passes.
+
+Six new adoption cases exercise actual source/import/publication/activation
+observations, original full-owner adoption with exhausted data capacity, stable
+data groups/epochs, preserved retries/outbox and exact bootstrap, mixed local
+parent -> metadata -> local parent changes, and checkpoint replay. The full
+source performs a later split through the migrated directory, imports both
+targets and activates them with original data retries. Metadata-adoption reads
+retain both the local owner result and original activation provenance.
+
+Wrong domains/plan hashes/index relationships, old profiles, insufficient
+capacity, truncated codecs/checkpoints and partial batches refuse. Opaque remote
+digests/configurations require host authentication; a byte mutation of an opaque
+profile is not locally detectable without that evidence. Initial fixture issues
+were corrected to use the existing transfer APIs and distinguish those claims.
+
+Native cache cases check exact ownership-preserving metadata changes, partial
+parent/child refresh refusal and unchanged state on bad admission. Native ModelIo
+cuts every adoption-frame byte plus synchronization/publication boundaries;
+both old and complete grants recover, preserving data/outbox and exact retry.
+These are selected modelled journal and embedding cases, not TCP/QUIC deployment
+or power-loss proof. Retained/imported families, foreign locators and repeated
+metadata moves remain, together with the full goal's other open requirements.
+Formatting, whitespace and the86-contract inventory/path check pass.

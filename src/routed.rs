@@ -24,6 +24,11 @@ pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
 mod control_reads;
 mod cross_parent_adoption;
+mod metadata_adoption;
+pub use metadata_adoption::{
+    MetadataGrantStatus, OwnerMetadataAdoption, MAX_METADATA_ADOPTION_BYTES,
+    METADATA_ADOPTING_ROUTED_SCHEMA,
+};
 pub(crate) mod parent_adoption;
 pub(crate) mod parent_slots;
 pub use codec::{encode_fence, encode_routed, encode_scope_fence};
@@ -157,6 +162,7 @@ pub struct RoutedApplication<A, P> {
     semantic_bytes: usize,
     parent_adoption_limit: usize,
     cross_parent_adoption: bool,
+    metadata_adoption: bool,
     parent_adoptions: Vec<ParentAdoptionRecord>,
 }
 impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A, P> {
@@ -231,6 +237,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             semantic_bytes: 0,
             parent_adoption_limit: 0,
             cross_parent_adoption: false,
+            metadata_adoption: false,
             parent_adoptions: Vec::new(),
         })
     }
@@ -330,7 +337,9 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: if self.cross_parent_adoption {
+            application_schema: if self.metadata_adoption {
+                METADATA_ADOPTING_ROUTED_SCHEMA
+            } else if self.cross_parent_adoption {
                 CROSS_PARENT_ADOPTING_ROUTED_SCHEMA
             } else if self.parent_adoption_limit != 0 {
                 PARENT_ADOPTING_ROUTED_SCHEMA
@@ -913,7 +922,9 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.cross_parent_adoption {
+        if self.metadata_adoption {
+            METADATA_ADOPTING_ROUTED_SCHEMA
+        } else if self.cross_parent_adoption {
             CROSS_PARENT_ADOPTING_ROUTED_SCHEMA
         } else if self.parent_adoption_limit != 0 {
             PARENT_ADOPTING_ROUTED_SCHEMA
@@ -961,7 +972,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.cross_parent_adoption {
+        bytes.extend(if self.metadata_adoption {
+            b"VBROUT05"
+        } else if self.cross_parent_adoption {
             b"VBROUT04"
         } else if self.parent_adoption_limit != 0 {
             b"VBROUT03"
@@ -1032,7 +1045,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.cross_parent_adoption {
+                != if self.metadata_adoption {
+                    b"VBROUT05"
+                } else if self.cross_parent_adoption {
                     b"VBROUT04"
                 } else if self.parent_adoption_limit != 0 {
                     b"VBROUT03"
@@ -1213,8 +1228,11 @@ where
                     let operation = r.operation()?;
                     let index = r.u64()?;
                     let n = r.u32()? as usize;
-                    let command =
-                        ParentAdoptionCommand::decode(r.take(n)?, self.cross_parent_adoption)?;
+                    let command = ParentAdoptionCommand::decode_metadata(
+                        r.take(n)?,
+                        self.cross_parent_adoption,
+                        self.metadata_adoption,
+                    )?;
                     let Some((initial, initial_index)) = initialized else {
                         return Err(ApplicationError::InvalidCheckpoint);
                     };

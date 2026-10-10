@@ -48,6 +48,7 @@ pub(crate) enum ParentAdoptionCommand {
     Cross(CrossOwnerParentAdoption),
     LocalSlots(ParentSlotAdoption),
     CrossSlots(CrossParentSlotAdoption),
+    Metadata(OwnerMetadataAdoption),
 }
 impl ParentAdoptionCommand {
     pub fn decode_scoped(bytes: &[u8], slots: bool) -> Result<Self, ApplicationError> {
@@ -66,12 +67,24 @@ impl ParentAdoptionCommand {
             OwnerParentAdoption::decode(bytes).map(Self::Local)
         }
     }
+    pub fn decode_metadata(
+        bytes: &[u8],
+        cross: bool,
+        metadata: bool,
+    ) -> Result<Self, ApplicationError> {
+        if metadata && bytes.starts_with(b"VBMAAD01") {
+            OwnerMetadataAdoption::decode(bytes).map(Self::Metadata)
+        } else {
+            Self::decode(bytes, cross)
+        }
+    }
     pub fn encode(&self, max: usize) -> Result<Vec<u8>, ApplicationError> {
         match self {
             Self::Local(a) => a.encode(max),
             Self::Cross(a) => a.encode(max),
             Self::LocalSlots(a) => a.encode(max),
             Self::CrossSlots(a) => a.encode(max),
+            Self::Metadata(a) => a.encode(max),
         }
     }
     pub fn before(&self) -> &ResponsibilityManifest {
@@ -80,6 +93,7 @@ impl ParentAdoptionCommand {
             Self::Cross(a) => a.before(),
             Self::LocalSlots(a) => a.before(),
             Self::CrossSlots(a) => a.before(),
+            Self::Metadata(a) => a.before(),
         }
     }
     pub fn after(&self) -> ResponsibilityManifest {
@@ -88,6 +102,7 @@ impl ParentAdoptionCommand {
             Self::Cross(a) => a.after(),
             Self::LocalSlots(a) => a.after(),
             Self::CrossSlots(a) => a.after(),
+            Self::Metadata(a) => a.after(),
         }
     }
     pub fn metadata(&self) -> (OperationId, u64) {
@@ -99,6 +114,12 @@ impl ParentAdoptionCommand {
                 a.observation.decision.index,
             ),
             Self::CrossSlots(a) => (a.parent_publication.operation, a.parent_publication.index),
+            // The metadata operation is the original transfer ID, but this index
+            // belongs to the new authority's activation, not the old source F.
+            Self::Metadata(a) => (
+                a.activation().publication.imported.source.operation,
+                a.activation().index,
+            ),
         }
     }
 }
@@ -198,7 +219,9 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         Ok(selected)
     }
     pub(super) fn parent_command_bound(&self) -> usize {
-        if self.cross_parent_adoption {
+        if self.metadata_adoption {
+            MAX_METADATA_ADOPTION_BYTES
+        } else if self.cross_parent_adoption {
             MAX_CROSS_PARENT_ADOPTION_BYTES
         } else {
             MAX_PARENT_ADOPTION_BYTES
@@ -216,7 +239,12 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         operation: OperationId,
         bytes: &[u8],
     ) -> Option<ParentGrantStatus> {
-        let command = ParentAdoptionCommand::decode(bytes, self.cross_parent_adoption).ok()?;
+        let command = ParentAdoptionCommand::decode_metadata(
+            bytes,
+            self.cross_parent_adoption,
+            self.metadata_adoption,
+        )
+        .ok()?;
         self.parent_adoptions
             .iter()
             .find(|a| a.status.operation == operation && a.command == command)
@@ -231,7 +259,11 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
         index: u64,
         bytes: &[u8],
     ) -> Result<RoutedOutcome<R>, ApplicationError> {
-        let command = ParentAdoptionCommand::decode(bytes, self.cross_parent_adoption)?;
+        let command = ParentAdoptionCommand::decode_metadata(
+            bytes,
+            self.cross_parent_adoption,
+            self.metadata_adoption,
+        )?;
         if let Some(old) = self
             .parent_adoptions
             .iter()

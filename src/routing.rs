@@ -352,6 +352,35 @@ impl ResponsibilityManifest {
             && b.state == ResponsibilityState::Active
             && a.execution == b.execution
     }
+    /// Exact trusted metadata relocation: local references follow the authority,
+    /// while concrete data owners, epochs, selectors and all other fields stay put.
+    /// This predicate validates structure, not remote commitment or authorization.
+    pub fn moves_metadata_from(&self, previous: &Self) -> bool {
+        let (a, b) = (self.input(), previous.input());
+        if a.authority.id == b.authority.id
+            || b.generation.get().checked_add(1) != Some(a.generation.get())
+        {
+            return false;
+        }
+        let mut expected = b.clone();
+        expected.authority = a.authority;
+        expected.generation = a.generation;
+        if let Some(parent) = &mut expected.parent {
+            if parent.group == b.authority {
+                parent.group = a.authority;
+            }
+        }
+        if let ExecutionMode::Delegated(routes) = &mut expected.execution {
+            for route in routes {
+                if let RouteTarget::Child(child) = &mut route.target {
+                    if child.group == b.authority {
+                        child.group = a.authority;
+                    }
+                }
+            }
+        }
+        a == &expected
+    }
     /// Charges value bytes and all retained route capacity. Collection/allocator
     /// bookkeeping is separately bounded by the fixed entry ceiling.
     pub fn retained_bytes(&self) -> usize {

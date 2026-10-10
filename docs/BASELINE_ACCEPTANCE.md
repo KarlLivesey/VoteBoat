@@ -260,3 +260,9 @@ adds a writable destination with original history and bounded new-command replay
 plus selected native journal fault evidence. Live owner/locator refresh, repeated
 movement and native TCP/QUIC composition156c are still required before claiming
 complete metadata-authority movement.
+
+Slice156c1 adds original full-owner metadata adoption and explicit native cache
+refresh. Six new cases cover real activation, mixed parent/metadata history,
+retry/outbox preservation, a later data split, partial cache refresh, old-profile
+refusal and every-byte native adoption-journal cuts. Retained/imported owners,
+foreign locators, repeated metadata moves and native socket composition remain.

@@ -19,12 +19,15 @@ pub enum RoutedControlQuery<Q> {
     Data(RoutedQuery<Q>),
     Fence,
     ParentAdoption(OperationId),
+    MetadataAdoption(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
+#[allow(clippy::large_enum_variant)] // Fixed observation is included in the read bound.
 pub enum RoutedControlRead<R> {
     Data(RoutedRead<R>),
     Fence(Option<OwnershipFence>),
     ParentAdoption(Option<ParentGrantStatus>),
+    MetadataAdoption(Option<MetadataGrantStatus>),
 }
 /// A read view, not another ownership guard or checkpoint format. Serving and
 /// foreign use still require the original Node quorum read and host authentication.
@@ -131,6 +134,9 @@ where
             RoutedControlQuery::ParentAdoption(op) => Ok(RoutedControlRead::ParentAdoption(
                 self.0.parent_adoption(op),
             )),
+            RoutedControlQuery::MetadataAdoption(op) => Ok(RoutedControlRead::MetadataAdoption(
+                self.0.metadata_adoption(op),
+            )),
         }
     }
 }
@@ -143,7 +149,9 @@ where
     fn query_bytes(&self, q: &Self::Query, max: usize) -> Result<usize, ApplicationError> {
         match q {
             RoutedControlQuery::Data(q) => self.0.query_bytes(q, max),
-            RoutedControlQuery::Fence | RoutedControlQuery::ParentAdoption(_) => Ok(0),
+            RoutedControlQuery::Fence
+            | RoutedControlQuery::ParentAdoption(_)
+            | RoutedControlQuery::MetadataAdoption(_) => Ok(0),
         }
     }
     fn read_result_bound(&self, q: &Self::Query) -> Result<usize, ApplicationError> {
@@ -153,7 +161,9 @@ where
                 .read_result_bound(q)?
                 .checked_sub(size_of::<RoutedRead<A::ReadResult>>())
                 .ok_or(ApplicationError::ReceiptBudget)?,
-            RoutedControlQuery::Fence | RoutedControlQuery::ParentAdoption(_) => 0,
+            RoutedControlQuery::Fence
+            | RoutedControlQuery::ParentAdoption(_)
+            | RoutedControlQuery::MetadataAdoption(_) => 0,
         };
         size_of::<Self::ReadResult>()
             .checked_add(nested)
@@ -166,7 +176,9 @@ where
     ) -> Result<usize, ApplicationError> {
         match r {
             RoutedControlRead::Data(r) => self.0.read_result_bytes(r, max),
-            RoutedControlRead::Fence(_) | RoutedControlRead::ParentAdoption(_) => Ok(0),
+            RoutedControlRead::Fence(_)
+            | RoutedControlRead::ParentAdoption(_)
+            | RoutedControlRead::MetadataAdoption(_) => Ok(0),
         }
     }
 }

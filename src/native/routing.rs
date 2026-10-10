@@ -42,6 +42,7 @@ pub struct NativeManifestCache {
     bytes: usize,
     local_reparenting: bool,
     cross_reparenting: bool,
+    metadata_moves: bool,
 }
 impl NativeManifestCache {
     pub fn new(limits: ManifestCacheLimits) -> Result<Self, RoutingError> {
@@ -52,6 +53,7 @@ impl NativeManifestCache {
             bytes: 0,
             local_reparenting: false,
             cross_reparenting: false,
+            metadata_moves: false,
         })
     }
     /// Opt into trusted same-authority reparenting views before admitting hints.
@@ -71,6 +73,16 @@ impl NativeManifestCache {
         selected.cross_reparenting = true;
         Ok(selected)
     }
+    /// Select before admitting hints. Hosts authenticate the completed metadata
+    /// move; this cache only checks the exact ownership-preserving transformation.
+    #[allow(clippy::result_large_err)]
+    pub fn with_metadata_authority_moves(mut self) -> Result<Self, (RoutingError, Self)> {
+        if !self.entries.is_empty() || self.metadata_moves {
+            return Err((RoutingError::InvalidLimits, self));
+        }
+        self.metadata_moves = true;
+        Ok(self)
+    }
     fn admission(&self, manifest: &ResponsibilityManifest) -> Result<usize, RoutingError> {
         let next = manifest.input();
         let mut old_bytes = 0;
@@ -86,10 +98,12 @@ impl NativeManifestCache {
                     Err(RoutingError::GenerationConflict)
                 };
             }
+            let metadata_move = self.metadata_moves && manifest.moves_metadata_from(old);
             if (next.parent != prior.parent
+                && !metadata_move
                 && !(self.local_reparenting && manifest.reparents_within_authority(old))
                 && !(self.cross_reparenting && manifest.reparents_preserving_owner(old)))
-                || next.authority != prior.authority
+                || (next.authority != prior.authority && !metadata_move)
                 || next.scope != prior.scope
                 || next.application != prior.application
                 || next.scheme != prior.scheme
@@ -102,6 +116,7 @@ impl NativeManifestCache {
             if next.epoch == prior.epoch
                 && next.execution != prior.execution
                 && !manifest.refreshes_child_epochs(old)
+                && !metadata_move
                 && !manifest.retires_child_slots(old)
                 && !(self.local_reparenting && manifest.fills_vacant_child_slots(old))
             {

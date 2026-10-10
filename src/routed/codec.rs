@@ -35,10 +35,14 @@ pub(crate) fn decode(bytes: &[u8], max_payload: usize) -> Result<Command<'_>, Ap
         || bytes.starts_with(b"VBROWN02")
         || bytes.starts_with(b"VBROWN03")
         || bytes.starts_with(b"VBROWN04")
+        || bytes.starts_with(b"VBROWN05")
     {
         return Ok(Command::Bootstrap(bytes));
     }
-    if bytes.starts_with(b"VBRPAD01") || bytes.starts_with(b"VBXPAD01") {
+    if bytes.starts_with(b"VBRPAD01")
+        || bytes.starts_with(b"VBXPAD01")
+        || bytes.starts_with(b"VBMAAD01")
+    {
         return Ok(Command::ParentAdopt(bytes));
     }
     if let Some(inner) = bytes.strip_prefix(b"VBRSCF01") {

@@ -1255,7 +1255,8 @@
         "ResponsibilityManifest::retires_child_slots",
         "ResponsibilityManifest::fills_vacant_child_slots",
         "ResponsibilityManifest::reparents_within_authority",
-        "ResponsibilityManifest::reparents_preserving_owner"
+        "ResponsibilityManifest::reparents_preserving_owner",
+        "ResponsibilityManifest::moves_metadata_from"
       ],
       "native": "NativeBytePartition: stable unsigned single-byte bucket scheme 1/version 1; native and host caches pass the same checked core resolver.",
       "conformance": [
@@ -1263,9 +1264,10 @@
         "tests/delegation.rs",
         "tests/child_slots.rs",
         "tests/reparenting.rs",
-        "tests/reparent_guards/commit_owner.rs"
+        "tests/reparent_guards/commit_owner.rs",
+        "tests/metadata_transfer/adoption.rs"
       ],
-      "scope": "Synchronous deterministic 256-bucket routing, immutable checked Single/Partitioned/Delegated manifests, distinct responsibility incarnation/ownership epoch/route generation, disjoint full coverage and bounded 32-visit traversal. Provider results and parent/child identity/authority/scope/epoch bindings are checked. Route hints cannot grant authority; check_owner requires caller-supplied local committed/applied ownership at admission and application. Host cache/policy injection and all-bucket/refusal/fence tests pass. This entry covers deterministic routing; separate directory, Node, discovery and lifecycle entries record their implementation evidence. Slice154a adds explicit non-serving Vacant selectors to Delegated manifests, including all-vacant namespaces. Complete coverage remains required; Partitioned vacancies refuse. resolve stops with RoutingError::Vacant without a child lookup. Vacant manifests use VBMAN002 while old VBMAN001 bytes remain exact; downgraded/noncanonical tags refuse. Slice154b recognizes trusted vacancy filling and same-authority parent rebinding while preserving epoch, identity, scope, application, placement and execution ownership. These shape predicates provide no commitment or activation certificate. Slice154d3 adds a trusted parent-only rebinding predicate across metadata groups, retaining authority, epoch, scope, placement, execution and application identity."
+      "scope": "Synchronous deterministic 256-bucket routing, immutable checked Single/Partitioned/Delegated manifests, distinct responsibility incarnation/ownership epoch/route generation, disjoint full coverage and bounded 32-visit traversal. Provider results and parent/child identity/authority/scope/epoch bindings are checked. Route hints cannot grant authority; check_owner requires caller-supplied local committed/applied ownership at admission and application. Host cache/policy injection and all-bucket/refusal/fence tests pass. This entry covers deterministic routing; separate directory, Node, discovery and lifecycle entries record their implementation evidence. Slice154a adds explicit non-serving Vacant selectors to Delegated manifests, including all-vacant namespaces. Complete coverage remains required; Partitioned vacancies refuse. resolve stops with RoutingError::Vacant without a child lookup. Vacant manifests use VBMAN002 while old VBMAN001 bytes remain exact; downgraded/noncanonical tags refuse. Slice154b recognizes trusted vacancy filling and same-authority parent rebinding while preserving epoch, identity, scope, application, placement and execution ownership. These shape predicates provide no commitment or activation certificate. Slice154d3 adds a trusted parent-only rebinding predicate across metadata groups, retaining authority, epoch, scope, placement, execution and application identity. Slice156c1 adds an exact metadata-authority/reference transformation with generation +1 and all data ownership, epochs and application fields preserved; this is a structural predicate, not authentication."
     },
     {
       "design_id": "C17",
@@ -1277,7 +1279,8 @@
         "limits",
         "usage",
         "NativeManifestCache::with_local_reparenting",
-        "NativeManifestCache::with_cross_authority_reparenting"
+        "NativeManifestCache::with_cross_authority_reparenting",
+        "NativeManifestCache::with_metadata_authority_moves"
       ],
       "native": "NativeManifestCache: explicit caller-owned BTreeMap hints, bounded count and retained value/route capacity, atomic owned admission/replacement and generation-scoped invalidation.",
       "conformance": [
@@ -1286,9 +1289,10 @@
         "tests/child_slots.rs",
         "tests/reparenting.rs",
         "tests/reparent_guards/commit_owner.rs",
-        "tests/routed/reparenting.rs"
+        "tests/routed/reparenting.rs",
+        "tests/metadata_transfer/adoption.rs"
       ],
-      "scope": "Volatile authenticated-source hints only; caller validates source authorization/commitment. Rejected admission returns original allocations without mutation. Same-generation identical content is idempotent; stale/conflicting generations, lineage/schema changes, epoch regression, same-epoch ownership mapping edits/reactivation and capacity overflow reject. An authenticated newer generation may refresh child locator epochs with unchanged ranges, child identities, groups and parent ownership; child epochs cannot regress. No implicit fetch/eviction, I/O, workers or external accepted work; restart/invalidation forget cached generations and must refetch authorized state. Count bounds map bookkeeping separately from charged payload bytes. Warm child routing survives parent cache removal; this does not establish actual child quorum progress during parent outage. Slice154a also accepts a newer trusted child-retirement view at the same parent epoch, with unchanged identity, authority, range and concrete owner routes. It can combine monotonic child-epoch refresh with child-to-vacant changes; vacancy restoration and concrete-owner removal refuse. The shape check is not deletion evidence; the publishing directory must verify the original tombstone. Slice154b adds explicit empty-cache construction selection for authenticated same-authority reparenting. Only that selection admits vacant-to-child transitions and parent rebinding at unchanged ownership; default refusal behavior remains. Partial cache refresh can return WrongParent until the child view is updated. Rejected stale/changed owner views leave cache state intact. Slice154d3 explicitly selects cross-authority trusted parent rebinding and vacancy filling before any cache admission. Default/local profiles stay unchanged. Partial child/parent refresh refuses traversal until compatible hints exist; stale generations and owner mutations remain refused. Slice154d4 adds four native TCP/TLS and QUIC original full-owner histories: separate three-replica metadata/data groups, original quorum facts, unread-result WAL/checkpoint reopen at every metadata phase, grant adoption, and owner restart/write/read/retry while all metadata is stopped. Original observations/outbox and unchanged stopped metadata files/GroupLogs are checked. Joined owner abort is not hardware power-loss or arbitrary-fault evidence; other owner families and macOS remain open."
+      "scope": "Volatile authenticated-source hints only; caller validates source authorization/commitment. Rejected admission returns original allocations without mutation. Same-generation identical content is idempotent; stale/conflicting generations, lineage/schema changes, epoch regression, same-epoch ownership mapping edits/reactivation and capacity overflow reject. An authenticated newer generation may refresh child locator epochs with unchanged ranges, child identities, groups and parent ownership; child epochs cannot regress. No implicit fetch/eviction, I/O, workers or external accepted work; restart/invalidation forget cached generations and must refetch authorized state. Count bounds map bookkeeping separately from charged payload bytes. Warm child routing survives parent cache removal; this does not establish actual child quorum progress during parent outage. Slice154a also accepts a newer trusted child-retirement view at the same parent epoch, with unchanged identity, authority, range and concrete owner routes. It can combine monotonic child-epoch refresh with child-to-vacant changes; vacancy restoration and concrete-owner removal refuse. The shape check is not deletion evidence; the publishing directory must verify the original tombstone. Slice154b adds explicit empty-cache construction selection for authenticated same-authority reparenting. Only that selection admits vacant-to-child transitions and parent rebinding at unchanged ownership; default refusal behavior remains. Partial cache refresh can return WrongParent until the child view is updated. Rejected stale/changed owner views leave cache state intact. Slice154d3 explicitly selects cross-authority trusted parent rebinding and vacancy filling before any cache admission. Default/local profiles stay unchanged. Partial child/parent refresh refuses traversal until compatible hints exist; stale generations and owner mutations remain refused. Slice154d4 adds four native TCP/TLS and QUIC original full-owner histories: separate three-replica metadata/data groups, original quorum facts, unread-result WAL/checkpoint reopen at every metadata phase, grant adoption, and owner restart/write/read/retry while all metadata is stopped. Original observations/outbox and unchanged stopped metadata files/GroupLogs are checked. Joined owner abort is not hardware power-loss or arbitrary-fault evidence; other owner families and macOS remain open. Slice156c1 explicitly enables authenticated metadata-authority changes before cache admission. Only the exact ownership-preserving manifest transformation is accepted; partial parent/child refresh refuses resolution and malformed/stale updates preserve prior cache state."
     },
     {
       "design_id": "C05/C16/C17",
@@ -2051,6 +2055,37 @@
         "tests/metadata_transfer/activation.rs"
       ],
       "scope": "Slice156b2 binds the publishing source profile and both configurations before target staging. Only a matching committed source publication permits activation. The original source image/history remains immutable. A private writable Directory base preserves inherited allocation reservations and operation outcomes while applying checked authority/reference/generation changes; a bounded local command tail is replayed separately during checkpoint recovery. Historical results explicitly name source authority/index; creation observations carry bounded canonical intent bytes. New writes and actual namespace readiness/publication after activation, inherited identity refusal, exact retries, malformed checkpoints, pending order, atomic batches and native every-byte activation/later-write journal faults are tested. No live-owner/locator adoption, second metadata export, TCP/QUIC composition, arbitrary failure or platform completion is claimed."
+    },
+    {
+      "design_id": "C05/C15/C16",
+      "public_contract": "OwnerMetadataAdoption / MetadataGrantStatus / RoutedApplication::with_metadata_authority_adoption",
+      "operations": [
+        "OwnerMetadataAdoption::new",
+        "OwnerMetadataAdoption::plan",
+        "OwnerMetadataAdoption::before",
+        "OwnerMetadataAdoption::after",
+        "OwnerMetadataAdoption::activation",
+        "OwnerMetadataAdoption::encode",
+        "OwnerMetadataAdoption::decode",
+        "MetadataActivationStatus::encode",
+        "MetadataActivationStatus::decode",
+        "with_metadata_authority_adoption",
+        "metadata_adoption",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "readiness_requirements"
+      ],
+      "native": "Explicit full-owner schema5 uses the existing ordered bounded grant ledger, application contract, TransferSource and native journal providers.",
+      "conformance": [
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/adoption.rs",
+        "tests/reparenting.rs",
+        "tests/reparent_guards.rs"
+      ],
+      "scope": "Slice156c1 carries the complete metadata move plan, selected responsibility and original activation/publication/import observations. Checked plan digest, authority domains and phase indices bind the exact current grant to the updated metadata references/generation. Hosts authenticate foreign quorum/configuration and opaque digest evidence; encoding is not a certificate. Selection occurs before bootstrap and reserves bounded command/checkpoint capacity; oversized complete plans refuse without truncation. Data ownership/epochs, application state, original bootstrap and retry/outbox history remain intact. MetadataGrantStatus and routed/source quorum reads retain both local owner receipt and original activation domains. Exact retries survive later fences; mixed parent/metadata adoption chains restore atomically. Default and earlier profiles refuse the new command. Tests include actual activation, full-owner adoption with exhausted data history, later split/import/activation through the migrated directory, strict native cache refresh, malformed/capacity/partial-batch rejection and every-byte ModelIo journal cuts. Retained/imported owner families, foreign locators, repeated metadata moves and TCP/QUIC authority-move composition remain open."
     }
   ],
   "not_yet_implemented": [
