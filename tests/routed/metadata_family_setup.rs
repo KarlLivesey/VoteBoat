@@ -14,20 +14,24 @@
 // rights and limitations under the RPL.
 use super::*;
 
-fn prepare_metadata(env: &Environment<'_>) -> Vec<Node<MetadataPublishingSource>> {
+pub(super) fn prepare_metadata(
+    env: &Environment<'_>,
+    make: fn() -> MetadataPublishingSource,
+) -> Vec<Node<MetadataPublishingSource>> {
     let mut nodes = open(
         configuration(env.root, 1, &[1, 2, 3], NativeOpenMode::Create),
         env.clock,
         env.protocol,
-        metadata,
+        make,
     );
     let q = DirectoryQuery::Manifest(source_fixture::grant().input().responsibility);
     metadata_phase(
         env,
         &mut nodes,
         1000,
-        metadata().bootstrap_command(1000000).unwrap(),
+        make().bootstrap_command(1000000).unwrap(),
         q,
+        make,
     );
     metadata_phase(
         env,
@@ -40,12 +44,14 @@ fn prepare_metadata(env: &Environment<'_>) -> Vec<Node<MetadataPublishingSource>
         .encode(1000000)
         .unwrap(),
         q,
+        make,
     );
     nodes
 }
-fn reserve(
+pub(super) fn reserve(
     env: &Environment<'_>,
     nodes: &mut Vec<Node<MetadataPublishingSource>>,
+    make: fn() -> MetadataPublishingSource,
 ) -> TransferIntent {
     let configs = configuration(env.root, 21, &[1, 2, 3], NativeOpenMode::Create);
     let before = source_fixture::grant();
@@ -64,6 +70,7 @@ fn reserve(
         21,
         request.encode(1000000).unwrap(),
         DirectoryQuery::Manifest(before.input().responsibility),
+        make,
     );
     let core = nodes[0].local().owner.core(group(1)).unwrap();
     let created = nodes[0].local().applications[&group(1)]
@@ -83,13 +90,14 @@ fn reserve(
             nodes,
             200,
             intent.encode(1000000).unwrap(),
-            DirectoryQuery::Transfer(source_fixture::op(200))
+            DirectoryQuery::Transfer(source_fixture::op(200)),
+            make,
         ),
         DirectoryRead::Transfer(Some(_))
     ));
     intent
 }
-fn prepare_owner(
+pub(super) fn prepare_owner(
     env: &Environment<'_>,
     intent: &TransferIntent,
 ) -> (Vec<Node<RetainedOwner>>, ScopedExportStatus) {
@@ -222,6 +230,7 @@ fn publish_transfer(
         201,
         publication.encode(1000000).unwrap(),
         DirectoryQuery::Publication(source_fixture::op(200)),
+        metadata,
     ) else {
         panic!("transfer publication")
     };
@@ -231,8 +240,8 @@ fn publish_transfer(
     }
 }
 pub(super) fn family(env: &Environment<'_>, partial: bool) -> Family {
-    let mut metadata = prepare_metadata(env);
-    let intent = reserve(env, &mut metadata);
+    let mut metadata = prepare_metadata(env, metadata);
+    let intent = reserve(env, &mut metadata, super::metadata);
     let (mut owner, frozen) = prepare_owner(env, &intent);
     let (mut child, image) = import_child(env, &intent, &owner, frozen, partial);
     let retained = publish_transfer(env, &mut metadata, &intent, &owner, &mut child, frozen);

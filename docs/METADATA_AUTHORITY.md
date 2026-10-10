@@ -203,11 +203,21 @@ checkpoint recovery, and ordinary/partial-delegation-capable imported profiles
 preserve initial activation, transfer publication provenance, frozen exports,
 data retries and outbox counts. Both data owners recover and write with A and B
 offline; their metadata files and logs remain unchanged. Later native handoffs
-for imported owners, their retirement, repeated moves for these families,
-wider faults and macOS validation remain separate work.
+and retirement are covered below. Repeated moves for these families, wider
+faults and macOS validation remain separate work.
 
 Selected native histories additionally complete a second retained-range handoff
 under the moved authority. They preserve the original and new exports, adopt
 the remaining source grant, activate the new child, and recover independent
 writes/retries at all three owners with both metadata services offline. This
 path is covered over TCP/TLS and QUIC with WAL and checkpoint recovery.
+
+Selected imported-owner histories complete a later full handoff, or first
+delegate a strict subrange and then transfer the remainder, under the moved
+metadata authority. The imported owner uses a RetirementGuard selected before
+bootstrap. Incomplete retirement evidence refuses; all destination activations
+and an explicit retention release precede retirement. WAL replay preserves the
+tombstone and lineage, and checkpoint/reclamation removes the old command payload
+without restoring a serving owner. Successors retain retries and accept new
+writes with both metadata services offline. TCP/TLS and QUIC each cover WAL and
+checkpoint recovery for both ordinary and partial-delegation histories.

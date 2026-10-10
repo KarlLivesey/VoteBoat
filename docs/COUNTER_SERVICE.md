@@ -691,9 +691,9 @@ Real TCP/QUIC tests cover dormant startup, reader/writer denial, missing operati
 learner and joint/final commitment, original-ID completion retries and application
 deduplication after checkpoint/restart. A separate fake-peer CLI test covers a
 lost reply; arbitrary socket-loss timing across every membership phase remains
-unverified. General client-supplied configuration targets and complete public
-administration release are still work. Earlier references to mutation ingress
-being absent apply to that broader endpoint or to the historical slice described.
+unverified. The next section describes the later client-supplied target mode.
+Earlier references to mutation ingress being absent describe historical slices;
+broader fault/release acceptance remains open.
 
 ## Client-supplied configuration targets
 

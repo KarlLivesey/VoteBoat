@@ -1,11 +1,16 @@
 # Owned configuration requests
 
-The counter executable now accepts bounded trusted startup plans through
-`--admin-plan` in member recovery mode. See the grammar, operator prerequisites
-and restart behavior in [the service guide](COUNTER_SERVICE.md#trusted-startup-administration-plan).
-This supplies the service adapter over the existing public Node authorization,
-readiness and durable-status APIs; public configuration mutation ingress remains
-gated pending the fault-tested lifecycle release.
+The counter executable supports trusted startup plans (`--admin-plan`),
+authenticated submission of provisioned intents (`--remote-admin-plan`) and
+bounded client-supplied targets (`--remote-admin-policy`) in member recovery
+mode. All use the public Node authorization, readiness and durable-status APIs.
+See [the service guide](COUNTER_SERVICE.md#client-supplied-configuration-targets)
+for grammar, operator prerequisites, retained retry limits and recovery evidence.
+Broader interruption/revocation and remote new-voter schedules remain open.
+
+The sections below record staged implementation. Earlier statements that public
+mutation ingress was pending are historical; slices115–121 added the current
+authenticated commands and selected fault/recovery coverage.
 
 Readiness rounds are volatile, exact-context checks. Owner-admitted
 `cancel_learner_readiness` clears the pending round and cached result; an old

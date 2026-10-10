@@ -329,3 +329,19 @@ serve retries/writes with both metadata groups offline, without changing their
 files/logs. A discovered creation-read overreservation now respects the immutable
 directory history capacity; the full42-test metadata-transfer suite passes.
 Imported-owner later handoff and retirement156c6b remain open.
+
+Slice156c6b closes that selected native composition: ordinary imported owners
+transfer their full scope, while partial histories first delegate a strict
+subrange and then transfer the remainder under moved metadata. Four new native
+TCP/TLS/QUIC x WAL/checkpoint tests cover eight histories. They preserve original
+activation/metadata provenance and earlier exports, reject incomplete retirement
+proofs, replay retirement from the WAL tail and recover exact tombstone lineage
+after checkpoint/reclamation. Successors serve transferred retries and new writes
+with metadata offline and unchanged. The complete affected family filter passed
+12 tests/20 histories in176.32s on Linux. Repeated family moves, broader faults,
+macOS/separate-host and the other roadmap exits remain open.
+
+A fresh current-source audit also confirms that public authenticated membership
+commands already exist; both client-supplied target TCP/QUIC histories passed in
+3.51s. Current summaries now distinguish this implemented ingress from remaining
+revocation, older-checkpoint and remote new-voter acceptance work.

@@ -462,7 +462,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
         checkpoint,
     };
     let mut family = setup::family(&env, false);
-    let mut moved = move_metadata(&env, &mut family);
+    let mut moved = move_metadata(&env, &mut family.metadata, metadata);
     let mut cache = adopt(&env, &mut family, &mut moved);
     let original_adoptions = adoption_status(&env, &mut family);
     let original_metadata = OfflineMetadata::capture(&env, &mut family.metadata, 1);

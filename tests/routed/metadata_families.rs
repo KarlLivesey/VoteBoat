@@ -52,9 +52,10 @@ fn metadata_phase(
     id: u128,
     bytes: Vec<u8>,
     q: DirectoryQuery,
+    make: fn() -> MetadataPublishingSource,
 ) -> DirectoryRead {
     let MetadataPublishingRead::Source(MetadataSourceRead::Directory(r)) =
-        phase(env, nodes, 1, id, bytes, directory_query(q), metadata)
+        phase(env, nodes, 1, id, bytes, directory_query(q), make)
     else {
         panic!("live metadata")
     };
@@ -80,47 +81,51 @@ struct MovedMetadata {
     plan: MetadataMovePlan,
     activation: MetadataActivationStatus,
 }
-fn freeze(env: &Environment<'_>, family: &mut Family) -> (MetadataMovePlan, MetadataImage) {
-    let plan = family.metadata[0].local().applications[&group(1)]
+fn freeze(
+    env: &Environment<'_>,
+    source: &mut Vec<Node<MetadataPublishingSource>>,
+    make: fn() -> MetadataPublishingSource,
+) -> (MetadataMovePlan, MetadataImage) {
+    let plan = source[0].local().applications[&group(1)]
         .source()
         .plan(group(9))
         .unwrap();
-    let bytes = family.metadata[0].local().applications[&group(1)]
+    let bytes = source[0].local().applications[&group(1)]
         .source()
         .freeze_command(&plan, 1000000)
         .unwrap();
     phase(
         env,
-        &mut family.metadata,
+        source,
         1,
         700,
         bytes,
         MetadataPublishingQuery::Source(MetadataSourceQuery::Status),
-        metadata,
+        make,
     );
     assert_eq!(
         observe(
-            &mut family.metadata,
+            source,
             env.clock,
             1,
             directory_query(DirectoryQuery::Manifest(
-                family.intent.before().input().responsibility
+                source_fixture::grant().input().responsibility
             ))
         ),
         MetadataPublishingRead::Source(MetadataSourceRead::Fenced)
     );
-    let image = source_image(&mut family.metadata, env.clock, 1);
+    let image = source_image(source, env.clock, 1);
     (plan, image)
 }
 fn import_metadata(
     env: &Environment<'_>,
-    family: &Family,
+    source_cfg: ConfigurationId,
     plan: &MetadataMovePlan,
     image: &MetadataImage,
+    make: fn() -> MetadataPublishingSource,
 ) -> (Vec<Node<MetadataServingTarget>>, MetadataServingTarget) {
-    let source_cfg = config(&family.metadata, 1);
     let template = MetadataServingTarget::new(
-        metadata(),
+        make(),
         plan.clone(),
         source_fixture::op(700),
         source_cfg,
@@ -158,32 +163,36 @@ fn import_metadata(
             env.clock,
             9,
             MetadataServingQuery::Directory(DirectoryQuery::Manifest(
-                family.intent.before().input().responsibility
+                source_fixture::grant().input().responsibility
             ))
         ),
         MetadataServingRead::NotActive
     );
     (nodes, template)
 }
-fn move_metadata(env: &Environment<'_>, family: &mut Family) -> MovedMetadata {
-    let (plan, image) = freeze(env, family);
-    let (mut nodes, template) = import_metadata(env, family, &plan, &image);
+fn move_metadata(
+    env: &Environment<'_>,
+    source: &mut Vec<Node<MetadataPublishingSource>>,
+    make: fn() -> MetadataPublishingSource,
+) -> MovedMetadata {
+    let (plan, image) = freeze(env, source, make);
+    let (mut nodes, template) = import_metadata(env, config(source, 1), &plan, &image, make);
     let MetadataServingRead::Status(status) =
         observe(&mut nodes, env.clock, 9, MetadataServingQuery::Status)
     else {
         panic!("imported metadata")
     };
-    let bytes = family.metadata[0].local().applications[&group(1)]
+    let bytes = source[0].local().applications[&group(1)]
         .publication_command(status.target.imported.unwrap(), config(&nodes, 9), 1000000)
         .unwrap();
     let MetadataPublishingRead::Publication(Some(publication)) = phase(
         env,
-        &mut family.metadata,
+        source,
         1,
         700,
         bytes,
         MetadataPublishingQuery::Publication,
-        metadata,
+        make,
     ) else {
         panic!("metadata publication")
     };
@@ -466,7 +475,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool, partial: bool) {
         checkpoint,
     };
     let mut family = setup::family(&env, partial);
-    let mut moved = move_metadata(&env, &mut family);
+    let mut moved = move_metadata(&env, &mut family.metadata, metadata);
     let cache = adopt(&env, &mut family, &mut moved);
     historical_publication(&env, &family, &mut moved);
     let original = OfflineMetadata::capture(&env, &mut family.metadata, 1);
@@ -507,3 +516,6 @@ fn quic_retained_and_imported_metadata_move_checkpoint() {
 
 #[path = "metadata_retained_handoff.rs"]
 mod retained_handoff;
+
+#[path = "metadata_imported_retirement.rs"]
+mod imported_retirement;
