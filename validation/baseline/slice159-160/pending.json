@@ -1,0 +1,26 @@
+{
+  "capturedAt": "2026-10-10T02:14:57.234Z",
+  "status": "pending-not-terminal",
+  "baseRevision": "1231153308e955f363a81174a5e4557e4a516a7f",
+  "command": "cargo +stable test --locked --offline --all-targets --all-features",
+  "process": 4075901,
+  "testProcess": 4109706,
+  "session": 64351,
+  "log": "/tmp/vb-baseline159-all.log",
+  "compiledBeforeSlice160": true,
+  "completedTargets": 49,
+  "passedInCompletedTargets": 803,
+  "passedLinesInPartialLog": 832,
+  "earlierObservedLive": [
+    {
+      "process": 2883494,
+      "testProcess": 2925812,
+      "log": "/tmp/voteboat-full-local-all-features.log"
+    },
+    {
+      "process": 3348989,
+      "testProcess": 3350963,
+      "log": "/tmp/voteboat-routed-lint-regression.log"
+    }
+  ]
+}

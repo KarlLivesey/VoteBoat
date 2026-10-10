@@ -2035,10 +2035,8 @@ fn remote_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configure", "15003"])
         .contains("action=completed"));
-    assert!(cluster
-        .ok(leader, &["add", "15000", "42"])
-        .contains("duplicate=true"));
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("duplicate=true"));
+    assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     for id in 1..=3 {
         cluster.ok(id, &["checkpoint"]);
     }
@@ -2050,10 +2048,8 @@ fn remote_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configure", "15001"])
         .contains("action=completed"));
-    assert!(cluster
-        .ok(leader, &["add", "15000", "42"])
-        .contains("duplicate=true"));
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    assert!(authenticated_write(&cluster, &["add", "15000", "42"]).contains("duplicate=true"));
+    assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     cluster.stop();
     fs::remove_dir_all(&cluster.root).unwrap();
 }
@@ -2099,6 +2095,28 @@ fn interrupted_configuration_reply_is_unknown_and_preserves_original_operation()
     fs::remove_dir_all(&cluster.root).unwrap();
 }
 
+// Administration has no CLI auto mode. Preserve the exact record on uncertainty.
+fn configuration_write(cluster: &mut Cluster, args: &[&str]) -> String {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let leader = cluster.leader();
+        let output = cluster.request(leader, args);
+        let text = String::from_utf8(output.stdout).unwrap();
+        if output.status.success() {
+            return text;
+        }
+        assert!(
+            text == "ERR NOT_LEADER\n" || text.starts_with("UNKNOWN LeadershipChanged;"),
+            "{args:?}: {text} {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(
+            Instant::now() < deadline,
+            "configuration did not settle: {text}"
+        );
+        std::thread::park_timeout(Duration::from_millis(10));
+    }
+}
 fn client_supplied_configuration_history(quic: bool) {
     let mut cluster = Cluster::new();
     cluster.quic = quic;
@@ -2131,12 +2149,14 @@ fn client_supplied_configuration_history(quic: bool) {
     let leader = cluster.leader();
     refuse_invalid_configurations(&mut cluster, leader);
     let record = "learners 16001 1 2 - m:3 v:1 v:2 v:3";
-    assert!(cluster
-        .ok(leader, &["configure-record", record])
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["configure-record", record])
-        .contains("duplicate=true"));
+    assert!(
+        configuration_write(&mut cluster, &["configure-record", record])
+            .contains("committed_index=")
+    );
+    assert!(
+        configuration_write(&mut cluster, &["configure-record", record]).contains("duplicate=true")
+    );
+    let leader = cluster.leader();
     let conflict = cluster.request(
         leader,
         &["configure-record", "learners 16001 1 99 - m:3 v:1 v:2 v:3"],
@@ -2145,19 +2165,22 @@ fn client_supplied_configuration_history(quic: bool) {
         .unwrap()
         .contains("conflicts with retained record"));
     let joint = "joint 16003 2 3 4 - w:3 1 v:1 1 v:2 1 v:3";
-    assert!(cluster
-        .ok(leader, &["configure-record", joint])
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["configure-record", joint])
-        .contains("duplicate=true"));
+    assert!(
+        configuration_write(&mut cluster, &["configure-record", joint])
+            .contains("committed_index=")
+    );
+    assert!(
+        configuration_write(&mut cluster, &["configure-record", joint]).contains("duplicate=true")
+    );
     let final_record = "final 16003 3 4";
-    assert!(cluster
-        .ok(leader, &["configure-record", final_record])
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["configure-record", final_record])
-        .contains("duplicate=true"));
+    assert!(
+        configuration_write(&mut cluster, &["configure-record", final_record])
+            .contains("committed_index=")
+    );
+    assert!(
+        configuration_write(&mut cluster, &["configure-record", final_record])
+            .contains("duplicate=true")
+    );
     for id in 1..=3 {
         cluster.ok(id, &["checkpoint"]);
     }
@@ -2174,19 +2197,16 @@ fn client_supplied_configuration_history(quic: bool) {
     assert!(cluster
         .ok(leader, &["configuration-status", "16001"])
         .contains("action=completed"));
-    assert!(cluster
-        .ok(
-            leader,
-            &[
-                "configure-record",
-                "learners 16004 4 5 - w:3 1 v:1 1 v:2 1 v:3"
-            ]
-        )
-        .contains("committed_index="));
-    assert!(cluster
-        .ok(leader, &["add", "16000", "42"])
-        .contains("duplicate=true"));
-    assert_eq!(cluster.ok(leader, &["read"]), "OK value=42\n");
+    assert!(configuration_write(
+        &mut cluster,
+        &[
+            "configure-record",
+            "learners 16004 4 5 - w:3 1 v:1 1 v:2 1 v:3"
+        ]
+    )
+    .contains("committed_index="));
+    assert!(authenticated_write(&cluster, &["add", "16000", "42"]).contains("duplicate=true"));
+    assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     let oversized = "x".repeat(257);
     let refused = cluster.request(leader, &["configure-record", &oversized]);
     assert!(!refused.status.success());
@@ -2425,10 +2445,8 @@ fn interrupted_native_configuration_history(quic: bool) {
         .contains("duplicate=true"));
     check_interrupted_record_conflict(&cluster, replacement);
     cluster.start(leader, "recover-member");
-    assert!(cluster
-        .ok(replacement, &["add", "17000", "42"])
-        .contains("duplicate=true"));
-    assert_eq!(cluster.ok(replacement, &["read"]), "OK value=42\n");
+    assert!(authenticated_write(&cluster, &["add", "17000", "42"]).contains("duplicate=true"));
+    assert_eq!(cluster.routed(&["read"]), "OK value=42\n");
     cluster.stop();
     check_interrupted_membership(&cluster);
     fs::remove_dir_all(&cluster.root).unwrap();

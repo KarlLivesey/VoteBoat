@@ -1,0 +1,175 @@
+voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+├── bytes feature "default"
+│   ├── bytes v1.12.1
+│   └── bytes feature "std"
+│       └── bytes v1.12.1
+├── quinn-proto feature "rustls-ring"
+│   ├── quinn-proto v0.11.19
+│   │   ├── bytes feature "default" (*)
+│   │   ├── lru-slab feature "default"
+│   │   │   └── lru-slab v0.1.3
+│   │   ├── rand feature "default"
+│   │   │   ├── rand v0.10.3
+│   │   │   │   ├── rand_core v0.10.1
+│   │   │   │   ├── chacha20 feature "rng"
+│   │   │   │   │   └── chacha20 v0.10.2
+│   │   │   │   │       ├── rand_core v0.10.1
+│   │   │   │   │       ├── cfg-if feature "default"
+│   │   │   │   │       │   └── cfg-if v1.0.5
+│   │   │   │   │       └── cpufeatures feature "default"
+│   │   │   │   │           └── cpufeatures v0.3.1
+│   │   │   │   └── getrandom feature "default"
+│   │   │   │       └── getrandom v0.4.3
+│   │   │   │           ├── libc v0.2.190
+│   │   │   │           ├── cfg-if feature "default" (*)
+│   │   │   │           └── rand_core feature "default"
+│   │   │   │               └── rand_core v0.10.1
+│   │   │   ├── rand feature "std"
+│   │   │   │   ├── rand v0.10.3 (*)
+│   │   │   │   ├── rand feature "alloc"
+│   │   │   │   │   └── rand v0.10.3 (*)
+│   │   │   │   └── getrandom feature "std"
+│   │   │   │       └── getrandom v0.4.3 (*)
+│   │   │   ├── rand feature "std_rng"
+│   │   │   │   └── rand v0.10.3 (*)
+│   │   │   ├── rand feature "sys_rng"
+│   │   │   │   ├── rand v0.10.3 (*)
+│   │   │   │   ├── rand feature "getrandom"
+│   │   │   │   │   └── rand v0.10.3 (*)
+│   │   │   │   └── getrandom feature "sys_rng"
+│   │   │   │       └── getrandom v0.4.3 (*)
+│   │   │   └── rand feature "thread_rng"
+│   │   │       ├── rand v0.10.3 (*)
+│   │   │       ├── rand feature "std" (*)
+│   │   │       ├── rand feature "std_rng" (*)
+│   │   │       └── rand feature "sys_rng" (*)
+│   │   ├── rand_pcg feature "default"
+│   │   │   └── rand_pcg v0.10.2
+│   │   │       └── rand_core feature "default" (*)
+│   │   ├── ring feature "default"
+│   │   │   ├── ring v0.17.14
+│   │   │   │   ├── cfg-if v1.0.5
+│   │   │   │   ├── getrandom feature "default"
+│   │   │   │   │   └── getrandom v0.2.17
+│   │   │   │   │       ├── libc v0.2.190
+│   │   │   │   │       └── cfg-if feature "default" (*)
+│   │   │   │   └── untrusted feature "default"
+│   │   │   │       └── untrusted v0.9.0
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── cc v1.6.0
+│   │   │   │       ├── find-msvc-tools feature "default"
+│   │   │   │       │   └── find-msvc-tools v0.1.14
+│   │   │   │       └── shlex feature "default"
+│   │   │   │           ├── shlex v2.0.1
+│   │   │   │           └── shlex feature "std"
+│   │   │   │               └── shlex v2.0.1
+│   │   │   ├── ring feature "alloc"
+│   │   │   │   └── ring v0.17.14 (*)
+│   │   │   └── ring feature "dev_urandom_fallback"
+│   │   │       └── ring v0.17.14 (*)
+│   │   ├── rustc-hash feature "default"
+│   │   │   ├── rustc-hash v2.1.3
+│   │   │   └── rustc-hash feature "std"
+│   │   │       └── rustc-hash v2.1.3
+│   │   ├── rustls feature "std"
+│   │   │   ├── rustls v0.23.45
+│   │   │   │   ├── subtle v2.6.1
+│   │   │   │   ├── ring feature "default" (*)
+│   │   │   │   ├── once_cell feature "alloc"
+│   │   │   │   │   ├── once_cell v1.21.4
+│   │   │   │   │   └── once_cell feature "race"
+│   │   │   │   │       └── once_cell v1.21.4
+│   │   │   │   ├── once_cell feature "race" (*)
+│   │   │   │   ├── rustls-pki-types feature "alloc"
+│   │   │   │   │   └── rustls-pki-types v1.15.1
+│   │   │   │   │       └── zeroize feature "default"
+│   │   │   │   │           ├── zeroize v1.9.1
+│   │   │   │   │           └── zeroize feature "alloc"
+│   │   │   │   │               └── zeroize v1.9.1
+│   │   │   │   ├── rustls-pki-types feature "default"
+│   │   │   │   │   ├── rustls-pki-types v1.15.1 (*)
+│   │   │   │   │   └── rustls-pki-types feature "alloc" (*)
+│   │   │   │   ├── zeroize feature "default" (*)
+│   │   │   │   └── rustls-webpki feature "alloc"
+│   │   │   │       ├── rustls-webpki v0.103.15
+│   │   │   │       │   ├── ring v0.17.14 (*)
+│   │   │   │       │   ├── rustls-pki-types v1.15.1 (*)
+│   │   │   │       │   └── untrusted feature "default" (*)
+│   │   │   │       ├── ring feature "alloc" (*)
+│   │   │   │       └── rustls-pki-types feature "alloc" (*)
+│   │   │   ├── once_cell feature "std"
+│   │   │   │   ├── once_cell v1.21.4
+│   │   │   │   └── once_cell feature "alloc" (*)
+│   │   │   ├── rustls-pki-types feature "std"
+│   │   │   │   ├── rustls-pki-types v1.15.1 (*)
+│   │   │   │   └── rustls-pki-types feature "alloc" (*)
+│   │   │   └── rustls-webpki feature "std"
+│   │   │       ├── rustls-webpki v0.103.15 (*)
+│   │   │       ├── rustls-pki-types feature "std" (*)
+│   │   │       └── rustls-webpki feature "alloc" (*)
+│   │   ├── slab feature "default"
+│   │   │   ├── slab v0.4.12
+│   │   │   └── slab feature "std"
+│   │   │       └── slab v0.4.12
+│   │   ├── thiserror feature "default"
+│   │   │   ├── thiserror v2.0.21
+│   │   │   │   └── thiserror-impl feature "default"
+│   │   │   │       └── thiserror-impl v2.0.21 (proc-macro)
+│   │   │   │           ├── proc-macro2 feature "default"
+│   │   │   │           │   ├── proc-macro2 v1.0.107
+│   │   │   │           │   │   └── unicode-ident feature "default"
+│   │   │   │           │   │       └── unicode-ident v1.0.26
+│   │   │   │           │   └── proc-macro2 feature "proc-macro"
+│   │   │   │           │       └── proc-macro2 v1.0.107 (*)
+│   │   │   │           ├── quote feature "default"
+│   │   │   │           │   ├── quote v1.0.47
+│   │   │   │           │   │   └── proc-macro2 v1.0.107 (*)
+│   │   │   │           │   └── quote feature "proc-macro"
+│   │   │   │           │       ├── quote v1.0.47 (*)
+│   │   │   │           │       └── proc-macro2 feature "proc-macro" (*)
+│   │   │   │           └── syn feature "default"
+│   │   │   │               ├── syn v3.0.6
+│   │   │   │               │   ├── proc-macro2 v1.0.107 (*)
+│   │   │   │               │   ├── quote v1.0.47 (*)
+│   │   │   │               │   └── unicode-ident feature "default" (*)
+│   │   │   │               ├── syn feature "clone-impls"
+│   │   │   │               │   └── syn v3.0.6 (*)
+│   │   │   │               ├── syn feature "derive"
+│   │   │   │               │   └── syn v3.0.6 (*)
+│   │   │   │               ├── syn feature "parsing"
+│   │   │   │               │   └── syn v3.0.6 (*)
+│   │   │   │               ├── syn feature "printing"
+│   │   │   │               │   └── syn v3.0.6 (*)
+│   │   │   │               └── syn feature "proc-macro"
+│   │   │   │                   ├── syn v3.0.6 (*)
+│   │   │   │                   ├── proc-macro2 feature "proc-macro" (*)
+│   │   │   │                   └── quote feature "proc-macro" (*)
+│   │   │   └── thiserror feature "std"
+│   │   │       └── thiserror v2.0.21 (*)
+│   │   ├── tinyvec feature "alloc"
+│   │   │   └── tinyvec v1.13.3
+│   │   ├── tinyvec feature "default"
+│   │   │   └── tinyvec v1.13.3
+│   │   └── tracing feature "std"
+│   │       ├── tracing v0.1.44
+│   │       │   ├── tracing-core v0.1.36
+│   │       │   │   └── once_cell feature "default"
+│   │       │   │       ├── once_cell v1.21.4
+│   │       │   │       └── once_cell feature "std" (*)
+│   │       │   └── pin-project-lite feature "default"
+│   │       │       └── pin-project-lite v0.2.17
+│   │       └── tracing-core feature "std"
+│   │           ├── tracing-core v0.1.36 (*)
+│   │           └── tracing-core feature "once_cell"
+│   │               └── tracing-core v0.1.36 (*)
+│   ├── quinn-proto feature "ring"
+│   │   └── quinn-proto v0.11.19 (*)
+│   └── rustls feature "ring"
+│       ├── rustls v0.23.45 (*)
+│       └── rustls-webpki feature "ring"
+│           └── rustls-webpki v0.103.15 (*)
+├── ring feature "std"
+│   ├── ring v0.17.14 (*)
+│   └── ring feature "alloc" (*)
+├── rustls feature "ring" (*)
+└── rustls feature "std" (*)

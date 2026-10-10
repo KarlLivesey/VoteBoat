@@ -12,12 +12,15 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
-//! Explicitly driven automatic original Directory reads for manifest cache misses.
+//! Explicitly driven automatic directory reads for manifest cache misses.
+#[path = "manifest_read_source.rs"]
+mod mapped;
 use super::authority_discovery::NativeAuthorityDiscovery;
 use crate::{
     application::*, connect::PeerConnector, outbound::OutboundQueue, routing::*, runtime::*,
     snapshot_worker::SnapshotWorker, transport::PeerTransportFactory, worker::PersistenceWorker,
 };
+pub use mapped::MappedManifestReadSource;
 impl<
         S: ReadyScheduler,
         T: TimerService,
@@ -37,6 +40,7 @@ where
     A::Receipt: ApplicationReceipt,
     C::Endpoint: Clone,
 {
+    type ReadResult = Option<ResponsibilityManifest>;
     fn binding(&self) -> ReadInvocationBinding {
         self.local().reads.binding()
     }
@@ -80,9 +84,9 @@ pub struct PendingManifestLookup {
     pub cancelled: bool,
 }
 #[derive(Debug)]
-pub enum ManifestLookupPollError {
+pub enum ManifestLookupPollError<R = Option<ResponsibilityManifest>> {
     Discovery(ManifestDiscoveryError),
-    Source(ReadCompletionRejected<Option<ResponsibilityManifest>>),
+    Source(ReadCompletionRejected<R>),
 }
 /// One accepted read at a time; caller explicitly polls the original source Node.
 /// Cache observations are volatile hints and do not replace server ownership checks.
@@ -173,7 +177,7 @@ impl<S: ManifestReadSource> NativeManifestLookup<S> {
         p.cancelled = true;
         self.source.cancel(p.ticket)
     }
-    pub fn poll(&mut self, now: MonoTime) -> Result<bool, ManifestLookupPollError> {
+    pub fn poll(&mut self, now: MonoTime) -> Result<bool, ManifestLookupPollError<S::ReadResult>> {
         self.time(now).map_err(ManifestLookupPollError::Discovery)?;
         let Some(p) = self.pending else {
             return Ok(false);

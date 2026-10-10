@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.44s
+     Running tests/lookup_discovery.rs (target/debug/deps/lookup_discovery-139020413b735c3b)
+
+running 3 tests
+test downstream_original_read_source_contract_compiles_without_native ... ok
+test native::construction_and_recovery_preserve_original_owned_source_and_ticket ... ok
+test native::deadline_retains_accepted_source_work_until_actual_terminal_result ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/manifest_mapping.rs (target/debug/deps/manifest_mapping-112b68340734a892)
+
+running 2 tests
+test host_mapping_uses_the_public_contract_without_native_features ... ok
+test default_mappings_accept_only_current_manifest_branches ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

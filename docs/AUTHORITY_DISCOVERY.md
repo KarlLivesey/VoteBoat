@@ -97,3 +97,38 @@ namespace creation/deletion/reparenting and relocation of directory authority's
 own data remain separate work. Native construction does not select an external
 issuer or trust unknown groups. Linux execution does not establish macOS,
 separate-host, arbitrary-fault or sustainable performance behavior.
+
+## Current metadata read adapters
+
+`MappedManifestReadSource<Node<...>, M>` owns an existing Node and selects the
+stateless public `ManifestReadMapping`. Default mappings cover
+`LifecycleDirectory`, `MetadataAuthoritySource`, `MetadataPublishingSource` and
+`MetadataServingTarget`. Construct the source with the mapping type, then pass
+it to the existing `NativeManifestLookup`. Drive its original Node through
+`source_mut().node_mut()`; after lookup close/drain, recover it with
+`into_source().into_node()`. The adapter creates no new storage or runtime.
+
+All query/result budgets, quorum barriers and cancellation are supplied by the
+original Node/application. Mapping moves the current manifest out of the typed
+result; it does not synthesize a barrier. Fenced sources, inactive destinations,
+historical reads and non-manifest control results cannot become observations.
+Missing current manifests remain `None`. Original application control APIs and
+checkpoint formats are preserved. After an authority moves, select the Node and
+locator for the verified destination; no automatic trust or credential is inferred
+from a hint. Existing cache identity/generation checks still apply.
+
+`ManifestReadSource` contract version2 adds `type ReadResult` for its *rejected*
+completion payload. Successful outcomes remain normalized to optional manifests.
+Original Directory providers use `Option<ResponsibilityManifest>`; adapters use
+the actual application's result. A wrong completion is returned intact so the
+host can resolve its original Node credits; converting it into a synthetic
+manifest result would lose that ownership. A consumed cancellation result may
+precede completion of its queued Node cancellation work: continue polling the
+original Node until those credits drain. Closing a lookup is not shutting down
+its Node or undoing accepted work.
+
+Downstream mapping tests compile without native features. Native TCP/TLS and
+QUIC histories exercise repeated metadata moves with WAL/checkpoint reopen,
+current route resolution, source fencing/inactive-target refusal, cancellation
+cleanup and return of an original wrongly matched completion. These remain
+selected histories; broader external remote-fetch protocols are separate work.

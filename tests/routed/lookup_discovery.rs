@@ -87,6 +87,7 @@ struct RetainedRead {
     cancellations: usize,
 }
 impl ManifestReadSource for RetainedRead {
+    type ReadResult = Option<ResponsibilityManifest>;
     fn binding(&self) -> ReadInvocationBinding {
         ManifestReadSource::binding(&self.node)
     }

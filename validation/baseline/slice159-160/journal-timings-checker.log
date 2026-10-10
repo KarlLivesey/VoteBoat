@@ -1,0 +1,11 @@
+✔ actual completed journal diagnostic has three finite per-replica deltas (1.447873ms)
+✔ missing or duplicate replica stage cannot certify a complete diagnostic (3.720797ms)
+✔ regression, errors, malformed values and fabricated logical metrics are refused (0.862953ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9.5452

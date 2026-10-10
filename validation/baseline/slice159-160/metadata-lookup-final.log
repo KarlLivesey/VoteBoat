@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.18s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 2 tests
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 147 filtered out; finished in 11.69s
+

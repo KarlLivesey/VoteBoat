@@ -57,6 +57,7 @@ fn query() -> ManifestLookup {
     }
 }
 impl ManifestReadSource for HostReads {
+    type ReadResult = Option<ResponsibilityManifest>;
     fn binding(&self) -> ReadInvocationBinding {
         self.binding
     }

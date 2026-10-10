@@ -4938,3 +4938,30 @@ selected success does not explain their packets. The p99 remains outside the
 fixed-p99 target. See performance/slice158/README.md for exact commands, source
 hashes, raw outcomes and limits. This is Linux evidence only; full P0–P7 remains
 active and P8/Windows remain deferred.
+
+### Slices159–160 — baseline ledger and automatic metadata reads
+
+Reviewed P0–P7 against current source, chapter11/12/17 requirements and the
+component catalogue. BASELINE_ACCEPTANCE.md now records implemented bounded
+lifecycle/admin paths and missing obligations separately. Full acceptance is
+not established: full-suite runs and corrected macOS execution remain pending.
+
+The new public stateless manifest mappings and owning native adapter preserve
+original Node tickets, barriers, result credits and rejected typed completions.
+ManifestReadSource's associated result is a version2 Rust API change. Four
+TCP/QUIC × WAL/checkpoint metadata histories pass across two actual moves/reopen,
+including inactive/fenced refusal, cancellation cleanup and wrong-ticket
+recovery. Four original native lookup tests pass; all-feature source/mapping5
+and core-only3 pass. No persistence format or quorum rule changes.
+
+Before160, core-only591/68 targets and native-without-TLS882/71 targets pass.
+The corrected library/service suite passes64+35; latest client-target fixture
+correction passes2/2 separately. Exact-argument retry fixes legal leader changes;
+positive-only bounded UDP receive fixes the observed macOS fixture assumption.
+Failed attempts remain archived. Strict all-feature/core Clippy has zero
+diagnostics, fmt/diff and warnings-denied API docs pass. Inventory metadata
+validation passes89 entries; independent existing checker suites pass19.
+
+See [retained evidence](baseline/slice159-160/README.md) for commands, source
+hashes, scope and live-sweep observations. A partial log is not a passed suite.
+No new throughput, fixed-p99, macOS or full baseline success is claimed.

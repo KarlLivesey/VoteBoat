@@ -1,0 +1,113 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.03s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-354c68027e80b385)
+
+running 64 tests
+test native::log_store::configuration_tests::configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag ... ok
+test native::group_creation::tests::immutable_file_binding_recovers_each_publication_boundary_and_rejects_other_bytes ... ok
+test native::vote_store::tests::crc_castagnoli_check_vector ... ok
+test native::log_store::configuration_tests::configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members ... ok
+test native::log_store::timing::tests::totals_saturate_and_reader_clone_has_no_close_effect ... ok
+test native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease ... ok
+test native::log_store::file::tests::initial_publication_never_selects_a_partial_manifest ... ok
+test native::log_store::configuration_tests::membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation ... ok
+test raft::membership_tests::accepted_final_clears_prior_authority_and_rollback_restores_joint_base ... ok
+test raft::membership_tests::a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot ... ok
+test native::dial::tests::dropping_owner_cancels_queue_and_stops_worker_after_active_call_returns ... ok
+test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+test raft::membership_tests::configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix ... ok
+test raft::membership_tests::connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit ... ok
+test raft::membership_tests::connection_retention_includes_pending_and_rollback_views_until_exact_commit ... ok
+test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+test raft::membership_tests::batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority ... ok
+test raft::membership_tests::committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority ... ok
+test raft::membership_tests::batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion ... ok
+test native::dial::tests::cancellation_retains_active_and_queued_slots_until_actual_worker_receipts ... ok
+test raft::membership_tests::batched_repair_rejects_committed_divergence_and_accepted_configuration_work ... ok
+test raft::membership_tests::learner_replication_is_separate_from_ballots_reads_and_identity_authority ... ok
+test native::dial::tests::panicked_worker_reports_every_accepted_ticket_once_and_fences_admission ... ok
+test raft::membership_tests::batched_repair_checks_authority_ranges_and_ack_context_before_progress ... ok
+test raft::membership_tests::connection_retention_keeps_committed_joint_predecessor_until_final_is_durable ... ok
+test raft::membership_tests::older_request_scope_can_roll_back_uncommitted_final_without_early_reply ... ok
+test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+test raft::membership_tests::historical_repair_higher_term_needs_exact_context_and_durable_observation ... ok
+test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+test raft::membership_tests::owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation ... ok
+test raft::membership_tests::lagging_follower_probes_and_joint_replication_echo_the_request_scope ... ok
+test raft::membership_tests::historical_repair_requires_old_voter_source_and_retained_promotion_evidence ... ok
+test raft::membership_tests::partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation ... ok
+test raft::membership_tests::in_flight_promotion_cannot_emit_witness_evidence_before_completion ... ok
+test raft::membership_tests::joint_commit_uses_old_and_new_and_never_counts_a_learner ... ok
+test raft::membership_tests::joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation ... ok
+test raft::membership_tests::joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners ... ok
+test raft::membership_tests::prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation ... ok
+test raft::membership_tests::permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads ... ok
+test raft::membership_tests::removed_or_demoted_local_replica_stops_service_and_campaigning ... ok
+test raft::membership_tests::promoted_term_observation_waits_for_storage_and_retains_same_base_permit ... ok
+test raft::membership_tests::request_scope_bridge_does_not_authorize_learners_or_reads ... ok
+test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+test raft::membership_tests::retired_commit_exception_cannot_append_raise_terms_or_authorize_learners ... ok
+test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+test raft::membership_tests::retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority ... ok
+test raft::membership_tests::reservation_covers_rollback_until_the_shrink_is_committed ... ok
+test raft::membership_tests::prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress ... ok
+test raft::membership_tests::same_voter_policy_changes_use_joint_rules_for_elections_and_reads ... ok
+test raft::membership_tests::partially_delivered_final_can_elect_new_leader_after_old_leader_loss ... ok
+test raft::membership_tests::snapshot_reply_keeps_head_scope_through_log_and_application_dependencies ... ok
+test raft::membership_tests::partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes ... ok
+test raft::membership_tests::prospective_reservation_retains_intermediate_joint_fanout_after_final ... ok
+test raft::membership_tests::witness_reply_is_bound_to_exact_pending_request_and_local_restart_session ... ok
+test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+test raft::membership_tests::witness_requires_authenticated_historical_assignment_and_surviving_history ... ok
+test raft::membership_tests::witnessed_promoted_leader_catches_up_only_after_exact_durability ... ok
+test raft::membership_tests::pending_configuration_view_precedes_durability_without_releasing_effects ... ok
+test raft::membership_tests::witness_never_grants_from_accepted_uncommitted_promotion_or_future_head ... ok
+test raft::membership_tests::recursive_joint_recovery_catches_up_old_voter_and_commits_after_election ... ok
+test raft::membership_tests::joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim ... ok
+test raft::membership_tests::stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot ... ok
+test native::log_store::file::tests::every_manifest_publication_boundary_preserves_selected_state_and_lock ... ok
+test native::log_store::file::tests::every_file_replacement_boundary_recovers_selected_pair_without_dual_writer ... ok
+
+test result: ok. 64 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 35 tests
+test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+test invalid_administration_is_rejected_before_store_open ... ok
+test invalid_deployment_is_rejected_before_store_creation ... ok
+test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+test trusted_startup_plan_promotes_and_restarts_quic ... ok
+test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 20.15s
+

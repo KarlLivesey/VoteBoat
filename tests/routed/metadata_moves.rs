@@ -911,3 +911,6 @@ fn quic_metadata_moves_recover_checkpoints_and_original_observations() {
 
 #[path = "metadata_families.rs"]
 mod families;
+
+#[path = "metadata_lookup.rs"]
+mod automatic_metadata;

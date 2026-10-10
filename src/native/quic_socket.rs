@@ -156,6 +156,22 @@ impl SessionSocket {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn receive(socket: &SessionSocket, bytes: &mut [u8; MTU]) -> (usize, Option<SocketAddr>) {
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(2);
+        loop {
+            match socket.recv(bytes) {
+                Ok(packet) => return packet,
+                Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                    assert!(
+                        std::time::Instant::now() < deadline,
+                        "datagram did not arrive"
+                    );
+                    std::thread::park_timeout(std::time::Duration::from_millis(1));
+                }
+                Err(error) => panic!("datagram receive failed: {error}"),
+            }
+        }
+    }
     #[test]
     fn routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease() {
         let bound = UdpSocket::bind("127.0.0.1:0").unwrap();
@@ -193,7 +209,7 @@ mod tests {
         let mut bytes = [0; MTU];
         for n in 0..20u8 {
             b.send_to(&[n; MTU], address).unwrap();
-            assert_eq!(a_route.recv(&mut bytes).unwrap(), (MTU, None));
+            assert_eq!(receive(&a_route, &mut bytes), (MTU, None));
         }
         assert_eq!(
             lock(&hub).unwrap().leases[&b.local_addr().unwrap()]
@@ -202,17 +218,17 @@ mod tests {
             QUEUED
         );
         stranger.send_to(&[9; MTU], address).unwrap();
-        assert_eq!(a_route.recv(&mut bytes).unwrap(), (MTU, None));
+        assert_eq!(receive(&a_route, &mut bytes), (MTU, None));
         assert_eq!(lock(&hub).unwrap().leases.len(), 2);
         for n in 0..QUEUED as u8 {
             assert_eq!(
-                b_route.recv(&mut bytes).unwrap(),
+                receive(&b_route, &mut bytes),
                 (MTU, Some(b.local_addr().unwrap()))
             );
             assert_eq!(bytes, [n; MTU]);
         }
         b.send_to(&[77; MTU], address).unwrap();
-        assert_eq!(a_route.recv(&mut bytes).unwrap(), (MTU, None));
+        assert_eq!(receive(&a_route, &mut bytes), (MTU, None));
         drop(b_route);
         let replacement =
             QuicSocketHub::lease(&hub, NodeId::new(2).unwrap(), b.local_addr().unwrap(), 2)
@@ -223,7 +239,7 @@ mod tests {
         );
         b.send_to(&[88; MTU], address).unwrap();
         assert_eq!(
-            replacement.recv(&mut bytes).unwrap(),
+            receive(&replacement, &mut bytes),
             (MTU, Some(b.local_addr().unwrap()))
         );
         assert_eq!(bytes, [88; MTU]);

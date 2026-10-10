@@ -14,9 +14,9 @@ record claims that unimplemented phases already work.
 | P2 | Shared Multi-Raft, bounded scheduling and overload isolation | Bounded ingress/effect/outbound scheduling, listener/dial workers, ingress/client/read admission, replica/peer drivers, owned node assembly/shutdown and native 100-group histories implemented; broader scale/fault coverage remains |
 | P3 | Recursive quorum integration at every consensus quorum site | Implemented elections, commitment and reads audited through accepted-log membership; online policy transitions remain gated under P4 |
 | P4 | Learners, joint membership/policy transitions and membership recovery | Journal, recovery, snapshot/wire, local proposals, native TCP/QUIC readiness, bounded activation model and owned Node administration, durable status/resumption and native placement authorization implemented; selected codec/transport envelope admission, explicit native/member service restart, bounded deployment declarations, offline CLI enrollment, enforced counter bounds and trusted executable administration plans implemented; selected native fault schedules and public joint-command leader-loss recovery157 are exercised; authenticated provisioned-intent and client-target ingress plus generic enforced application envelopes are implemented; broader revocation, older-checkpoint and remote new-voter schedules remain |
-| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; original full-owner/cache adoption156c1, retained-owner adoption156c2a and full/partial imported-owner adoption/retirement156c2b implemented; foreign directory/cache locator updates156c2c implemented; owner locator adoption156c2d and selected repeated moves156c3 implemented; selected original full-owner TCP/QUIC composition156c4 implemented; selected retained/imported native metadata continuity156c5 implemented; selected later retained native handoff156c6a implemented; selected later ordinary/partial imported movement and retirement156c6b implemented; broader lifecycle/fault coverage remains P6 |
+| P5 | Recursive responsibilities, manifests, selective placement and routing | Checked manifests/cache/partition policies, fixed-bootstrap replicated directory and routed applications implemented; TCP/QUIC distinct child groups survive parent outage with WAL/checkpoint recovery and unchanged parent logs. Opt-in committed group-creation reservations, exact assigned bootstrap and selected TCP/QUIC created-service partial-provision/reopen/retry histories implemented. Schema3 fresh independent namespace ready/publication/activation is implemented with selected native recovery evidence; checked same-authority root/nested insertion has selected recovery evidence; schema7 cross-authority insertion has deterministic/checkpoint/native-frame and selected TCP/QUIC WAL/checkpoint phase-recovery evidence; schema8 checked retained-scope insertion/source grant adoption has deterministic/checkpoint/native-frame evidence, with selected root/foreign TCP/QUIC WAL/checkpoint partial service composition152 implemented; schema9 recursive deletion has conformance/checkpoint/native journal evidence with selected native TCP/QUIC WAL/checkpoint composition153b implemented; schema11 atomic local metadata reparenting154b has application/checkpoint/native-journal evidence; selected original full-owner grant adoption154c and cross-authority metadata reparenting154d2 have application/checkpoint/native-journal evidence; selected cross-authority full-owner/cache adoption154d3 and native TCP/QUIC WAL/checkpoint move recovery154d4 implemented; selected retained/imported owner-family composition154e and parent-side grant continuity154f implemented; imported partial-source embedding155a, remaining ownership transfer155b1 and partial-lineage retirement155b2 implemented; selected native composition155b3 and metadata source fencing/export156a and non-serving target import156b1 implemented; publication/activation and a writable target156b2 implemented; original full-owner/cache adoption156c1, retained-owner adoption156c2a and full/partial imported-owner adoption/retirement156c2b implemented; foreign directory/cache locator updates156c2c implemented; owner locator adoption156c2d and selected repeated moves156c3 implemented; selected original full-owner TCP/QUIC composition156c4 implemented; selected retained/imported native metadata continuity156c5 implemented; selected later retained native handoff156c6a implemented; selected later ordinary/partial imported movement and retirement156c6b implemented; automatic current-manifest read adapters and selected native metadata move/reopen histories160 implemented; broader lifecycle/fault coverage remains P6 |
 | P6 | Durable split/import/fence/publish/activate, compatible merge and retry lineage | Bounded public scope data adapter and native per-bucket counter with transferable retries/outbox and durable intent journal implemented; source fence/exact-boundary export implemented; non-serving target staging/inline imports implemented; checked publication and durable target activation implemented with selected TCP/QUIC recovery; selected complete split and compatible two-source merge phase/reopen ledgers covered; selected repeated activated-target transfers covered; bounded retirement guard with explicit host retention release and selected recovery/reclamation evidence implemented; reserved delegated-child split/merge/repeated movement has selected native phase/reopen evidence; permanent pre-intent child refusal and parent cancellation/replanning have selected deterministic/native recovery evidence; slice134 adds inserted-grandchild later split/merge with selected checkpoint and native-file retirement recovery;135 adds selected TCP/QUIC later movement recovery;141–142 add selected native assigned-source and partial merged-source retirement/replay/reclamation; selected later imported movement/retirement after metadata migration156c6b implemented; broader lifecycle recovery remains |
-| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. A QUIC pause case fails its catch-up gate and is retained; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
+| P7 | Evidence-backed batching, lanes, reclamation and throughput tuning | Finite three-replica TCP/QUIC single/shared Multi-Raft benchmarks, raw recovery/latency evidence, actual WAL stage attribution and crash-tested ready-request shared barriers implemented; repeated eight-group throughput gains measured. Finite bounded offered-load/refusal/drain and checkpoint/reclaim measurements added, with selected TCP paused-follower catch-up. Early QUIC pause failures remain retained;158 adds forced native recovery and one passing original pause run without meeting the fixed-p99 budget; sustainable capacity, fixed-p99 tuning and broader platform/fault evidence remain |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates |
 
 [Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
@@ -93,9 +93,9 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: full baseline acceptance review | Reconcile P0–P7 requirements with the new lifecycle, administration and recovery evidence; advances all macro milestones. | Chapter12/17, the component contracts and current executed evidence. | Identify missing required behavior and its direct check; keep optional research separate and do not infer completion from test counts. |
-| Next: native discovery after metadata movement | Connect automatic manifest lookup to moved metadata authorities; advances recursive routing and embedding. | Existing ManifestReadSource, bounded native lookup and metadata serving read/provenance contracts; confirm scope in the baseline review. | Read/refresh through the same public discovery contract before and after a metadata move, reject fenced or inactive authorities, and verify bounded cancellation/restart behavior. |
-| Following: public new-voter promotion interruption | Broaden actual service membership recovery; advances online membership. | Existing authenticated configuration commands, native learner readiness and retained joint/final operation identities; confirm the uncovered schedule during review. | Interrupt a remotely configured new voter around readiness/promotion, recover original files, and verify exact retry/finalization and data receipts over TCP/QUIC without stale readiness authority. |
+| Current: finish the common baseline verification | Record the live all-feature sweep and correct concrete platform failures; advances all macro milestones. The requirement review and selected metadata discovery gap are implemented in159–160. | Existing live test process, current CI failure logs and focused slice160 results; do not restart a live sweep. | Preserve terminal outcome, investigate each real failure, keep strict lint at zero and distinguish focused coverage from a full-tree/platform result. |
+| Next: public new-voter promotion interruption | Broaden actual service membership recovery; advances online membership. | Existing authenticated configuration commands, native learner readiness and retained joint/final operation identities; inspect the uncovered schedule before editing. | Interrupt a remotely configured new voter around readiness/promotion, recover original files, and verify exact retry/finalization and data receipts over TCP/QUIC without stale readiness authority. |
+| Following: bounded recovery scheduling | Close a concrete shared-runtime resource gap; advances P2/P7 operational recovery. | Review existing snapshot/maintenance budgets and retained offered-load evidence; select the missing shared budget rather than add a parallel scheduler. | Record a schema plan, then show recovering groups make progress within declared limits while healthy groups retain service; include shutdown/cancellation and actual failure evidence. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -14831,3 +14831,150 @@ capacity, fixed-p99, macOS/separate-host and broader fault work remain. Current 
 the full baseline review; next automatic discovery after metadata movement;
 following the uncovered public new-voter interruption schedule. Full P0–P7 stays
 active, with P8 research deferred.
+
+### 159 baseline acceptance review — schema plan
+
+Previous goal turn was progress:158 is committed and pushed as1231153. Review
+chapter12's phase exits and VB-000–011, chapter11 invariants/scenarios and chapter17
+composition gates against current source, test bodies, contract inventory and
+retained results. The existing ledger still labels implemented deletion,
+reparenting and metadata migration as absent; replace stale current claims while
+preserving historical reports. Do not turn selected histories into general proof.
+
+No runtime data/API, state transition or owner changes are planned. The review
+maps requirement -> implementation -> direct executed evidence -> remaining gap.
+A whole-tree Linux all-feature test run and core-only run provide a fresh common
+reference; failures must be classified and fixed before treating them as passed.
+Inventory and independent checker execution remain metadata/arithmetic evidence.
+No performance experiment is needed to reconfirm an already unmet target.
+
+Completion: concise current acceptance ledger, explicit source-level blockers
+and original full-scope obligations, actual validation outcomes, and linked
+mini-plan for the next two implementation steps. The concrete candidate already
+visible in source is the native automatic manifest-read adapter: it accepts only
+an application's original ResponsibilityIdentity/Option<Manifest> query shape,
+while moved metadata serves different checked query/result envelopes. Verify the
+safe adaptation point and inactive/fenced behavior before selecting the next slice.
+This advances all macro milestones by selecting missing capability, not by
+redefining the P0–P7 goal or counting completed slices.
+
+159 review adjustment: completed CI run38015395454 fails Linux service fixtures
+on legal post-configuration leader changes, and macOS's QUIC mailbox test unwraps
+WouldBlock immediately after UDP send. These are concrete platform validation
+blockers; fix them before declaring the review's current baseline. For the mailbox
+fixture only, bound a receive loop and retry only WouldBlock; keep queue size,
+packet content, routing, stale-lease and negative assertions exact. For post-change
+service data validation, use the existing automatic route and original-ID retry
+helper instead of assuming an earlier leader status is a lease. Preserve explicit
+node selection where the test checks authorization, cancellation or reply loss.
+No production timeout, transport or quorum changes; run the affected tests and
+both strict lint profiles after the current all-tree run, retaining its outcome.
+
+### 160 automatic metadata reads — schema plan
+
+The159 review identifies a missing composition, not a new metadata protocol.
+Existing ManifestReadSource fixes its rejected completion payload to the original
+Directory result type, so merely mapping successful values would lose a rejected
+metadata completion and its original owner credits. Add an associated raw result
+type (contract version2) while keeping successful discovery observations normalized.
+NativeManifestLookup's source error retains that exact typed rejected completion.
+
+Add a public stateless ManifestReadMapping contract and explicit Node read-source
+wrapper selected at construction. It owns the existing Node, uses its original
+query admission/result budget, consumes only the exact requested completion and
+preserves its barrier. Native default mappings cover LifecycleDirectory and
+metadata source/publishing/serving enums; only current Manifest branches map to
+observations. Fenced/NotActive, history and unrelated control results refuse.
+No fallback to an old authority, second runtime, storage change or new credential.
+The original Directory Node implementation remains available.
+
+Ownership: accepted reads retain Node credits through completion/cancellation;
+lookup keeps its single pending slot, deadlines and negative-cache bounds.
+Failure returns original typed completions; recovery returns the original Node
+and pending lookup. Application query construction and mapping perform no I/O,
+allocate no background state and cannot certify a foreign quorum. Checkpoint
+formats, application command APIs and all existing control reads stay unchanged.
+
+Checks: downstream mapping in core-only builds; all four default query/result
+mappings reject non-current results; actual native metadata source and activated
+target reads before/after move and restart; fenced/inactive refusal, stale hints,
+original pending-ticket cancellation and application read-byte bounds. Reuse
+existing metadata move histories for real publication/activation, not fabricated
+activation. Existing Directory lookup tests and strict profiles remain green.
+This advances P5/C17; next remains public new-voter interruption, followed by
+bounded recovery/resource scheduling. Full P0–P7 and broader validation remain.
+
+160 focused correction: the first native tests observed the lookup cancellation
+result while the Node still retained its queued cancellation admission. This is
+the existing separate read-result/owner-cleanup contract, not a lost credit.
+Before another read or returning the Node, the fixture must keep polling until
+the original Node reports no retained reads. Also capture unavailable outcomes
+from poll directly, so crossing the one-millisecond negative-cache expiry cannot
+accidentally start another read during a failure assertion. Keep every ticket,
+credit and refusal check; no production cancellation behavior changes.
+
+159 latest-CI follow-up: run38015646068 on the starting revision also fails a
+client-supplied configuration fixture on UNKNOWN LeadershipChanged. The same
+existing explicit retry helper applies to successful configuration requests,
+not just data writes: retain the exact record and operation ID, use automatic
+leader routing, and retry only that documented uncertain result. Keep malformed,
+conflicting, unauthorized and deliberately unobserved requests as single requests.
+Check successful target configuration histories over both TCP and QUIC. This is
+a fixture correction; it does not add implicit uncertain-write retry to the CLI.
+
+159 correction before retry: the CLI deliberately limits `auto` to data reads
+and writes; the first fixture change incorrectly used it for configuration.
+Both focused tests failed at command parsing, with no protocol failure. Preserve
+that failed run. Use a small fixture-only helper that selects the current leader
+and resends the identical configuration arguments only for NOT_LEADER or
+UNKNOWN LeadershipChanged. Negative control queries still use explicit nodes.
+This helper is necessary because the data auto-routing path cannot send admin
+commands; no production command surface is expanded.
+
+### 159–160 implemented evidence and remaining work
+
+The acceptance ledger now maps all P0–P7 exits, initial VB tickets, component
+catalogue entries and chapter11 invariants to source/evidence and remaining
+obligations. It corrects stale claims that metadata movement, deletion,
+reparenting and configuration endpoints are wholly absent. The full roadmap
+remains active; the common all-feature sweep has not yet finished.
+
+Slice160 supplies ManifestReadMapping and MappedManifestReadSource. Default
+adapters cover lifecycle, source, publishing and serving query/result enums.
+ManifestReadSource version2 retains the original associated result in rejected
+completions; NativeManifestLookup preserves that type. Only current manifests
+are normalized, after consuming the exact Node completion. No new runtime,
+worker, persistence format, quorum rule or automatic old-authority fallback.
+
+Four selected TCP/QUIC × WAL/checkpoint histories pass across two actual metadata
+moves and source/target reopen. They verify current route resolution, fenced and
+inactive refusal, exact pending-ticket cancellation through owner cleanup, and
+original rejected-completion recovery. Four existing native lookup histories
+also pass. Five all-feature and three core-only mapping/source tests pass,
+including downstream host mapping. The associated-type change is a Rust API
+change, not a persistent-format migration.
+
+The159 core-only sweep passes591 tests in68 targets; native-without-TLS passes882
+in71 targets. Both compiled before160 and are not represented as whole-tree160
+coverage. The corrected library/service run passes64+35, with the final changed
+client-target tests passing2/2 separately. Both strict full-tree Clippy profiles
+are clean, formatting/diff checks pass, and warnings-denied API documentation
+builds. Inventory metadata validation passes89 entries. Nineteen existing
+independent checker tests pass; no new performance result is inferred.
+
+Reviewing the latest completed CI run38015646068 also identified a client-target
+configuration stale-leader assumption; the fixture now explicitly selects a
+leader and retries only NOT_LEADER/UNKNOWN LeadershipChanged with identical
+records. The failed use of data-only CLI auto mode and the following compile
+correction are retained. The macOS positive UDP receive fixture now waits only
+for WouldBlock within a bounded deadline. These are test changes; corrected
+macOS execution still requires the new CI revision.
+
+Raw logs, failed attempts, exact commands and source hashes are in
+validation/baseline/slice159-160. The all-feature sweep remains live; two earlier
+native routed sweeps were also observed still live. Preserve these processes and
+record their actual terminal results instead of launching replacements. The
+current mini plan finishes this baseline verification, then exercises public
+new-voter promotion interruption, then addresses a concrete shared recovery
+budget. This advances P5/C17 composition and P0–P7 acceptance without narrowing
+the original goal.

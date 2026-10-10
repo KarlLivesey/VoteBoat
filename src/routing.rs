@@ -23,6 +23,8 @@ use std::mem::size_of;
 pub(crate) mod codec;
 mod discovery;
 pub use discovery::*;
+mod read_mapping;
+pub use read_mapping::*;
 
 pub const ROUTING_CONTRACT_VERSION: u32 = 1;
 pub const MAX_MANIFEST_ROUTES: usize = 256;

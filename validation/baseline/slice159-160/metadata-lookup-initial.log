@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.44s
+     Running tests/routed.rs (target/debug/deps/routed-e306d78cde05e11d)
+
+running 2 tests
+
+thread 'native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen' (23145) panicked at tests/routed/metadata_lookup.rs:111:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... FAILED
+
+thread 'native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen' (23144) panicked at tests/routed/metadata_lookup.rs:111:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... FAILED
+
+failures:
+
+failures:
+    native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen
+    native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 147 filtered out; finished in 0.21s
+
+error: test failed, to rerun pass `--test routed`

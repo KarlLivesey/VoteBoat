@@ -1,0 +1,44 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0596]: cannot borrow `*cluster` as mutable, as it is behind a `&` reference
+    --> tests/counter_service.rs:2102:38
+     |
+2102 |         let output = cluster.request(cluster.leader(), args);
+     |                                      ^^^^^^^ `cluster` is a `&` reference, so it cannot be borrowed as mutable
+     |
+help: consider changing this to be a mutable reference
+     |
+2099 | fn configuration_write(cluster: &mut Cluster, args: &[&str]) -> String {
+     |                                  +++
+
+error[E0502]: cannot borrow `cluster` as mutable because it is also borrowed as immutable
+    --> tests/counter_service.rs:2156:9
+     |
+2155 |     let conflict = cluster.request(
+     |                    ------- ------- immutable borrow later used by call
+     |                    |
+     |                    immutable borrow occurs here
+2156 |         cluster.leader(),
+     |         ^^^^^^^^^^^^^^^^ mutable borrow occurs here
+
+error[E0502]: cannot borrow `cluster` as mutable because it is also borrowed as immutable
+    --> tests/counter_service.rs:2184:31
+     |
+2184 |     let old = cluster.request(cluster.leader(), &["configure-record", record]);
+     |               ------- ------- ^^^^^^^^^^^^^^^^ mutable borrow occurs here
+     |               |       |
+     |               |       immutable borrow later used by call
+     |               immutable borrow occurs here
+
+error[E0502]: cannot borrow `cluster` as mutable because it is also borrowed as immutable
+    --> tests/counter_service.rs:2190:13
+     |
+2189 |     assert!(cluster
+     |             ------- immutable borrow occurs here
+2190 |         .ok(cluster.leader(), &["configuration-status", "16001"])
+     |          -- ^^^^^^^^^^^^^^^^ mutable borrow occurs here
+     |          |
+     |          immutable borrow later used by call
+
+Some errors have detailed explanations: E0502, E0596.
+For more information about an error, try `rustc --explain E0502`.
+error: could not compile `voteboat` (test "counter_service") due to 4 previous errors

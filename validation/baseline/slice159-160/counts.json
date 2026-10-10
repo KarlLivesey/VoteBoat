@@ -1,0 +1,17 @@
+{
+  "core-before-adapter.log": {
+    "targets": 68,
+    "passed": 591,
+    "failed": 0
+  },
+  "native-before-adapter.log": {
+    "targets": 71,
+    "passed": 882,
+    "failed": 0
+  },
+  "fixtures-lib-counter.log": {
+    "targets": 2,
+    "passed": 99,
+    "failed": 0
+  }
+}

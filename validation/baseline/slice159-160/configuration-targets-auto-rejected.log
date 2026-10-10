@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.92s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 2 tests
+test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... FAILED
+test client_supplied_configuration_targets_are_checked_and_recovered_quic ... FAILED
+
+failures:
+
+---- client_supplied_configuration_targets_are_checked_and_recovered_tcp stdout ----
+
+thread 'client_supplied_configuration_targets_are_checked_and_recovered_tcp' (63238) panicked at tests/counter_service.rs:1849:9:
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- client_supplied_configuration_targets_are_checked_and_recovered_quic stdout ----
+
+thread 'client_supplied_configuration_targets_are_checked_and_recovered_quic' (63237) panicked at tests/counter_service.rs:1849:9:
+
+
+
+failures:
+    client_supplied_configuration_targets_are_checked_and_recovered_quic
+    client_supplied_configuration_targets_are_checked_and_recovered_tcp
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 33 filtered out; finished in 2.01s
+
+error: test failed, to rerun pass `--test counter_service`

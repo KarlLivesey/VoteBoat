@@ -1,357 +1,120 @@
-# Baseline acceptance map
+# Baseline acceptance map — review159, updated160
 
-This maps chapter 12's P0–P7 exit conditions and chapter 17's component catalogue
-to current source and recorded execution evidence. It is a working requirement
-ledger, not a completion certificate or a substitute for the detailed normative
-contracts, invariant catalogue, or failure schedules. Source inspection is not an
-executed test. Historical execution is recorded in validation/REPORT.md and raw
-performance artifacts; each slice records its actual executed checks separately.
-RPL-1.5 is retained. The original full goal remains active.
+Reviewed starting revision1231153 against design-pack chapters11,12,17 and the
+component contract specification. This is a current requirement ledger, **not a
+completion certificate**. Selected tests do not prove all schedules. Detailed
+historical results remain in IMPLEMENTATION.md, BASELINE_AUDIT.md and
+validation/REPORT.md; validation/baseline/slice159-160 retains fresh results and
+any failures. The full all-feature sweep remains pending as recorded there.
+The full P0–P7 objective stays active. RPL-1.5; Linux and macOS targets.
 
 ## Roadmap exits
 
-| Requirement | Existing implementation / direct evidence | What remains unproven or missing |
+| Requirement | Current implementation and direct test paths | Remaining acceptance |
 | --- | --- | --- |
-| P0 public identities, policies, virtual time/storage and composable lifetimes | identity/quorum/contracts/runtime modules; downstream providers in tests/support; tests/runtime.rs, tests/log_store.rs, tests/observability.rs | Several catalogue seams below are missing or partial; selected deterministic schedules are not a complete arbitrary-fault simulator. |
-| P1 durable three-node service, elections/repair/snapshots/reads/retries | src/raft.rs, native WAL/snapshot providers, owning Node and counter executable; tests/raft.rs, tests/snapshot.rs, tests/counter_service.rs; slices105–106 retain successful and failed repair experiments | General faulted-history coverage and macOS/separate-host execution remain. Historical long QUIC pause runs105/106 failed the selected-group boundary gate; one slice158 run passes the unchanged gate and full recovery. Buffered host-poll stalls still cannot guarantee snapshot necessity. Slice158 separately forces per-group snapshot recovery across all eight groups by closing every transport and reopening a stale follower beneath both peers' compacted prefixes over TCP/TLS and QUIC. |
-| P2 shared Multi-Raft and bounded fair overload isolation | shared Node/Shard/TimedShard, WAL/transport workers, bounded ingress/outbound/consumer ownership; tests/runtime.rs hundred-group histories and tests/support/native_node.rs | Broader scale/workload/failure evidence and multi-shard operational deployment remain; no claim of unbounded scale. |
-| P3 fixed recursive policy at all quorum sites | quorum.rs, membership-aware Raft; tests/quorum.rs, tests/raft.rs recursive reads, tests/snapshot.rs recursive catch-up, tests/activation_model.rs | Finite policy/activation models do not prove the complete protocol; relevant site audit and recorded P4 fault evidence must remain linked. Live policy hot reload stays forbidden. |
-| P4 membership survives election, rollback, restart and partial delivery with exact activation | membership journal/snapshots, learners/readiness, Node administration, NativeMemberStartup; tests/membership.rs, tests/member_recovery.rs, tests/native_member_startup/recursive.rs, tests/support/peer_fault.rs | Generic application envelopes now have a common fail-closed contract and configuration/readiness consumer (slice114); applications without enforceable bounds remain gated. Authenticated provisioned-intent and bounded client-supplied target ingress exist (slices115–116); broad interruption/revocation and remote new-voter schedules remain open. Slice117 adds selected TCP/QUIC close/deadline/unread-commit recovery and retained historical promotion election repair. Wire7 adds committed stable checkpoint learner recovery with host/native WAL-fault evidence (slice118); slice119 forces TCP/QUIC recovery from both committed-final and committed-joint checkpoints beneath accepted-final heads, with owner-abort/lost-observation/reopen and deduplication checks. Older mismatching stable checkpoints and broader failure schedules remain open. Slice120 adds native TCP/QUIC learner restart between readiness and promotion, exact old-session proof refusal, fresh promotion/finalization and voter demotion with duplicate receipt/file reopen checks. Slice121 moves command closure/deadline observation ahead of queued execution and adds process loss/reopen during unadmitted remote promotion preparation over TCP/QUIC. Trusted automatic administration also exists. Broader schedules remain, rather than treating one tested transition as universal safety. |
-| P5 selective placement, cached routing and durable delegation without ancestor writes | routing/directory/routed application, placement authorization; tests/routed/native.rs and tests/routed/delegation*.rs; recorded parent-outage histories | General discovery/resolution and placement planning are partial; Slice122 adds an opt-in schema2 metadata group-creation intent journal with bounded exact identity/configuration reservations, retries, checkpoint/replay and native fault/file evidence. Slice123 adds verified assigned-node bootstrap with immutable provenance, host seams, native WAL fault/reopen and real metadata-to-target file evidence. Slice124 adds native TCP/QUIC created-service partial-provision/reopen/retry and metadata-offline operation evidence. Slice125 adds explicit schema3 fresh independent namespace publication and guarded target activation, including reserved control capacity, native activation WAL faults and selected TCP/QUIC ready/publish/activate reopen histories. Slice126 adds unread-ticket, partial publication/activation owner-abort WAL replay with actual quorum/laggard commit boundaries and original status recovery. Slices127–129 add schema4 transfer metadata and a source-capable namespace guard, with selected deterministic/torn-frame and actual TCP/QUIC WAL/checkpoint created-source split phase/reopen/unread-result evidence. Slice130 adds checked root-to-fresh same-authority insertion into covered selectors, with deterministic handoff/atomic publication, exact child grants, later child freeze and native intent torn-frame evidence. Slice131 adds selected TCP/QUIC x WAL/checkpoint assigned insertion histories: partial provisioning, unread phase results, exact retry/reopen, atomic root/child publication, independent child activation and ancestor-offline writes with immutable metadata files. Slice132 adds checked same-authority nested insertion via full-map parent reservation, schema6 dynamic parents, exact grandchild grants and hop bounds, with actual deterministic handoff/parent refresh, retry/outbox, cancellation and checkpoint evidence. Slice133 adds selected TCP/TLS and QUIC WAL/checkpoint nested phase recovery with unread results, exact retries, parent refresh and independently activated grandchild writes while metadata/source files remain unchanged. Slice134 adds deterministic/checkpoint inserted-grandchild split/merge and selected native-file retirement interruption/reclaim evidence. Slice135 adds selected TCP/TLS and QUIC WAL/checkpoint subsequent split/merge phase recovery with exact unread-result retry/reopen, locator refresh, partial fencing and final ancestor/source-offline service with unchanged files. Slice140 adds initial guarded nested profiles;141 adds actual assigned31 split retirement/replay/reclamation;142 adds partial retirement/reopen of both later merge sources41/42, exact lineage and checkpoint/reclaim with43 serving imported retries and new writes over TCP/TLS and QUIC. These are selected histories. Slice149 adds schema7 cross-authority nested insertion with deterministic/checkpoint/native intent-frame evidence; Slice150 adds actual TCP/TLS and QUIC WAL/checkpoint separate-authority phase recovery, original command retries and metadata/source-offline independent activation and successor service with unchanged stopped durable files; retained-scope insertion and broader new-namespace lifecycle coverage remain open; deletion/reparenting and moving a metadata authority's own data remain outside implemented paths. |
-| P6 fenced split/import/publication/activation/merge, retry lineage and recoverable pause | public scope adapter; TransferSource/Target/Publication, RetirementGuard and delegated transfer journal; tests/transfer_*.rs, tests/routed/{split,merge,repeat,retirement,delegation_repeat,delegation_cancel}.rs | Selected phase/reopen ledgers do not cover every interruption/composition; general external retention and recursive directory ownership lifecycle remain. Slices151a/b add scoped fencing and immutable original-F exports while retained service continues, with canonical checkpoint/replay and selected native WAL-model frame/barrier faults; checked mixed retained/delegated intent/publication, retained-grant adoption and activation remain current work. No thaw-after-fence or unsafe forced replacement. |
-| P7 multiple local lanes, batching, reclamation, recovery throttling and sustainable improvement at fixed p99 | native shared barriers/reclaim, attribution/offered-load/maintenance harness; tests/shared_barrier.rs, tests/log_reclaim.rs, validation/performance/slice103–106 | 250ms TCP serial p99 gate remains unmet: slice136 disk B p99=432.366616ms; A ended with Unknown(LeadershipChanged). Finite runs do not prove sustainable capacity. Operational multi-lane placement, controlled recovery throttling, broader devices/platform/fault evidence remain. |
+| P0: reviewed ownership/ordering/cancellation contracts; downstream injection | Public contracts, scoped identities/tickets and explicit NodeParts; tests/{log_store,worker,runtime,effect_owner,lookup_discovery}.rs and tests/support implement public host providers. | Complete the catalogue gaps below; broader actual-core simulation, reusable provider conformance and generated/faulted-history checking remain. An inventory path is not evidence its assertions cover the full contract. |
+| P1: durable three-node service; crash/restart preserves acknowledged operations and single-group linearizability | Raft, native WAL/snapshots, owning Node, counter service; tests/{raft,snapshot,counter_service,native_member_startup}.rs. Local reads require quorum plus applied-prefix evidence; retries retain operation/payload identity. | Selected histories cover these paths; a general recorded-history linearizability checker including unknown outcomes, broader storage/network fault schedules, complete macOS execution and separate-host validation remain. No release-completion claim. |
+| P2: shared groups/lane/transport, bounded fair scheduling and unrelated-group isolation | Shared Shard/TimedShard/Node, workers, multiplexed TCP/TLS and QUIC. tests/runtime.rs hundred-group host/native histories; tests/worker.rs and tests/support/{native_node,native_pressure}.rs. | Broader active fractions, multi-shard/lane deployment, receive/connection fairness and combined recovery/overload evidence remain. No per-group threads/sockets are introduced by these native assemblies. |
+| P3: fixed recursive/weighted policy at every quorum site; intersection/nine-voter/election/read/commit tests | src/quorum.rs; Membership::is_satisfied/frontier; Raft election, read and commitment sites. tests/{quorum,raft,snapshot,activation_model}.rs and src/raft/membership_tests.rs. Nine-voter exhaustive intersection and reference-frontier checks exist. | Finite independent activation model excludes arbitrary log forks/term traces and liveness. Preserve full transition/fault coverage under P4; never infer a runtime proof from intersection alone. Live policy hot reload remains forbidden. |
+| P4: learners, joint changes, exact activation through election/rollback/restart/partial delivery | NativeMemberStartup, readiness/witness contracts, configuration journal and authenticated counter commands. tests/{learners,member_recovery,native_member_startup,counter_service}.rs and src/raft/membership_tests.rs. Slice157 tests public joint receipt loss and serving-leader demotion across WAL/checkpoint recovery. | Older mismatching checkpoint combinations, public remote new-voter interruption/revocation and broader overlapping fault schedules remain. Service test readiness assumptions found by CI must be repaired, not counted as successful platform execution. |
+| P5: versioned manifests, selective placement, cached routing/delegation; established children survive parent outage | Directory/LifecycleDirectory, created groups, retained insertion, deletion, local/foreign reparenting, metadata relocation and locator/grant adoption. tests/{directory,group_creation,namespace_creation,retained_insertion,deletion,reparenting,metadata_transfer}.rs; tests/routed native histories. | Automatic manifest lookup supports original Directory read types only; it cannot currently compose with moved metadata serving envelopes. General remote authority/endpoint refresh and broader placement remain. Native selected deletion/reparenting/migration paths now exist; they must not be listed as absent. |
+| P6: staged split/import/fence/publish/activate/merge, retry lineage, exclusive owners and bounded recoverable pauses | ScopeStateMachine and native BucketCounter; transfer source/target/publication/retirement, retained and imported partial owners. tests/transfer_*.rs, tests/{scoped_source,imported_parent,retained_insertion}.rs, tests/routed phase/restart/retirement histories. Metadata migration preserves original authority domains. | These are bounded profiles and selected cuts, not every lifecycle composition. General retention/reclamation policy, unresolved-creation cancellation, broader compatible mapping/provider coverage and combined failure schedules remain; no automatic timeout unfreeze. |
+| P7: multiple local lanes, batching/pipelining, reclamation and recovery throttling; sustainable improvement at fixed correctness/p99 with attributable costs | Explicit lane/store identities, shared barriers, exact-ticket reclamation and offered-load/maintenance/journal harnesses. tests/{shared_barrier,log_reclaim,maintenance}.rs and validation/performance. Slice158 adds forced eight-group native snapshot recovery and one successful original long QUIC pause run. | Operational multi-lane placement and recovery throttling, sustainable load, fuller allocation/RSS/copy/queue attribution and platform/device coverage remain. Original250ms serial TCP p99 gate remains unmet; latest retained gate result is slice138 (734.953838ms). Slice158's2918.173043ms offered-load p99 is a different workload, not that gate. |
 
-macOS and Linux are targets; current local execution is Linux. Windows is
-deferred by the user. CI remains background feedback and is not a merge gate.
-P8 logical voters, striped single-group WAL and broader transactions remain
-research; they are not substituted for a missing baseline requirement.
+Historical QUIC pause failures105/106 remain valid failed observations; the
+single success158 does not reconstruct their packet histories or guarantee
+snapshot necessity from a host-poll pause. The controlled158 tests instead close
+all transports and compact both surviving replicas beyond each stale prefix.
 
-## Component catalogue coverage
+## Initial tickets and composition gates
 
-Design IDs are pointers, not conformance evidence. Some older inventory entries
-used C08 for the wire seam and omitted C23 from the scope adapter. This slice
-corrects those metadata associations after checking the actual implementations.
-Each provider's operations, limits and conformance paths remain in
-component-contracts.json and its linked contract document.
+| Design ticket/gate | Evidence and unresolved obligation |
+| --- | --- |
+| VB-000 contracts/assembly | Public NodeParts and domain contracts with host tests; complete remaining catalogue seams and reusable conformance scope. |
+| VB-001 identities/envelopes | Distinct node/store/group/configuration/ownership/lane generations; bounded codecs and identity refusal tests in identity/wire/log/transport suites. |
+| VB-002 WAL/recovery | Native framed batches, hard state, barriers, range/suffix/prefix operations, snapshots and corruption/tail tests; general segment cleaning/retention and wider device failures remain. |
+| VB-003 deterministic effects | Raft/EffectOwner scoped persistence dependencies; stale/wrong-body/failed completion tests. Broader generated scheduling remains. |
+| VB-004 three-node writes/retries | Host actual-core and native service histories; general unknown-outcome linearizability checking remains. |
+| VB-005 shared runtime | Hundred-group shared workers/transports and overload-isolation tests; broader scale and active fractions remain. |
+| VB-006 quorum-site audit | Election after durable self-vote and received votes uses Membership::is_satisfied; read readiness uses the same predicate; commitment uses Membership::frontier with local durability/current-term bounds. Joint checks require both policies. No new count-based majority site found in this review. |
+| VB-007 recursive example | Separate services/assignments and parent-offline child progress are exercised by tests/routed/native.rs; broader live discovery remains. |
+| VB-008 safe split | Native source fence, actual import/publication/activation, lost-reply retry and no-dual-owner checks exist; general lifecycle fault coverage remains. |
+| VB-009 native/host lifetime | Native and host providers use public assembly; construction rejection, shared-resource independent shutdown, pending close/abort tests in effect_owner/worker/transport/startup suites. Extend with each new seam. |
+| VB-010 packaging/capabilities | src/lib.rs gates native; Cargo features native/tls/quic explicitly compose; startup validates selected providers, identities, wire/limits/durability. Core-only and supported feature builds are separate checks. No third-party adapters advertised. |
+| VB-011 reusable conformance | Shared host/native checks exist for storage, snapshots, scheduling and transport; full reusable harness coverage for every promised provider obligation remains. |
+| Chapter17 resource/capability gates | Scoped accepted-work ownership and shutdown are documented per subsystem. Missing general shared admission/retention and observer capabilities stay listed below. Backend migration is not a hot pointer swap. |
+| Chapter17 measurements | Batching, latency, throughput and selected native I/O timings are retained; comprehensive allocations/copies/RSS/binary-size/dependency attribution remains. No zero-overhead claim. |
 
-| Catalogue ID | Current public/native path | Coverage limit / next requirement |
+## Component catalogue
+
+Each row refers to implemented public types and actual provider/test paths, not
+just the proposed design name. docs/component-contracts.json provides detailed
+operations/scope and test locations; its checker validates metadata only.
+
+| ID | Public/native implementation | Remaining scope |
 | --- | --- | --- |
-| C01 log | LogStore / NativeLogStore; VoteStore narrow voting seam | General retention/segmented cleaning remains. |
-| C02 durability | Exact LogTicket barriers and worker completions bound to LogStore | No independent assertions or maximum-as-prefix fallback. |
-| C03 snapshots | SnapshotStore/Retention/Worker/Router and native providers | Selected crash/restart evidence; retain partial-install and membership checks. |
-| C04 platform I/O | JournalIo, SnapshotIo, VoteIo and native files/codecs | No alternate platform adapter claimed; macOS not executed locally. |
-| C05 application | StateMachine, admission/read/checkpoint, bounded routers, counter and scope applications | Optional enforced whole-lifetime deployment envelope and common validation now guard configuration/readiness; unavailable host bounds fail closed. Provider assertions remain trusted. |
-| C06 transport | PeerTransport/Factory, PeerDriver/Roster/Connector and TCP/TLS/QUIC | Supported combinations only; local send progress never means remote durability. |
-| C07 wire | WireCodec / NativeWireCodec, negotiated version/capacity checks | Correct inventory association; no Protobuf/gRPC adapter claimed. |
-| C08 persistent codec | LogCodec, VoteLogCodec, SnapshotCodec and native implementations | Format compatibility distinct from Rust trait compatibility. |
-| C09 secure session | SecureSession / native rustls sessions and QUIC | Established cryptography; service authorization remains separate C21. |
-| C10 scheduler | ReadyScheduler, Shard/TimedShard, EffectOwner/Node, native ready queue | Broader multi-shard deployment evidence remains. |
-| C11 timers | TimerService / native deadlines and explicit generations | Native lateness/owner tests exist; general telemetry remains partial. |
-| C12 clock | Clock / host-injected MonoTime and native clock | No implicit wall clock in the core. |
-| C13 entropy | ElectionEntropy / native jitter and deterministic doubles | Not a credential or cryptographic identity source. |
-| C14 buffers | Public BufferPool/FrameBuffer; native shared reservation provider; native codec/transport send and receive leases; tests/buffer.rs, tests/transport.rs, tests/wire.rs; slice108 | Slice143 adds optional declared control byte/lease reserve through class-aware public/native pools and selected native shared transport. Validated control sends progress under bulk saturation; mixed/data/background and unclassified receives stay bulk. Native/downstream lifetime/rollback/concurrency and transport flush/abort/declaration tests pass. WAL/snapshot/application buffers remain separate; Slice144 adds selected non-overbooked per-authenticated-peer Bulk quotas, exact reconnect/held-frame lifetime and public host/native other-peer progress evidence. Slice145 exercises one actual TCP/TLS NativeNode full-peer-quota disconnect/reconnect, other-peer writes/reads, release/catch-up, joined shutdown and durable retry/reopen history. Per-group/receive/connection fairness and host connection admission remain. Legacy host-codec defaults use separate bounded scratch. |
-| C15 admission | Core ceilings/reserves plus public AdmissionPolicy/AdmissionLease, native shareable bulk provider and NativeOutbound integration; tests/admission.rs, tests/transport.rs; slice109 | Initial outbound path. Policy cannot bypass hard ceilings or veto reserved control. General client/disk/connection/shared-buffer admission and fairness remain. |
-| C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | No hidden cross-group total ordering. |
-| C17 discovery | PeerDiscovery/DiscoveryConnector; ManifestDiscovery/resolve_discovered and NativeAuthorityDiscovery from original Directory quorum reads; tests/discovery.rs, tests/connect.rs, tests/routing.rs, tests/routed/native.rs | Initial peer-address and responsibility-authority observation seams. Slice146 adds explicit discovery-selected QUIC Dial endpoints with real native/host hint refresh/authentication/retained-lease evidence. Slice147 adds public ManifestReadSource and native single-flight automatic original Directory-read lookup/refresh, with TCP/QUIC resolution/expiry and late-cancellation evidence. External remote fetch protocols and dynamic executable endpoints remain; source hints cannot activate owners. |
-| C18 placement | PlacementAuthorizer plus PlacementPlanner/plan_learner and native bounded deterministic learner selection; tests/placement_planning.rs and executable TCP/QUIC membership histories, slice113 | Initial learner placement only. Automatic voter replacement/removal, global rebalancing, measured sample collection and resource reservations remain; recommendations cannot activate membership. |
-| C19 observability | Observer / NativeCounterObserver, post-poll capture, local service metrics and optional native JournalTimings | Fixed post-poll counts plus explicitly selected native append/log-sync/manifest timings (slice138). No full critical-path attribution, general timer/queue telemetry, per-group event history or exporter claim. |
-| C20 configuration/admin | Typed startup, Node configure/status/resume, trusted executable plans | Authenticated configure OPERATION_ID submits provisioned exact intents with live execution reauthorization (slice115). configure-record now parses full targets under operator-provisioned policy (slice116); exact retained retries/conflicts and compacted-history refusal are checked. Broad ingress fault-release remains open. Generic envelopes pass the shared execution-time application gate where implemented. |
-| C21 authorization | PrincipalCredentials / ServiceAuthorizer / checked session gate and NativeServiceAccess; optional mutual-TLS counter command mode; tests/authorization.rs and tests/counter_service.rs, slice110 | Initial group-scoped reader/writer/admin gate. Live credential rotation, external issuer integration, durable principal audit and broad ingress fault-release remain. Provisioned-intent and client-target Configure consume this same session gate. Unflagged command mode stays trusted plaintext loopback. |
-| C22 integrity/compression | Checked native WAL/wire/snapshot framing, CRC and content digests internally | No selectable integrity/compression provider; optional compression is not enabled. |
-| C23 scope transfer | ScopeStateMachine/ScopeImage, BucketCounter and source/target adapters | Core retains fence/publication/activation authority. Broader recursive lifecycle remains partial. |
-| C24 transactions | One-group command/state-machine ordering; no cross-group transaction service | Optional higher layer remains unsupported; do not add global coordination to normal writes. Broader transactions stay P8. |
+| C01 log | LogStore/NativeLogStore; narrow VoteStore; log_store/log_reclaim/raft tests | General retention and segment cleaning; broader real backend/device failures. |
+| C02 durability | Explicit LogTicket barriers and PersistenceWorker completions bound to one store | No independent assertion provider; keep domain/generation/contiguous-prefix conformance. |
+| C03 snapshots | SnapshotStore/Retention/Worker/Router and native files | Wider partial-install, membership and retention combinations. |
+| C04 platform I/O | JournalIo/SnapshotIo/VoteIo with native file providers | Complete macOS runtime evidence; no alternate platform provider claimed. |
+| C05 application | StateMachine, bounded admission/read/checkpoint/retry contracts; Counter/BucketCounter and lifecycle wrappers | Full declared deployment-envelope enforcement only where provided; alternative applications must supply their actual bounds. |
+| C06 transport | PeerTransport/Factory, PeerDriver/Roster/Connector; native TCP/TLS and QUIC | General receive/connection admission/fairness and separate-host evidence. Local send completion is never remote durability. |
+| C07 wire | WireCodec/NativeWireCodec, bounded negotiated formats | Fuzzing/compatibility expansion; no gRPC/Protobuf implementation. |
+| C08 persistent codec | LogCodec/VoteLogCodec/SnapshotCodec and native codecs | Persistent format migration remains explicit, separate from trait compatibility. |
+| C09 secure session | SecureSession and native rustls/QUIC | Live credential renewal/revocation integration and broader failure coverage. |
+| C10 scheduler | ReadyScheduler, FairScheduler, Shard/TimedShard/EffectOwner/Node | Wider multi-lane deployment/resource isolation. |
+| C11 timers | TimerService/DeadlineQueue, generation-scoped expiration | Broader queue/lateness attribution. |
+| C12 clock | Clock/MonotonicClock and explicit core MonoTime | No hidden core wall clock; maintain host injection. |
+| C13 entropy | ElectionEntropy/JitterEntropy and deterministic source | Election jitter only, not cryptographic identity. |
+| C14 buffers | BufferPool/FrameBuffer/BufferClass/BufferOwner; native reservations/control reserve/per-peer quotas | Receive/connection/group fairness and broader payload coverage; WAL/snapshot/application buffers remain separate. |
+| C15 admission | AdmissionPolicy/Lease and NativeAdmissionPolicy; hard runtime ceilings | General client, disk, connection and shared-resource admission remains. Policy cannot bypass control reserve or hard bounds. |
+| C16 routing | PartitionPolicy, checked manifests/resolve/check_owner, native byte partition | Broader mappings/automatic split policy; no hidden global ordering. |
+| C17 discovery | PeerDiscovery/DiscoveryConnector, ManifestDiscovery/ManifestReadSource, NativeManifestLookup/AuthorityDiscovery | Slice160 adds public read mappings and automatic lookup across selected native metadata moves/restarts. Bounded external remote refresh/live endpoints remain. Hints never activate owners. |
+| C18 placement | PlacementAuthorizer and PlacementPlanner/plan_learner; native bounded deterministic ranking | General voter replacement/removal, measured sample collection/reservations and global rebalancing. Recommendations never change membership alone. |
+| C19 observability | Observer/NativeCounterObserver and optional JournalTimings | General budgeted event history, latency/queue/critical-path telemetry and exporter integration. |
+| C20 configuration | Typed startup and Node configure/status/resume; authenticated provisioned/client-target service commands | Broader ingress interruption/revocation/new-voter recovery. Native configuration endpoints exist and must not be listed wholly missing. |
+| C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess | Live rotation/external issuer/durable audit and broader revocation schedules. Unflagged loopback mode is explicitly trusted. |
+| C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Preserve this distinction. |
+| C23 scope transfer | ScopeStateMachine/ScopeImage, native BucketCounter, source/target/lifecycle guards | Wider application/provider and recursive fault/retention coverage; core retains fence/publication/activation authority. |
+| C24 transactions | One-group ordered application commands | Cross-group transactions are unsupported P8, not a hidden baseline coordinator. |
 
-## Next usable path
+## Invariants and scenario limits
 
-See BASELINE_AUDIT.md for the slice136 requirement review and fresh reference
-results. The static-membership networked service and Rust embedding remain
-independent of online-change and lifecycle acceptance work.
+| Chapter11 invariant | Direct evidence families | Unclosed scope |
+| --- | --- | --- |
+| I01/I02/I03/I04: vote uniqueness, committed history, contiguous durability, effect dependencies | raft/ballots/replication_scope/log_store/shared_barrier/worker/effect_owner | General generated message/storage schedules, external devices and faulted-history checking. |
+| I05: validated effective policy | quorum/activation_model/member_recovery plus actual Raft sites above | Full policy-transition protocol model and arbitrary log/term cases. |
+| I06: exclusive transferred owner | transfer_source/target/publication, scoped_source, metadata_transfer, native routed phase histories | General recursive lifecycle composition and external provider assumptions. |
+| I07/I08/I09: acknowledged recovery, deduplication, valid snapshots | application/raft/snapshot/member_recovery/counter_service/routed | Broader power-loss/device/partial-install combinations, unknown-outcome checker. |
+| I10: bounded resources | buffer/admission/runtime/worker/transport and configuration_capacity | General disk/client/connection pressure, recovery-throttle fairness. |
+| I11: stale incarnation refusal | identity/wire/log/peers/member_recovery and owner-completion tests | Broader stale-disk/packet/reconnection schedules. |
+| I12: independent child authority | native routed parent-offline and unchanged stopped-file tests | Broader recursive outage/membership/migration combinations. |
 
-1. Slice139 adds15 native publication cuts and retains full synchronization;
-   its data-sync candidate failed and was reverted. No performance gate is closed.
-2. Slices140–142 connect initially guarded assigned nested targets to actual
-   later split and merge retirement/reclamation, retaining lineage and successor
-   service (P1/P6). Selected native lifecycle evidence does not close all P6 gaps.
-3. Slices143–145 supply selected control reserve, per-peer bulk quotas and native
-   Node pressure/reconnect/reopen evidence. Slice146 supplies explicit discovered
-   QUIC Dial endpoints. Slice147 adds automatic original Directory-read lookup/refresh for Rust hosts. Slice148 composes routed writes/reads/retries, exact invalidation refresh and WAL/checkpoint restart over TCP/QUIC. Next implement a missing recursive ownership operation. Discovery/placement, platform/fault and measured runtime work remain. Original250ms/sustainable-capacity requirements remain
-   active; repeated unsuccessful publication experiments are not acceptance.
+Scenarios1/2/6 have selected persistence/election/membership histories;
+4/5/9/10 have selected parent-outage, phase-cut, stale identity and retry histories.
+Scenario7 has per-group timer/idle tests, not a complete dormancy protocol.
+Scenario8 has reclamation, buffers/control reserve and snapshot experiments, not
+complete disk-full/recovery competition coverage. Scenario3's striped-group
+protocol is P8; its ordinary stale-completion obligations remain P0–P3.
+tests/raft.rs also executes32 seeds of256 actual-core actions with native WAL
+model power loss, partitions, reordered/duplicated messages and committed-prefix
+checks. This is a bounded majority schedule family. It does not establish a
+general schedule generator/minimizer, known-Raft differential runner or
+end-to-end linearizability checker. Those
+chapter11 validation obligations remain explicit rather than being replaced by
+a passing test count.
 
-Purpose, dependencies and completion checks are linked in IMPLEMENTATION.md's
-mini plan. These priorities do not redefine the full P0–P7 goal or assert that
-performance is its only remaining requirement. P8 stays deferred.
+## Next implementation decisions
 
-Slice151c adds opt-in schema8 retained-child insertion: one fresh Staging child
-receives a strict source subrange while metadata preserves the remainder on the
-original group. Explicit intent/plan/scoped-publication tags preserve old formats;
-actual creation and original fence/import facts precede atomic publication and
-child activation. Root/foreign nested data/retry/checkpoint paths, all old-directory
-profile refusals, pre-intent cancellation and native intent-frame faults pass.
-The source still retains its E1 grant; fresh E2 hints refuse until checked source
-binding/grant adoption151d. Complete native partial service evidence follows152.
-This advances P5/P6 without closing the full lifecycle or platform/fault/P7 gates.
+1. Correct observed test timing/leader assumptions and record the whole-tree
+   Linux baseline. CI stays background feedback; its failures still need work.
+2. Slice160 implements automatic lookup across actual metadata source/serving
+   query envelopes, with native move/reopen, inactive/fenced refusal and original
+   read ownership checks. Broader remote refresh and discovery faults remain.
+3. Exercise public remote new-voter interruption, preserving original operation
+   and fresh readiness authority. Keep all P0–P7 gaps above active.
 
-Slice151d2 closes the checked retained-grant adoption gap for the bounded original
-source path. Opt-in source schema3 preserves its original routed history guard and
-records actual publication-backed active grants at the same committed prefix.
-Root/foreign E2 and repeated actual child E3 data/retries/exports recover; stale or
-transferred contexts cannot bypass the active grant or original scoped fences.
-Ordered pending, checkpoint/profile/budget refusals and native adoption-frame cuts
-pass. Current152 still requires complete TCP/QUIC partial-service recovery evidence;
-153 deletion,154 reparenting, target-backed partial sources/general mappings/retention
-and original wider lifecycle/membership/platform/fault/P7 scope stay open.
-
-Slice152a adds selected native TCP/TLS and QUIC WAL/checkpoint root partial service:
-actual quorum creation/partial assignment and unread intent/stage/fence/import/
-publication/adoption/activation results recover through original facts/retries.
-Source retained E2 and activated-child service continue with metadata stopped;
-independent data-owner recovery preserves values/retries/exports while exact
-metadata files/GroupLogs stay unchanged. Current152b is foreign-parent composition;
-153 deletion,154 reparenting and all original broader scope/gates remain active.
-
-Slice152b completes selected native foreign-parent retained insertion evidence:
-actual reservation/recovery binds the child intent; child publication precedes
-parent completion and exact locator refresh. TCP/QUIC WAL/checkpoint unread-phase
-recovery4/4 passes. Both metadata authorities remain stopped while retained source
-and activated child serve/recover; original stopped metadata bytes/logs remain
-unchanged. Root TCP/WAL factory regression passes. No production protocol change.
-Current153 deletion, next154 reparenting, following155 target-backed partial sources
-and wider original scope/gates remain open; Linux evidence, macOS pending.
-
-Slice153a adds schema9 recursive deletion: bounded original manifest reservation,
-checked full-owner fences and published child tombstone projections precede
-retained Fenced manifests and exact immutable retry history. Leaf/multiple-owner,
-same/foreign and three-authority conformance, legacy/bounds/checkpoint/capacity/
-ordering refusal and native intent/tombstone journal faults pass. Native TCP/QUIC
-resumption remains current153b; reparenting154, partial sources155 and wider original
-scope remain open. Physical reclamation and unresolved-creation cancellation are
-not granted by this deletion protocol. See DELETION.md and IMPLEMENTATION.md.
-
-Slice154a adds schema10 checked retirement of an already-deleted child selector
-to an explicit vacancy. Local/foreign deletion facts, retained owner service,
-immutable status/retry replay, bounded capacity, profile/cache refusal and native
-journal cuts are checked. This permits deleted-slot cleanup and a representable
-empty destination; it does not implement moving a live child or complete P5/P6.
-See [child-slot retirement](CHILD_SLOTS.md).
-
-Slice154b adds atomic same-authority reparenting of a live child and locally known
-subtree into an exact vacancy. One metadata commit updates both parent routes and
-the child binding; data owners keep serving at the same epoch. Cycle/depth and
-pending lifecycle checks, exact retries, partial cache refresh and native journal
-cuts are exercised. Slice154c adds original full-owner parent adoption: a selected
-RoutedApplication schema3 and TransferSource preserve the immutable bootstrap,
-data/retries/outbox and original parent-change results across repeated changes,
-restart and later full split. Actual metadata publication/target activation and
-every-byte adoption/freeze journal cuts are checked. Scoped retained and imported
-owner-family composition, cross-authority movement and native network reparenting
-remain required. See [local reparenting](REPARENTING.md).
-
-Slice154d1 adds schema12 cross-authority preparation/cancellation, with complete
-bounded ancestry/subtree validation, coordinator-first evidence, conflicting
-metadata/creation/lifecycle guards and reserved cancellation capacity. Early
-cancellation tombstones reject delayed prepare. Original result/checkpoint replay
-and every-byte coordinator/participant journal failures are exercised. The next
-phase must add commit/publication; these guards alone cannot move a child.
-
-Slice154d2 adds schema13 commit/publication and completion after every participant
-has published. Actual three-authority routes, both publication orders, unchanged
-data-owner service/retries and native journal cuts across all new phases pass.
-The remaining cross-authority integration is native cache refresh, owner grant
-adoption for later transfers and complete native TCP/QUIC service recovery.
-
-Slice154f adds opt-in scoped-source schema5 for affected parents' child-slot
-updates. Both parent roles adopt checked local or completed cross-authority
-observations without changing concrete ownership. The bounded ordered ledger
-preserves original exports/fences/retries and reconstructs the current grant on
-restart. Both parents complete subsequent retained transfers through target
-activation in conformance tests. Local observations are supplied; cross metadata
-commit/publication/completion is executed. Native imported-child cases exercise
-the old parent's lost-result refresh and independent data service after metadata
-shutdown. These selected paths do not establish general provider/platform/fault
-coverage; imported partial-source composition and metadata authority movement
-remain155/156.
-
-Slice153b adds fixed quorum full-fence reads over the original routed owner, with
-unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
-WAL/checkpoint two-authority recursive deletion histories pass original unread
-results/reopen/retry facts. Both metadata authorities stop during independent owner
-recovery; retained values/retry/outbox and exact stopped metadata files/GroupLogs
-remain, old service stays fenced, late metadata recovery cannot thaw it. Current154
-reparenting, next155 activated partial sources, following156 metadata movement;
-wider owner families, retention/cancellation and original scope/gates remain open.
-
-Slice154d3 adds explicit schema4 full-owner adoption of completed cross-authority
-moves and an explicit native cache parent-refresh option. Checked three-authority
-metadata -> owner adoption/restart -> reserved later split -> both target
-activations preserve retries/outbox and source fencing. Every-byte native
-adoption/freeze journal cuts and old-profile refusal pass. Complete TCP/QUIC
-move-and-restart service, other owner families and broader platform/fault evidence
-remain open; this does not mark all reparenting or P5/P6 complete.
-
-Slice154d4 supplies the selected original full-owner native composition:
-four TCP/TLS and QUIC WAL/checkpoint histories move a child across three metadata
-authorities, recover each phase's unread result, adopt the owner grant and restart
-that owner with all metadata stopped. Original observations/retries/outbox and
-unchanged stopped metadata files/GroupLogs are checked. Retained/scoped/imported
-owners, macOS and broader faults remain; full P5/P6 is not thereby complete.
-
-Slice154e1 adds retained/scoped schema4 parent changes while preserving an ordered
-mixed grant history, immutable earlier scope exports and original data/control
-retries. Local/cross moves, a subsequent retained handoff, independent control
-capacity, strict recovery and native parent/full-fence frame cuts pass. Imported
-owner implementation is now added by154e2: TransferTarget schema5 preserves
-original import/activation while accepting bounded local/cross parent changes,
-later full transfer and retirement/reopen. Owner tests and native journal cuts
-pass; native parent-move service composition for these families is added below.
-
-Slice154e3 adds eight passing selected native parent-move service cases for
-retained and imported owners: TCP/TLS and QUIC, WAL and checkpoint recovery.
-Actual transfer lineage, original metadata quorum observations, unread-result
-recovery, route refresh and metadata-independent owner service are checked.
-The old parent's remaining service survives an imported-child move, but its
-next transfer still needs checked parent-side grant refresh154f. Full
-reparenting, broader faults, macOS and the remaining roadmap stay open.
-
-Slice155a adds opt-in imported partial-source schema6. A real activated child
-delegates to a fresh grandchild, keeps its remaining data serving, and repeats
-the transfer while preserving original import/activation/data retries and exact
-older exports. The selected tests execute metadata creation, delegation,
-publication and parent completion, with child import/activation. Parent/slot
-history, bounded reserve, partial-state refusal, checkpoint and native journal
-cuts pass. New-profile network composition and partial-lineage full-transfer
-retirement remain155b; this is not full completion of155 or P6.
-
-
-Slice155b1 adds explicit remaining-concrete ownership transfers after partial
-imported-owner delegation. Directory14 accepts VBTINT07/VBDPLAN5; destination
-schema7 binds the new intent. Actual one-/two-destination handoff, original parent
-completion, successor retry/new-write service, unchanged children and checkpoint
-recovery pass. Native journal final-fence byte/sync/publication interruptions and
-old-profile/malformed-map refusal are checked. Partial-owner retirement lineage,
-native TCP/QUIC composition, metadata authority movement and wider requirements
-remain open; the complete P5/P6 exits are not inferred from this slice.
-
-
-Slice155b2 completes selected partial-import retirement: original activation and
-ordered compact grant history bind the final full-transfer source. Actual two-
-partial-transfer -> remaining relocation/split -> successor activation -> explicit
-release -> retirement/retry/checkpoint recovery passes. Mixed parent/slot lineage,
-truncation and rehashed-history refusal are checked. Native-file interrupted
-publication/tail recovery, verified retired checkpoint and physical WAL reclaim
-pass. This closes the selected embedding cleanup path, not native TCP/QUIC155b3,
-metadata-authority movement156 or the broader P5/P6/full-goal requirements.
-
-Slice155b3 adds four selected native TCP/TLS/QUIC × WAL/checkpoint histories:
-actual imported-owner partial delegation twice, remaining relocation, explicit
-retirement and checkpoint-selected WAL reclamation. Lost control results survive
-worker join/reopen/exact retry. Creation bindings, old-child manifests, imported
-data/retries and final successor writes are checked, including service with all
-metadata/old owners stopped and their durable files unchanged. Multi-target
-remaining-transfer network coverage, wider faults, macOS, authority movement156
-and the other P0–P7 exits remain open.
-
-Slice156a implements selected metadata source fencing and bounded original-domain
-checkpoint export. Seven downstream tests include native journal byte-cut recovery;
-source mutation/authoritative reads stop after F and exact retries/export persist.
-Slice156b1 adds bounded non-serving target staging/import with original-domain
-history and independent local phase indices. Five target cases cover provenance,
-checkpoint/retry and native journal interruptions. Publication/activation156b2
-adds a writable destination with original history and bounded new-command replay,
-plus selected native journal fault evidence. Live owner/locator refresh, repeated
-movement and native TCP/QUIC composition156c are still required before claiming
-complete metadata-authority movement.
-
-Slice156c1 adds original full-owner metadata adoption and explicit native cache
-refresh. Six new cases cover real activation, mixed parent/metadata history,
-retry/outbox preservation, a later data split, partial cache refresh, old-profile
-refusal and every-byte native adoption-journal cuts. Retained/imported owners,
-foreign locators, repeated metadata moves and native socket composition remain.
-
-Slice156c2a adds selected retained-owner metadata adoption: actual prior scoped
-handoff, metadata relocation, another retained handoff under the new authority,
-original export/retry preservation, checked mixed-history recovery and modeled
-native journal cuts. Imported-owner metadata lineage, foreign locators, repeat
-movement and native socket composition remain open; this does not complete P5/P6.
-
-Slice156c2b adds imported full/partial metadata adoption and retirement lineage.
-Actual moved-authority split and retained/remaining handoffs preserve original
-activation, retry/outbox and earlier exports. Exact ordered retirement replay,
-negative history tests and modeled native adoption/retirement cuts pass. Foreign
-locators, repeat authority moves and native socket composition remain open.
-
-Slice156c2c adds schema15 foreign directory locator updates and a separate native
-cache opt-in. Complete original move observations authorize an exact foreign
-manifest reference/generation transformation. Seven new cases exercise actual
-move phases, both boundary roles, combined parent/child updates, bounded reserve,
-old-profile/refusal/replay checks and modeled native journal interruptions.
-Data-owner adoption of those locator results, repeated moves and native TCP/QUIC
-composition remain; this does not complete the metadata-movement requirement.
-
-Slice156c2d connects foreign locator updates to original, retained and imported
-full/partial owners through explicit immutable profiles. Deterministic actual
-move/update/adoption sequences preserve data and retry state through later
-original split, retained handoff, imported merge and retirement. Missing original
-locator history fails retirement, and native modeled journal cuts cover all four
-owner profiles plus both imported retirement formats. Repeated metadata exports
-and native TCP/QUIC authority-move composition remain open.
-
-Slice156c3 adds explicit repeated metadata source/import/serving profiles. Selected
-embedding histories move A->B->C->D, preserve original A/B/C operations and creation
-provenance, retain older rejected/control IDs and permit fresh destination writes.
-The current-domain fence may numerically coincide with an older-domain command.
-Complete checkpoint restore keeps those domains separate. Selected native journal
-cuts cover repeat freeze/import/publication/activation and original retries. Profile,
-export and nesting bounds refuse before ownership transfer. Native TCP/QUIC
-metadata-move composition and the wider roadmap exits remain open.
-
-Slice156c4 adds four selected native TCP/TLS/QUIC x WAL/checkpoint histories for
-A->B->C, foreign-parent locator refresh and original full-owner adoption. Each
-selected move/control phase recovers an unread completion and exact retry. The
-data owner preserves its epoch, data and outbox through both moves and serves
-with all metadata stopped; metadata files and recovered logs remain unchanged.
-Retained/imported owner-family native composition, broader failures and the other
-roadmap exits remain open. Background Linux/macOS CI is now activated; a running
-job is not platform validation.
-
-Slice156c5 adds four native tests/eight histories for retained and imported owner
-continuity across a root/child metadata move. TCP/TLS/QUIC and WAL/checkpoint
-profiles recover lost completions, preserve original frozen images, imported
-activation, publication provenance and retries, and keep exact outbox counts.
-Both owners write/recover while all metadata services are stopped; metadata
-files and recovered logs remain unchanged. Ordinary and partial-delegation-capable
-imported profiles are covered, but later native partial handoff/retirement and
-repeated moves for these families remain open, alongside broader roadmap exits.
-
-Slice156c6a adds4 native later-retained-handoff histories after metadata movement.
-TCP/TLS/QUIC and WAL/checkpoint recovery preserve both exports, original metadata
-adoptions and publication provenance. The source and both children recover and
-serve retries/writes with both metadata groups offline, without changing their
-files/logs. A discovered creation-read overreservation now respects the immutable
-directory history capacity; the full42-test metadata-transfer suite passes.
-Imported-owner later handoff and retirement156c6b remain open.
-
-Slice156c6b closes that selected native composition: ordinary imported owners
-transfer their full scope, while partial histories first delegate a strict
-subrange and then transfer the remainder under moved metadata. Four new native
-TCP/TLS/QUIC x WAL/checkpoint tests cover eight histories. They preserve original
-activation/metadata provenance and earlier exports, reject incomplete retirement
-proofs, replay retirement from the WAL tail and recover exact tombstone lineage
-after checkpoint/reclamation. Successors serve transferred retries and new writes
-with metadata offline and unchanged. The complete affected family filter passed
-12 tests/20 histories in176.32s on Linux. Repeated family moves, broader faults,
-macOS/separate-host and the other roadmap exits remain open.
-
-A fresh current-source audit also confirms that public authenticated membership
-commands already exist; both client-supplied target TCP/QUIC histories passed in
-3.51s. Current summaries now distinguish this implemented ingress from remaining
-revocation, older-checkpoint and remote new-voter acceptance work.
-
-Slice157 adds public joint-command recovery when the serving leader is demoted
-to learner. Both TCP and QUIC cover an unread committed result followed by either
-an abrupt WAL recovery or a drained joint checkpoint. Survivors elect, retain
-the exact joint operation, reject conflicting reuse and require an explicitly
-authorized final record. The recovered former leader catches up as a learner;
-full restart preserves the two-voter configuration, data and retries. The full
-counter_service suite passed35/35 in19.94s on Linux. This is selected P4/P1
-evidence, not completion of broader revocation, older-checkpoint, new-voter or
-platform/fault requirements.
+P8 and Windows are deferred. Automatic global split/merge orchestration,
+busy-polling, custom allocators and particular external adapters are explicitly
+not prerequisites in the design. That does not defer the baseline behavior or
+validation obligations identified above.

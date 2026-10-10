@@ -17,7 +17,7 @@ use super::*;
 use crate::runtime::MonoTime;
 use std::num::NonZeroU64;
 pub const MANIFEST_DISCOVERY_CONTRACT_VERSION: u32 = 1;
-pub const MANIFEST_READ_SOURCE_CONTRACT_VERSION: u32 = 1;
+pub const MANIFEST_READ_SOURCE_CONTRACT_VERSION: u32 = 2;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct AuthorityLocator {
     pub responsibility: ResponsibilityIdentity,
@@ -105,12 +105,14 @@ pub trait ManifestDiscovery {
     fn invalidate(&mut self, locator: AuthorityLocator, observed: ManifestObservationId) -> bool;
     fn close(&mut self);
 }
-/// Original trusted Directory reads, not serialized assertions of read authority.
+/// Original trusted application reads, not serialized assertions of read authority.
 /// Calls are bounded/nonblocking. Binding stays immutable. Submission refusal
 /// accepts nothing; accepted reads retain their original Node credits until the
 /// exact completion is consumed. Cancellation ends observation, not consensus.
 /// This source's read-result consumer is exclusive while a lookup is pending.
 pub trait ManifestReadSource {
+    /// Original application result retained on rejected completion; no erasure.
+    type ReadResult;
     fn binding(&self) -> crate::runtime::ReadInvocationBinding;
     fn pending_reads(&self) -> usize;
     fn submit(
@@ -125,7 +127,7 @@ pub trait ManifestReadSource {
         ticket: crate::runtime::ReadInvocationTicket,
     ) -> Result<
         Option<crate::runtime::ReadOutcome<Option<ResponsibilityManifest>>>,
-        crate::runtime::ReadCompletionRejected<Option<ResponsibilityManifest>>,
+        crate::runtime::ReadCompletionRejected<Self::ReadResult>,
     >;
     fn cancel(
         &mut self,

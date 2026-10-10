@@ -3,7 +3,8 @@
 Source fencing, import, publication and destination activation are implemented
 for Rust embedding, including original/retained/imported owner metadata adoption
 and foreign directory/cache locator refresh, owner adoption and selected repeated
-moves. Native socket composition remains; an imported image alone does not authorize a new metadata group.
+moves. Selected native TCP/TLS and QUIC recovery histories exercise these paths;
+an imported image alone does not authorize a new metadata group.
 
 `MetadataAuthoritySource` wraps a `LifecycleDirectory` before its first bootstrap
 and shares its existing Raft log, storage and runtime contracts. Construction

@@ -1,0 +1,14 @@
+✔ fixed p99 boundary distinguishes equality and actual numeric refusal (0.86139ms)
+✔ fast results from a different topology/window/assembly cannot satisfy the reference gate (1.596753ms)
+✔ incomplete recovery or worker ownership cannot be advertised as performance success (0.457991ms)
+✔ missing, nonfinite, unordered and inconsistent timings are refused (0.415762ms)
+✔ volatile/missing/mismatched reference provenance cannot release a numeric success (2.702382ms)
+✔ public context preserves workspace-relative root without local path disclosure (0.335641ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10.178862

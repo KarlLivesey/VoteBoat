@@ -1,0 +1,7 @@
+voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+└── ring v0.17.14
+    ├── cfg-if v1.0.5
+    ├── getrandom v0.2.17
+    │   ├── cfg-if v1.0.5
+    │   └── libc v0.2.190
+    └── untrusted v0.9.0

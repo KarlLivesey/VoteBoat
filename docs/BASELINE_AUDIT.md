@@ -1,4 +1,9 @@
-# Baseline audit — slice136
+# Baseline audits
+
+Latest: [review159](#review159--current-requirements-and-concrete-next-boundary).
+Earlier reviews below retain their original revision and scope.
+
+## Original review136
 
 Audited production revision: b2a367e48e045c1776f38aafb4826d4d50462b24.
 The full P0–P7 objective remains active. This is a requirement review, not a
@@ -241,3 +246,84 @@ recovery; retained values/retry/outbox and exact stopped metadata files/GroupLog
 remain, old service stays fenced, late metadata recovery cannot thaw it. Current154
 reparenting, next155 activated partial sources, following156 metadata movement;
 wider owner families, retention/cancellation and original scope/gates remain open.
+
+## Review159 — current requirements and concrete next boundary
+
+Starting revision1231153. Chapter12's P0–P7 exits and VB-000–011, chapter11's
+invariants/scenarios and chapter17's24 catalogue entries were rechecked against
+current source and tests. BASELINE_ACCEPTANCE.md is now the current compact
+ledger; earlier sections in this file remain historical. No completion percentage
+is inferred from implemented code or test counts.
+
+Deletion, reparenting, retained-child insertion and moving metadata authority
+are no longer absent features. They have bounded application contracts, native
+journal fault tests and selected TCP/TLS/QUIC phase/reopen histories. Selected
+later imported/retained owner transfers and retirement now follow those moves.
+Broader lifecycle, retention and failure coverage remains. Public authenticated
+configuration endpoints also exist; their unsupported fault combinations remain
+listed instead of categorizing the whole endpoint as missing.
+
+The concrete next P5/C17 gap is visible at the native lookup adapter. Its Node
+implementation requires Query=ResponsibilityIdentity and
+ReadResult=Option<ResponsibilityManifest>. The original Directory satisfies that
+shape; LifecycleDirectory and metadata source/publishing/serving wrappers use
+explicit enums. Their authoritative read branches already reject Fenced or
+NotActive and distinguish current manifests from inherited history. Native
+metadata movement tests manually consume these reads; automatic lookup tests
+exercise the original Directory only. Thus metadata migration itself works in
+selected histories, while automatic lookup cannot yet be assembled for its
+serving profile through the native convenience path.
+
+A follow-on must adapt query/result shapes through an explicit public boundary,
+keep original Node read tickets/bindings and bounded cancellation, and accept
+only the current-authority manifest branch. Historical metadata results cannot
+silently become current observations; source fencing and destination activation
+must still be enforced by the application. No new runtime, log, fallback identity
+or remote bearer proof is needed. Exercise the adapter before/after an actual
+metadata move and after restart, with inactive/fenced and late completion cases.
+
+P3 source inspection still finds the four expected quorum uses: durable campaign
+self-vote, received election votes, read readiness and commit frontier. Both
+accepted joint policies are evaluated by Membership; commit remains bounded by
+the local durable prefix and current term. Nine-voter/reference tests and the
+independent bounded activation model complement this source review. The
+32-seed/256-action native-WAL model in tests/raft.rs covers selected power loss,
+partition, duplicate/reordered message and committed-prefix histories. It is
+not a general minimizer, differential Raft runner or unknown-outcome
+linearizability checker; those broader chapter11 obligations remain open.
+
+The full goal also retains P2/P7 operational lane placement, general shared
+resource admission, recovery throttling, broader provider/device/host coverage
+and sustainable improvement under the original fixed-p99 budget. No new
+performance run is required to know the retained serial gate is still failing.
+Optional compression, specific external adapters, global automatic split/merge
+orchestration and P8 transactions are distinguished from mandatory baseline
+behavior. A core-only dependency tree still includes ring and its cryptographic
+support; it excludes the selected native providers, rustls and QUIC. It is not
+advertised as dependency-free.
+
+Review of completed GitHub run38015395454 (revisiona803a8b) found a successful
+format/strict-lint job, three Linux service test failures and one macOS QUIC unit
+test failure. Linux data checks reused an earlier leader ID after membership or
+restart; reported errors were NOT_LEADER/Unknown(LeadershipChanged). They now
+use the existing automatic routing and original-operation retry path. The macOS
+fixture treated UDP send completion as immediate receive availability; only its
+positive receive assertions now poll WouldBlock with a bounded deadline. Queue,
+packet, stale-lease and negative assertions remain exact. No production timers,
+protocol semantics, test serialization or CI limits are relaxed.
+
+Fresh local test results and the final platform status belong to this review's
+validation record. A prior or partial remote run cannot establish current macOS
+acceptance, and CI is background feedback rather than an implementation gate.
+
+Update160: the read-shape gap identified above now has a public stateless
+ManifestReadMapping and owning MappedManifestReadSource. Four selected native
+TCP/QUIC × WAL/checkpoint histories resolve current routes before/after two
+metadata moves, reject inactive/fenced sources, drain cancellation ownership and
+recover rejected original typed completions. The earlier paragraph records the
+pre-implementation finding. Broader remote discovery remains open. See
+validation/baseline/slice159-160 for final focused results, strict-lint evidence,
+retained failed attempts and explicitly pending full-suite/platform checks.
+The latest completed CI38015646068 also exposed a client-target configuration
+leadership-change assumption; its fixture correction preserves exact operations
+and does not add automatic admin retry to the CLI.
