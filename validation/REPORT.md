@@ -4480,3 +4480,37 @@ routing, while explicitly recording that the source's stored grant predates the
 child-slot removal. Parent-side grant refresh before its next transfer is154f,
 not a completed capability. These are Linux loopback joined-abort histories;
 arbitrary faults, macOS and the full roadmap remain separate requirements.
+
+## Slice154f — parent child-slot grant continuity
+
+Explicit scoped-source schema5 adds checked local and completed-cross parent
+slot adoption, retaining the bounded original grant ledger and historical export
+bindings. The cross command carries the selected parent's original publication
+and configuration, not just the child's observation. Both parent roles complete
+a later retained transfer through target import/publication/activation. Original
+exports, data retries and retained-publication statuses survive restart. Pending
+order, bounded capacity, profile mismatch, conflicting IDs, malformed provenance
+and truncated/corrupt checkpoints refuse without partial adoption. Every byte of
+the new native adoption frame plus sync/publication faults recovers either the
+old or complete grant; later full fencing preserves exact adoption retries.
+
+Five new conformance cases pass with the existing suite:19 retained/scoped tests,
+48 related all-feature lifecycle tests and51 core-only tests. All-target/all-feature
+Clippy with warnings denied, formatting/whitespace and81-contract inventory pass.
+The shared codecs were subsequently relocated beside routed control formats to
+keep module dependencies one-way; their public exports and encodings are unchanged,
+and final Clippy/format checks pass after the relocation.
+
+All eight selected native parent-move cases pass. TCP imported/WAL passes in38.51s;
+the other seven TCP/QUIC WAL/checkpoint cases pass in300.26s. Imported-child cases
+now recover an unread old-parent grant refresh, repeat its original result, keep
+remaining writes working with all metadata stopped, and independently reopen the
+parent source. Original export/creation/activation facts and stopped metadata
+bytes/GroupLogs remain exact. Retained-owner cases validate the same selected
+source5 profile. These are Linux loopback joined-owner-abort histories, not
+hardware power-loss, arbitrary-fault, macOS or full-roadmap proof.
+
+During development, the new profile exposed schema4 hard-coding in two shared
+test reopen factories; the factories now follow the selected profile. Production
+continued to reject the mismatched checkpoint. An initial native filter selected
+zero tests and is not counted among these results. No performance claim is made.

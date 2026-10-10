@@ -159,6 +159,18 @@ data-owner service/retries and native journal cuts across all new phases pass.
 The remaining cross-authority integration is native cache refresh, owner grant
 adoption for later transfers and complete native TCP/QUIC service recovery.
 
+Slice154f adds opt-in scoped-source schema5 for affected parents' child-slot
+updates. Both parent roles adopt checked local or completed cross-authority
+observations without changing concrete ownership. The bounded ordered ledger
+preserves original exports/fences/retries and reconstructs the current grant on
+restart. Both parents complete subsequent retained transfers through target
+activation in conformance tests. Local observations are supplied; cross metadata
+commit/publication/completion is executed. Native imported-child cases exercise
+the old parent's lost-result refresh and independent data service after metadata
+shutdown. These selected paths do not establish general provider/platform/fault
+coverage; imported partial-source composition and metadata authority movement
+remain155/156.
+
 Slice153b adds fixed quorum full-fence reads over the original routed owner, with
 unchanged commands/schema/checkpoints and host bounds. Selected native TCP/QUIC
 WAL/checkpoint two-authority recursive deletion histories pass original unread

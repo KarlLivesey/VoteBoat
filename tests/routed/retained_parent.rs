@@ -367,6 +367,19 @@ impl Moves {
             }
         }
     }
+    fn reopen_remaining_parent(&mut self) {
+        let b = &mut self.base;
+        if b.checkpoint {
+            compact(&mut b.source, &b.clock, 20);
+        }
+        creation::abandon(std::mem::take(&mut b.source), 20);
+        b.source = open(
+            configuration(&b.root, 20, &[1, 2, 3], NativeOpenMode::Recover),
+            &b.clock,
+            b.protocol,
+            || source_profile(true, true),
+        );
+    }
     fn adopt(&mut self, bytes: Vec<u8>, unread: bool) -> Option<ParentGrantStatus> {
         let b = &mut self.base;
         match self.family {
@@ -586,6 +599,7 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool, family: Family) {
     assert_eq!(hint.group, group(family.group()));
     assert_eq!(r.value(hint), original_value + 1);
     assert!(r.hint(fixture::id(500)).is_err());
+    let mut parent_refresh = None;
     if matches!(family, Family::Imported) {
         // Moving the imported child must leave the old parent's retained
         // data path usable through refreshed routing (same epoch and scope).
@@ -606,19 +620,74 @@ fn run(protocol: NativePeerProtocol, checkpoint: bool, family: Family) {
             matches!(propose_recovering(&mut r.base.source,&r.base.clock,20,6200,data(h,200,2)).outcome,
             RoutedOutcome::Applied(receipt) if receipt.outcome == BucketOutcome::Value(13))
         );
-        // Its next transfer still needs an explicit metadata-only grant
-        // refresh; ordinary data admission does not compare route generation.
+        // The original grant precedes the removed child slot. Adopt only the
+        // original quorum's checked parent publication, then lose the receipt.
         assert_ne!(
             r.base.source[0].local().applications[&group(20)].grant(),
             r.cache
                 .get(r.original.manifest.input().responsibility)
                 .unwrap()
         );
+        let refresh = CrossParentSlotAdoption {
+            side: ReparentSide::Old,
+            observation: command.clone(),
+            parent_configuration: r.config(1),
+            parent_publication: command.child_publication,
+        }
+        .encode(MAX_PARENT_SLOT_ADOPTION_BYTES)
+        .unwrap();
+        phase_write(
+            true,
+            &mut r.base.source,
+            &r.base.clock,
+            20,
+            6300,
+            refresh.clone(),
+        );
+        r.reopen_remaining_parent();
+        let ScopedSourceRead::ParentAdoption(Some(status)) = observe(
+            &mut r.base.source,
+            &r.base.clock,
+            20,
+            ScopedSourceQuery::ParentAdoption(op(6300)),
+        ) else {
+            panic!("parent refresh")
+        };
+        campaign(&mut r.base.source, &r.base.clock, 20);
+        assert_eq!(
+            propose_recovering(&mut r.base.source, &r.base.clock, 20, 6300, refresh.clone())
+                .outcome,
+            RoutedOutcome::ParentAdopted(status)
+        );
+        assert_eq!(
+            r.base.source[0].local().applications[&group(20)].grant(),
+            r.cache
+                .get(r.original.manifest.input().responsibility)
+                .unwrap()
+        );
+        parent_refresh = Some((refresh, status, h));
     }
     r.preserved();
     let facts = [1, 100, 200].map(|g| r.facts(g));
     let logs = [1, 100, 200].map(|g| creation::abandon(std::mem::take(r.nodes(g)), g));
     let files = [1, 100, 200].map(|g| durable_files(&r.base.root.join(g.to_string())));
+    if let Some((refresh, status, h)) = parent_refresh {
+        campaign(&mut r.base.source, &r.base.clock, 20);
+        assert!(
+            matches!(propose_recovering(&mut r.base.source, &r.base.clock, 20, 6201, data(h, 200, 4)).outcome,
+            RoutedOutcome::Applied(receipt) if receipt.outcome == BucketOutcome::Value(17))
+        );
+        r.reopen_remaining_parent();
+        assert_eq!(
+            source_read(&mut r.base.source, &r.base.clock, h, 200),
+            ScopedSourceRead::Data(RoutedRead::Served(17))
+        );
+        campaign(&mut r.base.source, &r.base.clock, 20);
+        assert_eq!(
+            propose_recovering(&mut r.base.source, &r.base.clock, 20, 6300, refresh).outcome,
+            RoutedOutcome::ParentAdopted(status)
+        );
+    }
     r.write(hint, 6101, 3, false);
     r.reopen_owner();
     assert_eq!(r.adoption(), Some(adopted));

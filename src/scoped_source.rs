@@ -30,6 +30,10 @@ use std::{collections::BTreeMap, mem::size_of};
 mod adoption;
 use adoption::{Adoption, GrantChange};
 mod parent;
+pub use crate::routed::parent_slots::{
+    CrossParentSlotAdoption, ParentSlotAdoption, ReparentSide, MAX_PARENT_SLOT_ADOPTION_BYTES,
+    PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA,
+};
 pub use adoption::{RetainedGrantAdoption, MAX_RETAINED_ADOPTION_BYTES};
 use parent::parent_command;
 pub use parent::PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA;
@@ -80,6 +84,7 @@ pub struct ScopedTransferSource<A, P> {
     active_grant: ResponsibilityManifest,
     adoptions: Vec<GrantChange>,
     parent_limit: usize,
+    parent_slots: bool,
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -137,6 +142,7 @@ where
             retained_grants: false,
             adoptions: Vec::new(),
             parent_limit: 0,
+            parent_slots: false,
         })
     }
     /// Bind each scoped freeze to its exact retained-insertion intent before bootstrap.
@@ -373,7 +379,9 @@ where
         }
         let mut bytes =
             Vec::with_capacity(if self.parent_limit == 0 { 20 } else { 22 } + inner.len());
-        bytes.extend(if self.parent_limit != 0 {
+        bytes.extend(if self.parent_slots {
+            b"VBSCOWN5"
+        } else if self.parent_limit != 0 {
             b"VBSCOWN4"
         } else if self.retained_grants {
             b"VBSCOWN3"
@@ -404,6 +412,7 @@ where
                 || bytes.starts_with(b"VBSCOWN2")
                 || bytes.starts_with(b"VBSCOWN3")
                 || bytes.starts_with(b"VBSCOWN4")
+                || bytes.starts_with(b"VBSCOWN5")
             {
                 if bytes != &self.bootstrap_command(bytes.len())? {
                     return Err(ApplicationError::InvalidCommand);
@@ -555,7 +564,9 @@ where
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: if self.parent_limit != 0 {
+            application_schema: if self.parent_slots {
+                PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
+            } else if self.parent_limit != 0 {
                 PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA
             } else if self.retained_grants {
                 RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA
@@ -565,7 +576,9 @@ where
                 SCOPED_TRANSFER_SOURCE_SCHEMA
             },
             command_bytes: (inner.command_bytes + if self.parent_limit == 0 { 20 } else { 22 })
-                .max(if self.parent_limit != 0 {
+                .max(if self.parent_slots {
+                    MAX_RETAINED_ADOPTION_BYTES.max(MAX_PARENT_SLOT_ADOPTION_BYTES)
+                } else if self.parent_limit != 0 {
                     MAX_RETAINED_ADOPTION_BYTES.max(MAX_CROSS_PARENT_ADOPTION_BYTES)
                 } else if self.retained_grants {
                     MAX_RETAINED_ADOPTION_BYTES
@@ -592,7 +605,7 @@ where
                     0
                 } else {
                     2 + self.routed.scoped_fence_limit()
-                        + self.parent_limit * (61 + MAX_CROSS_PARENT_ADOPTION_BYTES)
+                        + self.parent_limit * (61 + self.parent_command_bound())
                 },
         }
     }
@@ -885,7 +898,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(if self.parent_limit != 0 {
+        out.extend(if self.parent_slots {
+            b"VBSCCHK5"
+        } else if self.parent_limit != 0 {
             b"VBSCCHK4"
         } else if self.retained_grants {
             b"VBSCCHK3"
@@ -961,7 +976,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.parent_limit != 0 {
+                != if self.parent_slots {
+                    b"VBSCCHK5"
+                } else if self.parent_limit != 0 {
                     b"VBSCCHK4"
                 } else if self.retained_grants {
                     b"VBSCCHK3"
@@ -1111,9 +1128,9 @@ where
                         next.checked_parent(
                             operation,
                             index,
-                            crate::routed::parent_adoption::ParentAdoptionCommand::decode(
+                            crate::routed::parent_adoption::ParentAdoptionCommand::decode_scoped(
                                 command_bytes,
-                                true,
+                                next.parent_slots,
                             )?,
                         )?
                     } else {

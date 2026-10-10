@@ -17,7 +17,10 @@ use super::*;
 use crate::routed::parent_adoption::ParentAdoptionCommand;
 pub const PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 4;
 pub(super) fn parent_command(bytes: &[u8]) -> bool {
-    bytes.starts_with(b"VBRPAD01") || bytes.starts_with(b"VBXPAD01")
+    bytes.starts_with(b"VBRPAD01")
+        || bytes.starts_with(b"VBXPAD01")
+        || bytes.starts_with(b"VBSLAD01")
+        || bytes.starts_with(b"VBSXAD01")
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -25,6 +28,34 @@ where
     A::Receipt: ApplicationReceipt,
     P: PartitionPolicy + Clone,
 {
+    pub(super) fn parent_command_bound(&self) -> usize {
+        if self.parent_slots {
+            MAX_PARENT_SLOT_ADOPTION_BYTES
+        } else {
+            MAX_CROSS_PARENT_ADOPTION_BYTES
+        }
+    }
+    /// Select schema5 before bootstrap, after retained grants. The same bounded
+    /// parent ledger accepts both moved-owner and parent child-slot observations.
+    #[allow(clippy::result_large_err)]
+    pub fn with_parent_slot_adoption(
+        self,
+        maximum: usize,
+    ) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_parent_adoption(maximum)?;
+        let extra = maximum * (MAX_PARENT_SLOT_ADOPTION_BYTES - MAX_CROSS_PARENT_ADOPTION_BYTES);
+        if next
+            .readiness_requirements()
+            .snapshot_bytes
+            .checked_add(extra)
+            .is_none_or(|n| n > MAX_SCOPED_SOURCE_CHECKPOINT_BYTES)
+        {
+            next.parent_limit = 0;
+            return Err((ApplicationError::InvalidCommand, next));
+        }
+        next.parent_slots = true;
+        Ok(next)
+    }
     /// Select before bootstrap, after retained grants. Supports authenticated
     /// local and completed cross-authority moves with independent lifetime reserve.
     #[allow(clippy::result_large_err)]
@@ -112,7 +143,7 @@ where
         index: u64,
         bytes: &[u8],
     ) -> Result<ParentGrantStatus, ApplicationError> {
-        let command = ParentAdoptionCommand::decode(bytes, true)?;
+        let command = ParentAdoptionCommand::decode_scoped(bytes, self.parent_slots)?;
         let change = self.checked_parent(op, index, command)?;
         let GrantChange::Parent { status, .. } = change else {
             unreachable!()

@@ -93,7 +93,7 @@ fn source_profile(foreign: bool, moves: bool) -> Source {
         .with_retained_grants()
         .unwrap_or_else(|e| panic!("{:?}", e.0));
     if moves {
-        base.with_parent_adoption(4)
+        base.with_parent_slot_adoption(4)
             .unwrap_or_else(|_| panic!("scoped parent profile"))
     } else {
         base

@@ -248,6 +248,32 @@ remain exact; late metadata reopen returns the original observations.
 Moving the imported child also changes its old parent's child slot. The parent's
 remaining data keeps working at the same epoch and concrete scope, but its
 stored grant must be refreshed before a later transfer can use the newly
-published manifest. That parent-side continuity is the next154f deliverable.
+published manifest. Slice154f adds that parent-side continuity to scoped owners.
 These are selected Linux loopback recovery histories, not full-roadmap or
 arbitrary-fault proof.
+
+Select `ScopedTransferSource::with_parent_slot_adoption(maximum)` after retained
+grants, before bootstrap. Schema5 (`VBSCOWN5`/`VBSCCHK5`) preserves schemas1–4.
+`ParentSlotAdoption` carries a local atomic reparent decision and `ReparentSide`;
+`CrossParentSlotAdoption` additionally carries the selected parent's original
+publication and configuration alongside the completed cross-authority move.
+The host must authenticate the original quorum observations. The encodings do
+not certify foreign commitment. Same-authority observations must agree exactly.
+
+Only the plan-derived parent slot/generation changes. Its concrete data scope,
+group and epoch stay unchanged. The source requires the exact current grant,
+keeps the ordered bounded parent ledger, and preserves original exports, fences,
+data retries and retained-publication results. A subsequent retained transfer
+uses the new grant. Changed IDs, stale order, unsupported profiles, exhausted
+capacity and updates after full fencing fail closed; original retries remain
+valid. Restart replays the mixed grant chain and verifies each old export against
+the grant at its original fence.
+
+Conformance covers both parent roles, local observations, actual cross-authority
+metadata completion, subsequent transfer/import/publication/activation on both
+parents, bounded admission, malformed checkpoints and native journal cuts.
+The local-command test supplies its metadata observation; it does not itself
+execute a local metadata move. Native imported-child histories additionally
+exercise the remaining parent's lost-result refresh, reopen and service with
+metadata offline. Wider parent/provider families and arbitrary fault schedules
+are not inferred from these selected paths.

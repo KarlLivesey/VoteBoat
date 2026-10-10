@@ -13,6 +13,7 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 //! Adoption of an original local-reparenting quorum observation by its data owner.
+use super::parent_slots::{CrossParentSlotAdoption, ParentSlotAdoption};
 use super::*;
 use crate::reparenting::{ReparentPlan, ReparentStatus, MAX_REPARENT_PLAN_BYTES};
 pub const PARENT_ADOPTING_ROUTED_SCHEMA: u64 = 3;
@@ -45,8 +46,19 @@ pub(super) struct ParentAdoptionRecord {
 pub(crate) enum ParentAdoptionCommand {
     Local(OwnerParentAdoption),
     Cross(CrossOwnerParentAdoption),
+    LocalSlots(ParentSlotAdoption),
+    CrossSlots(CrossParentSlotAdoption),
 }
 impl ParentAdoptionCommand {
+    pub fn decode_scoped(bytes: &[u8], slots: bool) -> Result<Self, ApplicationError> {
+        if slots && bytes.starts_with(b"VBSLAD01") {
+            ParentSlotAdoption::decode(bytes).map(Self::LocalSlots)
+        } else if slots && bytes.starts_with(b"VBSXAD01") {
+            CrossParentSlotAdoption::decode(bytes).map(Self::CrossSlots)
+        } else {
+            Self::decode(bytes, true)
+        }
+    }
     pub fn decode(bytes: &[u8], cross: bool) -> Result<Self, ApplicationError> {
         if cross && bytes.starts_with(b"VBXPAD01") {
             CrossOwnerParentAdoption::decode(bytes).map(Self::Cross)
@@ -58,24 +70,35 @@ impl ParentAdoptionCommand {
         match self {
             Self::Local(a) => a.encode(max),
             Self::Cross(a) => a.encode(max),
+            Self::LocalSlots(a) => a.encode(max),
+            Self::CrossSlots(a) => a.encode(max),
         }
     }
     pub fn before(&self) -> &ResponsibilityManifest {
         match self {
             Self::Local(a) => a.before(),
             Self::Cross(a) => a.before(),
+            Self::LocalSlots(a) => a.before(),
+            Self::CrossSlots(a) => a.before(),
         }
     }
     pub fn after(&self) -> ResponsibilityManifest {
         match self {
             Self::Local(a) => a.after(),
             Self::Cross(a) => a.after(),
+            Self::LocalSlots(a) => a.after(),
+            Self::CrossSlots(a) => a.after(),
         }
     }
     pub fn metadata(&self) -> (OperationId, u64) {
         match self {
             Self::Local(a) => (a.decision.operation, a.decision.index),
             Self::Cross(a) => (a.child_publication.operation, a.child_publication.index),
+            Self::LocalSlots(a) => (
+                a.observation.decision.operation,
+                a.observation.decision.index,
+            ),
+            Self::CrossSlots(a) => (a.parent_publication.operation, a.parent_publication.index),
         }
     }
 }

@@ -279,6 +279,19 @@ fn handoff_profile(
     TransferIntent,
     RetainedGrantAdoption,
 ) {
+    handoff_family(foreign, parent_moves, false)
+}
+fn handoff_family(
+    foreign: bool,
+    parent_moves: bool,
+    parent_slots: bool,
+) -> (
+    Directory,
+    Option<Directory>,
+    Source,
+    TransferIntent,
+    RetainedGrantAdoption,
+) {
     let (mut d, mut p, intent) = setup_profile(foreign, parent_moves);
     let bytes = intent.encode(100000).unwrap();
     assert_eq!(&bytes[..8], b"VBTINT06");
@@ -318,7 +331,13 @@ fn handoff_profile(
         intent
     );
     assert!(commit(&mut d, 200, bytes).duplicate);
-    let mut s = source_profile(&intent, parent_moves);
+    let mut s = if parent_slots {
+        retained_source(&intent)
+            .with_parent_slot_adoption(4)
+            .unwrap_or_else(|_| panic!("slots"))
+    } else {
+        source_profile(&intent, parent_moves)
+    };
     let boot = s.bootstrap_command(100000).unwrap();
     commit(&mut s, 100, boot);
     commit(&mut s, 1, data_at(&intent, 1, 7));
@@ -567,7 +586,13 @@ fn handoff_profile(
     );
     let image = s.export(op(200), 65536).unwrap();
     let cp = s.checkpoint(100000).unwrap();
-    let mut restored = source_profile(&intent, parent_moves);
+    let mut restored = if parent_slots {
+        retained_source(&intent)
+            .with_parent_slot_adoption(4)
+            .unwrap_or_else(|_| panic!("slots"))
+    } else {
+        source_profile(&intent, parent_moves)
+    };
     restored
         .restore_checkpoint(s.schema_version(), s.applied_index(), &cp)
         .unwrap();
@@ -640,7 +665,13 @@ fn handoff_profile(
         RoutedOutcome::Rejected(RoutingError::EpochMismatch)
     ));
     let cp = restored.checkpoint(100000).unwrap();
-    let mut reopened = source_profile(&intent, parent_moves);
+    let mut reopened = if parent_slots {
+        retained_source(&intent)
+            .with_parent_slot_adoption(4)
+            .unwrap_or_else(|_| panic!("slots"))
+    } else {
+        source_profile(&intent, parent_moves)
+    };
     reopened
         .restore_checkpoint(restored.schema_version(), restored.applied_index(), &cp)
         .unwrap();
@@ -1658,3 +1689,5 @@ fn source_profile(i: &TransferIntent, moves: bool) -> Source {
 }
 #[path = "retained_insertion/parent_moves.rs"]
 mod parent_moves;
+#[path = "retained_insertion/parent_slots.rs"]
+mod parent_slots;
