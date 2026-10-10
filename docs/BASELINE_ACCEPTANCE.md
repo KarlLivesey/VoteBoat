@@ -1,5 +1,13 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice221 checks explicit original-write continuation at selected Busy/deadline
+caller boundaries, without changing production automatic routing or uncertainty.
+Five scripted checks pass after the old narrow policy fails3; full native
+counter171, default assignment2/drain1 and formatting/four strict profiles pass.
+Exact restart receipts, changed-delta conflict and fresh reads remain required.
+Preceding220 macOS counter162/4 failures are retained separately; matching-source
+platform acceptance stays open. Original P7 measurement proceeds while CI runs.
+
 Slice220 adds opt-in bounded single-authority executable lookup through the
 existing route Discovery. Original query/output, provisioned endpoints and10s
 deadline remain; numeric-source behavior stays pinned. Selected TCP/QUIC source

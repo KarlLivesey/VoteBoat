@@ -1,0 +1,37 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.95s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 4 tests
+test write_recovery::tests::existing_leadership_and_read_interruptions_retain_original_identity ... ok
+test write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success ... FAILED
+test write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt ... FAILED
+test write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt ... FAILED
+
+failures:
+
+---- write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success stdout ----
+
+thread 'write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success' (324) panicked at tests/counter_service/write_recovery.rs:101:9:
+assertion failed: result.unwrap_err().contains("caller deadline expired")
+
+---- write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt stdout ----
+
+thread 'write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt' (326) panicked at tests/counter_service/write_recovery.rs:65:26:
+called `Result::unwrap()` on an `Err` value: "original write [\"group\", \"7\", \"3\", \"add\", \"42\", \"5\"]: \"ERR not_proposed=Busy\\n\" Error: \"request unsuccessful; preserve the operation ID and payload when retrying a write\""
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt stdout ----
+
+thread 'write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt' (327) panicked at tests/counter_service/write_recovery.rs:65:26:
+called `Result::unwrap()` on an `Err` value: "original write [\"group\", \"7\", \"3\", \"add\", \"42\", \"5\"]: \"UNKNOWN reply deadline expired; retry the same operation ID and delta\\n\" Error: \"request interrupted after connection; automatic routing stopped\""
+
+
+failures:
+    write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success
+    write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt
+    write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt
+
+test result: FAILED. 1 passed; 3 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test counter_service`

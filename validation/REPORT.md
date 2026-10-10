@@ -1,5 +1,21 @@
 # Validation report — slice 35
 
+Original write caller recovery: [slice221](baseline/slice221/README.md). The old
+narrow policy passes1 scripted case/fails3 on the recorded Busy/deadline boundaries.
+The shared test-only continuation passes5 cases, retaining original arguments,
+fixed caller deadlines and terminal malformed/unrelated stdout/stderr. Actual
+all-feature counter171 passes, including assignment restart with exact retained
+receipt/conflict/fresh-read checks, failed drain publication and original unread
+TCP/QUIC checkpoint/reopen. Default assignment2 and drain1 pass. Formatting/four
+strict profiles stay zero. Production uncertainty handling and budgets remain
+unchanged. Preceding220 macOS counter162/4 fails on configuration preparing,
+runner deadline, native Closed exit and original configuration interruption;
+later targets are unrun. Ubuntu remains live at the last retained observation.
+Fresh matching platform, broader faults/provider and original P7 gates stay open.
+After the full sweep, the drain test additionally requires exact Value(7)/duplicate
+and a fresh read of7. The affected all-feature/default histories pass1 each;
+pre-strengthening full source hashes and final focused/strict logs remain distinct.
+
 Bounded directory read source selection: [slice220](baseline/slice220/README.md).
 Opt-in `lookup auto` reuses route Discovery with a fixed original query, provisioned
 endpoints and unchanged10s deadline; numeric sources remain pinned. TCP/QUIC

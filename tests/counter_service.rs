@@ -93,6 +93,8 @@ mod quorum;
 mod read_failover;
 #[path = "counter_service/timing.rs"]
 mod timing;
+#[path = "counter_service/write_recovery.rs"]
+mod write_recovery;
 
 fn fixture_gate() -> std::sync::MutexGuard<'static, ()> {
     STORE_SPAWN.lock().unwrap_or_else(|e| e.into_inner())
@@ -2089,28 +2091,10 @@ fn native_quic_metrics_are_volatile_and_preserve_recovery_and_retries() {
     metrics_history(true);
 }
 
-// The caller may explicitly retry a leadership-change uncertainty with exactly
-// the same operation ID and payload. The CLI itself still stops on uncertainty.
+// Explicit caller recovery keeps the original operation ID and payload. The CLI
+// itself still stops on uncertainty; only an actual success returns a receipt.
 fn authenticated_write(cluster: &Cluster, args: &[&str]) -> String {
-    let deadline = Instant::now() + Duration::from_secs(10);
-    loop {
-        let output = cluster.target("auto", args);
-        let text = String::from_utf8(output.stdout).unwrap();
-        if output.status.success() {
-            return text;
-        }
-        assert!(
-            text.starts_with("UNKNOWN LeadershipChanged;"),
-            "{text}\n{}",
-            failure_diagnostics::snapshot(cluster, args)
-        );
-        assert!(
-            Instant::now() < deadline,
-            "leadership failed to settle: {text}\n{}",
-            failure_diagnostics::snapshot(cluster, args)
-        );
-        std::thread::park_timeout(Duration::from_millis(10));
-    }
+    write_recovery::invoke(cluster, args, Duration::from_secs(10))
 }
 fn authenticated_command_history(quic: bool) {
     let mut cluster = Cluster::new();

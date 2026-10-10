@@ -499,17 +499,42 @@ matching macOS/separate-host acceptance, broader faults/provider obligations and
 the original P7 performance gate remain open. Broad security remains with the
 user's Daybreak run; full P0–P7 stays active.
 
-Current: reproduce the two remaining matching219 macOS counter transitions.
-Purpose: finish usable-service/platform recovery rather than broaden security.
-Depend on exact original assignment IDs/delta, drain setup operation and retained
-UNKNOWN/interruption or not_proposed=Busy evidence. Sketch the caller's known
-non-admission versus unknown-outcome transitions before editing. Completion
-requires original-ID positive durable/quorum recovery, changed-payload refusal,
-actual TCP/QUIC histories within existing budgets and fresh platform evidence.
-Keep older19770/21101 failures explicit until their matching histories pass.
-This advances usable-service/P4 acceptance; CI remains background feedback.
+Implemented221 corrects the two selected original-write caller boundaries from
+matching219: exact Busy non-admission and UNKNOWN reply-deadline interruption.
+The old narrow policy passes1 scripted check and fails3; after correction all5
+checks pass, including immutable arguments, fixed caller deadline and terminal
+modified/unrelated stdout/stderr pairs. A shared test-only helper replaces the
+duplicated callers, retaining10s write/15s assignment admission budgets and the
+unchanged CLI subprocess deadline. It cannot synthesize a success receipt.
+Assignment restart now requires exact Value(5)/duplicate=true, changed-delta
+OperationConflict and a fresh read retaining5. Full local all-feature counter171
+passes, including original unread-write TCP/QUIC checkpoint/reopen and failed
+drain-publication recovery. Default assignment2 and failed-journal1 pass.
+Formatting and four strict Clippy profiles have zero diagnostics. No production
+protocol, routing, timer, format, public seam or success interpretation changes.
+The full171 sweep precedes one further test-only strengthening: failed drain
+publication now requires exact Value(7)/duplicate=true and a fresh read retaining7.
+That affected history passes1 all-feature and1 default afterward; its prior full
+source hashes and final focused logs are retained separately. Final strict checks
+run again on the strengthened source, with zero diagnostics.
 
-Next: repeat the original P7 committed/applied latency profile with the
+Preceding220 run38054167141 has completed macOS counter162/4 failures before
+later targets run: original21101 configuration preparing expires before queued;
+the resumed QUIC drain runner's original19701 budget expires; membership-drain
+node1 exits Closed after startup; configure-record17012 has an authenticated
+read interruption. Its original assignment/drain cases pass, but that is not
+evidence for221's new continuation. Raw logs and exact-source state are retained;
+Ubuntu is still live at the last observation. Do not restart that handle or
+infer current-source/macOS acceptance from these results.
+
+Macro review221 advances usable-service/P4 explicit original-write recovery and
+replaces duplicated caller assumptions with one checked policy. The latest
+platform failures change the next investigation set, not the full scope or
+deadlines. Production functional checks are sufficient to run the original P7
+measurement while platform feedback remains background. Broader provider/fault,
+deployment/platform and full P0–P7 acceptance stay open; security stays with Daybreak.
+
+Current: repeat the original P7 committed/applied latency profile with the
 corrected transport after its functional checks, while platform feedback runs.
 Depend on the recorded benchmark workload, durability, offered load and hardware
 details; keep the fixed250ms serial TCP p99 gate unchanged. Completion requires
@@ -517,6 +542,16 @@ reproducible committed/applied results and a cause-specific correction if the
 original gate still fails, plus contract/recovery checks for any changed path.
 This advances measured tuning; broader fault/provider and deployment obligations
 remain explicit in the full P0–P7 acceptance ledger.
+
+Next: isolate the retained220 platform failures by their earliest exact boundary.
+Purpose: finish usable-service/P4/platform recovery. Depend on original21101/
+17012 configuration records,19701 drain sequence and node1's actual Closed exit,
+plus retained logs and fresh221 platform results. Sketch known non-admission,
+unknown work and owned shutdown before selecting a correction; these different
+outcomes cannot share an unchecked retry rule. Completion requires exact original
+receipts/state, refusal of changed records, bounded cleanup and relevant native
+TCP/QUIC recovery plus matching platform evidence. Do not widen timers or make
+CI a prerequisite for the independent measurement/provider deliverables.
 
 Following: review the next uncovered replacement-provider operation set through
 shared downstream/native checks. Purpose: make the promised mix-and-match Rust
@@ -526,6 +561,41 @@ choose a bounded contract with a concrete ownership/failure obligation. Completi
 requires actual shared checks, refusal/cleanup evidence and explicit remaining
 limitations, not only a valid metadata reference. This advances P0 composition;
 no expanded security/fuzz corpus or automatic certification claim.
+
+### Slice221 schema plan — original write continuation at two caller boundaries
+
+Purpose/dependencies: matching219 macOS evidence identifies assignment retry42/5
+after restart as UNKNOWN reply deadline/interruption, and drain recovery19700/7
+as explicit not_proposed=Busy. Neither is a positive receipt. The two fixture
+callers currently admit different narrow outcome sets. Reuse one test-only caller
+continuation for these exact outcomes; this is needed to exercise the promised
+original-operation recovery rather than fail before its receipt check. It advances
+usable-service/P4/platform acceptance, without changing production routing.
+
+Data/API: an immutable original argument slice, the existing10s write or15s
+assignment caller deadline, and injected attempt/clock/pause callbacks. Each
+attempt returns success text or the original stdout/stderr pair. A bounded loop
+returns only a successful invocation; callers still validate exact application
+receipt/value/duplicate fields. Retain diagnostic failure output and stop on
+unrelated/modified outcomes. No new operation ID, payload, source trust, public
+trait, timeout or automatic production write retry.
+
+Transitions/ownership: exact Busy proves no admission; exact recognized UNKNOWN
+permits an explicit caller repeat of the same deduplicated identity, not a success
+claim. Existing admitted work remains owned by Node/recovery. The helper creates
+no new native runtime or persistent state; its before-attempt deadline prevents
+renewing the outer budget. Existing CLI subprocesses keep their own unchanged
+deadline. Native lost-reply, checkpoint/reopen and conflict checks remain the
+durability evidence; a scripted continuation alone cannot establish that.
+
+Acceptance: reproduce the recorded outcome pairs against the old narrow policy
+before widening it. Check original arguments on every callback, finite deadline,
+terminal malformed/unrelated failures and no synthetic success on expiry. Run
+affected assignment/drain plus existing actual unread-write TCP/QUIC recovery,
+then the affected full counter target. Keep exact receipts, changed-delta refusal
+and fresh reads. Retain matching220 CI under its existing handle; local passing
+histories do not close fresh macOS acceptance. Formatting/four strict profiles
+stay zero. Broad security remains with Daybreak; full P0–P7/P7 scope stays open.
 
 ### Slice220 schema plan — directory source selection and retained failure phase
 

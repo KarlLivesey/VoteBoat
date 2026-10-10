@@ -23,29 +23,14 @@ fn page(c: &Cluster, cursor: &str, limit: &str) -> String {
     }
 }
 fn original_retry(c: &Cluster) {
-    let deadline = Instant::now() + Duration::from_secs(15);
-    loop {
-        // This write was acknowledged before restart. Retry only its original
-        // identity/payload; an interrupted observation is not a new operation.
-        let output = c.target("auto", &["group", "7", "3", "add", "42", "5"]);
-        let text = String::from_utf8(output.stdout).unwrap();
-        if output.status.success() {
-            assert!(text.contains("duplicate=true"), "{text}");
-            return;
-        }
-        assert!(
-            text.starts_with("UNKNOWN LeadershipChanged;")
-                || text
-                    == "UNKNOWN authenticated read failed; retry the same operation ID and delta\n",
-            "original retry status={} stdout={text:?} stderr={}\nnode1={}\nnode2={}\nnode3={}",
-            output.status,
-            String::from_utf8_lossy(&output.stderr),
-            c.service_log(1),
-            c.service_log(2),
-            c.service_log(3),
-        );
-        assert!(Instant::now() < deadline, "{text}");
-    }
+    // This write was acknowledged before restart. A repeated observation must
+    // recover its exact retained receipt, never treat UNKNOWN as success.
+    let text = write_recovery::invoke(
+        c,
+        &["group", "7", "3", "add", "42", "5"],
+        Duration::from_secs(15),
+    );
+    assert_eq!(text, "OK outcome=Value(5) duplicate=true\n");
 }
 fn history(quic: bool) {
     let mut c = group_admin::setup(quic);
@@ -108,6 +93,9 @@ fn history(quic: bool) {
     assert!(!stale.status.success());
     assert!(String::from_utf8_lossy(&stale.stdout).contains("stale assignment cursor"));
     original_retry(&c);
+    let conflict = authenticated_write(&c, &["group", "7", "3", "add", "42", "6"]);
+    assert_eq!(conflict, "OK outcome=OperationConflict duplicate=true\n");
+    assert_eq!(c.routed(&["group", "7", "3", "read"]), "OK value=5\n");
     c.stop();
 }
 #[test]

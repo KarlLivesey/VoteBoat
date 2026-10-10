@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.55s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 5 tests
+test write_recovery::tests::existing_leadership_and_read_interruptions_retain_original_identity ... ok
+test write_recovery::tests::caller_deadline_never_renews_or_becomes_a_success ... ok
+test write_recovery::tests::interrupted_reply_repeats_only_the_original_write_until_positive_receipt ... ok
+test write_recovery::tests::unrelated_or_modified_failures_remain_terminal ... ok
+test write_recovery::tests::explicit_busy_repeats_only_the_original_write_until_positive_receipt ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 166 filtered out; finished in 0.00s
+

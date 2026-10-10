@@ -352,7 +352,11 @@ fn failed_journal_publication_stops_service_and_preserves_recovery_evidence() {
         .request(source, &["drain-status", "1", "19701"])
         .status
         .success());
-    assert!(authenticated_write(&c, &["add", "19700", "7"]).contains("duplicate=true"));
+    assert_eq!(
+        authenticated_write(&c, &["add", "19700", "7"]),
+        "OK outcome=Value(7) duplicate=true\n"
+    );
+    assert_eq!(c.routed(&["read"]), "OK value=7\n");
     c.stop();
 }
 
