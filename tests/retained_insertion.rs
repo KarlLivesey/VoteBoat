@@ -116,8 +116,15 @@ fn setup_profile(
     foreign: bool,
     parent_moves: bool,
 ) -> (Directory, Option<Directory>, TransferIntent) {
+    setup_with_directory(foreign, parent_moves, initial_profile)
+}
+fn setup_with_directory(
+    foreign: bool,
+    parent_moves: bool,
+    profile: fn(ResponsibilityManifest, bool) -> Directory,
+) -> (Directory, Option<Directory>, TransferIntent) {
     let b = before(foreign);
-    let mut d = initial_profile(b.clone(), parent_moves);
+    let mut d = profile(b.clone(), parent_moves);
     let mut c = b.clone().into_input();
     c.parent = Some(ParentAuthority {
         responsibility: b.input().responsibility,
@@ -164,7 +171,7 @@ fn setup_profile(
     ]);
     let after = ResponsibilityManifest::new(after).unwrap();
     if foreign {
-        let mut p = initial_profile(parent(&b), parent_moves);
+        let mut p = profile(parent(&b), parent_moves);
         let plan =
             DelegationPlan::retained_insertion(parent(&b), b, after, child, op(200)).unwrap();
         let bytes = plan.encode(100000).unwrap();

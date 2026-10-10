@@ -165,8 +165,9 @@ Evidence and limits are recorded in the slice154f section below.
    grant continuity154. Check imported data/retries/outbox, exact activation
    lineage, both service paths, repeated moves, refusal before activation and
    restart. The embedding path155a is implemented with actual nested transfers
-   and journal recovery. Current155b must complete partial-lineage full-transfer
-   retirement/reclamation and native network composition. Advances the
+   and journal recovery.155b1 now adds an explicit remaining-data move after
+   partial delegation. Current155b2 must complete its retirement lineage and
+   reclamation;155b3 composes native network recovery. Advances the
    recursive-routing and split/merge milestones.
 2. **156, metadata authority movement (next; P5).** Move metadata authority
    while retaining responsibility identity and original lifecycle facts. Depends
@@ -321,7 +322,7 @@ its selected native acceptance passes. General retention and broader faults rema
    recovery, with original children/owners preventing unsafe early deletion.
    Advances complete recursive responsibility management.
 
-12. **Recursive reparenting (current154, P5/P6).** Purpose: move a responsibility
+12. **Recursive reparenting (selected paths completed154, P5/P6).** Purpose: move a responsibility
    within the logical tree while preserving its data and usable descendants.
    Dependencies: original manifest identity, checked old/new parent reservations,
    source grant lifecycle and pack review before API selection. Completion: cycle/
@@ -335,7 +336,7 @@ its selected native acceptance passes. General retention and broader faults rema
    transfers;154d adds guarded multi-authority movement. The local metadata path
    does not complete the full reparenting milestone.
 
-13. **Activated children as partial sources (next155, P5/P6).** Purpose:
+13. **Activated children as partial sources (current155, P5/P6).** Purpose:
    let a previously imported child delegate only part of its scope while retaining
    service, including repeated descendants. Dependencies: original activation/
    import lineage, creation-time source capability selection,151 grant adoption
@@ -344,7 +345,7 @@ its selected native acceptance passes. General retention and broader faults rema
    original activation and F facts survive, and stale/moved routes refuse. This
    advances complete reusable recursive ownership, beyond152's original sources.
 
-14. **Metadata authority movement (following156, P5/P6).** Purpose: move the
+14. **Metadata authority movement (next156, P5/P6).** Purpose: move the
    metadata owner while preserving responsibility identities and usable descendants.
    Dependencies: original authority grants, checked old/new ownership reservations,
    namespace/locator records and durable old-authority closure; review pack and
@@ -12497,3 +12498,118 @@ native TCP/QUIC service composition are155b. Those validations are not claimed
 by the in-memory and native-journal evidence above. Metadata-authority movement156,
 public administration/API coverage, macOS and broader faults remain in the macro
 plan; performance tuning remains later.
+
+## Slice155b1 schema plan — retire a previously partial imported owner
+
+Purpose: complete the later full-transfer/cleanup path for the schema6 imported
+owner before composing its native network service. The current retirement gate
+only recognizes the original imported grant or parent-only changes, so it cannot
+safely release an owner after partial delegation. This is part of155, not a new
+prerequisite milestone.155b2 native TCP/QUIC composition and156 metadata authority
+movement remain next.
+
+Data/API: preserve the original activation prefix; append a versioned, bounded
+retirement-only ledger of completed retained-grant and parent/slot observations.
+Publication commands already contain the exact earlier scoped fence and export
+commitment, so retired lineage need not retain application images. Replay that
+ledger from the original imported grant; require exact before/after continuity,
+strict local fence/adoption ordering, distinct control/creation IDs and declared
+lifetime counts. Bind its derived final grant to the later full-transfer proof.
+The existing target checkpoint schema and all old lineage formats stay unchanged.
+Give the sealed retirement-owner contract a declared lineage bound with the old
+bound as default, so only selected partial owners reserve their larger history.
+
+State/ownership: selected pristine owner -> import/activation -> completed partial
+transfers and optional parent changes -> full remaining-scope fence -> successor
+activation -> explicit retention release -> retired. One authoritative provider
+and log remain throughout. The retired guard drops provider/import/export image
+buffers and stores only activation, ownership evidence and final retirement facts.
+A pending partial transfer cannot full-freeze or retire. Recovery validates the
+whole evidence chain before replacing state and cannot revive retired service.
+
+Acceptance: actual repeated partial transfers followed by a full transfer of the
+remaining concrete scope, exact imported retries on successors, complete proof
+and release before retirement, original activation plus mixed grant history after
+retired checkpoint recovery, changed/truncated/misordered histories and wrong
+final grants rejected atomically. Exercise native-file retired checkpoint/tail
+replay and reclamation. Native socket composition remains155b2; no broad-fault or
+macOS claim follows from these cases. Run focused core/all-feature regressions,
+Clippy, formatting and contract inventory checks.
+
+### 155b1 contract check and revised ordering
+
+Inspection before implementing retirement found that TransferIntent::validate_shape
+rejects every Delegated before-layout. Therefore a partial owner cannot yet form
+the later full remaining-data transfer named above. Implement that missing usable
+path first; do not manufacture a retired proof around an impossible intent.
+The temporary lineage-bound edit was removed before validation/commit.
+
+Use explicit VBTINT07 / VBDPLAN5 remaining-transfer commands and pristine selected
+Directory schema14. The before-layout has one contiguous concrete source range;
+the after-layout replaces exactly that range with fresh concrete destination
+ranges and preserves every child/vacant selector byte-for-byte. Identity, scope,
+placement, parent and scheme remain fixed; epoch/generation each advance once.
+Parent reservation and completion use the existing checked delegation protocol.
+Existing publication/source-fence/target-activation evidence remains authoritative.
+A new automatically selected target schema7 binds this intent without reinterpreting
+old target formats. Accept split or one-destination relocation; reject gaps,
+child edits, old-source reuse, duplicate destination groups and metadata identities.
+
+Acceptance first: actual imported owner delegates twice, then transfers its
+remaining range through Directory reservation/publication/parent completion and
+successor activation; old owner stays fenced, existing children retain data and
+routes, successor imports exact retries, and all sides recover checkpoints.
+Exercise invalid shapes, old profile refusal and native journal interruption.
+Then complete the retirement lineage design above and native TCP/QUIC composition;
+these remain within155b and do not reduce the full goal.
+
+
+## Slice155b1 implemented — transfer remaining concrete ownership
+
+An imported schema6 owner can now complete two partial child delegations, then
+transfer its remaining contiguous concrete range to one fresh group or split it
+between fresh groups. Existing child/vacant selectors stay identical. Explicit
+VBTINT07 and VBDPLAN5 encode the checked mapping and original parent reservation;
+Directory schema14 is selected before bootstrap and rejects cross-profile replay.
+Existing publication, source-fence, import and activation records retain their
+original authority. New destination targets select schema7/VBTSOWN6/VBTRGT08.
+Original formats and profiles retain their earlier interpretation.
+
+The actual test composition starts with imported values/retries, performs two
+child transfers, then commits a parent reservation, remaining-data intent,
+original source fence, target imports, Directory publication, parent completion
+and target activations. It checks one- and two-destination variants, unchanged
+child manifests/data, exact old retries and new successor writes. Source, targets
+and Directory recover from checkpoints; the source cannot serve after its fence.
+The native journal model interrupts every final-freeze frame byte, sync and
+publication boundary and observes only the old serving or complete fenced state.
+
+Malformed mappings, source ID reuse including a changed incarnation, altered
+child epochs, duplicate destinations, codec downgrades, missing parent binding,
+old Directory profiles and truncated intent/plan/Directory/target checkpoints
+are checked. Initial test compilation exposed fixture-only method/variant names
+and a reservation moved into a helper; those were corrected. A negative fixture
+used responsibility number10 as though it were the metadata group; the actual
+authority is group1, so that check now uses the manifest's authority. The valid
+group10 destination was correctly accepted. No production checks were weakened.
+
+123 related all-feature tests pass across Directory, delegation, source/target,
+publication, activation, merge, repeat, imported parent, retained insertion and
+retirement. The same core-only targets pass. Formatting/Clippy/inventory results
+are recorded in validation/REPORT.md. These are selected deterministic and native
+journal histories, not live network, arbitrary-fault, macOS or power-loss proof.
+
+Macro review: this closes the missing legal remaining-scope movement within155;
+partial-lineage retirement/reclamation155b2 and native TCP/QUIC composition155b3
+remain current.156 metadata authority movement and public administration follow.
+No complete P5/P6 or full-goal exit is asserted. The original broader requirement
+ledger, Linux/macOS targets and deferred P7 tuning remain unchanged.
+
+Composition confirmation: retain public domain contracts and explicit provider
+selection so storage, snapshots, application state and runtime/network providers
+can be replaced independently. NativeNode is a convenient assembly, while Node
+accepts contracted providers. A future database adapter must implement the actual
+durability/recovery contract; adding another mandatory runtime or duplicating the
+authoritative log is not a substitute. No Turso or other database adapter is
+implemented by this work. New lifecycle behavior continues to use the existing
+ScopeStateMachine and authoritative log seams.

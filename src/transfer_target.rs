@@ -37,6 +37,7 @@ pub use partial::{MAX_TARGET_PARTIAL_TRANSFERS, PARTIAL_TRANSFER_TARGET_SCHEMA};
 pub const TRANSFER_TARGET_SCHEMA: u64 = 2;
 pub const INSERTION_TRANSFER_TARGET_SCHEMA: u64 = 3;
 pub const RECURSIVE_INSERTION_TRANSFER_TARGET_SCHEMA: u64 = 4;
+pub const REMAINING_TRANSFER_TARGET_SCHEMA: u64 = 7;
 pub const MAX_TARGET_ACTIVATION_BYTES: usize = 64 * 1024;
 pub const MAX_INLINE_IMPORT_BYTES: usize = 8 * 1024 * 1024;
 pub const MAX_TARGET_FREEZE_BYTES: usize = 52 + MAX_TRANSFER_INTENT_BYTES;
@@ -405,15 +406,15 @@ where
                 return Err(ApplicationError::InvalidCommand);
             }
             let mut bytes = Vec::with_capacity(len);
-            bytes.extend(
-                if intent.insertion_children().is_some() && intent.delegation().is_some() {
-                    b"VBTSOWN3"
-                } else if intent.insertion_children().is_some() {
-                    b"VBTSOWN2"
-                } else {
-                    b"VBTSOWN1"
-                },
-            );
+            bytes.extend(if intent.is_remaining_transfer() {
+                b"VBTSOWN6"
+            } else if intent.insertion_children().is_some() && intent.delegation().is_some() {
+                b"VBTSOWN3"
+            } else if intent.insertion_children().is_some() {
+                b"VBTSOWN2"
+            } else {
+                b"VBTSOWN1"
+            });
             put_group(&mut bytes, group);
             bytes.extend(operation.get().to_le_bytes());
             bytes.extend((limits.import_bytes as u64).to_le_bytes());
@@ -1199,6 +1200,8 @@ where
             PARTIAL_TRANSFER_TARGET_SCHEMA
         } else if self.parent_limit != 0 {
             PARENT_TRANSFER_TARGET_SCHEMA
+        } else if self.intent.is_remaining_transfer() {
+            REMAINING_TRANSFER_TARGET_SCHEMA
         } else if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
             RECURSIVE_INSERTION_TRANSFER_TARGET_SCHEMA
         } else if self.intent.insertion_children().is_some() {
@@ -1240,6 +1243,8 @@ where
             b"VBTRGT07"
         } else if self.parent_limit != 0 {
             b"VBTRGT06"
+        } else if self.intent.is_remaining_transfer() {
+            b"VBTRGT08"
         } else if self.intent.insertion_children().is_some() && self.intent.delegation().is_some() {
             b"VBTRGT05"
         } else if self.intent.insertion_children().is_some() {
@@ -1293,10 +1298,12 @@ where
         let recursive = insertion && self.intent.delegation().is_some();
         let parent = self.parent_limit != 0;
         let partial = self.partial.is_some();
-        if ((insertion || parent || partial) && schema != self.schema_version())
+        let remaining = self.intent.is_remaining_transfer();
+        if ((insertion || parent || partial || remaining) && schema != self.schema_version())
             || (!insertion
                 && !parent
                 && !partial
+                && !remaining
                 && schema != TRANSFER_TARGET_SCHEMA
                 && schema != 1)
         {
@@ -1311,13 +1318,17 @@ where
             || tag == b"VBTRGT04"
             || tag == b"VBTRGT05"
             || tag == b"VBTRGT06"
-            || tag == b"VBTRGT07";
+            || tag == b"VBTRGT07"
+            || tag == b"VBTRGT08";
         if (partial && tag != b"VBTRGT07")
             || (!partial && tag == b"VBTRGT07")
             || (!partial && parent && tag != b"VBTRGT06")
             || (!partial && !parent && tag == b"VBTRGT06")
+            || (!partial && !parent && remaining && tag != b"VBTRGT08")
+            || (!remaining && tag == b"VBTRGT08")
             || (!partial
                 && !parent
+                && !remaining
                 && ((recursive && tag != b"VBTRGT05")
                     || (!recursive && tag == b"VBTRGT05")
                     || (insertion && !recursive && tag != b"VBTRGT04")

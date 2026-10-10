@@ -17,12 +17,13 @@ use crate::transfer_publication::{TransferPublication, TransferPublicationStatus
 use crate::{application::*, directory::*, identity::*, log::*, routing::codec::*, routing::*};
 use std::{collections::BTreeSet, mem::size_of};
 mod insertion;
+mod remaining;
 pub use insertion::InsertionChild;
 pub(crate) use insertion::{insertion_len, put_insertion, read_insertion};
 
 // One Single plus at most 256 concrete-group routes fits the existing envelope.
 pub const MAX_TRANSFER_INTENT_BYTES: usize = MAX_DIRECTORY_PUBLICATION_BYTES;
-pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 6;
+pub const TRANSFER_INTENT_CONTRACT_VERSION: u32 = 7;
 
 /// Exact before/after manifests for a conservative whole-responsibility split
 /// or compatible merge. Sources and targets are distinct concrete groups.
@@ -174,6 +175,9 @@ impl TransferIntent {
         if self.retained {
             return vec![self.retained_source().expect("checked retained mapping")];
         }
+        if self.is_remaining_transfer() {
+            return Self::concrete_routes(&self.before);
+        }
         Self::groups(&self.before).expect("checked intent")
     }
     pub fn targets(&self) -> Vec<RouteEntry> {
@@ -191,6 +195,9 @@ impl TransferIntent {
                 })
                 .collect();
         }
+        if self.is_remaining_transfer() {
+            return Self::concrete_routes(&self.after);
+        }
         Self::groups(&self.after).expect("checked intent")
     }
     pub fn encode(&self, max_bytes: usize) -> Result<Vec<u8>, ApplicationError> {
@@ -199,12 +206,14 @@ impl TransferIntent {
             + manifest_len(&self.after)
             + self.delegation.map_or(0, |_| 120)
             + self.insertion.as_ref().map_or(0, |c| insertion_len(c))
-            + usize::from(self.retained);
+            + usize::from(self.retained || self.is_remaining_transfer());
         if len > max_bytes || len > MAX_TRANSFER_INTENT_BYTES {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.retained {
+        bytes.extend(if self.is_remaining_transfer() {
+            b"VBTINT07"
+        } else if self.retained {
             b"VBTINT06"
         } else if self.insertion.is_some()
             && self
@@ -227,7 +236,7 @@ impl TransferIntent {
             bytes.extend((manifest_len(m) as u32).to_le_bytes());
             put_manifest(&mut bytes, m);
         }
-        if self.retained {
+        if self.retained || self.is_remaining_transfer() {
             bytes.push(u8::from(self.delegation.is_some()));
         }
         if let Some(binding) = self.delegation {
@@ -250,6 +259,7 @@ impl TransferIntent {
             && tag != b"VBTINT04"
             && tag != b"VBTINT05"
             && tag != b"VBTINT06"
+            && tag != b"VBTINT07"
         {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -257,13 +267,19 @@ impl TransferIntent {
         let before = read_manifest(r.take(len)?)?;
         let len = r.u32()? as usize;
         let after = read_manifest(r.take(len)?)?;
-        let retained_bound = tag == b"VBTINT06" && r.boolean()?;
+        let retained_bound = (tag == b"VBTINT06" || tag == b"VBTINT07") && r.boolean()?;
         let delegation =
             if retained_bound || tag == b"VBTINT02" || tag == b"VBTINT04" || tag == b"VBTINT05" {
                 Some(crate::delegation::DelegationBinding::read(&mut r)?)
             } else {
                 None
             };
+        if tag == b"VBTINT07" {
+            if before.input().parent.is_some() != delegation.is_some() || !r.done() {
+                return Err(ApplicationError::InvalidCommand);
+            }
+            return Self::remaining_candidate(before, after, delegation);
+        }
         if tag == b"VBTINT06" {
             let children = read_insertion(&mut r)?;
             if children.len() != 1 || !r.done() {

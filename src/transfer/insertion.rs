@@ -242,7 +242,7 @@ impl TransferIntent {
         } else {
             match &self.after.input().execution {
                 ExecutionMode::Single(g) if *g == group => Some(&self.after),
-                ExecutionMode::Partitioned(routes)
+                ExecutionMode::Partitioned(routes) | ExecutionMode::Delegated(routes)
                     if routes.iter().any(|r| r.target == RouteTarget::Group(group)) =>
                 {
                     Some(&self.after)

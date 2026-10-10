@@ -256,6 +256,28 @@ impl DelegationPlan {
             retained: true,
         })
     }
+    /// Move all remaining concrete ownership while preserving delegated children.
+    pub fn move_remaining(
+        parent: ResponsibilityManifest,
+        before: ResponsibilityManifest,
+        after: ResponsibilityManifest,
+        child_operation: OperationId,
+    ) -> Result<Self, ApplicationError> {
+        Self::validate_parent(&parent, &before)?;
+        TransferIntent::remaining_candidate(before.clone(), after.clone(), None)?;
+        Ok(Self {
+            parent,
+            before,
+            after,
+            child_operation,
+            insertion: None,
+            retained: false,
+        })
+    }
+    pub fn is_remaining_transfer(&self) -> bool {
+        self.insertion.is_none()
+            && matches!(self.before.input().execution, ExecutionMode::Delegated(_))
+    }
     pub fn is_retained_insertion(&self) -> bool {
         self.retained
     }
@@ -286,7 +308,9 @@ impl DelegationPlan {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(if self.retained {
+        out.extend(if self.is_remaining_transfer() {
+            b"VBDPLAN5"
+        } else if self.retained {
             b"VBDPLAN4"
         } else if self.insertion.is_some()
             && self.before.input().authority != self.parent.input().authority
@@ -313,7 +337,12 @@ impl DelegationPlan {
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
-        if tag != b"VBDPLAN1" && tag != b"VBDPLAN2" && tag != b"VBDPLAN3" && tag != b"VBDPLAN4" {
+        if tag != b"VBDPLAN1"
+            && tag != b"VBDPLAN2"
+            && tag != b"VBDPLAN3"
+            && tag != b"VBDPLAN4"
+            && tag != b"VBDPLAN5"
+        {
             return Err(ApplicationError::InvalidCommand);
         }
         let operation = r.operation()?;
@@ -349,7 +378,11 @@ impl DelegationPlan {
         if !r.done() {
             return Err(ApplicationError::InvalidCommand);
         }
-        Self::new(parent, before, after, operation)
+        if tag == b"VBDPLAN5" {
+            Self::move_remaining(parent, before, after, operation)
+        } else {
+            Self::new(parent, before, after, operation)
+        }
     }
     pub fn retained_bytes(&self) -> usize {
         size_of::<Self>()
@@ -430,7 +463,15 @@ impl DelegationReservationStatus {
             );
         }
         binding.plan_digest = binding.digest_for(&self.plan.before, &self.plan.after);
-        TransferIntent::delegated(self.plan.before.clone(), self.plan.after.clone(), binding)
+        if self.plan.is_remaining_transfer() {
+            TransferIntent::remaining_candidate(
+                self.plan.before.clone(),
+                self.plan.after.clone(),
+                Some(binding),
+            )
+        } else {
+            TransferIntent::delegated(self.plan.before.clone(), self.plan.after.clone(), binding)
+        }
     }
 }
 #[derive(Clone, Debug, Eq, PartialEq)]

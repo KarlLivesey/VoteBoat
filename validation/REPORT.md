@@ -4544,3 +4544,28 @@ New-profile full-transfer retirement/reclamation and native network composition
 remain155b. The existing retirement-lineage validator has not been widened for
 partial delegation. The full goal and outstanding macOS/general-fault work remain
 active; this is selected embedding-path evidence only.
+
+
+## Slice155b1 — remaining data transfer after imported partial delegation
+
+Three added cases cover actual two-child partial delegation followed by complete
+remaining-range relocation or split, unchanged earlier children, original retry
+and new successor writes, source/target/Directory checkpoint recovery, malformed
+maps, old profiles, truncated codecs/checkpoints and every final-freeze native
+journal frame byte plus sync/publication failures. Native tests use ModelIo, not
+live sockets or actual hardware power cuts. Root construction and parent-reserved
+same-authority execution are covered; foreign-authority execution is not claimed.
+
+All123 cases pass in the eleven relevant all-feature targets: delegation14,
+Directory31, imported parent4, retained insertion27, retirement7, activation9,
+merge3, publication7, repeated transfer5, source7 and target9. The same eleven
+core-only targets pass. No unrun tests or unfinished processes count as evidence.
+Initial fixture compilation mistakes and a negative case's incorrect metadata
+group were fixed; the latter had correctly accepted an ordinary fresh group.
+Retirement support for this partial lineage and native network composition remain
+pending. No P5/P6 completion or performance claim follows from these results.
+
+Final all-target/all-feature Clippy with warnings denied passes. Formatting,
+whitespace and the81-contract inventory check also pass. The inventory check
+validates metadata shape and paths; executed conformance is the test evidence
+above. All test and check sessions are terminal.

@@ -44,6 +44,7 @@ use std::{
 };
 
 pub const DIRECTORY_APPLICATION_SCHEMA: u64 = 1;
+pub const REMAINING_TRANSFER_DIRECTORY_SCHEMA: u64 = 14;
 pub const CREATION_DIRECTORY_APPLICATION_SCHEMA: u64 = 2;
 pub const NAMESPACE_DIRECTORY_APPLICATION_SCHEMA: u64 = 3;
 pub const NAMESPACE_TRANSFER_DIRECTORY_APPLICATION_SCHEMA: u64 = 4;
@@ -351,6 +352,7 @@ pub struct Directory {
     recursive_insertion: bool,
     cross_authority_insertion: bool,
     retained_insertion: bool,
+    remaining_transfer: bool,
     namespace_deletion: bool,
     child_slot_retirement: bool,
     local_reparenting: bool,
@@ -406,6 +408,7 @@ impl Directory {
             recursive_insertion: false,
             cross_authority_insertion: false,
             retained_insertion: false,
+            remaining_transfer: false,
             namespace_deletion: false,
             child_slot_retirement: false,
             local_reparenting: false,
@@ -528,6 +531,13 @@ impl Directory {
         next.cross_reparenting = true;
         Ok(next)
     }
+    /// Select schema14 before bootstrap for remaining concrete ownership moves.
+    #[allow(clippy::result_large_err)]
+    pub fn with_remaining_transfer(self) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_cross_authority_reparenting()?;
+        next.remaining_transfer = true;
+        Ok(next)
+    }
     fn control_command_limit(&self) -> usize {
         if self.namespace_deletion {
             MAX_DELETION_COMPLETION_BYTES.max(MAX_DIRECTORY_CONTROL_BYTES)
@@ -592,7 +602,9 @@ impl Directory {
             return Err(ApplicationError::InvalidCommand);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.cross_reparenting {
+        bytes.extend(if self.remaining_transfer {
+            b"VBDINI14"
+        } else if self.cross_reparenting {
             b"VBDINI13"
         } else if self.reparent_guards {
             b"VBDINI12"
@@ -649,6 +661,7 @@ impl Directory {
             || bytes.starts_with(b"VBDINI11")
             || bytes.starts_with(b"VBDINI12")
             || bytes.starts_with(b"VBDINI13")
+            || bytes.starts_with(b"VBDINI14")
         {
             if bytes != self.bootstrap_command(bytes.len())? {
                 return Err(ApplicationError::InvalidCommand);
@@ -696,6 +709,7 @@ impl Directory {
                 || (self.recursive_insertion && bytes.starts_with(b"VBTINT04"))
                 || (self.cross_authority_insertion && bytes.starts_with(b"VBTINT05"))
                 || (self.retained_insertion && bytes.starts_with(b"VBTINT06"))
+                || (self.remaining_transfer && bytes.starts_with(b"VBTINT07"))
             {
                 TransferIntent::decode(bytes).map(Request::Transfer)
             } else if bytes.starts_with(b"VBTPUB01")
@@ -706,6 +720,7 @@ impl Directory {
                 || (self.recursive_insertion && bytes.starts_with(b"VBDPLAN2"))
                 || (self.cross_authority_insertion && bytes.starts_with(b"VBDPLAN3"))
                 || (self.retained_insertion && bytes.starts_with(b"VBDPLAN4"))
+                || (self.remaining_transfer && bytes.starts_with(b"VBDPLAN5"))
             {
                 DelegationPlan::decode(bytes).map(Request::Delegation)
             } else if bytes.starts_with(b"VBDCOMP1") {
@@ -726,6 +741,12 @@ impl Directory {
             Request::DelegationCancellation(c) => Some(c.decline.decline.intent()),
             _ => None,
         };
+        if !self.remaining_transfer
+            && (intent.is_some_and(TransferIntent::is_remaining_transfer)
+                || matches!(&request, Request::Delegation(p) if p.is_remaining_transfer()))
+        {
+            return Err(ApplicationError::InvalidCommand);
+        }
         if !self.retained_insertion && intent.is_some_and(TransferIntent::is_retained_insertion) {
             return Err(ApplicationError::InvalidCommand);
         }
@@ -1650,7 +1671,9 @@ impl BoundedReadableStateMachine for Directory {
 }
 impl CheckpointStateMachine for Directory {
     fn schema_version(&self) -> u64 {
-        if self.cross_reparenting {
+        if self.remaining_transfer {
+            REMAINING_TRANSFER_DIRECTORY_SCHEMA
+        } else if self.cross_reparenting {
             CROSS_REPARENT_DIRECTORY_SCHEMA
         } else if self.reparent_guards {
             REPARENT_GUARD_DIRECTORY_SCHEMA
@@ -1690,7 +1713,9 @@ impl CheckpointStateMachine for Directory {
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.cross_reparenting {
+        bytes.extend(if self.remaining_transfer {
+            b"VBDIR014"
+        } else if self.cross_reparenting {
             b"VBDIR013"
         } else if self.reparent_guards {
             b"VBDIR012"
@@ -1752,7 +1777,9 @@ impl CheckpointStateMachine for Directory {
         let restore = || -> Result<Self, ApplicationError> {
             let mut reader = Reader::new(bytes);
             if reader.take(8)?
-                != if self.cross_reparenting {
+                != if self.remaining_transfer {
+                    b"VBDIR014"
+                } else if self.cross_reparenting {
                     b"VBDIR013"
                 } else if self.reparent_guards {
                     b"VBDIR012"
@@ -1807,6 +1834,7 @@ impl CheckpointStateMachine for Directory {
             next.recursive_insertion = self.recursive_insertion;
             next.cross_authority_insertion = self.cross_authority_insertion;
             next.retained_insertion = self.retained_insertion;
+            next.remaining_transfer = self.remaining_transfer;
             next.namespace_deletion = self.namespace_deletion;
             next.child_slot_retirement = self.child_slot_retirement;
             next.local_reparenting = self.local_reparenting;

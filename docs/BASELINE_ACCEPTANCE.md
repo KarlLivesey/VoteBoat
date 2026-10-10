@@ -220,3 +220,13 @@ publication and parent completion, with child import/activation. Parent/slot
 history, bounded reserve, partial-state refusal, checkpoint and native journal
 cuts pass. New-profile network composition and partial-lineage full-transfer
 retirement remain155b; this is not full completion of155 or P6.
+
+
+Slice155b1 adds explicit remaining-concrete ownership transfers after partial
+imported-owner delegation. Directory14 accepts VBTINT07/VBDPLAN5; destination
+schema7 binds the new intent. Actual one-/two-destination handoff, original parent
+completion, successor retry/new-write service, unchanged children and checkpoint
+recovery pass. Native journal final-fence byte/sync/publication interruptions and
+old-profile/malformed-map refusal are checked. Partial-owner retirement lineage,
+native TCP/QUIC composition, metadata authority movement and wider requirements
+remain open; the complete P5/P6 exits are not inferred from this slice.

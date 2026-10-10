@@ -94,7 +94,18 @@ fn initial(
     TransferIntent,
     Vec<voteboat::log::LogEntry>,
 ) {
-    let (mut d, _, i) = setup(false);
+    initial_with_directory(limit, initial_profile)
+}
+fn initial_with_directory(
+    limit: usize,
+    profile: fn(ResponsibilityManifest, bool) -> Directory,
+) -> (
+    Directory,
+    Target,
+    TransferIntent,
+    Vec<voteboat::log::LogEntry>,
+) {
+    let (mut d, _, i) = setup_with_directory(false, false, profile);
     let mut s = retained_source(&i);
     let boot = s.bootstrap_command(200000).unwrap();
     commit(&mut s, 100, boot);
@@ -723,3 +734,6 @@ fn partial_freeze_and_grant_frames_recover_exact_images_and_retained_service() {
         assert!(old && complete);
     }
 }
+
+#[path = "imported_partial/remaining.rs"]
+mod remaining;

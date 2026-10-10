@@ -120,3 +120,29 @@ in that mixed-history owner test are supplied by the host fixture. New-profile
 TCP/QUIC service composition, later full-transfer retirement/reclamation and
 broader provider/failure/platform evidence remain155b and subsequent work.
 Partial-profile retirement lineage is not yet supported by RetirementGuard.
+
+
+## Moving the remaining range — slice155b1
+
+A delegated manifest with one contiguous concrete source range can move that
+entire remaining range while keeping every existing child/vacant selector exact.
+Use `TransferIntent::move_remaining` for a root or `DelegationPlan::move_remaining`
+for an owner with a parent. The latter requires the committed parent reservation
+and its `child_intent`, followed by original parent completion after publication.
+Select `Directory::with_remaining_transfer` before bootstrap (schema14); existing
+Directory profiles do not accept these operations, including nested observations.
+
+The explicit VBTINT07/VBDPLAN5 formats support a fresh single destination or
+multiple fresh destination groups covering the same remaining range. Source IDs,
+metadata identities, modified child selectors, gaps and reused destination IDs
+are rejected. Existing source fence, target import, publication and activation
+contracts still apply. Destinations automatically select target schema7 with
+VBTSOWN6/VBTRGT08; they receive the current complete responsibility grant but
+import only their exact concrete range. No owner activates from a routing change
+alone. The original source stays fully fenced after this move.
+
+Tests compose imported data -> two partial delegations -> remaining relocation
+or split -> successor activation/new writes/retries and checkpoint recovery.
+Native journal cuts cover the final source fence. Retirement of the original
+partial owner and TCP/QUIC composition remain155b2/155b3; these tests do not imply
+that old images can already be reclaimed.
