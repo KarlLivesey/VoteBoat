@@ -380,3 +380,18 @@ The summary includes `journal_timings=true`, and the fixed serial acceptance
 checker rejects that diagnostic in place of the uninstrumented reference.
 Parallel worker time sums overlap; these timings attribute file work, not every
 client critical-path dependency or separate-host capacity.
+
+Slice158 adds one successful60-second QUIC pause run with the original gate:
+group1's forced boundary11 is installed and retained across reopen, two new
+follower installs occur, and the source leader/term/binding is unchanged. All
+value/read/retry/join and independent raw-result checks pass. Earlier failed
+runs remain in slices105/106; this success does not reconstruct their packet
+histories or make host polling stalls guarantee snapshot necessity. Applied
+p99=2918.173043ms remains outside the fixed-p99 target. Raw artifacts and exact
+scope are in [slice158](../validation/performance/slice158/README.md).
+
+Separate TCP/TLS and QUIC tests close every transport after both surviving
+replicas compact beyond all eight stale follower prefixes. Reopening the actual
+native files requires a snapshot for each group; restored applications, exact
+retries and another full restart are checked. These are controlled recovery
+histories, not throughput measurements or substitutes for the polling-stall run.

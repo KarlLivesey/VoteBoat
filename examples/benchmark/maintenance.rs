@@ -124,6 +124,51 @@ struct Forced {
     binding: StoreBinding,
     term: u64,
 }
+#[derive(Clone, Copy)]
+struct FollowerProgress {
+    base: u64,
+    last: u64,
+    committed: u64,
+    applied: u64,
+    value: Option<i64>,
+}
+impl std::fmt::Debug for FollowerProgress {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("FollowerProgress")
+            .field("base", &self.base)
+            .field("last", &self.last)
+            .field("committed", &self.committed)
+            .field("applied", &self.applied)
+            .field("value", &self.value)
+            .finish()
+    }
+}
+impl FollowerProgress {
+    fn capture<L: LogStore + Send + 'static>(replica: &Replica<L>, group: GroupIdentity) -> Self {
+        let local = replica.local();
+        let state = local.owner.core(group).unwrap().state();
+        let application = &local.applications[&group];
+        Self {
+            base: state.base_index(),
+            last: state.last_index(),
+            committed: state.commit_index,
+            applied: application.applied_index(),
+            value: application.read_applied(application.applied_index()).ok(),
+        }
+    }
+}
+fn follower_progress<L: LogStore + Send + 'static>(
+    replicas: &[Replica<L>],
+) -> BTreeMap<GroupIdentity, FollowerProgress> {
+    replicas.get(2).map_or_else(BTreeMap::new, |replica| {
+        replica
+            .local()
+            .applications
+            .keys()
+            .map(|&group| (group, FollowerProgress::capture(replica, group)))
+            .collect()
+    })
+}
 enum Active {
     Checkpoint(Checkpoint),
     Reclaims(BTreeMap<usize, (ReclaimTicket, usize)>),
@@ -141,6 +186,8 @@ pub(super) struct Maintenance {
     actual_resume: Option<u128>,
     installs_at_resume: usize,
     forced: Option<Forced>,
+    follower_at_pause: BTreeMap<GroupIdentity, FollowerProgress>,
+    follower_at_resume: BTreeMap<GroupIdentity, FollowerProgress>,
 }
 impl Maintenance {
     pub(super) fn new(config: Option<Config>, horizon: u128, groups: usize) -> Self {
@@ -158,6 +205,8 @@ impl Maintenance {
             actual_resume: None,
             installs_at_resume: 0,
             forced: None,
+            follower_at_pause: BTreeMap::new(),
+            follower_at_resume: BTreeMap::new(),
         }
     }
     fn push(&mut self, row: Row) -> Result<usize, Failure> {
@@ -199,6 +248,7 @@ impl Maintenance {
                 );
             }
             self.actual_pause = Some(now);
+            self.follower_at_pause = follower_progress(replicas);
             let mut row = Row::new(0, "pause", group_id(1), 2, start, now);
             row.completed = now;
             row.status = "completed";
@@ -207,6 +257,7 @@ impl Maintenance {
         let actual_end = self.actual_pause.map(|pause| pause + (end - start));
         if self.actual_resume.is_none() && actual_end.is_some_and(|end| now >= end) {
             self.actual_resume = Some(now);
+            self.follower_at_resume = follower_progress(replicas);
             self.installs_at_resume = totals.snapshot_installs[2];
             let mut row = Row::new(0, "resume", group_id(1), 2, end, now);
             row.completed = now;
@@ -446,11 +497,13 @@ impl Maintenance {
                 || follower_base < proof.index
             {
                 return Err(format!(
-                    "paused follower lacks verified same-leader snapshot catch-up: resume={:?} installs_at_resume={} installs_now={} forced_group={:?} forced_index={} follower_base={} source_binding_expected={:?} source_binding_now={:?} source_term_expected={} source_term_now={} source_role={:?}",
+                    "paused follower lacks verified same-leader snapshot catch-up: resume={:?} installs_at_resume={} installs_now={} forced_group={:?} forced_index={} follower_base={} source_binding_expected={:?} source_binding_now={:?} source_term_expected={} source_term_now={} source_role={:?} follower_before_pause={:?} follower_before_resume={:?} follower_now={:?}",
                     self.actual_resume, self.installs_at_resume, totals.snapshot_installs[2],
                     proof.group, proof.index, follower_base, proof.binding,
                     source.storage_binding(), proof.term, source.state().hard_state.term,
-                    source.role(),
+                    source.role(), self.follower_at_pause.get(&proof.group),
+                    self.follower_at_resume.get(&proof.group),
+                    FollowerProgress::capture(&replicas[2], proof.group),
                 ).into());
             }
         }

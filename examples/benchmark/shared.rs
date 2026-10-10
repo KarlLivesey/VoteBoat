@@ -526,3 +526,7 @@ fn peer_io(
 }
 
 type BenchmarkRoster = PeerRoster<NativePeerTransport<Box<dyn SecureSession>, NativeWireCodec>>;
+
+#[cfg(test)]
+#[path = "shared_recovery.rs"]
+mod recovery;

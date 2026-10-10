@@ -1,0 +1,19 @@
+fixture: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 1 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=100.000 reclaim_ms=1500.000 reclaimed_bytes=150 pending_at_horizon=0; concurrent/queued durations are not a critical path
+fixture: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 1 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=100.000 reclaim_ms=1500.000 reclaimed_bytes=150 pending_at_horizon=0; concurrent/queued durations are not a critical path
+fixture: 1 durable checkpoint boundaries, 3 exact-scope reclamation rows, 1 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=100.000 reclaim_ms=1500.000 reclaimed_bytes=150 pending_at_horizon=0; concurrent/queued durations are not a critical path
+✔ durable boundary, three reclaimed files and explicit missed opportunity reconcile (2.2603ms)
+✔ reject fabricated completed checkpoint below requested boundary or missing reclamation (3.360149ms)
+✔ reject unfinished work and regressed recovered snapshot base (1.012935ms)
+✔ catch-up needs a post-pause boundary, new snapshot install and recovered follower base (1.38253ms)
+✔ a snapshot on another group cannot certify the forced group caught up (0.569951ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 11.619281

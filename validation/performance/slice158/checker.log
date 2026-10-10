@@ -1,0 +1,5 @@
+validation/performance/slice158/quic-pause: 480 scheduled offers, 416 admissions, 416 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=8.000 admitted_during=6.933 applied_during=6.817 applied_drain=22.650 applied_total=6.898 ops/s; window_refused=64 backlog_at_horizon=7
+validation/performance/slice158/quic-pause: 26 durable checkpoint boundaries, 78 exact-scope reclamation rows, 3 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=13331.519 reclaim_ms=23354.083 reclaimed_bytes=341638 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=2483 units=2484 commands=1245 mean_units=1.000 append_ms=184.834 barriers=1906 mean_appends_per_barrier=1.303 mean_units_per_barrier=1.302 barrier_ms=139070.849 sync_ms=46582.950 publish_ms=92415.920 histogram=1:2482|2:1|3:0|4:0|5:0|6:0|8:0

@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.58s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+
+thread 'shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart' (4034316) panicked at examples/benchmark/shared_recovery.rs:218:5:
+assertion failed: totals.snapshot_installs[2] >= GROUPS
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart ... FAILED
+
+thread 'shared::recovery::quic_each_stale_group_requires_snapshot_after_transport_restart' (4034315) panicked at examples/benchmark/shared_recovery.rs:218:5:
+assertion failed: totals.snapshot_installs[2] >= GROUPS
+test shared::recovery::quic_each_stale_group_requires_snapshot_after_transport_restart ... FAILED
+
+failures:
+
+failures:
+    shared::recovery::quic_each_stale_group_requires_snapshot_after_transport_restart
+    shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 16 filtered out; finished in 5.71s
+
+error: test failed, to rerun pass `--example native_benchmark`

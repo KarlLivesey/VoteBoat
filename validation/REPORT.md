@@ -4913,3 +4913,28 @@ Strict library Clippy still fails with35 production findings; core all-target
 Clippy fails with25 production and9 inline-test findings. Other integration
 fixture findings remain from the audit. These results are not a clean lint or
 full-roadmap completion claim.
+
+## Current strict baseline and native recovery — slice158, 10 October 2026
+
+The earlier maintainability entry above describes its historical failing audit,
+not the current status. Both current complete all-target strict Clippy profiles
+(all features and no default features) pass with warnings denied and zero
+function-size/cognitive-complexity diagnostics. Existing limits remain enforced.
+
+New actual native TCP/TLS and QUIC shared-assembly cases force all eight stale
+follower groups to install snapshots after all transports are closed and their
+peers compact beyond the old prefixes. Per-group durable bases, restored
+application values/indices, old receipts, quorum reads and a second full restart
+pass. Full native_benchmark suite18/18 passes in6.20s; independent maintenance
+checker5/5 passes. The first fixture's premature loaded-count assertion failed;
+it now waits for the separate application restoration boundary as well as the
+WAL base. Both initial and final logs are retained.
+
+One original60-second QUIC paused-follower workload passes the unchanged selected
+group1 snapshot gate and full recovery/retry/join verification. The archived raw
+checker passes:416 applied of480 offered,64 window refusals, zero unknown/pending,
+26 checkpoints and78 reclamations. Earlier failed runs remain retained, and this
+selected success does not explain their packets. The p99 remains outside the
+fixed-p99 target. See performance/slice158/README.md for exact commands, source
+hashes, raw outcomes and limits. This is Linux evidence only; full P0–P7 remains
+active and P8/Windows remain deferred.

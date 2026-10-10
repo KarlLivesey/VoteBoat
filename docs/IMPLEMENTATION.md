@@ -93,9 +93,9 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: retained QUIC follower catch-up failure | Restore the measured paused-follower recovery path; advances broader validation and tuning. | Existing failing P7 workload and transport/checkpoint evidence. | Use the existing per-group failure diagnostics and a declared delivery schedule to distinguish buffered log repair from required snapshot installation; preserve the original benchmark gate and durability semantics. |
-| Next: full baseline acceptance review | Reconcile P0–P7 requirements with the new lifecycle and administration evidence; advances all macro milestones. | Chapter12/17, the component contracts and current executed evidence. | Identify the next missing required behavior and its direct check; keep optional research separate and do not infer completion from test counts. |
-| Following: native discovery after metadata movement | Connect automatic manifest lookup to moved metadata authorities; advances recursive routing and embedding. | Existing ManifestReadSource, bounded native lookup and metadata serving read/provenance contracts; confirm scope in the baseline review. | Read/refresh through the same public discovery contract before and after a metadata move, reject fenced or inactive authorities, and verify bounded cancellation/restart behavior. |
+| Current: full baseline acceptance review | Reconcile P0–P7 requirements with the new lifecycle, administration and recovery evidence; advances all macro milestones. | Chapter12/17, the component contracts and current executed evidence. | Identify missing required behavior and its direct check; keep optional research separate and do not infer completion from test counts. |
+| Next: native discovery after metadata movement | Connect automatic manifest lookup to moved metadata authorities; advances recursive routing and embedding. | Existing ManifestReadSource, bounded native lookup and metadata serving read/provenance contracts; confirm scope in the baseline review. | Read/refresh through the same public discovery contract before and after a metadata move, reject fenced or inactive authorities, and verify bounded cancellation/restart behavior. |
+| Following: public new-voter promotion interruption | Broaden actual service membership recovery; advances online membership. | Existing authenticated configuration commands, native learner readiness and retained joint/final operation identities; confirm the uncovered schedule during review. | Interrupt a remotely configured new voter around readiness/promotion, recover original files, and verify exact retry/finalization and data receipts over TCP/QUIC without stale readiness authority. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
@@ -14753,3 +14753,81 @@ P7 QUIC experiment with its original group-specific gate; a host-poll pause does
 not itself guarantee snapshot necessity. The baseline review then reconciles
 remaining required behavior, including the original-Directory-only native
 automatic lookup adapter identified in current source. Full P0–P7 stays active.
+
+### 158 QUIC catch-up investigation — schema plan
+
+Previous goal turn was progress:157 was tested and pushed as a803a8b. The retained
+60-second host-poll pause experiment failed its selected-group snapshot gate;
+aggregate installs from another group cannot pass it. A paused reactor still
+owns socket/transport buffers, so that experiment does not guarantee snapshot
+necessity. Preserve its original gate and all failed evidence.
+
+Diagnostic data: bounded maps (at most the configured32 groups) capture follower
+base, accepted last index, committed prefix, applied index and current counter
+value before pause and before resume. The existing failed-gate diagnostic adds
+those observations and the same fields at validation. These are local diagnostic
+facts, not new durability authority or a success path. No wire, disk, core or
+benchmark scheduling semantics change. Run the original60-second QUIC case once
+with the added facts; retain its outcome rather than seeking a preferred rerun.
+
+Controlled acceptance: reuse the benchmark's actual shared native assembly for
+eight groups. Commit/replay a baseline, abort/join follower3, then commit more
+work and durably checkpoint both surviving replicas beyond every follower prefix.
+Close/reopen the remaining owners too, eliminating retained transport buffers.
+Reopen the follower's original files, elect and require each group's durable
+snapshot base to cross its own recorded boundary, exact values/quorum reads,
+original duplicate receipts, and another full restart with nonregressing bases.
+TCP/QUIC exercise the same public Node, worker, transport and snapshot seams.
+This is an explicit restart schedule, not a substitute for the earlier polling
+stall or a throughput measurement. No production API or tuning is introduced.
+
+Next is the full baseline acceptance review; following is native automatic
+manifest lookup after metadata movement, subject to that review. The goal and
+original P7 performance gates remain active, including sustainable fixed-p99
+capacity and macOS/separate-host evidence.
+
+158 focused validation correction: the first controlled native runs crossed all
+WAL snapshot bases before the final application-restore observations were
+consumed. Checking aggregate loaded counts immediately at that boundary was too
+early. Keep the per-group base check and additionally wait for each restored
+application index/value before asserting the install count. This follows the
+existing separate durable-install/application-restore contract; no production
+behavior or acceptance count is relaxed.
+
+### 158 implemented — native snapshot necessity and retained QUIC outcome
+
+The benchmark diagnostics now retain each follower group's base, accepted last,
+committed prefix, applied index and current value at pause/resume. A failed
+selected-group gate reports those fields alongside its original proof facts.
+No gate, scheduling, wire, persistence or production library behavior changed.
+
+Two actual native shared-assembly tests pass over TCP/TLS and QUIC. After eight
+baseline groups commit, follower3 is aborted and its stores joined. Both survivors
+commit more data, checkpoint beyond every recorded follower prefix, and close.
+All transports are recreated with original files. Each follower group must reach
+its own durable snapshot boundary and restore its application before successful
+acceptance; all eight report old last2, required base3 and recovered base3. Exact
+old retries, values/quorum reads and a second complete restart pass. This forces
+snapshot necessity independently of the retained host-poll pause experiment.
+
+The one planned long QUIC experiment also passes, with its original gate intact:
+selected group1 reaches base11 and retains it across reopen; source leader/term/
+store binding is unchanged and two new follower installs are observed. 480 offers
+produce416 applied results and64 window refusals, zero unknown/pending outcomes,
+26 checkpoints and78 reclamations. Raw output and independent arithmetic checks
+are archived in validation/performance/slice158. Prior slice105/106 failures stay
+retained and unexplained at packet-history level. This is a selected success,
+not deterministic proof that a polling pause always requires a snapshot. Its
+2918.173043ms p99 does not satisfy the original fixed-p99 performance target.
+
+Linux validation: full native_benchmark suite18/18 in6.20s, independent maintenance
+checker5/5 and archived result checker pass. Both complete strict Clippy profiles
+pass with zero diagnostics; no lint limits or allowances changed. The initial
+fixture timing failure and focused correction are retained with the final log.
+
+Macro review: advances P1/P2 snapshot recovery evidence and closes this P7
+investigation slice without erasing the original failed experiments. Sustainable
+capacity, fixed-p99, macOS/separate-host and broader fault work remain. Current is
+the full baseline review; next automatic discovery after metadata movement;
+following the uncovered public new-voter interruption schedule. Full P0–P7 stays
+active, with P8 research deferred.
