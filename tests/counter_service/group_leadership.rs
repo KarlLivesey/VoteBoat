@@ -2,6 +2,9 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+#[path = "group_leadership/historical.rs"]
+mod historical;
+
 const OP: &str = "40001";
 const NEXT: &str = "40002";
 pub(super) fn command(c: &mut Cluster, scope: (&str, &str), words: &[&str]) -> String {
@@ -192,32 +195,21 @@ fn history(quic: bool) {
     }
     let mut completed = Vec::new();
     for (group, incarnation, config, op) in [("7", "3", "9", NEXT), ("8", "2", "11", OP)] {
-        let (leader, text) = status(&mut c, (group, incarnation), op, "phase=Completed");
-        assert_eq!(leader, target);
+        let (_, text) = status(&mut c, (group, incarnation), op, "phase=Completed");
+        // Completion records the past handoff. A later election is allowed.
+        assert!(text.contains("historical=true"));
         assert!(text.contains(&format!("target={target} ")));
-        assert!(c
-            .ok(
-                leader,
-                &["group", group, incarnation, "resume-leadership", op]
-            )
-            .contains("phase=Completed"));
+        assert!(
+            command(&mut c, (group, incarnation), &["resume-leadership", op])
+                .contains("phase=Completed")
+        );
         let target = target.to_string();
-        assert!(c
-            .ok(
-                leader,
-                &[
-                    "group",
-                    group,
-                    incarnation,
-                    "move-leader",
-                    op,
-                    config,
-                    &target,
-                    &target,
-                    "1"
-                ]
-            )
-            .contains("phase=Completed"));
+        assert!(command(
+            &mut c,
+            (group, incarnation),
+            &["move-leader", op, config, &target, &target, "1"]
+        )
+        .contains("phase=Completed"));
         completed.push(text);
     }
     status(&mut c, ("7", "3"), OP, "phase=Cancelled");

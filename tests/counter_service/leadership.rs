@@ -126,7 +126,7 @@ fn history(quic: bool) {
     }
     let (leader, completed) = status(&mut c, op, "phase=Completed");
     check_identity(&completed, op, source, target);
-    assert_eq!(leader, target);
+    assert!(completed.contains("historical=true"));
     let retry = begin(&c, leader, target, op);
     assert_eq!(retry.trim(), completed.split(" evidence=").next().unwrap());
     assert!(c

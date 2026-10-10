@@ -1,6 +1,14 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
+Historical-handoff evidence: [slice199h](baseline/slice199h/README.md), with two
+new executable target-loss histories. The original record, independent group
+scope and data survive retries and restart; QUIC includes actual checkpoint
+recovery. This corrects a test assumption, without production protocol changes.
+The full local counter target passes131 tests, the default-feature leadership
+selection passes9 and formatting/four strict Clippy profiles pass.
+Newer retained platform logs also identify directory initialization failures;
+platform acceptance remains open.
 Read-failover evidence: [slice199g](baseline/slice199g/README.md). A real CLI
 regression fails before the fix; five new socket/service checks pass afterward.
 Automatic reads can leave a silent replica or stalled handshake within the same

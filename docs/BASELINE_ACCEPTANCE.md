@@ -1,5 +1,14 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice199h corrects the handoff tests' current-leader assumption: Completed is
+historical. New TCP/QUIC group histories kill the recorded target, observe the
+same receipt through another leader, retry original operations and recover
+unchanged data and records. QUIC verifies the actual recovered checkpoint
+prefix. No production semantics change. Recorded directory initialization
+failures and other platform acceptance remain open.
+The complete local all-feature counter target passes131 tests;9 default-feature
+leadership tests and all four strict lint profiles pass.
+
 Slice199g adds automatic read failover within the existing ten-second deadline:
 two-second attempts, fresh quorum reads, exact group scope and retries limited
 to known transient observation failures. Partial replies remain terminal;

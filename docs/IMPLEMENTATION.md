@@ -91,11 +91,16 @@ the count of remaining milestones.
 Completed202a covers the selected old-checkpoint/member recovery cases below.
 Completed199f corrects the recorded cancellation acceptance assumption and adds
 admitted-cancel/source-loss recovery over TCP and QUIC. Completed199g adds bounded
-automatic read failover. Current199h addresses
-the remaining recorded service command/QUIC failures: it depends on
-the retained exact platform logs and must reproduce the relevant local failure
-or distinguish an unresolved platform-only failure before changing behavior.
-This advances the usable Linux/macOS service milestone. Next202b selects
+automatic read failover. Completed199h corrects the historical-handoff acceptance
+assumption with target-loss and actual checkpoint recovery tests. These advance
+the usable Linux/macOS service milestone without closing platform acceptance.
+Newly completed
+run38036099346 also identifies five Linux directory-setup failures on explicit
+unknown initialization outcomes. Current199i will correct that demonstrated setup
+assumption using original-ID recovery before proceeding to202b. It depends on
+the directory initialization/publication contract and the retained exact logs;
+acceptance requires recovered original initialization/publication, no blanket
+retry of errors, and actual directory/recursive-routing tests. Next202b selects
 the next combined lifecycle/revocation schedule from the acceptance ledger;
 it depends on existing original-ID lifecycle and credential contracts and must
 preserve authoritative ownership plus retry state across the selected restart.
@@ -103,6 +108,66 @@ Following201d extends the unreviewed provider obligations; it depends on the
 existing inventory and shared conformance harness, and must connect each selected
 obligation to actual host/native assertions. This advances replaceable Rust
 embedding without treating a metadata count as provider certification.
+
+### Slice199h schema plan — historical handoff after later leader loss
+
+The public LeadershipPhase::Completed contract records historical success,
+not current leadership authority. Older macOS run38035784987 at54a73ad fails
+the contrary test assertion. Correct that assumption without removing the
+original intent, terminal index/term, quorum-read or data checks.
+Apply the same historical-record interpretation to the existing single-group
+handoff history; its target identity is already checked independently.
+
+Data/API shape: reuse the existing authenticated group commands, original
+operation ID, completed receipt and exact record fields. No production API,
+wire, consensus or persistence change. Use the existing bounded command helper
+when re-observing an intent rather than assuming the just-observed leader cannot
+change between commands.
+
+Transitions: Pending -> Completed on the target -> target process lost -> new
+leader serves the same Completed record -> original begin/resume/cancel retries
+leave that record unchanged -> checkpoint/restart preserves it. Scope the
+operation to group7; group8's identical operation ID must remain absent. Original
+data retries stay deduplicated and new writes still commit with the target down.
+For QUIC, checkpoint through the post-write committed prefix before restart.
+Dropping a process or client observation cannot erase or re-run the old handoff.
+The group command surface has no maintenance-status query. Verify the requested
+checkpoint by recovering the stopped node's actual WAL/snapshot and checking its
+base prefix, using the existing native recovery contracts.
+
+Acceptance: explicit TCP/WAL and QUIC/checkpoint histories must observe a live
+leader different from the unavailable target, byte-identical historical records
+across retries/reopen, unaffected sibling scope and preserved application data.
+Run these and the existing grouped leadership histories, then relevant complete
+service tests and all four lint profiles. Other platform failures remain open.
+
+### Slice199h implemented — completed handoffs survive later leadership
+
+The single/grouped handoff histories now check the historical Completed record
+and original target identity without treating them as a current leader guarantee.
+Grouped original-command retries select a current leader through the existing
+bounded helper. No production code, quorum rule, wire format or timeout changes.
+
+Two new TCP/QUIC executable histories complete a real group7 handoff, kill the
+recorded target, and require a different live leader to serve the exact original
+record. Original begin/resume/cancel replies preserve every record field;
+group8's same operation ID remains absent. Duplicate data stays5, a new write
+reaches6, sibling data stays8, and all-process restart preserves both data and
+the historical receipt. QUIC additionally verifies the requested snapshot prefix
+by reopening the stopped node's actual WAL and snapshot through native recovery.
+
+The first run passed TCP and exposed an unsupported group maintenance-status
+query in the QUIC test; it is retained and corrected by the actual-file check.
+All five grouped leadership tests then pass. The complete all-feature counter
+target passes131 tests and the default-feature leadership selection passes9.
+Formatting and all four strict Clippy profiles pass; evidence is recorded in
+validation/baseline/slice199h.
+
+Newer completed run38036099346 at a41a6ec passes122 Linux counter tests but fails
+five of13 directory tests on UNKNOWN initialization replies. Its macOS counter
+target passes114 and fails8; those logs predate199f/g/h and remain separate from
+current local results. Next199i addresses the concrete directory setup failure;
+202b and201d remain the next recovery/provider work. Full P0–P7 remains active.
 
 ### Slice199g schema plan — bounded automatic read failover
 

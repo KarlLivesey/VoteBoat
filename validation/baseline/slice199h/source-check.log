@@ -1,0 +1,7 @@
+tests/counter_service/group_leadership.rs: OK
+tests/counter_service/group_leadership/historical.rs: OK
+tests/counter_service/leadership.rs: OK
+docs/IMPLEMENTATION.md: OK
+docs/BASELINE_ACCEPTANCE.md: OK
+validation/REPORT.md: OK
+validation/baseline/slice199h/README.md: OK

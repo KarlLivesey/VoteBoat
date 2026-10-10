@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic ... FAILED
+test group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_tcp ... ok
+
+failures:
+
+---- group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic stdout ----
+
+thread 'group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic' (2156226) panicked at tests/counter_service.rs:354:9:
+node 1 ["group", "7", "3", "maintenance"]:  Error: "unsupported group command"
+
+service log: ready node=1 peer=127.0.0.1:10001 transport=Quic command=127.0.0.1:10101
+leadership status admitted operation=40001
+leadership status admitted operation=40001
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    group_leadership::historical::completed_group_handoff_remains_historical_after_target_loss_quic
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 129 filtered out; finished in 2.43s
+
+error: test failed, to rerun pass `--test counter_service`

@@ -1,0 +1,576 @@
+Operators on ubuntu-latest	Set up job	﻿2026-10-10T07:56:41.7695075Z Current runner version: '2.337.0'
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7724656Z ##[group]Runner Image Provisioner
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7725682Z Hosted Compute Agent
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7726356Z Version: 20261002.596
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7727201Z Commit: c3d12f3313a95f25162a1503be624f3b0617f8c0
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7728126Z Build Date: 2026-10-02T22:28:27Z
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7729202Z Worker ID: {07d39b6d-08a6-4246-85c0-97b340889478}
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7730058Z Region: eastus
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7730754Z Cloud: Azure
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7731401Z ##[endgroup]
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7733041Z ##[group]Operating System
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7733890Z Ubuntu
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7734549Z 24.04.5
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7735266Z LTS
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7735954Z ##[endgroup]
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7736669Z ##[group]Runner Image
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7737841Z Image: ubuntu-24.04
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7738663Z Version: 20261004.327.1
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7740030Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261004.327/images/ubuntu/Ubuntu2404-Readme.md
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7742253Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261004.327
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7743578Z ##[endgroup]
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7744865Z ##[group]GITHUB_TOKEN Permissions
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7747187Z Contents: read
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7747912Z Metadata: read
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7748815Z ##[endgroup]
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7751171Z Secret source: Actions
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7752449Z Cache mode: write
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.7753561Z Prepare workflow directory
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.8177715Z Prepare all required actions
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.8231670Z Getting action download info
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:41.9940005Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:42.0692634Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+Operators on ubuntu-latest	Set up job	2026-10-10T07:56:42.3296668Z Complete job name: Operators on ubuntu-latest
+Operators on ubuntu-latest	Run actions/checkout@v4	﻿2026-10-10T07:56:42.3922440Z ##[group]Run actions/checkout@v4
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3923218Z with:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3923614Z   repository: KarlLivesey/VoteBoat
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3927220Z   token: ***
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3927599Z   ssh-strict: true
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3927980Z   ssh-user: git
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3928525Z   persist-credentials: true
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3928941Z   clean: true
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3929323Z   sparse-checkout-cone-mode: true
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3929761Z   fetch-depth: 1
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3930133Z   fetch-tags: false
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3930513Z   show-progress: true
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3930934Z   lfs: false
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3931294Z   submodules: false
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3931690Z   set-safe-directory: true
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3932122Z   allow-unsafe-pr-checkout: false
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3932718Z env:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3933073Z   CARGO_TERM_COLOR: never
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3933473Z   RUST_BACKTRACE: 1
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.3933844Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4736680Z Syncing repository: KarlLivesey/VoteBoat
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4738675Z ##[group]Getting Git version info
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4739331Z Working directory is '/home/runner/work/VoteBoat/VoteBoat'
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4744948Z [command]/usr/bin/git version
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4824528Z git version 2.55.0
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4843702Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4858159Z Temporarily overriding HOME='/home/runner/work/_temp/3dd627a5-0a48-4851-9568-d3b162370e8e' before making global git config changes
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4860266Z Adding repository directory to the temporary git global config as a safe directory
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4863012Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VoteBoat/VoteBoat
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4905208Z Deleting the contents of '/home/runner/work/VoteBoat/VoteBoat'
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4916115Z ##[group]Initializing the repository
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4920134Z [command]/usr/bin/git init /home/runner/work/VoteBoat/VoteBoat
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4994921Z hint: Using 'master' as the name for the initial branch. This default branch name
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4996859Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4998116Z hint: to use in all of your new repositories, which will suppress this warning,
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4998874Z hint: call:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4999237Z hint:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.4999690Z hint: 	git config --global init.defaultBranch <name>
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5000221Z hint:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5000714Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5001759Z hint: 'development'. The just-created branch can be renamed via this command:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5003041Z hint:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5003593Z hint: 	git branch -m <name>
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5004012Z hint:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5004547Z hint: Disable this message with "git config set advice.defaultBranchName false"
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5005372Z Initialized empty Git repository in /home/runner/work/VoteBoat/VoteBoat/.git/
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5006921Z [command]/usr/bin/git remote add origin https://github.com/KarlLivesey/VoteBoat
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5044474Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5045575Z ##[group]Disabling automatic garbage collection
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5046784Z [command]/usr/bin/git config --local gc.auto 0
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5074840Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5075819Z ##[group]Setting up auth
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5080575Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5107978Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5409319Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5436276Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5635818Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5666768Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5856959Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5891966Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5892759Z ##[group]Fetching the repository
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:42.5899855Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +a41a6ec3e6fd0e1dd01f372a92f148e94adaa175:refs/remotes/origin/main
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5816305Z From https://github.com/KarlLivesey/VoteBoat
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5818335Z  * [new ref]         a41a6ec3e6fd0e1dd01f372a92f148e94adaa175 -> origin/main
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5820851Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5821459Z ##[group]Determining the checkout info
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5822326Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5827136Z [command]/usr/bin/git sparse-checkout disable
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5872251Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5901342Z ##[group]Checking out the ref
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.5905406Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.6981742Z Switched to a new branch 'main'
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.6986786Z branch 'main' set up to track 'origin/main'.
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.6995106Z ##[endgroup]
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.7035739Z [command]/usr/bin/git log -1 --format=%H
+Operators on ubuntu-latest	Run actions/checkout@v4	2026-10-10T07:56:43.7058662Z a41a6ec3e6fd0e1dd01f372a92f148e94adaa175
+Operators on ubuntu-latest	Install pinned Rust toolchain	﻿2026-10-10T07:56:43.7239777Z ##[group]Run rustup toolchain install 1.98.1 --profile minimal
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7240304Z ^[[36;1mrustup toolchain install 1.98.1 --profile minimal^[[0m
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7434174Z shell: /usr/bin/bash -e {0}
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7434474Z env:
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7434909Z   CARGO_TERM_COLOR: never
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7435150Z   RUST_BACKTRACE: 1
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7435371Z ##[endgroup]
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.7805698Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.9033240Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:43.9033949Z info: downloading 3 components
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:50.8282270Z 
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:50.8343914Z   1.98.1-x86_64-unknown-linux-gnu installed - rustc 1.98.1 (48a229cea 2026-09-01)
+Operators on ubuntu-latest	Install pinned Rust toolchain	2026-10-10T07:56:50.8344427Z 
+Operators on ubuntu-latest	Run cargo fetch --locked	﻿2026-10-10T07:56:50.8427529Z ##[group]Run cargo fetch --locked
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8427852Z ^[[36;1mcargo fetch --locked^[[0m
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8485694Z shell: /usr/bin/bash -e {0}
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8485935Z env:
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8486104Z   CARGO_TERM_COLOR: never
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8486331Z   RUST_BACKTRACE: 1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8486505Z ##[endgroup]
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.8994189Z info: syncing channel updates for 1.98.1-x86_64-unknown-linux-gnu
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.9722224Z info: latest update on 2026-09-03 for version 1.98.1 (48a229cea 2026-09-01)
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:50.9824421Z info: downloading 2 components
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.5878517Z     Updating crates.io index
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8225226Z  Downloading crates ...
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8505569Z   Downloaded rustc-hash v2.1.3
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8518480Z   Downloaded subtle v2.6.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8540205Z   Downloaded rustls-webpki v0.103.15
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8578660Z   Downloaded proc-macro2 v1.0.107
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8602777Z   Downloaded wasm-bindgen v0.2.129
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8626626Z   Downloaded wasm-bindgen-shared v0.2.129
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8635294Z   Downloaded quote v1.0.47
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8658272Z   Downloaded unicode-ident v1.0.26
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8680912Z   Downloaded rustls-pki-types v1.15.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8701904Z   Downloaded syn v3.0.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8789798Z   Downloaded zeroize v1.9.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8803088Z   Downloaded bumpalo v3.20.3
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8835593Z   Downloaded windows-targets v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8910689Z   Downloaded thiserror v2.0.21
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.8911144Z   Downloaded rustls v0.23.45
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9006995Z   Downloaded shlex v2.0.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9017426Z   Downloaded rand_core v0.10.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9030617Z   Downloaded bytes v1.12.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9059553Z   Downloaded getrandom v0.4.3
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9091091Z   Downloaded tinyvec v1.13.3
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9119764Z   Downloaded lru-slab v0.1.3
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9126844Z   Downloaded wasm-bindgen-macro v0.2.129
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9134654Z   Downloaded rand v0.10.3
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9164985Z   Downloaded r-efi v6.0.0
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9206049Z   Downloaded futures-task v0.3.34
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9215662Z   Downloaded cfg-if v1.0.5
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9226237Z   Downloaded web-time v1.1.0
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9240191Z   Downloaded once_cell v1.21.4
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9261067Z   Downloaded tracing-core v0.1.36
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9283255Z   Downloaded rand_pcg v0.10.2
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9295308Z   Downloaded cpufeatures v0.3.1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9307264Z   Downloaded slab v0.4.12
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9318111Z   Downloaded futures-core v0.3.34
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9329449Z   Downloaded untrusted v0.9.0
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9343106Z   Downloaded getrandom v0.2.17
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9367270Z   Downloaded wasi v0.11.1+wasi-snapshot-preview1
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9381071Z   Downloaded find-msvc-tools v0.1.14
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9394721Z   Downloaded thiserror-impl v2.0.21
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9406593Z   Downloaded chacha20 v0.10.2
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9427820Z   Downloaded pin-project-lite v0.2.17
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9476694Z   Downloaded rustversion v1.0.23
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9499979Z   Downloaded wasm-bindgen-macro-support v0.2.129
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9520241Z   Downloaded cc v1.6.0
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9548552Z   Downloaded js-sys v0.3.106
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9575019Z   Downloaded futures-util v0.3.34
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9684780Z   Downloaded quinn-proto v0.11.19
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9740924Z   Downloaded windows_x86_64_gnullvm v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9805283Z   Downloaded tracing v0.1.44
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9934754Z   Downloaded windows_aarch64_gnullvm v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:51.9998498Z   Downloaded windows_i686_gnullvm v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.0067083Z   Downloaded windows_x86_64_msvc v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.0162619Z   Downloaded windows_x86_64_gnu v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.0314971Z   Downloaded windows_aarch64_msvc v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.0409837Z   Downloaded libc v0.2.190
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.0807640Z   Downloaded windows_i686_gnu v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.0964833Z   Downloaded windows_i686_msvc v0.52.6
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.1071829Z   Downloaded ring v0.17.14
+Operators on ubuntu-latest	Run cargo fetch --locked	2026-10-10T07:56:52.1420068Z   Downloaded windows-sys v0.52.0
+Operators on ubuntu-latest	Exercise operator recovery	﻿2026-10-10T07:56:52.2341253Z ##[group]Run set -o pipefail
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2341538Z ^[[36;1mset -o pipefail^[[0m
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2341781Z ^[[36;1mcargo test --locked --offline --all-features \^[[0m
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2342166Z ^[[36;1m  --test counter_service --test directory_service --test transfer_service \^[[0m
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2342528Z ^[[36;1m  2>&1 | tee operator-recovery.log^[[0m
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2400024Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2400316Z env:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2400482Z   CARGO_TERM_COLOR: never
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2400675Z   RUST_BACKTRACE: 1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.2400844Z ##[endgroup]
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.3189192Z    Compiling libc v0.2.190
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.3189834Z    Compiling shlex v2.0.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.3190494Z    Compiling cfg-if v1.0.5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.3191039Z    Compiling find-msvc-tools v0.1.14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.3497094Z    Compiling proc-macro2 v1.0.107
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.4109892Z    Compiling cc v1.6.0
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.4469380Z    Compiling unicode-ident v1.0.26
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.4954552Z    Compiling quote v1.0.47
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.6299492Z    Compiling rand_core v0.10.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.6994918Z    Compiling once_cell v1.21.4
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:52.8189945Z    Compiling getrandom v0.4.3
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.0049820Z    Compiling untrusted v0.9.0
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.0459410Z    Compiling zeroize v1.9.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.0633904Z    Compiling syn v3.0.6
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.1379540Z    Compiling rustls-pki-types v1.15.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.4331845Z    Compiling getrandom v0.2.17
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.5080958Z    Compiling cpufeatures v0.3.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.5229722Z    Compiling thiserror v2.0.21
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.5319142Z    Compiling rustls v0.23.45
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.6036578Z    Compiling chacha20 v0.10.2
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.7201415Z    Compiling ring v0.17.14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.7579152Z    Compiling tracing-core v0.1.36
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.8099203Z    Compiling subtle v2.6.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.8723702Z    Compiling pin-project-lite v0.2.17
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:53.9049001Z    Compiling rand v0.10.3
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.1987883Z    Compiling tracing v0.1.44
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.3320065Z    Compiling rand_pcg v0.10.2
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.3829996Z    Compiling tinyvec v1.13.3
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.3980597Z    Compiling rustc-hash v2.1.3
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.4413452Z    Compiling lru-slab v0.1.3
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.4959342Z    Compiling slab v0.4.12
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.5864178Z    Compiling bytes v1.12.1
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:54.7790150Z    Compiling thiserror-impl v2.0.21
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:56.6986604Z    Compiling rustls-webpki v0.103.15
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:58.5267381Z    Compiling quinn-proto v0.11.19
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:56:59.9855803Z    Compiling voteboat v0.1.0 (/home/runner/work/VoteBoat/VoteBoat)
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:21.0792750Z     Finished `test` profile [unoptimized + debuginfo] target(s) in 28.81s
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:21.0831584Z      Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:21.0842166Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:21.0842410Z running 122 tests
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:21.8184440Z test assignments::single_group_inventory_does_not_require_a_leader ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:23.6576291Z test assignments::assignment_pages_tcp_bind_permissions_membership_and_reopen ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:23.6986412Z test automatic_client_never_reroutes_uncertain_writes_or_other_errors ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:23.7062119Z test automatic_client_reuses_original_command_after_only_proven_non_acceptance ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:23.7546550Z test automatic_read_retries_only_exact_unavailable_replica_replies ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:24.5459532Z test authenticated_service_principals_scope_commands_and_recover_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:24.6857364Z test authenticated_service_principals_scope_commands_and_recover_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:30.2166012Z test assignments::assignment_pages_quic_bind_permissions_membership_and_reopen ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:30.9835442Z test client_supplied_configuration_targets_are_checked_and_recovered_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:31.7012618Z test client_supplied_configuration_targets_are_checked_and_recovered_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:32.2677205Z test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:32.9212097Z test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:33.1521412Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:33.1575841Z test command_endpoints::command_listener_requires_authentication_before_opening_files_or_sockets ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:33.1658688Z test command_endpoints::command_route_pins_have_an_aggregate_budget_before_connecting ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:33.1699255Z test command_endpoints::command_route_tls_interruption_never_reroutes_an_unknown_write ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:33.6125677Z test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:34.0292593Z test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:34.0574260Z test command_endpoints::malformed_command_routes_and_missing_targets_fail_before_connecting ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:34.7498617Z test bounded_commands_and_quorum_loss_preserve_retry_identity ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:35.9557488Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:37.4464836Z test drain::drain_requires_admin_and_never_stops_an_incomplete_handoff ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:37.6339732Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:38.0420473Z test credential_reload::live_reload_revokes_writer_and_recovers_after_lost_reply_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:38.7226133Z test drain::failed_journal_publication_stops_service_and_preserves_recovery_evidence ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:38.8302352Z test drain::recovery_refuses_to_omit_the_existing_drain_profile ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:39.3844462Z test drain::lost_drain_reply_keeps_original_identity_and_local_cancel_is_durable ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:39.5320039Z test drain::required_empty_drain_journal_cannot_be_silently_recreated_on_recovery ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:40.1515147Z test command_endpoints::configured_remote_command_endpoints_retry_and_recover_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:40.3513815Z test drain::retained_profile_refuses_to_interpret_a_membership_drain_journal ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:40.9493044Z test drain::retained_drain_handoff_stop_recover_and_cancel_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:41.2114271Z test drain::retained_drain_handoff_stop_recover_and_cancel_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:54.4977807Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:54.8194978Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:55.1897459Z test drain_retirement::drained_learner_retirement_recovers_unknown_and_stale_source_quic_checkpoint ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:56.8707698Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:56.9250931Z test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:57.0890863Z test enrollment_refuses_missing_checkpoint_voter_import_and_joint_image_before_creation ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:57.6666600Z test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:58.6090918Z test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:59.1272551Z test events::quic_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:59.4286878Z test drain_replacement::maintenance_replacement_drain_waits_for_exact_learner_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:57:59.4844955Z test events::tcp_bounded_events_checkpoint_and_restart_preserve_original_operations ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:00.8000381Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:00.8737280Z test explicit_deployment_enrolls_fourth_exact_store_and_restarts_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:04.1633297Z test group_admin::group_membership_tcp_reopens_joint_records_and_preserves_scope ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:04.2531443Z test group_admin::group_plan_count_and_aggregate_bytes_are_bounded_before_store_creation ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:04.2947124Z test group_admin::group_plan_manifest_rejects_wrong_scopes_and_bounds_before_store_creation ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:05.2587623Z test group_admin::group_membership_quic_reopens_joint_checkpoints_and_preserves_scope ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:05.4344312Z test executable_membership_add_enroll_promote_retire_and_restart_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:06.8313398Z test group_drain::multi_group_drain_failed_publication_stops_service_without_receipt ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:07.7364991Z test group_drain::multi_group_drain_preserves_original_plan_and_cancelled_gate_on_restart ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:07.8192262Z test group_drain_bounds::group_drain_bounds_aggregate_referenced_input_before_resources ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:08.0441197Z test group_drain_bounds::group_drain_rejects_invalid_identity_scope_coverage_and_input_before_resources ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:11.5314064Z test executable_membership_add_enroll_promote_retire_and_restart_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:11.7644206Z test group_drain::multi_group_drain_tcp_recovers_partial_progress_and_stops_only_when_ready ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:11.7702847Z test group_drain::multi_group_drain_quic_recovers_partial_checkpoints_and_stops_only_when_ready ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:12.7269364Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:16.4522367Z test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:16.5559265Z test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:18.5216034Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:20.6693283Z test group_leadership::group_maintenance_schema_cannot_reinterpret_existing_counter_checkpoints ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:21.3962846Z test group_leadership::group_leadership_tcp_recovers_independent_pending_and_cancelled_intents ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:22.8357735Z test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:22.8622031Z test groups::group_routing_preserves_exact_request_and_stops_after_uncertainty ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:22.8712849Z test groups::invalid_group_commands_are_rejected_before_connecting ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:22.9493450Z test groups::malformed_group_manifests_and_incompatible_profiles_create_no_store ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:25.5537244Z test groups::authenticated_group_commands_tcp_recover_independent_histories ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:25.7763528Z test group_leadership::group_leadership_quic_recovers_independent_pending_and_cancelled_checkpoints ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:25.7799600Z test interrupted_configuration_reply_is_unknown_and_preserves_original_operation ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:25.8173902Z test invalid_administration_is_rejected_before_store_open ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:25.9232468Z test invalid_deployment_is_rejected_before_store_creation ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:25.9258932Z test invalid_service_access_fails_before_store_creation_or_listener_ownership ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:27.6257818Z test history::quic_faulted_client_histories_are_linearizable ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:29.0731419Z test history::tcp_faulted_client_histories_are_linearizable ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:29.3613288Z test groups::authenticated_group_commands_quic_recover_independent_histories ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:32.4290801Z test leadership::authenticated_handoff_and_pending_checkpoint_restart_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:35.1986157Z test joint_retirement::public_joint_survives_demoted_leader_loss_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:35.2529670Z test leadership::authenticated_handoff_and_pending_restart_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:36.4897121Z test leadership::authenticated_cancel_deadline_and_permission_boundaries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:36.6337207Z test leadership::lost_begin_reply_retains_exact_intent_and_data ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:37.1449383Z test leadership::maintenance_profile_refuses_existing_plain_counter_data ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:38.0467252Z test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:38.0874001Z test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:38.8462256Z test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:38.8542259Z test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:38.8599216Z test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:39.0970239Z test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:40.5202173Z test joint_retirement::public_joint_survives_demoted_leader_loss_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:40.5801823Z test member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:41.8679397Z test leadership::disconnected_and_expired_status_waits_release_original_tickets ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:42.4258026Z test membership_drain::membership_drain_recovery_refuses_changed_or_omitted_original_plan ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:42.4348461Z test missing_recovery_and_invalid_configuration_do_not_create_a_store ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:43.4696509Z test membership_drain::membership_drain_rejects_invalid_plan_files_before_opening_store ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:43.7525914Z test membership_drain::executable_membership_drain_resumes_joint_and_final_quic_checkpoint ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:44.2411002Z test membership_drain::executable_membership_drain_resumes_joint_and_final_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:44.9545224Z test native_quic_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:45.0030430Z test native_tcp_metrics_are_volatile_and_preserve_recovery_and_retries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:52.6981599Z test native_configuration_close_deadline_and_unread_commit_recover_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:53.8130643Z test offline_enrollment_retries_then_runs_and_recovers_quic_service ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:54.6341425Z test offline_enrollment_retries_then_runs_and_recovers_tcp_service ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:54.6382869Z test placement::exact_planned_store_is_checked_before_opening_runtime_files ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:58:58.6775798Z test placement::generated_placement_executes_and_recovers_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:02.2447572Z test placement::generated_placement_executes_and_recovers_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:02.2526130Z test placement::placement_cli_preserves_exact_targets_and_recursive_policy ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:02.2679219Z test placement::placement_cli_refuses_expired_ambiguous_and_unsafe_inputs_without_output ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:03.1266440Z test native_configuration_close_deadline_and_unread_commit_recover_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:03.8505780Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:04.6656599Z test quorum::quorum_explanation_is_hypothetical_bounded_and_authorized_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:04.6679983Z test remote_configuration_requires_access_before_opening_files_or_listeners ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:05.3564453Z test quic_member_service_recovers_joint_and_final_histories_and_checkpoint_retries ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:09.0461669Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:09.9771544Z test remote_configuration_requires_admin_and_preserves_checkpoint_retries_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:11.0151078Z test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:11.8678669Z test new_voter::public_new_voter_tcp_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:12.0246858Z test timing::service_timings_include_interruptions_and_reset_on_recovery_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:12.8319370Z test timing::service_timings_include_interruptions_and_reset_on_recovery_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:14.6205850Z test trusted_startup_plan_promotes_and_restarts_quic ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:15.8263221Z test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:18.3677796Z test trusted_startup_plan_promotes_and_restarts_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:22.0554063Z test trickled_reply_cannot_extend_the_clients_absolute_routing_deadline ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8036740Z test new_voter::public_new_voter_quic_recovers_readiness_and_joint_wal_and_checkpoint ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8037236Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8037571Z test result: ok. 122 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 125.72s
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8038024Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8041295Z      Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8051853Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8052078Z running 13 tests
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:26.8220521Z test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:27.9755751Z test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:28.6408941Z test directory_publication_remote_reads_and_checkpoint_recovery_quic ... FAILED
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:28.6611871Z test routes::recursive_route_interrupted_leaf_never_returns_a_hint ... FAILED
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:28.6699970Z test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:28.6995177Z test routes::recursive_route_rejects_invalid_maps_and_options_before_connections ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:29.1441500Z test routes::recursive_route_quic_and_known_child_without_ancestors ... FAILED
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:30.4358966Z test routes::recursive_route_missing_leaf_is_not_a_partial_success ... FAILED
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:31.2900930Z test routes::recursive_route_rejects_wrong_authority_and_tls_identity ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:31.6614052Z test routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss ... FAILED
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:37.1599854Z test routes::recursive_route_tcp_and_known_child_without_ancestors ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:41.2633494Z test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2269473Z test routes::recursive_route_enforces_root_observation_floors ... ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2269930Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2270030Z failures:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2270163Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2270452Z ---- directory_publication_remote_reads_and_checkpoint_recovery_quic stdout ----
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2272429Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2272933Z thread 'directory_publication_remote_reads_and_checkpoint_recovery_quic' (16840) panicked at tests/directory_service.rs:194:9:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2273828Z ["initialize"]: UNKNOWN Unknown(LeadershipChanged); retry original plan operation
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2274353Z  Error: "metadata command refused"
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2274559Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2274662Z stack backtrace:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2274955Z    0: __rustc::rust_begin_unwind
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2275472Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2276287Z    1: core::panicking::panic_fmt
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2276791Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2277312Z    2: <directory_service::Cluster>::ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2277544Z              at ./tests/directory_service.rs:194:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2277778Z    3: directory_service::history
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2277999Z              at ./tests/directory_service.rs:304:15
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2278576Z    4: directory_service::directory_publication_remote_reads_and_checkpoint_recovery_quic
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2278929Z              at ./tests/directory_service.rs:334:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2279308Z    5: directory_service::directory_publication_remote_reads_and_checkpoint_recovery_quic::{closure#0}
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2279824Z              at ./tests/directory_service.rs:333:69
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2280334Z    6: <directory_service::directory_publication_remote_reads_and_checkpoint_recovery_quic::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2281026Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2281541Z    7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2282019Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2282492Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2282752Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2282929Z ---- routes::recursive_route_interrupted_leaf_never_returns_a_hint stdout ----
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2283167Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2283441Z thread 'routes::recursive_route_interrupted_leaf_never_returns_a_hint' (17015) panicked at tests/directory_service.rs:194:9:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2283965Z ["initialize"]: UNKNOWN Unknown(LeadershipChanged); retry original plan operation
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2284290Z  Error: "metadata command refused"
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2284424Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2284493Z stack backtrace:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2284664Z    0: __rustc::rust_begin_unwind
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2284984Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2285322Z    1: core::panicking::panic_fmt
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2285633Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2285977Z    2: <directory_service::Cluster>::ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2286201Z              at ./tests/directory_service.rs:194:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2286434Z    3: directory_service::routes::publish
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2286669Z              at ./tests/directory_service/routes.rs:94:7
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2287145Z    4: <directory_service::routes::Tree>::new::<directory_service::routes::recursive_route_interrupted_leaf_never_returns_a_hint::{closure#0}>
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2287604Z              at ./tests/directory_service/routes.rs:147:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2287932Z    5: directory_service::routes::recursive_route_interrupted_leaf_never_returns_a_hint
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2288424Z              at ./tests/directory_service/routes.rs:304:17
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2288790Z    6: directory_service::routes::recursive_route_interrupted_leaf_never_returns_a_hint::{closure#0}
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2289151Z              at ./tests/directory_service/routes.rs:303:59
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2289628Z    7: <directory_service::routes::recursive_route_interrupted_leaf_never_returns_a_hint::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2290206Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2290680Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2291145Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2291724Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2291975Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2292138Z ---- routes::recursive_route_quic_and_known_child_without_ancestors stdout ----
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2292370Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2292645Z thread 'routes::recursive_route_quic_and_known_child_without_ancestors' (17084) panicked at tests/directory_service.rs:194:9:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2293151Z ["initialize"]: UNKNOWN Unknown(LeadershipChanged); retry original plan operation
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2293462Z  Error: "metadata command refused"
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2293590Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2293660Z stack backtrace:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2293849Z    0: __rustc::rust_begin_unwind
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2294160Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2294624Z    1: core::panicking::panic_fmt
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2294933Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2295285Z    2: <directory_service::Cluster>::ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2295502Z              at ./tests/directory_service.rs:194:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2295731Z    3: directory_service::routes::publish
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2295971Z              at ./tests/directory_service/routes.rs:94:7
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2296364Z    4: <directory_service::routes::Tree>::new::<directory_service::routes::history::{closure#0}>
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2296913Z              at ./tests/directory_service/routes.rs:147:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2297224Z    5: directory_service::routes::history
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2297457Z              at ./tests/directory_service/routes.rs:224:17
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2297812Z    6: directory_service::routes::recursive_route_quic_and_known_child_without_ancestors
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2298157Z              at ./tests/directory_service/routes.rs:243:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2298929Z    7: directory_service::routes::recursive_route_quic_and_known_child_without_ancestors::{closure#0}
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2299508Z              at ./tests/directory_service/routes.rs:242:60
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2300224Z    8: <directory_service::routes::recursive_route_quic_and_known_child_without_ancestors::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2301161Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2301910Z    9: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2302635Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2303357Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2303770Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2304021Z ---- routes::recursive_route_missing_leaf_is_not_a_partial_success stdout ----
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2304392Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2304823Z thread 'routes::recursive_route_missing_leaf_is_not_a_partial_success' (17071) panicked at tests/directory_service.rs:194:9:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2305626Z ["initialize"]: UNKNOWN Unknown(LeadershipChanged); retry original plan operation
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2306104Z  Error: "metadata command refused"
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2306294Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2306394Z stack backtrace:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2306681Z    0: __rustc::rust_begin_unwind
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2307170Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2307723Z    1: core::panicking::panic_fmt
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2308538Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2309143Z    2: <directory_service::Cluster>::ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2309495Z              at ./tests/directory_service.rs:194:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2309866Z    3: directory_service::routes::publish
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2310243Z              at ./tests/directory_service/routes.rs:94:7
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2311256Z    4: <directory_service::routes::Tree>::new::<directory_service::routes::recursive_route_missing_leaf_is_not_a_partial_success::{closure#0}>
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2312061Z              at ./tests/directory_service/routes.rs:149:27
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2312625Z    5: directory_service::routes::recursive_route_missing_leaf_is_not_a_partial_success
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2313188Z              at ./tests/directory_service/routes.rs:298:17
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2313804Z    6: directory_service::routes::recursive_route_missing_leaf_is_not_a_partial_success::{closure#0}
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2314422Z              at ./tests/directory_service/routes.rs:297:59
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2314959Z    7: <directory_service::routes::recursive_route_missing_leaf_is_not_a_partial_success::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2315978Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2316471Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2316940Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2317384Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2317638Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2317833Z ---- routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss stdout ----
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2318091Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2318661Z thread 'routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss' (17282) panicked at tests/directory_service.rs:194:9:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2319547Z ["initialize"]: UNKNOWN Unknown(LeadershipChanged); retry original plan operation
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2320083Z  Error: "metadata command refused"
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2320295Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2320363Z stack backtrace:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2320537Z    0: __rustc::rust_begin_unwind
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2320862Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2321211Z    1: core::panicking::panic_fmt
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2321529Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2321872Z    2: <directory_service::Cluster>::ok
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2322096Z              at ./tests/directory_service.rs:194:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2322325Z    3: directory_service::routes::publish
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2322559Z              at ./tests/directory_service/routes.rs:94:7
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2323045Z    4: <directory_service::routes::Tree>::new::<directory_service::routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss::{closure#0}>
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2323548Z              at ./tests/directory_service/routes.rs:148:9
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2323912Z    5: directory_service::routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2324282Z              at ./tests/directory_service/routes.rs:421:17
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2324675Z    6: directory_service::routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss::{closure#0}
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2325066Z              at ./tests/directory_service/routes.rs:420:69
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2325568Z    7: <directory_service::routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2326175Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2326653Z    8: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2327111Z              at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2327594Z note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2327979Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2327983Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2328053Z failures:
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2331187Z     directory_publication_remote_reads_and_checkpoint_recovery_quic
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2331724Z     routes::recursive_route_interrupted_leaf_never_returns_a_hint
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2332065Z     routes::recursive_route_missing_leaf_is_not_a_partial_success
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2332380Z     routes::recursive_route_quic_and_known_child_without_ancestors
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2332718Z     routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2332934Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2333141Z test result: FAILED. 8 passed; 5 failed; 0 ignored; 0 measured; 0 filtered out; finished in 22.42s
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2333408Z 
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2333570Z error: test failed, to rerun pass `--test directory_service`
+Operators on ubuntu-latest	Exercise operator recovery	2026-10-10T07:59:49.2341479Z ##[error]Process completed with exit code 101.
+Operators on ubuntu-latest	Preserve operator results	﻿2026-10-10T07:59:49.2422896Z ##[group]Run actions/upload-artifact@v4
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2423140Z with:
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2423428Z   name: operator-recovery-ubuntu-latest-a41a6ec3e6fd0e1dd01f372a92f148e94adaa175
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2423775Z   path: operator-recovery.log
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2423987Z   if-no-files-found: ignore
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2424176Z   retention-days: 14
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2424355Z   compression-level: 6
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2424529Z   overwrite: false
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2424699Z   include-hidden-files: false
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2424880Z env:
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2425033Z   CARGO_TERM_COLOR: never
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2425212Z   RUST_BACKTRACE: 1
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.2425374Z ##[endgroup]
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.3771474Z (node:17694) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.3772222Z (Use `node --trace-deprecation ...` to show where the warning was created)
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.3807857Z With the provided path, there will be 1 file uploaded
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.3813058Z Artifact name is valid!
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.3813703Z Root directory input is valid!
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.5611010Z Beginning upload of artifact content to blob storage
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.5751819Z (node:17694) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.6021620Z Uploaded bytes 4221
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.6197000Z Finished uploading artifact content to blob storage!
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.6197707Z SHA256 digest of uploaded artifact zip is 407630bd12cb732d8cb2df97d6f8e47c86e4349897407be4ff05166186465839
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.6199704Z Finalizing artifact upload
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.8482382Z Artifact operator-recovery-ubuntu-latest-a41a6ec3e6fd0e1dd01f372a92f148e94adaa175.zip successfully finalized. Artifact ID 11663506826
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.8483998Z Artifact operator-recovery-ubuntu-latest-a41a6ec3e6fd0e1dd01f372a92f148e94adaa175 has been successfully uploaded! Final size is 4221 bytes. Artifact ID is 11663506826
+Operators on ubuntu-latest	Preserve operator results	2026-10-10T07:59:49.8488554Z Artifact download URL: https://github.com/KarlLivesey/VoteBoat/actions/runs/38036099346/artifacts/11663506826
+Operators on ubuntu-latest	Post Run actions/checkout@v4	﻿2026-10-10T07:59:49.8664457Z Post job cleanup.
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9340075Z [command]/usr/bin/git version
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9374623Z git version 2.55.0
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9403523Z Temporarily overriding HOME='/home/runner/work/_temp/7d82af9d-c486-4117-8346-32b0df7c28b7' before making global git config changes
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9404525Z Adding repository directory to the temporary git global config as a safe directory
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9407601Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/VoteBoat/VoteBoat
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9444390Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9479013Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9707421Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9728794Z http.https://github.com/.extraheader
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9744070Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:49.9768533Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:50.0012490Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+Operators on ubuntu-latest	Post Run actions/checkout@v4	2026-10-10T07:59:50.0044242Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+Operators on ubuntu-latest	Complete job	﻿2026-10-10T07:59:50.0385123Z Cleaning up orphan processes
+Operators on ubuntu-latest	Complete job	2026-10-10T07:59:50.0609907Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
