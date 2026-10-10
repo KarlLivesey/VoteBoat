@@ -9,6 +9,8 @@ use super::{
     setup::Failure,
 };
 use std::time::{Duration, Instant};
+#[path = "drain_runner/multi.rs"]
+mod multi;
 
 #[derive(Debug, Eq, PartialEq)]
 struct Progress {
@@ -192,7 +194,7 @@ impl Runner {
         Ok(())
     }
 }
-pub fn run(base: u16, source: u64, input: &[String]) -> Result<(), Failure> {
+fn configured(base: u16, source: u64, input: &[String]) -> Result<Runner, Failure> {
     let mut args = input.to_vec();
     let options = local_client::options(&mut args)?;
     let [sequence, operation] = args.as_slice() else {
@@ -218,7 +220,7 @@ pub fn run(base: u16, source: u64, input: &[String]) -> Result<(), Failure> {
     };
     let auth = ClientAccess::load(directory, principal, &endpoints)?;
     let start = Instant::now();
-    Runner {
+    Ok(Runner {
         endpoints,
         source,
         auth,
@@ -227,8 +229,16 @@ pub fn run(base: u16, source: u64, input: &[String]) -> Result<(), Failure> {
         start,
         deadline: start + Duration::from_secs(45),
         remaining: 128,
-    }
-    .execute()
+    })
+}
+pub fn run(base: u16, source: u64, input: &[String]) -> Result<(), Failure> {
+    configured(base, source, input)?.execute()
+}
+pub fn run_multi(base: u16, source: u64, input: &[String]) -> Result<(), Failure> {
+    let mut runner = configured(base, source, input)?;
+    runner.deadline = runner.start + Duration::from_secs(120);
+    runner.remaining = 4096;
+    runner.execute_multi()
 }
 
 #[cfg(test)]
@@ -236,6 +246,26 @@ mod tests {
     use super::*;
     fn sample() -> String {
         format!("OK sequence=1 operation=2 phase=Active membership_change=true configuration_operation=3 plan_digest={} ready=false", "ab".repeat(32))
+    }
+    #[test]
+    fn exhausted_runner_budgets_refuse_before_connection() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
+        let args = [
+            "1",
+            "2",
+            "--service-tls",
+            path.to_str().unwrap(),
+            "--principal",
+            "3",
+        ]
+        .map(str::to_owned);
+        let mut runner = configured(10000, 3, &args).unwrap();
+        runner.remaining = 0;
+        assert!(runner.exchange(0, "status").is_err());
+        runner.remaining = 1;
+        runner.deadline = Instant::now();
+        assert!(runner.exchange(0, "status").is_err());
+        assert_eq!(runner.remaining, 1);
     }
     #[test]
     fn configuration_busy_reobserves_but_does_not_mask_other_rejections() {

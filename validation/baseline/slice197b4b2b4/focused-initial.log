@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.01s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 3 tests
+test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 114 filtered out; finished in 3.46s

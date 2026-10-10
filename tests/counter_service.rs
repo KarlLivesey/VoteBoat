@@ -55,6 +55,8 @@ mod group_admin;
 mod group_drain;
 #[path = "counter_service/group_drain_bounds.rs"]
 mod group_drain_bounds;
+#[path = "counter_service/group_drain_runner.rs"]
+mod group_drain_runner;
 #[path = "counter_service/group_leadership.rs"]
 mod group_leadership;
 #[path = "counter_service/groups.rs"]

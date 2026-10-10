@@ -75,7 +75,7 @@ cause and revise this sketch before another material change.
 | Milestone | User-visible result and completion criteria | Position in the full design |
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss and restart, and shut down cleanly; document the same composition for Rust hosts. TCP and optional QUIC are implemented and exercised on Linux. macOS execution and separate-host operational validation remain outstanding. | First usable delivery, built on P0–P3. Keep it usable while later milestones develop. |
-| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. Slice196 now provides targeted durable maintenance through Rust and the opt-in authenticated counter profile; coordinated drain197 remains open. |
+| Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; demonstrate recovery, rollback and partial-delivery behavior before exposing online configuration ingress. | Trusted Node/executable administration, authenticated public commands and selected P4 fault schedules are implemented. Selected authenticated new-store interruption/joint recovery161 is exercised. Broader revocation, older-checkpoint and combined failures remain. Safe placement supports ownership movement. Slice196 now provides targeted durable maintenance through Rust and the opt-in authenticated counter profile; bounded coordinated drain197 is implemented for explicit original plans; broader recovery and platform acceptance remain open. |
 | Recursive responsibilities and routing | Resolve responsibility manifests, selectively place groups and route requests; cached child operation must survive parent unavailability without an ancestor commit in the normal write path. | P5, using the existing group/runtime foundation and P4 placement changes where required. Slices130–132 add checked same-authority root and nested insertion; slice133 validates selected native nested phase histories. Slice189 adds a runnable replicated metadata authority and explicit remote lookup;190 adds bounded executable multi-authority traversal. Slice191 adds explicit offline placement plans consumed by the existing member executor. Automatic online orchestration and broader faults remain. |
 | Split and merge | Move real application data with source fencing, import readiness and durable activation; preserve retry/deduplication lineage and recover without two active owners. | P6, using P5 manifests/routing and the membership/recovery foundation. |
 | Measured tuning and broader validation | Reproduce committed/applied performance results and improve batching, lanes, reclamation and recovery throttling where measurements justify them; broaden failure coverage. | P7 plus remaining cross-cutting P0–P3 validation. Target Linux/macOS; CI stays background feedback. |
@@ -135,9 +135,101 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b1: native multi-group startup | Open the complete production assignment set in one native node; advances P2 and enables197b4b. | Existing generic NodeParts, native provider/recovery contracts and197b4a assignment checks. | Public bounded startup with exact applications and original bootstraps; shared WAL/endpoint; TCP/QUIC checkpoint/reopen/retry, incomplete-inventory refusal and joined failure cleanup. |
 | Completed197b4b2a: executable group data commands | Make the shared node usable from actual service processes; advances P2 and enables197b4b2b. |197b4b1 native startup, existing scoped command authorization and recursive policy grammar. | Explicit bounded original group file, group-addressed status/read/add/checkpoint and exact-scope authentication; TCP/QUIC independent operation histories survive checkpoint/reopen. |
 | Completed197b4b2b3: multi-group source drain controls | Bind node maintenance to every actual assignment; advances P4/P2 and chapter09. |197b4b2b1/2 group membership/leadership, mixed-role plans, native journal and Node readiness. | Bounded complete original manifest, all-group permission checks, durable start/cancel/recovery, one-row inspection and authoritative stop refusal. TCP/WAL and QUIC/checkpoint partial-progress histories plus bounds and publication-failure tests pass; full evidence below. |
-| Current197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
-| Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
-| Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+| Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
+| Current198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
+| Next199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+| Following200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
+
+### Slice197b4b2b4 schema plan — bounded foreground multi-group runner
+
+Reuse the authenticated command runner's endpoint/TLS and per-request lifetime
+owner. Add an explicit `group-drain-run` entry point; retain single-group
+behavior. The foreground process owns at most256 typed original assignment
+rows and no background workers. Its120-second total,4096-request and existing
+five-second per-request budgets bound work; interrupted/expired waits report
+UNKNOWN and preserve the original sequence and operation for a later rerun.
+
+Publish/observe the source intent first, then bind every row to its sequence,
+operation, count, sorted group/incarnation, original configuration and exact
+handoff/configuration IDs. Check the source digest and immutable rows on each
+pass. For an unfinished voter group, locate a current leader, inspect that
+group's original configuration operation, hand off to the planned target before
+the initial joint request, and submit the existing joint/final command as
+indicated by committed progress. A completed historical handoff is not proof
+of current leadership. Never change accepted IDs or interpret a cached leader,
+row count or individual success as a stop certificate. Refusals and unknown
+mutations are not success; reobserve original state or exit with its identity.
+Only the source's fresh all-group readiness and explicit stop receipt complete
+the runner. Cancellation stays a separate operator action; killing the runner
+does not roll back accepted work or automatically stop the source.
+
+Acceptance: TCP and QUIC complete a mixed three-group drain with distinct
+handoff targets, preserve original data retries and surviving writes, and
+resume after runner/source interruption with partial membership progress.
+Reject wrong identities, counts/digests, changed rows, unconfigured targets,
+unauthorized or cancelled intent. Keep the single-group runner and all strict
+lint profiles clean. This completes the foreground portion of197/P2/P4;
+assignment listing198 and actual Linux/macOS operator evidence199 follow.
+
+The first interrupted QUIC run returned the existing LeadershipChanged unknown
+response during an idempotent handoff. Keep the original bound action and
+return to fresh group/source observation for exactly the existing known
+leadership/read-authority transition replies. Other unknowns, authorization or
+storage errors remain terminal with their original identities; an authority
+transition is never treated as completion. This is a bounded retry inside the
+same foreground request/time limits, not a new operation or extended deadline.
+
+A later run hit the same known unknown response while seeding the fixture's
+initial group data, before its drain manifest or runner existed. Reuse the
+existing authenticated-write helper to retry only that response with identical
+operation and payload, both for setup and post-drain data checks. Do not make
+the generic data CLI automatically retry unknown writes. A historical handoff
+whose target has since lost leadership is explicitly refused rather than
+replayed indefinitely or assigned an invented operation ID; resolving that
+subsequent leadership change remains an explicit operator action.
+
+The next interrupted QUIC run reached a handoff proposal while recovery was
+busy and received the explicit `not_proposed=Busy` refusal. Reobserve and retry
+only that exact refusal within the existing budget: it admits no proposal and
+does not alter the original intent. Other refusals remain terminal. Add the
+exact reply and a lookalike rejection to the response-classification test.
+
+### Slice197b4b2b4 implementation and validation
+
+The counter executable now exposes `group-drain-run`, sharing the existing
+TLS/endpoint/request owner with the single-group runner. It binds the complete
+source plan, checks immutable rows on each pass, locates each group's leader,
+and executes only the original handoff/configuration operations. Source stop
+still requires fresh all-group readiness. No core, persistence format, public
+provider, dependency or hidden worker was added. Request/time/row bounds and
+explicit cancellation semantics are documented in MAINTENANCE.md.
+
+Five focused process tests pass: normal TCP and QUIC, explicit reordered peer
+endpoints, permission/identity/missing-target/cancelled-intent refusal, and
+runner/source loss with partial joint configuration followed by TCP/WAL or
+QUIC/checkpoint recovery. The final full counter regression passes119 service
+tests and14 command tests, with no ignored tests; service execution took53.23s.
+Parser tests bind counts, digests, rows and exact handoff receipts; a separate
+check refuses exhausted request/time budgets before connecting.
+
+Earlier failures are retained: authority-transition replies now return to
+bounded observation; a fixture's pre-drain unknown write uses the existing
+same-ID retry helper; explicit no-proposal busy responses are reobserved.
+The fixes preserve original operation IDs and do not broaden arbitrary errors
+into retryable success. A completed historical handoff whose target is no
+longer leader still requires explicit operator resolution.
+
+Formatting, all four strict Clippy profiles (default, all features, no default
+features and native only), warnings-denied API docs and the105-contract
+inventory check pass.
+
+See [slice197b4b2b4 evidence](../validation/baseline/slice197b4b2b4/README.md).
+This closes the selected foreground multi-group maintenance deliverable, not
+all drain fault schedules or full P0–P7 acceptance. Macro review: assignment
+listing198 is the next feature;199 records actual supported-platform operator
+recovery, while200 addresses the existing group-retirement operator gap.
+The broader provider, admission, lifecycle, fault and performance ledger stays
+active; the original250ms p99 gate is still unmet.
 
 ### Slice197b4b2b3 schema plan — complete source-side multi-group drain
 

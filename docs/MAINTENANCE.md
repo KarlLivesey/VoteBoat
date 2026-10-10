@@ -458,5 +458,27 @@ without a successful receipt; preserve its files and recover before retrying.
 It does not undo membership or leadership operations already sent elsewhere.
 Keep original records when resolving any uncertain remote result. Cancellation
 survives restart; these commands do not delete or reclaim the source's storage.
-The existing `drain-run` is the single-group runner; automated multi-group
-foreground orchestration is the next deliverable.
+The existing `drain-run` is the single-group runner. For a complete multi-group
+plan, use:
+
+```sh
+voteboat-counter group-drain-run BASE SOURCE SEQUENCE OP \
+  --service-tls ./tls --principal ADMIN --command-peers ./command-peers.txt
+```
+
+The runner loads the original rows from the source, checks their identities
+and digest on each pass, discovers each group's leader, and drives the planned
+handoff and joint/final configuration operations. All planned target endpoints
+must be configured. Its bounds are256 rows,4096 requests,120 seconds total and
+five seconds per request. It stops only after fresh source readiness and an
+accepted `drain-stop`; the receipt does not certify remote worker shutdown.
+
+After a killed runner, unavailable source or unknown result, inspect the original
+intent and rerun the same sequence and operation. Accepted work remains durable.
+Only known leadership/read transitions and an explicit no-proposal busy refusal
+are retried inside the budget. Other errors stop the runner and preserve IDs.
+If a historical completed handoff's target has since lost leadership, inspect
+and resolve that change explicitly; the runner cannot invent a new handoff ID.
+An invalid or incomplete endpoint list may be discovered after the source intent
+is durable: correct the list and resume, or explicitly cancel the original drain.
+Runner exit never cancels accepted work, changes the plan or deletes storage.

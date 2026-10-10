@@ -4,7 +4,7 @@ use super::*;
 
 const SOURCE: usize = 3;
 const OP: &str = "19701";
-fn setup(quic: bool) -> Cluster {
+pub(super) fn setup(quic: bool) -> Cluster {
     let mut c = group_admin::setup(quic);
     c.leadership_maintenance = true;
     c.node_drain = true;
@@ -22,7 +22,7 @@ fn setup(quic: bool) -> Cluster {
         c.start(n, "create");
     }
     for (g, inc, delta) in [("1", "1", "3"), ("7", "3", "5"), ("8", "2", "8")] {
-        c.routed(&["group", g, inc, "add", "42", delta]);
+        authenticated_write(&c, &["group", g, inc, "add", "42", delta]);
     }
     group_admin::configure(&mut c, "1", "1");
     group_admin::configure(&mut c, "1", "1");
@@ -62,7 +62,7 @@ fn setup(quic: bool) -> Cluster {
     configured(&c, "1", "1", "committed=Final");
     c
 }
-fn status(c: &Cluster, expected: &str) -> String {
+pub(super) fn status(c: &Cluster, expected: &str) -> String {
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
         let output = c.request(SOURCE, &["drain-status", "1", OP]);

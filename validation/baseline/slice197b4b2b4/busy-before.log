@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.72s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 5 tests
+test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... FAILED
+
+failures:
+
+---- group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic stdout ----
+
+thread 'group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic' (997441) panicked at tests/counter_service/group_drain_runner.rs:24:5:
+ Error: "ERR not_proposed=Busy\npreserve original group drain identities"
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic
+
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 114 filtered out; finished in 8.12s
+
+error: test failed, to rerun pass `--test counter_service`

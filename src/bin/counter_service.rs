@@ -112,6 +112,7 @@ Multi-group membership: --group-admin-plans FILE selects per-group trusted plans
 Commands: group ID INC configure OP|configuration-status OP; address the selected group's leader for configure.\n\
 Multi-group leadership: --groups FILE --leadership-maintenance enabled; use the same group prefix for move-leader, leadership-status, resume-leadership and cancel-leadership.\n\
 Multi-group drain: --node-drain enabled on all peers, --group-drain-plan FILE on the source, plus group administration and maintenance profiles.\n\
+voteboat-counter group-drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
 Commands: drain-node SEQUENCE OP; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP; drain-group SEQUENCE OP OFFSET. See docs/MAINTENANCE.md.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -713,9 +714,13 @@ fn main() -> Result<(), Failure> {
                 local_client::run(base, Some(id), rest)
             }
         }
-        [verb, base, source, rest @ ..] if verb == "drain-run" => {
+        [verb, base, source, rest @ ..] if verb == "drain-run" || verb == "group-drain-run" => {
             let (base, source) = ports(base, source)?;
-            drain_runner::run(base, source, rest)
+            if verb == "group-drain-run" {
+                drain_runner::run_multi(base, source, rest)
+            } else {
+                drain_runner::run(base, source, rest)
+            }
         }
         _ => Err(HELP.into()),
     }

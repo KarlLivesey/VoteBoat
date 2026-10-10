@@ -160,8 +160,8 @@ Different groups may reuse an operation ID. A cancellation in one group cannot
 cancel another group's same-ID handoff. Restart resumes durable pending work;
 completed records remain idempotent. The existing group administration plans
 also use schema2 readiness requirements in this profile. This enables individual
-group handoffs. Multi-group source drain controls are available as described
-below; the foreground multi-group automation runner remains separate work.
+group handoffs. Multi-group source drain controls and the bounded foreground
+runner are available as described below.
 
 ## Multi-group source drain
 
@@ -171,4 +171,9 @@ source, add `--group-drain-plan FILE`; voter entries require the corresponding
 assignment, including groups where the source is already a learner. Start,
 status, resume, cancellation and checked stop operate on that complete plan.
 Per-group leadership and membership commands perform the individual moves.
+Use `group-drain-run BASE SOURCE SEQUENCE OP --service-tls DIR --principal ID`
+to drive those moves with the original plan; `--command-peers FILE` supplies
+explicit remote endpoints. It requires permission for every source assignment
+and endpoints for each planned target. It reports success only after the source
+accepts its readiness-checked shutdown.
 See [the plan grammar and operator sequence](MAINTENANCE.md#multi-group-source-controls).
