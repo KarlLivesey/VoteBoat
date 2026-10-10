@@ -41,6 +41,8 @@ mod command_endpoints;
 mod credential_reload;
 #[path = "counter_service/drain.rs"]
 mod drain;
+#[path = "counter_service/drain_runner.rs"]
+mod drain_runner;
 #[path = "counter_service/events.rs"]
 mod events;
 #[path = "counter_service/history.rs"]

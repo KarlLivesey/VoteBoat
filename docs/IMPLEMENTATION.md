@@ -129,9 +129,59 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
 | Completed197b2a: executable retained-replica drain | Connect durable gates and handoff to authenticated maintenance and shutdown; advances P4/P2 and chapter09. |197a/197b1 gates and journal,196 durable handoff, authenticated command sessions. | Original identities survive restart; missing journals fail closed; local admission stays closed until durable cancellation; stop requires completed recorded handoff, unchanged stable configuration and local quiescence. Remaining configured voters must satisfy the recursive policy. |
 | Completed197b2b1: Rust membership evacuation | Bind the original evacuation plan and resume joint/final changes; advances coordinated drain, P4/P2 and chapter09. |197b1 durable journal, existing Node readiness and placement authorization, joint consensus. | Bounded host plan, exact digest binding, complete local assignment checks and selected TCP/QUIC joint/final restart histories preserve original IDs and allow remaining voters to write after source shutdown. The source remains a non-voting learner. |
-| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop now composes explicit authenticated membership commands with exact original records; TCP/QUIC joint/final restart and lost-reply histories pass. Automatic multi-group orchestration, replacement-promotion drain histories and final learner removal remain explicit scope. |
+| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Automatic multi-group orchestration, replacement-promotion drain histories and final learner removal remain explicit scope. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b2c schema plan — bounded authenticated drain runner
+
+Remove the manual leader/configuration polling loop using the existing command
+protocol. A foreground `drain-run BASE SOURCE SEQUENCE OP` client loads explicit
+authenticated endpoints, starts or resumes the exact source operation, obtains
+the bound membership operation from source status, and submits that same
+configuration operation to current leaders. It stops the source only after its
+existing readiness check passes. The source must initially lead or already have
+the requested durable drain. This advances the coordinated-drain/P4 milestone;
+multi-group orchestration and final learner removal remain the next work.
+
+No new network protocol or background owner is introduced. Source status adds
+stable scalar plan fields. The client owns one request at a time, a fixed total
+deadline and bounded attempts, and validates sequence/operation/plan identity
+on every source response. Explicit non-leader and transient responses allow
+trying another endpoint; authentication, malformed identity or conflicting
+intent fail closed. Configuration retries use the same provisioned operation;
+unknown shutdown delivery is reported as unknown, never as joined completion.
+Restart reruns the same CLI against the durable source journal/plan.
+
+Acceptance: actual TCP/QUIC process clusters finish with source shutdown,
+remaining-voter writes and original retries; resume an already-active source
+after runner interruption; refuse changed identities, unauthorized callers,
+non-membership profiles and invalid endpoint/options before mutation. Keep
+all service tests and strict formatting/Clippy profiles clean.
+
+### Slice197b2c implementation evidence
+
+The foreground drain-run client now drives the existing single-group workflow
+from a fixed source and original sequence/operation. Source status exposes the
+bound membership operation and plan digest; the runner validates those fields
+on every observation, uses authenticated current-leader configuration requests
+and requests source shutdown only after existing local readiness succeeds.
+It retains at most one connection,128 total requests, a45-second overall bound
+and five-second per-request bounds. It creates no background service.
+
+TCP and QUIC-peer process histories complete joint/final changes, stop/join the
+source and preserve new writes/original retries on the remaining voters. A
+killed runner/source history resumes the original durable plan. Denied callers,
+wrong IDs, missing credentials/endpoints and malformed status fields refuse;
+explicit shuffled command endpoints are exercised. This is not multi-group
+orchestration or final learner retirement, and shutdown_requested does not
+claim remote workers have already joined. See
+[slice197b2c evidence](../validation/baseline/slice197b2c/README.md).
+All92 service tests and8 command unit tests pass; the final4 runner histories
+also exercise configured endpoint order and missing-source refusal. Formatting
+and all three strict Clippy profiles remain at zero diagnostics. Macro review:
+this removes the manual single-group polling loop, while multi-group drain,
+final learner retirement and the full P0–P7 acceptance gates remain open.
 
 ### Slice197b2b2 schema plan — executable membership-drain workflow
 

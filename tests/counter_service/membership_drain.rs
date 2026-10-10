@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
-fn prepare(quic: bool) -> (Cluster, usize, usize) {
+pub(super) fn prepare(quic: bool) -> (Cluster, usize, usize) {
     let mut c = drain::cluster(quic);
     let source = c.leader();
     let target = source % 3 + 1;

@@ -25,7 +25,7 @@ use std::{
     time::{Duration, Instant},
 };
 const NOT_LEADER: &str = "ERR NOT_LEADER\n";
-fn exchange(
+pub(super) fn exchange(
     target: &Endpoint,
     text: &[u8],
     deadline: Instant,
@@ -77,13 +77,13 @@ fn interrupted(command: &[String], reason: &str) -> Result<(), Failure> {
     }
     Err("request interrupted after connection; automatic routing stopped".into())
 }
-struct Options {
-    tls_directory: Option<PathBuf>,
-    principal: Option<u64>,
-    command_peers: Option<PathBuf>,
-    discover_via: Option<u64>,
+pub(super) struct Options {
+    pub tls_directory: Option<PathBuf>,
+    pub principal: Option<u64>,
+    pub command_peers: Option<PathBuf>,
+    pub discover_via: Option<u64>,
 }
-fn options(command: &mut Vec<String>) -> Result<Options, Failure> {
+pub(super) fn options(command: &mut Vec<String>) -> Result<Options, Failure> {
     let mut tls_directory = None;
     let mut principal = None;
     let mut command_peers = None;

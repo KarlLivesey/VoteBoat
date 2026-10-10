@@ -199,8 +199,12 @@ impl Driver {
             return "OK phase=Absent evidence=local_durable".into();
         };
         let local = service.local_drain_status();
-        format!("OK sequence={} operation={} phase={:?} ready={} resuming={} handoff={:?} publication_pending={} evidence=local_durable retained_replica=true cancellation_scope=local_gate membership_change={}",
+        let plan = self
+            .plan
+            .as_ref()
+            .map_or_else(String::new, plan::status_fields);
+        format!("OK sequence={} operation={} phase={:?} ready={} resuming={} handoff={:?} publication_pending={} evidence=local_durable retained_replica=true cancellation_scope=local_gate membership_change={}{}",
             record.sequence, record.request.operation.get(), record.phase, self.ready(service).is_ok(),
-            local.as_ref().is_some_and(|s| s.resuming), handoff(service, record.request.operation).map(|r| r.phase), self.worker.is_some(), self.plan.is_some())
+            local.as_ref().is_some_and(|s| s.resuming), handoff(service, record.request.operation).map(|r| r.phase), self.worker.is_some(), self.plan.is_some(), plan)
     }
 }

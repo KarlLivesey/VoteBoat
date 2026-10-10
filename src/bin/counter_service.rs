@@ -29,6 +29,8 @@ mod credential_reload;
 mod diagnostics;
 #[path = "support/drain_commands.rs"]
 mod drain_commands;
+#[path = "support/drain_runner.rs"]
+mod drain_runner;
 #[path = "support/leadership_commands.rs"]
 mod leadership_commands;
 #[path = "support/local_client.rs"]
@@ -89,6 +91,7 @@ Commands: move-leader OP CONFIG TARGET STORE INC; leadership-status OP; resume-l
 Retained-replica drain: --node-drain enabled requires the maintenance profile.\n\
 Commands: drain-node SEQUENCE OP CONFIG TARGET STORE INC; drain-status|resume-drain|cancel-drain|drain-stop SEQUENCE OP.\n\
 Membership drain: source uses --membership-drain FILE and all peers use --remote-admin-plan FILE; see docs/MAINTENANCE.md.\n\
+voteboat-counter drain-run BASE SOURCE SEQUENCE OP --service-tls TLS_DIRECTORY --principal ADMIN [--command-peers FILE]\n\
 Authenticated local credential reload: reload-access REQUEST EXPECTED NEXT; credential-status REQUEST.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -679,6 +682,10 @@ fn main() -> Result<(), Failure> {
                 let (base, id) = ports(base, id)?;
                 local_client::run(base, Some(id), rest)
             }
+        }
+        [verb, base, source, rest @ ..] if verb == "drain-run" => {
+            let (base, source) = ports(base, source)?;
+            drain_runner::run(base, source, rest)
         }
         _ => Err(HELP.into()),
     }

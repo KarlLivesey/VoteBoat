@@ -5,6 +5,19 @@ use super::*;
 use std::{collections::BTreeMap, io::Read};
 use voteboat::placement::PlannedVoterChange;
 
+pub(super) fn status_fields(plan: &MembershipDrainPlan) -> String {
+    let digest = plan
+        .digest()
+        .as_bytes()
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<String>();
+    format!(
+        " configuration_operation={} plan_digest={digest}",
+        plan.groups()[0].change.joint.operation.get()
+    )
+}
+
 fn line<'a>(
     lines: &mut impl Iterator<Item = &'a str>,
     kind: &str,

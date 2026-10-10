@@ -229,3 +229,31 @@ execution still needs the explicit request on the current leader. Cancellation
 only reopens the local gate; it does not restore removed voting rights. Restart
 never automatically stops the service. Source learner deletion, automatic
 multi-group coordination and replacement-promotion fault coverage remain open.
+
+### Drive the single-group workflow with one client
+
+With the same files and service profiles above, run:
+
+```sh
+voteboat-counter drain-run BASE SOURCE SEQUENCE OP \
+  --service-tls TLS_DIRECTORY --principal ADMIN
+```
+
+Use `--command-peers FILE` for explicit remote endpoints. Include the source
+and eligible leaders. The source must initially lead, or already have this
+durable drain. The runner starts/resumes that identity, reads the bound
+membership operation and plan fingerprint from authenticated source status,
+finds the current leader and drives joint/final completion. It asks the source
+to stop only after `ready=true` and the source rechecks its own stop conditions.
+
+The runner makes at most128 requests within45 seconds, with five-second request
+deadlines and one owned connection at a time. It is a foreground process; no
+daemon or new consensus owner is created. Killing it does not cancel accepted
+work. After an interruption, rerun the exact same sequence and operation.
+Malformed identities, changed fingerprints and authorization failures stop it.
+An interrupted configuration or shutdown request is an unknown outcome.
+
+Success says `shutdown_requested=true`: the source accepted shutdown after its
+local readiness check. It does not certify that remote worker joining finished
+or that every remote voter is currently available. The source remains a learner;
+multi-group coordination and final learner removal remain separate work.

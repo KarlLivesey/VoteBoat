@@ -1,7 +1,7 @@
 # Validation report — slice 35
 
 Current evidence index: [slice192 baseline review](baseline/slice192/README.md).
-Latest focused implementation evidence: [slice197b2b2 executable membership drain](baseline/slice197b2b2/README.md).
+Latest focused implementation evidence: [slice197b2c bounded drain runner](baseline/slice197b2c/README.md).
 Entries below are historical and retain their original source/coverage limits.
 
 The independent Rust model in `tests/ballot_model.rs` explores the complete
