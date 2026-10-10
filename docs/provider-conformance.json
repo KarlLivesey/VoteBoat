@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
+  "reviews": [
+    {
+      "public_contract": "LogStore",
+      "status": "partial",
+      "runners": [
+        {"file": "tests/provider_conformance.rs", "symbol": "host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native"},
+        {"file": "tests/provider_conformance.rs", "symbol": "model_log_store_satisfies_same_obligations_and_recovers_original_history"},
+        {"file": "tests/provider_conformance.rs", "symbol": "file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets"}
+      ],
+      "operations": [
+        {
+          "names": ["binding", "limits"],
+          "obligation": "Binding identifies one selected store incarnation and open session; declared limits validate. Invalid dependency tokens cannot change that binding or certify another store/session.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "cross_store"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"}
+          ],
+          "remaining": ["Concurrent multi-instance resource-pressure coverage beyond these two-store histories."]
+        },
+        {
+          "names": ["state"],
+          "obligation": "Return verified durable state for the exact group incarnation; missing is an error. Admission alone does not advance the durable view. Recovery preserves the acknowledged state.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"}
+          ],
+          "remaining": ["Older mismatching membership checkpoints and wider generated corruption/recovery histories."]
+        },
+        {
+          "names": ["append_batch"],
+          "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "refusal_and_reclamation"},
+            {"file": "tests/log_store.rs", "symbol": "every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix"}
+          ],
+          "remaining": ["General independently failing per-group batches for future backends; these providers implement stronger atomic batch recovery."]
+        },
+        {
+          "names": ["barrier"],
+          "obligation": "Certify only the supplied exact accepted tickets in the same domain: store identity/incarnation/session, group identity/incarnation, batch, revision, generation, last index and term. Invalid tokens retain genuine pending work. Uncertain persistence fences the store until explicit recovery; there is no cancel/rollback operation.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "exercise"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "cross_store"},
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "reopened"},
+            {"file": "tests/log_store.rs", "symbol": "failed_sync_or_publication_fences_without_acknowledging_the_transition"}
+          ],
+          "remaining": ["Broader generated device/sync failure schedules and future backend conformance. Physical sync may cover more bytes than the explicit returned evidence."]
+        },
+        {
+          "names": ["fetch_range"],
+          "obligation": "Return ordered durable entries within the selected generation and count/byte budget. Reject stale suffix generations and invalid boundaries. Refuse an oversized first entry instead of violating the budget; snapshot compaction reports its floor.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "suffix_and_ranges"},
+            {"file": "tests/log_store.rs", "symbol": "compacted_log_ranges_and_committed_prefix_protection_with_native_and_host"}
+          ],
+          "remaining": ["Generated boundary/capacity histories and future backend coverage."]
+        },
+        {
+          "names": ["supports_reclaim", "reclaim"],
+          "obligation": "Declare optional physical reclamation. Unsupported calls fail without mutation. Reject outstanding transitions and insufficient budgets. Successful cleanup preserves every group's current durable state and snapshot references, does not move the logical retention floor and issues no new durability ticket.",
+          "assertions": [
+            {"file": "tests/provider_conformance/log_store.rs", "symbol": "refusal_and_reclamation"},
+            {"file": "tests/log_reclaim.rs", "symbol": "rewrite_preserves_exact_live_state_and_never_reuses_tickets"}
+          ],
+          "remaining": ["General retention/segment policy and wider disk-full/device failure combinations."]
+        }
+      ]
+    }
+  ]
+}

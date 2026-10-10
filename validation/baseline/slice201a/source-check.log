@@ -1,0 +1,9 @@
+tests/provider_conformance.rs: OK
+tests/provider_conformance/log_store.rs: OK
+tests/support/mod.rs: OK
+src/log.rs: OK
+src/native/log_store.rs: OK
+docs/provider-conformance.json: OK
+docs/component-contracts.json: OK
+validation/check-provider-conformance.mjs: OK
+validation/check-provider-conformance.test.mjs: OK

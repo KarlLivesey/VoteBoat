@@ -6,6 +6,14 @@ fresh selected tests in [slice192](../validation/baseline/slice192/README.md).
 This is not a full-suite or release certificate. The first review started at
 1231153; do not attribute that review's results to today's source.
 
+Slice201a adds an [operation obligation ledger](provider-conformance.json) and
+reusable host/native LogStore cases. All eight operations have explicit reviewed
+obligations, selected assertions and remaining limitations; the other104
+inventory contracts are explicitly unreviewed by this new ledger. The metadata
+validator does not inspect assertion semantics or establish runtime conformance.
+Core-only host and native model/file execution results are recorded separately
+in [slice201a](../validation/baseline/slice201a/README.md).
+
 The original review started at revision1231153 against design-pack chapters11,12,17 and the
 component contract specification. This is a current requirement ledger, **not a
 completion certificate**. Selected tests do not prove all schedules. Detailed

@@ -1,0 +1,40 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-c48c5aebb65dfc8c)
+
+running 8 tests
+test unsupported_codec_and_host_store_decline_maintenance_before_mutation ... ok
+test host_checkpoint_decoder_cannot_bypass_mandatory_log_invariants ... ok
+test pending_transitions_and_encoding_budget_reject_before_replacement ... ok
+test rewrite_preserves_exact_live_state_and_never_reuses_tickets ... ok
+test live_image_can_exceed_one_batch_without_losing_cold_group_or_suffix ... ok
+test replacement_failure_fences_and_power_loss_recovers_whole_old_or_new_state ... ok
+test native_files_keep_exclusive_selection_and_reclaim_repeatedly ... ok
+test image_codec_rejects_every_truncation_bit_corruption_and_invalid_state ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/log_store.rs (target/debug/deps/log_store-db8969454f7bc57e)
+
+running 9 tests
+test suffix_fence_invalidates_uncompleted_old_generation ... ok
+test valid_checksums_cannot_hide_unbounded_policy_or_command_lengths ... ok
+test user_commands_leave_control_reserve_and_admission_is_bounded ... ok
+test restart_recovers_policy_identity_hard_state_suffix_and_commit ... ok
+test compacted_log_ranges_and_committed_prefix_protection_with_native_and_host ... ok
+test failed_sync_or_publication_fences_without_acknowledging_the_transition ... ok
+test public_store_conformance_runs_against_native_and_host ... ok
+test every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix ... ok
+test codec_roundtrips_rejects_every_single_bit_mutation_and_unbounded_lengths ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-70ab728b605d1ee5)
+
+running 3 tests
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test native::model_log_store_satisfies_same_obligations_and_recovers_original_history ... ok
+test native::file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

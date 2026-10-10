@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.14s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-dda7fda5b64439ba)
+
+running 1 test
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

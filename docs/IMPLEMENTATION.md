@@ -139,9 +139,70 @@ strict profiles clean while advancing the remaining capability work.
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Current199c–e: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d/e are recorded below; platform acceptance remains open. CI stays background feedback. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
-| Next201: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24. | Design component contracts,105-entry inventory and actual downstream/native tests. | Each operation has explicit ownership, cancellation, error and stale-completion obligations linked to assertions; missing checks remain listed for implementation rather than being inferred from a trait name. |
+| Current201a: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24, starting with replaceable log stores. | Design component contracts,105-entry inventory and actual downstream/native tests. | Review every operation against ownership, cancellation, error and stale-completion obligations. First run identical scoped-ticket/range/reclamation checks against host, native model and native file stores, including core-only builds. Unreviewed contracts remain explicitly counted. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice201a implemented evidence and next review
+
+The new operation ledger explicitly reviews all eight LogStore operations and
+links selected assertions and remaining obligations. Its validator reports the
+other104 inventory contracts as unreviewed, rejects broken/missing operation
+rows and assertion references, and cannot turn a named test into certification.
+Eleven validator checks pass, including ten negative fixtures. The component
+inventory now links the reusable cases and also records the completed203 merge
+operator surface, which its earlier entry omitted.
+
+One Rust case runs through the same helpers on a host provider in a core-only
+build; the all-feature/native-only targets add native model and actual file
+providers. Cases alter each ticket domain field, try foreign-store barriers,
+preserve genuine pending work, reject stale suffix generations, enforce range
+limits and exercise optional reclamation. Model/file reopen restores the same
+durable history with a new session, refusing the prior session's ticket. The
+fixture supplies its one-entry byte charge instead of imposing a storage format.
+All20 focused all-feature tests, one core-only and three native-only cases pass;
+formatting and all four strict Clippy profiles pass. No production behavior or
+public storage contract changes. See validation/baseline/slice201a.
+
+The newer7fca6a4 operator run is terminal: Ubuntu121 pass/one TCP replacement-drain
+timeout; macOS111 pass/11 failures. Neither reaches directory/transfer. Raw logs
+are preserved separately from the current local checks. Current199 should next
+diagnose the shared replacement-drain timeout, while201 continues with remaining
+provider obligations and202 retains combined membership/checkpoint recovery.
+The macro scope, separate-machine/macOS gaps and P7 gates remain unchanged.
+
+### Slice201a schema plan — reusable provider obligations
+
+Revalidated clean446c807. The preceding turn implemented and pushed the merge
+operator with passing tests, so it made concrete progress. The existing105-entry
+inventory lists test files but does not link operation obligations to individual
+assertions. Existing generic log checks are hidden behind a native-only target.
+This slice advances the P0 public-composition milestone, without changing storage
+or consensus semantics or treating metadata validation as runtime proof.
+
+Add a reviewed-contract ledger keyed by exact public contract and operation
+names. Each reviewed operation has an explicit obligation, named test anchors
+and remaining limitations. The validator checks coverage and references within
+reviewed contracts and reports the unreviewed inventory; it must not interpret a
+listed symbol as proof of all schedules. Initially review LogStore's eight
+operations. Subsequent201 work must extend this ledger;202 remains combined
+membership/checkpoint recovery, with199 platform diagnosis parallel.
+
+The reusable Rust cases take caller-owned LogStore instances and fixtures. Run
+the same cases on a core-only host provider, native ModelIo and actual native
+files. Inspect exact ticket domain fields, rejected-barrier state preservation,
+cross-store isolation, accepted-but-not-durable suffix replacement, stale ranges,
+bounded reads and optional physical reclamation. No provider may substitute a
+different group's or session's token. Refusal must not consume genuine pending
+work. Successful reclamation preserves durable logical state and supplies no
+new durability token. Dropping/reopening native files changes the session and
+retains the acknowledged log; tests own and clean their directories.
+
+Acceptance: all provider cases and negative ledger-validator fixtures pass;
+native file reopen and scoped-token checks pass; existing log-store and reclaim
+regressions remain green; core-only and all-feature execution plus all four
+strict Clippy profiles stay clean. Any failure is diagnosed before broadening
+the change. Shared-resource fairness and unreviewed contracts remain open.
 
 ### Slice203 implemented evidence and macro review
 

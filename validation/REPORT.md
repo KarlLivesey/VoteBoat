@@ -5593,3 +5593,21 @@ tests and fails six QUIC histories, preventing later targets from running. Raw
 logs retain that revision's scope. Those failures and the separate direct
 manifest-read timeout remain open; slice203 changes do not establish a macOS
 pass or full P0–P7 acceptance.
+
+## Slice201a — operation obligations and reusable storage cases
+
+Added a reviewed-operation ledger and validator, plus identical scoped-ticket,
+suffix, bounded-range and optional-reclamation cases for host, native model and
+native file stores. The ledger covers eight LogStore operations with explicit
+remaining scope and reports104 unreviewed inventory entries; its metadata checks
+are not a substitute for actual provider tests. All20 focused all-feature Rust
+tests, one core-only and three native-only cases pass. Eleven ledger-validator
+tests and formatting/all four strict Clippy profiles pass. Sources, commands and
+logs are in [slice201a](baseline/slice201a/README.md). No production storage or
+consensus behavior changes, and no external backend is claimed supported.
+
+The completed prior7fca6a4 operator run38034168031 reports Ubuntu121 passes and
+one replacement-drain TCP timeout; macOS111 passes and11 failures. Neither reaches
+directory/transfer. Logs identify the actual job/platform; they do not validate
+the current source. The shared replacement-drain timeout is the next focused199
+diagnosis. Full provider, platform, lifecycle-fault and P7 acceptance remain open.
