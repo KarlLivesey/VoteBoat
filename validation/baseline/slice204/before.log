@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.40s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 1 test
+
+thread 'drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop' (1656398) panicked at src/bin/support/drain_runner/recovery_tests.rs:136:5:
+Err("UNKNOWN configuration: reply deadline expired; rerun the same drain identity"); commands=["drain-node 1 2\n", "resume-drain 1 2\n", "configure 3\n"]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop ... FAILED
+
+failures:
+
+failures:
+    drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 5.10s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

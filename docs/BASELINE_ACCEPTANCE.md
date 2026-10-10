@@ -1,4 +1,12 @@
-# Baseline acceptance map — review192, operator evidence updated203
+# Baseline acceptance map — review192, operator evidence updated204
+
+Slice204 reproduces and fixes the foreground drain's configuration reply-timeout
+exit. Single- and multi-group configuration attempts now reobserve the original
+journal after recognized transport deadlines/closures, retaining the original
+time/request budget and identity checks. Eleven focused runner tests and eleven
+actual TCP/QUIC replacement/runner histories pass locally; the interrupted-runner
+fixture no longer retries the whole invocation to hide this timeout. This does
+not close the other timeout paths or establish current macOS acceptance.
 
 Current review starts at 639c1fb (slice191). The roadmap and catalogue below
 retain historical test scopes, with corrections from source inspection and

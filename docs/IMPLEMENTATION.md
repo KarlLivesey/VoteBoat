@@ -138,10 +138,73 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b4b2b4: bounded foreground multi-group drain runner | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4b2b3 source commands and immutable plan rows, existing authenticated group membership/leadership commands and bounded client. | Drive original per-group moves/configurations, tolerate lost waits and runner restart, reject changed source/plan/identity and stop only on source readiness. Retain explicit request/time budgets and cancellation semantics. |
 | Completed198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Current199c–e: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. Fixes and local evidence199d/e are recorded below; platform acceptance remains open. CI stays background feedback. |
+| Completed204: bounded configuration reply recovery | Keep an uncertain configuration attempt inside the original single-/multi-group drain budget; advances usable maintenance/P4. | Original immutable drain plans, journal observation, idempotent configuration commands and shared authenticated exchange. | An authenticated withheld-reply regression fails before and passes after; exhausted requests cannot reach shutdown; rejection/identity checks, actual TCP/QUIC replacement and single-/multi-group recovery histories pass. Broader platform acceptance199 remains open. |
 | Completed200: explicit group retirement operator workflow | Connect existing retirement proofs and retained-state release to bounded operator status/resumption; advances P6/chapter09. | Existing RetirementGuard, durable deletion, lifecycle receipts and completed maintenance commands; schema review before implementation. | Original identities survive lost replies/restart, retirement requires valid ownership and retention proof, stale owners stay fenced, and no command silently deletes unproven state. Broader recursive profiles remain separately tracked. |
 | Current201a: provider conformance obligation audit | Turn remaining public-contract obligations into a reusable checked matrix; advances P0/C01–C24, starting with replaceable log stores. | Design component contracts,105-entry inventory and actual downstream/native tests. | Review every operation against ownership, cancellation, error and stale-completion obligations. First run identical scoped-ticket/range/reclamation checks against host, native model and native file stores, including core-only builds. Unreviewed contracts remain explicitly counted. |
 | Following202: combined membership/checkpoint recovery | Close the next uncovered P4/P6 recovery obligations while preserving usable operators. | The201 obligation matrix, original configuration receipts and existing older-checkpoint/native harnesses. | Select and record missing mismatched-checkpoint/revocation schedules, preserve request identity through restart and reject stale authority; do not infer full coverage from selected passes. |
 | Completed203: compatible merge operator profile | Extend the usable executable lifecycle beyond a single-source split; advances P6/chapter09 while199 platform diagnosis remains parallel. | Existing merge intent/import/publication/retirement contracts and explicit bounded startup profiles. | Two real sources merge, preserve both retry histories and recover original operation IDs through interrupted import/activation and independent source retirement over TCP/QUIC. Three new executable histories pass; broader profiles and platform acceptance remain open. |
+
+### Slice204 implemented evidence and next review
+
+The focused authenticated fixture reproduced the recorded configuration reply
+timeout before the change: the runner exited after begin, resume and configure,
+without querying its original journal. A shared attempt classifier now returns
+recognized request/reply deadlines and socket closures to source observation
+in both single- and multi-group configuration paths. It does not report a
+committed configuration or renew any budget. Other transport/authentication
+errors and malformed or mismatched responses remain terminal.
+
+Eleven runner tests pass, including the actual five-second withheld-reply
+exchange followed by fresh pending status, the same configuration ID, fresh
+ready status and only then stop. A second authenticated case exhausts its three
+requests at the uncertain configure: no status or stop escapes the budget.
+The actual executable TCP/QUIC replacement tests pass (two), as do all nine
+selected single-/multi-group runner histories. The interrupted-runner test now
+requires one resumed invocation; its old outer retry workaround was removed.
+Formatting and all four strict Clippy profiles pass with zero diagnostics.
+See validation/baseline/slice204 for raw commands, failures, passes and hashes.
+
+The initial fixture needed its module path and TLS-readiness polling corrected
+before the pre-fix behavioral failure was captured. The first sandboxed run
+could not bind loopback; actual socket checks ran with the necessary permission.
+These setup failures are not treated as evidence for the production fix.
+
+The macro plan is unchanged: maintenance has stronger bounded recovery, while
+macOS/separate-machine acceptance, other timeout paths, provider obligations,
+combined lifecycle failures and P7 gates remain open. At this review d691c16's
+two workflows were pending, 446c807's workflows were in progress, and the old
+7fca6a4 platform/operator workflows had failed. No current-source remote pass
+is inferred. Current199 continues the platform failures; next201 reviews the
+remaining provider contracts, followed by202 combined membership/checkpoints.
+
+### Slice204 schema plan — bounded configuration reply recovery
+
+The previous turn listed outstanding work; it did not change implementation.
+Revalidated clean d691c16. The latest recorded operator run fails replacement
+drain on Linux and macOS when a configuration reply exceeds its five-second
+attempt deadline. The runner currently abandons its still-live overall budget.
+
+This slice advances the usable maintenance/P4 milestone: preserve the existing
+configuration operation and immutable drain plan, but return an incomplete
+configuration exchange to fresh source observation for specifically recognized
+transport timeout/closure outcomes. No timeout is a committed receipt. The
+source's original journal and readiness checks still decide whether another
+configuration step or shutdown is permitted. Authentication failures, malformed
+replies and wrong identities remain errors. The single- and multi-group paths
+must use the same classification. No new wire format, durable state, provider or
+consensus transition is needed; the small shared classifier prevents the two
+existing command paths from disagreeing about the same uncertain result.
+
+Ownership stays with the existing exchange: its channel is dropped before
+observation, and every request consumes the original count and absolute time
+budget. Restart still requires the original sequence, operation and plan. Tests
+will withhold an authenticated configuration reply, check fresh original-ID
+status before shutdown, and verify budgets and refusal cases. Then run the
+actual TCP/QUIC replacement and related drain histories plus strict lint/fmt.
+Next remains provider conformance201 (public replacement contracts, reviewed
+against real assertions), followed by combined membership/checkpoint202
+(original receipts and missing checkpoint/revocation schedules). Neither the
+platform milestone nor the full P0–P7 goal is complete from this slice alone.
 
 ### Slice201a implemented evidence and next review
 

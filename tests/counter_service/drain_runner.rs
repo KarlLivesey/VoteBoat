@@ -23,18 +23,8 @@ pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u6
     }
     command
 }
-fn finish(c: &mut Cluster, source: usize, attempts: usize) {
-    let mut remaining = attempts;
-    let output = loop {
-        let output = run(&mut command(c, source, "19701", 3));
-        remaining -= 1;
-        if output.status.success() || remaining == 0 {
-            break output;
-        }
-        // After source/target restart, the bounded wait can expire before
-        // readiness recovers. Exercise the documented original-ID rerun.
-        assert_eq!(String::from_utf8_lossy(&output.stderr).trim(), "Error: \"UNKNOWN configuration: reply deadline expired; rerun the same drain identity\"");
-    };
+fn finish(c: &mut Cluster, source: usize) {
+    let output = run(&mut command(c, source, "19701", 3));
     assert!(
         output.status.success(),
         "{} {}",
@@ -50,7 +40,7 @@ fn finish(c: &mut Cluster, source: usize, attempts: usize) {
 #[test]
 fn authenticated_runner_drives_membership_and_stops_source_tcp() {
     let (mut c, source, _) = membership_drain::prepare(false);
-    finish(&mut c, source, 1);
+    finish(&mut c, source);
 }
 #[cfg(feature = "quic")]
 #[test]
@@ -66,7 +56,7 @@ fn authenticated_runner_drives_membership_and_stops_source_quic() {
     }
     fs::write(&path, peers).unwrap();
     c.command_peers = Some(path);
-    finish(&mut c, source, 1);
+    finish(&mut c, source);
 }
 #[test]
 fn killed_runner_and_source_resume_original_durable_plan() {
@@ -88,7 +78,7 @@ fn killed_runner_and_source_resume_original_durable_plan() {
     c.start(target, "recover-member");
     c.start(source, "recover-member");
     drain::wait_status(&c, source, "phase=Active");
-    finish(&mut c, source, 2);
+    finish(&mut c, source);
 }
 #[test]
 fn runner_rejects_unauthorized_and_wrong_identity_without_drain() {

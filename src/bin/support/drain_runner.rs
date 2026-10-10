@@ -11,6 +11,9 @@ use super::{
 use std::time::{Duration, Instant};
 #[path = "drain_runner/multi.rs"]
 mod multi;
+#[cfg(test)]
+#[path = "drain_runner/recovery_tests.rs"]
+mod recovery_tests;
 
 #[derive(Debug, Eq, PartialEq)]
 struct Progress {
@@ -22,6 +25,23 @@ struct Progress {
 enum ConfigurationReply {
     AnotherPeer,
     ObserveSource,
+}
+fn configuration_attempt(attempt: Attempt, operation: u128) -> Result<ConfigurationReply, Failure> {
+    match attempt {
+        Attempt::Unavailable => Ok(ConfigurationReply::AnotherPeer),
+        Attempt::Reply(reply) => configuration_reply(&reply, operation),
+        // The request may have been accepted. Observe the bound source journal
+        // before retrying; neither a deadline nor a closed socket proves commit.
+        Attempt::Interrupted(
+            "request deadline expired"
+            | "reply deadline expired"
+            | "connection closed during request"
+            | "connection closed without a complete reply",
+        ) => Ok(ConfigurationReply::ObserveSource),
+        Attempt::Interrupted(reason) => {
+            Err(format!("UNKNOWN configuration: {reason}; rerun the same drain identity").into())
+        }
+    }
 }
 fn configuration_reply(reply: &str, operation: u128) -> Result<ConfigurationReply, Failure> {
     if reply.trim() == "ERR NOT_LEADER" {
@@ -140,18 +160,10 @@ impl Runner {
     }
     fn configure(&mut self, operation: u128) -> Result<(), Failure> {
         for target in 0..self.endpoints.len() {
-            match self.exchange(target, &format!("configure {operation}"))? {
-                Attempt::Unavailable => continue,
-                Attempt::Reply(reply) => match configuration_reply(&reply, operation)? {
-                    ConfigurationReply::AnotherPeer => continue,
-                    ConfigurationReply::ObserveSource => return Ok(()),
-                },
-                Attempt::Interrupted(reason) => {
-                    return Err(format!(
-                        "UNKNOWN configuration: {reason}; rerun the same drain identity"
-                    )
-                    .into())
-                }
+            let attempt = self.exchange(target, &format!("configure {operation}"))?;
+            match configuration_attempt(attempt, operation)? {
+                ConfigurationReply::AnotherPeer => continue,
+                ConfigurationReply::ObserveSource => return Ok(()),
             }
         }
         Ok(()) // No leader observed. A later bounded iteration may observe one.

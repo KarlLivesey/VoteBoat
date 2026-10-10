@@ -108,14 +108,8 @@ impl Runner {
                 self.handoff(peer, row, voter)
             }
             "inconclusive_local_absence" | "finalize_requires_authorization" => {
-                match self.exchange(peer, &row.command(&format!("configure {op}")))? {
-                    Attempt::Unavailable => Ok(()),
-                    Attempt::Reply(text) => configuration_reply(&text, op).map(|_| ()),
-                    Attempt::Interrupted(reason) => Err(format!(
-                        "UNKNOWN group configuration: {reason}; rerun the same drain identity"
-                    )
-                    .into()),
-                }
+                let attempt = self.exchange(peer, &row.command(&format!("configure {op}")))?;
+                configuration_attempt(attempt, op).map(|_| ())
             }
             _ => Err("invalid group configuration progress".into()),
         }

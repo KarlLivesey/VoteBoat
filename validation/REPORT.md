@@ -5611,3 +5611,26 @@ one replacement-drain TCP timeout; macOS111 passes and11 failures. Neither reach
 directory/transfer. Logs identify the actual job/platform; they do not validate
 the current source. The shared replacement-drain timeout is the next focused199
 diagnosis. Full provider, platform, lifecycle-fault and P7 acceptance remain open.
+
+## Slice204 — bounded drain configuration recovery
+
+A real authenticated command fixture withholds the configuration reply beyond
+the existing five-second attempt deadline. Before the production change it
+reproduces `UNKNOWN configuration: reply deadline expired` after three commands.
+After the change it observes pending original-journal status, retries the same
+configuration ID, observes readiness and only then requests stop. A second
+fixture exhausts its three-request budget at the uncertain configure and proves
+no status or shutdown request escapes the limit. The absolute deadline remains
+unchanged. Invalid authentication, malformed replies and wrong identities are
+still refused. Both configuration runner paths use the same classification.
+
+All eleven selected runner unit tests pass, including those two authenticated
+histories. Actual executable replacement tests pass over TCP and QUIC (two);
+all nine selected single-/multi-group runner histories pass, including restart,
+checkpoint and refusal cases. The former outer retry in the interrupted-runner
+test is removed, requiring one resumed invocation. Formatting and all four
+strict Clippy profiles pass with zero diagnostics. Initial fixture compilation,
+TLS-readiness polling and sandbox socket-permission issues were fixed before
+capturing the pre-change behavioral failure. Evidence and commands are retained
+in [slice204](baseline/slice204/README.md). No macOS or full-suite pass is claimed;
+other timeout paths, provider conformance and the full P0–P7 goal remain open.
