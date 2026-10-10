@@ -2,8 +2,12 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 pub(super) fn cluster(quic: bool) -> Cluster {
+    cluster_with_tls(quic, None)
+}
+pub(super) fn cluster_with_tls(quic: bool, tls: Option<PathBuf>) -> Cluster {
     let mut c = Cluster::new();
     c.quic = quic;
+    c.tls = tls;
     c.leadership_maintenance = true;
     c.node_drain = true;
     let access = c.root.join("access.txt");

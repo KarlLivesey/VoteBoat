@@ -67,7 +67,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 const HELP: &str =
     "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--command-listen ADDRESS] [--discovery-peers FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter placement-plan INPUT learner OPERATION | replace RETIRING LEARNER_OPERATION VOTER_OPERATION retire|retain | voters OPERATION retire|retain POLICY\n\
-voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
+voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE] [--leadership-maintenance enabled]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|timings|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
 voteboat-counter client BASE_PORT NODE events SESSION AFTER LIMIT\n\
@@ -647,7 +647,12 @@ fn main() -> Result<(), Failure> {
             };
             let config =
                 setup::configuration(Path::new(root), id, base, Path::new(tls), create, input)?;
-            let (index, term) = setup::enroll(config, Path::new(source), source_id.parse()?)?;
+            let (index, term) = setup::enroll(
+                config,
+                Path::new(source),
+                source_id.parse()?,
+                options.leadership_maintenance,
+            )?;
             println!("OK enrolled node={id} checkpoint={index} term={term} evidence=trusted_local_source");
             Ok(())
         }
@@ -977,9 +982,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
             "--wal-reclaim-ms" if wal_reclaim_ms.is_none() && args[0] == "serve" => {
                 wal_reclaim_ms = Some(positive_option(&value, "WAL reclaim interval")?);
             }
-            "--leadership-maintenance"
-                if leadership_maintenance.is_none() && args[0] == "serve" =>
-            {
+            "--leadership-maintenance" if leadership_maintenance.is_none() => {
                 leadership_maintenance = Some(enabled_option(&value, "--leadership-maintenance")?);
             }
             "--node-drain" if node_drain.is_none() && args[0] == "serve" => {

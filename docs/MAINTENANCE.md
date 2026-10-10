@@ -66,6 +66,21 @@ requested `--remote-admin-plan` operations and the wrapper's actual readiness
 requirements. Automatic administration is refused with this profile. There is
 no automatic migration or history eviction.
 
+When enrolling an assigned learner from this profile, select the same schema:
+
+```text
+enroll create DESTINATION NODE BASE TLS_DIR SOURCE_DIRECTORY SOURCE_NODE --deployment DEPLOYMENT_FILE --leadership-maintenance enabled
+```
+
+Stop the source and destination first and checkpoint the committed learner
+assignment. Use `enroll recover` with the same inputs after an uncertain result.
+The import preserves Counter retries and replicated maintenance records; a
+wrong profile refuses rather than converting data. Start the learner with
+`serve recover-member`, the same maintenance flag and its access policy.
+Enrollment does not copy the source's local `drain.record`: the new learner
+starts without `--node-drain`. Enabling that local journal on an already
+enrolled store still requires an explicit migration.
+
 Use the ordinary authenticated client flags, selecting a current leader node:
 
 ```text

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
-fn command(c: &Cluster, source: usize, operation: &str, principal: u64) -> Command {
+pub(super) fn command(c: &Cluster, source: usize, operation: &str, principal: u64) -> Command {
     let mut command = Command::new(BIN);
     command
         .args([
@@ -13,7 +13,9 @@ fn command(c: &Cluster, source: usize, operation: &str, principal: u64) -> Comma
             operation,
         ])
         .arg("--service-tls")
-        .arg(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls"))
+        .arg(c.tls.clone().unwrap_or_else(|| {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls")
+        }))
         .arg("--principal")
         .arg(principal.to_string());
     if let Some(path) = &c.command_peers {

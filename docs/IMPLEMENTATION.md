@@ -129,9 +129,66 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b1: durable local drain intent and cancellation | Restore the drain gate before recovered work and reopen only after durable cancellation; advances197, P2/P4 and chapter09. |197a, native atomic record I/O, explicit host journal ownership and tracked owner admissions. | Versioned bounded journal with required-record recovery, exact owner/sequence, corruption and uncertainty refusal; stale assignments remain gated; exact enable completions release cancellation. Native TCP/WAL and QUIC/checkpoint restart histories pass. |
 | Completed197b2a: executable retained-replica drain | Connect durable gates and handoff to authenticated maintenance and shutdown; advances P4/P2 and chapter09. |197a/197b1 gates and journal,196 durable handoff, authenticated command sessions. | Original identities survive restart; missing journals fail closed; local admission stays closed until durable cancellation; stop requires completed recorded handoff, unchanged stable configuration and local quiescence. Remaining configured voters must satisfy the recursive policy. |
 | Completed197b2b1: Rust membership evacuation | Bind the original evacuation plan and resume joint/final changes; advances coordinated drain, P4/P2 and chapter09. |197b1 durable journal, existing Node readiness and placement authorization, joint consensus. | Bounded host plan, exact digest binding, complete local assignment checks and selected TCP/QUIC joint/final restart histories preserve original IDs and allow remaining voters to write after source shutdown. The source remains a non-voting learner. |
-| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Automatic multi-group orchestration, replacement-promotion drain histories and final learner removal remain explicit scope. |
+| Current197b2b2: executable membership-aware coordinated drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Automatic multi-group orchestration, phase-internal replacement faults and final learner removal remain explicit scope. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b2d schema plan — replacement-voter drain and maintenance enrollment
+
+The next complete drain path replaces the departing voter with an already
+assigned learner. Offline enrollment currently constructs plain Counter schema1
+even when the source uses the maintenance schema2 profile. Add explicit
+`enroll ... --leadership-maintenance enabled`, constructing the same application
+wrapper and wire8 selection as serving. Default enrollment keeps schema1/wire7.
+Do not infer or convert schemas. This prerequisite advances P4 coordinated drain:
+without it a newly assigned store cannot join the maintenance-profile service.
+
+Ownership and recovery stay with the existing offline native enrollment contract:
+source and destination must be stopped, source checkpoint membership must be
+current and stable, and the exact destination must be its learner. Recover the
+source application (including the committed tail) using the selected profile,
+then validate/import the pinned image. Wrong profiles fail before destination
+creation. Retrying an unobserved successful import must preserve the exact image
+and retry/maintenance records. No new journal, watermark or protocol is added.
+
+Acceptance: actual authenticated TCP/QUIC processes add an exact fourth learner,
+checkpoint and enroll it under schema2, refuse default-schema import, and retry
+the original import. Run the existing drain client with the replacement offline,
+confirm no joint configuration is admitted before live readiness, interrupt the
+client during preparation, then start the learner and resume the original drain.
+Require committed final voters including the replacement, joined source shutdown,
+preserved retry state and fresh writes after another remaining voter stops.
+All formatting and strict Clippy profiles must remain clean. Multi-group drain
+and final learner deletion remain the subsequent coordinated-drain work; the
+linked assignment198 and platform199 deliverables remain unchanged.
+
+### Slice197b2d implementation evidence
+
+Offline counter enrollment now accepts an explicit maintenance profile and uses
+the same application wrapper as serving for source recovery and destination
+validation. It retains the existing pinned-image, exact learner, stable-source,
+bootstrap, capacity and original-image retry checks. The plain profile remains
+the default. There is no schema conversion or copied local drain journal.
+
+Two authenticated native process histories (TCP/TLS and QUIC peers) assign
+store404/incarnation7 as learner4, checkpoint the actual committed membership,
+import schema2 data and an existing completed maintenance record, and preserve
+the original image on retry. Wrong-profile create/recover attempts refuse.
+The drain client waits for the offline replacement without admitting a joint
+record; after interrupting that client, starting the learner and retrying the
+original IDs completes handoff and joint/final changes. The source stops and
+joins. With another original voter killed, the remaining original voter and
+replacement commit new writes and preserve retries across another restart.
+See [slice197b2d evidence](../validation/baseline/slice197b2d/README.md).
+All94 service histories and8 command unit tests pass on Linux. Formatting,
+strict all-target Clippy for all/default/no-default features and the103-entry
+contract inventory pass. The initial sandbox-only socket refusal is retained
+separately from the successful authorized native runs.
+
+Macro review: the single-group operator path can now replace a departing voter
+without shrinking the voter count. This closes the demonstrated enrollment
+profile gap; multi-group drain, final learner deletion, phase-internal fault
+coverage and full P0–P7/platform/performance acceptance remain open.
 
 ### Slice197b2c schema plan — bounded authenticated drain runner
 

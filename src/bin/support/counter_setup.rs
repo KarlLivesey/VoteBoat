@@ -53,6 +53,7 @@ pub fn enroll(
     mut config: NativeMemberStartup,
     source: &Path,
     source_node: u64,
+    maintenance: bool,
 ) -> Result<(u64, u64), Failure> {
     use voteboat::{
         native::{log_store::*, snapshot_store::*},
@@ -70,9 +71,16 @@ pub fn enroll(
         .provisioned_stores
         .get(&node(source_node))
         .ok_or("source node missing from deployment")?;
-    config.startup.tls = checked(config.startup.tls.with_wire_version(7))?;
-    let mut destination_app = application()?;
-    let mut source_app = application()?;
+    config.startup.tls =
+        checked(
+            config
+                .startup
+                .tls
+                .with_wire_version(if maintenance { 8 } else { 7 }),
+        )?;
+    let mut destination_app =
+        super::counter_application::Application::new(application()?, maintenance)?;
+    let mut source_app = super::counter_application::Application::new(application()?, maintenance)?;
     let log = checked(NativeLogStore::recover(
         FileLogIo::open(&source_path)?,
         source_store,

@@ -39,7 +39,7 @@ fn begin(c: &Cluster, source: usize, target: usize, op: &str) -> String {
         ],
     )
 }
-fn status(c: &mut Cluster, op: &str, phase: &str) -> (usize, String) {
+pub(super) fn status(c: &mut Cluster, op: &str, phase: &str) -> (usize, String) {
     let end = Instant::now() + Duration::from_secs(15);
     loop {
         let leader = c.leader();

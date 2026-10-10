@@ -588,6 +588,8 @@ identity without the deployment's explicit identity/lifetime authorization.
 The command opens no sockets and starts no workers. BASE_PORT, TLS_DIRECTORY and
 optional PEERS_FILE describe the same checked deployment used by subsequent
 `serve recover-member`; no transport flag is needed for offline enrollment.
+For a maintenance-schema source, pass `--leadership-maintenance enabled` to
+both enrollment and serving; see [maintenance enrollment](MAINTENANCE.md#authenticated-counter-executable).
 To resolve a lost completed reply, replace `create` with `recover` and use the
 same source image. A changed image is refused instead of overwriting an import.
 Missing files are not created in Recover mode. Source recovery may advance its

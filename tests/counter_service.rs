@@ -41,6 +41,8 @@ mod command_endpoints;
 mod credential_reload;
 #[path = "counter_service/drain.rs"]
 mod drain;
+#[path = "counter_service/drain_replacement.rs"]
+mod drain_replacement;
 #[path = "counter_service/drain_runner.rs"]
 mod drain_runner;
 #[path = "counter_service/events.rs"]
@@ -283,6 +285,9 @@ impl Cluster {
             .arg(source.to_string());
         if let Some(path) = &self.deployment {
             command.arg("--deployment").arg(path);
+        }
+        if self.leadership_maintenance {
+            command.args(["--leadership-maintenance", "enabled"]);
         }
         run(&mut command)
     }
