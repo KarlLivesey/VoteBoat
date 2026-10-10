@@ -1,0 +1,38 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 32 tests
+test failure::tests::drive_failure_keeps_poll_totals_and_original_error ... ok
+test failure::tests::partial_history_preserves_receipts_and_uncertainty_without_success_summary ... ok
+test offered::maintenance::tests::checkpoint_admission_or_unfinished_snapshot_never_counts_as_completion ... ok
+test offered::maintenance::tests::late_start_still_retains_the_full_requested_pause_duration ... ok
+test offered::maintenance::tests::missed_opportunities_are_bounded_skips_and_must_all_be_reported_before_finish ... ok
+test offered::maintenance::tests::reclaim_requires_the_original_full_ticket_and_never_reports_failure_as_freed_bytes ... ok
+test lanes::tests::assignments_preserve_totals_and_never_overlap ... ok
+test offered::tests::missed_schedule_does_not_shift_intended_start_or_drop_due_ids ... ok
+test offered::tests::stage_failure_retains_both_work_and_cleanup_errors ... ok
+test offered::tests::windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot ... ok
+test offered::maintenance::tests::invalid_or_missed_pause_never_silently_becomes_a_shorter_outage ... ok
+test offered::tests::group_window_can_refuse_before_global_window_is_full ... ok
+test offered::tests::refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts ... ok
+test offered::tests::no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known ... ok
+test observe::tests::observer_preserves_real_store_rejection_and_durable_ticket_scope ... ok
+test offered::maintenance::tests::checkpoint_rejects_leader_term_store_session_and_reference_scope_changes ... ok
+test lanes::tests::partial_replica_startup_joins_previously_opened_nodes ... ok
+test failure::tests::native_capacity_failure_retains_applied_prefix_and_joins_workers ... ok
+test lanes::tests::failed_lane_aborts_prepared_lanes_and_joins_hosts ... ok
+test lanes::tests::uneven_three_lane_workload_keeps_exact_global_counts ... ok
+test lanes::tests::tcp_two_lanes_share_groups_and_recover ... ok
+test shared::recovery::tcp_each_stale_group_requires_snapshot_after_transport_restart ... ok
+test shared::recovery::tcp_recovery_quota_drains_eight_groups_with_foreground_writes ... ok
+test shared::recovery::maintenance::tcp_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+test lanes::tests::quic_two_lanes_share_groups_and_recover ... ok
+test shared::recovery::quic_recovery_quota_drains_eight_groups_with_foreground_writes ... ok
+test shared::recovery::quic_each_stale_group_requires_snapshot_after_transport_restart ... ok
+test shared::recovery::maintenance::quic_automatic_maintenance_progresses_with_held_snapshot_recovery ... ok
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... ok
+test shared::drain::tcp_mixed_voter_and_learner_assignments_resume_together ... ok
+test shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress ... ok
+test shared::drain::quic_mixed_voter_and_learner_assignments_resume_together ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 18.31s

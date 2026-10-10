@@ -131,9 +131,90 @@ strict profiles clean while advancing the remaining capability work.
 | Completed197b2b1: Rust membership evacuation | Bind the original evacuation plan and resume joint/final changes; advances coordinated drain, P4/P2 and chapter09. |197b1 durable journal, existing Node readiness and placement authorization, joint consensus. | Bounded host plan, exact digest binding, complete local assignment checks and selected TCP/QUIC joint/final restart histories preserve original IDs and allow remaining voters to write after source shutdown. The source remains a non-voting learner. |
 | Completed197b2b2: executable membership-aware single-group drain | Complete the operator workflow for configurations requiring replica replacement/removal; advances P4/P2 and chapter09. |197b2a authenticated operator path,197b2b1 bound plans, existing placement authorization and joint/final executor. | Single-group executable plan/start/resume/status/stop composes authenticated membership commands. Slice197b2c adds the bounded authenticated foreground runner and killed-runner/source recovery. Slice197b2d adds maintenance-profile learner enrollment and selected replacement-voter drain histories. Slice197b2e covers explicit final learner removal after source shutdown, accepted-but-uncommitted recovery and stale-source gating. |
 | Completed197b3: bounded multi-group Rust dispatcher | Advance independent membership evacuations fairly while retaining original identities; advances P4/P2 and chapter09. |197b2b1 immutable plan, journal, ordinary Node configuration ownership and native shared-WAL assembly. | Bounded scan/in-flight slots, stale ticket refusal, per-group errors, native TCP/QUIC mixed completed/joint/unstarted recovery and surviving writes/retries. Broader failures remain open. |
-| Current197b4: mixed-role and operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b3 dispatcher, retained-group drain path, exact assignment inventory and existing authenticated operator contracts. | Cover voter and learner-only source assignments together, preserve original plan through partial progress/restart, expose bounded operator start/status/resume/stop with no premature source stop. This remains planned work; the counter executable is still single-group. |
+| Completed197b4a: mixed-role Rust drain | Cover the actual complete source assignment set; advances P4/P2 and chapter09. |197b3 dispatcher, original journal and local source readiness contracts. | Combined bounded voter/learner plans, exact identity/configuration binding, no spurious learner actions, TCP/QUIC four-group shared-WAL partial progress and restart with preserved data receipts. |
+| Current197b4b: operator multi-group drain | Complete coordinated node maintenance across actual assignments; advances P4/P2 and chapter09. |197b4a mixed-role dispatcher, exact assignment inventory and existing authenticated operator contracts. | Expose bounded operator start/status/resume/stop across groups, preserving the original plan and refusing premature source stop. This remains planned work; the counter executable is still single-group. |
 | Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
 | Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197b4a schema plan — mixed voter and learner source assignments
+
+Extend the existing immutable MembershipDrainPlan with explicitly retained
+learner groups. Each binds the exact stable Configuration and source store;
+it emits no transfer or configuration change. Preserve the original voter-only
+constructor and v1 digest. A new constructor accepts both sorted disjoint sets,
+applies the existing combined1024-group/4MiB limits and binds all fields using a
+distinct digest domain when retained groups exist. The journal's existing plan
+digest and complete assignment list remain authoritative; no file format or
+consensus change is needed.
+
+The bounded coordinator scans the complete sorted assignment list. A retained
+group is complete only while its exact unchanged stable configuration is
+committed; an uncommitted match waits and a changed configuration refuses.
+Source readiness still requires the actual full assignment set, exact source
+identity, application catch-up, campaign suppression and drained work for every
+group. No learner votes or stored leader hint can substitute for those checks.
+
+Recovery reloads the original combined plan and journal before Node polling.
+Omitting or modifying a retained assignment changes the digest and refuses.
+The host still owns normal request cancellation and shutdown. Acceptance:
+construction bounds/identity/order/digest tests; accepted-but-uncommitted learner
+state waits; changed/omitted state refuses; coordinator includes retained groups
+without emitting actions. Native TCP/QUIC shared-WAL histories combine three
+voter evacuations with one already-learner assignment, restart at mixed progress,
+then verify source shutdown and exact retries/new values in all four groups.
+This advances197b4's Rust path; multi-group executable controls remain next.
+
+Regression-driven repair: the existing QUIC learner-retirement process history
+returned `ERR not_proposed=Busy` to the drain runner, which exited instead of
+re-observing progress. The exact reply explicitly means no proposal occurred.
+Classify only that response as a bounded status/retry step, preserving the
+original operation and existing128-request/45-second limits. Authorization,
+identity, malformed and unknown replies keep their existing terminal handling.
+This repair is needed to retain the usable operator-drain contract while adding
+mixed assignments; it introduces no new background work or authority.
+
+### Slice197b4a implementation evidence
+
+`MembershipDrainPlan::with_retained_learners` accepts sorted disjoint voter
+evacuations and exact already-learner assignments under the combined original
+group/byte limits. `groups()` remains the voter subset; `assignments()` is the
+complete sorted inventory. Voter-only digest calculation is unchanged. The
+additional digest domain binds all retained configurations without changing
+the journal format. The coordinator and source readiness use the full inventory.
+Retained groups emit no transfer or membership change; changed state refuses,
+uncommitted matching state waits, and committed matching state still needs
+source application catch-up and local quiescence before shutdown.
+
+Three new host tests cover disjoint/sorted identities, omitted/changed plans,
+all-learner construction, combined bounds, accepted-but-uncommitted membership,
+changed membership and no spurious dispatch. The new native TCP/QUIC histories
+first make source1 a learner in group4, then drain groups1–3 while retaining4.
+They reopen the original mixed plan and journal from WAL or checkpoints at
+partial progress, finish the original changes, stop/join the source, and verify
+exact old receipt values and fresh writes in all four groups. The initial QUIC
+test failed because its inherited three-group scan omitted a fourth-group
+cursor position; the harness now derives its scan count from the complete plan.
+That failure is retained with the final results in
+[slice197b4a evidence](../validation/baseline/slice197b4a/README.md).
+The broader service run also exposed the pre-existing exact-Busy runner exit
+described above. A deterministic reply-classification test fails before its
+repair and passes afterwards; unrelated/unknown/unauthorized/wrong-operation
+replies still fail. Both native learner-retirement histories then pass with the
+original budget and stop conditions.
+All32 native assembly tests, nine membership-plan tests,29 minimal-profile Raft
+tests and11 native drain-journal tests pass. Formatting and all three strict
+Clippy profiles remain at zero diagnostics;104 contract metadata/path checks
+pass. Parent revision06fbcab's background CI was still pending when checked;
+no new macOS evidence is inferred.
+After the Busy-response repair, all96 service tests and nine command unit tests
+also pass; the earlier failing service run and deterministic before/after
+response check remain in the evidence directory.
+
+Macro review: mixed source roles no longer require pretending every assignment
+needs a voting change. The Rust path advances the same coordinated-drain
+milestone; executable multi-group controls, broader faults and platform evidence
+remain open. No new membership protocol, automatic learner removal, file deletion
+or remote-availability certificate is introduced.
 
 ### Slice197b3 schema plan — bounded multi-group drain dispatcher
 

@@ -61,11 +61,11 @@ pub struct MembershipDrainCoordinator {
 }
 impl MembershipDrainCoordinator {
     pub fn new(plan: MembershipDrainPlan, limit: usize) -> Result<Self, DrainCoordinatorError> {
-        if limit == 0 || limit > plan.groups().len() {
+        if limit == 0 || limit > plan.assignments().len() {
             return Err(DrainCoordinatorError::InvalidLimit);
         }
         Ok(Self {
-            outstanding: vec![None; plan.groups().len()],
+            outstanding: vec![None; plan.assignments().len()],
             plan,
             domain: Arc::new(()),
             in_flight: 0,
@@ -89,7 +89,7 @@ impl MembershipDrainCoordinator {
         }
         let index = self
             .plan
-            .groups()
+            .assignments()
             .binary_search_by_key(&ticket.group, |entry| entry.group)
             .map_err(|_| DrainCoordinatorError::StaleTicket)?;
         if self.outstanding[index].as_ref() != Some(ticket) {
@@ -131,7 +131,7 @@ impl MembershipDrainCoordinator {
             if self.outstanding[index].is_some() {
                 continue;
             }
-            let group = self.plan.groups()[index].group;
+            let group = self.plan.assignments()[index].group;
             let Some(core) = observe(group) else {
                 batch.unavailable += 1;
                 continue;

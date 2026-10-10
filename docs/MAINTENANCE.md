@@ -268,6 +268,9 @@ daemon or new consensus owner is created. Killing it does not cancel accepted
 work. After an interruption, rerun the exact same sequence and operation.
 Malformed identities, changed fingerprints and authorization failures stop it.
 An interrupted configuration or shutdown request is an unknown outcome.
+An exact `ERR not_proposed=Busy` configuration reply causes another source
+status check and a retry of the original operation within the same budget.
+It is not reported as commitment or success; other error replies still stop.
 
 Success says `shutdown_requested=true`: the source accepted shutdown after its
 local readiness check. It does not certify that remote worker joining finished
@@ -342,3 +345,31 @@ plan and journal for the local stop check. The native shared-WAL tests exercise
 three groups with different handoff leaders, incomplete joint progress, lost
 waits and restart over TCP/QUIC. This Rust dispatcher does not add multi-group
 commands to the single-group executable or certify remote availability.
+
+### Mixed source roles
+
+Use `MembershipDrainPlan::with_retained_learners` when the source is already a
+learner in some groups. Supply the voter evacuations plus a second sorted list
+of `DrainRetainedGroup { group, original }` entries. The lists must be disjoint;
+their combined count is bounded to1024 and retained plan storage to4MiB. Each
+retained configuration must assign the exact source store as a learner. A plan
+containing only retained learner groups is also supported.
+
+`groups()` returns the voter evacuations. `retained_learners()` returns the
+unchanged learner assignments; `assignments()` returns the complete sorted
+source inventory used by the journal, coordinator and final local readiness
+check. Use that complete inventory when checking coverage.
+
+Retained groups emit no transfer or configuration request. They count as
+complete only when the observed stable configuration exactly matches the plan
+and is committed. An accepted-but-uncommitted match waits; a changed membership
+refuses. Local readiness additionally requires application catch-up and drained
+owned work, as for voter groups. Replication continues until checked shutdown;
+the learner's eventual removal remains a separate authorized operation.
+
+Voter-only plans keep their original digest. Plans containing retained groups
+use a distinct digest domain binding all original configurations and roles.
+The journal format is unchanged; after restart reload the exact mixed plan.
+Omitting a learner group or substituting its configuration fails verification.
+The single-group counter plan file and commands still expose voter evacuation
+only; these mixed-role APIs currently serve Rust hosts.

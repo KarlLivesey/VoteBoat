@@ -5,7 +5,9 @@ use crate::{identity::*, membership::*, placement::PlannedVoterChange, raft::*};
 use std::mem::size_of;
 mod digest;
 mod progress;
+mod retained;
 pub use progress::MembershipDrainAction;
+pub use retained::DrainRetainedGroup;
 
 pub const MAX_DRAIN_PLAN_BYTES: usize = 4 * 1024 * 1024;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -45,6 +47,8 @@ pub struct MembershipDrainPlan {
     owner: PeerIdentity,
     operation: OperationId,
     groups: Vec<DrainMembershipGroup>,
+    retained: Vec<DrainRetainedGroup>,
+    assignments: Vec<crate::runtime::DrainGroup>,
     digest: DrainPlanDigest,
 }
 impl MembershipDrainPlan {
@@ -53,9 +57,23 @@ impl MembershipDrainPlan {
         operation: OperationId,
         groups: Vec<DrainMembershipGroup>,
     ) -> Result<Self, DrainPlanError> {
-        if groups.is_empty()
-            || groups.len() > MAX_LOCAL_DRAIN_GROUPS
+        Self::with_retained_learners(owner, operation, groups, Vec::new())
+    }
+    /// Retain already non-voting source assignments without inventing a
+    /// membership operation. Both input lists must be sorted and disjoint.
+    pub fn with_retained_learners(
+        owner: PeerIdentity,
+        operation: OperationId,
+        groups: Vec<DrainMembershipGroup>,
+        retained: Vec<DrainRetainedGroup>,
+    ) -> Result<Self, DrainPlanError> {
+        let count = groups.len().saturating_add(retained.len());
+        if count == 0
+            || count > MAX_LOCAL_DRAIN_GROUPS
             || groups.windows(2).any(|pair| pair[0].group >= pair[1].group)
+            || retained
+                .windows(2)
+                .any(|pair| pair[0].group >= pair[1].group)
         {
             return Err(DrainPlanError::InvalidPlan);
         }
@@ -68,22 +86,37 @@ impl MembershipDrainPlan {
                 .checked_add(entry.change.joint.retained_bytes())?
                 .checked_add(entry.change.finalize.retained_bytes())
         });
+        let bytes = retained::retained_bytes(bytes, &retained, count);
         if bytes.is_none_or(|n| n > MAX_DRAIN_PLAN_BYTES) {
             return Err(DrainPlanError::TooLarge);
         }
         for entry in &groups {
             entry.validate(owner)?;
         }
-        let digest = digest::plan(owner, operation, &groups);
+        for entry in &retained {
+            entry.validate(owner)?;
+        }
+        let assignments = retained::assignments(&groups, &retained)?;
+        let digest = digest::with_retained(digest::plan(owner, operation, &groups), &retained);
         Ok(Self {
             owner,
             operation,
             groups,
+            retained,
+            assignments,
             digest,
         })
     }
+    /// Voter evacuations only. Use `assignments` for the complete source set.
     pub fn groups(&self) -> &[DrainMembershipGroup] {
         &self.groups
+    }
+    pub fn retained_learners(&self) -> &[DrainRetainedGroup] {
+        &self.retained
+    }
+    /// Complete sorted inventory, including already non-voting assignments.
+    pub fn assignments(&self) -> &[crate::runtime::DrainGroup] {
+        &self.assignments
     }
     pub fn digest(&self) -> DrainPlanDigest {
         self.digest
@@ -94,14 +127,7 @@ impl MembershipDrainPlan {
             sequence,
             request: LocalDrainRequest {
                 operation: self.operation,
-                groups: self
-                    .groups
-                    .iter()
-                    .map(|entry| crate::runtime::DrainGroup {
-                        group: entry.group,
-                        configuration: entry.original.id(),
-                    })
-                    .collect(),
+                groups: self.assignments.clone(),
             },
             phase: DrainPhase::Active,
             plan: Some(self.digest),

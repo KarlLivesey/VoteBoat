@@ -33,7 +33,7 @@ where
         if self.state != NodeState::Running
             || drain.resuming
             || !plan
-                .groups()
+                .assignments()
                 .iter()
                 .map(|g| g.group)
                 .eq(self.local.owner.groups())
@@ -44,7 +44,7 @@ where
         {
             return Ok(false);
         }
-        for entry in plan.groups() {
+        for entry in plan.assignments() {
             let core = self
                 .local
                 .owner
@@ -55,7 +55,7 @@ where
             {
                 return Err(DrainPlanError::WrongIntent);
             }
-            if !entry.completed(core)?
+            if !plan.completed(core)?
                 || !self
                     .local
                     .applications
@@ -65,7 +65,7 @@ where
                     core,
                     DrainGroup {
                         group: entry.group,
-                        configuration: entry.target_configuration(),
+                        configuration: plan.target_configuration(entry.group)?,
                     },
                 ) != DrainGroupState::LocallyQuiescent
             {

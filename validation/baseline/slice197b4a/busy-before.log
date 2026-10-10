@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.15s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 1 test
+test drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections ... FAILED
+
+failures:
+
+---- drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections stdout ----
+
+thread 'drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections' (198) panicked at src/bin/support/drain_runner.rs:237:70:
+called `Result::unwrap()` on an `Err` value: "ERR not_proposed=Busy\npreserve original drain and configuration identities"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--bin voteboat-counter`

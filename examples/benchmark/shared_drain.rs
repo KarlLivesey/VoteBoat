@@ -82,7 +82,7 @@ fn plan(bootstraps: &[Bootstrap]) -> MembershipDrainPlan {
     .unwrap()
 }
 impl Harness {
-    fn new(protocol: NativePeerProtocol) -> Self {
+    fn new(protocol: NativePeerProtocol, mixed: bool) -> Self {
         let root = std::env::temp_dir().join(format!(
             "voteboat-multi-drain-{}-{protocol:?}-{}",
             std::process::id(),
@@ -108,7 +108,7 @@ impl Harness {
             Limits::default(),
         )
         .unwrap();
-        let bootstraps = (1..=3)
+        let bootstraps = (1..=if mixed { 4 } else { 3 })
             .map(|g| Bootstrap {
                 group: group_id(g),
                 configuration: ConfigurationId::new(1).unwrap(),
@@ -137,14 +137,17 @@ impl Harness {
         drop(sockets);
         h.nodes = h.open(NativeOpenMode::Create);
         h.configure_authorization();
-        for g in 1..=3 {
+        for g in 1..=h.bootstraps.len() {
             h.nodes[0]
                 .control(group_id(g), NodeControl::Campaign)
                 .unwrap();
         }
-        h.wait(|h| (1..=3).all(|g| h.leader(group_id(g)) == Some(0)));
-        for g in 1..=3 {
+        h.wait(|h| (1..=h.bootstraps.len()).all(|g| h.leader(group_id(g)) == Some(0)));
+        for g in 1..=h.bootstraps.len() {
             h.write(group_id(g), 100 + g as u128, 7, false, 7);
+        }
+        if mixed {
+            h.prepare_retained();
         }
         h.journal.publish(h.plan.record(1).unwrap()).unwrap();
         h.nodes[0].restore_drain(&h.journal).unwrap();
@@ -249,7 +252,7 @@ impl Harness {
             .iter()
             .enumerate()
             .map(|(index, n)| {
-                let groups = (1..=3)
+                let groups = (1..=self.bootstraps.len())
                     .map(|g| {
                         let c = n.local().owner.core(group_id(g)).unwrap();
                         format!(
@@ -300,13 +303,13 @@ impl Harness {
     #[cfg(feature = "quic")]
     fn checkpoint(&mut self) {
         for n in &mut self.nodes {
-            for g in 1..=3 {
+            for g in 1..=self.bootstraps.len() {
                 n.control(group_id(g), NodeControl::Checkpoint).unwrap();
             }
         }
         self.wait(|h| {
             h.nodes.iter().all(|n| {
-                (1..=3).all(|g| {
+                (1..=h.bootstraps.len()).all(|g| {
                     n.local()
                         .owner
                         .core(group_id(g))
@@ -328,6 +331,57 @@ impl Harness {
         .unwrap();
         self.nodes = self.open(NativeOpenMode::Recover);
         self.nodes[0].restore_drain(&self.journal).unwrap();
+    }
+    fn prepare_retained(&mut self) {
+        let entry = self.plan.groups()[3].clone();
+        self.configure_before_drain(entry.change.joint);
+        self.configure_before_drain(entry.change.finalize);
+        self.plan = MembershipDrainPlan::with_retained_learners(
+            self.plan.record(1).unwrap().owner,
+            self.plan.record(1).unwrap().request.operation,
+            self.plan.groups()[..3].to_vec(),
+            vec![DrainRetainedGroup {
+                group: group_id(4),
+                original: self.core(0, group_id(4)).membership().stable().clone(),
+            }],
+        )
+        .unwrap();
+    }
+    fn configure_before_drain(&mut self, record: ConfigurationRecord) {
+        self.wait(|h| h.leader(group_id(4)).is_some());
+        let owner = self.leader(group_id(4)).unwrap();
+        let configuration = match &record.change {
+            ConfigurationChange::Joint { id, .. } | ConfigurationChange::Final { id } => id.get(),
+            _ => unreachable!(),
+        };
+        let requirements = self.nodes[owner].local().applications[&group_id(4)]
+            .deployment_requirements()
+            .unwrap();
+        let ticket = self.nodes[owner]
+            .configure(ConfigurationRequest {
+                group: group_id(4),
+                proposal: ConfigurationProposal {
+                    record,
+                    requirements,
+                    readiness: vec![],
+                },
+            })
+            .unwrap();
+        let until = Instant::now() + Duration::from_secs(10);
+        loop {
+            self.poll();
+            if let Some(result) = self.nodes[owner].poll_configuration() {
+                assert_eq!(result.ticket, ticket);
+                assert!(matches!(
+                    result.outcome,
+                    ConfigurationOutcome::Committed(_)
+                        | ConfigurationOutcome::Unknown(ConfigurationUnknown::LeadershipChanged)
+                ));
+                break;
+            }
+            assert!(Instant::now() < until, "retained group preparation timeout");
+        }
+        self.wait(|h| committed(h, 4, configuration));
     }
 }
 enum WaitKind {
@@ -423,6 +477,12 @@ impl Driver {
         assert!(batch.requests.len() <= 1 && self.coordinator.in_flight() <= 2);
         for dispatch in batch.requests {
             let g = dispatch.ticket.group();
+            assert!(!self
+                .coordinator
+                .plan()
+                .retained_learners()
+                .iter()
+                .any(|entry| entry.group == g));
             let owner = h.leader(g).unwrap();
             let kind = match dispatch.action {
                 MembershipDrainAction::Transfer(request) => {
@@ -468,8 +528,8 @@ fn committed(h: &Harness, g: usize, configuration: u64) -> bool {
             && core.membership().last_configuration_index() <= core.state().commit_index
     })
 }
-fn history(protocol: NativePeerProtocol) {
-    let mut h = Harness::new(protocol);
+fn history(protocol: NativePeerProtocol, mixed: bool) {
+    let mut h = Harness::new(protocol, mixed);
     let mut driver = Driver::new(h.plan.clone());
     let deadline = Instant::now() + Duration::from_secs(20);
     while !(committed(&h, 1, 3)
@@ -492,7 +552,7 @@ fn history(protocol: NativePeerProtocol) {
     h.write(group_id(1), 501, 2, false, 9);
     let batch = driver
         .coordinator
-        .poll(&h.journal, 3, |g| {
+        .poll(&h.journal, h.plan.assignments().len(), |g| {
             if g == group_id(2) {
                 h.leader(g).map(|i| h.core(i, g))
             } else {
@@ -524,12 +584,12 @@ fn history(protocol: NativePeerProtocol) {
             h.root.display()
         );
     }
-    for g in 1..=3 {
+    for g in 1..=h.bootstraps.len() {
         assert!(committed(&h, g, 3));
     }
     let source = h.nodes.remove(0);
     close(vec![source], &h.clock).unwrap();
-    for g in 1..=3 {
+    for g in 1..=h.bootstraps.len() {
         h.write(group_id(g), 100 + g as u128, 7, true, 7);
         h.write(
             group_id(g),
@@ -544,10 +604,19 @@ fn history(protocol: NativePeerProtocol) {
 }
 #[test]
 fn tcp_shared_wal_drain_resumes_mixed_group_progress() {
-    history(NativePeerProtocol::TcpTls);
+    history(NativePeerProtocol::TcpTls, false);
 }
 #[cfg(feature = "quic")]
 #[test]
 fn quic_shared_wal_drain_resumes_mixed_checkpoint_progress() {
-    history(NativePeerProtocol::Quic);
+    history(NativePeerProtocol::Quic, false);
+}
+#[test]
+fn tcp_mixed_voter_and_learner_assignments_resume_together() {
+    history(NativePeerProtocol::TcpTls, true);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn quic_mixed_voter_and_learner_assignments_resume_together() {
+    history(NativePeerProtocol::Quic, true);
 }

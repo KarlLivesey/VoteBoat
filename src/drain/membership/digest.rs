@@ -35,6 +35,24 @@ fn peer(hash: &mut Context, peer: PeerIdentity) {
     hash.update(&peer.store.id.get().to_be_bytes());
     hash.update(&peer.store.incarnation.get().to_be_bytes());
 }
+pub(super) fn with_retained(
+    original: DrainPlanDigest,
+    retained: &[DrainRetainedGroup],
+) -> DrainPlanDigest {
+    if retained.is_empty() {
+        return original;
+    }
+    let mut hash = Context::new(&SHA256);
+    hash.update(b"VoteBoat-membership-drain-plan-v2");
+    hash.update(original.as_bytes());
+    hash.update(&(retained.len() as u64).to_be_bytes());
+    for entry in retained {
+        hash.update(&entry.group.id.get().to_be_bytes());
+        hash.update(&entry.group.incarnation.get().to_be_bytes());
+        configuration(&mut hash, &entry.original);
+    }
+    DrainPlanDigest(hash.finish().as_ref().try_into().unwrap())
+}
 fn configuration(hash: &mut Context, configuration: &Configuration) {
     hash.update(&configuration.id().get().to_be_bytes());
     tree(hash, configuration.policy().tree());

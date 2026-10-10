@@ -6,6 +6,8 @@ use voteboat::{
     drain::*, identity::*, log::*, membership::*, placement::*, quorum::*, raft::*,
     secure::PeerIdentity,
 };
+#[path = "drain_membership/retained.rs"]
+mod retained;
 #[derive(Clone)]
 struct Journal(DrainRecord);
 impl DrainJournal for Journal {

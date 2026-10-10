@@ -17,6 +17,19 @@ impl MembershipDrainPlan {
         core: &Raft,
     ) -> Result<MembershipDrainAction, DrainPlanError> {
         self.verify(journal)?;
+        if let Some(entry) = self
+            .retained
+            .iter()
+            .find(|entry| entry.group == core.state().bootstrap.group)
+        {
+            return entry.completed(core).map(|complete| {
+                if complete {
+                    MembershipDrainAction::Completed
+                } else {
+                    MembershipDrainAction::Wait
+                }
+            });
+        }
         let entry = self
             .groups
             .iter()
@@ -64,6 +77,32 @@ impl MembershipDrainPlan {
             ))
         } else {
             Ok(MembershipDrainAction::Wait)
+        }
+    }
+    pub(crate) fn completed(&self, core: &Raft) -> Result<bool, DrainPlanError> {
+        let group = core.state().bootstrap.group;
+        if let Some(entry) = self.groups.iter().find(|entry| entry.group == group) {
+            entry.completed(core)
+        } else {
+            self.retained
+                .iter()
+                .find(|entry| entry.group == group)
+                .ok_or(DrainPlanError::UnknownGroup)?
+                .completed(core)
+        }
+    }
+    pub(crate) fn target_configuration(
+        &self,
+        group: GroupIdentity,
+    ) -> Result<ConfigurationId, DrainPlanError> {
+        if let Some(entry) = self.groups.iter().find(|entry| entry.group == group) {
+            Ok(entry.target_configuration())
+        } else {
+            self.retained
+                .iter()
+                .find(|entry| entry.group == group)
+                .map(|entry| entry.original.id())
+                .ok_or(DrainPlanError::UnknownGroup)
         }
     }
 }

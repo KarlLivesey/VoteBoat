@@ -1,0 +1,51 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.47s
+     Running tests/drain_membership.rs (target/debug/deps/drain_membership-3fd43fc371ba4e59)
+
+running 9 tests
+test bounded_sorted_plan_inventory_and_retained_byte_limit_are_enforced ... ok
+test digest_binds_recursive_branch_structure_and_fixed_weights ... ok
+test only_prepared_exact_learners_can_be_replacement_voters ... ok
+test invalid_targets_and_joint_links_are_refused_before_journal_creation ... ok
+test exact_multigroup_plan_binds_original_fields_and_rejects_replacement_on_recovery ... ok
+test retained::complete_inventory_binds_disjoint_roles_and_preserves_voter_only_digest ... ok
+test retained::learner_completion_requires_unchanged_committed_membership_and_no_dispatch ... ok
+test accepted_final_and_rolled_back_suffix_are_not_completed_evacuation ... ok
+test retained::retained_assignments_require_exact_learner_identity_and_combined_bounds ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/raft.rs (target/debug/deps/raft-ef870167f3a6c747)
+
+running 29 tests
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test three_node_history_with_only_host_components ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -16,6 +16,28 @@ struct Progress {
     configuration: u128,
     digest: String,
 }
+#[derive(Debug, Eq, PartialEq)]
+enum ConfigurationReply {
+    AnotherPeer,
+    ObserveSource,
+}
+fn configuration_reply(reply: &str, operation: u128) -> Result<ConfigurationReply, Failure> {
+    if reply.trim() == "ERR NOT_LEADER" {
+        return Ok(ConfigurationReply::AnotherPeer);
+    }
+    // No proposal was accepted. Recheck the source and retry the same record
+    // under the existing total request/time budget, rather than guessing success.
+    if reply.trim() == "ERR not_proposed=Busy" {
+        return Ok(ConfigurationReply::ObserveSource);
+    }
+    if reply.starts_with("OK ") {
+        if field(reply, "operation")?.parse::<u128>()? != operation {
+            return Err("configuration replied with a different operation".into());
+        }
+        return Ok(ConfigurationReply::ObserveSource);
+    }
+    Err(format!("{reply}preserve original drain and configuration identities").into())
+}
 fn field<'a>(text: &'a str, name: &str) -> Result<&'a str, Failure> {
     let prefix = format!("{name}=");
     let mut values = text
@@ -111,19 +133,10 @@ impl Runner {
         for target in 0..self.endpoints.len() {
             match self.exchange(target, &format!("configure {operation}"))? {
                 Attempt::Unavailable => continue,
-                Attempt::Reply(reply) if reply.trim() == "ERR NOT_LEADER" => continue,
-                Attempt::Reply(reply) if reply.starts_with("OK ") => {
-                    if field(&reply, "operation")?.parse::<u128>()? != operation {
-                        return Err("configuration replied with a different operation".into());
-                    }
-                    return Ok(());
-                }
-                Attempt::Reply(reply) => {
-                    return Err(format!(
-                        "{reply}preserve original drain and configuration identities"
-                    )
-                    .into())
-                }
+                Attempt::Reply(reply) => match configuration_reply(&reply, operation)? {
+                    ConfigurationReply::AnotherPeer => continue,
+                    ConfigurationReply::ObserveSource => return Ok(()),
+                },
                 Attempt::Interrupted(reason) => {
                     return Err(format!(
                         "UNKNOWN configuration: {reason}; rerun the same drain identity"
@@ -223,6 +236,31 @@ mod tests {
     use super::*;
     fn sample() -> String {
         format!("OK sequence=1 operation=2 phase=Active membership_change=true configuration_operation=3 plan_digest={} ready=false", "ab".repeat(32))
+    }
+    #[test]
+    fn configuration_busy_reobserves_but_does_not_mask_other_rejections() {
+        assert_eq!(
+            configuration_reply("ERR not_proposed=Busy\n", 3).unwrap(),
+            ConfigurationReply::ObserveSource
+        );
+        assert_eq!(
+            configuration_reply("ERR NOT_LEADER\n", 3).unwrap(),
+            ConfigurationReply::AnotherPeer
+        );
+        assert_eq!(
+            configuration_reply("OK operation=3 action=wait_for_commit\n", 3).unwrap(),
+            ConfigurationReply::ObserveSource
+        );
+        for rejected in [
+            "ERR not_proposed=Busy extra=unknown\n",
+            "ERR not_proposed=WrongIdentity\n",
+            "ERR Unauthorized\n",
+            "UNKNOWN configuration\n",
+            "OK operation=4 action=completed\n",
+            "OK action=completed\n",
+        ] {
+            assert!(configuration_reply(rejected, 3).is_err(), "{rejected}");
+        }
     }
     #[test]
     fn source_progress_rejects_wrong_duplicate_missing_and_non_membership_fields() {

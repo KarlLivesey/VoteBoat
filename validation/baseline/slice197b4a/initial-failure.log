@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.07s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+test shared::drain::quic_mixed_voter_and_learner_assignments_resume_together ... FAILED
+test shared::drain::tcp_mixed_voter_and_learner_assignments_resume_together ... ok
+
+failures:
+
+---- shared::drain::quic_mixed_voter_and_learner_assignments_resume_together stdout ----
+
+thread 'shared::drain::quic_mixed_voter_and_learner_assignments_resume_together' (305527) panicked at examples/benchmark/shared_drain.rs:563:49:
+called `Option::unwrap()` on a `None` value
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    shared::drain::quic_mixed_voter_and_learner_assignments_resume_together
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 30 filtered out; finished in 17.44s
+
+error: test failed, to rerun pass `--example native_benchmark`

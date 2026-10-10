@@ -1,0 +1,14 @@
+# Run from repository root; native process histories need local sockets.
+cargo +stable test --locked --offline --no-default-features --test drain_membership --test raft
+cargo +stable test --locked --offline --all-features --test drain_membership --test drain_journal
+cargo +stable test --locked --offline --all-features --example native_benchmark mixed_voter_and_learner
+cargo +stable test --locked --offline --all-features --example native_benchmark
+cargo +stable test --locked --offline --all-features --bin voteboat-counter configuration_busy_reobserves
+cargo +stable test --locked --offline --all-features --test counter_service drain_retirement::
+cargo +stable test --locked --offline --all-features --test counter_service --bin voteboat-counter
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# Enabled pre-push hook repeats formatting and all three strict Clippy profiles.
