@@ -791,8 +791,9 @@ it is not a quorum receipt. One job runs at a time, overload retries after the
 interval, and shutdown drains admitted work. The native worker bounds each
 replacement image by its configured WAL ceiling. This rewrites the live image
 and can delay foreground work on that worker; it is not incremental cleaning.
-Checkpoints remain explicit (`client ... checkpoint`): reclamation cannot remove
-the live log suffix or advance the durable application boundary by itself.
+Reclamation cannot remove the live log suffix or advance the durable application
+boundary by itself. Use manual `client ... checkpoint` or the automatic policy
+below to authorize checkpoint progression.
 
 Rust hosts use `Node::configure_wal_maintenance(Some(WalMaintenancePolicy {
 interval_ms, retry_ms, max_bytes }))` and inspect `Node::wal_maintenance()`.
@@ -802,3 +803,26 @@ created. Manual `reclaim` results stay in `poll_reclaim`, while scheduled result
 replace only the latest maintenance diagnostic. Disabling/changing the policy
 requires its admitted job to finish. On restart, configure a new schedule after
 normal durable recovery.
+
+## Automatic checkpoints
+
+Append `--checkpoint-entries 1024` to a serve/recover command to checkpoint when
+the applied log is at least 1024 entries beyond its durable snapshot base. The
+count includes noops and applied configuration entries. The service checks every
+100ms, examines at most64 groups and allows at most4 automatic requests. It uses
+the same application, snapshot worker, retention and WAL path as manual
+checkpoints. Combine with `--wal-reclaim-ms 60000` for physical reclamation.
+Both policies are opt-in and should be supplied again on recovery.
+
+`client ... maintenance` reports `checkpoint_enabled`, `checkpoint_pending` and
+`checkpoint_base` for the local replica. The base is durable local state, not a
+quorum acknowledgement. Admission is not completion. Pending/busy groups are
+skipped and missed scan intervals coalesce. Shutdown stops new scans and drains
+already accepted requests.
+
+Rust hosts can choose `CheckpointPolicy { min_entries, interval_ms, scan_groups,
+max_in_flight }` through `Node::configure_checkpoints`. Inspect tracked admissions
+and latest results through `Node::checkpoints()`. Disable or reconfigure after
+its pending map empties. These limits bound maintenance admission; they do not
+guarantee a write rate, latency, unlimited application growth or a fixed disk
+footprint. General retention and incremental cleaning remain separate work.

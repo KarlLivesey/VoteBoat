@@ -312,3 +312,5 @@ fn facade_scheduled_reclaim(nodes: &mut [Facade]) {
     }
     assert!(reclaimed > 0);
 }
+
+include!("native_checkpoints.rs");

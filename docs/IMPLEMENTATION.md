@@ -93,13 +93,45 @@ strict profiles clean while advancing the remaining capability work.
 
 | Deliverable | Purpose and macro link | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Completed: automatic physical WAL maintenance165 | Let Rust hosts and the service schedule bounded reclamation without manual requests; advances measured tuning and the usable service. | Existing crash-tested LogStore reclaim, worker admission and Node result ownership. | Explicit opt-in policy, monotonic deadlines, one accepted job, bounded diagnostics, manual-result isolation, rejection/backoff and drain/failure tests; native reclaim/reopen evidence and both strict lint profiles. |
-| Current: automatic checkpoint progression | Keep long-running service replay/log retention bounded; advances the same service/tuning milestones. | Current reclaim scheduling plus existing verified checkpoint/apply boundaries. | Bounded fair group selection, explicit checkpoint threshold, no repeated pending checkpoints, real service writes/checkpoint/reclaim/reopen with original retries intact. |
-| Next: maintenance under recovery pressure | Validate maintenance alongside recovering replicas and shared-group work; advances broader P1/P2/P7 validation. | Both automatic policies, recovery quotas162 and existing snapshot catch-up. | Selected TCP/QUIC lag/restart and pressure histories preserve known operations, source/checkpoint dependencies and bounded admission; no unsupported latency guarantee. |
-| Following: bounded operational event reporting | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded event cardinality/retention, overflow reporting and failing-sink isolation with no consensus dependency. |
+| Completed: automatic checkpoint progression166 | Keep long-running service replay/log retention bounded; advances the same service/tuning milestones. | Current reclaim scheduling plus existing verified checkpoint/apply boundaries. | Bounded fair group selection, explicit checkpoint threshold, no repeated pending checkpoints, real service writes/checkpoint/reclaim/reopen with original retries intact. |
+| Current: maintenance under recovery pressure | Validate maintenance alongside recovering replicas and shared-group work; advances broader P1/P2/P7 validation. | Both automatic policies, recovery quotas162 and existing snapshot catch-up. | Selected TCP/QUIC lag/restart and pressure histories preserve known operations, source/checkpoint dependencies and bounded admission; no unsupported latency guarantee. |
+| Next: bounded operational event reporting | Make overload and recovery behavior diagnosable while preserving service progress; advances usable operations and C19. | Existing Node observations and explicit bounded sink ownership. | Host/native injection, bounded event cardinality/retention, overflow reporting and failing-sink isolation with no consensus dependency. |
+| Following: unresolved group-creation cancellation | Close the remaining pre-activation lifecycle gap; advances recursive responsibilities and split/merge. | Existing creation intents, assigned bootstrap identities and irreversible activation boundary. | Bounded recorded cancellation and recovery reject late readiness/publication without canceling any active owner; no-dual-owner and receipt-loss histories. |
 
 The earlier capability sketches below remain design context, not evidence of
 completion. No additional feature prerequisites are introduced by this cleanup.
+
+#### 166 schema sketch (planned, before implementation)
+
+Add an opt-in checkpoint policy: minimum applied entries beyond the durable
+snapshot base, scan interval, maximum groups examined per scan and maximum
+outstanding automatic requests. Host monotonic time and a persistent cursor
+bound and rotate scanning. An ordered next-group query on the existing group
+map is needed so advancing the cursor does not repeatedly traverse every group.
+No new worker, timer or storage owner is introduced. The selected snapshot
+worker must advertise checkpoint support for assigned groups before enabling.
+
+Each selected group retains its exact tracked Checkpoint admission and the
+applied target index: queued -> observed execution -> durable base at/above
+that target. Admission is not completion. Pending groups and groups with core
+dependencies are skipped; no duplicate automatic request is enqueued. Every
+scan examines at most its budget, every request uses normal owner admission,
+and all outstanding metadata is bounded by the configured cap. Failed steps
+release the automatic slot with the original error; worker/storage faults use
+the existing Node recovery path. Manual checkpoints may race and satisfy the
+same boundary, but are not consumed or canceled. Policy changes require empty
+automatic slots. Shutdown stops scanning, drains tracked requests and observes
+real boundaries; abort preserves tracked requests with the original components.
+Restart reconstructs a new schedule from recovered application/base indexes.
+
+Automatic physical reclamation165 can run alongside this policy; it preserves
+the then-current live suffix if a checkpoint has not finished. Acceptance:
+threshold/durable-boundary distinction, bounded fair scan/concurrency, repeated
+polls without duplicate requests, disabled/unsupported/invalid configuration,
+manual race and shutdown/failure ownership, then actual native checkpoints,
+physical reclaim, process restart and original deduplication. This closes the
+automatic checkpoint scheduling gap, not general retention, incremental cleaning
+or a claim that every application can grow forever within a fixed disk quota.
 
 #### 165 schema sketch (planned, before implementation)
 
@@ -15372,3 +15404,50 @@ incremental cleaning, disk admission, bandwidth shaping or a foreground latency
 guarantee. Checkpoints remain explicit; automatic checkpoint progression is the
 next mini-plan item. The macro milestone remains open. The inspected CI run for
 previous commit f8e903d was still active, so no new macOS execution claim follows.
+
+### Slice166 — bounded automatic checkpoint progression
+
+Implemented `CheckpointPolicy`, `CheckpointStatus`, `ScheduledCheckpoint` and
+`CheckpointResult` over Node's existing checkpoint effect path. An ordered
+`groups_after` query on TimedShard/EffectOwner supports cursor scans without
+repeatedly walking the prefix. Policy chooses applied-entry threshold, scan
+interval, groups examined and total queued/executing automatic requests. Pending
+and core-busy groups are skipped; each scan and retained admission map is bounded.
+
+Each request retains the existing exact AdmissionTicket and its applied target.
+Successful execution plus a durable local snapshot base at/above that target
+releases the automatic slot. This is local checkpoint evidence, not quorum
+commit evidence. Failed execution records the original error. A manual request
+that wins the race can cause NotApplied for the automatic request; no fictitious
+completion is reported. Node shutdown stops new scans and drains accepted work;
+abort/recovery carries pending admissions with the original providers. Policy
+changes require empty slots. The schedule is reconstructed after normal recovery.
+
+The counter service adds `--checkpoint-entries N` with a100ms scan interval,
+64-group scan budget and4-request cap; the flag is optional. `maintenance` reports
+local checkpoint enabled/pending/base fields. It composes with the existing
+`--wal-reclaim-ms` option, through the same snapshot and WAL workers. No new
+runtime, effect, persistence format, voting rule or retention override was added.
+
+Validation:143 core-only effect-owner tests pass, including6 new Node scheduling
+histories. All6 also pass with all features. They cover threshold/admission versus
+durable completion, scan/cap limits, a held group with independent group progress,
+manual race, disabled/unsupported/invalid policy, shutdown and failure ownership.
+The host snapshot fixture now returns its actual selected store identity rather
+than a fixed store2; its new controls allow held-group and failed-publication
+injection. All11 snapshot-router tests pass. Existing storage suites pass8
+log-reclaim,21 snapshot and14 snapshot-worker tests, including modeled publication,
+pinning, receipt-loss and crash recovery. The new native100-group test requires
+all three replicas' automatic bases, actual physical byte reduction, drain/join,
+reopen, original deduplication and a new write; final run passes in14.79s.
+All45 service tests pass in41.09s; new TCP/QUIC histories checkpoint two waves,
+inspect durable bases, stop/reopen and preserve retries. Final focused service
+and host runs verify the last source changes. Both strict Clippy profiles,
+formatting and91-record inventory metadata checks pass.
+
+Evidence and corrected test-fixture/helper failures are retained under
+`validation/baseline/slice166`. This completes automatic checkpoint scheduling;
+combined recovery-pressure schedules remain next. General retention, incremental
+cleaning, unlimited application growth, fixed disk occupancy and latency/SLO
+claims remain outside this implementation. CI for the previous325b887 commit was
+still running when inspected; no new macOS execution is inferred.

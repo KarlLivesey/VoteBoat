@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.97s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-79f2565914f95fa1)
+
+running 6 tests
+test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 1.03s
+

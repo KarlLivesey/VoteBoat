@@ -1,0 +1,24 @@
+    Blocking waiting for file lock on build directory
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0382]: borrow of moved value: `nodes`
+  --> tests/support/native_checkpoints.rs:68:25
+   |
+48 | fn automatic_checkpoint_waves(nodes: &mut [Facade]) -> MonoTime {
+   |                               ----- move occurs because `nodes` has type `&mut [Node<FairScheduler, ..., ..., ..., ..., ..., ..., ..., ...>]`, which does not implement the `Copy` trait
+49 |     for n in nodes {
+   |              ----- `nodes` moved due to this implicit call to `.into_iter()`
+...
+68 |         facade_drive_at(nodes, MonoTime(round), |nodes| {
+   |                         ^^^^^ value borrowed here after move
+   |
+note: `std::iter::IntoIterator::into_iter` takes ownership of the receiver `self`, which moves `nodes`
+  --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/iter/traits/collect.rs:312:17
+   = note: the full name for the type has been written to '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/effect_owner-813366bfa0b4edd1.long-type-12711182457585469733.txt'
+   = note: consider using `--verbose` to print the full type name to the console
+help: consider creating a fresh reborrow of `nodes` here
+   |
+49 |     for n in &mut *nodes {
+   |              ++++++
+
+For more information about this error, try `rustc --explain E0382`.
+error: could not compile `voteboat` (test "effect_owner") due to 1 previous error

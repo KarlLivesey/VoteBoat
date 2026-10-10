@@ -26,6 +26,7 @@ use std::{
 };
 mod administration;
 mod applications;
+mod checkpoint_schedule;
 mod clients;
 mod connections;
 mod effects;
@@ -40,6 +41,7 @@ mod snapshots;
 mod timed;
 pub use administration::*;
 pub use applications::*;
+pub use checkpoint_schedule::*;
 pub use clients::*;
 pub use connections::ConnectionBudget;
 pub use effects::*;

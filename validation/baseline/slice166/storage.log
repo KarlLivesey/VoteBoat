@@ -1,0 +1,63 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.01s
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-1bd6d57bd065c56a)
+
+running 8 tests
+test unsupported_codec_and_host_store_decline_maintenance_before_mutation ... ok
+test host_checkpoint_decoder_cannot_bypass_mandatory_log_invariants ... ok
+test pending_transitions_and_encoding_budget_reject_before_replacement ... ok
+test rewrite_preserves_exact_live_state_and_never_reuses_tickets ... ok
+test live_image_can_exceed_one_batch_without_losing_cold_group_or_suffix ... ok
+test replacement_failure_fences_and_power_loss_recovers_whole_old_or_new_state ... ok
+test native_files_keep_exclusive_selection_and_reclaim_repeatedly ... ok
+test image_codec_rejects_every_truncation_bit_corruption_and_invalid_state ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/snapshot.rs (target/debug/deps/snapshot-12f4b198e21e5cbc)
+
+running 21 tests
+test durable_pin_switch_conformance_with_host_provider ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test native::downstream_snapshot_codec_is_used_and_incompatible_version_is_rejected ... ok
+test native::bounded_codec_rejects_oversize_lengths_even_with_valid_checksums ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test native::native_files_restore_checkpoint_plus_tail_and_exclude_concurrent_writers ... ok
+test native::pins_survive_restart_and_legacy_manifest_upgrade ... ok
+test native::native_snapshot_conformance_and_restart_session_fencing ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test native::staged_corruption_is_detected_against_submitted_bytes_before_sealing ... ok
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test native::native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test buffered_compaction_schedules_survive_native_file_reopen_and_original_retry ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test native::native_snapshot_catchup_history_and_actual_files ... ok
+test native::corruption_truncation_missing_data_and_identity_mismatch_fail_closed ... ok
+test native::interrupted_chunks_seals_and_publication_recover_old_or_complete_new ... ok
+test native::snapshot_log_failure_and_lost_application_completion_recover_without_false_ack ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.33s
+
+     Running tests/snapshot_worker.rs (target/debug/deps/snapshot_worker-43c1c42d877bb37e)
+
+running 14 tests
+test invalid_application_and_store_scope_never_submit_work ... ok
+test downstream_worker_selection_rejection_stale_envelope_and_failure ... ok
+test install_requires_reconciled_image_and_valid_application_before_acknowledgement ... ok
+test local_checkpoint_checks_context_boundary_and_exact_retention_completion ... ok
+test native::native_worker_uses_host_stores_and_retains_credits_until_terminal_poll ... ok
+test local_checkpoint_rejects_foreign_published_boundary_before_wal ... ok
+test native::admission_rejects_wrong_scope_and_excess_capacity_without_progress ... ok
+test native::asynchronous_pinned_load_supplies_exact_leader_snapshot_request ... ok
+test native::a_failed_snapshot_request_reports_every_accepted_group_without_success ... ok
+test native::bulk_snapshot_loads_leave_control_capacity_for_installation ... ok
+test faults::checkpoint_retention_failure_fences_and_recovers_the_durable_anchor ... ok
+test faults::async_snapshot_short_write_sync_publication_pin_and_panic_fail_closed ... ok
+test native::real_files_install_through_effect_owner_snapshot_worker_and_wal_worker ... ok
+test native::local_checkpoint_receipt_loss_recovers_exact_wal_anchor_and_tail ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+

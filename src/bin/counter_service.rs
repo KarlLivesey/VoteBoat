@@ -34,7 +34,7 @@ use voteboat::{identity::*, native::connect::NativePeerProtocol, raft::RaftError
 use voteboat::{native::observability::NativeCounterObserver, observability::*};
 
 const HELP: &str =
-    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--wal-reclaim-ms MS]\n\
+    "voteboat-counter serve create|recover|recover-member DIRECTORY NODE BASE_PORT TLS_DIRECTORY [PEERS_FILE | --deployment FILE] [--transport tcp|quic] [--admin-plan FILE | --remote-admin-plan FILE | --remote-admin-policy FILE] [--service-access FILE] [--wal-reclaim-ms MS] [--checkpoint-entries N]\n\
 voteboat-counter enroll create|recover DIRECTORY NODE BASE_PORT TLS_DIRECTORY SOURCE_DIRECTORY SOURCE_NODE [PEERS_FILE | --deployment FILE]\n\
 voteboat-counter client BASE_PORT NODE status|metrics|maintenance|configuration-status OPERATION_ID|configure OPERATION_ID|read|add OPERATION_ID DELTA|checkpoint|quit\n\
 voteboat-counter client BASE_PORT auto read|add OPERATION_ID DELTA\n\
@@ -48,7 +48,7 @@ PEERS_FILE lines: NODE SOCKET_ADDRESS TLS_SERVER_NAME.\n\
 recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named options may appear in any order.\n\
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
---wal-reclaim-ms enables periodic physical WAL replacement; checkpoints remain explicit.\n\
+--wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 Use the same operation ID and delta when retrying an unknown write.";
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Pending {
@@ -92,11 +92,12 @@ fn maintenance_status(service: &Service) -> String {
     let status = service.wal_maintenance();
     let event = status.last_completion.as_ref();
     let reclaimed = event.and_then(|e| e.result.as_ref().ok());
-    format!("OK enabled={} pending={} next_ms={:?} last_sequence={} before_bytes={} after_bytes={} admission_error={:?} completion_error={:?}",
+    format!("OK enabled={} pending={} next_ms={:?} last_sequence={} before_bytes={} after_bytes={} admission_error={:?} completion_error={:?} checkpoint_enabled={} checkpoint_pending={} checkpoint_base={}",
         status.policy.is_some(), status.pending.is_some(), status.next_deadline.map(|d| d.0),
         event.map_or(0, |e| e.request.sequence), reclaimed.map_or(0, |r| r.before_bytes),
         reclaimed.map_or(0, |r| r.after_bytes), status.last_admission_error,
-        event.and_then(|e| e.result.as_ref().err()))
+        event.and_then(|e| e.result.as_ref().err()), service.checkpoints().policy.is_some(),
+        service.checkpoints().pending.len(), service.local().owner.core(group()).map_or(0, |c| c.state().base_index()))
 }
 fn command(
     service: &mut Service,
@@ -512,6 +513,7 @@ struct StartupOptions {
     service_access: Option<std::path::PathBuf>,
     remote_admin: administration::Mode,
     wal_reclaim_ms: Option<u64>,
+    checkpoint_entries: Option<u64>,
 }
 impl StartupOptions {
     fn configure_maintenance(&self, service: &mut Service) -> Result<(), Failure> {
@@ -528,6 +530,14 @@ impl StartupOptions {
                 })),
             )?;
         }
+        if let Some(min_entries) = self.checkpoint_entries {
+            checked(service.configure_checkpoints(Some(CheckpointPolicy {
+                min_entries,
+                interval_ms: 100,
+                scan_groups: 64,
+                max_in_flight: 4,
+            })))?;
+        }
         Ok(())
     }
 }
@@ -539,6 +549,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
     let mut service_access = None;
     let mut remote_admin = administration::Mode::Automatic;
     let mut wal_reclaim_ms = None;
+    let mut checkpoint_entries = None;
     while args.first().is_some_and(|a| a == "serve" || a == "enroll") && args.len() >= 3 {
         let flag = args[args.len() - 2].as_str();
         if !matches!(
@@ -550,6 +561,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 | "--remote-admin-policy"
                 | "--service-access"
                 | "--wal-reclaim-ms"
+                | "--checkpoint-entries"
         ) {
             break;
         }
@@ -591,6 +603,13 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
                 }
                 wal_reclaim_ms = Some(interval);
             }
+            "--checkpoint-entries" if checkpoint_entries.is_none() && args[0] == "serve" => {
+                let entries: u64 = value.parse()?;
+                if entries == 0 {
+                    return Err("checkpoint entry threshold must be positive".into());
+                }
+                checkpoint_entries = Some(entries);
+            }
             _ => return Err("duplicate or unsupported startup option".into()),
         }
     }
@@ -601,6 +620,7 @@ fn startup_options(args: &mut Vec<String>) -> Result<StartupOptions, Failure> {
         service_access,
         remote_admin,
         wal_reclaim_ms,
+        checkpoint_entries,
     })
 }
 

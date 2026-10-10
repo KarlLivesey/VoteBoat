@@ -1,0 +1,19 @@
+    Blocking waiting for file lock on build directory
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.20s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-df5ff286ac217b9a)
+
+running 11 tests
+test snapshot_routes::accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard ... ok
+test snapshot_routes::closing_owner_drains_snapshot_wal_and_application_dependencies ... ok
+test snapshot_routes::invalid_accepted_ticket_fences_but_returns_original_lease_for_discard ... ok
+test snapshot_routes::recovery_budget::oversized_recovery_and_invalid_limits_are_rejected_before_preparation ... ok
+test snapshot_routes::oversized_provider_result_fences_and_releases_only_router_owned_payload ... ok
+test snapshot_routes::bounded_routing_and_wrong_binding_reject_before_transfer ... ok
+test snapshot_routes::rejection_retries_keep_exact_lease_and_stale_completions_do_not_release_it ... ok
+test snapshot_routes::recovery_budget::byte_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::count_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::checkpoint_publication_and_reconciliation_bypass_full_recovery_quota ... ok
+test snapshot_routes::recovery_budget::provider_refusal_and_failed_owner_discard_release_only_their_credits ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 138 filtered out; finished in 0.00s
+

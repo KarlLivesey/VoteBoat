@@ -228,6 +228,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
         self.runtime.groups()
     }
+    /// Ordered iteration strictly after a cursor; used by bounded maintenance.
+    pub fn groups_after(
+        &self,
+        after: Option<GroupIdentity>,
+    ) -> impl Iterator<Item = GroupIdentity> + '_ {
+        self.runtime.groups_after(after)
+    }
     pub fn is_failed(&self) -> bool {
         self.failed.is_some()
     }

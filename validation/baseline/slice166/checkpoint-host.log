@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-df5ff286ac217b9a)
+
+running 6 tests
+test node_facade::automatic_checkpoints::abort_and_snapshot_failure_preserve_checkpoint_identity ... ok
+test node_facade::automatic_checkpoints::manual_checkpoint_and_late_scans_do_not_invent_a_new_boundary ... ok
+test node_facade::automatic_checkpoints::policy_is_opt_in_and_validated_without_work ... ok
+test node_facade::automatic_checkpoints::threshold_is_applied_distance_and_admission_is_not_completion ... ok
+test node_facade::automatic_checkpoints::concurrency_bound_and_shutdown_keep_exact_requests_until_durable ... ok
+test node_facade::automatic_checkpoints::held_group_does_not_duplicate_or_block_another_group ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 143 filtered out; finished in 0.00s
+

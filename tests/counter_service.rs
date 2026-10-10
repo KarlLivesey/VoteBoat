@@ -74,6 +74,7 @@ struct Cluster {
     udp_sockets: Vec<UdpSocket>,
     quic: bool,
     wal_reclaim_ms: Option<u64>,
+    checkpoint_entries: Option<u64>,
 }
 impl Cluster {
     fn new() -> Self {
@@ -135,6 +136,7 @@ impl Cluster {
             udp_sockets,
             quic: false,
             wal_reclaim_ms: None,
+            checkpoint_entries: None,
         }
     }
     fn take_listener(&mut self, offset: u16) -> TcpListener {
@@ -171,6 +173,9 @@ impl Cluster {
         }
         if let Some(interval) = self.wal_reclaim_ms {
             command.arg("--wal-reclaim-ms").arg(interval.to_string());
+        }
+        if let Some(entries) = self.checkpoint_entries {
+            command.arg("--checkpoint-entries").arg(entries.to_string());
         }
         if let Some(path) = &self.admin_plan {
             command

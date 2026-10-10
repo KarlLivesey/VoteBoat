@@ -2949,10 +2949,13 @@ mod snapshot_routes {
         closed: bool,
         allowance: usize,
         images: BTreeMap<GroupIdentity, Snapshot>,
+        pub(super) hold: std::rc::Rc<std::cell::Cell<Option<GroupIdentity>>>,
+        pub(super) checkpoint_supported: bool,
+        pub(super) fail_checkpoint: bool,
     }
     impl SnapshotWorker for Worker {
         fn checkpoint_bytes(&self, _: GroupIdentity) -> Option<usize> {
-            Some(self.allowance / 2)
+            self.checkpoint_supported.then_some(self.allowance / 2)
         }
         fn binding(&self) -> SnapshotWorkerBinding {
             self.binding
@@ -2993,8 +2996,21 @@ mod snapshot_routes {
         }
         fn poll(&mut self, limit: usize) -> Vec<SnapshotWorkEvent> {
             (0..limit)
-                .filter_map(|_| self.pending.pop_front())
+                .filter_map(|_| {
+                    let index = self
+                        .pending
+                        .iter()
+                        .position(|(_, w)| Some(w.visit.group) != self.hold.get())?;
+                    self.pending.remove(index)
+                })
                 .map(|(request, work)| {
+                    if self.fail_checkpoint {
+                        return SnapshotWorkEvent {
+                            request,
+                            visit: work.visit,
+                            result: Err(StorageError::Uncertain("checkpoint publication".into())),
+                        };
+                    }
                     let result = match work.job {
                         SnapshotJob::Readiness { reference } => SnapshotOutput::Readiness {
                             snapshot: reference.map(|_| self.images[&work.visit.group].clone()),
@@ -3004,7 +3020,8 @@ mod snapshot_routes {
                             SnapshotOutput::Reconciled(reference)
                         }
                         SnapshotJob::Publish { snapshot, .. } => {
-                            let reference = reference(&snapshot);
+                            let mut reference = reference(&snapshot);
+                            reference.store = self.binding.store.identity;
                             self.images.insert(work.visit.group, snapshot);
                             SnapshotOutput::Published(reference)
                         }
@@ -3061,6 +3078,9 @@ mod snapshot_routes {
             closed: false,
             allowance: 65536,
             images: BTreeMap::new(),
+            hold: Default::default(),
+            checkpoint_supported: true,
+            fail_checkpoint: false,
         };
         let router = SnapshotRouter::new(
             owner.identity(),

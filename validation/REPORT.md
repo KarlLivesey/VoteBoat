@@ -5070,3 +5070,19 @@ initial corrections and exact scope. Scheduling physical replacement does not
 advance application checkpoints or prove sustainable throughput, incremental
 cleaning, physical power-loss safety or macOS execution. Automatic checkpoint
 progression remains planned.
+
+### Slice166 — automatic checkpoints on existing durable contracts
+
+143 core-only effect-owner tests pass;6 new automatic-checkpoint Node histories
+also pass with all features.11 snapshot-router tests pass. The unchanged storage
+mechanisms pass8 log-reclaim,21 snapshot and14 snapshot-worker checks, including
+modeled publication/pin/receipt-loss failures. The native100-group automatic
+checkpoint/reclaim/reopen history passes, with positive physical byte reduction
+and preserved retries. All45 executable tests pass, including TCP/QUIC automatic
+checkpoint waves and actual on-disk bases after shutdown. Strict lint profiles,
+formatting and91-record metadata validation pass.
+
+[Slice166 evidence](baseline/slice166/README.md) records exact commands and limits.
+New policies bound scan/admission work and preserve existing checkpoint/retention
+semantics. They do not establish bandwidth or latency guarantees, incremental
+cleaning, general backup/retention policy or complete macOS validation.

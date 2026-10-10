@@ -243,6 +243,17 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn groups(&self) -> impl Iterator<Item = GroupIdentity> + '_ {
         self.shard.groups.keys().copied()
     }
+    /// Ordered iteration strictly after a cursor, without scanning its prefix.
+    pub fn groups_after(
+        &self,
+        after: Option<GroupIdentity>,
+    ) -> impl Iterator<Item = GroupIdentity> + '_ {
+        use std::ops::Bound::{Excluded, Unbounded};
+        self.shard
+            .groups
+            .range((after.map_or(Unbounded, Excluded), Unbounded))
+            .map(|(&g, _)| g)
+    }
     pub fn validate_quiescent(&self) -> Result<(), RuntimeError> {
         self.check()?;
         if self.closed {

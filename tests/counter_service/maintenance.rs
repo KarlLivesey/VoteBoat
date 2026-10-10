@@ -96,3 +96,90 @@ fn wait_maintenance(c: &Cluster, id: usize, after: u64) -> u64 {
         std::thread::sleep(Duration::from_millis(10));
     }
 }
+
+#[test]
+fn automatic_checkpoints_and_reclaim_tcp_survive_restart() {
+    checkpoint_history(false);
+}
+#[cfg(feature = "quic")]
+#[test]
+fn automatic_checkpoints_and_reclaim_quic_survive_restart() {
+    checkpoint_history(true);
+}
+fn checkpoint_history(quic: bool) {
+    let mut c = Cluster::new();
+    c.quic = quic;
+    c.checkpoint_entries = Some(2);
+    c.wal_reclaim_ms = Some(20);
+    for id in 1..=3 {
+        c.start(id, "create");
+    }
+    c.leader();
+    assert!(c.routed(&["add", "92001", "7"]).contains("Value(7)"));
+    for id in 1..=3 {
+        wait_checkpoint(&c, id, 2);
+    }
+    assert!(c.routed(&["add", "92002", "3"]).contains("Value(10)"));
+    assert!(c.routed(&["add", "92003", "4"]).contains("Value(14)"));
+    for id in 1..=3 {
+        wait_checkpoint(&c, id, 4);
+    }
+    c.stop();
+    for id in 1..=3 {
+        check_drained_checkpoint(&c, id);
+    }
+    for id in 1..=3 {
+        c.start(id, "recover");
+    }
+    c.leader();
+    let retry = c.routed(&["add", "92001", "7"]);
+    assert!(
+        retry.contains("Value(7)") && retry.contains("duplicate=true"),
+        "{retry}"
+    );
+    assert_eq!(c.routed(&["read"]), "OK value=14\n");
+    assert!(c.routed(&["add", "92004", "5"]).contains("Value(19)"));
+    c.stop();
+    fs::remove_dir_all(&c.root).unwrap();
+}
+fn wait_checkpoint(c: &Cluster, id: usize, target: u64) {
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let out = c.request(id, &["maintenance"]);
+        if out.status.success() {
+            let text = String::from_utf8(out.stdout).unwrap();
+            assert!(text.contains("checkpoint_enabled=true"), "{text}");
+            let base = text
+                .split_whitespace()
+                .find_map(|s| s.strip_prefix("checkpoint_base="))
+                .unwrap()
+                .parse::<u64>()
+                .unwrap();
+            if base >= target {
+                return;
+            }
+        }
+        assert!(
+            Instant::now() < deadline,
+            "automatic checkpoint did not finish"
+        );
+        std::thread::sleep(Duration::from_millis(10));
+    }
+}
+#[test]
+fn invalid_checkpoint_schedule_precedes_resource_creation() {
+    let c = Cluster::new();
+    let target = c.root.join("invalid-checkpoint");
+    for value in ["0", "-1", "NaN", "18446744073709551616"] {
+        let out = run(Command::new(BIN)
+            .args(["serve", "create"])
+            .arg(&target)
+            .arg("1")
+            .arg(c.base.to_string())
+            .arg("missing-tls")
+            .args(["--checkpoint-entries", value]));
+        assert!(!out.status.success());
+        assert!(!target.exists());
+    }
+    fs::remove_dir_all(&c.root).unwrap();
+}

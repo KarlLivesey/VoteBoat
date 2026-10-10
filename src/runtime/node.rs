@@ -162,6 +162,7 @@ pub struct NodeRecovery<L, R, C: PeerConnector, F: PeerTransportFactory<C::Sessi
     pub reason: NodeError,
     pub configuration: ConfigurationRequests,
     pub maintenance: WalMaintenanceStatus,
+    pub checkpoints: CheckpointStatus,
 }
 /// One owner of selected component handles, not a process-wide service. Provider
 /// scoped close/drain contracts leave shared host executors and unrelated users
@@ -187,6 +188,7 @@ pub struct Node<
     failure: Option<NodeError>,
     configuration: ConfigurationRequests,
     maintenance: WalMaintenanceStatus,
+    checkpoints: CheckpointStatus,
 }
 impl<
         S: ReadyScheduler,
@@ -303,6 +305,7 @@ where
             failure: None,
             configuration,
             maintenance: WalMaintenanceStatus::default(),
+            checkpoints: CheckpointStatus::default(),
         })
     }
     fn validate_group_parts(parts: &NodeParts<S, T, E, A, W, O, H, C, F>) -> Result<(), NodeError> {
@@ -400,6 +403,36 @@ where
     }
     pub fn wal_maintenance(&self) -> &WalMaintenanceStatus {
         &self.maintenance
+    }
+    /// Configure fair, bounded local checkpoints. This never bypasses the
+    /// selected snapshot worker, application validation or durable log update.
+    pub fn configure_checkpoints(
+        &mut self,
+        policy: Option<CheckpointPolicy>,
+    ) -> Result<(), NodeError> {
+        if self.state != NodeState::Running {
+            return Err(NodeError::Closed);
+        }
+        if policy.is_some() {
+            let snapshots = self
+                .local
+                .snapshots
+                .as_ref()
+                .ok_or(NodeError::MissingSnapshots)?;
+            for group in self.local.owner.groups() {
+                if snapshots
+                    .worker
+                    .checkpoint_bytes(group)
+                    .is_none_or(|n| n == 0)
+                {
+                    return Err(NodeError::MissingSnapshots);
+                }
+            }
+        }
+        self.checkpoints.configure(policy, self.now)
+    }
+    pub fn checkpoints(&self) -> &CheckpointStatus {
+        &self.checkpoints
     }
     pub fn propose(&mut self, request: ClientRequest) -> Result<ClientTicket, ClientRejected> {
         let Some(app) = self.local.applications.get(&request.group) else {
@@ -776,6 +809,8 @@ where
             self.enter_recovery(reason.clone());
         }
         if result.is_ok() && self.state == NodeState::Running {
+            self.checkpoints
+                .schedule(&mut self.local.owner, &self.local.applications, now);
             if let Err(reason) = self.schedule_wal_maintenance(now) {
                 self.enter_recovery(reason.clone());
                 return Err(reason);
@@ -838,6 +873,7 @@ where
                 |core, event| Self::authorize_configuration(network, core, event, authorize),
             )
             .map_err(NodeError::Replica)?;
+        self.checkpoints.observe(&self.local.owner, &replica.steps);
         self.configuration
             .observe(&self.local.owner, &replica.steps)
             .map_err(NodeError::Configuration)?;
@@ -864,6 +900,7 @@ where
             self.state = NodeState::Draining;
         }
         if self.state == NodeState::Draining
+            && self.checkpoints.pending.is_empty()
             && self.local.owner.is_drained()
             && self.local.persistence.is_drained()
             && self.replica.is_drained()
@@ -993,6 +1030,7 @@ where
             reason: self.failure.unwrap(),
             configuration: self.configuration,
             maintenance: self.maintenance,
+            checkpoints: self.checkpoints,
         })
     }
 }
