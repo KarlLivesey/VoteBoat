@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.45s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-3639936cb54e2253)
+
+running 6 tests
+test node_facade::local_drain::gate_is_idempotent_and_disables_every_assigned_follower ... ok
+test node_facade::local_drain::accepted_work_is_not_lost_when_admission_closes ... ok
+test node_facade::local_drain::membership_change_never_reuses_old_drain_configuration ... ok
+test node_facade::local_drain::exact_manifest_validation_has_no_partial_side_effects ... ok
+test node_facade::local_drain::ordinary_requests_keep_their_ownership_and_maintenance_stays_available ... ok
+test node_facade::local_drain::queue_pressure_retries_suppression_without_failing_the_node ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 157 filtered out; finished in 0.01s
+

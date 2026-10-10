@@ -18,6 +18,8 @@ use crate::{
     application::*, connect::PeerConnector, outbound::*, snapshot_worker::*, transport::*,
     worker::*,
 };
+mod drain;
+pub use drain::*;
 
 pub struct NodeSnapshots<H: SnapshotWorker> {
     pub router: SnapshotRouter,
@@ -113,6 +115,7 @@ pub enum NodeError {
     InvalidLimits,
     TimeWentBack,
     Closed,
+    Draining,
     RecoveryRequired,
     MissingPeers,
     WrongPeerStore,
@@ -194,6 +197,7 @@ pub struct Node<
     configuration: ConfigurationRequests,
     maintenance: WalMaintenanceStatus,
     checkpoints: CheckpointStatus,
+    drain: Option<drain::LocalDrain>,
 }
 impl<
         S: ReadyScheduler,
@@ -311,6 +315,7 @@ where
             configuration,
             maintenance: WalMaintenanceStatus::default(),
             checkpoints: CheckpointStatus::default(),
+            drain: None,
         })
     }
     fn validate_group_parts(parts: &NodeParts<S, T, E, A, W, O, H, C, F>) -> Result<(), NodeError> {
@@ -444,6 +449,20 @@ where
         &self.checkpoints
     }
     pub fn propose(&mut self, request: ClientRequest) -> Result<ClientTicket, ClientRejected> {
+        if self.drain.is_some() {
+            return Err(ClientRejected {
+                reason: ClientError::Draining,
+                request,
+            });
+        }
+        self.propose_maintenance(request)
+    }
+    /// Host-authorized maintenance admission during a local drain. This grants
+    /// no authorization itself; normal application and consensus checks apply.
+    pub fn propose_maintenance(
+        &mut self,
+        request: ClientRequest,
+    ) -> Result<ClientTicket, ClientRejected> {
         let Some(app) = self.local.applications.get(&request.group) else {
             return Err(ClientRejected {
                 reason: ClientError::UnknownGroup,
@@ -455,6 +474,22 @@ where
             .submit(&mut self.local.owner, app, request)
     }
     pub fn read(
+        &mut self,
+        group: GroupIdentity,
+        query: A::Query,
+    ) -> Result<ReadInvocationTicket, ReadInvocationRejected<A::Query>> {
+        if self.drain.is_some() {
+            return Err(ReadInvocationRejected {
+                reason: ReadInvocationError::Draining,
+                group,
+                query,
+            });
+        }
+        self.read_maintenance(group, query)
+    }
+    /// Explicit host-authorized maintenance query. Reads still require the
+    /// ordinary fresh quorum barrier; a drain never supplies read authority.
+    pub fn read_maintenance(
         &mut self,
         group: GroupIdentity,
         query: A::Query,
@@ -512,6 +547,7 @@ where
             NodeControl::CancelLeadershipTransfer { context } => {
                 Event::CancelLeadershipTransfer { context }
             }
+            NodeControl::Campaign if self.drain.is_some() => return Err(NodeError::Draining),
             NodeControl::Campaign => Event::Campaign,
             NodeControl::Heartbeat => Event::Heartbeat,
             NodeControl::Checkpoint => {
@@ -865,6 +901,9 @@ where
             &ConfigurationProposal,
         ) -> Result<(), ConfigurationProposalError>,
     ) -> Result<NodeProgress, NodeError> {
+        if self.state == NodeState::Running {
+            self.poll_drain_gate()?;
+        }
         if matches!(self.state, NodeState::Running | NodeState::Quiescing) {
             if let Some(peers) = &mut self.peers {
                 peers

@@ -159,6 +159,11 @@ pub enum Event {
     /// Host-authorized administrative input; public network configuration
     /// ingress remains independently gated. This is not an application command.
     Configure(Box<ConfigurationProposal>),
+    /// Volatile host maintenance gate. Recovery enables campaigning again;
+    /// restore durable maintenance intent before exposing a recovered replica.
+    SetCampaigning {
+        enabled: bool,
+    },
     Campaign,
     Heartbeat,
     /// Request a local application checkpoint; never establishes quorum evidence.
@@ -305,6 +310,7 @@ pub struct Raft {
     durable: GroupLog,
     membership: Membership,
     role: Role,
+    campaigning_enabled: bool,
     votes: BTreeSet<NodeId>,
     vote_context: Option<RequestContext>,
     progress: BTreeMap<NodeId, u64>,
@@ -422,6 +428,7 @@ impl Raft {
             durable: state,
             membership,
             role: Role::Follower,
+            campaigning_enabled: true,
             votes: BTreeSet::new(),
             vote_context: None,
             progress: BTreeMap::new(),
@@ -565,6 +572,10 @@ impl Raft {
 
     pub fn role(&self) -> Role {
         self.role
+    }
+    /// Local maintenance policy, not membership or evidence of remote quorum.
+    pub fn campaigning_enabled(&self) -> bool {
+        self.campaigning_enabled
     }
     pub fn local_node(&self) -> NodeId {
         self.node
@@ -893,6 +904,7 @@ impl Raft {
             }
             Event::Configure(_) if self.transfer.is_some() => Err(RaftError::Busy),
             Event::Configure(proposal) => self.configure(*proposal),
+            Event::SetCampaigning { enabled } => self.set_campaigning(enabled),
             Event::AuthorizeReplication {
                 witness,
                 candidate,
@@ -944,7 +956,23 @@ impl Raft {
         effects.extend(self.drive_transfer()?);
         Ok(effects)
     }
+    fn set_campaigning(&mut self, enabled: bool) -> Result<Vec<Effect>, RaftError> {
+        if self.campaigning_enabled != enabled {
+            self.reset_election()?;
+            self.campaigning_enabled = enabled;
+            if !enabled && self.role == Role::Candidate {
+                self.role = Role::Follower;
+                self.votes.clear();
+                self.vote_context = None;
+                self.repair_requests.clear();
+            }
+        }
+        Ok(Vec::new())
+    }
     fn campaign(&mut self) -> Result<Vec<Effect>, RaftError> {
+        if !self.campaigning_enabled {
+            return Err(RaftError::Busy);
+        }
         if !self.local_voter() {
             return Err(RaftError::NotVoter);
         }

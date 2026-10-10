@@ -12,6 +12,8 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
+#[path = "runtime/campaigning.rs"]
+mod campaigning;
 mod support;
 use std::{
     cell::Cell,

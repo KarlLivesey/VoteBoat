@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use voteboat::{maintenance::*, native::connect::*, raft::*, secure::PeerIdentity};
+#[path = "maintenance/drain.rs"]
+mod drain;
 type Managed = NativeNode<Maintenance<HostApplication>, NativeServiceConnector>;
 static DIRECTORY: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 struct History {
@@ -148,13 +150,26 @@ impl History {
         operation: OperationId,
         bytes: Vec<u8>,
     ) -> ClientOutcome<MaintenanceReceipt<CounterReceipt>> {
-        let ticket = self.nodes[id]
-            .propose(ClientRequest {
-                group: group(),
-                operation,
-                bytes,
-            })
-            .unwrap();
+        self.submit_with(id, operation, bytes, false)
+    }
+    fn submit_with(
+        &mut self,
+        id: usize,
+        operation: OperationId,
+        bytes: Vec<u8>,
+        maintenance: bool,
+    ) -> ClientOutcome<MaintenanceReceipt<CounterReceipt>> {
+        let request = ClientRequest {
+            group: group(),
+            operation,
+            bytes,
+        };
+        let ticket = if maintenance {
+            self.nodes[id].propose_maintenance(request)
+        } else {
+            self.nodes[id].propose(request)
+        }
+        .unwrap();
         let start = Instant::now();
         loop {
             self.poll();
@@ -175,10 +190,11 @@ impl History {
         }
     }
     fn control(&mut self, id: usize, command: LeadershipCommand) -> LeadershipRecord {
-        match self.submit(
+        match self.submit_with(
             id,
             command.intent().request.operation,
             command.encode().unwrap(),
+            true,
         ) {
             ClientOutcome::Applied {
                 receipt:

@@ -125,9 +125,75 @@ strict profiles clean while advancing the remaining capability work.
 | Completed196a: deterministic targeted handoff | Supply the protocol primitive needed for maintenance; advances P4 and chapter09. | Existing quorum, durable replication/election contracts and exact wire capability selection. | Host-driven stable/recursive elections, catch-up and ballot persistence boundaries, restart/cancellation/identity/membership refusals; wire8 encoding and exact TCP/QUIC session selection. This is not a durable administrative operation. |
 | Completed196b1: durable Rust maintenance | Preserve original intent/status through the existing group log and checkpoints; advances P4/chapter09 and usable embedding. |196a, opt-in application composition, Node result ownership and execution-time proposal context. | Bounded records, original-ID retries/cancellation, host context rechecks, every-byte torn journal records, and native TCP/WAL and QUIC/checkpoint pending/completed recovery plus fresh quorum status. |
 | Completed196b2: authenticated move-leader commands | Expose the durable Rust workflow to operators; advances P4 and chapter09 maintenance. |196b1, existing bounded authenticated command sessions, explicit application schema and wire8 selection. | Start/status/resume/cancel retain original IDs and return applied or explicit unknown outcomes; unauthorized commands fail, disconnected waits release resources, and actual executable TCP/QUIC recovery histories preserve data. Coordinated drain then composes this completed196 workflow with membership. |
-| Current197: coordinated node drain | Make planned maintenance use the existing placement, membership and shutdown paths; advances P4/P2 and chapter09 operations. |196 leadership transfer, explicit assignment inventory and existing bounded shutdown ownership. | Stop new local work, transfer eligible leadership, expose unresolved groups, and join workers only after the selected drain conditions hold. Interruption and stale assignment must not report successful drain. Sketch the precise schema before implementation. |
-| Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. |
-| Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances the broader P0–P7 validation milestone. | Completed maintenance196, drain197 and assignment198; actual Linux/macOS execution, pinned source and recorded transport profiles. | Record executable TCP/QUIC recovery and interruption results for each platform; preserve failing schedules and exact revisions. CI remains background feedback, not a prerequisite for continued feature work. |
+| Completed197a: local drain admission and campaign gate | Keep a replica from immediately campaigning after handing off; advances coordinated drain197, P4/P2 and chapter09. |196 leadership transfer, exact bounded assignment inventory and existing Node ownership. | Reject ordinary new work while preserving maintenance/replication; disable automatic, explicit and transfer-triggered campaigns; retain leader heartbeat until handoff. Report unresolved/stale groups and outstanding results. Local readiness is not remote quorum or durable completion. |
+| Current197b: durable coordinated drain | Expose recoverable operator drain through existing maintenance, membership and shutdown paths; advances P4/P2 and chapter09. |197a gates,196 durable operations, authenticated administration and placement/membership authorization. | Persist original identity and expected assignments before executing; recover interrupted plans, transfer eligible leaders and change membership as required; never call unavailable or stale groups safely drained. Join selected workers after verified conditions. |
+| Next198: executable assignment listing | Expose the remaining chapter09 assignment-list surface; advances P2/P5 operator support. | Existing public group cursors and authenticated Inspect commands. | Bounded pages include exact local group/incarnation/configuration identities; reject stale cursors and unauthorized scope. Local inventory must not claim globally complete placement or ownership. Cross-platform operator recovery199 follows197/198; actual Linux/macOS TCP/QUIC evidence remains required. |
+| Following199: cross-platform operator recovery evidence | Exercise the assembled operator paths on both supported platforms; advances P0–P7 validation. | Completed maintenance196, coordinated drain197 and assignment198; actual Linux/macOS execution. | Record executable TCP/QUIC recovery and interruption, exact revisions and failing schedules. CI stays background feedback. |
+
+### Slice197a implementation evidence
+
+Added public local drain admission/status over the existing owned Node. All
+assigned groups and expected stable committed configurations are checked before
+closing ordinary work. The owner admits at most32 campaign suppressions per
+poll and retains admitted identities during backpressure. Explicit maintenance
+proposal/read methods preserve existing application, quorum and result ownership
+checks. Candidates step down without changing durable votes; existing leaders
+retain heartbeats and handoff. Disabled followers keep voting and replicating.
+
+Eighteen focused tests cover explicit and transfer-triggered campaigns, pending
+self-vote durability, late ballots, recovery, queued stale election timers,
+leader heartbeat, exact multi-group manifests, stale configurations, queue
+pressure and held results. Actual native TCP and QUIC histories commit a
+maintenance intent while gated, transfer leadership, stop/join the source and
+write through the two remaining voters. The affected all-feature regression
+passes247 tests; the core/runtime/Node no-default regression passes206. Counts
+overlap and do not establish a full protocol proof. Commands, source digests and
+results are recorded in validation/baseline/slice197a. Formatting and all three
+strict all-target Clippy profiles pass with zero diagnostics; the101-entry
+contract metadata/path check passes.
+
+Macro review: this closes the local gate prerequisite, not coordinated drain197.
+Status is an ephemeral local observation, never remote quorum or safe replica
+removal evidence. The gate is volatile and one-way until shutdown. Durable
+operation recovery, cancellation/resumption, membership/placement orchestration
+and authenticated executable drain remain197b. No native process restart of
+a drain, macOS execution, general quorum-availability or power-loss claim.
+
+### Slice197a schema and acceptance plan
+
+The preceding explanation-only turn made no implementation progress. The clean
+worktree at96d7bee confirms the next missing action: add local drain gates.
+This prerequisite is needed because an otherwise successful leadership handoff
+can be undone by the draining replica's next election timeout.
+
+Raft receives an explicit volatile SetCampaigning event. Disabling it abandons
+a candidate's volatile ballot collection but keeps an existing leader active
+for the normal handoff. Persistent votes are unchanged. Every campaign entry
+point checks the flag; timers cancel election deadlines while preserving leader
+heartbeats. Recovery resets the flag:197b must restore durable intent before
+exposing recovered work. No new durability token, watermark or wire format.
+
+Node accepts an operation ID and a sorted exact list of assigned group identities
+and expected stable committed configuration IDs (at most1024 groups). Validate
+the entire list before closing ordinary proposal/read admission. Same-request
+retries are idempotent; conflicts reject without changing the original gate.
+Bound each poll's suppression work and retain queued group identities to avoid
+duplicate control admission under backpressure. Maintenance proposal/read paths
+stay explicit and host-authorized, alongside replication and configuration.
+The local gate is one-way until shutdown; durable resume/cancellation belongs
+to197b. Hosts using lower-level components must enforce equivalent admission.
+
+Inspection separates pending suppression, leader, stale configuration, pending
+core effects and locally quiescent groups. Unconsumed client/read/configuration
+results prevent local readiness. Readiness is an ephemeral local observation,
+not evidence of remote availability, safe decommissioning or completed drain.
+Normal shutdown still owns and drains accepted work and joins native workers.
+
+Acceptance: candidate/late-ballot, explicit/timeout campaigns, normal voting and
+replication, stale timer cancellation, leader heartbeat, exact multi-group
+manifest and original-request rejection tests; maintenance admission and held
+results; native TCP/QUIC handoff composition. Run affected tests, formatting,
+all three strict Clippy profiles and update contracts/evidence honestly.
 
 The192 audit changes the immediate order: chapter09 still has missing operator
 capabilities, so close a usable preview/execution path before another performance

@@ -64,6 +64,7 @@ pub enum ClientError {
     WrongBinding,
     UnknownGroup,
     Closed,
+    Draining,
     Fenced,
     Overloaded,
     RequestTooLarge,

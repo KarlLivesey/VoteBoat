@@ -58,6 +58,7 @@ pub enum ReadInvocationError {
     InvalidLimits,
     WrongBinding,
     Closed,
+    Draining,
     Fenced,
     UnknownGroup,
     Overloaded,

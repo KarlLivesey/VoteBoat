@@ -1,0 +1,11 @@
+# Successful checks, run from repository root. Logs are in this directory.
+cargo +stable test --locked --offline --all-features --test effect_owner local_drain
+cargo +stable test --locked --offline --all-features --test startup local_drain
+cargo +stable test --locked --offline --all-features --test raft --test runtime --test effect_owner --test startup
+cargo +stable test --locked --offline --no-default-features --test raft --test runtime --test effect_owner
+cargo +stable fmt --all -- --check
+cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings
+cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
+node validation/check-inventory.mjs
+# Native socket regressions require loopback permission. Feature builds ran sequentially.

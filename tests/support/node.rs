@@ -26,6 +26,8 @@ mod automatic_checkpoints;
 mod automatic_maintenance;
 #[path = "node_events.rs"]
 mod event_reporting;
+#[path = "node_drain.rs"]
+mod local_drain;
 type Parts = NodeParts<
     Ready,
     Timers,

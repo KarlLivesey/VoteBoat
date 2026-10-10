@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.03s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp ... ok
+test maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 14 filtered out; finished in 0.32s
+

@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 use voteboat::secure::PeerIdentity;
-fn request(target: u64) -> LeadershipTransferRequest {
+pub(super) fn request(target: u64) -> LeadershipTransferRequest {
     LeadershipTransferRequest {
         operation: OperationId::new(100).unwrap(),
         target: PeerIdentity {
@@ -12,14 +12,14 @@ fn request(target: u64) -> LeadershipTransferRequest {
         configuration: ConfigurationId::new(1).unwrap(),
     }
 }
-fn elected() -> Cluster<HostLogStore> {
+pub(super) fn elected() -> Cluster<HostLogStore> {
     let mut c = Cluster::new(bootstrap(1, 3), |id| HostLogStore::new(id.into()));
     c.act(1, Event::Campaign);
     c.pump();
     c.propose(1, 1, 7);
     c
 }
-fn signal(c: &mut Cluster<HostLogStore>) -> Message {
+pub(super) fn signal(c: &mut Cluster<HostLogStore>) -> Message {
     let at = c
         .messages
         .iter()
