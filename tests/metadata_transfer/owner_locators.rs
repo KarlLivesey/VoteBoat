@@ -569,89 +569,15 @@ fn imported_full_and_partial_locators_preserve_import_and_retire_exact_later_mer
         assert_eq!(successors[0].application().value(&[1]), Ok(10));
         assert_eq!(successors[0].application().value(&[100]), Ok(15));
         for (index, (t, log)) in targets.iter().zip(&mut logs).enumerate() {
-            let template = &templates[index];
-            let status = t.freeze_status().unwrap().unwrap();
-            let lineage = t.retirement_lineage().unwrap();
-            template
-                .validate_retirement_evidence(&status, &lineage)
-                .unwrap();
-            // A well-formed empty grant history must not pass merely because
-            // preliminary source-shape normalization permits metadata changes.
-            let activation_bytes = u32::from_le_bytes(lineage[8..12].try_into().unwrap()) as usize;
-            let count_at = 12 + activation_bytes + 8;
-            let mut missing = lineage[..count_at + 2].to_vec();
-            missing[count_at..count_at + 2].copy_from_slice(&0u16.to_le_bytes());
-            assert!(template
-                .validate_retirement_evidence(&status, &missing)
-                .is_err());
-            let proof = RetirementProof {
-                metadata_configuration: cfg(3),
-                decision: decision.clone(),
-                targets: vec![TargetActivationEvidence::from_status(
-                    cfg(4),
-                    successors[0].status(),
-                )
-                .unwrap()],
-                release: RetentionRelease {
-                    source: t.status().group,
-                    operation: op(900),
-                    fence_index: status.fence.index,
-                    release: op(999),
-                },
-            };
-            let mut guard =
-                RetirementGuard::new(template.clone()).unwrap_or_else(|_| panic!("guard"));
-            guard.apply_batch(log).unwrap();
-            let b = guard.retirement_command(&proof, 300000).unwrap();
-            #[cfg(feature = "native")]
-            {
-                let mut history = log.clone();
-                history.push(entry(guard.applied_index() + 1, 900, b.clone()));
-                journal_cuts(
-                    t.status().group,
-                    || RetirementGuard::new(template.clone()).unwrap_or_else(|_| panic!("guard")),
-                    &history,
-                );
-            }
-            apply(&mut guard, 900, b);
-            let cp = guard.checkpoint(300000).unwrap();
-            let mut reopened =
-                RetirementGuard::new(template.clone()).unwrap_or_else(|_| panic!("guard"));
-            reopened
-                .restore_checkpoint(guard.schema_version(), guard.applied_index(), &cp)
-                .unwrap();
-            assert!(reopened.owner().is_none());
-            for n in [0, 8, lineage.len() - 1] {
-                assert!(template
-                    .validate_retirement_evidence(&status, &lineage[..n])
-                    .is_err());
-            }
-            let old = Target::new(
-                t.status().group,
-                op(200),
-                first.clone(),
-                BucketCounter::new(
-                    if index == 0 {
-                        range(0, 64)
-                    } else {
-                        range(64, 128)
-                    },
-                    fixture::Policy,
-                    fixture::bucket_limits(),
-                )
-                .unwrap(),
-                fixture::Policy,
-                TargetLimits {
-                    import_bytes: 65536,
-                    application_checkpoint_bytes: fixture::bucket_limits()
-                        .checkpoint_bound()
-                        .unwrap(),
-                },
-            )
-            .unwrap_or_else(|_| panic!("old"))
-            .with_metadata_authority_adoption(2)
-            .unwrap_or_else(|_| panic!("old profile"));
-            assert!(old.validate_retirement_evidence(&status, &lineage).is_err());
+            retire_imported_target(
+                index,
+                &templates[index],
+                t,
+                log,
+                &decision,
+                &successors[0],
+                &first,
+            );
         }
     }
 }
@@ -670,57 +596,7 @@ fn retained_owner_keeps_exports_and_adopts_a_later_retained_transfer() {
     let first = apply(&mut owner, 801, b.clone());
     assert_eq!(owner.grant(), &a.after());
     apply(&mut owner, 3, data(&a.after(), 21, 100, 2));
-    let mut child = a.after().into_input();
-    child.responsibility.id = ResponsibilityId::new(70).unwrap();
-    child.parent = Some(ParentAuthority {
-        responsibility: before.input().responsibility,
-        group: before.input().authority,
-    });
-    child.scope = range(0, 64);
-    child.generation = RouteGeneration::new(1).unwrap();
-    child.execution = ExecutionMode::Single(group(70));
-    let child = ResponsibilityManifest::new(child).unwrap();
-    let creation = GroupCreationIntent {
-        authority: before.input().authority,
-        parent: before.input().responsibility,
-        expected: a.after().input().generation,
-        responsibility: child.input().responsibility,
-        bootstrap: support::bootstrap(70, 3),
-        application: child.input().application,
-        mode: GroupCreationMode::Staging,
-    };
-    apply(&mut world.child, 70, creation.encode(200000).unwrap());
-    let status = world
-        .child
-        .group_creation_at(world.child.applied_index(), group(70))
-        .unwrap()
-        .unwrap();
-    let insertion = InsertionChild::from_creation(child.clone(), &status).unwrap();
-    let mut after = a.after().into_input();
-    after.epoch = OwnershipEpoch::new(2).unwrap();
-    after.generation = RouteGeneration::new(3).unwrap();
-    after.execution = ExecutionMode::Delegated(vec![
-        RouteEntry {
-            scope: range(0, 64),
-            target: RouteTarget::Child(ChildAuthority {
-                responsibility: child.input().responsibility,
-                group: before.input().authority,
-                epoch: child.input().epoch,
-            }),
-        },
-        RouteEntry {
-            scope: range(64, 128),
-            target: RouteTarget::Group(group(21)),
-        },
-    ]);
-    let plan = DelegationPlan::retained_insertion(
-        world.parent_manifest(),
-        a.after(),
-        ResponsibilityManifest::new(after).unwrap(),
-        insertion,
-        op(900),
-    )
-    .unwrap();
+    let plan = retained_locator_plan(&mut world, &before, &a);
     let (i, r) = world.reserve_plan(plan, 900);
     apply(&mut owner, 900, i.encode(200000).unwrap());
     let ScopedSourceRead::Frozen(Some(frozen)) = owner
@@ -986,4 +862,147 @@ fn native_locator_adoption_cuts_preserve_all_owner_families_and_exact_retries() 
             &history,
         );
     }
+}
+
+fn retire_imported_target(
+    index: usize,
+    template: &Target,
+    t: &Target,
+    log: &[LogEntry],
+    decision: &TransferPublicationStatus,
+    successor: &Target,
+    first: &TransferIntent,
+) {
+    let status = t.freeze_status().unwrap().unwrap();
+    let lineage = t.retirement_lineage().unwrap();
+    template
+        .validate_retirement_evidence(&status, &lineage)
+        .unwrap();
+    // A well-formed empty grant history must not pass merely because
+    // preliminary source-shape normalization permits metadata changes.
+    let activation_bytes = u32::from_le_bytes(lineage[8..12].try_into().unwrap()) as usize;
+    let count_at = 12 + activation_bytes + 8;
+    let mut missing = lineage[..count_at + 2].to_vec();
+    missing[count_at..count_at + 2].copy_from_slice(&0u16.to_le_bytes());
+    assert!(template
+        .validate_retirement_evidence(&status, &missing)
+        .is_err());
+    let proof = RetirementProof {
+        metadata_configuration: cfg(3),
+        decision: decision.clone(),
+        targets: vec![TargetActivationEvidence::from_status(cfg(4), successor.status()).unwrap()],
+        release: RetentionRelease {
+            source: t.status().group,
+            operation: op(900),
+            fence_index: status.fence.index,
+            release: op(999),
+        },
+    };
+    let mut guard = RetirementGuard::new(template.clone()).unwrap_or_else(|_| panic!("guard"));
+    guard.apply_batch(log).unwrap();
+    let b = guard.retirement_command(&proof, 300000).unwrap();
+    #[cfg(feature = "native")]
+    {
+        let mut history = log.to_vec();
+        history.push(entry(guard.applied_index() + 1, 900, b.clone()));
+        journal_cuts(
+            t.status().group,
+            || RetirementGuard::new(template.clone()).unwrap_or_else(|_| panic!("guard")),
+            &history,
+        );
+    }
+    apply(&mut guard, 900, b);
+    let cp = guard.checkpoint(300000).unwrap();
+    let mut reopened = RetirementGuard::new(template.clone()).unwrap_or_else(|_| panic!("guard"));
+    reopened
+        .restore_checkpoint(guard.schema_version(), guard.applied_index(), &cp)
+        .unwrap();
+    assert!(reopened.owner().is_none());
+    for n in [0, 8, lineage.len() - 1] {
+        assert!(template
+            .validate_retirement_evidence(&status, &lineage[..n])
+            .is_err());
+    }
+    let old = Target::new(
+        t.status().group,
+        op(200),
+        first.clone(),
+        BucketCounter::new(
+            if index == 0 {
+                range(0, 64)
+            } else {
+                range(64, 128)
+            },
+            fixture::Policy,
+            fixture::bucket_limits(),
+        )
+        .unwrap(),
+        fixture::Policy,
+        TargetLimits {
+            import_bytes: 65536,
+            application_checkpoint_bytes: fixture::bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|_| panic!("old"))
+    .with_metadata_authority_adoption(2)
+    .unwrap_or_else(|_| panic!("old profile"));
+    assert!(old.validate_retirement_evidence(&status, &lineage).is_err());
+}
+
+fn retained_locator_plan(
+    world: &mut World,
+    before: &ResponsibilityManifest,
+    a: &OwnerMetadataLocatorAdoption,
+) -> DelegationPlan {
+    let mut child = a.after().into_input();
+    child.responsibility.id = ResponsibilityId::new(70).unwrap();
+    child.parent = Some(ParentAuthority {
+        responsibility: before.input().responsibility,
+        group: before.input().authority,
+    });
+    child.scope = range(0, 64);
+    child.generation = RouteGeneration::new(1).unwrap();
+    child.execution = ExecutionMode::Single(group(70));
+    let child = ResponsibilityManifest::new(child).unwrap();
+    let creation = GroupCreationIntent {
+        authority: before.input().authority,
+        parent: before.input().responsibility,
+        expected: a.after().input().generation,
+        responsibility: child.input().responsibility,
+        bootstrap: support::bootstrap(70, 3),
+        application: child.input().application,
+        mode: GroupCreationMode::Staging,
+    };
+    apply(&mut world.child, 70, creation.encode(200000).unwrap());
+    let status = world
+        .child
+        .group_creation_at(world.child.applied_index(), group(70))
+        .unwrap()
+        .unwrap();
+    let insertion = InsertionChild::from_creation(child.clone(), &status).unwrap();
+    let mut after = a.after().into_input();
+    after.epoch = OwnershipEpoch::new(2).unwrap();
+    after.generation = RouteGeneration::new(3).unwrap();
+    after.execution = ExecutionMode::Delegated(vec![
+        RouteEntry {
+            scope: range(0, 64),
+            target: RouteTarget::Child(ChildAuthority {
+                responsibility: child.input().responsibility,
+                group: before.input().authority,
+                epoch: child.input().epoch,
+            }),
+        },
+        RouteEntry {
+            scope: range(64, 128),
+            target: RouteTarget::Group(group(21)),
+        },
+    ]);
+    DelegationPlan::retained_insertion(
+        world.parent_manifest(),
+        a.after(),
+        ResponsibilityManifest::new(after).unwrap(),
+        insertion,
+        op(900),
+    )
+    .unwrap()
 }

@@ -82,6 +82,69 @@ fn cancellation(
     }
 }
 
+fn verify_replanned_targets(
+    next: &TransferIntent,
+    targets: &mut [Target],
+    decision: voteboat::transfer_publication::TransferPublicationStatus,
+) {
+    let activation = TargetActivation {
+        metadata_configuration: cfg(),
+        decision,
+    };
+    let cache = Cache(BTreeMap::from([(id(10), next.after().clone())]));
+    for (t, (key, operation, value)) in targets.iter_mut().zip([(1, 1, 7), (200, 2, 11)]) {
+        let bytes = t.activation_command(&activation, 65536).unwrap();
+        command(t, 202, bytes);
+        let hint = resolve(&cache, &base::Policy, id(10), &[key], 1).unwrap();
+        let bytes = encode_routed(
+            hint,
+            &[key],
+            &encode_add(&[key], value, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        let TargetOutcome::Applied(r) = command(t, operation, bytes).outcome else {
+            panic!("original retry")
+        };
+        assert!(r.duplicate);
+        assert_eq!(r.outcome, BucketOutcome::Value(value));
+    }
+    let hint = resolve(&cache, &base::Policy, id(10), &[1], 1).unwrap();
+    let bytes = encode_routed(
+        hint,
+        &[1],
+        &encode_add(&[1], 2, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    let TargetOutcome::Applied(r) = command(&mut targets[0], 3, bytes).outcome else {
+        panic!("new write")
+    };
+    assert!(!r.duplicate);
+    assert_eq!(r.outcome, BucketOutcome::Value(9));
+    let bytes = targets[0].checkpoint(300000).unwrap();
+    let mut recovered = fresh_target_for(21, next, 202);
+    recovered
+        .restore_checkpoint(
+            targets[0].schema_version(),
+            targets[0].applied_index(),
+            &bytes,
+        )
+        .unwrap();
+    assert_eq!(
+        recovered
+            .read_at(
+                recovered.applied_index(),
+                TargetQuery::Data(RoutedQuery {
+                    hint,
+                    key: vec![1],
+                    query: vec![1]
+                })
+            )
+            .unwrap(),
+        TargetRead::Data(9)
+    );
+}
 #[test]
 fn durable_decline_cancels_parent_and_fresh_transfer_preserves_real_data() {
     let (mut p, mut c, s, intent) = prepared(10);
@@ -147,63 +210,7 @@ fn durable_decline_cancels_parent_and_fresh_transfer_preserves_real_data() {
         command(&mut p, 403, completion.encode(100000).unwrap()).outcome,
         DirectoryOutcome::DelegationPublished(RouteGeneration::new(2).unwrap())
     );
-    let activation = TargetActivation {
-        metadata_configuration: cfg(),
-        decision,
-    };
-    let cache = Cache(BTreeMap::from([(id(10), next.after().clone())]));
-    for (t, (key, operation, value)) in targets.iter_mut().zip([(1, 1, 7), (200, 2, 11)]) {
-        let bytes = t.activation_command(&activation, 65536).unwrap();
-        command(t, 202, bytes);
-        let hint = resolve(&cache, &base::Policy, id(10), &[key], 1).unwrap();
-        let bytes = encode_routed(
-            hint,
-            &[key],
-            &encode_add(&[key], value, b"effect", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        let TargetOutcome::Applied(r) = command(t, operation, bytes).outcome else {
-            panic!("original retry")
-        };
-        assert!(r.duplicate);
-        assert_eq!(r.outcome, BucketOutcome::Value(value));
-    }
-    let hint = resolve(&cache, &base::Policy, id(10), &[1], 1).unwrap();
-    let bytes = encode_routed(
-        hint,
-        &[1],
-        &encode_add(&[1], 2, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    let TargetOutcome::Applied(r) = command(&mut targets[0], 3, bytes).outcome else {
-        panic!("new write")
-    };
-    assert!(!r.duplicate);
-    assert_eq!(r.outcome, BucketOutcome::Value(9));
-    let bytes = targets[0].checkpoint(300000).unwrap();
-    let mut recovered = fresh_target_for(21, &next, 202);
-    recovered
-        .restore_checkpoint(
-            targets[0].schema_version(),
-            targets[0].applied_index(),
-            &bytes,
-        )
-        .unwrap();
-    assert_eq!(
-        recovered
-            .read_at(
-                recovered.applied_index(),
-                TargetQuery::Data(RoutedQuery {
-                    hint,
-                    key: vec![1],
-                    query: vec![1]
-                })
-            )
-            .unwrap(),
-        TargetRead::Data(9)
-    );
+    verify_replanned_targets(&next, &mut targets, decision);
     assert!(matches!(
         source
             .read_at(
@@ -486,6 +493,35 @@ fn failed_old_intent_can_be_declined_but_child_history_exhaustion_never_infers_r
     assert_eq!(full.checkpoint(1000000).unwrap(), before);
 }
 
+fn verify_decline_status_codec(status: &DelegationDeclineStatus) {
+    let bytes = status.encode(MAX_DELEGATION_DECLINE_STATUS_BYTES).unwrap();
+    assert_eq!(bytes.capacity(), bytes.len());
+    assert_eq!(DelegationDeclineStatus::decode(&bytes).unwrap(), *status);
+    assert!(status.encode(bytes.len() - 1).is_err());
+    for end in 0..bytes.len() {
+        assert!(DelegationDeclineStatus::decode(&bytes[..end]).is_err());
+    }
+    for index in [0, u64::MAX] {
+        let mut invalid = status.clone();
+        invalid.index = index;
+        assert!(invalid.encode(100000).is_err());
+        let mut altered = bytes.clone();
+        altered[24..32].copy_from_slice(&index.to_le_bytes());
+        assert!(DelegationDeclineStatus::decode(&altered).is_err());
+    }
+    let mut invalid = status.clone();
+    invalid.operation = op(200);
+    assert!(invalid.encode(100000).is_err());
+    let mut altered = bytes.clone();
+    altered[8..24].copy_from_slice(&200u128.to_le_bytes());
+    assert!(DelegationDeclineStatus::decode(&altered).is_err());
+    let mut trailing = bytes.clone();
+    trailing.push(0);
+    assert!(DelegationDeclineStatus::decode(&trailing).is_err());
+    let mut length = bytes;
+    length[32..36].copy_from_slice(&u32::MAX.to_le_bytes());
+    assert!(DelegationDeclineStatus::decode(&length).is_err());
+}
 #[test]
 fn decline_and_cancellation_codecs_are_bounded_and_reject_incomplete_provenance() {
     let mut p = ready_directory(true, 10);
@@ -515,33 +551,7 @@ fn decline_and_cancellation_codecs_are_bounded_and_reject_incomplete_provenance(
         index: 17,
         decline,
     };
-    let bytes = status.encode(MAX_DELEGATION_DECLINE_STATUS_BYTES).unwrap();
-    assert_eq!(bytes.capacity(), bytes.len());
-    assert_eq!(DelegationDeclineStatus::decode(&bytes).unwrap(), status);
-    assert!(status.encode(bytes.len() - 1).is_err());
-    for end in 0..bytes.len() {
-        assert!(DelegationDeclineStatus::decode(&bytes[..end]).is_err());
-    }
-    for index in [0, u64::MAX] {
-        let mut invalid = status.clone();
-        invalid.index = index;
-        assert!(invalid.encode(100000).is_err());
-        let mut altered = bytes.clone();
-        altered[24..32].copy_from_slice(&index.to_le_bytes());
-        assert!(DelegationDeclineStatus::decode(&altered).is_err());
-    }
-    let mut invalid = status.clone();
-    invalid.operation = op(200);
-    assert!(invalid.encode(100000).is_err());
-    let mut altered = bytes.clone();
-    altered[8..24].copy_from_slice(&200u128.to_le_bytes());
-    assert!(DelegationDeclineStatus::decode(&altered).is_err());
-    let mut trailing = bytes.clone();
-    trailing.push(0);
-    assert!(DelegationDeclineStatus::decode(&trailing).is_err());
-    let mut length = bytes;
-    length[32..36].copy_from_slice(&u32::MAX.to_le_bytes());
-    assert!(DelegationDeclineStatus::decode(&length).is_err());
+    verify_decline_status_codec(&status);
 
     let cancellation = DelegationCancellation {
         reservation: reservation.operation,

@@ -194,6 +194,23 @@ fn add(
         RoutedOutcome::Applied(_)
     ));
 }
+fn verify_reparent_status_budget(d: Directory, status: ReparentStatus) {
+    let view = LifecycleDirectory::new(d);
+    let q = DirectoryQuery::Reparent(op(200));
+    let result = view.read_at(view.applied_index(), q).unwrap();
+    assert_eq!(result, DirectoryRead::Reparent(Some(status)));
+    let nested = view.read_result_bytes(&result, usize::MAX).unwrap();
+    assert!(nested > 0);
+    assert_eq!(
+        view.read_result_bound(&q).unwrap(),
+        std::mem::size_of::<DirectoryRead>() + nested
+    );
+    assert!(view.read_result_bytes(&result, nested - 1).is_err());
+    assert_eq!(
+        view.read_at(view.applied_index() + 1, q),
+        Err(ApplicationError::NotApplied)
+    );
+}
 #[test]
 fn one_commit_moves_live_child_and_preserves_values_retries_and_parent_service() {
     let (plan, grants) = fixture();
@@ -294,21 +311,7 @@ fn one_commit_moves_live_child_and_preserves_values_retries_and_parent_service()
         DirectoryOutcome::Reparented
     );
     d = recover(&d);
-    let view = LifecycleDirectory::new(d);
-    let q = DirectoryQuery::Reparent(op(200));
-    let result = view.read_at(view.applied_index(), q).unwrap();
-    assert_eq!(result, DirectoryRead::Reparent(Some(status)));
-    let nested = view.read_result_bytes(&result, usize::MAX).unwrap();
-    assert!(nested > 0);
-    assert_eq!(
-        view.read_result_bound(&q).unwrap(),
-        std::mem::size_of::<DirectoryRead>() + nested
-    );
-    assert!(view.read_result_bytes(&result, nested - 1).is_err());
-    assert_eq!(
-        view.read_at(view.applied_index() + 1, q),
-        Err(ApplicationError::NotApplied)
-    );
+    verify_reparent_status_budget(d, status);
 }
 #[test]
 fn nested_child_moves_without_changing_descendants_or_their_data() {
@@ -545,12 +548,13 @@ fn destination_depth_is_checked_against_the_whole_moved_subtree() {
         Some(base.child())
     );
 }
-#[test]
-fn lifecycle_reservations_capacity_and_batch_failure_cannot_half_move_a_child() {
-    let (plan, grants) = fixture();
-    let bytes = plan.encode(200000).unwrap();
+fn verify_deletion_blocks_reparent(
+    plan: &ReparentPlan,
+    grants: &[ResponsibilityManifest],
+    bytes: &[u8],
+) {
     for target in [plan.old_parent(), plan.new_parent(), plan.child()] {
-        let mut d = initial(grants.clone(), 32);
+        let mut d = initial(grants.to_vec(), 32);
         assert_eq!(
             commit(
                 &mut d,
@@ -565,7 +569,7 @@ fn lifecycle_reservations_capacity_and_batch_failure_cannot_half_move_a_child() 
             DirectoryOutcome::DeletionIntentRecorded
         );
         assert_eq!(
-            commit(&mut d, 200, bytes.clone()).outcome,
+            commit(&mut d, 200, bytes.to_vec()).outcome,
             DirectoryOutcome::LifecycleBusy
         );
         assert_eq!(
@@ -573,6 +577,12 @@ fn lifecycle_reservations_capacity_and_batch_failure_cannot_half_move_a_child() 
             Some(plan.child())
         );
     }
+}
+#[test]
+fn lifecycle_reservations_capacity_and_batch_failure_cannot_half_move_a_child() {
+    let (plan, grants) = fixture();
+    let bytes = plan.encode(200000).unwrap();
+    verify_deletion_blocks_reparent(&plan, &grants, &bytes);
     let mut after = plan.child().clone().into_input();
     after.generation = RouteGeneration::new(2).unwrap();
     after.epoch = OwnershipEpoch::new(2).unwrap();
@@ -774,9 +784,41 @@ fn original_profiles_refuse_reparenting_and_checkpoint_restore_is_atomic() {
     assert!(d.with_local_reparenting().is_err());
 }
 #[cfg(feature = "native")]
+fn seed_reparent_log(
+    prefix: &[voteboat::log::LogEntry],
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let limits = LogLimits::default();
+
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(1, 3))],
+    );
+    let state = log.state(group(1)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            4,
+            Some(Suffix {
+                from: 1,
+                entries: prefix.to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+#[cfg(feature = "native")]
 #[test]
 fn journal_cuts_never_publish_only_one_parent_or_lose_the_original_result() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (plan, grants) = fixture();
     let d = initial(grants.clone(), 32);
@@ -795,28 +837,7 @@ fn journal_cuts_never_publish_only_one_parent_or_lose_the_original_result() {
         ));
     }
     let limits = LogLimits::default();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-        support::append(
-            &mut log,
-            vec![LogMutation::Create(support::bootstrap(1, 3))],
-        );
-        let state = log.state(group(1)).unwrap();
-        support::append(
-            &mut log,
-            vec![support::update(
-                &state,
-                1,
-                4,
-                Some(Suffix {
-                    from: 1,
-                    entries: prefix.clone(),
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_reparent_log(&prefix);
     let (_, log) = seed();
     let mutation = support::update(
         &log.state(group(1)).unwrap(),

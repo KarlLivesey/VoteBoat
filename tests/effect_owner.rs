@@ -1740,30 +1740,7 @@ mod native {
         recover: bool,
         with_snapshots: bool,
     ) -> Node {
-        let mut store = if recover {
-            NativeLogStore::recover(
-                FileLogIo::open(path).unwrap(),
-                identity(id.into()),
-                LogLimits::default(),
-            )
-            .unwrap()
-        } else {
-            NativeLogStore::create(
-                FileLogIo::create(path).unwrap(),
-                identity(id.into()),
-                LogLimits::default(),
-            )
-            .unwrap()
-        };
-        // Bootstrap is explicit in this test; incoming peer traffic cannot create groups.
-        if !recover {
-            append(
-                &mut store,
-                (1..=100)
-                    .map(|g| LogMutation::Create(bootstrap(g, 3)))
-                    .collect(),
-            );
-        }
+        let mut store = open_owner_store(id, path, recover);
         let runtime_owner = RuntimeOwner {
             store: store.binding(),
             lane: ExecutionLaneId::new(1).unwrap(),
@@ -1779,96 +1756,9 @@ mod native {
             FairScheduler::new(100).unwrap(),
         )
         .unwrap();
-        if with_snapshots && !recover && id <= 2 {
-            let mutations = (1..=100)
-                .map(|g| {
-                    let state = store.state(group(g)).unwrap();
-                    update(
-                        &state,
-                        1,
-                        1,
-                        Some(Suffix {
-                            from: 1,
-                            entries: vec![LogEntry {
-                                index: 1,
-                                term: 1,
-                                payload: EntryPayload::Command {
-                                    operation: OperationId::new(1).unwrap(),
-                                    bytes: 7i64.to_le_bytes().to_vec(),
-                                },
-                            }],
-                        }),
-                    )
-                })
-                .collect();
-            append(&mut store, mutations);
-        }
-        let mut apps = BTreeMap::new();
-        let mut snapshot_stores = BTreeMap::new();
-        if with_snapshots && !recover {
-            std::fs::create_dir(path.join("snapshots")).unwrap();
-        }
-        for g in 1..=100 {
-            let mut app = Counter::new(100).unwrap();
-            let mut snap = with_snapshots.then(|| {
-                let directory = path.join("snapshots").join(g.to_string());
-                let identity = SnapshotIdentity {
-                    store: store.binding().identity,
-                    group: group(g),
-                };
-                let limits = SnapshotLimits {
-                    max_application_bytes: 65536,
-                    max_metadata_bytes: 4096,
-                    max_chunk_bytes: 1024,
-                };
-                if recover {
-                    NativeSnapshotStore::recover(
-                        FileSnapshotIo::open(directory).unwrap(),
-                        identity,
-                        limits,
-                    )
-                    .unwrap()
-                } else {
-                    NativeSnapshotStore::create(
-                        FileSnapshotIo::create(directory).unwrap(),
-                        identity,
-                        limits,
-                    )
-                    .unwrap()
-                }
-            });
-            let mut core = if recover && with_snapshots {
-                recover_replica(node(id), group(g), &store, snap.as_mut().unwrap(), &mut app)
-                    .unwrap()
-                    .0
-            } else {
-                let core = Raft::recover(
-                    node(id),
-                    store.binding(),
-                    store.state(group(g)).unwrap(),
-                    store.limits(),
-                )
-                .unwrap();
-                app.apply_batch(core.replay_committed()).unwrap();
-                core
-            };
-            if with_snapshots && !recover && id <= 2 {
-                let receipt = checkpoint_application(&core, &app, snap.as_mut().unwrap()).unwrap();
-                compact_replica(
-                    &mut core,
-                    &mut store,
-                    snap.as_mut().unwrap(),
-                    &app,
-                    receipt.reference(),
-                )
-                .unwrap();
-            }
-            if let Some(snap) = snap {
-                snapshot_stores.insert(group(g), snap);
-            }
-            apps.insert(group(g), app);
-            shard.register(core).unwrap();
-        }
+        seed_snapshot_commands(&mut store, id, with_snapshots, recover);
+        let (apps, snapshot_stores) =
+            load_owner_groups(id, path, recover, with_snapshots, &mut store, &mut shard);
         let runtime = TimedShard::new(
             shard,
             DeadlineQueue::new(runtime_owner, 100).unwrap(),
@@ -1918,79 +1808,15 @@ mod native {
             )
             .unwrap()
         });
-        let mut n = Node {
+        assemble_node(
+            runtime_owner,
             owner,
             worker,
             apps,
             outbound,
-            driver: None,
-            reads: Vec::new(),
-            clients: ClientRouter::new(
-                ClientRouterBinding {
-                    owner: runtime_owner,
-                    generation: ClientRouterGeneration::new(1).unwrap(),
-                },
-                ClientRouterLimits::default(),
-            )
-            .unwrap(),
-            client_applied: 0,
-            client_unknown: 0,
-            read_unavailable: 0,
-            read_requests: ReadRequests::new(
-                ReadInvocationBinding {
-                    owner: runtime_owner,
-                    generation: ReadInvocationGeneration::new(1).unwrap(),
-                },
-                ReadInvocationLimits::default(),
-                ReadRouter::new(
-                    ReadRouterBinding {
-                        owner: runtime_owner,
-                        generation: ReadRouterGeneration::new(1).unwrap(),
-                    },
-                    ReadRouterLimits::default(),
-                )
-                .unwrap(),
-            )
-            .unwrap(),
-            results: ApplicationRouter::new(
-                ApplicationRouterBinding {
-                    owner: runtime_owner,
-                    generation: ApplicationRouterGeneration::new(1).unwrap(),
-                },
-                ApplicationRouterLimits::default(),
-            )
-            .unwrap(),
-            ingress: Some(
-                IngressRouter::new(
-                    IngressBinding {
-                        owner: runtime_owner,
-                        local: voteboat::secure::LocalIdentity {
-                            node: node(id),
-                            store: runtime_owner.store,
-                        },
-                        generation: IngressGeneration::new(1).unwrap(),
-                    },
-                    IngressLimits::default(),
-                )
-                .unwrap(),
-            ),
-            #[cfg(feature = "tls")]
-            peer_driver: None,
-            #[cfg(feature = "tls")]
-            faults: Default::default(),
-            sent: 0,
-            received: 0,
             snapshots,
             router,
-            installed: 0,
-            supplied: 0,
-        };
-        n.with_replica(|driver, parts| {
-            *driver = Some(
-                ReplicaDriver::new(parts, ReplicaDriverLimits::default(), MonoTime(0)).unwrap(),
-            );
-        });
-        n
+        )
     }
     #[cfg(feature = "tls")]
     fn establish(nodes: &mut [Node], now: MonoTime) {
@@ -2175,80 +2001,8 @@ mod native {
                 "effect-owner cluster did not drain"
             );
             for n in nodes.iter_mut() {
-                let progress = n
-                    .with_replica(|driver, parts| {
-                        driver.as_mut().unwrap().poll(
-                            parts,
-                            now,
-                            ReplicaPollBudget {
-                                worker_events: 1,
-                                snapshot_events: 1,
-                                steps: 100,
-                                ..Default::default()
-                            },
-                        )
-                    })
-                    .unwrap();
-                n.installed += progress.snapshot_installs;
-                n.supplied += progress.snapshot_supplies;
-                for step in progress.steps {
-                    assert!(
-                        step.error.is_none() || step.error == Some(RaftError::StaleRead),
-                        "{:?}",
-                        step.error
-                    );
-                }
-                while let Some(output) = n.read_requests.poll() {
-                    match n.read_requests.complete(output).unwrap() {
-                        ReadOutcome::Read { result, .. } => n.reads.push(result.unwrap()),
-                        ReadOutcome::Unavailable(_) => n.read_unavailable += 1,
-                        ReadOutcome::NotRead(e) => panic!("unexpected read rejection: {e:?}"),
-                    }
-                }
-                while let Some(completion) = n.clients.poll() {
-                    match n.clients.complete(completion).unwrap() {
-                        ClientOutcome::Applied { .. } => n.client_applied += 1,
-                        ClientOutcome::Unknown(_) => n.client_unknown += 1,
-                        ClientOutcome::NotProposed(e) => {
-                            panic!("unexpected client rejection: {e:?}")
-                        }
-                    }
-                }
-                n.clients.reconcile(&n.owner, 128).unwrap();
-                assert!(n.clients.usage().bytes <= ClientRouterLimits::default().bytes);
-                #[cfg(feature = "tls")]
-                if let Some(driver) = &mut n.peer_driver {
-                    n.faults.isolated.set(isolated);
-                    let dropped = n.faults.dropped.get();
-                    let progress = driver
-                        .poll(
-                            &mut n.owner,
-                            &mut n.outbound,
-                            now,
-                            PeerDriverBudget {
-                                peer_visits: 3,
-                                ..Default::default()
-                            },
-                        )
-                        .unwrap();
-                    n.sent += progress.sends;
-                    n.received += progress.received + n.faults.dropped.get() - dropped;
-                    assert!(progress.ingress.rejected.is_empty());
-                    assert_eq!(progress.ingress.discarded, 0);
-                    assert!(driver.ingress().usage().bytes <= IngressLimits::default().bytes);
-                } else {
-                    for mut batch in n.outbound.poll(32) {
-                        assert!(network.len() + batch.messages.len() <= 8192);
-                        network.extend(batch.messages.drain(..));
-                        n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
-                    }
-                }
-                #[cfg(not(feature = "tls"))]
-                for mut batch in n.outbound.poll(32) {
-                    assert!(network.len() + batch.messages.len() <= 8192);
-                    network.extend(batch.messages.drain(..));
-                    n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
-                }
+                poll_replica_outputs(n, now);
+                poll_node_network(n, &mut network, isolated, now);
                 assert!(
                     n.owner.usage().reserved_bytes <= EffectOwnerLimits::default().reserved_bytes
                 );
@@ -2747,11 +2501,7 @@ mod native {
         }
         drain(&mut nodes, None, MonoTime(2));
         assert_eq!(nodes[1].reads, vec![10; 100]);
-        for n in &nodes {
-            for a in n.apps.values() {
-                assert_eq!(a.read_applied(a.applied_index()).unwrap(), 10);
-            }
-        }
+        assert_native_values(&nodes, 10);
         let old = nodes
             .iter()
             .map(|n| n.worker.binding().store)
@@ -2765,24 +2515,339 @@ mod native {
         mesh(&mut nodes);
         for (id, n) in nodes.iter().enumerate() {
             assert_ne!(n.worker.binding().store, old[id]);
-            for a in n.apps.values() {
-                assert_eq!(a.read_applied(a.applied_index()).unwrap(), 10);
-            }
         }
+        assert_native_values(&nodes, 10);
         for g in 1..=100 {
             nodes[1].owner.admit(group(g), Event::Campaign).unwrap();
         }
         drain(&mut nodes, None, MonoTime(0));
         proposals(&mut nodes, 1, 1, 7, None, MonoTime(0));
         proposals(&mut nodes, 1, 3, 5, None, MonoTime(0));
-        for n in &nodes {
-            for a in n.apps.values() {
-                assert_eq!(a.read_applied(a.applied_index()).unwrap(), 15);
-            }
-        }
+        assert_native_values(&nodes, 15);
         close(&mut nodes, MonoTime(0));
         drop(nodes);
         std::fs::remove_dir_all(root).unwrap();
+    }
+    fn open_owner_store(
+        id: u64,
+        path: &std::path::Path,
+        recover: bool,
+    ) -> NativeLogStore<FileLogIo> {
+        let mut store = if recover {
+            NativeLogStore::recover(
+                FileLogIo::open(path).unwrap(),
+                identity(id.into()),
+                LogLimits::default(),
+            )
+            .unwrap()
+        } else {
+            NativeLogStore::create(
+                FileLogIo::create(path).unwrap(),
+                identity(id.into()),
+                LogLimits::default(),
+            )
+            .unwrap()
+        };
+        // Bootstrap is explicit in this test; incoming peer traffic cannot create groups.
+        if !recover {
+            append(
+                &mut store,
+                (1..=100)
+                    .map(|g| LogMutation::Create(bootstrap(g, 3)))
+                    .collect(),
+            );
+        }
+        store
+    }
+
+    fn seed_snapshot_commands(
+        store: &mut NativeLogStore<FileLogIo>,
+        id: u64,
+        with_snapshots: bool,
+        recover: bool,
+    ) {
+        if with_snapshots && !recover && id <= 2 {
+            let mutations = (1..=100)
+                .map(|g| {
+                    let state = store.state(group(g)).unwrap();
+                    update(
+                        &state,
+                        1,
+                        1,
+                        Some(Suffix {
+                            from: 1,
+                            entries: vec![LogEntry {
+                                index: 1,
+                                term: 1,
+                                payload: EntryPayload::Command {
+                                    operation: OperationId::new(1).unwrap(),
+                                    bytes: 7i64.to_le_bytes().to_vec(),
+                                },
+                            }],
+                        }),
+                    )
+                })
+                .collect();
+            append(store, mutations);
+        }
+    }
+
+    type SnapshotStores = BTreeMap<GroupIdentity, NativeSnapshotStore<FileSnapshotIo>>;
+    fn load_owner_groups(
+        id: u64,
+        path: &std::path::Path,
+        recover: bool,
+        with_snapshots: bool,
+        store: &mut NativeLogStore<FileLogIo>,
+        shard: &mut Shard<FairScheduler>,
+    ) -> (BTreeMap<GroupIdentity, Counter>, SnapshotStores) {
+        let mut apps = BTreeMap::new();
+        let mut snapshot_stores = BTreeMap::new();
+        if with_snapshots && !recover {
+            std::fs::create_dir(path.join("snapshots")).unwrap();
+        }
+        for g in 1..=100 {
+            let mut app = Counter::new(100).unwrap();
+            let mut snap = with_snapshots.then(|| {
+                let directory = path.join("snapshots").join(g.to_string());
+                let identity = SnapshotIdentity {
+                    store: store.binding().identity,
+                    group: group(g),
+                };
+                let limits = SnapshotLimits {
+                    max_application_bytes: 65536,
+                    max_metadata_bytes: 4096,
+                    max_chunk_bytes: 1024,
+                };
+                if recover {
+                    NativeSnapshotStore::recover(
+                        FileSnapshotIo::open(directory).unwrap(),
+                        identity,
+                        limits,
+                    )
+                    .unwrap()
+                } else {
+                    NativeSnapshotStore::create(
+                        FileSnapshotIo::create(directory).unwrap(),
+                        identity,
+                        limits,
+                    )
+                    .unwrap()
+                }
+            });
+            let mut core = if recover && with_snapshots {
+                recover_replica(node(id), group(g), store, snap.as_mut().unwrap(), &mut app)
+                    .unwrap()
+                    .0
+            } else {
+                let core = Raft::recover(
+                    node(id),
+                    store.binding(),
+                    store.state(group(g)).unwrap(),
+                    store.limits(),
+                )
+                .unwrap();
+                app.apply_batch(core.replay_committed()).unwrap();
+                core
+            };
+            if with_snapshots && !recover && id <= 2 {
+                let receipt = checkpoint_application(&core, &app, snap.as_mut().unwrap()).unwrap();
+                compact_replica(
+                    &mut core,
+                    store,
+                    snap.as_mut().unwrap(),
+                    &app,
+                    receipt.reference(),
+                )
+                .unwrap();
+            }
+            if let Some(snap) = snap {
+                snapshot_stores.insert(group(g), snap);
+            }
+            apps.insert(group(g), app);
+            shard.register(core).unwrap();
+        }
+        (apps, snapshot_stores)
+    }
+
+    fn assemble_node(
+        runtime_owner: RuntimeOwner,
+        owner: Owner,
+        worker: Worker,
+        apps: BTreeMap<GroupIdentity, Counter>,
+        outbound: NativeOutbound,
+        snapshots: Option<Snapshots>,
+        router: Option<SnapshotRouter>,
+    ) -> Node {
+        let local = outbound.binding().node;
+        let mut n = Node {
+            owner,
+            worker,
+            apps,
+            outbound,
+            driver: None,
+            reads: Vec::new(),
+            clients: ClientRouter::new(
+                ClientRouterBinding {
+                    owner: runtime_owner,
+                    generation: ClientRouterGeneration::new(1).unwrap(),
+                },
+                ClientRouterLimits::default(),
+            )
+            .unwrap(),
+            client_applied: 0,
+            client_unknown: 0,
+            read_unavailable: 0,
+            read_requests: ReadRequests::new(
+                ReadInvocationBinding {
+                    owner: runtime_owner,
+                    generation: ReadInvocationGeneration::new(1).unwrap(),
+                },
+                ReadInvocationLimits::default(),
+                ReadRouter::new(
+                    ReadRouterBinding {
+                        owner: runtime_owner,
+                        generation: ReadRouterGeneration::new(1).unwrap(),
+                    },
+                    ReadRouterLimits::default(),
+                )
+                .unwrap(),
+            )
+            .unwrap(),
+            results: ApplicationRouter::new(
+                ApplicationRouterBinding {
+                    owner: runtime_owner,
+                    generation: ApplicationRouterGeneration::new(1).unwrap(),
+                },
+                ApplicationRouterLimits::default(),
+            )
+            .unwrap(),
+            ingress: Some(
+                IngressRouter::new(
+                    IngressBinding {
+                        owner: runtime_owner,
+                        local: voteboat::secure::LocalIdentity {
+                            node: local,
+                            store: runtime_owner.store,
+                        },
+                        generation: IngressGeneration::new(1).unwrap(),
+                    },
+                    IngressLimits::default(),
+                )
+                .unwrap(),
+            ),
+            #[cfg(feature = "tls")]
+            peer_driver: None,
+            #[cfg(feature = "tls")]
+            faults: Default::default(),
+            sent: 0,
+            received: 0,
+            snapshots,
+            router,
+            installed: 0,
+            supplied: 0,
+        };
+        n.with_replica(|driver, parts| {
+            *driver = Some(
+                ReplicaDriver::new(parts, ReplicaDriverLimits::default(), MonoTime(0)).unwrap(),
+            );
+        });
+        n
+    }
+
+    fn poll_replica_outputs(n: &mut Node, now: MonoTime) {
+        let progress = n
+            .with_replica(|driver, parts| {
+                driver.as_mut().unwrap().poll(
+                    parts,
+                    now,
+                    ReplicaPollBudget {
+                        worker_events: 1,
+                        snapshot_events: 1,
+                        steps: 100,
+                        ..Default::default()
+                    },
+                )
+            })
+            .unwrap();
+        n.installed += progress.snapshot_installs;
+        n.supplied += progress.snapshot_supplies;
+        for step in progress.steps {
+            assert!(
+                step.error.is_none() || step.error == Some(RaftError::StaleRead),
+                "{:?}",
+                step.error
+            );
+        }
+        while let Some(output) = n.read_requests.poll() {
+            match n.read_requests.complete(output).unwrap() {
+                ReadOutcome::Read { result, .. } => n.reads.push(result.unwrap()),
+                ReadOutcome::Unavailable(_) => n.read_unavailable += 1,
+                ReadOutcome::NotRead(e) => panic!("unexpected read rejection: {e:?}"),
+            }
+        }
+        while let Some(completion) = n.clients.poll() {
+            match n.clients.complete(completion).unwrap() {
+                ClientOutcome::Applied { .. } => n.client_applied += 1,
+                ClientOutcome::Unknown(_) => n.client_unknown += 1,
+                ClientOutcome::NotProposed(e) => {
+                    panic!("unexpected client rejection: {e:?}")
+                }
+            }
+        }
+        n.clients.reconcile(&n.owner, 128).unwrap();
+        assert!(n.clients.usage().bytes <= ClientRouterLimits::default().bytes);
+    }
+
+    fn poll_node_network(
+        n: &mut Node,
+        network: &mut VecDeque<Message>,
+        isolated: Option<NodeId>,
+        now: MonoTime,
+    ) {
+        #[cfg(feature = "tls")]
+        if let Some(driver) = &mut n.peer_driver {
+            n.faults.isolated.set(isolated);
+            let dropped = n.faults.dropped.get();
+            let progress = driver
+                .poll(
+                    &mut n.owner,
+                    &mut n.outbound,
+                    now,
+                    PeerDriverBudget {
+                        peer_visits: 3,
+                        ..Default::default()
+                    },
+                )
+                .unwrap();
+            n.sent += progress.sends;
+            n.received += progress.received + n.faults.dropped.get() - dropped;
+            assert!(progress.ingress.rejected.is_empty());
+            assert_eq!(progress.ingress.discarded, 0);
+            assert!(driver.ingress().usage().bytes <= IngressLimits::default().bytes);
+        } else {
+            for mut batch in n.outbound.poll(32) {
+                assert!(network.len() + batch.messages.len() <= 8192);
+                network.extend(batch.messages.drain(..));
+                n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
+            }
+        }
+        #[cfg(not(feature = "tls"))]
+        for mut batch in n.outbound.poll(32) {
+            assert!(network.len() + batch.messages.len() <= 8192);
+            network.extend(batch.messages.drain(..));
+            n.outbound.complete(batch, LocalSendResult::Sent).unwrap();
+        }
+        #[cfg(not(feature = "tls"))]
+        let _ = (isolated, now);
+    }
+
+    fn assert_native_values(nodes: &[Node], value: i64) {
+        for n in nodes {
+            for a in n.apps.values() {
+                assert_eq!(a.read_applied(a.applied_index()).unwrap(), value);
+            }
+        }
     }
 }
 

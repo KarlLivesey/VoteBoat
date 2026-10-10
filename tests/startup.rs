@@ -187,11 +187,7 @@ fn close(mut n: NativeNode<HostApplication>) {
 }
 #[test]
 fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_history() {
-    use voteboat::{
-        membership::*,
-        native::log_store::{FileLogIo, NativeLogStore},
-        raft::*,
-    };
+    use voteboat::raft::*;
     use voteboat::{native::placement::NativePlacementAuthorizer, placement::*};
     let root = root();
     let mut startup = config(root.clone(), NativeOpenMode::Create);
@@ -241,54 +237,8 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
             };
             ticket
         } else {
-            let request = ConfigurationRequest {
-                group: group(),
-                proposal: ConfigurationProposal {
-                    record: ConfigurationRecord {
-                        operation,
-                        expected: ConfigurationId::new(9).unwrap(),
-                        change: ConfigurationChange::Joint {
-                            id: ConfigurationId::new(10).unwrap(),
-                            next: Configuration::new(
-                                ConfigurationId::new(11).unwrap(),
-                                bootstrap.policy.clone(),
-                                bootstrap.voter_stores.clone(),
-                                BTreeMap::new(),
-                            )
-                            .unwrap(),
-                        },
-                    },
-                    readiness: vec![],
-                    requirements: ReadinessRequirements {
-                        application_schema: 1,
-                        command_bytes: 8,
-                        snapshot_bytes: 4096,
-                    },
-                },
-            };
-            let before = n.local().owner.core(group()).unwrap().state().clone();
-            let mut oversized = ConfigurationRequest {
-                group: request.group,
-                proposal: request.proposal.clone(),
-            };
-            oversized.proposal.requirements.snapshot_bytes = usize::MAX;
-            let rejected = n.configure(oversized).unwrap();
-            n.poll_with_placement_authorizer(MonoTime(5000), NodePollBudget::default(), &placement)
-                .unwrap();
-            let outcome = n.poll_configuration().unwrap();
-            assert_eq!(outcome.ticket, rejected);
-            assert_eq!(
-                outcome.outcome,
-                ConfigurationOutcome::NotProposed(
-                    ConfigurationProposalError::TransportCapacity(
-                        voteboat::transport::TransportError::Wire(
-                            voteboat::wire::WireError::TooLarge
-                        )
-                    )
-                    .into()
-                )
-            );
-            assert_eq!(n.local().owner.core(group()).unwrap().state(), &before);
+            let request = startup_configuration_request(&bootstrap, operation);
+            reject_oversized_configuration(&mut n, &placement, &request);
             n.configure(request).unwrap()
         };
         let start = Instant::now();
@@ -313,32 +263,7 @@ fn native_administration_receipts_commit_joint_and_final_and_reopen_exact_histor
         );
     }
     close(n);
-    let store = NativeLogStore::recover(
-        FileLogIo::open(&root).unwrap(),
-        identity,
-        LogLimits::default(),
-    )
-    .unwrap();
-    let state = store.state(group()).unwrap();
-    assert_eq!(state.commit_index, 3);
-    assert_eq!(
-        state.membership().unwrap().id(),
-        ConfigurationId::new(11).unwrap()
-    );
-    let recovered = Raft::recover_member(local, store.binding(), state, store.limits()).unwrap();
-    assert_eq!(
-        recovered
-            .configuration_status(operation)
-            .unwrap()
-            .resume_action(),
-        ConfigurationResumeAction::Completed
-    );
-    assert_eq!(
-        recovered.membership().id(),
-        ConfigurationId::new(11).unwrap()
-    );
-    assert!(recovered.membership().operations().contains(&operation));
-    drop(store);
+    verify_administration_recovery(&root, identity, local, operation);
     std::fs::remove_dir_all(root).unwrap();
 }
 #[test]
@@ -573,7 +498,7 @@ fn quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers(
 }
 
 fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol, version: u16) {
-    use voteboat::{native::connect::NativeServiceConnector, raft::Role};
+    use voteboat::raft::Role;
     let directory = root();
     std::fs::create_dir(&directory).unwrap();
     let reservations = (0..3)
@@ -612,46 +537,8 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
         .unwrap(),
         voter_stores: stores.clone(),
     };
-    let certificate = |n| match n {
-        1 => include_bytes!("fixtures/tls/node1.der").as_slice(),
-        2 => include_bytes!("fixtures/tls/node2.der").as_slice(),
-        _ => include_bytes!("fixtures/tls/node3.der").as_slice(),
-    };
-    let key = |n| match n {
-        1 => include_bytes!("fixtures/tls/node1-key.der").as_slice(),
-        2 => include_bytes!("fixtures/tls/node2-key.der").as_slice(),
-        _ => include_bytes!("fixtures/tls/node3-key.der").as_slice(),
-    };
-    let make_config = |n: usize, mode| {
-        let mut config = config(directory.join(n.to_string()), mode);
-        config.node = NodeId::new(n as u64).unwrap();
-        config.store = stores[&config.node];
-        config.bootstrap = bootstrap.clone();
-        config.listen = addresses[n - 1];
-        config.peers = (1..=3)
-            .filter(|p| *p != n)
-            .map(|p| {
-                (
-                    NodeId::new(p as u64).unwrap(),
-                    NativeStartupPeer {
-                        address: addresses[p - 1],
-                        certificate: certificate(p).to_vec(),
-                        server_name: format!("node{p}.voteboat.test"),
-                    },
-                )
-            })
-            .collect();
-        config.entropy_seed += n as u64;
-        config.tls = NativeTlsConfig::new(TlsCredentials {
-            roots: vec![include_bytes!("fixtures/tls/ca.der").to_vec()],
-            certificate_chain: vec![certificate(n).to_vec()],
-            private_key: key(n).to_vec(),
-        })
-        .unwrap()
-        .with_wire_version(version)
-        .unwrap();
-        config
-    };
+    let make_config =
+        |n, mode| selected_wire_config(&directory, &addresses, &bootstrap, n, mode, version);
     // Release every placeholder before any real peer can connect to it.
     drop(reservations);
     let open = |mode| {
@@ -669,20 +556,7 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
             .collect::<Vec<_>>()
     };
     let mut nodes = open(NativeOpenMode::Create);
-    for node in &nodes {
-        assert_eq!(node.peers().unwrap().roster().wire_version(), version);
-        assert_eq!(node.peers().unwrap().admission_routes().unwrap().len(), 2);
-        assert_eq!(
-            node.local()
-                .owner
-                .connection_budget()
-                .unwrap()
-                .provisioned_peers()
-                .unwrap()
-                .count(),
-            2
-        );
-    }
+    check_wire_roster(&nodes, version);
     nodes[0].control(group(), NodeControl::Campaign).unwrap();
     let clock = Instant::now();
     loop {
@@ -706,143 +580,9 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
         nodes[0].local().owner.core(group()).unwrap().role(),
         Role::Leader
     );
-    // Both native connectors attest exact provisioned stores. Reconciliation
-    // of an unchanged shared roster must preserve its active bindings.
-    for (index, node) in nodes.iter_mut().enumerate() {
-        use voteboat::connect::ConnectDirection;
-        let before = stores
-            .keys()
-            .filter_map(|peer| {
-                node.peers()
-                    .unwrap()
-                    .roster()
-                    .binding(*peer)
-                    .map(|binding| (*peer, binding))
-            })
-            .collect::<BTreeMap<_, _>>();
-        let routes = (0..3)
-            .filter(|peer| *peer != index)
-            .map(|peer| {
-                (
-                    NodeId::new(peer as u64 + 1).unwrap(),
-                    if index < peer {
-                        ConnectDirection::Dial(addresses[peer])
-                    } else {
-                        ConnectDirection::Accept
-                    },
-                )
-            })
-            .collect();
-        node.reconcile_membership(routes, MonoTime(clock.elapsed().as_millis() as u64))
-            .unwrap_or_else(|r| panic!("{:?}", r.reason));
-        let mut retained = node.peers().unwrap().admission_routes().unwrap().clone();
-        let peer = *retained.keys().next().unwrap();
-        let store = retained[&peer].store;
-        retained.get_mut(&peer).unwrap().store.id = StoreId::new(999).unwrap();
-        let rejected = node
-            .set_admission_routes(retained, MonoTime(clock.elapsed().as_millis() as u64))
-            .err()
-            .unwrap();
-        assert_eq!(
-            rejected.reason,
-            voteboat::runtime::PeerDriverError::WrongBinding
-        );
-        let mut retained = rejected.routes;
-        retained.get_mut(&peer).unwrap().store = store;
-        node.set_admission_routes(retained, MonoTime(clock.elapsed().as_millis() as u64))
-            .unwrap_or_else(|r| panic!("{:?}", r.reason));
-        for (peer, binding) in before {
-            assert_eq!(node.peers().unwrap().roster().binding(peer), Some(binding));
-        }
-    }
-    nodes[0]
-        .propose(ClientRequest {
-            group: group(),
-            operation: OperationId::new(88).unwrap(),
-            bytes: 9i64.to_le_bytes().to_vec(),
-        })
-        .unwrap();
-    let mut completed = false;
-    loop {
-        for node in &mut nodes {
-            node.poll(
-                MonoTime(clock.elapsed().as_millis() as u64),
-                NodePollBudget::default(),
-            )
-            .unwrap();
-        }
-        if let Some(reply) = nodes[0].poll_client() {
-            assert!(matches!(
-                nodes[0].complete_client(reply).unwrap(),
-                ClientOutcome::Applied {
-                    receipt: CounterReceipt {
-                        outcome: CounterOutcome::Value(9),
-                        ..
-                    },
-                    ..
-                }
-            ));
-            completed = true;
-        }
-        if completed
-            && nodes
-                .iter()
-                .all(|n| n.local().applications[&group()].applied_index() >= 2)
-        {
-            break;
-        }
-        assert!(clock.elapsed() < Duration::from_secs(10));
-        std::thread::park_timeout(Duration::from_millis(1));
-    }
-    fn drain(mut nodes: Vec<NativeNode<HostApplication, NativeServiceConnector>>) {
-        for node in &mut nodes {
-            node.begin_shutdown();
-        }
-        let clock = Instant::now();
-        loop {
-            for node in &mut nodes {
-                node.poll(
-                    MonoTime(10000 + clock.elapsed().as_millis() as u64),
-                    NodePollBudget::default(),
-                )
-                .unwrap();
-            }
-            if nodes.iter().all(|n| n.is_drained()) {
-                break;
-            }
-            assert!(clock.elapsed() < Duration::from_secs(10));
-            std::thread::park_timeout(Duration::from_millis(1));
-        }
-        for node in nodes {
-            let mut parts = node.into_parts().unwrap_or_else(|_| panic!("not drained"));
-            let mut dialer = parts
-                .peers
-                .take()
-                .unwrap()
-                .connector
-                .into_dialer()
-                .unwrap_or_else(|_| panic!("connector not drained"));
-            let mut snapshots = parts.local.snapshots.take().unwrap();
-            let (mut log_done, mut snapshot_done) = (false, false);
-            loop {
-                let dial_done = dialer
-                    .as_mut()
-                    .is_none_or(|dialer| dialer.try_finish().unwrap());
-                if !log_done {
-                    log_done = parts.local.persistence.try_reclaim().unwrap().is_some();
-                }
-                if !snapshot_done {
-                    snapshot_done = snapshots.worker.try_reclaim().unwrap().is_some();
-                }
-                if dial_done && log_done && snapshot_done {
-                    break;
-                }
-                assert!(clock.elapsed() < Duration::from_secs(10));
-                std::thread::park_timeout(Duration::from_millis(1));
-            }
-        }
-    }
-    drain(nodes);
+    reconcile_wire_nodes(&mut nodes, &stores, &addresses, clock);
+    write_wire_nodes(&mut nodes, clock);
+    drain_wire_nodes(nodes);
     let nodes = open(NativeOpenMode::Recover);
     for node in &nodes {
         assert_eq!(node.peers().unwrap().roster().wire_version(), version);
@@ -852,7 +592,7 @@ fn selected_wire_cluster(protocol: voteboat::native::connect::NativePeerProtocol
             Ok(9)
         );
     }
-    drain(nodes);
+    drain_wire_nodes(nodes);
     std::fs::remove_dir_all(directory).unwrap();
 }
 #[test]
@@ -966,5 +706,319 @@ fn explicit_startup_timers_validate_before_files_and_use_host_deadlines() {
             std::thread::park_timeout(Duration::from_millis(1));
         }
         std::fs::remove_dir_all(root).unwrap();
+    }
+}
+
+type WireNode = NativeNode<HostApplication, voteboat::native::connect::NativeServiceConnector>;
+
+fn startup_configuration_request(
+    bootstrap: &Bootstrap,
+    operation: OperationId,
+) -> ConfigurationRequest {
+    use voteboat::{membership::*, raft::*};
+    ConfigurationRequest {
+        group: group(),
+        proposal: ConfigurationProposal {
+            record: ConfigurationRecord {
+                operation,
+                expected: ConfigurationId::new(9).unwrap(),
+                change: ConfigurationChange::Joint {
+                    id: ConfigurationId::new(10).unwrap(),
+                    next: Configuration::new(
+                        ConfigurationId::new(11).unwrap(),
+                        bootstrap.policy.clone(),
+                        bootstrap.voter_stores.clone(),
+                        BTreeMap::new(),
+                    )
+                    .unwrap(),
+                },
+            },
+            readiness: vec![],
+            requirements: ReadinessRequirements {
+                application_schema: 1,
+                command_bytes: 8,
+                snapshot_bytes: 4096,
+            },
+        },
+    }
+}
+fn reject_oversized_configuration(
+    n: &mut NativeNode<HostApplication>,
+    placement: &voteboat::native::placement::NativePlacementAuthorizer,
+    request: &ConfigurationRequest,
+) {
+    use voteboat::raft::*;
+    let before = n.local().owner.core(group()).unwrap().state().clone();
+    let mut oversized = ConfigurationRequest {
+        group: request.group,
+        proposal: request.proposal.clone(),
+    };
+    oversized.proposal.requirements.snapshot_bytes = usize::MAX;
+    let rejected = n.configure(oversized).unwrap();
+    n.poll_with_placement_authorizer(MonoTime(5000), NodePollBudget::default(), placement)
+        .unwrap();
+    let outcome = n.poll_configuration().unwrap();
+    assert_eq!(outcome.ticket, rejected);
+    assert_eq!(
+        outcome.outcome,
+        ConfigurationOutcome::NotProposed(
+            ConfigurationProposalError::TransportCapacity(
+                voteboat::transport::TransportError::Wire(voteboat::wire::WireError::TooLarge)
+            )
+            .into()
+        )
+    );
+    assert_eq!(n.local().owner.core(group()).unwrap().state(), &before);
+}
+
+fn selected_wire_config(
+    directory: &std::path::Path,
+    addresses: &[std::net::SocketAddr],
+    bootstrap: &Bootstrap,
+    n: usize,
+    mode: NativeOpenMode,
+    version: u16,
+) -> NativeStartup {
+    let certificate = |n| match n {
+        1 => include_bytes!("fixtures/tls/node1.der").as_slice(),
+        2 => include_bytes!("fixtures/tls/node2.der").as_slice(),
+        _ => include_bytes!("fixtures/tls/node3.der").as_slice(),
+    };
+    let key = |n| match n {
+        1 => include_bytes!("fixtures/tls/node1-key.der").as_slice(),
+        2 => include_bytes!("fixtures/tls/node2-key.der").as_slice(),
+        _ => include_bytes!("fixtures/tls/node3-key.der").as_slice(),
+    };
+    let mut config = config(directory.join(n.to_string()), mode);
+    config.node = NodeId::new(n as u64).unwrap();
+    config.store = bootstrap.voter_stores[&config.node];
+    config.bootstrap = bootstrap.clone();
+    config.listen = addresses[n - 1];
+    config.peers = (1..=3)
+        .filter(|p| *p != n)
+        .map(|p| {
+            (
+                NodeId::new(p as u64).unwrap(),
+                NativeStartupPeer {
+                    address: addresses[p - 1],
+                    certificate: certificate(p).to_vec(),
+                    server_name: format!("node{p}.voteboat.test"),
+                },
+            )
+        })
+        .collect();
+    config.entropy_seed += n as u64;
+    config.tls = NativeTlsConfig::new(TlsCredentials {
+        roots: vec![include_bytes!("fixtures/tls/ca.der").to_vec()],
+        certificate_chain: vec![certificate(n).to_vec()],
+        private_key: key(n).to_vec(),
+    })
+    .unwrap()
+    .with_wire_version(version)
+    .unwrap();
+    config
+}
+
+fn reconcile_wire_nodes(
+    nodes: &mut [WireNode],
+    stores: &BTreeMap<NodeId, StoreIdentity>,
+    addresses: &[std::net::SocketAddr],
+    clock: Instant,
+) {
+    // Both native connectors attest exact provisioned stores. Reconciliation
+    // of an unchanged shared roster must preserve its active bindings.
+    for (index, node) in nodes.iter_mut().enumerate() {
+        use voteboat::connect::ConnectDirection;
+        let before = stores
+            .keys()
+            .filter_map(|peer| {
+                node.peers()
+                    .unwrap()
+                    .roster()
+                    .binding(*peer)
+                    .map(|binding| (*peer, binding))
+            })
+            .collect::<BTreeMap<_, _>>();
+        let routes = (0..3)
+            .filter(|peer| *peer != index)
+            .map(|peer| {
+                (
+                    NodeId::new(peer as u64 + 1).unwrap(),
+                    if index < peer {
+                        ConnectDirection::Dial(addresses[peer])
+                    } else {
+                        ConnectDirection::Accept
+                    },
+                )
+            })
+            .collect();
+        node.reconcile_membership(routes, MonoTime(clock.elapsed().as_millis() as u64))
+            .unwrap_or_else(|r| panic!("{:?}", r.reason));
+        let mut retained = node.peers().unwrap().admission_routes().unwrap().clone();
+        let peer = *retained.keys().next().unwrap();
+        let store = retained[&peer].store;
+        retained.get_mut(&peer).unwrap().store.id = StoreId::new(999).unwrap();
+        let rejected = node
+            .set_admission_routes(retained, MonoTime(clock.elapsed().as_millis() as u64))
+            .err()
+            .unwrap();
+        assert_eq!(
+            rejected.reason,
+            voteboat::runtime::PeerDriverError::WrongBinding
+        );
+        let mut retained = rejected.routes;
+        retained.get_mut(&peer).unwrap().store = store;
+        node.set_admission_routes(retained, MonoTime(clock.elapsed().as_millis() as u64))
+            .unwrap_or_else(|r| panic!("{:?}", r.reason));
+        for (peer, binding) in before {
+            assert_eq!(node.peers().unwrap().roster().binding(peer), Some(binding));
+        }
+    }
+}
+
+fn drain_wire_nodes(mut nodes: Vec<WireNode>) {
+    for node in &mut nodes {
+        node.begin_shutdown();
+    }
+    let clock = Instant::now();
+    loop {
+        for node in &mut nodes {
+            node.poll(
+                MonoTime(10000 + clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        }
+        if nodes.iter().all(|n| n.is_drained()) {
+            break;
+        }
+        assert!(clock.elapsed() < Duration::from_secs(10));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+    for node in nodes {
+        let mut parts = node.into_parts().unwrap_or_else(|_| panic!("not drained"));
+        let mut dialer = parts
+            .peers
+            .take()
+            .unwrap()
+            .connector
+            .into_dialer()
+            .unwrap_or_else(|_| panic!("connector not drained"));
+        let mut snapshots = parts.local.snapshots.take().unwrap();
+        let (mut log_done, mut snapshot_done) = (false, false);
+        loop {
+            let dial_done = dialer
+                .as_mut()
+                .is_none_or(|dialer| dialer.try_finish().unwrap());
+            if !log_done {
+                log_done = parts.local.persistence.try_reclaim().unwrap().is_some();
+            }
+            if !snapshot_done {
+                snapshot_done = snapshots.worker.try_reclaim().unwrap().is_some();
+            }
+            if dial_done && log_done && snapshot_done {
+                break;
+            }
+            assert!(clock.elapsed() < Duration::from_secs(10));
+            std::thread::park_timeout(Duration::from_millis(1));
+        }
+    }
+}
+
+fn write_wire_nodes(nodes: &mut [WireNode], clock: Instant) {
+    nodes[0]
+        .propose(ClientRequest {
+            group: group(),
+            operation: OperationId::new(88).unwrap(),
+            bytes: 9i64.to_le_bytes().to_vec(),
+        })
+        .unwrap();
+    let mut completed = false;
+    loop {
+        for node in nodes.iter_mut() {
+            node.poll(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget::default(),
+            )
+            .unwrap();
+        }
+        if let Some(reply) = nodes[0].poll_client() {
+            assert!(matches!(
+                nodes[0].complete_client(reply).unwrap(),
+                ClientOutcome::Applied {
+                    receipt: CounterReceipt {
+                        outcome: CounterOutcome::Value(9),
+                        ..
+                    },
+                    ..
+                }
+            ));
+            completed = true;
+        }
+        if completed
+            && nodes
+                .iter()
+                .all(|n| n.local().applications[&group()].applied_index() >= 2)
+        {
+            break;
+        }
+        assert!(clock.elapsed() < Duration::from_secs(10));
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+
+fn verify_administration_recovery(
+    root: &std::path::Path,
+    identity: StoreIdentity,
+    local: NodeId,
+    operation: OperationId,
+) {
+    use voteboat::{
+        membership::ConfigurationResumeAction,
+        native::log_store::{FileLogIo, NativeLogStore},
+        raft::*,
+    };
+    let store = NativeLogStore::recover(
+        FileLogIo::open(root).unwrap(),
+        identity,
+        LogLimits::default(),
+    )
+    .unwrap();
+    let state = store.state(group()).unwrap();
+    assert_eq!(state.commit_index, 3);
+    assert_eq!(
+        state.membership().unwrap().id(),
+        ConfigurationId::new(11).unwrap()
+    );
+    let recovered = Raft::recover_member(local, store.binding(), state, store.limits()).unwrap();
+    assert_eq!(
+        recovered
+            .configuration_status(operation)
+            .unwrap()
+            .resume_action(),
+        ConfigurationResumeAction::Completed
+    );
+    assert_eq!(
+        recovered.membership().id(),
+        ConfigurationId::new(11).unwrap()
+    );
+    assert!(recovered.membership().operations().contains(&operation));
+    drop(store);
+}
+
+fn check_wire_roster(nodes: &[WireNode], version: u16) {
+    for node in nodes {
+        assert_eq!(node.peers().unwrap().roster().wire_version(), version);
+        assert_eq!(node.peers().unwrap().admission_routes().unwrap().len(), 2);
+        assert_eq!(
+            node.local()
+                .owner
+                .connection_budget()
+                .unwrap()
+                .provisioned_peers()
+                .unwrap()
+                .count(),
+            2
+        );
     }
 }

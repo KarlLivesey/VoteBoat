@@ -14188,3 +14188,136 @@ refactors; it is not evidence for every current change. Continue mini item1
 with the17 remaining routed diagnostics and the other integration-test targets.
 Do not activate the requested hook or claim zero before both strict profiles
 and formatting pass on the final tree.
+
+### Created-source recovery cleanup — schema plan
+
+Keep CreatedSplit and its exact observed-state/retry contract. Separate creation
+binding establishment, namespace readiness, source fencing, target import and
+publication selection. The resume method must still choose the first missing
+phase in the same order and return the same original bytes. Separate offline
+target activation/reopen from data retries and final source-fence validation.
+Keep the original metadata file/log snapshot around all independent writes.
+Acceptance: four native created-namespace split WAL/checkpoint histories, unchanged
+assertion sites and full strict lint. Continues mini item1, with no production
+semantics changed.
+
+### Created-group service cleanup — schema plan
+
+Keep the same recursive voter policy and partially assigned replica stores.
+Represent the verified reservation as a private fixture value; separate initial
+assignment, remaining assignment after parent restart, counter service and
+recovery checks. Continue matching original creation bindings, child logs and
+unchanged parent logs. No route is installed by this test. Acceptance: TCP/QUIC
+created-group service histories, original assertion count and full strict lint.
+This supports mini item1; the fixture methods only clarify existing test phases.
+
+### Namespace service cleanup — schema plan
+
+A private service fixture owns its root, clock, plan and live parent/child handles.
+Separate reservation/store setup, readiness/reopen, metadata publication/reopen,
+activation and service recovery. Consume handles only at the original shutdown
+or abort boundaries. Preserve the lagging-replica checks for unread publication
+and activation, and the checkpoint path's exact prefix predicate. Both paths
+retain the same original operation bytes and unchanged offline parent-log check.
+Acceptance: four TCP/QUIC namespace service histories and full strict lint.
+
+### Insertion recovery cleanup — schema plan
+
+Separate child reservation and completion from the Insertion constructor while
+keeping partial provisioning and the parent restart before completion. Split the
+first-missing-phase dispatcher into data, source fence, import and publication
+steps, carrying the same delivery mode and original bytes. Separate offline
+target activation/reopen, independent data and final fencing checks. Acceptance:
+all four insertion WAL/checkpoint histories, unchanged assertion sites and full
+strict lint. This supports mini item1 and preserves nested fixture contracts.
+
+### Nested insertion cleanup — schema plan
+
+Keep generic TargetProfile coverage and exact root-to-child lineage. Separate
+reservation/binding setup, observed routing checks and the ordered resume
+phases. Readiness must still come from observed committed state, and import must
+follow the matching source fence. Keep each target's offline activation, restart,
+original operation retry and new write separate from the final source rejection
+and unchanged metadata/source-file checks. Acceptance: raw and retained-profile
+TCP/QUIC nested insertion histories, assertion inventory and full strict lint.
+
+### Directory and delegation test cleanup — schema plan
+
+Separate created-group provisioning from metadata catch-up, and distinguish
+changed recovery-envelope refusals from isolated-leader rollback. Keep native
+file ownership and original reservation bytes. For delegation, separate target
+activation/retry/recovery from parent control history, isolate codec corruption
+checks, and express repeated split/merge data operations as the same ordered
+table of inputs. Preserve every assertion and snapshot boundary. Acceptance:
+directory and delegation suites plus strict scans; current mini item1.
+
+### Reparenting/deletion fault history cleanup — schema plan
+
+Separate public read-budget checks from the live reparent service history and
+separate deletion-reservation refusals from other lifecycle conflicts. Extract
+only WAL seed construction from the journal fault tests; keep the complete
+byte-cut enumeration, old/new state assertions and exact original-operation
+retry in each test. Acceptance: full reparenting/deletion suites and strict lint.
+
+### Startup and host-fixture cleanup — schema plan
+
+Keep the existing startup configuration, authenticated peer identities and exact
+operation IDs. Separate reservation/configuration assembly, live wire checks,
+reconciliation, writes and restart verification. In the host readiness history,
+separate delayed replies, session replacement, stale-proof refusal and fresh
+promotion; carry the same node/network and original state boundary through these
+phases. Every shutdown must retain its existing drain/reclaim path. Acceptance:
+startup and host node/peer-driver tests, unchanged assertion inventory and both
+strict lint configurations. This continues mini item1; no production changes.
+
+The effect-owner fixture uses the same phase split: store opening and explicit
+bootstrap, optional seeded checkpoints, group recovery, then node assembly.
+During drain, separate replica/client polling from transport polling without
+moving the deadline, retry queue or ownership release. Preserve feature-gated
+TLS and in-memory paths and the 100-group restart/session checks.
+
+### Repeated transfer and retirement fixture cleanup — schema plan
+
+Keep the preflight-all-sources-before-any-fence rule. Extract a single-source
+freeze/checkpoint phase and pending-activation validation while preserving the
+same mutation order. For adopted owners and retired child slots, separate target
+provisioning from route publication and retained service, and isolate the exact
+journal prefix setup from the full byte-cut/retry loop. Acceptance: transfer,
+reparenting-owner and child-slot suites and strict scans, with unchanged fault
+coverage and assertion inventory. Continues mini item1.
+
+### Metadata test cleanup — schema plan
+
+Separate metadata publication/activation from checkpoint replay and inherited
+creation from new creation. Keep exact source/target indices, historical grants,
+operation conflicts and original retry bytes. The generic journal-cut driver
+remains the same exhaustive loop, lifted out of the test body. For adopted data
+owners, separate target import setup, control reads and owner construction; no
+lifecycle boundary or assertion is removed. Acceptance: metadata-transfer suite,
+strict lint and assertion inventory. Advances mini item1.
+
+## Test-history phase cleanup — implemented evidence
+
+Separated routed creation/source/insertion recovery, directory/delegation,
+reparenting/deletion, metadata publication/adoption/locator histories, startup
+configuration/recovery and host owner fixtures into named phases. The ordered
+first-missing-phase selection, original bytes, byte-cut enumeration, retry and
+shutdown ownership assertions remain. Production code and lint settings were
+not changed. The full all-feature lint scan now reports106 distinct remaining
+diagnostics; the full core-only scan reports58. Both still fail, so this is not
+zero and the requested pre-push hook remains pending.
+
+Local validation passed: directory31, delegation14, deletion12, reparenting14,
+startup10, effect-owner131, child-slots10, metadata-transfer41 and repeated
+transfer5. Created-group TCP/QUIC2 and created-namespace WAL/checkpoint4 passed;
+the broader namespace selector passed9. Retained/imported parent-move8 also
+finished successfully. The longer insertion/nested-insertion and older broad
+routed runs remain active; the older binary does not validate this final tree.
+
+Assertion-site inventory is unchanged across all21 changed Rust source files
+except effect_owner.rs (521 to519): three identical per-application value checks
+are now one helper called at the same three history points (10,10,15). Its131
+cases pass. The created-group and namespace files are counted with their former
+creation.rs parent. Formatting and whitespace checks pass. Continue the current
+mini item with the106 remaining all-feature diagnostics and58 core diagnostics;
+install/verify the hook only when both full commands reach zero.

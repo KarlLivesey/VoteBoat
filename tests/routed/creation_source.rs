@@ -161,6 +161,46 @@ struct CreatedSplit {
     targets: [Vec<Node<target_fixture::Target>>; 2],
     creation_records: BTreeMap<NodeId, Vec<u8>>,
 }
+fn establish_source_replicas(
+    parent: &[Node<LifecycleDirectory>],
+    configs: &[NativeStartup],
+    intent: &GroupCreationIntent,
+    creation: &GroupCreationStatus,
+) -> BTreeMap<NodeId, Vec<u8>> {
+    let mut records = BTreeMap::new();
+    for c in configs {
+        let verified = VerifiedGroupCreation::verify(
+            &LocalCreationAuthority {
+                core: parent[0].local().owner.core(group(1)).unwrap(),
+                directory: parent[0].local().applications[&group(1)].directory(),
+            },
+            creation.clone(),
+            c.node,
+            c.store,
+            intent.application,
+        )
+        .unwrap();
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&c.directory).unwrap(),
+            c.store,
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
+        establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+        records.insert(c.node, bindings.load().unwrap().unwrap());
+        NativeSnapshotStore::create(
+            FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
+            SnapshotIdentity {
+                store: c.store,
+                group: group(20),
+            },
+            SnapshotLimits::default(),
+        )
+        .unwrap();
+    }
+    records
+}
 impl CreatedSplit {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
         let root = std::env::temp_dir().join(format!(
@@ -229,38 +269,7 @@ impl CreatedSplit {
             manifest: source_fixture::grant(),
         };
         std::fs::create_dir_all(root.join("20")).unwrap();
-        let mut records = BTreeMap::new();
-        for c in &configs {
-            let verified = VerifiedGroupCreation::verify(
-                &LocalCreationAuthority {
-                    core: parent[0].local().owner.core(group(1)).unwrap(),
-                    directory: parent[0].local().applications[&group(1)].directory(),
-                },
-                creation.clone(),
-                c.node,
-                c.store,
-                intent.application,
-            )
-            .unwrap();
-            let mut log = NativeLogStore::create(
-                FileLogIo::create(&c.directory).unwrap(),
-                c.store,
-                LogLimits::default(),
-            )
-            .unwrap();
-            let mut bindings = FileCreationBindings::open(&c.directory).unwrap();
-            establish_created_group(&verified, &mut log, &mut bindings).unwrap();
-            records.insert(c.node, bindings.load().unwrap().unwrap());
-            NativeSnapshotStore::create(
-                FileSnapshotIo::create(c.directory.join("snapshots")).unwrap(),
-                SnapshotIdentity {
-                    store: c.store,
-                    group: group(20),
-                },
-                SnapshotLimits::default(),
-            )
-            .unwrap();
-        }
+        let records = establish_source_replicas(&parent, &configs, &intent, &creation);
         let source = open(configs, &clock, protocol, || source(&plan));
         let targets = std::array::from_fn(|i| {
             open(
@@ -356,6 +365,49 @@ impl CreatedSplit {
     }
     fn resume_one(&mut self) -> Option<Retry> {
         let state = self.observed();
+        if let Some(retry) = self.resume_namespace(&state) {
+            return Some(retry);
+        }
+        if let Some(retry) = self.resume_source_freeze(&state) {
+            return Some(retry);
+        }
+        if let Some(retry) = self.resume_target_import(&state) {
+            return Some(retry);
+        }
+        if state.publication.is_none() {
+            return self.resume_publication(state);
+        }
+        for i in 0..2 {
+            if state.targets[i].activated.is_none() {
+                let g = 21 + i as u128;
+                let activation = TargetActivation {
+                    metadata_configuration: self.parent[0]
+                        .local()
+                        .owner
+                        .core(group(1))
+                        .unwrap()
+                        .state()
+                        .bootstrap
+                        .configuration,
+                    decision: state.publication.clone().unwrap(),
+                };
+                let b = self.targets[i][0].local().applications[&group(g)]
+                    .activation_command(&activation, 100000)
+                    .unwrap();
+                unread(&mut self.targets[i], &self.clock, g, 200, b.clone(), |a| {
+                    a.status().activated.is_some()
+                });
+                return Some(Retry {
+                    phase: Phase::Activate(g),
+                    group: g,
+                    operation: 200,
+                    bytes: b,
+                });
+            }
+        }
+        None
+    }
+    fn resume_namespace(&mut self, state: &Observed) -> Option<Retry> {
         if state.namespace.ready_index.is_none() {
             let b = source(&self.plan)
                 .initialization_command(MAX_ROUTED_COMMAND_BYTES)
@@ -423,6 +475,9 @@ impl CreatedSplit {
                 });
             }
         }
+        None
+    }
+    fn resume_source_freeze(&mut self, state: &Observed) -> Option<Retry> {
         if state.intent.is_none() {
             let b = source_fixture::intent()
                 .encode(MAX_TRANSFER_INTENT_BYTES)
@@ -473,6 +528,9 @@ impl CreatedSplit {
                 bytes: b,
             });
         }
+        None
+    }
+    fn resume_target_import(&mut self, state: &Observed) -> Option<Retry> {
         let status = state.source.as_ref().unwrap();
         let configuration = self.source[0]
             .local()
@@ -520,78 +578,58 @@ impl CreatedSplit {
                 });
             }
         }
-        if state.publication.is_none() {
-            let source = SourceFenceEvidence::from_status(configuration, state.source.unwrap())
-                .unwrap_or_else(|e| panic!("source {:?}", e.0));
-            let targets = state
-                .targets
-                .into_iter()
-                .enumerate()
-                .map(|(i, t)| {
-                    TargetReadyEvidence::from_status(
-                        self.targets[i][0]
-                            .local()
-                            .owner
-                            .core(group(21 + i as u128))
-                            .unwrap()
-                            .state()
-                            .bootstrap
-                            .configuration,
-                        t,
-                    )
-                    .unwrap_or_else(|e| panic!("ready {:?}", e.0))
-                })
-                .collect();
-            let p = TransferPublication::new(
-                source_fixture::op(200),
-                source_fixture::intent(),
-                vec![source],
-                targets,
-            )
-            .unwrap_or_else(|e| panic!("publication {:?}", e.0));
-            let b = p.encode(MAX_TRANSFER_PUBLICATION_BYTES).unwrap();
-            unread(&mut self.parent, &self.clock, 1, 201, b.clone(), |a| {
-                a.directory()
-                    .transfer_publication_at(a.applied_index(), source_fixture::op(200))
-                    .unwrap()
-                    .is_some()
-            });
-            return Some(Retry {
-                phase: Phase::Publish,
-                group: 1,
-                operation: 201,
-                bytes: b,
-            });
-        }
-        for i in 0..2 {
-            if state.targets[i].activated.is_none() {
-                let g = 21 + i as u128;
-                let activation = TargetActivation {
-                    metadata_configuration: self.parent[0]
+        None
+    }
+    fn resume_publication(&mut self, state: Observed) -> Option<Retry> {
+        let configuration = self.source[0]
+            .local()
+            .owner
+            .core(group(20))
+            .unwrap()
+            .state()
+            .bootstrap
+            .configuration;
+        let source = SourceFenceEvidence::from_status(configuration, state.source.unwrap())
+            .unwrap_or_else(|e| panic!("source {:?}", e.0));
+        let targets = state
+            .targets
+            .into_iter()
+            .enumerate()
+            .map(|(i, t)| {
+                TargetReadyEvidence::from_status(
+                    self.targets[i][0]
                         .local()
                         .owner
-                        .core(group(1))
+                        .core(group(21 + i as u128))
                         .unwrap()
                         .state()
                         .bootstrap
                         .configuration,
-                    decision: state.publication.clone().unwrap(),
-                };
-                let b = self.targets[i][0].local().applications[&group(g)]
-                    .activation_command(&activation, 100000)
-                    .unwrap();
-                unread(&mut self.targets[i], &self.clock, g, 200, b.clone(), |a| {
-                    a.status().activated.is_some()
-                });
-                return Some(Retry {
-                    phase: Phase::Activate(g),
-                    group: g,
-                    operation: 200,
-                    bytes: b,
-                });
-            }
-        }
-        None
+                    t,
+                )
+                .unwrap_or_else(|e| panic!("ready {:?}", e.0))
+            })
+            .collect();
+        let p = TransferPublication::new(
+            source_fixture::op(200),
+            source_fixture::intent(),
+            vec![source],
+            targets,
+        )
+        .unwrap_or_else(|e| panic!("publication {:?}", e.0));
+        let b = p.encode(MAX_TRANSFER_PUBLICATION_BYTES).unwrap();
+        unread(&mut self.parent, &self.clock, 1, 201, b.clone(), |a| {
+            a.directory()
+                .transfer_publication_at(a.applied_index(), source_fixture::op(200))
+                .unwrap()
+                .is_some()
+        });
+        Some(Retry {
+            phase: Phase::Publish,
+            group: 1,
+            operation: 201,
+            bytes: b,
+        })
     }
     fn serving(&mut self, state: &Observed) {
         let expected = if state.namespace.activation_index.is_none() {
@@ -800,6 +838,162 @@ impl CreatedSplit {
         }
     }
 }
+impl CreatedSplit {
+    fn activate_offline_target(
+        &mut self,
+        i: usize,
+        metadata_configuration: ConfigurationId,
+        publication: &TransferPublicationStatus,
+        original: &mut Observed,
+    ) {
+        let g = 21 + i as u128;
+        let activation = TargetActivation {
+            metadata_configuration,
+            decision: publication.clone(),
+        };
+        let bytes = self.targets[i][0].local().applications[&group(g)]
+            .activation_command(&activation, 100000)
+            .unwrap();
+        unread(
+            &mut self.targets[i],
+            &self.clock,
+            g,
+            200,
+            bytes.clone(),
+            |a| a.status().activated.is_some(),
+        );
+        let TargetRead::Status(status) =
+            split::observe(&mut self.targets[i], &self.clock, g, TargetQuery::Status)
+        else {
+            panic!("activation status")
+        };
+        original.targets[i] = status;
+        if self.checkpoint {
+            split::compact(&mut self.targets[i], &self.clock, g);
+        }
+        CreatedSplit::stop(
+            std::mem::take(&mut self.targets[i]),
+            &self.clock,
+            g,
+            self.checkpoint,
+        );
+        self.targets[i] = open(
+            configuration(&self.root, g, &[1, 2, 3], NativeOpenMode::Recover),
+            &self.clock,
+            self.protocol,
+            || target_fixture::fresh_for(g),
+        );
+        campaign(&mut self.targets[i], &self.clock, g);
+        let r = propose_recovering(&mut self.targets[i], &self.clock, g, 200, bytes);
+        assert!(
+            matches!(r.outcome,TargetOutcome::Activated(ref s) if Some(s)==original.targets[i].activated.as_ref())
+        );
+    }
+    fn exercise_offline_target(&mut self, i: usize) {
+        let g = 21 + i as u128;
+        let key = if i == 0 { 1 } else { 200 };
+        let value = if i == 0 { 7 } else { 11 };
+        assert_eq!(
+            split::observe(
+                &mut self.targets[i],
+                &self.clock,
+                g,
+                TargetQuery::Data(RoutedQuery {
+                    hint: target_hint(key),
+                    key: vec![key],
+                    query: vec![key]
+                })
+            ),
+            TargetRead::Data(value)
+        );
+        if i == 0 {
+            assert_eq!(
+                split::observe(
+                    &mut self.targets[1],
+                    &self.clock,
+                    22,
+                    TargetQuery::Data(RoutedQuery {
+                        hint: target_hint(200),
+                        key: vec![200],
+                        query: vec![200]
+                    })
+                ),
+                TargetRead::NotActive
+            );
+        }
+        let old_op = 1 + i as u128;
+        let r = propose_recovering(
+            &mut self.targets[i],
+            &self.clock,
+            g,
+            old_op,
+            target_data(key, value),
+        );
+        assert!(
+            matches!(r.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
+        );
+        let r = propose_recovering(
+            &mut self.targets[i],
+            &self.clock,
+            g,
+            100 + old_op,
+            target_data(key, 2),
+        );
+        assert!(
+            matches!(r.outcome,TargetOutcome::Applied(v) if !v.duplicate&&v.outcome==BucketOutcome::Value(value+2))
+        );
+    }
+    fn verify_completed(&mut self, original: &Observed) {
+        for (i, key, value) in [(0, 1u8, 9), (1, 200u8, 13)] {
+            let g = 21 + i as u128;
+            assert_eq!(
+                split::observe(
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    TargetQuery::Data(RoutedQuery {
+                        hint: target_hint(key),
+                        key: vec![key],
+                        query: vec![key]
+                    })
+                ),
+                TargetRead::Data(value)
+            );
+            assert!(self.targets[i]
+                .iter()
+                .all(|n| n.local().applications[&group(g)]
+                    .application()
+                    .outbox()
+                    .count()
+                    == 2));
+            assert!(matches!(
+                split::observe(
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    TargetQuery::Data(RoutedQuery {
+                        hint: source_fixture::hint(key),
+                        key: vec![key],
+                        query: vec![key]
+                    })
+                ),
+                TargetRead::Rejected(_)
+            ));
+        }
+        assert_eq!(
+            split::observe(&mut self.source, &self.clock, 20, source_query(1)),
+            NamespaceOwnerRead::Data(SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced)))
+        );
+        assert_eq!(
+            self.source[0].local().applications[&group(20)]
+                .owner()
+                .export_target(group(21), 65536)
+                .unwrap()
+                .source_applied(),
+            original.source.as_ref().unwrap().fence.index
+        );
+    }
+}
 fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let mut rig = CreatedSplit::new(protocol, checkpoint);
@@ -852,99 +1046,8 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     // Publication is already quorum-observed. Both original activations now run
     // with source and metadata fully stopped, using the retained exact decision.
     for i in 0..2 {
-        let g = 21 + i as u128;
-        let key = if i == 0 { 1 } else { 200 };
-        let value = if i == 0 { 7 } else { 11 };
-        let activation = TargetActivation {
-            metadata_configuration,
-            decision: publication.clone(),
-        };
-        let bytes = rig.targets[i][0].local().applications[&group(g)]
-            .activation_command(&activation, 100000)
-            .unwrap();
-        unread(
-            &mut rig.targets[i],
-            &rig.clock,
-            g,
-            200,
-            bytes.clone(),
-            |a| a.status().activated.is_some(),
-        );
-        let TargetRead::Status(status) =
-            split::observe(&mut rig.targets[i], &rig.clock, g, TargetQuery::Status)
-        else {
-            panic!("activation status")
-        };
-        original.targets[i] = status;
-        if checkpoint {
-            split::compact(&mut rig.targets[i], &rig.clock, g);
-        }
-        CreatedSplit::stop(
-            std::mem::take(&mut rig.targets[i]),
-            &rig.clock,
-            g,
-            checkpoint,
-        );
-        rig.targets[i] = open(
-            configuration(&rig.root, g, &[1, 2, 3], NativeOpenMode::Recover),
-            &rig.clock,
-            protocol,
-            || target_fixture::fresh_for(g),
-        );
-        campaign(&mut rig.targets[i], &rig.clock, g);
-        let r = propose_recovering(&mut rig.targets[i], &rig.clock, g, 200, bytes);
-        assert!(
-            matches!(r.outcome,TargetOutcome::Activated(ref s) if Some(s)==original.targets[i].activated.as_ref())
-        );
-        assert_eq!(
-            split::observe(
-                &mut rig.targets[i],
-                &rig.clock,
-                g,
-                TargetQuery::Data(RoutedQuery {
-                    hint: target_hint(key),
-                    key: vec![key],
-                    query: vec![key]
-                })
-            ),
-            TargetRead::Data(value)
-        );
-        if i == 0 {
-            assert_eq!(
-                split::observe(
-                    &mut rig.targets[1],
-                    &rig.clock,
-                    22,
-                    TargetQuery::Data(RoutedQuery {
-                        hint: target_hint(200),
-                        key: vec![200],
-                        query: vec![200]
-                    })
-                ),
-                TargetRead::NotActive
-            );
-        }
-        let old_op = 1 + i as u128;
-        let r = propose_recovering(
-            &mut rig.targets[i],
-            &rig.clock,
-            g,
-            old_op,
-            target_data(key, value),
-        );
-        assert!(
-            matches!(r.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
-        );
-        let r = propose_recovering(
-            &mut rig.targets[i],
-            &rig.clock,
-            g,
-            100 + old_op,
-            target_data(key, 2),
-        );
-        assert!(
-            matches!(r.outcome,TargetOutcome::Applied(v) if !v.duplicate&&v.outcome==BucketOutcome::Value(value+2))
-        );
+        rig.activate_offline_target(i, metadata_configuration, &publication, &mut original);
+        rig.exercise_offline_target(i);
     }
     assert_eq!(durable_files(&rig.root.join("1")), parent_files);
     for c in configuration(&rig.root, 1, &[1, 2, 3], NativeOpenMode::Recover) {
@@ -959,54 +1062,7 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool) {
     rig.restart();
     assert_eq!(rig.observed(), original);
     assert!(rig.resume_one().is_none());
-    for (i, key, value) in [(0, 1u8, 9), (1, 200u8, 13)] {
-        let g = 21 + i as u128;
-        assert_eq!(
-            split::observe(
-                &mut rig.targets[i],
-                &rig.clock,
-                g,
-                TargetQuery::Data(RoutedQuery {
-                    hint: target_hint(key),
-                    key: vec![key],
-                    query: vec![key]
-                })
-            ),
-            TargetRead::Data(value)
-        );
-        assert!(rig.targets[i]
-            .iter()
-            .all(|n| n.local().applications[&group(g)]
-                .application()
-                .outbox()
-                .count()
-                == 2));
-        assert!(matches!(
-            split::observe(
-                &mut rig.targets[i],
-                &rig.clock,
-                g,
-                TargetQuery::Data(RoutedQuery {
-                    hint: source_fixture::hint(key),
-                    key: vec![key],
-                    query: vec![key]
-                })
-            ),
-            TargetRead::Rejected(_)
-        ));
-    }
-    assert_eq!(
-        split::observe(&mut rig.source, &rig.clock, 20, source_query(1)),
-        NamespaceOwnerRead::Data(SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced)))
-    );
-    assert_eq!(
-        rig.source[0].local().applications[&group(20)]
-            .owner()
-            .export_target(group(21), 65536)
-            .unwrap()
-            .source_applied(),
-        original.source.as_ref().unwrap().fence.index
-    );
+    rig.verify_completed(&original);
     rig.stop_all();
     std::fs::remove_dir_all(rig.root).unwrap();
 }

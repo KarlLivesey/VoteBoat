@@ -431,10 +431,43 @@ fn reserved_completion_survives_exhausted_ordinary_capacity_and_pending_duplicat
     assert_eq!(recover(&d).remaining_operations(), 0);
 }
 #[cfg(feature = "native")]
-#[test]
-fn deletion_native_intent_and_tombstone_frame_cuts_recover_exact_original_state() {
-    use support::{Fault, ModelIo};
+fn seed_deletion_log(
+    prefix: &[voteboat::log::LogEntry],
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
     use voteboat::{log::*, native::log_store::*};
+    let limits = LogLimits::default();
+
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(1, 3))],
+    );
+    let state = log.state(group(1)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            prefix.len() as u64,
+            Some(Suffix {
+                from: 1,
+                entries: prefix.to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+#[cfg(feature = "native")]
+fn deletion_fault_fixture() -> (
+    ResponsibilityManifest,
+    DeletionCompletion,
+    [voteboat::log::LogEntry; 4],
+) {
     let m = grant();
     let d = initial(vec![m.clone()], 8);
     let mut ready = d.clone();
@@ -461,31 +494,18 @@ fn deletion_native_intent_and_tombstone_frame_cuts_recover_exact_original_state(
         entry(3, 200, c.intent.intent.encode(200000).unwrap()),
         entry(4, 201, c.encode(200000).unwrap()),
     ];
+    (m, c, prefix_all)
+}
+#[cfg(feature = "native")]
+#[test]
+fn deletion_native_intent_and_tombstone_frame_cuts_recover_exact_original_state() {
+    use support::Fault;
+    use voteboat::{log::*, native::log_store::*};
+    let (m, c, prefix_all) = deletion_fault_fixture();
     for boundary in [3usize, 4] {
         let prefix = prefix_all[..boundary - 1].to_vec();
         let limits = LogLimits::default();
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(1, 3))],
-            );
-            let state = log.state(group(1)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    prefix.len() as u64,
-                    Some(Suffix {
-                        from: 1,
-                        entries: prefix.clone(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
+        let seed = || seed_deletion_log(&prefix);
         let (_, log) = seed();
         let state = log.state(group(1)).unwrap();
         let mutation = support::update(

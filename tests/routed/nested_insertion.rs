@@ -115,6 +115,82 @@ struct Nested<P: TargetProfile = Raw> {
     bindings: BTreeMap<(u128, NodeId), Vec<u8>>,
     stopped: BTreeMap<std::path::PathBuf, Vec<u8>>,
 }
+fn reserve_grandchildren(
+    base: &mut Insertion,
+    configs: &[Vec<NativeStartup>; 2],
+    before: &ResponsibilityManifest,
+) -> [GroupCreationStatus; 2] {
+    let creations: [GroupCreationStatus; 2] = std::array::from_fn(|i| {
+        let g = 31 + i as u128;
+        let value = GroupCreationIntent {
+            authority: group(1),
+            parent: before.input().responsibility,
+            expected: before.input().generation,
+            responsibility: responsibility(g),
+            bootstrap: configs[i][0].bootstrap.clone(),
+            application: before.input().application,
+            mode: GroupCreationMode::Staging,
+        };
+        assert_eq!(
+            propose_recovering(
+                &mut base.parent,
+                &base.clock,
+                1,
+                g * 10,
+                value.encode(100000).unwrap()
+            )
+            .outcome,
+            DirectoryOutcome::CreationReserved
+        );
+        let _ = split::observe(
+            &mut base.parent,
+            &base.clock,
+            1,
+            DirectoryQuery::Manifest(before.input().responsibility),
+        );
+        let core = base.parent[0].local().owner.core(group(1)).unwrap();
+        base.parent[0].local().applications[&group(1)]
+            .directory()
+            .group_creation_at(core.state().commit_index, group(g))
+            .unwrap()
+            .unwrap()
+    });
+    creations
+}
+fn bind_grandchildren(
+    base: &Insertion,
+    configs: &[Vec<NativeStartup>; 2],
+    before: &ResponsibilityManifest,
+    creations: &[GroupCreationStatus; 2],
+) -> (Vec<InsertionChild>, CreationRecords) {
+    let mut children = Vec::new();
+    let mut bindings = BTreeMap::new();
+    for c in configuration(&base.root, 21, &[1, 2, 3], NativeOpenMode::Recover) {
+        let mut b = FileCreationBindings::open(&c.directory).unwrap();
+        bindings.insert((21, c.node), b.load().unwrap().unwrap());
+    }
+    for i in 0..2 {
+        for c in &configs[i] {
+            bindings.insert(
+                (31 + i as u128, c.node),
+                establish(&base.parent, c, &creations[i]),
+            );
+        }
+        let mut m = before.clone().into_input();
+        m.responsibility = responsibility(31 + i as u128);
+        m.parent = Some(ParentAuthority {
+            responsibility: before.input().responsibility,
+            group: group(1),
+        });
+        m.scope = source_fixture::range(if i == 0 { 0 } else { 64 }, if i == 0 { 64 } else { 128 });
+        m.execution = ExecutionMode::Single(group(31 + i as u128));
+        children.push(
+            InsertionChild::from_creation(ResponsibilityManifest::new(m).unwrap(), &creations[i])
+                .unwrap(),
+        );
+    }
+    (children, bindings)
+}
 impl<P: TargetProfile> Nested<P> {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
         let mut base = Insertion::with_metadata(protocol, checkpoint, metadata);
@@ -151,71 +227,8 @@ impl<P: TargetProfile> Nested<P> {
         let before = base.intent.insertion_children().unwrap()[0]
             .manifest
             .clone();
-        let creations: [GroupCreationStatus; 2] = std::array::from_fn(|i| {
-            let g = 31 + i as u128;
-            let value = GroupCreationIntent {
-                authority: group(1),
-                parent: before.input().responsibility,
-                expected: before.input().generation,
-                responsibility: responsibility(g),
-                bootstrap: configs[i][0].bootstrap.clone(),
-                application: before.input().application,
-                mode: GroupCreationMode::Staging,
-            };
-            assert_eq!(
-                propose_recovering(
-                    &mut base.parent,
-                    &base.clock,
-                    1,
-                    g * 10,
-                    value.encode(100000).unwrap()
-                )
-                .outcome,
-                DirectoryOutcome::CreationReserved
-            );
-            let _ = split::observe(
-                &mut base.parent,
-                &base.clock,
-                1,
-                DirectoryQuery::Manifest(before.input().responsibility),
-            );
-            let core = base.parent[0].local().owner.core(group(1)).unwrap();
-            base.parent[0].local().applications[&group(1)]
-                .directory()
-                .group_creation_at(core.state().commit_index, group(g))
-                .unwrap()
-                .unwrap()
-        });
-        let mut children = Vec::new();
-        let mut bindings = BTreeMap::new();
-        for c in configuration(&base.root, 21, &[1, 2, 3], NativeOpenMode::Recover) {
-            let mut b = FileCreationBindings::open(&c.directory).unwrap();
-            bindings.insert((21, c.node), b.load().unwrap().unwrap());
-        }
-        for i in 0..2 {
-            for c in &configs[i] {
-                bindings.insert(
-                    (31 + i as u128, c.node),
-                    establish(&base.parent, c, &creations[i]),
-                );
-            }
-            let mut m = before.clone().into_input();
-            m.responsibility = responsibility(31 + i as u128);
-            m.parent = Some(ParentAuthority {
-                responsibility: before.input().responsibility,
-                group: group(1),
-            });
-            m.scope =
-                source_fixture::range(if i == 0 { 0 } else { 64 }, if i == 0 { 64 } else { 128 });
-            m.execution = ExecutionMode::Single(group(31 + i as u128));
-            children.push(
-                InsertionChild::from_creation(
-                    ResponsibilityManifest::new(m).unwrap(),
-                    &creations[i],
-                )
-                .unwrap(),
-            );
-        }
+        let creations = reserve_grandchildren(&mut base, &configs, &before);
+        let (children, bindings) = bind_grandchildren(&base, &configs, &before, &creations);
         let mut after = before.clone().into_input();
         after.epoch = OwnershipEpoch::new(2).unwrap();
         after.generation = RouteGeneration::new(2).unwrap();
@@ -257,44 +270,7 @@ impl<P: TargetProfile> Nested<P> {
         }
     }
     fn observed(&mut self) -> Facts {
-        let DirectoryRead::DelegationReservation(reservation) = split::observe(
-            &mut self.parent,
-            &self.clock,
-            1,
-            DirectoryQuery::DelegationReservation(source_fixture::op(400)),
-        ) else {
-            panic!("reservation")
-        };
-        if let Some(r) = &reservation {
-            assert_eq!(r.plan, self.plan);
-            let core = self.parent[0].local().owner.core(group(1)).unwrap();
-            let bound = r
-                .child_intent(core.state().bootstrap.configuration)
-                .unwrap();
-            if let Some(old) = &self.bound {
-                assert_eq!(old, &bound);
-            } else {
-                self.bound = Some(bound);
-            }
-            for i in 0..2 {
-                if self.targets[i].is_empty() {
-                    let intent = self.bound.as_ref().unwrap();
-                    self.targets[i] = open(
-                        configuration(
-                            &self.root,
-                            31 + i as u128,
-                            &[1, 2, 3],
-                            NativeOpenMode::Recover,
-                        ),
-                        &self.clock,
-                        self.protocol,
-                        || profile_target::<P>(intent, 31 + i as u128),
-                    );
-                }
-            }
-        } else {
-            assert!(self.bound.is_none() && self.targets.iter().all(Vec::is_empty));
-        }
+        let reservation = self.observe_reservation();
         let DirectoryRead::Transfer(intent) = split::observe(
             &mut self.parent,
             &self.clock,
@@ -335,76 +311,14 @@ impl<P: TargetProfile> Nested<P> {
         ) else {
             panic!("child")
         };
-        let grandchildren = std::array::from_fn(|i| {
-            let DirectoryRead::Manifest(m) = split::observe(
-                &mut self.parent,
-                &self.clock,
-                1,
-                DirectoryQuery::Manifest(responsibility(31 + i as u128)),
-            ) else {
-                panic!("grandchild")
-            };
-            let core = self.parent[0].local().owner.core(group(1)).unwrap();
-            assert_eq!(
-                self.parent[0].local().applications[&group(1)]
-                    .directory()
-                    .group_creation_at(core.state().commit_index, group(31 + i as u128))
-                    .unwrap()
-                    .as_ref(),
-                Some(&self.creations[i])
-            );
-            m
-        });
-        if publication.is_some() {
-            assert_eq!(&child, self.plan.after());
-            let mut cache = NativeManifestCache::new(ManifestCacheLimits {
-                manifests: 4,
-                bytes: 65536,
-            })
-            .unwrap();
-            cache.admit(parent.clone()).unwrap();
-            cache.admit(child.clone()).unwrap();
-            for (i, m) in grandchildren.iter().enumerate() {
-                assert_eq!(
-                    m.as_ref(),
-                    Some(&self.plan.insertion_children().unwrap()[i].manifest)
-                );
-                cache.admit(m.clone().unwrap()).unwrap();
-            }
-            for (g, key) in [(31, 1), (32, 80)] {
-                let result = resolve(
-                    &cache,
-                    &source_fixture::Policy,
-                    parent.input().responsibility,
-                    &[key],
-                    4,
-                );
-                if completion.is_some() {
-                    assert_eq!(
-                        result.unwrap(),
-                        hint(
-                            self.bound
-                                .as_ref()
-                                .unwrap()
-                                .target_manifest(group(g))
-                                .unwrap(),
-                            g,
-                            key
-                        )
-                    );
-                } else {
-                    assert_eq!(result, Err(RoutingError::WrongChild));
-                }
-            }
-        } else {
-            assert_eq!(&child, self.plan.before());
-            assert!(grandchildren.iter().all(Option::is_none));
-        }
-        if completion.is_some() {
-            assert_eq!(parent.input().generation, RouteGeneration::new(3).unwrap());
-        } else {
-            assert_eq!(&parent, self.plan.parent());
-        }
+        let grandchildren = self.observe_grandchildren();
+        self.verify_routing(
+            &parent,
+            &child,
+            &grandchildren,
+            publication.is_some(),
+            completion.is_some(),
+        );
         let TargetRead::Status(source) =
             split::observe(&mut self.source, &self.clock, 21, TargetQuery::Status)
         else {
@@ -443,11 +357,187 @@ impl<P: TargetProfile> Nested<P> {
             targets,
         }
     }
+    fn observe_reservation(&mut self) -> Option<DelegationReservationStatus> {
+        let DirectoryRead::DelegationReservation(reservation) = split::observe(
+            &mut self.parent,
+            &self.clock,
+            1,
+            DirectoryQuery::DelegationReservation(source_fixture::op(400)),
+        ) else {
+            panic!("reservation")
+        };
+        if let Some(r) = &reservation {
+            assert_eq!(r.plan, self.plan);
+            let core = self.parent[0].local().owner.core(group(1)).unwrap();
+            let bound = r
+                .child_intent(core.state().bootstrap.configuration)
+                .unwrap();
+            if let Some(old) = &self.bound {
+                assert_eq!(old, &bound);
+            } else {
+                self.bound = Some(bound);
+            }
+            for i in 0..2 {
+                if self.targets[i].is_empty() {
+                    let intent = self.bound.as_ref().unwrap();
+                    self.targets[i] = open(
+                        configuration(
+                            &self.root,
+                            31 + i as u128,
+                            &[1, 2, 3],
+                            NativeOpenMode::Recover,
+                        ),
+                        &self.clock,
+                        self.protocol,
+                        || profile_target::<P>(intent, 31 + i as u128),
+                    );
+                }
+            }
+        } else {
+            assert!(self.bound.is_none() && self.targets.iter().all(Vec::is_empty));
+        }
+        reservation
+    }
+    fn observe_grandchildren(&mut self) -> [Option<ResponsibilityManifest>; 2] {
+        let grandchildren = std::array::from_fn(|i| {
+            let DirectoryRead::Manifest(m) = split::observe(
+                &mut self.parent,
+                &self.clock,
+                1,
+                DirectoryQuery::Manifest(responsibility(31 + i as u128)),
+            ) else {
+                panic!("grandchild")
+            };
+            let core = self.parent[0].local().owner.core(group(1)).unwrap();
+            assert_eq!(
+                self.parent[0].local().applications[&group(1)]
+                    .directory()
+                    .group_creation_at(core.state().commit_index, group(31 + i as u128))
+                    .unwrap()
+                    .as_ref(),
+                Some(&self.creations[i])
+            );
+            m
+        });
+        grandchildren
+    }
+    fn verify_routing(
+        &self,
+        parent: &ResponsibilityManifest,
+        child: &ResponsibilityManifest,
+        grandchildren: &[Option<ResponsibilityManifest>; 2],
+        published: bool,
+        completed: bool,
+    ) {
+        if published {
+            assert_eq!(child, self.plan.after());
+            let mut cache = NativeManifestCache::new(ManifestCacheLimits {
+                manifests: 4,
+                bytes: 65536,
+            })
+            .unwrap();
+            cache.admit(parent.clone()).unwrap();
+            cache.admit(child.clone()).unwrap();
+            for (i, m) in grandchildren.iter().enumerate() {
+                assert_eq!(
+                    m.as_ref(),
+                    Some(&self.plan.insertion_children().unwrap()[i].manifest)
+                );
+                cache.admit(m.clone().unwrap()).unwrap();
+            }
+            for (g, key) in [(31, 1), (32, 80)] {
+                let result = resolve(
+                    &cache,
+                    &source_fixture::Policy,
+                    parent.input().responsibility,
+                    &[key],
+                    4,
+                );
+                if completed {
+                    assert_eq!(
+                        result.unwrap(),
+                        hint(
+                            self.bound
+                                .as_ref()
+                                .unwrap()
+                                .target_manifest(group(g))
+                                .unwrap(),
+                            g,
+                            key
+                        )
+                    );
+                } else {
+                    assert_eq!(result, Err(RoutingError::WrongChild));
+                }
+            }
+        } else {
+            assert_eq!(child, self.plan.before());
+            assert!(grandchildren.iter().all(Option::is_none));
+        }
+        if completed {
+            assert_eq!(parent.input().generation, RouteGeneration::new(3).unwrap());
+        } else {
+            assert_eq!(parent, self.plan.parent());
+        }
+    }
     fn resume(&mut self) -> Option<Request> {
         self.resume_with_delivery(true)
     }
     fn resume_with_delivery(&mut self, keep_unread: bool) -> Option<Request> {
         let f = self.observed();
+        if let Some(r) = self.resume_reservation(&f, keep_unread) {
+            return Some(r);
+        }
+        if let Some(r) = self.resume_fence(&f, keep_unread) {
+            return Some(r);
+        }
+        if let Some(r) = self.resume_import(&f, keep_unread) {
+            return Some(r);
+        }
+        if f.publication.is_none() {
+            return self.resume_publication(f, keep_unread);
+        }
+        if f.completion.is_none() {
+            let configuration = self.parent[0]
+                .local()
+                .owner
+                .core(group(1))
+                .unwrap()
+                .state()
+                .bootstrap
+                .configuration;
+            let completion = DelegationCompletion {
+                reservation: source_fixture::op(400),
+                reservation_index: f.reservation.unwrap().index,
+                parent_configuration: configuration,
+                child_configuration: configuration,
+                decision: f.publication.unwrap(),
+            };
+            let b = completion.encode(100000).unwrap();
+            deliver(
+                keep_unread,
+                &mut self.parent,
+                &self.clock,
+                1,
+                403,
+                b.clone(),
+                |a| {
+                    a.directory()
+                        .delegation_publication_at(a.applied_index(), source_fixture::op(400))
+                        .unwrap()
+                        .is_some()
+                },
+            );
+            return Some(Request {
+                step: Step::Refresh,
+                group: 1,
+                operation: 403,
+                bytes: b,
+            });
+        }
+        None
+    }
+    fn resume_reservation(&mut self, f: &Facts, keep_unread: bool) -> Option<Request> {
         if f.fence.is_none()
             && self.source[0].local().applications[&group(21)]
                 .application()
@@ -495,6 +585,9 @@ impl<P: TargetProfile> Nested<P> {
                 bytes: b,
             });
         }
+        None
+    }
+    fn resume_fence(&mut self, f: &Facts, keep_unread: bool) -> Option<Request> {
         let intent = self.bound.as_ref().unwrap();
         if f.intent.is_none() {
             let b = intent.encode(100000).unwrap();
@@ -561,6 +654,10 @@ impl<P: TargetProfile> Nested<P> {
                 bytes: b,
             });
         }
+        None
+    }
+    fn resume_import(&mut self, f: &Facts, keep_unread: bool) -> Option<Request> {
+        let intent = self.bound.as_ref().unwrap();
         let fence = f.fence.as_ref().unwrap();
         assert_eq!(&fence.intent, intent);
         let configuration = self.source[0]
@@ -613,89 +710,61 @@ impl<P: TargetProfile> Nested<P> {
                 });
             }
         }
-        if f.publication.is_none() {
-            let source = SourceFenceEvidence::from_status(configuration, fence.clone())
-                .unwrap_or_else(|e| panic!("{:?}", e.0));
-            let targets = f
-                .targets
-                .into_iter()
-                .enumerate()
-                .map(|(i, t)| {
-                    TargetReadyEvidence::from_status(
-                        self.creations[i].intent.bootstrap.configuration,
-                        t.unwrap(),
-                    )
-                    .unwrap_or_else(|e| panic!("{:?}", e.0))
-                })
-                .collect();
-            let p = TransferPublication::new(
-                source_fixture::op(300),
-                intent.clone(),
-                vec![source],
-                targets,
-            )
-            .unwrap_or_else(|e| panic!("{:?}", e.0));
-            let b = p.encode(100000).unwrap();
-            deliver(
-                keep_unread,
-                &mut self.parent,
-                &self.clock,
-                1,
-                301,
-                b.clone(),
-                |a| {
-                    a.directory()
-                        .transfer_publication_at(a.applied_index(), source_fixture::op(300))
-                        .unwrap()
-                        .is_some()
-                },
-            );
-            return Some(Request {
-                step: Step::Publish,
-                group: 1,
-                operation: 301,
-                bytes: b,
-            });
-        }
-        if f.completion.is_none() {
-            let configuration = self.parent[0]
-                .local()
-                .owner
-                .core(group(1))
-                .unwrap()
-                .state()
-                .bootstrap
-                .configuration;
-            let completion = DelegationCompletion {
-                reservation: source_fixture::op(400),
-                reservation_index: f.reservation.unwrap().index,
-                parent_configuration: configuration,
-                child_configuration: configuration,
-                decision: f.publication.unwrap(),
-            };
-            let b = completion.encode(100000).unwrap();
-            deliver(
-                keep_unread,
-                &mut self.parent,
-                &self.clock,
-                1,
-                403,
-                b.clone(),
-                |a| {
-                    a.directory()
-                        .delegation_publication_at(a.applied_index(), source_fixture::op(400))
-                        .unwrap()
-                        .is_some()
-                },
-            );
-            return Some(Request {
-                step: Step::Refresh,
-                group: 1,
-                operation: 403,
-                bytes: b,
-            });
-        }
         None
+    }
+    fn resume_publication(&mut self, f: Facts, keep_unread: bool) -> Option<Request> {
+        let intent = self.bound.as_ref().unwrap();
+        let fence = f.fence.as_ref().unwrap();
+        let configuration = self.source[0]
+            .local()
+            .owner
+            .core(group(21))
+            .unwrap()
+            .state()
+            .bootstrap
+            .configuration;
+        let source = SourceFenceEvidence::from_status(configuration, fence.clone())
+            .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let targets = f
+            .targets
+            .into_iter()
+            .enumerate()
+            .map(|(i, t)| {
+                TargetReadyEvidence::from_status(
+                    self.creations[i].intent.bootstrap.configuration,
+                    t.unwrap(),
+                )
+                .unwrap_or_else(|e| panic!("{:?}", e.0))
+            })
+            .collect();
+        let p = TransferPublication::new(
+            source_fixture::op(300),
+            intent.clone(),
+            vec![source],
+            targets,
+        )
+        .unwrap_or_else(|e| panic!("{:?}", e.0));
+        let b = p.encode(100000).unwrap();
+        deliver(
+            keep_unread,
+            &mut self.parent,
+            &self.clock,
+            1,
+            301,
+            b.clone(),
+            |a| {
+                a.directory()
+                    .transfer_publication_at(a.applied_index(), source_fixture::op(300))
+                    .unwrap()
+                    .is_some()
+            },
+        );
+        Some(Request {
+            step: Step::Publish,
+            group: 1,
+            operation: 301,
+            bytes: b,
+        })
     }
     fn service(&mut self, f: &Facts) {
         let before = self.plan.before();
@@ -849,6 +918,137 @@ impl<P: TargetProfile> Nested<P> {
         }
     }
 }
+impl<P: TargetProfile> Nested<P> {
+    fn activate_offline_target(
+        &mut self,
+        i: usize,
+        configuration: ConfigurationId,
+        publication: &TransferPublicationStatus,
+        original: &mut Facts,
+    ) {
+        let g = 31 + i as u128;
+        let intent = self.bound.clone().unwrap();
+
+        let activation = TargetActivation {
+            metadata_configuration: configuration,
+            decision: publication.clone(),
+        };
+        let bytes = P::owner(&self.targets[i][0].local().applications[&group(g)])
+            .activation_command(&activation, 100000)
+            .unwrap();
+        unread(
+            &mut self.targets[i],
+            &self.clock,
+            g,
+            300,
+            bytes.clone(),
+            |a| P::owner(a).status().activated.is_some(),
+        );
+        let TargetRead::Status(status) =
+            observe_target::<P>(&mut self.targets[i], &self.clock, g, TargetQuery::Status)
+        else {
+            panic!("activation")
+        };
+        original.targets[i] = Some(status.clone());
+        if self.checkpoint {
+            split::compact(&mut self.targets[i], &self.clock, g);
+        }
+        Insertion::stop(
+            std::mem::take(&mut self.targets[i]),
+            &self.clock,
+            g,
+            self.checkpoint,
+        );
+        self.targets[i] = open(
+            configuration_for(&self.root, g),
+            &self.clock,
+            self.protocol,
+            || profile_target::<P>(&intent, g),
+        );
+        campaign(&mut self.targets[i], &self.clock, g);
+        let retry = propose_target::<P>(&mut self.targets[i], &self.clock, g, 300, bytes);
+        assert!(matches!(retry.outcome,TargetOutcome::Activated(v) if Some(v)==status.activated));
+    }
+    fn exercise_offline_target(&mut self, i: usize) {
+        let (g, key, old_op, value) = if i == 0 {
+            (31, 1, 1, 7)
+        } else {
+            (32, 80, 80, 5)
+        };
+        let intent = self.bound.clone().unwrap();
+        let m = intent.target_manifest(group(g)).unwrap();
+        assert_eq!(
+            observe_target::<P>(&mut self.targets[i], &self.clock, g, query(m, g, key)),
+            TargetRead::Data(value)
+        );
+        if i == 0 {
+            assert_eq!(
+                observe_target::<P>(
+                    &mut self.targets[1],
+                    &self.clock,
+                    32,
+                    query(intent.target_manifest(group(32)).unwrap(), 32, 80)
+                ),
+                TargetRead::NotActive
+            );
+        }
+        let retry = propose_target::<P>(
+            &mut self.targets[i],
+            &self.clock,
+            g,
+            old_op,
+            data(m, g, key, value),
+        );
+        assert!(
+            matches!(retry.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
+        );
+        let write = propose_target::<P>(
+            &mut self.targets[i],
+            &self.clock,
+            g,
+            100 + old_op,
+            data(m, g, key, 2),
+        );
+        assert!(
+            matches!(write.outcome,TargetOutcome::Applied(v) if !v.duplicate&&v.outcome==BucketOutcome::Value(value+2))
+        );
+    }
+    fn verify_completed(&mut self) {
+        let intent = self.bound.clone().unwrap();
+        for (i, g, key, value) in [(0, 31, 1, 9), (1, 32, 80, 7)] {
+            let m = intent.target_manifest(group(g)).unwrap();
+            assert_eq!(
+                observe_target::<P>(&mut self.targets[i], &self.clock, g, query(m, g, key)),
+                TargetRead::Data(value)
+            );
+            assert!(self.targets[i]
+                .iter()
+                .all(|n| P::owner(&n.local().applications[&group(g)])
+                    .application()
+                    .outbox()
+                    .count()
+                    == 2));
+            assert_eq!(
+                observe_target::<P>(
+                    &mut self.targets[i],
+                    &self.clock,
+                    g,
+                    query(self.plan.before(), g, key)
+                ),
+                TargetRead::Rejected(RoutingError::WrongIdentity)
+            );
+        }
+        assert_eq!(
+            split::observe(
+                &mut self.source,
+                &self.clock,
+                21,
+                query(self.plan.before(), 21, 1)
+            ),
+            TargetRead::Rejected(RoutingError::Fenced)
+        );
+    }
+}
 fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
     let mut rig = Nested::<P>::new(protocol, checkpoint);
@@ -897,83 +1097,9 @@ fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
     Insertion::stop(std::mem::take(&mut rig.source), &rig.clock, 21, checkpoint);
     let parent_files = durable_files(&rig.root.join("1"));
     let source_files = durable_files(&rig.root.join("21"));
-    let intent = rig.bound.clone().unwrap();
-    for (i, g, key, old_op, value) in [(0, 31, 1, 1, 7), (1, 32, 80, 80, 5)] {
-        let m = intent.target_manifest(group(g)).unwrap();
-        let activation = TargetActivation {
-            metadata_configuration: configuration,
-            decision: publication.clone(),
-        };
-        let bytes = P::owner(&rig.targets[i][0].local().applications[&group(g)])
-            .activation_command(&activation, 100000)
-            .unwrap();
-        unread(
-            &mut rig.targets[i],
-            &rig.clock,
-            g,
-            300,
-            bytes.clone(),
-            |a| P::owner(a).status().activated.is_some(),
-        );
-        let TargetRead::Status(status) =
-            observe_target::<P>(&mut rig.targets[i], &rig.clock, g, TargetQuery::Status)
-        else {
-            panic!("activation")
-        };
-        original.targets[i] = Some(status.clone());
-        if checkpoint {
-            split::compact(&mut rig.targets[i], &rig.clock, g);
-        }
-        Insertion::stop(
-            std::mem::take(&mut rig.targets[i]),
-            &rig.clock,
-            g,
-            checkpoint,
-        );
-        rig.targets[i] = open(
-            configuration_for(&rig.root, g),
-            &rig.clock,
-            protocol,
-            || profile_target::<P>(&intent, g),
-        );
-        campaign(&mut rig.targets[i], &rig.clock, g);
-        let retry = propose_target::<P>(&mut rig.targets[i], &rig.clock, g, 300, bytes);
-        assert!(matches!(retry.outcome,TargetOutcome::Activated(v) if Some(v)==status.activated));
-        assert_eq!(
-            observe_target::<P>(&mut rig.targets[i], &rig.clock, g, query(m, g, key)),
-            TargetRead::Data(value)
-        );
-        if i == 0 {
-            assert_eq!(
-                observe_target::<P>(
-                    &mut rig.targets[1],
-                    &rig.clock,
-                    32,
-                    query(intent.target_manifest(group(32)).unwrap(), 32, 80)
-                ),
-                TargetRead::NotActive
-            );
-        }
-        let retry = propose_target::<P>(
-            &mut rig.targets[i],
-            &rig.clock,
-            g,
-            old_op,
-            data(m, g, key, value),
-        );
-        assert!(
-            matches!(retry.outcome,TargetOutcome::Applied(v) if v.duplicate&&v.outcome==BucketOutcome::Value(value))
-        );
-        let write = propose_target::<P>(
-            &mut rig.targets[i],
-            &rig.clock,
-            g,
-            100 + old_op,
-            data(m, g, key, 2),
-        );
-        assert!(
-            matches!(write.outcome,TargetOutcome::Applied(v) if !v.duplicate&&v.outcome==BucketOutcome::Value(value+2))
-        );
+    for i in 0..2 {
+        rig.activate_offline_target(i, configuration, &publication, &mut original);
+        rig.exercise_offline_target(i);
     }
     assert_eq!(durable_files(&rig.root.join("1")), parent_files);
     assert_eq!(durable_files(&rig.root.join("21")), source_files);
@@ -992,38 +1118,7 @@ fn history<P: TargetProfile>(protocol: NativePeerProtocol, checkpoint: bool) {
     rig.restart();
     assert_eq!(rig.observed(), original);
     assert!(rig.resume().is_none());
-    for (i, g, key, value) in [(0, 31, 1, 9), (1, 32, 80, 7)] {
-        let m = intent.target_manifest(group(g)).unwrap();
-        assert_eq!(
-            observe_target::<P>(&mut rig.targets[i], &rig.clock, g, query(m, g, key)),
-            TargetRead::Data(value)
-        );
-        assert!(rig.targets[i]
-            .iter()
-            .all(|n| P::owner(&n.local().applications[&group(g)])
-                .application()
-                .outbox()
-                .count()
-                == 2));
-        assert_eq!(
-            observe_target::<P>(
-                &mut rig.targets[i],
-                &rig.clock,
-                g,
-                query(rig.plan.before(), g, key)
-            ),
-            TargetRead::Rejected(RoutingError::WrongIdentity)
-        );
-    }
-    assert_eq!(
-        split::observe(
-            &mut rig.source,
-            &rig.clock,
-            21,
-            query(rig.plan.before(), 21, 1)
-        ),
-        TargetRead::Rejected(RoutingError::Fenced)
-    );
+    rig.verify_completed();
     rig.stop();
     std::fs::remove_dir_all(rig.root).unwrap();
 }

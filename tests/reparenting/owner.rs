@@ -266,48 +266,7 @@ fn adopted_original_source_restarts_splits_and_preserves_both_target_retries() {
         panic!("frozen")
     };
     s = source_reopen(&s, plan.child(), 4);
-    let mut targets = Vec::new();
-    let mut ready = Vec::new();
-    for (g, start, end) in [(31, 0, 64), (32, 64, 128)] {
-        let mut target = TransferTarget::new(
-            group(g),
-            op(500),
-            intent.clone(),
-            BucketCounter::new(range(start, end), Policy, bucket_limits()).unwrap(),
-            Policy,
-            TargetLimits {
-                import_bytes: 65536,
-                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|e| panic!("target: {:?}", e.0));
-        let boot = target.bootstrap_command(200000).unwrap();
-        commit(&mut target, 500, boot);
-        let import = TargetImport::new(
-            op(500),
-            intent.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: frozen.fence,
-                configuration: cfg,
-                image: s.export_target(group(g), 65536).unwrap(),
-                digest: frozen
-                    .exports
-                    .iter()
-                    .find(|e| e.target == group(g))
-                    .unwrap()
-                    .digest,
-            }],
-        )
-        .unwrap_or_else(|e| panic!("import: {:?}", e.0));
-        let command = target.import_command(&import, 200000).unwrap();
-        commit(&mut target, 500, command);
-        ready.push(
-            TargetReadyEvidence::from_status(cfg, target.status())
-                .unwrap_or_else(|e| panic!("ready: {:?}", e.0)),
-        );
-        targets.push(target);
-    }
+    let (mut targets, ready) = provision_adopted_targets(&s, &intent, &frozen, cfg);
     let publication = TransferPublication::new(
         op(500),
         intent.clone(),
@@ -346,38 +305,7 @@ fn adopted_original_source_restarts_splits_and_preserves_both_target_retries() {
         .unwrap()
         .clone();
     let cache = View(vec![parent, intent.after().clone()]);
-    for (target, (operation, key, delta)) in targets.iter_mut().zip([(1, 1, 7), (2, 100, 11)]) {
-        let command = target
-            .activation_command(
-                &TargetActivation {
-                    metadata_configuration: cfg,
-                    decision: decision.clone(),
-                },
-                200000,
-            )
-            .unwrap();
-        commit(target, 500, command);
-        let hint = resolve(
-            &cache,
-            &Policy,
-            plan.new_parent().input().responsibility,
-            &[key],
-            3,
-        )
-        .unwrap();
-        let command = encode_routed(
-            hint,
-            &[key],
-            &encode_add(&[key], delta, b"effect", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        let TargetOutcome::Applied(r) = commit(target, operation, command).outcome else {
-            panic!("retry")
-        };
-        assert!(r.duplicate);
-        assert_eq!(target.application().outbox().count(), 1);
-    }
+    activate_adopted_targets(&mut targets, cfg, &decision, &plan, &cache);
     let frozen_cp = s.checkpoint(1000000).unwrap();
     assert_eq!(
         commit(&mut s, 300, adoption.encode(200000).unwrap()).outcome,
@@ -481,7 +409,7 @@ fn adoption_control_reserve_and_checkpoint_chain_refuse_partial_or_conflicting_s
 #[cfg(feature = "native")]
 #[test]
 fn native_adoption_and_subsequent_freeze_cuts_replay_only_complete_owner_states() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (mut d, plan, adoption) = metadata();
     let intent = reserve_split(&mut d, &adoption);
@@ -494,29 +422,7 @@ fn native_adoption_and_subsequent_freeze_cuts_replay_only_complete_owner_states(
     ];
     let limits = LogLimits::default();
     for boundary in [3, 4] {
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log =
-                NativeLogStore::create(io.clone(), support::identity(21), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(21, 3))],
-            );
-            let state = log.state(group(21)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    boundary - 1,
-                    Some(Suffix {
-                        from: 1,
-                        entries: entries[..boundary as usize - 1].to_vec(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
+        let seed = || seed_adoption_log(&entries, boundary);
         let (_, log) = seed();
         let mutation = support::update(
             &log.state(group(21)).unwrap(),
@@ -589,5 +495,131 @@ fn native_adoption_and_subsequent_freeze_cuts_replay_only_complete_owner_states(
             }
         }
         assert!(old && complete);
+    }
+}
+
+type AdoptedTarget = TransferTarget<BucketCounter<Policy>, Policy>;
+fn provision_adopted_targets(
+    s: &Source,
+    intent: &TransferIntent,
+    frozen: &SourceFreezeStatus,
+    cfg: ConfigurationId,
+) -> (Vec<AdoptedTarget>, Vec<TargetReadyEvidence>) {
+    let mut targets = Vec::new();
+    let mut ready = Vec::new();
+    for (g, start, end) in [(31, 0, 64), (32, 64, 128)] {
+        let mut target = TransferTarget::new(
+            group(g),
+            op(500),
+            intent.clone(),
+            BucketCounter::new(range(start, end), Policy, bucket_limits()).unwrap(),
+            Policy,
+            TargetLimits {
+                import_bytes: 65536,
+                application_checkpoint_bytes: bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|e| panic!("target: {:?}", e.0));
+        let boot = target.bootstrap_command(200000).unwrap();
+        commit(&mut target, 500, boot);
+        let import = TargetImport::new(
+            op(500),
+            intent.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: frozen.fence,
+                configuration: cfg,
+                image: s.export_target(group(g), 65536).unwrap(),
+                digest: frozen
+                    .exports
+                    .iter()
+                    .find(|e| e.target == group(g))
+                    .unwrap()
+                    .digest,
+            }],
+        )
+        .unwrap_or_else(|e| panic!("import: {:?}", e.0));
+        let command = target.import_command(&import, 200000).unwrap();
+        commit(&mut target, 500, command);
+        ready.push(
+            TargetReadyEvidence::from_status(cfg, target.status())
+                .unwrap_or_else(|e| panic!("ready: {:?}", e.0)),
+        );
+        targets.push(target);
+    }
+    (targets, ready)
+}
+
+#[cfg(feature = "native")]
+fn seed_adoption_log(
+    entries: &[voteboat::log::LogEntry],
+    boundary: u64,
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let limits = LogLimits::default();
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(21), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(21, 3))],
+    );
+    let state = log.state(group(21)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            boundary - 1,
+            Some(Suffix {
+                from: 1,
+                entries: entries[..boundary as usize - 1].to_vec(),
+            }),
+        )],
+    );
+    (io, log)
+}
+
+fn activate_adopted_targets(
+    targets: &mut [AdoptedTarget],
+    cfg: ConfigurationId,
+    decision: &TransferPublicationStatus,
+    plan: &ReparentPlan,
+    cache: &View,
+) {
+    for (target, (operation, key, delta)) in targets.iter_mut().zip([(1, 1, 7), (2, 100, 11)]) {
+        let command = target
+            .activation_command(
+                &TargetActivation {
+                    metadata_configuration: cfg,
+                    decision: decision.clone(),
+                },
+                200000,
+            )
+            .unwrap();
+        commit(target, 500, command);
+        let hint = resolve(
+            cache,
+            &Policy,
+            plan.new_parent().input().responsibility,
+            &[key],
+            3,
+        )
+        .unwrap();
+        let command = encode_routed(
+            hint,
+            &[key],
+            &encode_add(&[key], delta, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        let TargetOutcome::Applied(r) = commit(target, operation, command).outcome else {
+            panic!("retry")
+        };
+        assert!(r.duplicate);
+        assert_eq!(target.application().outbox().count(), 1);
     }
 }

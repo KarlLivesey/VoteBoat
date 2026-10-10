@@ -114,30 +114,7 @@ fn full_owner_adopts_activated_metadata_with_original_data_and_control_retries()
         .unwrap();
     assert_eq!(reopened.grant(), &a.after());
     assert!(reopened.fence().is_some());
-    let reads = RoutedControlReads::new(reopened);
-    assert_eq!(
-        reads
-            .read_at(
-                reads.applied_index(),
-                RoutedControlQuery::ParentAdoption(op(300))
-            )
-            .unwrap(),
-        RoutedControlRead::ParentAdoption(Some(status))
-    );
-    let query = RoutedControlQuery::MetadataAdoption(op(300));
-    let value = reads.read_at(reads.applied_index(), query.clone()).unwrap();
-    assert_eq!(
-        value,
-        RoutedControlRead::MetadataAdoption(Some(MetadataGrantStatus {
-            owner: status,
-            activation: a.activation(),
-        }))
-    );
-    assert_eq!(reads.read_result_bytes(&value, 0).unwrap(), 0);
-    assert_eq!(
-        reads.read_result_bound(&query).unwrap(),
-        std::mem::size_of::<RoutedControlRead<i64>>()
-    );
+    verify_adoption_reads(reopened, status, &a);
 }
 #[test]
 fn adoption_provenance_profiles_capacity_and_atomic_recovery_are_checked() {
@@ -277,48 +254,7 @@ fn adopted_full_source_performs_later_data_split_without_old_metadata() {
         panic!("frozen")
     };
     let old = owner.export_target(group(21), 65536).unwrap();
-    let mut targets = Vec::new();
-    let mut ready = Vec::new();
-    for (g, scope) in [(21, range(0, 128)), (22, range(128, 256))] {
-        let mut target = TransferTarget::new(
-            group(g),
-            op(500),
-            intent.clone(),
-            BucketCounter::new(scope, fixture::Policy, fixture::bucket_limits()).unwrap(),
-            fixture::Policy,
-            TargetLimits {
-                import_bytes: 65536,
-                application_checkpoint_bytes: fixture::bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|_| panic!("target"));
-        let boot = target.bootstrap_command(100000).unwrap();
-        apply(&mut target, 500, boot);
-        let import = TargetImport::new(
-            op(500),
-            intent.clone(),
-            group(g),
-            vec![SourceImport {
-                fence: frozen.fence,
-                configuration: cfg,
-                image: owner.export_target(group(g), 65536).unwrap(),
-                digest: frozen
-                    .exports
-                    .iter()
-                    .find(|e| e.target == group(g))
-                    .unwrap()
-                    .digest,
-            }],
-        )
-        .unwrap_or_else(|_| panic!("import"));
-        let cmd = target.import_command(&import, 100000).unwrap();
-        apply(&mut target, 500, cmd);
-        ready.push(
-            TargetReadyEvidence::from_status(cfg, target.status())
-                .unwrap_or_else(|_| panic!("ready")),
-        );
-        targets.push(target);
-    }
+    let (mut targets, ready) = provision_split_targets(&owner, &intent, &frozen, cfg);
     let publication = TransferPublication::new(
         op(500),
         intent.clone(),
@@ -337,45 +273,7 @@ fn adopted_full_source_performs_later_data_split_without_old_metadata() {
     else {
         panic!("publication")
     };
-    for (target, (g, key, operation, delta)) in
-        targets.iter_mut().zip([(21, 1, 1, 7), (22, 200, 2, 11)])
-    {
-        let cmd = target
-            .activation_command(
-                &TargetActivation {
-                    metadata_configuration: ConfigurationId::new(2).unwrap(),
-                    decision: p.clone(),
-                },
-                100000,
-            )
-            .unwrap();
-        apply(target, 500, cmd);
-        let input = intent.after().input();
-        let hint = RouteHint {
-            responsibility: input.responsibility,
-            group: group(g),
-            application: input.application,
-            scheme: input.scheme,
-            scope: if g == 21 {
-                range(0, 128)
-            } else {
-                range(128, 256)
-            },
-            bucket: key as u16,
-            epoch: input.epoch,
-            generation: input.generation,
-        };
-        let command = encode_routed(
-            hint,
-            &[key],
-            &encode_add(&[key], delta, b"outbox", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        assert!(
-            matches!(apply(target,operation,command).outcome,TargetOutcome::Applied(r) if r.duplicate)
-        );
-    }
+    activate_split_targets(&mut targets, &intent, &p);
     let before = owner.checkpoint(100000).unwrap();
     let mut reopened = source(2);
     reopened
@@ -501,19 +399,7 @@ fn initialize_metadata(s: &mut MetadataPublishingSource, manifests: &[Responsibi
 fn ordered_local_parent_metadata_and_later_parent_changes_recover_together() {
     use voteboat::reparenting::*;
     let (old, child) = tree();
-    let mut new = grant().into_input();
-    new.responsibility.id = ResponsibilityId::new(30).unwrap();
-    new.execution = ExecutionMode::Delegated(vec![
-        RouteEntry {
-            scope: range(0, 128),
-            target: RouteTarget::Vacant,
-        },
-        RouteEntry {
-            scope: range(128, 256),
-            target: RouteTarget::Group(group(40)),
-        },
-    ]);
-    let new = ResponsibilityManifest::new(new).unwrap();
+    let new = alternate_metadata_parent();
     let manifests = vec![old.clone(), new.clone(), child.clone()];
     let template = metadata_source(manifests.clone());
     let mut metadata = template.clone();
@@ -531,23 +417,7 @@ fn ordered_local_parent_metadata_and_later_parent_changes_recover_together() {
             .unwrap()
             .unwrap(),
     };
-    let make = || {
-        RoutedApplication::new(
-            group(21),
-            child.clone(),
-            BucketCounter::new(range(0, 128), fixture::Policy, fixture::bucket_limits()).unwrap(),
-            fixture::Policy,
-            RoutedLimits {
-                operations: 32,
-                semantic_bytes: 8192,
-                payload_bytes: 1024,
-                inner_checkpoint_bytes: fixture::bucket_limits().checkpoint_bound().unwrap(),
-            },
-        )
-        .unwrap_or_else(|_| panic!("owner"))
-        .with_metadata_authority_adoption(3)
-        .unwrap_or_else(|_| panic!("profile"))
-    };
+    let make = || make_child_owner(&child);
     let mut owner = make();
     let boot = owner.bootstrap_command(100000).unwrap();
     apply(&mut owner, 100, boot);
@@ -801,4 +671,167 @@ fn native_metadata_owner_adoption_cuts_preserve_data_and_resume_exact_control() 
         );
     }
     assert_eq!(outcomes, [true, true]);
+}
+
+fn verify_adoption_reads(reopened: Owner, status: ParentGrantStatus, a: &OwnerMetadataAdoption) {
+    let reads = RoutedControlReads::new(reopened);
+    assert_eq!(
+        reads
+            .read_at(
+                reads.applied_index(),
+                RoutedControlQuery::ParentAdoption(op(300))
+            )
+            .unwrap(),
+        RoutedControlRead::ParentAdoption(Some(status))
+    );
+    let query = RoutedControlQuery::MetadataAdoption(op(300));
+    let value = reads.read_at(reads.applied_index(), query.clone()).unwrap();
+    assert_eq!(
+        value,
+        RoutedControlRead::MetadataAdoption(Some(MetadataGrantStatus {
+            owner: status,
+            activation: a.activation(),
+        }))
+    );
+    assert_eq!(reads.read_result_bytes(&value, 0).unwrap(), 0);
+    assert_eq!(
+        reads.read_result_bound(&query).unwrap(),
+        std::mem::size_of::<RoutedControlRead<i64>>()
+    );
+}
+
+type SplitTarget = TransferTarget<BucketCounter<fixture::Policy>, fixture::Policy>;
+fn provision_split_targets(
+    owner: &Source,
+    intent: &TransferIntent,
+    frozen: &SourceFreezeStatus,
+    cfg: ConfigurationId,
+) -> (
+    Vec<SplitTarget>,
+    Vec<voteboat::transfer_publication::TargetReadyEvidence>,
+) {
+    use voteboat::transfer_publication::*;
+    let mut targets = Vec::new();
+    let mut ready = Vec::new();
+    for (g, scope) in [(21, range(0, 128)), (22, range(128, 256))] {
+        let mut target = TransferTarget::new(
+            group(g),
+            op(500),
+            intent.clone(),
+            BucketCounter::new(scope, fixture::Policy, fixture::bucket_limits()).unwrap(),
+            fixture::Policy,
+            TargetLimits {
+                import_bytes: 65536,
+                application_checkpoint_bytes: fixture::bucket_limits().checkpoint_bound().unwrap(),
+            },
+        )
+        .unwrap_or_else(|_| panic!("target"));
+        let boot = target.bootstrap_command(100000).unwrap();
+        apply(&mut target, 500, boot);
+        let import = TargetImport::new(
+            op(500),
+            intent.clone(),
+            group(g),
+            vec![SourceImport {
+                fence: frozen.fence,
+                configuration: cfg,
+                image: owner.export_target(group(g), 65536).unwrap(),
+                digest: frozen
+                    .exports
+                    .iter()
+                    .find(|e| e.target == group(g))
+                    .unwrap()
+                    .digest,
+            }],
+        )
+        .unwrap_or_else(|_| panic!("import"));
+        let cmd = target.import_command(&import, 100000).unwrap();
+        apply(&mut target, 500, cmd);
+        ready.push(
+            TargetReadyEvidence::from_status(cfg, target.status())
+                .unwrap_or_else(|_| panic!("ready")),
+        );
+        targets.push(target);
+    }
+    (targets, ready)
+}
+
+fn activate_split_targets(
+    targets: &mut [SplitTarget],
+    intent: &TransferIntent,
+    p: &voteboat::transfer_publication::TransferPublicationStatus,
+) {
+    for (target, (g, key, operation, delta)) in
+        targets.iter_mut().zip([(21, 1, 1, 7), (22, 200, 2, 11)])
+    {
+        let cmd = target
+            .activation_command(
+                &TargetActivation {
+                    metadata_configuration: ConfigurationId::new(2).unwrap(),
+                    decision: p.clone(),
+                },
+                100000,
+            )
+            .unwrap();
+        apply(target, 500, cmd);
+        let input = intent.after().input();
+        let hint = RouteHint {
+            responsibility: input.responsibility,
+            group: group(g),
+            application: input.application,
+            scheme: input.scheme,
+            scope: if g == 21 {
+                range(0, 128)
+            } else {
+                range(128, 256)
+            },
+            bucket: key as u16,
+            epoch: input.epoch,
+            generation: input.generation,
+        };
+        let command = encode_routed(
+            hint,
+            &[key],
+            &encode_add(&[key], delta, b"outbox", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        assert!(
+            matches!(apply(target,operation,command).outcome,TargetOutcome::Applied(r) if r.duplicate)
+        );
+    }
+}
+
+fn make_child_owner(child: &ResponsibilityManifest) -> Owner {
+    RoutedApplication::new(
+        group(21),
+        child.clone(),
+        BucketCounter::new(range(0, 128), fixture::Policy, fixture::bucket_limits()).unwrap(),
+        fixture::Policy,
+        RoutedLimits {
+            operations: 32,
+            semantic_bytes: 8192,
+            payload_bytes: 1024,
+            inner_checkpoint_bytes: fixture::bucket_limits().checkpoint_bound().unwrap(),
+        },
+    )
+    .unwrap_or_else(|_| panic!("owner"))
+    .with_metadata_authority_adoption(3)
+    .unwrap_or_else(|_| panic!("profile"))
+}
+
+fn alternate_metadata_parent() -> ResponsibilityManifest {
+    let mut new = grant().into_input();
+    new.responsibility.id = ResponsibilityId::new(30).unwrap();
+    new.execution = ExecutionMode::Delegated(vec![
+        RouteEntry {
+            scope: range(0, 128),
+            target: RouteTarget::Vacant,
+        },
+        RouteEntry {
+            scope: range(128, 256),
+            target: RouteTarget::Group(group(40)),
+        },
+    ]);
+    ResponsibilityManifest::new(new).unwrap()
 }

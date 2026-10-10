@@ -356,60 +356,24 @@ fn delegated_split_merge_split_preserves_actual_lineage_and_recovers_later_movem
             },
         ]),
     );
-    write(
-        &mut final_targets[0],
-        final_intent.after(),
-        1,
-        1,
-        7,
-        7,
-        true,
-    );
-    write(
-        &mut final_targets[0],
-        final_intent.after(),
-        3,
-        1,
-        2,
-        9,
-        true,
-    );
-    write(
-        &mut final_targets[1],
-        final_intent.after(),
-        2,
-        200,
-        11,
-        11,
-        true,
-    );
-    write(
-        &mut final_targets[1],
-        final_intent.after(),
-        4,
-        200,
-        3,
-        14,
-        true,
-    );
-    write(
-        &mut final_targets[0],
-        final_intent.after(),
-        5,
-        1,
-        1,
-        10,
-        false,
-    );
-    write(
-        &mut final_targets[1],
-        final_intent.after(),
-        6,
-        200,
-        2,
-        16,
-        false,
-    );
+    for (target_index, operation, key, delta, value, duplicate) in [
+        (0, 1, 1, 7, 7, true),
+        (0, 3, 1, 2, 9, true),
+        (1, 2, 200, 11, 11, true),
+        (1, 4, 200, 3, 14, true),
+        (0, 5, 1, 1, 10, false),
+        (1, 6, 200, 2, 16, false),
+    ] {
+        write(
+            &mut final_targets[target_index],
+            final_intent.after(),
+            operation,
+            key,
+            delta,
+            value,
+            duplicate,
+        );
+    }
     for (t, (key, value)) in final_targets.iter_mut().zip([(1, 10), (200, 16)]) {
         recover_target(t, &c);
         assert_eq!(

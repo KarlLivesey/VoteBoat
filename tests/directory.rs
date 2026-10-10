@@ -726,9 +726,79 @@ mod native {
             self.pump();
         }
     }
+    fn provision_recovered_group(
+        root: &Path,
+        cluster: &Cluster,
+        committed: voteboat::directory::GroupCreationStatus,
+        intent: voteboat::directory::GroupCreationIntent,
+    ) {
+        use voteboat::{group_creation::*, native::group_creation::*};
+        let authority = LocalCreationAuthority {
+            core: &cluster.replicas[&node(3)].core,
+            directory: &cluster.replicas[&node(3)].app,
+        };
+        let mut forged = committed.clone();
+        forged.operation = OperationId::new(11).unwrap();
+        assert!(VerifiedGroupCreation::verify(
+            &authority,
+            forged,
+            node(1),
+            identity(1),
+            intent.application,
+        )
+        .is_err());
+        let verified = VerifiedGroupCreation::verify(
+            &authority,
+            committed.clone(),
+            node(1),
+            identity(1),
+            intent.application,
+        )
+        .unwrap();
+        let target = root.join("created-1");
+        let mut log = NativeLogStore::create(
+            FileLogIo::create(&target).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut bindings = FileCreationBindings::open(&target).unwrap();
+        let receipt = establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+        assert_eq!(receipt.metadata_index(), committed.index);
+        let old_binding = receipt.binding();
+        drop(bindings);
+        drop(log);
+        let mut log = NativeLogStore::recover(
+            FileLogIo::open(&target).unwrap(),
+            identity(1),
+            LogLimits::default(),
+        )
+        .unwrap();
+        let mut bindings = FileCreationBindings::open(&target).unwrap();
+        let receipt = establish_created_group(&verified, &mut log, &mut bindings).unwrap();
+        assert_ne!(receipt.binding(), old_binding);
+        assert_eq!(receipt.operation(), committed.operation);
+        assert_eq!(log.state(group(100)).unwrap().bootstrap, intent.bootstrap);
+        let mut core = Raft::recover(
+            node(1),
+            log.binding(),
+            log.state(group(100)).unwrap(),
+            log.limits(),
+        )
+        .unwrap();
+        let effects = core.step(Event::Campaign).unwrap();
+        let [Effect::Persist(update)] = effects.as_slice() else {
+            panic!("created group must persist ballot before voting");
+        };
+        let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
+        assert!(effects.iter().any(|e| matches!(e,
+            Effect::Send(message) if matches!(message.rpc, Rpc::Vote { .. }))));
+        drop(bindings);
+        drop(log);
+    }
     #[test]
     fn native_creation_intent_survives_lost_receipt_snapshot_catchup_and_file_reopen() {
-        use voteboat::{group_creation::*, native::group_creation::*};
+        use voteboat::group_creation::*;
         let root = std::env::temp_dir().join(format!(
             "voteboat-creation-{}-{}",
             std::process::id(),
@@ -807,68 +877,7 @@ mod native {
             assert!(r.app.manifest(id(50)).is_none());
             assert_eq!(r.app.manifest(id(1)), Some(&manifests()[0]));
         }
-        let authority = LocalCreationAuthority {
-            core: &cluster.replicas[&node(3)].core,
-            directory: &cluster.replicas[&node(3)].app,
-        };
-        let mut forged = committed.clone();
-        forged.operation = OperationId::new(11).unwrap();
-        assert!(VerifiedGroupCreation::verify(
-            &authority,
-            forged,
-            node(1),
-            identity(1),
-            intent.application,
-        )
-        .is_err());
-        let verified = VerifiedGroupCreation::verify(
-            &authority,
-            committed.clone(),
-            node(1),
-            identity(1),
-            intent.application,
-        )
-        .unwrap();
-        let target = root.join("created-1");
-        let mut log = NativeLogStore::create(
-            FileLogIo::create(&target).unwrap(),
-            identity(1),
-            LogLimits::default(),
-        )
-        .unwrap();
-        let mut bindings = FileCreationBindings::open(&target).unwrap();
-        let receipt = establish_created_group(&verified, &mut log, &mut bindings).unwrap();
-        assert_eq!(receipt.metadata_index(), committed.index);
-        let old_binding = receipt.binding();
-        drop(bindings);
-        drop(log);
-        let mut log = NativeLogStore::recover(
-            FileLogIo::open(&target).unwrap(),
-            identity(1),
-            LogLimits::default(),
-        )
-        .unwrap();
-        let mut bindings = FileCreationBindings::open(&target).unwrap();
-        let receipt = establish_created_group(&verified, &mut log, &mut bindings).unwrap();
-        assert_ne!(receipt.binding(), old_binding);
-        assert_eq!(receipt.operation(), committed.operation);
-        assert_eq!(log.state(group(100)).unwrap().bootstrap, intent.bootstrap);
-        let mut core = Raft::recover(
-            node(1),
-            log.binding(),
-            log.state(group(100)).unwrap(),
-            log.limits(),
-        )
-        .unwrap();
-        let effects = core.step(Event::Campaign).unwrap();
-        let [Effect::Persist(update)] = effects.as_slice() else {
-            panic!("created group must persist ballot before voting");
-        };
-        let effects = persist_effect(&mut core, &mut log, update.clone()).unwrap();
-        assert!(effects.iter().any(|e| matches!(e,
-            Effect::Send(message) if matches!(message.rpc, Rpc::Vote { .. }))));
-        drop(bindings);
-        drop(log);
+        provision_recovered_group(&root, &cluster, committed, intent);
         drop(cluster);
         std::fs::remove_dir_all(root).unwrap();
     }
@@ -962,42 +971,7 @@ mod native {
         drop(cluster);
         std::fs::remove_dir_all(root).unwrap();
     }
-    #[test]
-    fn native_three_replica_directory_commits_replays_compacts_and_installs_retry_state() {
-        let root = std::env::temp_dir().join(format!("voteboat-directory-{}", std::process::id()));
-        if root.exists() {
-            std::fs::remove_dir_all(&root).unwrap();
-        }
-        std::fs::create_dir(&root).unwrap();
-        let values = manifests();
-        let mut cluster = Cluster::open(&root, false);
-        cluster.act(1, Event::Campaign);
-        cluster.pump();
-        let bytes = cluster.replicas[&node(1)]
-            .app
-            .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
-            .unwrap();
-        cluster.act(
-            1,
-            Event::Propose {
-                operation: OperationId::new(1_000_000).unwrap(),
-                bytes,
-            },
-        );
-        cluster.pump();
-        assert!(cluster.replicas.values().all(|r| r.app.is_initialized()));
-        assert_eq!(
-            cluster.propose(1, 101, values[0].clone(), None).outcome,
-            DirectoryOutcome::Published(RouteGeneration::new(1).unwrap())
-        );
-        cluster.propose(1, 102, values[1].clone(), None);
-        for r in cluster.replicas.values() {
-            assert_eq!(r.app.manifest(id(1)), Some(&values[0]));
-            assert_eq!(r.app.manifest(id(2)), Some(&values[1]));
-        }
-        // Lose all volatile results before any application checkpoint. WAL replay
-        // must reconstruct both the published view and the original retry result.
-        drop(cluster);
+    fn verify_changed_recovery_envelopes(root: &Path) {
         for change in 0..3 {
             let log = NativeLogStore::recover(
                 FileLogIo::open(root.join("1")).unwrap(),
@@ -1038,15 +1012,11 @@ mod native {
             assert!(!wrong.is_initialized());
             assert!(wrong.manifest(id(1)).is_none());
         }
-        let mut cluster = Cluster::open(&root, true);
-        cluster.act(2, Event::Campaign);
-        cluster.pump();
-        let receipt = cluster.propose(2, 101, values[0].clone(), None);
-        assert!(receipt.duplicate);
-        assert_eq!(
-            receipt.outcome,
-            DirectoryOutcome::Published(RouteGeneration::new(1).unwrap())
-        );
+    }
+    fn replace_isolated_leader(
+        cluster: &mut Cluster,
+        values: &[ResponsibilityManifest],
+    ) -> ResponsibilityManifest {
         cluster.blocked.insert(node(2));
         let old_applied = cluster.replicas[&node(2)].app.applied_index();
         let old_receipts = cluster.replicas[&node(2)].receipts.len();
@@ -1080,6 +1050,55 @@ mod native {
         for n in [1, 3] {
             assert!(cluster.replicas[&node(n)].core.state().snapshot.is_some());
         }
+        next
+    }
+    #[test]
+    fn native_three_replica_directory_commits_replays_compacts_and_installs_retry_state() {
+        let root = std::env::temp_dir().join(format!("voteboat-directory-{}", std::process::id()));
+        if root.exists() {
+            std::fs::remove_dir_all(&root).unwrap();
+        }
+        std::fs::create_dir(&root).unwrap();
+        let values = manifests();
+        let mut cluster = Cluster::open(&root, false);
+        cluster.act(1, Event::Campaign);
+        cluster.pump();
+        let bytes = cluster.replicas[&node(1)]
+            .app
+            .bootstrap_command(MAX_DIRECTORY_COMMAND_BYTES)
+            .unwrap();
+        cluster.act(
+            1,
+            Event::Propose {
+                operation: OperationId::new(1_000_000).unwrap(),
+                bytes,
+            },
+        );
+        cluster.pump();
+        assert!(cluster.replicas.values().all(|r| r.app.is_initialized()));
+        assert_eq!(
+            cluster.propose(1, 101, values[0].clone(), None).outcome,
+            DirectoryOutcome::Published(RouteGeneration::new(1).unwrap())
+        );
+        cluster.propose(1, 102, values[1].clone(), None);
+        for r in cluster.replicas.values() {
+            assert_eq!(r.app.manifest(id(1)), Some(&values[0]));
+            assert_eq!(r.app.manifest(id(2)), Some(&values[1]));
+        }
+        // Lose all volatile results before any application checkpoint. WAL replay
+        // must reconstruct both the published view and the original retry result.
+        drop(cluster);
+        verify_changed_recovery_envelopes(&root);
+        let mut cluster = Cluster::open(&root, true);
+        cluster.act(2, Event::Campaign);
+        cluster.pump();
+        let receipt = cluster.propose(2, 101, values[0].clone(), None);
+        assert!(receipt.duplicate);
+        assert_eq!(
+            receipt.outcome,
+            DirectoryOutcome::Published(RouteGeneration::new(1).unwrap())
+        );
+        let next = replace_isolated_leader(&mut cluster, &values);
         drop(cluster);
         // The older replica has no new directory checkpoint. Actual snapshot
         // transfer must restore the exact plan and retry history before its ack.

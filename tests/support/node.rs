@@ -190,329 +190,7 @@ fn admin_settle(n: &mut Boat) {
 
 #[test]
 fn delayed_readiness_and_restarted_peer_session_cannot_promote_through_owned_node() {
-    use super::peer_driver::{parts_for_version, PeerNetwork};
-    use voteboat::{membership::*, wire::*};
-    fn tick(n: &mut Boat, now: u64, budget: NodePollBudget) -> Vec<RaftError> {
-        n.poll_with_configuration_authorization(MonoTime(now), budget, |_, _| Ok(()))
-            .unwrap()
-            .replica
-            .unwrap()
-            .steps
-            .into_iter()
-            .filter_map(|s| s.error)
-            .collect()
-    }
-    fn round(n: &mut Boat, network: &PeerNetwork, now: u64) -> Message {
-        n.request_learner_readiness(
-            group(1),
-            node(2),
-            Counter::new(100).unwrap().readiness_requirements(),
-        )
-        .unwrap();
-        for _ in 0..100 {
-            assert!(tick(n, now, NodePollBudget::default()).is_empty());
-            if let Some(message) = network.take_readiness(node(2)) {
-                return message;
-            }
-        }
-        panic!("readiness request not sent");
-    }
-    fn reply(network: &PeerNetwork, request: Message) {
-        let Rpc::LearnerReadinessRequest(request_body) = request.rpc else {
-            panic!("wrong request")
-        };
-        network.deliver(
-            node(2),
-            Message {
-                group: request.group,
-                configuration: request.configuration,
-                from: node(2),
-                sender: network.binding(node(2)).unwrap().peer.store,
-                to: node(1),
-                term: request.term,
-                context: request.context,
-                rpc: Rpc::LearnerReadinessReply {
-                    request: request_body,
-                    ready: true,
-                },
-            },
-        );
-    }
-    fn settle_at(n: &mut Boat, now: u64) {
-        for _ in 0..20 {
-            assert!(tick(n, now, NodePollBudget::default()).is_empty());
-        }
-    }
-    let mut p = parts(1, false);
-    let mut peers = parts_for_version(p.local.owner.identity(), p.local.outbound.binding(), 4);
-    let footprint = WireFootprint {
-        frame_bytes: 8192,
-        decoded_bytes: 8192,
-    };
-    peers.factory.capacity = Some(ConfigurationWireCapacity {
-        wire_version: 4,
-        append: footprint,
-        command: footprint,
-        snapshot: footprint,
-    });
-    let network = peers.factory.network(&peers.connector);
-    p.peers = Some(peers);
-    let mut n = boat(p);
-    n.control(group(1), NodeControl::Campaign).unwrap();
-    settle_at(&mut n, 0);
-    let b = bootstrap(1, 1);
-    let learners = ConfigurationRequest {
-        group: group(1),
-        proposal: ConfigurationProposal {
-            record: ConfigurationRecord {
-                operation: OperationId::new(100).unwrap(),
-                expected: ConfigurationId::new(1).unwrap(),
-                change: ConfigurationChange::Learners(
-                    Configuration::new(
-                        ConfigurationId::new(2).unwrap(),
-                        b.policy,
-                        b.voter_stores,
-                        [(node(2), identity(2))].into(),
-                    )
-                    .unwrap(),
-                ),
-            },
-            requirements: Counter::new(100).unwrap().readiness_requirements(),
-            readiness: vec![],
-        },
-    };
-    let added = n.configure(learners).unwrap();
-    settle_at(&mut n, 0);
-    let receipt = n.poll_configuration().unwrap();
-    assert_eq!(receipt.ticket, added);
-    assert!(matches!(
-        receipt.outcome,
-        ConfigurationOutcome::Committed(_)
-    ));
-    // Hold an authenticated reply outside the owner, cancel its request, then
-    // deliver it both before and during a fresh round on the same connection.
-    let held = round(&mut n, &network, 0);
-    let boundary = n.local().owner.core(group(1)).unwrap().state().clone();
-    n.cancel_learner_readiness(group(1)).unwrap();
-    settle_at(&mut n, 0);
-    reply(&network, held.clone());
-    settle_at(&mut n, 0);
-    assert!(n
-        .local()
-        .owner
-        .core(group(1))
-        .unwrap()
-        .ready_learner()
-        .is_none());
-    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &boundary);
-    let fresh = round(&mut n, &network, 0);
-    assert_ne!(held.context, fresh.context);
-    reply(&network, held);
-    settle_at(&mut n, 0);
-    assert!(n
-        .local()
-        .owner
-        .core(group(1))
-        .unwrap()
-        .ready_learner()
-        .is_none());
-    reply(&network, fresh);
-    settle_at(&mut n, 0);
-    let old_proof = n
-        .local()
-        .owner
-        .core(group(1))
-        .unwrap()
-        .ready_learner()
-        .unwrap()
-        .clone();
-    let old_binding = network.binding(node(2)).unwrap();
-    let held_across_session = round(&mut n, &network, 0);
-    assert!(n.local().owner.is_drained());
-    n.cancel_learner_readiness(group(1)).unwrap();
-    reply(&network, held_across_session);
-    let one_step = NodePollBudget {
-        replica: ReplicaPollBudget {
-            steps: 1,
-            ..Default::default()
-        },
-        ..Default::default()
-    };
-    assert!(tick(&mut n, 0, one_step).is_empty());
-    assert!(n
-        .local()
-        .owner
-        .core(group(1))
-        .unwrap()
-        .ready_learner()
-        .is_none());
-    // Cancellation consumed the single consensus step. The delayed old-session
-    // reply remains owned by ingress/runtime when its connection is revoked.
-    assert!(!n.local().owner.is_drained() || !n.peers().unwrap().ingress().is_drained());
-    let promotion = |ready: ReadyLearner, authenticated: StoreBinding| ConfigurationRequest {
-        group: group(1),
-        proposal: ConfigurationProposal {
-            record: ConfigurationRecord {
-                operation: OperationId::new(101).unwrap(),
-                expected: ConfigurationId::new(2).unwrap(),
-                change: ConfigurationChange::Joint {
-                    id: ConfigurationId::new(3).unwrap(),
-                    next: Configuration::new(
-                        ConfigurationId::new(4).unwrap(),
-                        bootstrap(1, 2).policy,
-                        bootstrap(1, 2).voter_stores,
-                        BTreeMap::new(),
-                    )
-                    .unwrap(),
-                },
-            },
-            requirements: Counter::new(100).unwrap().readiness_requirements(),
-            readiness: vec![PromotionReadiness {
-                ready,
-                authenticated,
-            }],
-        },
-    };
-    // Admission is not execution: queue the valid old proof, restart its peer
-    // store session, and drive the ordinary disconnect/reconnect polling path.
-    let stale = n
-        .configure(promotion(old_proof, old_binding.peer.store))
-        .unwrap();
-    n.disconnect(node(2), MonoTime(0)).unwrap();
-    network.restart_session(node(2), StoreSession::new(2).unwrap());
-    let mut now = 0;
-    let mut rejected = false;
-    for time in 1..=20 {
-        now = time;
-        for error in tick(&mut n, now, NodePollBudget::default()) {
-            assert_eq!(
-                error,
-                RaftError::Configuration(Box::new(
-                    ConfigurationProposalError::AuthenticationRequired
-                ))
-            );
-            rejected = true;
-        }
-        if n.peers()
-            .unwrap()
-            .roster()
-            .binding(node(2))
-            .is_some_and(|b| b.peer.store.session == StoreSession::new(2).unwrap())
-        {
-            break;
-        }
-    }
-    let new_binding = n.peers().unwrap().roster().binding(node(2)).unwrap();
-    assert_ne!(new_binding.generation, old_binding.generation);
-    assert_ne!(
-        new_binding.peer.store.session,
-        old_binding.peer.store.session
-    );
-    for _ in 0..100 {
-        for error in tick(&mut n, now, NodePollBudget::default()) {
-            assert_eq!(
-                error,
-                RaftError::Configuration(Box::new(
-                    ConfigurationProposalError::AuthenticationRequired
-                ))
-            );
-            rejected = true;
-        }
-        if let Some(receipt) = n.poll_configuration() {
-            assert_eq!(receipt.ticket, stale);
-            assert_eq!(
-                receipt.outcome,
-                ConfigurationOutcome::NotProposed(RaftError::Configuration(Box::new(
-                    ConfigurationProposalError::AuthenticationRequired
-                )))
-            );
-            break;
-        }
-    }
-    assert!(rejected);
-    assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &boundary);
-    assert_eq!(n.state(), NodeState::Running);
-    n.cancel_learner_readiness(group(1)).unwrap();
-    settle_at(&mut n, now);
-    let fresh = round(&mut n, &network, now);
-    let Rpc::LearnerReadinessRequest(request) = &fresh.rpc else {
-        unreachable!()
-    };
-    assert_eq!(request.session, StoreSession::new(2).unwrap());
-    reply(&network, fresh);
-    settle_at(&mut n, now);
-    let ready = n
-        .local()
-        .owner
-        .core(group(1))
-        .unwrap()
-        .ready_learner()
-        .unwrap()
-        .clone();
-    assert_eq!(ready.binding(), new_binding.peer.store);
-    let promoted = n
-        .configure(promotion(ready, new_binding.peer.store))
-        .unwrap();
-    // The fresh proof only admits the transition. Exact joint replication is
-    // still required; drive authenticated host-provider append acknowledgments.
-    let mut committed = false;
-    for _ in 0..100 {
-        assert!(tick(&mut n, now, NodePollBudget::default()).is_empty());
-        if let Some(request) = network.take_append(node(2)) {
-            let Rpc::Append {
-                previous_index,
-                entries,
-                ..
-            } = &request.rpc
-            else {
-                unreachable!()
-            };
-            let matching_index = entries.last().map_or(*previous_index, |e| e.index);
-            network.deliver(
-                node(2),
-                Message {
-                    group: request.group,
-                    configuration: request.configuration,
-                    from: node(2),
-                    sender: new_binding.peer.store,
-                    to: node(1),
-                    term: request.term,
-                    context: request.context,
-                    rpc: Rpc::Appended {
-                        success: true,
-                        matching_index,
-                    },
-                },
-            );
-        }
-        if let Some(receipt) = n.poll_configuration() {
-            assert_eq!(receipt.ticket, promoted);
-            assert!(matches!(
-                receipt.outcome,
-                ConfigurationOutcome::Committed(_)
-            ));
-            committed = true;
-            break;
-        }
-    }
-    assert!(committed);
-    assert!(n
-        .local()
-        .owner
-        .core(group(1))
-        .unwrap()
-        .membership()
-        .joint()
-        .is_some());
-    assert!(!n.local().owner.is_failed());
-    n.begin_shutdown();
-    for _ in 0..100 {
-        assert!(tick(&mut n, now, NodePollBudget::default()).is_empty());
-        if n.is_drained() {
-            return;
-        }
-    }
-    panic!("readiness fault fixture did not drain");
+    readiness_history::run();
 }
 #[test]
 fn configuration_receipts_wait_for_durability_and_joint_then_final_commit() {
@@ -1735,54 +1413,7 @@ fn selected_transport_capacity_rechecks_version_and_roster_budgets_before_persis
         frame_bytes: 1024,
         decoded_bytes: 1024,
     };
-    for (capacity, expected) in [
-        (
-            None,
-            Some(TransportError::UnsupportedConfigurationAdmission),
-        ),
-        (
-            Some(ConfigurationWireCapacity {
-                wire_version: 3,
-                append: footprint,
-                command: footprint,
-                snapshot: footprint,
-            }),
-            Some(TransportError::IncompatibleCodec),
-        ),
-        (
-            Some(ConfigurationWireCapacity {
-                wire_version: 4,
-                append: footprint,
-                command: footprint,
-                snapshot: WireFootprint {
-                    frame_bytes: 4096,
-                    ..footprint
-                },
-            }),
-            Some(TransportError::IncompatibleCodec),
-        ),
-        (
-            Some(ConfigurationWireCapacity {
-                wire_version: 4,
-                append: WireFootprint {
-                    frame_bytes: 0,
-                    ..footprint
-                },
-                command: footprint,
-                snapshot: footprint,
-            }),
-            Some(TransportError::ProviderViolation),
-        ),
-        (
-            Some(ConfigurationWireCapacity {
-                wire_version: 4,
-                append: footprint,
-                command: footprint,
-                snapshot: footprint,
-            }),
-            None,
-        ),
-    ] {
+    for (capacity, expected) in transport_capacity_cases(footprint) {
         let mut p = parts(1, true);
         let net = p.peers.as_mut().unwrap();
         net.factory.capacity = capacity;
@@ -1977,4 +1608,420 @@ fn configuration_checks_enforced_application_envelope_before_authorization_or_pe
         assert_eq!(n.state(), NodeState::Running);
         shutdown(&mut n);
     }
+}
+
+mod readiness_history {
+    use super::super::peer_driver::{parts_for_version, PeerNetwork};
+    use super::*;
+    use voteboat::{membership::*, secure::SessionBinding, wire::*};
+    fn tick(n: &mut Boat, now: u64, budget: NodePollBudget) -> Vec<RaftError> {
+        n.poll_with_configuration_authorization(MonoTime(now), budget, |_, _| Ok(()))
+            .unwrap()
+            .replica
+            .unwrap()
+            .steps
+            .into_iter()
+            .filter_map(|s| s.error)
+            .collect()
+    }
+    fn round(n: &mut Boat, network: &PeerNetwork, now: u64) -> Message {
+        n.request_learner_readiness(
+            group(1),
+            node(2),
+            Counter::new(100).unwrap().readiness_requirements(),
+        )
+        .unwrap();
+        for _ in 0..100 {
+            assert!(tick(n, now, NodePollBudget::default()).is_empty());
+            if let Some(message) = network.take_readiness(node(2)) {
+                return message;
+            }
+        }
+        panic!("readiness request not sent");
+    }
+    fn reply(network: &PeerNetwork, request: Message) {
+        let Rpc::LearnerReadinessRequest(request_body) = request.rpc else {
+            panic!("wrong request")
+        };
+        network.deliver(
+            node(2),
+            Message {
+                group: request.group,
+                configuration: request.configuration,
+                from: node(2),
+                sender: network.binding(node(2)).unwrap().peer.store,
+                to: node(1),
+                term: request.term,
+                context: request.context,
+                rpc: Rpc::LearnerReadinessReply {
+                    request: request_body,
+                    ready: true,
+                },
+            },
+        );
+    }
+    fn settle_at(n: &mut Boat, now: u64) {
+        for _ in 0..20 {
+            assert!(tick(n, now, NodePollBudget::default()).is_empty());
+        }
+    }
+
+    fn setup() -> (Boat, PeerNetwork) {
+        let mut p = parts(1, false);
+        let mut peers = parts_for_version(p.local.owner.identity(), p.local.outbound.binding(), 4);
+        let footprint = WireFootprint {
+            frame_bytes: 8192,
+            decoded_bytes: 8192,
+        };
+        peers.factory.capacity = Some(ConfigurationWireCapacity {
+            wire_version: 4,
+            append: footprint,
+            command: footprint,
+            snapshot: footprint,
+        });
+        let network = peers.factory.network(&peers.connector);
+        p.peers = Some(peers);
+        let mut n = boat(p);
+        n.control(group(1), NodeControl::Campaign).unwrap();
+        settle_at(&mut n, 0);
+        let b = bootstrap(1, 1);
+        let learners = ConfigurationRequest {
+            group: group(1),
+            proposal: ConfigurationProposal {
+                record: ConfigurationRecord {
+                    operation: OperationId::new(100).unwrap(),
+                    expected: ConfigurationId::new(1).unwrap(),
+                    change: ConfigurationChange::Learners(
+                        Configuration::new(
+                            ConfigurationId::new(2).unwrap(),
+                            b.policy,
+                            b.voter_stores,
+                            [(node(2), identity(2))].into(),
+                        )
+                        .unwrap(),
+                    ),
+                },
+                requirements: Counter::new(100).unwrap().readiness_requirements(),
+                readiness: vec![],
+            },
+        };
+        let added = n.configure(learners).unwrap();
+        settle_at(&mut n, 0);
+        let receipt = n.poll_configuration().unwrap();
+        assert_eq!(receipt.ticket, added);
+        assert!(matches!(
+            receipt.outcome,
+            ConfigurationOutcome::Committed(_)
+        ));
+        (n, network)
+    }
+    fn delayed(n: &mut Boat, network: &PeerNetwork) -> (ReadyLearner, SessionBinding, GroupLog) {
+        // Hold an authenticated reply outside the owner, cancel its request, then
+        // deliver it both before and during a fresh round on the same connection.
+        let held = round(n, network, 0);
+        let boundary = n.local().owner.core(group(1)).unwrap().state().clone();
+        n.cancel_learner_readiness(group(1)).unwrap();
+        settle_at(n, 0);
+        reply(network, held.clone());
+        settle_at(n, 0);
+        assert!(n
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .ready_learner()
+            .is_none());
+        assert_eq!(n.local().owner.core(group(1)).unwrap().state(), &boundary);
+        let fresh = round(n, network, 0);
+        assert_ne!(held.context, fresh.context);
+        reply(network, held);
+        settle_at(n, 0);
+        assert!(n
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .ready_learner()
+            .is_none());
+        reply(network, fresh);
+        settle_at(n, 0);
+        let old_proof = n
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .ready_learner()
+            .unwrap()
+            .clone();
+        let old_binding = network.binding(node(2)).unwrap();
+        (old_proof, old_binding, boundary)
+    }
+    fn cancel_session_reply(n: &mut Boat, network: &PeerNetwork) {
+        let held_across_session = round(n, network, 0);
+        assert!(n.local().owner.is_drained());
+        n.cancel_learner_readiness(group(1)).unwrap();
+        reply(network, held_across_session);
+        let one_step = NodePollBudget {
+            replica: ReplicaPollBudget {
+                steps: 1,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        assert!(tick(n, 0, one_step).is_empty());
+        assert!(n
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .ready_learner()
+            .is_none());
+        // Cancellation consumed the single consensus step. The delayed old-session
+        // reply remains owned by ingress/runtime when its connection is revoked.
+        assert!(!n.local().owner.is_drained() || !n.peers().unwrap().ingress().is_drained());
+    }
+    fn promotion(ready: ReadyLearner, authenticated: StoreBinding) -> ConfigurationRequest {
+        ConfigurationRequest {
+            group: group(1),
+            proposal: ConfigurationProposal {
+                record: ConfigurationRecord {
+                    operation: OperationId::new(101).unwrap(),
+                    expected: ConfigurationId::new(2).unwrap(),
+                    change: ConfigurationChange::Joint {
+                        id: ConfigurationId::new(3).unwrap(),
+                        next: Configuration::new(
+                            ConfigurationId::new(4).unwrap(),
+                            bootstrap(1, 2).policy,
+                            bootstrap(1, 2).voter_stores,
+                            BTreeMap::new(),
+                        )
+                        .unwrap(),
+                    },
+                },
+                requirements: Counter::new(100).unwrap().readiness_requirements(),
+                readiness: vec![PromotionReadiness {
+                    ready,
+                    authenticated,
+                }],
+            },
+        }
+    }
+    fn reject_stale(
+        n: &mut Boat,
+        network: &PeerNetwork,
+        old_proof: ReadyLearner,
+        old_binding: SessionBinding,
+        boundary: &GroupLog,
+    ) -> (u64, SessionBinding) {
+        // Admission is not execution: queue the valid old proof, restart its peer
+        // store session, and drive the ordinary disconnect/reconnect polling path.
+        let stale = n
+            .configure(promotion(old_proof, old_binding.peer.store))
+            .unwrap();
+        n.disconnect(node(2), MonoTime(0)).unwrap();
+        network.restart_session(node(2), StoreSession::new(2).unwrap());
+        let mut now = 0;
+        let mut rejected = false;
+        for time in 1..=20 {
+            now = time;
+            for error in tick(n, now, NodePollBudget::default()) {
+                assert_eq!(
+                    error,
+                    RaftError::Configuration(Box::new(
+                        ConfigurationProposalError::AuthenticationRequired
+                    ))
+                );
+                rejected = true;
+            }
+            if n.peers()
+                .unwrap()
+                .roster()
+                .binding(node(2))
+                .is_some_and(|b| b.peer.store.session == StoreSession::new(2).unwrap())
+            {
+                break;
+            }
+        }
+        let new_binding = n.peers().unwrap().roster().binding(node(2)).unwrap();
+        assert_ne!(new_binding.generation, old_binding.generation);
+        assert_ne!(
+            new_binding.peer.store.session,
+            old_binding.peer.store.session
+        );
+        for _ in 0..100 {
+            for error in tick(n, now, NodePollBudget::default()) {
+                assert_eq!(
+                    error,
+                    RaftError::Configuration(Box::new(
+                        ConfigurationProposalError::AuthenticationRequired
+                    ))
+                );
+                rejected = true;
+            }
+            if let Some(receipt) = n.poll_configuration() {
+                assert_eq!(receipt.ticket, stale);
+                assert_eq!(
+                    receipt.outcome,
+                    ConfigurationOutcome::NotProposed(RaftError::Configuration(Box::new(
+                        ConfigurationProposalError::AuthenticationRequired
+                    )))
+                );
+                break;
+            }
+        }
+        assert!(rejected);
+        assert_eq!(n.local().owner.core(group(1)).unwrap().state(), boundary);
+        assert_eq!(n.state(), NodeState::Running);
+        (now, new_binding)
+    }
+    fn promote_fresh(n: &mut Boat, network: &PeerNetwork, now: u64, new_binding: SessionBinding) {
+        n.cancel_learner_readiness(group(1)).unwrap();
+        settle_at(n, now);
+        let fresh = round(n, network, now);
+        let Rpc::LearnerReadinessRequest(request) = &fresh.rpc else {
+            unreachable!()
+        };
+        assert_eq!(request.session, StoreSession::new(2).unwrap());
+        reply(network, fresh);
+        settle_at(n, now);
+        let ready = n
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .ready_learner()
+            .unwrap()
+            .clone();
+        assert_eq!(ready.binding(), new_binding.peer.store);
+        let promoted = n
+            .configure(promotion(ready, new_binding.peer.store))
+            .unwrap();
+        // The fresh proof only admits the transition. Exact joint replication is
+        // still required; drive authenticated host-provider append acknowledgments.
+        let mut committed = false;
+        for _ in 0..100 {
+            assert!(tick(n, now, NodePollBudget::default()).is_empty());
+            if let Some(request) = network.take_append(node(2)) {
+                let Rpc::Append {
+                    previous_index,
+                    entries,
+                    ..
+                } = &request.rpc
+                else {
+                    unreachable!()
+                };
+                let matching_index = entries.last().map_or(*previous_index, |e| e.index);
+                network.deliver(
+                    node(2),
+                    Message {
+                        group: request.group,
+                        configuration: request.configuration,
+                        from: node(2),
+                        sender: new_binding.peer.store,
+                        to: node(1),
+                        term: request.term,
+                        context: request.context,
+                        rpc: Rpc::Appended {
+                            success: true,
+                            matching_index,
+                        },
+                    },
+                );
+            }
+            if let Some(receipt) = n.poll_configuration() {
+                assert_eq!(receipt.ticket, promoted);
+                assert!(matches!(
+                    receipt.outcome,
+                    ConfigurationOutcome::Committed(_)
+                ));
+                committed = true;
+                break;
+            }
+        }
+        assert!(committed);
+        assert!(n
+            .local()
+            .owner
+            .core(group(1))
+            .unwrap()
+            .membership()
+            .joint()
+            .is_some());
+        assert!(!n.local().owner.is_failed());
+    }
+    fn drain(n: &mut Boat, now: u64) {
+        n.begin_shutdown();
+        for _ in 0..100 {
+            assert!(tick(n, now, NodePollBudget::default()).is_empty());
+            if n.is_drained() {
+                return;
+            }
+        }
+        panic!("readiness fault fixture did not drain");
+    }
+    pub(super) fn run() {
+        let (mut n, network) = setup();
+        let (proof, binding, boundary) = delayed(&mut n, &network);
+        cancel_session_reply(&mut n, &network);
+        let (now, binding) = reject_stale(&mut n, &network, proof, binding, &boundary);
+        promote_fresh(&mut n, &network, now, binding);
+        drain(&mut n, now);
+    }
+}
+
+fn transport_capacity_cases(
+    footprint: voteboat::wire::WireFootprint,
+) -> [(
+    Option<voteboat::wire::ConfigurationWireCapacity>,
+    Option<voteboat::transport::TransportError>,
+); 5] {
+    use voteboat::{transport::*, wire::*};
+    [
+        (
+            None,
+            Some(TransportError::UnsupportedConfigurationAdmission),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 3,
+                append: footprint,
+                command: footprint,
+                snapshot: footprint,
+            }),
+            Some(TransportError::IncompatibleCodec),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 4,
+                append: footprint,
+                command: footprint,
+                snapshot: WireFootprint {
+                    frame_bytes: 4096,
+                    ..footprint
+                },
+            }),
+            Some(TransportError::IncompatibleCodec),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 4,
+                append: WireFootprint {
+                    frame_bytes: 0,
+                    ..footprint
+                },
+                command: footprint,
+                snapshot: footprint,
+            }),
+            Some(TransportError::ProviderViolation),
+        ),
+        (
+            Some(ConfigurationWireCapacity {
+                wire_version: 4,
+                append: footprint,
+                command: footprint,
+                snapshot: footprint,
+            }),
+            None,
+        ),
+    ]
 }

@@ -27,6 +27,7 @@ use voteboat::{
     application::*, bucket_counter::*, delegation::*, directory::*, identity::*, routed::*,
     routing::*, transfer::*, transfer_target::*,
 };
+type Target = TransferTarget<BucketCounter<base::Policy>, base::Policy>;
 fn refreshed_parent(epoch: u64) -> ResponsibilityManifest {
     let mut input = parent().into_input();
     input.generation = RouteGeneration::new(2).unwrap();
@@ -117,6 +118,70 @@ fn native_parent_cache_accepts_child_epoch_refresh_and_preserves_rejected_view()
         assert_eq!(cache.get(id(500)), Some(&next));
     }
 }
+fn verify_independent_targets(
+    targets: &mut [Target],
+    cache: &Cache,
+    intent: &TransferIntent,
+    decision: &voteboat::transfer_publication::TransferPublicationStatus,
+) {
+    for (i, target) in targets.iter_mut().enumerate() {
+        let activation = target
+            .activation_command(
+                &TargetActivation {
+                    metadata_configuration: ConfigurationId::new(1).unwrap(),
+                    decision: decision.clone(),
+                },
+                65536,
+            )
+            .unwrap();
+        command(target, 200, activation);
+        let key = if i == 0 { 1 } else { 200 };
+        let hint = resolve(cache, &base::Policy, id(500), &[key], 4).unwrap();
+        assert_eq!(
+            resolve(cache, &base::Policy, id(600), &[key], 4).unwrap(),
+            hint
+        );
+        assert_eq!(hint.group, group(21 + i as u128));
+        let data = encode_routed(
+            hint,
+            &[key],
+            &encode_add(&[key], if i == 0 { 7 } else { 11 }, b"effect", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        let TargetOutcome::Applied(retry) = command(target, 1 + i as u128, data).outcome else {
+            panic!("retry")
+        };
+        assert!(retry.duplicate);
+        let checkpoint = target.checkpoint(100000).unwrap();
+        let mut recovered = fresh_target(21 + i as u128, intent);
+        recovered
+            .restore_checkpoint(target.schema_version(), target.applied_index(), &checkpoint)
+            .unwrap();
+        assert_eq!(recovered.status(), target.status());
+        // Warm path starts at the child and has no parent manifest.
+        let warm = Cache(BTreeMap::from([(before().input().responsibility, after())]));
+        let hint = resolve(
+            &warm,
+            &base::Policy,
+            before().input().responsibility,
+            &[key],
+            4,
+        )
+        .unwrap();
+        let data = encode_routed(
+            hint,
+            &[key],
+            &encode_add(&[key], 1, b"", 1024).unwrap(),
+            4096,
+        )
+        .unwrap();
+        assert!(matches!(
+            command(&mut recovered, 10 + i as u128, data).outcome,
+            TargetOutcome::Applied(_)
+        ));
+    }
+}
 #[test]
 fn delegated_split_reserves_parent_and_recovers_epochs_without_ancestor_write_dependency() {
     let mut p = ready_directory(true, 3);
@@ -172,63 +237,7 @@ fn delegated_split_reserves_parent_and_recovers_epochs_without_ancestor_write_de
     assert_eq!(updated.input().parent, parent().input().parent);
     cache.admit(updated).unwrap();
     let parent_cp = p.checkpoint(1000000).unwrap();
-    for (i, target) in targets.iter_mut().enumerate() {
-        let activation = target
-            .activation_command(
-                &TargetActivation {
-                    metadata_configuration: ConfigurationId::new(1).unwrap(),
-                    decision: decision.clone(),
-                },
-                65536,
-            )
-            .unwrap();
-        command(target, 200, activation);
-        let key = if i == 0 { 1 } else { 200 };
-        let hint = resolve(&cache, &base::Policy, id(500), &[key], 4).unwrap();
-        assert_eq!(
-            resolve(&cache, &base::Policy, id(600), &[key], 4).unwrap(),
-            hint
-        );
-        assert_eq!(hint.group, group(21 + i as u128));
-        let data = encode_routed(
-            hint,
-            &[key],
-            &encode_add(&[key], if i == 0 { 7 } else { 11 }, b"effect", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        let TargetOutcome::Applied(retry) = command(target, 1 + i as u128, data).outcome else {
-            panic!("retry")
-        };
-        assert!(retry.duplicate);
-        let checkpoint = target.checkpoint(100000).unwrap();
-        let mut recovered = fresh_target(21 + i as u128, &intent);
-        recovered
-            .restore_checkpoint(target.schema_version(), target.applied_index(), &checkpoint)
-            .unwrap();
-        assert_eq!(recovered.status(), target.status());
-        // Warm path starts at the child and has no parent manifest.
-        let warm = Cache(BTreeMap::from([(before().input().responsibility, after())]));
-        let hint = resolve(
-            &warm,
-            &base::Policy,
-            before().input().responsibility,
-            &[key],
-            4,
-        )
-        .unwrap();
-        let data = encode_routed(
-            hint,
-            &[key],
-            &encode_add(&[key], 1, b"", 1024).unwrap(),
-            4096,
-        )
-        .unwrap();
-        assert!(matches!(
-            command(&mut recovered, 10 + i as u128, data).outcome,
-            TargetOutcome::Applied(_)
-        ));
-    }
+    verify_independent_targets(&mut targets, &cache, &intent, &decision);
     assert_eq!(p.checkpoint(1000000).unwrap(), parent_cp);
     let mut replay = fresh_directory(true, 3);
     let completion_bytes = completion.encode(100000).unwrap();

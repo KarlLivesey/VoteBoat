@@ -1469,25 +1469,7 @@ fn owned_route_plan_checks_pins_retains_queued_dependencies_and_rejects_stale_bu
 
 #[test]
 fn retained_plan_connects_only_after_valid_witness_reply_and_preserves_live_bindings() {
-    let mut f = Fixture::with_peer_capacity(4);
-    let mut log = HostLogStore::new(1);
-    let runtime = timed(1, &mut log, 1, 3);
-    f.owner = EffectOwner::new(
-        runtime,
-        HostWorker::new(log).binding(),
-        EffectOwnerLimits::default(),
-    )
-    .unwrap();
-    f.connect
-        .borrow_mut()
-        .extra_pins
-        .insert(node(4), identity(4));
-    f.driver
-        .as_mut()
-        .unwrap()
-        .set_admission_routes(&mut f.owner, plan(&[2, 3, 4]), MonoTime(0))
-        .unwrap_or_else(|r| panic!("{:?}", r.reason));
-    f.attach();
+    let mut f = witness_route_fixture();
     let before = f.driver.as_ref().unwrap().roster().binding(node(2));
     f.owner
         .admit(
@@ -1752,4 +1734,27 @@ fn discovery_misses_back_off_without_fencing_but_invalid_scope_is_terminal() {
         f.poll(0).unwrap_err(),
         PeerDriverError::Connect(ConnectError::Discovery(DiscoveryError::WrongBinding))
     );
+}
+
+fn witness_route_fixture() -> Fixture {
+    let mut f = Fixture::with_peer_capacity(4);
+    let mut log = HostLogStore::new(1);
+    let runtime = timed(1, &mut log, 1, 3);
+    f.owner = EffectOwner::new(
+        runtime,
+        HostWorker::new(log).binding(),
+        EffectOwnerLimits::default(),
+    )
+    .unwrap();
+    f.connect
+        .borrow_mut()
+        .extra_pins
+        .insert(node(4), identity(4));
+    f.driver
+        .as_mut()
+        .unwrap()
+        .set_admission_routes(&mut f.owner, plan(&[2, 3, 4]), MonoTime(0))
+        .unwrap_or_else(|r| panic!("{:?}", r.reason));
+    f.attach();
+    f
 }

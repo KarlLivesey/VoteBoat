@@ -164,54 +164,7 @@ fn handoff(
         })
         .collect();
     for (source, bytes) in sources.iter_mut().zip(commands) {
-        let original = source.status();
-        let f = source.applied_index() + 1;
-        let entries = [
-            entry(f, operation, bytes.clone()),
-            noop(f + 1),
-            entry(
-                f + 2,
-                999,
-                data(
-                    intent.before(),
-                    source.application().scope().start() as u8,
-                    1,
-                ),
-            ),
-            entry(f + 3, operation, bytes),
-        ];
-        let bound = source.receipt_bytes_bound(&entries).unwrap();
-        let receipts = source.apply_batch(&entries).unwrap();
-        assert_eq!(
-            bound,
-            receipts.len() * std::mem::size_of::<TargetReceipt<BucketReceipt>>()
-        );
-        assert_eq!(
-            receipts[0].outcome,
-            TargetOutcome::Frozen(source.fence().unwrap())
-        );
-        assert_eq!(
-            receipts[1].outcome,
-            TargetOutcome::Rejected(RoutingError::Fenced)
-        );
-        assert_eq!(receipts[2].outcome, receipts[0].outcome);
-        assert_eq!(source.status(), original);
-        assert_eq!(source.application().applied_index(), f);
-        assert_eq!(source.applied_index(), f + 3);
-        let cp = source.checkpoint(300000).unwrap();
-        let mut restored = source.clone();
-        restored
-            .restore_checkpoint(TRANSFER_TARGET_SCHEMA, f + 3, &cp)
-            .unwrap();
-        assert_eq!(
-            restored.freeze_status().unwrap(),
-            source.freeze_status().unwrap()
-        );
-        assert_eq!(
-            restored.application().checkpoint(65536).unwrap(),
-            source.application().checkpoint(65536).unwrap()
-        );
-        *source = restored;
+        freeze_source(source, intent, operation, bytes);
     }
     let statuses: Vec<_> = sources.iter().map(freeze_status).collect();
     for target in &mut targets {
@@ -419,28 +372,7 @@ fn later_freeze_checks_activation_binding_manifest_budget_and_reserved_operation
     foreign[8] ^= 1;
     assert!(s.apply_batch(&[entry(4, 300, foreign)]).is_err());
     assert_eq!(s.checkpoint(300000).unwrap(), before);
-    // Pending activation followed by freeze is evaluated against the staged copy.
-    let mut pending = fixture::ready();
-    pending
-        .apply_batch(&[entry(2, 200, fixture::load())])
-        .unwrap();
-    let activation = TargetActivation {
-        metadata_configuration: cfg(),
-        decision: TransferPublicationStatus {
-            publication_operation: op(201),
-            index: 4,
-            publication: fixture::publication(),
-        },
-    };
-    let activate = pending.activation_command(&activation, 65536).unwrap();
-    assert!(pending
-        .validate_proposal(
-            op(300),
-            &bytes,
-            [(op(200), activate.as_slice())].into_iter()
-        )
-        .is_ok());
-    assert_eq!(pending.fence(), None);
+    check_pending_activation(&bytes);
     s.apply_batch(&[entry(4, 300, bytes.clone())]).unwrap();
     let frozen = s.checkpoint(300000).unwrap();
     let status = freeze_status(&s);
@@ -466,14 +398,7 @@ fn later_freeze_checks_activation_binding_manifest_budget_and_reserved_operation
         )
         .is_err());
     assert_eq!(s.checkpoint(300000).unwrap(), frozen);
-    for end in 0..frozen.len() {
-        let mut r = fixture::fresh();
-        let pristine = r.checkpoint(300000).unwrap();
-        assert!(r
-            .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 4, &frozen[..end])
-            .is_err());
-        assert_eq!(r.checkpoint(300000).unwrap(), pristine);
-    }
+    check_truncated_frozen_checkpoint(&frozen);
     let mut replay = active_split().remove(0);
     replay
         .apply_batch(&[entry(4, 300, bytes), noop(5)])
@@ -574,5 +499,93 @@ fn frozen_checkpoint_rejects_changed_boundaries_operation_and_bootstrap_atomical
             .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 5, &changed)
             .is_err());
         assert_eq!(recovered.checkpoint(300000).unwrap(), before);
+    }
+}
+
+fn freeze_source(
+    source: &mut fixture::Target,
+    intent: &TransferIntent,
+    operation: u128,
+    bytes: Vec<u8>,
+) {
+    let original = source.status();
+    let f = source.applied_index() + 1;
+    let entries = [
+        entry(f, operation, bytes.clone()),
+        noop(f + 1),
+        entry(
+            f + 2,
+            999,
+            data(
+                intent.before(),
+                source.application().scope().start() as u8,
+                1,
+            ),
+        ),
+        entry(f + 3, operation, bytes),
+    ];
+    let bound = source.receipt_bytes_bound(&entries).unwrap();
+    let receipts = source.apply_batch(&entries).unwrap();
+    assert_eq!(
+        bound,
+        receipts.len() * std::mem::size_of::<TargetReceipt<BucketReceipt>>()
+    );
+    assert_eq!(
+        receipts[0].outcome,
+        TargetOutcome::Frozen(source.fence().unwrap())
+    );
+    assert_eq!(
+        receipts[1].outcome,
+        TargetOutcome::Rejected(RoutingError::Fenced)
+    );
+    assert_eq!(receipts[2].outcome, receipts[0].outcome);
+    assert_eq!(source.status(), original);
+    assert_eq!(source.application().applied_index(), f);
+    assert_eq!(source.applied_index(), f + 3);
+    let cp = source.checkpoint(300000).unwrap();
+    let mut restored = source.clone();
+    restored
+        .restore_checkpoint(TRANSFER_TARGET_SCHEMA, f + 3, &cp)
+        .unwrap();
+    assert_eq!(
+        restored.freeze_status().unwrap(),
+        source.freeze_status().unwrap()
+    );
+    assert_eq!(
+        restored.application().checkpoint(65536).unwrap(),
+        source.application().checkpoint(65536).unwrap()
+    );
+    *source = restored;
+}
+
+fn check_pending_activation(bytes: &[u8]) {
+    // Pending activation followed by freeze is evaluated against the staged copy.
+    let mut pending = fixture::ready();
+    pending
+        .apply_batch(&[entry(2, 200, fixture::load())])
+        .unwrap();
+    let activation = TargetActivation {
+        metadata_configuration: cfg(),
+        decision: TransferPublicationStatus {
+            publication_operation: op(201),
+            index: 4,
+            publication: fixture::publication(),
+        },
+    };
+    let activate = pending.activation_command(&activation, 65536).unwrap();
+    assert!(pending
+        .validate_proposal(op(300), bytes, [(op(200), activate.as_slice())].into_iter())
+        .is_ok());
+    assert_eq!(pending.fence(), None);
+}
+
+fn check_truncated_frozen_checkpoint(frozen: &[u8]) {
+    for end in 0..frozen.len() {
+        let mut r = fixture::fresh();
+        let pristine = r.checkpoint(300000).unwrap();
+        assert!(r
+            .restore_checkpoint(TRANSFER_TARGET_SCHEMA, 4, &frozen[..end])
+            .is_err());
+        assert_eq!(r.checkpoint(300000).unwrap(), pristine);
     }
 }

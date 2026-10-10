@@ -212,40 +212,7 @@ fn publication_activation_and_new_writes_preserve_original_history_and_indices()
         MetadataPublishingOutcome::Source(MetadataSourceOutcome::Fenced)
     ));
     assert_eq!(s.source().export(100000).unwrap(), image);
-    let cp = t
-        .checkpoint(t.readiness_requirements().snapshot_bytes)
-        .unwrap();
-    let mut reopened = make_target(image.plan().clone());
-    reopened
-        .restore_checkpoint(METADATA_SERVING_SCHEMA, t.applied_index(), &cp)
-        .unwrap();
-    assert_eq!(query(&reopened), query(&t));
-    assert_eq!(reopened.status(), t.status());
-    assert_eq!(reopened.imported_image(), Some(&image));
-    assert!(matches!(
-        target_apply(&mut reopened, 90, updated()),
-        MetadataServingOutcome::Directory(DirectoryReceipt {
-            duplicate: true,
-            ..
-        })
-    ));
-    assert_eq!(
-        target_apply(&mut reopened, 7, activate),
-        MetadataServingOutcome::Activated(a)
-    );
-    let cp = s
-        .checkpoint(s.readiness_requirements().snapshot_bytes)
-        .unwrap();
-    let mut reopened = source();
-    reopened
-        .restore_checkpoint(METADATA_PUBLISHING_SCHEMA, s.applied_index(), &cp)
-        .unwrap();
-    assert_eq!(reopened.publication(), Some(p));
-    assert_eq!(reopened.source().export(100000).unwrap(), image);
-    assert_eq!(
-        source_apply(&mut reopened, 7, publish),
-        MetadataPublishingOutcome::Published(p)
-    );
+    verify_activated_recovery(&s, &t, &image, p, a, publish, activate);
 }
 #[test]
 fn activation_bindings_early_attempts_and_partial_batches_refuse_atomically() {
@@ -422,45 +389,7 @@ pub(super) fn ready_namespace(
 }
 #[test]
 fn inherited_creation_reservations_survive_and_new_namespace_publication_works() {
-    let mut s = source();
-    let boot = s.bootstrap_command(40).unwrap();
-    source_apply(&mut s, 1000, boot);
-    source_apply(
-        &mut s,
-        1001,
-        DirectoryCommand {
-            expected: None,
-            manifest: grant(),
-        }
-        .encode(100000)
-        .unwrap(),
-    );
-    let old = create_intent(group(1), 30, 1);
-    assert!(matches!(
-        source_apply(&mut s, 1002, old.encode(100000).unwrap()),
-        MetadataPublishingOutcome::Source(MetadataSourceOutcome::Directory(DirectoryReceipt {
-            outcome: DirectoryOutcome::CreationReserved,
-            ..
-        }))
-    ));
-    let old_status = s
-        .source()
-        .directory()
-        .unwrap()
-        .directory()
-        .group_creation_at(s.applied_index(), group(30))
-        .unwrap()
-        .unwrap();
-    let old_pub = ready_namespace(old_status.clone());
-    source_apply(&mut s, 1003, old_pub.encode(100000).unwrap());
-    let plan = s.source().plan(group(9)).unwrap();
-    let freeze = s.source().freeze_command(&plan, 100000).unwrap();
-    source_apply(&mut s, 7, freeze);
-    let image = s.source().export(100000).unwrap();
-    let (mut t, _) = imported(&image);
-    let (p, _) = publication(&mut s, &t);
-    let activate = t.activation_command(p, 100000).unwrap();
-    target_apply(&mut t, 7, activate);
+    let (mut t, image, old, old_status) = inherited_creation_target();
     let MetadataServingRead::Creation(Some(inherited)) = t
         .read_at(t.applied_index(), MetadataServingQuery::Creation(group(30)))
         .unwrap()
@@ -538,92 +467,11 @@ fn inherited_creation_reservations_survive_and_new_namespace_publication_works()
 #[cfg(feature = "native")]
 #[test]
 fn native_publication_and_activation_cuts_preserve_single_authority() {
-    use support::{Fault, ModelIo};
-    use voteboat::native::log_store::{LogCodec, NativeLogCodec, NativeLogStore};
-    fn cuts<A: StateMachine + Clone>(
-        group_id: u128,
-        entries: Vec<LogEntry>,
-        initial: A,
-        inspect: impl Fn(&A, bool),
-    ) {
-        let limits = LogLimits::default();
-        let count = entries.len();
-        let seed = || {
-            let io = ModelIo::default();
-            let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-            support::append(
-                &mut log,
-                vec![LogMutation::Create(support::bootstrap(group_id, 3))],
-            );
-            let state = log.state(group(group_id)).unwrap();
-            support::append(
-                &mut log,
-                vec![support::update(
-                    &state,
-                    1,
-                    entries[count - 2].index,
-                    Some(Suffix {
-                        from: 1,
-                        entries: entries[..count - 1].to_vec(),
-                    }),
-                )],
-            );
-            (io, log)
-        };
-        let (_, log) = seed();
-        let mutation = support::update(
-            &log.state(group(group_id)).unwrap(),
-            1,
-            entries[count - 1].index,
-            Some(Suffix {
-                from: entries[count - 1].index,
-                entries: entries[count - 1..].to_vec(),
-            }),
-        );
-        let frame = NativeLogCodec
-            .encode_batch(3, std::slice::from_ref(&mutation), limits)
-            .unwrap();
-        let mut outcomes = [false; 2];
-        for fault in (0..=frame.len()).map(Fault::Append).chain([
-            Fault::Sync,
-            Fault::PublishBefore,
-            Fault::PublishAfter,
-        ]) {
-            let (io, mut log) = seed();
-            io.0.borrow_mut().fault = fault;
-            if let Ok(tickets) = log.append_batch(vec![mutation.clone()]) {
-                assert!(log.barrier(&tickets).is_err());
-            }
-            drop(log);
-            io.0.borrow_mut().power_loss();
-            let log = NativeLogStore::recover(io, support::identity(1), limits).unwrap();
-            let state = log.state(group(group_id)).unwrap();
-            let complete = state.commit_index == entries[count - 1].index;
-            outcomes[usize::from(complete)] = true;
-            let mut recovered = initial.clone();
-            recovered
-                .apply_batch(
-                    &state
-                        .entries
-                        .into_iter()
-                        .filter(|e| e.index <= state.commit_index)
-                        .collect::<Vec<_>>(),
-                )
-                .unwrap();
-            inspect(&recovered, complete);
-            let mut retried = recovered;
-            let mut retry = entries[count - 1].clone();
-            retry.index = retried.applied_index() + 1;
-            retried.apply_batch(&[retry]).unwrap();
-            inspect(&retried, true);
-        }
-        assert_eq!(outcomes, [true, true]);
-    }
     let (mut s, image, mut source_entries) = frozen();
     let (mut t, mut target_entries) = imported(&image);
     let (p, publish) = publication(&mut s, &t);
     source_entries.push(entry(13, 7, publish));
-    cuts(1, source_entries, source(), |recovered, complete| {
+    metadata_journal_cuts(1, source_entries, source(), |recovered, complete| {
         assert_eq!(recovered.publication().is_some(), complete);
         assert_eq!(recovered.source().export(100000).unwrap(), image);
         assert!(recovered.source().directory().is_none());
@@ -635,7 +483,7 @@ fn native_publication_and_activation_cuts_preserve_single_authority() {
     });
     let command = t.activation_command(p, 100000).unwrap();
     target_entries.push(entry(3, 7, command));
-    cuts(
+    metadata_journal_cuts(
         9,
         target_entries.clone(),
         make_target(image.plan().clone()),
@@ -654,7 +502,7 @@ fn native_publication_and_activation_cuts_preserve_single_authority() {
     );
     t.apply_batch(&target_entries[2..]).unwrap();
     target_entries.push(entry(4, 90, updated()));
-    cuts(
+    metadata_journal_cuts(
         9,
         target_entries,
         make_target(image.plan().clone()),
@@ -666,4 +514,180 @@ fn native_publication_and_activation_cuts_preserve_single_authority() {
             assert_eq!(m.input().generation.get(), if complete { 3 } else { 2 });
         },
     );
+}
+
+fn verify_activated_recovery(
+    s: &MetadataPublishingSource,
+    t: &MetadataServingTarget,
+    image: &MetadataImage,
+    p: MetadataPublicationStatus,
+    a: MetadataActivationStatus,
+    publish: Vec<u8>,
+    activate: Vec<u8>,
+) {
+    let cp = t
+        .checkpoint(t.readiness_requirements().snapshot_bytes)
+        .unwrap();
+    let mut reopened = make_target(image.plan().clone());
+    reopened
+        .restore_checkpoint(METADATA_SERVING_SCHEMA, t.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(query(&reopened), query(t));
+    assert_eq!(reopened.status(), t.status());
+    assert_eq!(reopened.imported_image(), Some(image));
+    assert!(matches!(
+        target_apply(&mut reopened, 90, updated()),
+        MetadataServingOutcome::Directory(DirectoryReceipt {
+            duplicate: true,
+            ..
+        })
+    ));
+    assert_eq!(
+        target_apply(&mut reopened, 7, activate),
+        MetadataServingOutcome::Activated(a)
+    );
+    let cp = s
+        .checkpoint(s.readiness_requirements().snapshot_bytes)
+        .unwrap();
+    let mut reopened = source();
+    reopened
+        .restore_checkpoint(METADATA_PUBLISHING_SCHEMA, s.applied_index(), &cp)
+        .unwrap();
+    assert_eq!(reopened.publication(), Some(p));
+    assert_eq!(reopened.source().export(100000).unwrap(), *image);
+    assert_eq!(
+        source_apply(&mut reopened, 7, publish),
+        MetadataPublishingOutcome::Published(p)
+    );
+}
+
+fn inherited_creation_target() -> (
+    MetadataServingTarget,
+    MetadataImage,
+    GroupCreationIntent,
+    GroupCreationStatus,
+) {
+    let mut s = source();
+    let boot = s.bootstrap_command(40).unwrap();
+    source_apply(&mut s, 1000, boot);
+    source_apply(
+        &mut s,
+        1001,
+        DirectoryCommand {
+            expected: None,
+            manifest: grant(),
+        }
+        .encode(100000)
+        .unwrap(),
+    );
+    let old = create_intent(group(1), 30, 1);
+    assert!(matches!(
+        source_apply(&mut s, 1002, old.encode(100000).unwrap()),
+        MetadataPublishingOutcome::Source(MetadataSourceOutcome::Directory(DirectoryReceipt {
+            outcome: DirectoryOutcome::CreationReserved,
+            ..
+        }))
+    ));
+    let old_status = s
+        .source()
+        .directory()
+        .unwrap()
+        .directory()
+        .group_creation_at(s.applied_index(), group(30))
+        .unwrap()
+        .unwrap();
+    let old_pub = ready_namespace(old_status.clone());
+    source_apply(&mut s, 1003, old_pub.encode(100000).unwrap());
+    let plan = s.source().plan(group(9)).unwrap();
+    let freeze = s.source().freeze_command(&plan, 100000).unwrap();
+    source_apply(&mut s, 7, freeze);
+    let image = s.source().export(100000).unwrap();
+    let (mut t, _) = imported(&image);
+    let (p, _) = publication(&mut s, &t);
+    let activate = t.activation_command(p, 100000).unwrap();
+    target_apply(&mut t, 7, activate);
+    (t, image, old, old_status)
+}
+
+#[cfg(feature = "native")]
+fn metadata_journal_cuts<A: StateMachine + Clone>(
+    group_id: u128,
+    entries: Vec<LogEntry>,
+    initial: A,
+    inspect: impl Fn(&A, bool),
+) {
+    use support::{Fault, ModelIo};
+    use voteboat::native::log_store::{LogCodec, NativeLogCodec, NativeLogStore};
+    let limits = LogLimits::default();
+    let count = entries.len();
+    let seed = || {
+        let io = ModelIo::default();
+        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+        support::append(
+            &mut log,
+            vec![LogMutation::Create(support::bootstrap(group_id, 3))],
+        );
+        let state = log.state(group(group_id)).unwrap();
+        support::append(
+            &mut log,
+            vec![support::update(
+                &state,
+                1,
+                entries[count - 2].index,
+                Some(Suffix {
+                    from: 1,
+                    entries: entries[..count - 1].to_vec(),
+                }),
+            )],
+        );
+        (io, log)
+    };
+    let (_, log) = seed();
+    let mutation = support::update(
+        &log.state(group(group_id)).unwrap(),
+        1,
+        entries[count - 1].index,
+        Some(Suffix {
+            from: entries[count - 1].index,
+            entries: entries[count - 1..].to_vec(),
+        }),
+    );
+    let frame = NativeLogCodec
+        .encode_batch(3, std::slice::from_ref(&mutation), limits)
+        .unwrap();
+    let mut outcomes = [false; 2];
+    for fault in (0..=frame.len()).map(Fault::Append).chain([
+        Fault::Sync,
+        Fault::PublishBefore,
+        Fault::PublishAfter,
+    ]) {
+        let (io, mut log) = seed();
+        io.0.borrow_mut().fault = fault;
+        if let Ok(tickets) = log.append_batch(vec![mutation.clone()]) {
+            assert!(log.barrier(&tickets).is_err());
+        }
+        drop(log);
+        io.0.borrow_mut().power_loss();
+        let log = NativeLogStore::recover(io, support::identity(1), limits).unwrap();
+        let state = log.state(group(group_id)).unwrap();
+        let complete = state.commit_index == entries[count - 1].index;
+        outcomes[usize::from(complete)] = true;
+        let mut recovered = initial.clone();
+        recovered
+            .apply_batch(
+                &state
+                    .entries
+                    .into_iter()
+                    .filter(|e| e.index <= state.commit_index)
+                    .collect::<Vec<_>>(),
+            )
+            .unwrap();
+        inspect(&recovered, complete);
+        let mut retried = recovered;
+        let mut retry = entries[count - 1].clone();
+        retry.index = retried.applied_index() + 1;
+        retried.apply_batch(&[retry]).unwrap();
+        inspect(&retried, true);
+    }
+    assert_eq!(outcomes, [true, true]);
 }

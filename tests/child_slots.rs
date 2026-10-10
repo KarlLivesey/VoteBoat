@@ -260,49 +260,7 @@ fn retirement(foreign: bool) {
         Err(RoutingError::Vacant)
     );
     assert_eq!(ca.check_context(&stale, &[1]), Err(RoutingError::Fenced));
-    // Fresh and previously cached parent hints still address the original retained owner.
-    let old_hint = resolve(
-        &View(vec![parent.clone()]),
-        &Policy,
-        parent.input().responsibility,
-        &[200],
-        1,
-    )
-    .unwrap();
-    let new_hint = resolve(
-        &View(vec![after.clone()]),
-        &Policy,
-        parent.input().responsibility,
-        &[200],
-        1,
-    )
-    .unwrap();
-    let mut pa = owner(parent.clone(), 20, range(128, 256));
-    let boot = pa.bootstrap_command(200000).unwrap();
-    commit(&mut pa, 100, boot);
-    let b = encode_routed(
-        old_hint,
-        &[200],
-        &encode_add(&[200], 11, b"effect", 1024).unwrap(),
-        4096,
-    )
-    .unwrap();
-    assert!(matches!(
-        commit(&mut pa, 1, b).outcome,
-        RoutedOutcome::Applied(_)
-    ));
-    assert_eq!(
-        pa.read_at(
-            pa.applied_index(),
-            RoutedQuery {
-                hint: new_hint,
-                key: vec![200],
-                query: vec![200]
-            }
-        )
-        .unwrap(),
-        RoutedRead::Served(11)
-    );
+    check_retained_service(&parent, &after);
     let status = pd
         .retired_child_slot_at(pd.applied_index(), op(220))
         .unwrap()
@@ -762,7 +720,7 @@ fn successive_slot_retirements_replay_vacant_manifests_and_keep_identities_reser
 #[cfg(feature = "native")]
 #[test]
 fn retirement_native_journal_cuts_recover_only_original_or_completed_routes() {
-    use support::{Fault, ModelIo};
+    use support::Fault;
     use voteboat::{log::*, native::log_store::*};
     let (parent, child) = tree(true);
     let mut cd = initial(vec![child.clone()], 16);
@@ -788,28 +746,7 @@ fn retirement_native_journal_cuts_recover_only_original_or_completed_routes() {
     ];
     let bytes = r.encode(200000).unwrap();
     let limits = LogLimits::default();
-    let seed = || {
-        let io = ModelIo::default();
-        let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
-        support::append(
-            &mut log,
-            vec![LogMutation::Create(support::bootstrap(1, 3))],
-        );
-        let state = log.state(group(1)).unwrap();
-        support::append(
-            &mut log,
-            vec![support::update(
-                &state,
-                1,
-                2,
-                Some(Suffix {
-                    from: 1,
-                    entries: prefix.clone(),
-                }),
-            )],
-        );
-        (io, log)
-    };
+    let seed = || seed_retirement_log(&prefix);
     let (_, log) = seed();
     let mutation = support::update(
         &log.state(group(1)).unwrap(),
@@ -881,4 +818,82 @@ fn retirement_native_journal_cuts_recover_only_original_or_completed_routes() {
         assert!(ca.fence().is_some());
     }
     assert!(old && complete);
+}
+
+fn check_retained_service(parent: &ResponsibilityManifest, after: &ResponsibilityManifest) {
+    // Fresh and previously cached parent hints still address the original retained owner.
+    let old_hint = resolve(
+        &View(vec![parent.clone()]),
+        &Policy,
+        parent.input().responsibility,
+        &[200],
+        1,
+    )
+    .unwrap();
+    let new_hint = resolve(
+        &View(vec![after.clone()]),
+        &Policy,
+        parent.input().responsibility,
+        &[200],
+        1,
+    )
+    .unwrap();
+    let mut pa = owner(parent.clone(), 20, range(128, 256));
+    let boot = pa.bootstrap_command(200000).unwrap();
+    commit(&mut pa, 100, boot);
+    let b = encode_routed(
+        old_hint,
+        &[200],
+        &encode_add(&[200], 11, b"effect", 1024).unwrap(),
+        4096,
+    )
+    .unwrap();
+    assert!(matches!(
+        commit(&mut pa, 1, b).outcome,
+        RoutedOutcome::Applied(_)
+    ));
+    assert_eq!(
+        pa.read_at(
+            pa.applied_index(),
+            RoutedQuery {
+                hint: new_hint,
+                key: vec![200],
+                query: vec![200]
+            }
+        )
+        .unwrap(),
+        RoutedRead::Served(11)
+    );
+}
+
+#[cfg(feature = "native")]
+fn seed_retirement_log(
+    prefix: &[voteboat::log::LogEntry],
+) -> (
+    support::ModelIo,
+    voteboat::native::log_store::NativeLogStore<support::ModelIo>,
+) {
+    use support::ModelIo;
+    use voteboat::{log::*, native::log_store::*};
+    let limits = LogLimits::default();
+    let io = ModelIo::default();
+    let mut log = NativeLogStore::create(io.clone(), support::identity(1), limits).unwrap();
+    support::append(
+        &mut log,
+        vec![LogMutation::Create(support::bootstrap(1, 3))],
+    );
+    let state = log.state(group(1)).unwrap();
+    support::append(
+        &mut log,
+        vec![support::update(
+            &state,
+            1,
+            2,
+            Some(Suffix {
+                from: 1,
+                entries: prefix.to_vec(),
+            }),
+        )],
+    );
+    (io, log)
 }

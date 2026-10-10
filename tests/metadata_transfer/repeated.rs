@@ -70,51 +70,8 @@ struct Prepared {
     local_command: Vec<u8>,
 }
 fn prepared() -> Prepared {
-    // A reserves and publishes a namespace before its first move.
-    let mut a = original();
-    let mut ignored = vec![];
-    let b = a.bootstrap_command(100000).unwrap();
-    apply(&mut a, 1000, b, &mut ignored);
-    let old_command = DirectoryCommand {
-        expected: None,
-        manifest: grant(),
-    }
-    .encode(100000)
-    .unwrap();
-    apply(&mut a, 1001, old_command.clone(), &mut ignored);
-    let stale = a.source().plan(group(9)).unwrap();
-    for index in 3..=6 {
-        a.apply_batch(&[LogEntry {
-            index,
-            term: 1,
-            payload: EntryPayload::Noop,
-        }])
-        .unwrap();
-    }
-    let intent = activation::create_intent(group(1), 30, 1);
-    apply(&mut a, 1002, intent.encode(100000).unwrap(), &mut ignored);
-    let created = a
-        .source()
-        .active_directory()
-        .unwrap()
-        .group_creation_at(a.applied_index(), group(30))
-        .unwrap()
-        .unwrap();
-    apply(
-        &mut a,
-        1003,
-        activation::ready_namespace(created).encode(100000).unwrap(),
-        &mut ignored,
-    );
-    let refused = a.source().freeze_command(&stale, 100000).unwrap();
-    assert_eq!(
-        apply(&mut a, 6, refused, &mut ignored),
-        MetadataPublishingOutcome::Source(MetadataSourceOutcome::Conflict)
-    );
-    let plan = a.source().plan(group(9)).unwrap();
-    let command = a.source().freeze_command(&plan, 100000).unwrap();
-    apply(&mut a, 7, command, &mut ignored);
-    let first_image = a.source().export(100000).unwrap();
+    let (mut a, first_image, old_command) = prepare_original();
+    let plan = first_image.plan().clone();
     let template = repeatable(plan.clone());
     let mut source = template.clone();
     let mut entries = vec![];
@@ -235,42 +192,7 @@ fn repeated_move_preserves_all_authority_domains_creations_and_retries() {
     let activation = finish(&mut p);
     assert_eq!(activation.publication.imported.source.source, group(9));
     assert_eq!(activation.publication.imported.source.target, group(11));
-    assert!(
-        matches!(activation::target_apply(&mut p.target, 1001, p.old_command.clone()), MetadataServingOutcome::Historical { source, index: 2, outcome: DirectoryOutcome::Published(_)} if source == group(1))
-    );
-    assert!(
-        matches!(activation::target_apply(&mut p.target, 90, p.local_command.clone()), MetadataServingOutcome::Historical { source, index: 4, outcome: DirectoryOutcome::Published(_)} if source == group(9))
-    );
-    assert!(
-        matches!(activation::target_apply(&mut p.target, 90, p.old_command.clone()), MetadataServingOutcome::Historical { source, index: 4, outcome: DirectoryOutcome::OperationConflict } if source == group(9))
-    );
-    for id in [6, 7, 8] {
-        assert_eq!(
-            activation::target_apply(&mut p.target, id, p.local_command.clone()),
-            MetadataServingOutcome::Conflict
-        );
-    }
-    for (g, authority, index) in [(30, 1, 7), (40, 9, 5)] {
-        let MetadataServingRead::Creation(Some(c)) = p
-            .target
-            .read_at(
-                p.target.applied_index(),
-                MetadataServingQuery::Creation(group(g)),
-            )
-            .unwrap()
-        else {
-            panic!("creation")
-        };
-        assert_eq!((c.authority, c.index), (group(authority), index));
-        let q = MetadataServingQuery::Directory(DirectoryQuery::Publication(if g == 30 {
-            op(1003)
-        } else {
-            op(92)
-        }));
-        assert!(
-            matches!(p.target.read_at(p.target.applied_index(),q).unwrap(), MetadataServingRead::Historical {source,..} if source == group(authority))
-        );
-    }
+    verify_repeated_history(&mut p);
     let before = p
         .target
         .active_directory()
@@ -535,4 +457,92 @@ fn nested_construction_is_bounded_before_ownership_transfer() {
         }
     }
     panic!("unbounded nested profile");
+}
+
+fn prepare_original() -> (MetadataPublishingSource, MetadataImage, Vec<u8>) {
+    // A reserves and publishes a namespace before its first move.
+    let mut a = original();
+    let mut ignored = vec![];
+    let b = a.bootstrap_command(100000).unwrap();
+    apply(&mut a, 1000, b, &mut ignored);
+    let old_command = DirectoryCommand {
+        expected: None,
+        manifest: grant(),
+    }
+    .encode(100000)
+    .unwrap();
+    apply(&mut a, 1001, old_command.clone(), &mut ignored);
+    let stale = a.source().plan(group(9)).unwrap();
+    for index in 3..=6 {
+        a.apply_batch(&[LogEntry {
+            index,
+            term: 1,
+            payload: EntryPayload::Noop,
+        }])
+        .unwrap();
+    }
+    let intent = activation::create_intent(group(1), 30, 1);
+    apply(&mut a, 1002, intent.encode(100000).unwrap(), &mut ignored);
+    let created = a
+        .source()
+        .active_directory()
+        .unwrap()
+        .group_creation_at(a.applied_index(), group(30))
+        .unwrap()
+        .unwrap();
+    apply(
+        &mut a,
+        1003,
+        activation::ready_namespace(created).encode(100000).unwrap(),
+        &mut ignored,
+    );
+    let refused = a.source().freeze_command(&stale, 100000).unwrap();
+    assert_eq!(
+        apply(&mut a, 6, refused, &mut ignored),
+        MetadataPublishingOutcome::Source(MetadataSourceOutcome::Conflict)
+    );
+    let plan = a.source().plan(group(9)).unwrap();
+    let command = a.source().freeze_command(&plan, 100000).unwrap();
+    apply(&mut a, 7, command, &mut ignored);
+    let first_image = a.source().export(100000).unwrap();
+    (a, first_image, old_command)
+}
+
+fn verify_repeated_history(p: &mut Prepared) {
+    assert!(
+        matches!(activation::target_apply(&mut p.target, 1001, p.old_command.clone()), MetadataServingOutcome::Historical { source, index: 2, outcome: DirectoryOutcome::Published(_)} if source == group(1))
+    );
+    assert!(
+        matches!(activation::target_apply(&mut p.target, 90, p.local_command.clone()), MetadataServingOutcome::Historical { source, index: 4, outcome: DirectoryOutcome::Published(_)} if source == group(9))
+    );
+    assert!(
+        matches!(activation::target_apply(&mut p.target, 90, p.old_command.clone()), MetadataServingOutcome::Historical { source, index: 4, outcome: DirectoryOutcome::OperationConflict } if source == group(9))
+    );
+    for id in [6, 7, 8] {
+        assert_eq!(
+            activation::target_apply(&mut p.target, id, p.local_command.clone()),
+            MetadataServingOutcome::Conflict
+        );
+    }
+    for (g, authority, index) in [(30, 1, 7), (40, 9, 5)] {
+        let MetadataServingRead::Creation(Some(c)) = p
+            .target
+            .read_at(
+                p.target.applied_index(),
+                MetadataServingQuery::Creation(group(g)),
+            )
+            .unwrap()
+        else {
+            panic!("creation")
+        };
+        assert_eq!((c.authority, c.index), (group(authority), index));
+        let q = MetadataServingQuery::Directory(DirectoryQuery::Publication(if g == 30 {
+            op(1003)
+        } else {
+            op(92)
+        }));
+        assert!(
+            matches!(p.target.read_at(p.target.applied_index(),q).unwrap(), MetadataServingRead::Historical {source,..} if source == group(authority))
+        );
+    }
 }
