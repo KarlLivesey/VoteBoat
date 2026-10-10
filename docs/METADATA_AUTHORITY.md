@@ -98,9 +98,17 @@ space for complete observations. Its `MetadataAdoption` read includes original
 activation provenance. Earlier scoped exports stay immutable; later retained
 transfers can proceed through the new metadata authority after adoption.
 
+For an imported owner, select `TransferTarget::with_metadata_authority_adoption`
+before bootstrap. Select `with_partial_delegation` afterward if it must retain
+scopes while delegating others. Profiles8/9 preserve the original import and
+activation while recording metadata changes in the existing grant history.
+The same `RetirementGuard` validates that history against the final source grant
+after a later handoff, then retains it without the retired application payload.
+`TargetQuery::MetadataAdoption` returns the original adoption provenance.
+
 The native cache's opt-in `with_metadata_authority_moves` accepts only the exact
 metadata/reference/generation transformation through `ManifestCache`. Verify
 the move before supplying these hints. Partial parent/child refresh fails route
-resolution; cache contents do not authorize writes. Imported owners,
-foreign parent/child locators, a second metadata move and TCP/QUIC service
+resolution; cache contents do not authorize writes. Foreign parent/child
+locators, a second metadata move and TCP/QUIC service
 composition remain work.

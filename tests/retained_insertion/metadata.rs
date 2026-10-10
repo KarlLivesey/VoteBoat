@@ -29,8 +29,22 @@ fn frozen(owner: &Source, id: u128) -> ScopedExportStatus {
     };
     status
 }
-fn metadata_source() -> MetadataPublishingSource {
-    let d = LifecycleDirectory::new(fresh(before(false), true));
+fn metadata_source(remaining: bool) -> MetadataPublishingSource {
+    let directory = if remaining {
+        Directory::new(
+            DirectoryPlan::new(group(1), vec![before(false)]).unwrap(),
+            DirectoryLimits {
+                operations: 32,
+                history_bytes: 200000,
+            },
+        )
+        .unwrap()
+        .with_remaining_transfer()
+        .unwrap_or_else(|_| panic!("remaining profile"))
+    } else {
+        fresh(before(false), true)
+    };
+    let d = LifecycleDirectory::new(directory);
     let limit = d.directory().readiness_requirements().snapshot_bytes;
     MetadataPublishingSource::new(
         MetadataAuthoritySource::new(d, limit).unwrap_or_else(|_| panic!("source")),
@@ -47,8 +61,13 @@ struct Moved {
     adoption: OwnerMetadataAdoption,
     target: MetadataServingTarget,
     owner_log: Vec<LogEntry>,
+    child: Target,
+    child_log: Vec<LogEntry>,
 }
 fn moved() -> Moved {
+    moved_with(None)
+}
+fn moved_with(profile: Option<bool>) -> Moved {
     // Replay the actual initial reservation into the publishing profile, then
     // perform the transfer under that profile rather than fabricating statuses.
     let (seed, _, first) = setup(false);
@@ -56,7 +75,7 @@ fn moved() -> Moved {
         .group_creation_at(seed.applied_index(), group(21))
         .unwrap()
         .unwrap();
-    let mut d = metadata_source();
+    let mut d = metadata_source(profile.is_some());
     let boot = d.bootstrap_command(100000).unwrap();
     commit(&mut d, 1000, boot);
     commit(
@@ -80,9 +99,14 @@ fn moved() -> Moved {
     ];
     owner.apply_batch(&owner_log).unwrap();
     let status = frozen(&owner, 200);
-    let mut child = target(&first);
+    let mut child = if let Some(partial) = profile {
+        imported::selected(&first, partial)
+    } else {
+        target(&first)
+    };
+    let mut child_log = Vec::new();
     let boot = child.bootstrap_command(100000).unwrap();
-    commit(&mut child, 200, boot);
+    record_target(&mut child, &mut child_log, 200, boot);
     let import = TargetImport::new(
         op(200),
         first.clone(),
@@ -96,7 +120,7 @@ fn moved() -> Moved {
     )
     .unwrap();
     let command = child.import_command(&import, 100000).unwrap();
-    commit(&mut child, 200, command);
+    record_target(&mut child, &mut child_log, 200, command);
     let publication = TransferPublication::new(
         op(200),
         first.clone(),
@@ -133,13 +157,13 @@ fn moved() -> Moved {
             100000,
         )
         .unwrap();
-    commit(&mut child, 200, activation);
+    record_target(&mut child, &mut child_log, 200, activation);
     let plan = d.source().plan(group(9)).unwrap();
     let command = d.source().freeze_command(&plan, 100000).unwrap();
     commit(&mut d, 700, command);
     let image = d.source().export(1000000).unwrap();
     let mut target = MetadataServingTarget::new(
-        metadata_source(),
+        metadata_source(profile.is_some()),
         plan.clone(),
         op(700),
         ConfigurationId::new(1).unwrap(),
@@ -178,6 +202,8 @@ fn moved() -> Moved {
         adoption,
         target,
         owner_log,
+        child,
+        child_log,
     }
 }
 fn reopen(owner: &Source, first: &TransferIntent) -> Source {
@@ -665,3 +691,21 @@ fn retained_metadata_adoption_native_cuts_keep_original_exports_and_resume() {
     }
     assert!(old && complete);
 }
+
+fn record_target(
+    t: &mut Target,
+    log: &mut Vec<LogEntry>,
+    id: u128,
+    bytes: Vec<u8>,
+) -> TargetOutcome<BucketReceipt> {
+    let e = entry(t.applied_index() + 1, id, bytes);
+    let r = t
+        .apply_batch(std::slice::from_ref(&e))
+        .unwrap()
+        .remove(0)
+        .outcome;
+    log.push(e);
+    r
+}
+#[path = "metadata/imported.rs"]
+mod imported;

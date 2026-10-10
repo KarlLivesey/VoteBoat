@@ -109,7 +109,11 @@ where
             self.partial = None;
             return Err((ApplicationError::InvalidCommand, self));
         }
-        self.binding[..8].copy_from_slice(b"VBTSOWN5");
+        self.binding[..8].copy_from_slice(if self.metadata_adoption {
+            b"VBTSOWN7"
+        } else {
+            b"VBTSOWN5"
+        });
         self.binding.extend((maximum as u16).to_le_bytes());
         self.binding.extend((export_bytes as u64).to_le_bytes());
         Ok(self)
@@ -119,8 +123,10 @@ where
             2 + p.export_bytes
                 + p.maximum * (172 + MAX_TRANSFER_INTENT_BYTES + MAX_RETAINED_ADOPTION_BYTES)
                 + self.parent_limit
-                    * (4 + MAX_PARENT_SLOT_ADOPTION_BYTES
-                        - crate::routed::MAX_CROSS_PARENT_ADOPTION_BYTES)
+                    * (4 + self
+                        .parent_command_bound()
+                        .max(MAX_PARENT_SLOT_ADOPTION_BYTES)
+                        - self.parent_command_bound())
         })
     }
     pub fn scoped_freeze(&self, op: OperationId) -> Option<ScopedExportStatus> {
@@ -366,7 +372,8 @@ where
             if restored.is_some() || self.partial_pending() {
                 return Err(ApplicationError::InvalidCommand);
             }
-            let command = ParentAdoptionCommand::decode_scoped(bytes, true)?;
+            let command =
+                ParentAdoptionCommand::decode_scoped_metadata(bytes, true, self.metadata_adoption)?;
             let TargetOutcome::ParentAdopted(status) =
                 self.apply_parent_command::<()>(*op, entry.index, command)?
             else {
@@ -492,7 +499,11 @@ where
         Some(
             22 + MAX_TARGET_ACTIVATION_BYTES
                 + p.maximum * (60 + MAX_RETAINED_ADOPTION_BYTES)
-                + self.parent_limit * (60 + MAX_PARENT_SLOT_ADOPTION_BYTES),
+                + self.parent_limit
+                    * (60
+                        + self
+                            .parent_command_bound()
+                            .max(MAX_PARENT_SLOT_ADOPTION_BYTES)),
         )
     }
 
@@ -522,7 +533,11 @@ where
         bytes.extend(activation.status.index.to_le_bytes());
         bytes.extend((activation.bytes.len() as u32).to_le_bytes());
         bytes.extend(&activation.bytes);
-        bytes.extend(b"VBTPRTL1");
+        bytes.extend(if self.metadata_adoption {
+            b"VBTPRTL2"
+        } else {
+            b"VBTPRTL1"
+        });
         bytes.extend((changes.len() as u16).to_le_bytes());
         for e in changes {
             bytes.extend(digest(e.operation, e.index, &e.bytes, None).0);
@@ -564,7 +579,12 @@ where
             .ok_or(ApplicationError::InvalidCheckpoint)?;
         if previous <= imported.imported.index
             || previous >= fence_index
-            || r.take(8)? != b"VBTPRTL1"
+            || r.take(8)?
+                != if self.metadata_adoption {
+                    b"VBTPRTL2"
+                } else {
+                    b"VBTPRTL1"
+                }
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -580,7 +600,11 @@ where
             let op = r.operation()?;
             let index = r.u64()?;
             let len = r.u32()? as usize;
-            if len > MAX_RETAINED_ADOPTION_BYTES.max(MAX_PARENT_SLOT_ADOPTION_BYTES)
+            if len
+                > MAX_RETAINED_ADOPTION_BYTES.max(
+                    self.parent_command_bound()
+                        .max(MAX_PARENT_SLOT_ADOPTION_BYTES),
+                )
                 || index <= previous
                 || index >= fence_index
                 || !used.insert(op)
@@ -624,7 +648,11 @@ where
                 if parents > self.parent_limit {
                     return Err(ApplicationError::InvalidCheckpoint);
                 }
-                let change = ParentAdoptionCommand::decode_scoped(command, true)?;
+                let change = ParentAdoptionCommand::decode_scoped_metadata(
+                    command,
+                    true,
+                    self.metadata_adoption,
+                )?;
                 if change.before() != &grant || change.encode(len)? != command {
                     return Err(ApplicationError::InvalidCheckpoint);
                 }

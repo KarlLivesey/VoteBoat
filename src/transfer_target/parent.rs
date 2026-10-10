@@ -25,7 +25,9 @@ pub(super) struct ParentRecord {
     command: ParentAdoptionCommand,
 }
 pub(super) fn is_parent(bytes: &[u8]) -> bool {
-    bytes.starts_with(b"VBRPAD01") || bytes.starts_with(b"VBXPAD01")
+    bytes.starts_with(b"VBRPAD01")
+        || bytes.starts_with(b"VBXPAD01")
+        || bytes.starts_with(b"VBMAAD01")
 }
 // Retired owners never serve again. Their compact lineage permits a round trip
 // to the original parent while preserving every ownership/selector field.
@@ -44,7 +46,7 @@ pub(super) fn same_owner_lineage(
     normalized.generation = original.input().generation;
     normalized == *original.input()
 }
-fn digest(op: OperationId, index: u64, command: &[u8]) -> ContentDigest {
+pub(super) fn digest(op: OperationId, index: u64, command: &[u8]) -> ContentDigest {
     let mut b = Vec::with_capacity(32 + command.len());
     b.extend(b"VBTPARD1");
     b.extend(op.get().to_le_bytes());
@@ -85,6 +87,23 @@ where
         self.binding.extend((maximum as u16).to_le_bytes());
         Ok(self)
     }
+    pub fn metadata_adoption(
+        &self,
+        operation: OperationId,
+    ) -> Option<crate::routed::MetadataGrantStatus> {
+        self.parents.iter().find_map(|record| {
+            if record.status.operation != operation {
+                return None;
+            }
+            let ParentAdoptionCommand::Metadata(command) = &record.command else {
+                return None;
+            };
+            Some(crate::routed::MetadataGrantStatus {
+                owner: record.status,
+                activation: command.activation(),
+            })
+        })
+    }
     pub fn grant(&self) -> &ResponsibilityManifest {
         &self.active_grant
     }
@@ -94,11 +113,18 @@ where
             .find(|p| p.status.operation == op)
             .map(|p| p.status)
     }
+    pub(super) fn parent_command_bound(&self) -> usize {
+        if self.metadata_adoption {
+            crate::routed::MAX_METADATA_ADOPTION_BYTES
+        } else {
+            MAX_CROSS_PARENT_ADOPTION_BYTES
+        }
+    }
     pub(super) fn parent_reserve(&self) -> usize {
         if self.parent_limit == 0 {
             0
         } else {
-            2 + self.parent_limit * (60 + MAX_CROSS_PARENT_ADOPTION_BYTES)
+            2 + self.parent_limit * (60 + self.parent_command_bound())
         }
     }
     pub(super) fn apply_parent<R>(
@@ -110,7 +136,7 @@ where
         if self.parent_limit == 0 {
             return Err(ApplicationError::UnsupportedSchema);
         }
-        let command = ParentAdoptionCommand::decode(bytes, true)?;
+        let command = ParentAdoptionCommand::decode_metadata(bytes, true, self.metadata_adoption)?;
         self.apply_parent_command(op, index, command)
     }
     pub(super) fn apply_parent_command<R>(
@@ -171,7 +197,7 @@ where
         let mut out = Vec::new();
         out.extend((self.parents.len() as u16).to_le_bytes());
         for p in &self.parents {
-            let command = p.command.encode(MAX_CROSS_PARENT_ADOPTION_BYTES)?;
+            let command = p.command.encode(self.parent_command_bound())?;
             out.extend(digest(p.status.operation, p.status.index, &command).0);
             out.extend(p.status.operation.get().to_le_bytes());
             out.extend(p.status.index.to_le_bytes());
@@ -205,7 +231,7 @@ where
             let op = r.operation()?;
             let index = r.u64()?;
             let len = r.u32()? as usize;
-            if len > MAX_CROSS_PARENT_ADOPTION_BYTES {
+            if len > self.parent_command_bound() {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
             let command = r.take(len)?;

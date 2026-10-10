@@ -28,7 +28,9 @@ use crate::{
     transfer_source::{SourceExportCommitment, SourceFreezeStatus},
 };
 use std::mem::size_of;
+mod metadata;
 mod parent;
+pub use metadata::{METADATA_PARTIAL_TRANSFER_TARGET_SCHEMA, METADATA_TRANSFER_TARGET_SCHEMA};
 mod partial;
 use crate::{routed::RetainedGrantStatus, scoped_source::ScopedExportStatus};
 pub use parent::PARENT_TRANSFER_TARGET_SCHEMA;
@@ -309,6 +311,7 @@ pub enum TargetQuery<Q> {
     ScopedFreeze(OperationId),
     RetainedGrant(OperationId),
     ParentAdoption(OperationId),
+    MetadataAdoption(OperationId),
     Status,
     Freeze,
     Data(RoutedQuery<Q>),
@@ -319,6 +322,7 @@ pub enum TargetRead<R> {
     ScopedFreeze(Option<ScopedExportStatus>),
     RetainedGrant(Option<RetainedGrantStatus>),
     ParentAdoption(Option<ParentGrantStatus>),
+    MetadataAdoption(Option<crate::routed::MetadataGrantStatus>),
     Status(TargetStatus),
     Freeze(Option<SourceFreezeStatus>),
     NotActive,
@@ -357,6 +361,7 @@ pub struct TransferTarget<A, P> {
     activated: Option<ActivationRecord>,
     frozen: Option<FreezeRecord>,
     parent_limit: usize,
+    metadata_adoption: bool,
     parents: Vec<parent::ParentRecord>,
     active_grant: ResponsibilityManifest,
     applied: u64,
@@ -447,6 +452,7 @@ where
             activated: None,
             frozen: None,
             parent_limit: 0,
+            metadata_adoption: false,
             parents: Vec::new(),
             applied: 0,
             partial: None,
@@ -760,7 +766,11 @@ where
             self.freeze_request(bytes)?;
             Ok(None)
         } else if parent::is_parent(bytes) && self.parent_limit != 0 {
-            crate::routed::parent_adoption::ParentAdoptionCommand::decode(bytes, true)?;
+            crate::routed::parent_adoption::ParentAdoptionCommand::decode_metadata(
+                bytes,
+                true,
+                self.metadata_adoption,
+            )?;
             Ok(None)
         } else {
             match decode(bytes, crate::routed::MAX_ROUTED_PAYLOAD_BYTES)? {
@@ -813,7 +823,7 @@ where
                 .max(if self.parent_limit == 0 {
                     0
                 } else {
-                    crate::routed::MAX_CROSS_PARENT_ADOPTION_BYTES
+                    self.parent_command_bound()
                 }),
             snapshot_bytes: 112
                 + MAX_TARGET_FREEZE_BYTES
@@ -1196,7 +1206,13 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.partial.is_some() {
+        if self.metadata_adoption {
+            if self.partial.is_some() {
+                METADATA_PARTIAL_TRANSFER_TARGET_SCHEMA
+            } else {
+                METADATA_TRANSFER_TARGET_SCHEMA
+            }
+        } else if self.partial.is_some() {
             PARTIAL_TRANSFER_TARGET_SCHEMA
         } else if self.parent_limit != 0 {
             PARENT_TRANSFER_TARGET_SCHEMA
@@ -1239,7 +1255,13 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.partial.is_some() {
+        bytes.extend(if self.metadata_adoption {
+            if self.partial.is_some() {
+                b"VBTRGT10"
+            } else {
+                b"VBTRGT09"
+            }
+        } else if self.partial.is_some() {
             b"VBTRGT07"
         } else if self.parent_limit != 0 {
             b"VBTRGT06"
@@ -1314,6 +1336,18 @@ where
         }
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
+        let tag = if self.metadata_adoption {
+            if tag != if partial { b"VBTRGT10" } else { b"VBTRGT09" } {
+                return Err(ApplicationError::UnsupportedSchema);
+            }
+            if partial {
+                &b"VBTRGT07"[..]
+            } else {
+                &b"VBTRGT06"[..]
+            }
+        } else {
+            tag
+        };
         let frozen_format = tag == b"VBTRGT03"
             || tag == b"VBTRGT04"
             || tag == b"VBTRGT05"
@@ -1503,6 +1537,12 @@ where
                     Ok(TargetRead::ParentAdoption(self.parent_adoption(op)))
                 }
             }
+            TargetQuery::MetadataAdoption(op) => {
+                if !self.metadata_adoption {
+                    return Err(ApplicationError::UnsupportedSchema);
+                }
+                Ok(TargetRead::MetadataAdoption(self.metadata_adoption(op)))
+            }
             TargetQuery::Status => Ok(TargetRead::Status(self.status())),
             TargetQuery::Freeze => self.freeze_status().map(TargetRead::Freeze),
             TargetQuery::Data(query) => {
@@ -1533,6 +1573,7 @@ where
             TargetQuery::Status
             | TargetQuery::Freeze
             | TargetQuery::ParentAdoption(_)
+            | TargetQuery::MetadataAdoption(_)
             | TargetQuery::ScopedFreeze(_)
             | TargetQuery::RetainedGrant(_) => Ok(0),
             TargetQuery::Data(q) => {
@@ -1550,6 +1591,7 @@ where
     fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match query {
             TargetQuery::ParentAdoption(_)
+            | TargetQuery::MetadataAdoption(_)
             | TargetQuery::ScopedFreeze(_)
             | TargetQuery::RetainedGrant(_) => 0,
             TargetQuery::Freeze => self.frozen.as_ref().map_or(0, |r| {
@@ -1590,6 +1632,7 @@ where
             TargetRead::NotActive
             | TargetRead::Rejected(_)
             | TargetRead::ParentAdoption(_)
+            | TargetRead::MetadataAdoption(_)
             | TargetRead::ScopedFreeze(_)
             | TargetRead::RetainedGrant(_) => 0,
             TargetRead::Data(r) => self.inner.read_result_bytes(r, limit)?,
@@ -1625,6 +1668,9 @@ where
         if self.partial.is_some() {
             return self.partial_retirement_lineage();
         }
+        if self.metadata_adoption {
+            return self.metadata_retirement_lineage();
+        }
         let record = self
             .activated
             .as_ref()
@@ -1652,8 +1698,13 @@ where
         Ok(bytes)
     }
     fn retirement_lineage_bound(&self) -> usize {
-        self.partial_retirement_bound()
-            .unwrap_or(crate::retirement::MAX_RETIREMENT_LINEAGE_BYTES)
+        self.partial_retirement_bound().unwrap_or_else(|| {
+            if self.metadata_adoption {
+                self.metadata_retirement_bound()
+            } else {
+                crate::retirement::MAX_RETIREMENT_LINEAGE_BYTES
+            }
+        })
     }
     fn validate_retirement_source(
         &self,
@@ -1674,8 +1725,35 @@ where
             grant.epoch = original.input().epoch;
             grant.generation = original.input().generation;
             grant.parent = original.input().parent;
+            if self.metadata_adoption {
+                grant.authority = original.input().authority;
+            }
             grant.execution = original.input().execution.clone();
             return if grant == *original.input() {
+                Ok(())
+            } else {
+                Err(ApplicationError::InvalidCheckpoint)
+            };
+        }
+        if self.metadata_adoption {
+            let current = status.intent.before().input();
+            let mut normalized = current.clone();
+            if current.generation < original.input().generation {
+                return Err(ApplicationError::InvalidCheckpoint);
+            }
+            normalized.authority = original.input().authority;
+            normalized.parent = original.input().parent;
+            normalized.generation = original.input().generation;
+            if let ExecutionMode::Delegated(routes) = &mut normalized.execution {
+                for route in routes {
+                    if let RouteTarget::Child(child) = &mut route.target {
+                        if child.group == current.authority {
+                            child.group = original.input().authority;
+                        }
+                    }
+                }
+            }
+            return if normalized == *original.input() {
                 Ok(())
             } else {
                 Err(ApplicationError::InvalidCheckpoint)
@@ -1697,6 +1775,11 @@ where
         if self.partial.is_some() {
             return self
                 .partial_retirement_grant(bytes, fence_index)
+                .map(|_| ());
+        }
+        if self.metadata_adoption {
+            return self
+                .metadata_retirement_grant(bytes, fence_index)
                 .map(|_| ());
         }
         if bytes.len() > crate::retirement::MAX_RETIREMENT_LINEAGE_BYTES {
@@ -1748,6 +1831,15 @@ where
         self.validate_retirement_source(status)?;
         if self.partial.is_some() {
             return if self.partial_retirement_grant(lineage, status.fence.index)?
+                == *status.intent.before()
+            {
+                Ok(())
+            } else {
+                Err(ApplicationError::InvalidCheckpoint)
+            };
+        }
+        if self.metadata_adoption {
+            return if self.metadata_retirement_grant(lineage, status.fence.index)?
                 == *status.intent.before()
             {
                 Ok(())

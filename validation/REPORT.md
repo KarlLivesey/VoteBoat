@@ -4754,3 +4754,36 @@ The matching core-only targets pass67 cases (18/14/11/24). The three new
 all-feature cases were rerun after adding an explicit imported-value and duplicate
 retry check on the second target. All-target/all-feature Clippy with warnings
 denied, formatting, whitespace and the86-contract inventory/path check pass.
+
+## Slice156c2b — imported metadata adoption and retirement
+
+All-feature local tests pass across metadata_transfer23, reparent_guards18,
+reparenting14, retained_insertion38, retirement7, transfer_target9 and
+imported_parent4 (113 cases). Core-only runs of the first six targets pass85
+cases (18/14/11/28/5/9). All-target/all-feature Clippy with warnings denied passes.
+
+Five new imported-owner tests cover both full and partial profiles: actual initial
+import/activation, complete metadata relocation/adoption, later split or
+retained-then-remaining handoff, retirement and exact restart/retry. They preserve
+original imports, activation, data retries/outbox and partial exports. The retired
+lineage reconstructs the exact final grant without application payloads. Missing,
+reordered, rehashed-invalid and truncated histories, stale/wrong profiles, partial
+batches and checkpoint truncations refuse. Old imported-parent retirement tests
+also pass against unchanged profile encodings.
+
+Native ModelIo cuts every adoption and retirement frame byte plus sync/publication
+boundaries for both profiles. Recovery reaches only the old or complete state,
+then resumes exact original control outcomes. These are modeled native-journal
+and embedding cases, not TCP/QUIC deployment or physical power-loss validation.
+
+Test corrections used existing public status/query variants, a supported split
+shape, separate metadata/data configurations, and preserved original semantic
+receipts while retry log indices advance. Partial pre-activation refusal retains
+its existing NotApplied contract. Production checks were not relaxed to make
+these fixtures pass. Foreign locators, repeat metadata movement and native socket
+composition remain active work under the unchanged full P0–P7 goal.
+
+Core-only imported_parent adds3 passing cases (88 total across all seven targets).
+Both all-feature and core-only all-target Clippy pass with warnings denied. Final
+metadata tests pass8 cases after the fixture cleanup; formatting, whitespace and
+the86-contract inventory/path check pass. README remains unchanged.

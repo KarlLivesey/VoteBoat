@@ -272,3 +272,9 @@ handoff, metadata relocation, another retained handoff under the new authority,
 original export/retry preservation, checked mixed-history recovery and modeled
 native journal cuts. Imported-owner metadata lineage, foreign locators, repeat
 movement and native socket composition remain open; this does not complete P5/P6.
+
+Slice156c2b adds imported full/partial metadata adoption and retirement lineage.
+Actual moved-authority split and retained/remaining handoffs preserve original
+activation, retry/outbox and earlier exports. Exact ordered retirement replay,
+negative history tests and modeled native adoption/retirement cuts pass. Foreign
+locators, repeat authority moves and native socket composition remain open.
