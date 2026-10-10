@@ -159,9 +159,32 @@ server listeners are selected at startup. Commands remain TCP/TLS even when Raft
 
 To resolve current command addresses from a running service, add
 `--discovery-peers advertised.txt` to that service's startup command. The file
-uses the same bounded format above and requires `--service-access`. It is an
-immutable startup view; restart with a changed file to advertise changed
-addresses. Configure reachable addresses, not wildcard listener addresses.
+uses the same bounded format above and requires `--service-access`. That v1
+format is an immutable startup view; restart with a changed file to advertise
+changed addresses. Configure reachable addresses, not wildcard listener addresses.
+
+For address updates without restarting the source, use an explicit generation:
+
+```text
+voteboat-discovery-peers-v2 10
+1 127.0.0.1:43101 node1.voteboat.test
+2 127.0.0.1:43102 node2.voteboat.test
+3 127.0.0.1:43103 node3.voteboat.test
+```
+
+Inspect with `discovery-status`. An administrator with Configure permission can
+run `discovery-update 10 11 2 127.0.0.1:43202` to change node2's advertised address.
+The expected generation must match and the next must increase. Nodes and TLS
+names stay fixed; invalid/duplicate addresses and conflicting or stale updates
+refuse. Retrying the exact latest update during that source's lifetime returns
+`duplicate=true`; its retry record is not retained across restart.
+
+These are **local, volatile hints**. Replies say `durable=false`; the command
+does not write files or coordinate other sources. Save the corresponding v2
+file separately before restarting. Restart loads that file's generation and
+addresses, so choose generations above every earlier advertisement, including
+when migrating from v1. This changes advertised addresses only; it does not
+move listeners, replace client certificate pins, or grant ownership.
 
 Clients select a pinned source from their own command file:
 

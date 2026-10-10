@@ -19,8 +19,10 @@ use super::{
     setup::Failure,
 };
 use std::{
+    cell::RefCell,
+    net::SocketAddr,
     path::Path,
-    sync::Arc,
+    rc::Rc,
     time::{Duration, Instant},
 };
 use voteboat::{discovery::*, native::remote_discovery::*, runtime::MonoTime, secure::*};
@@ -29,9 +31,21 @@ pub const ACK: &str = "OK discovery-v1\n";
 pub type Server = NativeDiscoveryResponder<Box<dyn SecureSession>, Source>;
 #[derive(Clone)]
 pub struct Source {
-    endpoints: Arc<[Endpoint]>,
-    generation: HintGeneration,
+    current: Rc<RefCell<Snapshot>>,
+    explicit: bool,
     closed: bool,
+}
+struct Snapshot {
+    endpoints: Vec<Endpoint>,
+    generation: HintGeneration,
+    last: Option<Update>,
+}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+struct Update {
+    expected: HintGeneration,
+    next: HintGeneration,
+    node: u64,
+    address: SocketAddr,
 }
 impl Source {
     pub fn load(path: Option<&Path>, authenticated: bool) -> Result<Option<Self>, Failure> {
@@ -39,14 +53,107 @@ impl Source {
         if !authenticated {
             return Err("--discovery-peers requires --service-access".into());
         }
-        Ok(Some(Self {
-            endpoints: command_endpoints::load(path)?.into(),
-            generation: HintGeneration::new(1).unwrap(),
+        Ok(Some(Self::parse(&command_endpoints::read(path)?)?))
+    }
+    fn parse(text: &str) -> Result<Self, Failure> {
+        let header = text.lines().next().unwrap_or("");
+        let (generation, explicit, endpoints) = if header.starts_with("voteboat-discovery-peers-v2")
+        {
+            let words = header.split_whitespace().collect::<Vec<_>>();
+            let ["voteboat-discovery-peers-v2", generation] = words.as_slice() else {
+                return Err("expected voteboat-discovery-peers-v2 GENERATION".into());
+            };
+            let generation =
+                HintGeneration::new(generation.parse()?).ok_or("invalid hint generation")?;
+            let (_, body) = text.split_once('\n').ok_or("missing discovery endpoints")?;
+            let endpoints =
+                command_endpoints::parse(&format!("voteboat-command-peers-v1\n{body}"))?;
+            (generation, true, endpoints)
+        } else {
+            (
+                HintGeneration::new(1).unwrap(),
+                false,
+                command_endpoints::parse(text)?,
+            )
+        };
+        Ok(Self {
+            current: Rc::new(RefCell::new(Snapshot {
+                endpoints,
+                generation,
+                last: None,
+            })),
+            explicit,
             closed: false,
-        }))
+        })
     }
     pub fn bind_session(&mut self, session: u64) {
-        self.generation = HintGeneration::new(session).expect("nonzero store session");
+        if !self.explicit {
+            self.current.borrow_mut().generation =
+                HintGeneration::new(session).expect("nonzero store session");
+        }
+    }
+    pub fn status(&self) -> String {
+        let current = self.current.borrow();
+        format!(
+            "OK generation={} targets={} updates={} durable=false",
+            current.generation.get(),
+            current.endpoints.len(),
+            self.explicit
+        )
+    }
+    pub fn update(&self, words: &[&str]) -> Result<String, String> {
+        let [expected, next, node, address] = words else {
+            return Err("expected discovery-update EXPECTED NEXT NODE SOCKET_ADDRESS".into());
+        };
+        let generation = |s: &str| {
+            s.parse()
+                .ok()
+                .and_then(HintGeneration::new)
+                .ok_or("invalid hint generation")
+        };
+        self.replace(Update {
+            expected: generation(expected)?,
+            next: generation(next)?,
+            node: node.parse().map_err(|_| "invalid endpoint node")?,
+            address: address.parse().map_err(|_| "invalid endpoint address")?,
+        })
+    }
+    fn replace(&self, update: Update) -> Result<String, String> {
+        if self.closed || !self.explicit {
+            return Err("endpoint updates require an open v2 discovery source".into());
+        }
+        let mut current = self.current.borrow_mut();
+        if current.last == Some(update) {
+            return Ok(format!(
+                "OK generation={} duplicate=true durable=false",
+                current.generation.get()
+            ));
+        }
+        if update.expected != current.generation || update.next <= update.expected {
+            return Err("stale or invalid endpoint generation".into());
+        }
+        if update.address.port() == 0
+            || update.address.ip().is_unspecified()
+            || update.address.ip().is_multicast()
+            || current
+                .endpoints
+                .iter()
+                .any(|e| e.node != update.node && e.address == update.address)
+        {
+            return Err("invalid or duplicate endpoint address".into());
+        }
+        let endpoint = current
+            .endpoints
+            .iter_mut()
+            .find(|e| e.node == update.node)
+            .ok_or("endpoint node not provisioned")?;
+        endpoint.address = update.address;
+        current.generation = update.next;
+        current.last = Some(update);
+        Ok(format!(
+            "OK generation={} duplicate=false durable=false",
+            update.next.get()
+        ))
     }
     pub fn serve(self, session: Box<dyn SecureSession>, now: MonoTime) -> Result<Server, Failure> {
         let binding = require_authenticated(&*session)
@@ -68,7 +175,8 @@ impl PeerDiscovery for Source {
         if self.closed {
             return Err(DiscoveryError::Closed);
         }
-        let entry = self
+        let current = self.current.borrow();
+        let entry = current
             .endpoints
             .iter()
             .find(|e| service_access::transport_identity(e.node, false) == peer)
@@ -80,7 +188,7 @@ impl PeerDiscovery for Source {
         );
         Ok(PeerEndpointHint {
             peer,
-            generation: self.generation,
+            generation: current.generation,
             endpoint: entry.address,
             expires_at,
         })
@@ -137,3 +245,7 @@ pub fn resolve(
     discovery.close();
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "command_discovery/tests.rs"]
+mod tests;

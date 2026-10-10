@@ -102,6 +102,7 @@ recover-member accepts --deployment FILE instead of PEERS_FILE; trailing named o
 --admin-plan FILE is trusted startup input for recover-member; see docs/COUNTER_SERVICE.md for grammar and restart rules.\n\
 Optional authenticated commands: serve --service-access FILE; client ... --service-tls TLS_DIRECTORY --principal ID.\n\
 Endpoint discovery: client ... --discover-via NODE --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
+Versioned discovery source: discovery-status; discovery-update EXPECTED NEXT NODE SOCKET_ADDRESS. Updates are local volatile hints; persist the v2 startup file separately.\n\
 Remote command routing: client ... --command-peers FILE --service-tls TLS_DIRECTORY --principal ID.\n\
 --wal-reclaim-ms enables physical reclamation; --checkpoint-entries enables automatic checkpoints.\n\
 Use the same operation ID and delta when retrying an unknown write.\n\
@@ -192,6 +193,34 @@ fn maintenance_status(service: &Service) -> String {
         event.and_then(|e| e.result.as_ref().err()), service.checkpoints().policy.is_some(),
         service.checkpoints().pending.len(), service.local().owner.core(group()).map_or(0, |c| c.state().base_index()))
 }
+fn discovery_command(
+    source: &Option<command_discovery::Source>,
+    words: &[&str],
+) -> Option<Result<Phase, String>> {
+    let result = match words {
+        ["discover"] => source
+            .clone()
+            .ok_or_else(|| "endpoint discovery disabled".to_owned())
+            .map(|source| Phase::DiscoveryAck { source, sent: 0 }),
+        ["discovery-status"] => source
+            .as_ref()
+            .ok_or_else(|| "endpoint discovery disabled".to_owned())
+            .map(|source| Phase::Output {
+                bytes: format!("{}\n", source.status()).into_bytes(),
+                sent: 0,
+            }),
+        ["discovery-update", fields @ ..] => source
+            .as_ref()
+            .ok_or_else(|| "endpoint discovery disabled".to_owned())
+            .and_then(|source| source.update(fields))
+            .map(|reply| Phase::Output {
+                bytes: format!("{reply}\n").into_bytes(),
+                sent: 0,
+            }),
+        _ => return None,
+    };
+    Some(result)
+}
 fn command(
     service: &mut Service,
     observer: &Diagnostics,
@@ -204,8 +233,10 @@ fn command(
     let selected = group_command::resolve(service, command)?;
     let group = selected.group;
     let words = selected.text.split_whitespace().collect::<Vec<_>>();
+    if let Some(result) = discovery_command(discovery, &words) {
+        return result;
+    }
     let reply = match words.as_slice() {
-        ["discover"] => return Ok(Phase::DiscoveryAck { source: discovery.clone().ok_or("endpoint discovery disabled")?, sent: 0 }),
         ["credential-status" | "reload-access", ..] => credentials.command(&words)?,
         ["maintenance"] => maintenance_status(service),
         ["list-assigned-groups", cursor, limit] => assignment_listing::list(service, cursor, limit)?,

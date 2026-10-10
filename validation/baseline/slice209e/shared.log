@@ -1,0 +1,93 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.73s
+     Running unittests src/bin/counter_service.rs (target/debug/deps/voteboat_counter-c0255e79019f8dd0)
+
+running 34 tests
+test command_discovery::tests::malformed_versioned_sources_are_rejected ... ok
+test command_discovery::tests::existing_source_views_observe_checked_address_updates_and_close_independently ... ok
+test command_discovery::tests::explicit_generation_survives_binding_and_legacy_sources_keep_session_generation ... ok
+test command_discovery::tests::only_the_exact_latest_update_can_be_retried ... ok
+test command_discovery::tests::invalid_updates_preserve_all_current_hints_and_generation ... ok
+test drain_commands::validation::tests::retained_capacity_uses_recursive_policy_not_voter_count ... ok
+test assignment_listing::tests::cursor_rejects_changed_identity_inventory_and_configuration ... ok
+test assignment_listing::tests::maximum_identity_page_and_inventory_are_bounded ... ok
+test diagnostics::tests::maximum_timing_values_fit_reply_and_closed_sink_reports_loss ... ok
+test drain_runner::multi::actions::tests::only_known_authority_transitions_return_to_observation ... ok
+test drain_runner::observation_tests::observation_retry_refuses_authentication_failure_and_invalid_transport_data ... ok
+test diagnostics::tests::maximum_value_pages_fit_client_reply_budget_and_report_loss ... ok
+test drain_runner::tests::configuration_busy_reobserves_but_does_not_mask_other_rejections ... ok
+test drain_runner::multi::actions::tests::handoff_receipts_must_match_original_bound_target_and_operation ... ok
+test drain_runner::recovery_tests::invalid_configuration_transport_is_not_hidden_by_retry ... ok
+test credential_reload::tests::held_preparation_is_single_flight_and_shutdown_joins_before_publication_returns ... ok
+test drain_runner::recovery_tests::uncertain_configuration_attempts_require_observation ... ok
+test drain_runner::multi::rows::tests::assignment_rows_reject_wrong_identity_bounds_missing_and_duplicate_fields ... ok
+test drain_runner::tests::exhausted_runner_budgets_refuse_before_connection ... ok
+test quorum_diagnostics::tests::joint_views_require_both_policies_and_keep_parent_indexes_when_paged ... ok
+test drain_runner::multi::rows::tests::progress_binds_identity_active_phase_count_and_plan_digest ... ok
+test drain_runner::tests::source_progress_rejects_wrong_duplicate_missing_and_non_membership_fields ... ok
+test credential_reload::tests::uncertain_worker_result_fences_current_credentials_and_drains_the_handle ... ok
+test peer_credentials::tests::malformed_or_unauthenticated_selection_cannot_create_a_peer_record ... ok
+test quorum_diagnostics::tests::maximum_weight_pages_fit_the_bounded_reply ... ok
+test peer_credentials::tests::shutdown_joins_unpublished_preparation_and_startup_recovers_its_original_record ... ok
+test drain_runner::observation_tests::completed_observation_still_rejects_invalid_identity_or_authorization ... ok
+test drain_runner::observation_tests::stalled_observation_cannot_renew_the_absolute_deadline ... ok
+test drain_runner::observation_tests::lost_source_observation_cannot_replenish_exhausted_requests ... ok
+test drain_runner::observation_tests::lost_assignment_page_reply_repeats_the_same_offset ... ok
+test drain_runner::observation_tests::lost_source_status_reply_repeats_only_original_observation ... ok
+test drain_runner::observation_tests::source_authentication_timeout_preserves_observation_budget ... ok
+test drain_runner::recovery_tests::configuration_reply_timeout_cannot_replenish_request_budget_or_stop_source ... ok
+test drain_runner::recovery_tests::configuration_reply_timeout_observes_original_journal_before_retry_and_stop ... ok
+
+test result: ok. 34 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.34s
+
+     Running tests/directory_service.rs (target/debug/deps/directory_service-dbb88e6e11c04bf0)
+
+running 19 tests
+test invalid_metadata_plan_is_rejected_before_storage_or_tls ... ok
+test initialization::setup_retries_exact_leadership_loss_and_requires_original_applied_receipt ... ok
+test initialization::setup_is_bounded_and_rejects_unrelated_errors_or_changed_receipts ... ok
+test routes::recursive_route_rejects_invalid_maps_and_options_before_connections ... ok
+test disconnected_manifest_read_retains_and_drains_node_ownership ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_tcp ... ok
+test directory_publication_remote_reads_and_checkpoint_recovery_quic ... ok
+test routes::recursive_route_rejects_wrong_authority_and_tls_identity ... ok
+test routes::recursive_route_interrupted_leaf_never_returns_a_hint ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_tcp ... ok
+test routes::recursive_route_missing_leaf_is_not_a_partial_success ... ok
+test initialization::recovery::original_directory_operations_recover_after_admitted_client_loss_quic ... ok
+test routes::recursive_route_rotates_unavailable_endpoints_after_leader_loss ... ok
+test routes::recursive_route_tcp_and_known_child_without_ancestors ... ok
+test routes::recursive_route_quic_and_known_child_without_ancestors ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_tcp ... ok
+test peer_credentials::peer_rotation_preserves_committed_directory_and_command_access_quic ... ok
+test routes::recursive_route_rejects_wrong_parent_epoch_and_scope ... ok
+test routes::recursive_route_enforces_root_observation_floors ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 21.52s
+
+     Running tests/transfer_service.rs (target/debug/deps/transfer_service-cec75a1df63a0f32)
+
+running 18 tests
+test initialization::setup_repeats_only_explicit_leadership_loss_and_requires_applied_receipt ... ok
+test initialization::setup_attempts_are_bounded_and_other_failures_remain_terminal ... ok
+test profiles::invalid_profiles_fail_before_opening_replica_files ... ok
+test tcp_authenticated_operator_starts_a_split_and_children_survive_parent_shutdown ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp ... ok
+test initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts ... ok
+test retirement::tcp_retirement_recovers_unread_proposal_and_original_release_from_wal ... ok
+test peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic ... ok
+test merge::tcp_operator_collects_both_images_before_importing_a_merge ... ok
+test retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint ... ok
+test initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data ... ok
+test quic_authenticated_operator_resumes_original_split_after_process_crash ... ok
+test revocation::interrupted_split_resumes_under_replacement_administrator_tcp ... ok
+test revocation::interrupted_split_resumes_under_replacement_administrator_quic ... ok
+test merge::tcp_merge_recovers_both_sources_import_activation_and_independent_retirement ... ok
+test cuts::tcp_wal_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts has been running for over 60 seconds
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement has been running for over 60 seconds
+test merge::quic_merge_recovers_checkpoints_both_sources_and_independent_retirement ... ok
+test cuts::quic_checkpoint_recovery_at_every_split_phase_and_lost_fence_publication_receipts ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 71.93s
+

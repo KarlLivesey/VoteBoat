@@ -1,5 +1,15 @@
 # Baseline acceptance map — review192, operator206 and provider201b evidence
 
+Slice209e adds explicit-generation counter command-endpoint sources and
+authenticated address compare-and-set updates. The bounded shared snapshot
+preserves fixed identities/TLS names, refuses invalid/stale/conflicting updates,
+and permits exact latest retries during the source lifetime. Updates explicitly
+report durable=false; restart loads the separately saved operator snapshot.
+Selected TCP/QUIC process histories cover discovery, authorization, data retries
+and that restart boundary. Native peer-source provisioning and combined
+long-lived endpoint/recursive movement remain open, along with broader provider,
+platform and performance acceptance.
+
 Slice209d adds selected cold child restart while every metadata replica and its
 remote source remain closed. TCP/TLS and QUIC histories cover WAL and installed
 checkpoint recovery, empty-cache root refusal, routing from the actual recovered

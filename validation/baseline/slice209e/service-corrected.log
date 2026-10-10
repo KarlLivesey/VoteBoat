@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-65dd303b36a1d059)
+
+running 8 tests
+test command_discovery::updates::versioned_source_rejects_zero_generation_before_storage_is_opened ... ok
+test command_discovery::discovery_failure_never_submits_a_command_or_uses_stale_addresses ... ok
+test command_discovery::discovery_is_opt_in_and_requires_authentication_before_opening_storage ... ok
+test command_discovery::discovery_scope_and_startup_validation_fail_before_submission ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_tcp ... ok
+test command_discovery::discovered_command_endpoints_preserve_retries_and_recovery_quic ... ok
+test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_tcp ... ok
+test command_discovery::updates::versioned_discovery_update_is_authorized_retryable_and_restart_explicit_quic ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 133 filtered out; finished in 3.39s
+

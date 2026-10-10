@@ -221,3 +221,6 @@ fn discovery_scope_and_startup_validation_fail_before_submission() {
     assert!(!root.exists());
     fs::remove_dir_all(&c.root).unwrap();
 }
+
+#[path = "command_discovery_updates.rs"]
+mod updates;

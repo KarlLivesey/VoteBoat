@@ -126,7 +126,8 @@ adds opt-in connector-owned discovery progress and bounded waiting admission,
 including native Node reconnect/reopen and QUIC connection evidence. Completed209c
 adds connector-driven source-session reconnection with host/TCP/QUIC checks.
 Completed209d covers cold child WAL/checkpoint recovery with metadata offline.
-Current209 continues executable source provisioning and combined long-lived
+Completed209e adds versioned counter command-endpoint updates with explicit
+volatile/restart semantics. Current209 continues native peer-source provisioning and combined long-lived
 endpoint/recursive restart composition against the existing authenticated endpoint/manifest source and
 bounded cache. Its purpose is usable reconnect after discovery changes;
 dependencies are existing discovery, exact peer pins and the fair reactor.
@@ -145,6 +146,78 @@ supported platform job. Depend on the existing operator fixtures and logs;
 completion is terminal passing evidence for the selected failure, not a claim
 that other platform failures disappeared. This advances the usable service and
 cross-cutting baseline acceptance. CI continues as background feedback.
+
+### Slice209e implemented — versioned counter endpoint updates
+
+The counter executable accepts an opt-in v2 discovery file with an explicit
+nonzero generation. Inspect status and Configure-authorized address updates use
+the existing authenticated command path. One bounded shared source snapshot
+keeps the original identities/TLS names; updates require the exact current
+generation, a later generation and a valid unique address for an existing node.
+Existing source views observe accepted updates, while closing one view does not
+close another. The identical latest update is retryable during the process
+lifetime; rejected updates leave the snapshot unchanged. Legacy v1 files retain
+the original immutable, session-derived generation behavior.
+
+These updates are local volatile hints and report durable=false. Neither the
+startup file nor another source is changed. Tests explicitly save the accepted
+v2 snapshot before process restart; the source then reloads that snapshot and
+application operation20901 retains its original result. No change to Raft state,
+membership, listeners, trust pins or discovery wire format is introduced.
+
+Validation in validation/baseline/slice209e: the five source unit tests pass;
+the shared run passes all34 counter binary tests,19 directory service tests and
+18 transfer service tests. After the fixture correction below, all eight
+all-feature and six default-feature discovery integration tests pass. They include TCP/QUIC data
+transport, authorization refusal, stale address refusal before submission,
+exact/conflicting updates and restart/data retries. The malformed-v2 process
+case refuses generation0 before opening storage. Formatting and all four strict
+Clippy profiles pass with zero diagnostics. The108-entry inventory and13
+obligation metadata checks pass; no additional public provider is introduced.
+The README records each run, including the retained failed verification.
+
+Macro review: this closes counter executable live-address administration, not
+native peer-source provisioning or combined long-lived endpoint/recursive
+movement acceptance. The next two mini-plan deliverables remain provider
+conformance and reproduced platform failures. Full P0–P7 stays active; these
+selected Linux process histories do not establish macOS or separate-host use.
+
+### Slice209e schema plan — executable versioned endpoint updates
+
+The counter executable already provisions a fixed authenticated command-endpoint
+source. Add an explicit v2 source file containing its initial hint generation,
+plus Inspect status and Configure-authorized compare-and-set updates for one
+already provisioned endpoint. This closes live endpoint-address administration
+without introducing trust distribution, file writes, or another runtime. Keep
+the v1 startup format and session-derived generation behavior unchanged.
+
+One shared bounded source snapshot contains the original endpoint identities and
+TLS names, current generation and last accepted update tuple. Update requires the
+exact expected generation, strictly later next generation, an existing node and
+a valid numeric address. It changes only that node's address, rejecting duplicate
+addresses and retaining all names/identities. The identical most-recent tuple may
+be retried after a lost reply; a conflicting or stale tuple must not mutate state.
+Per-connection source close remains local. File parsing occurs only at startup;
+the service command performs no file I/O and uses the existing authorization and
+256-byte input bounds. Discovery consumers still independently authenticate peers.
+
+Updates are local volatile hints, not replicated membership or durable operator
+records. Restart reloads the administrator's explicit v2 snapshot; persistence
+requires updating that snapshot out of band. Tests must distinguish this limit,
+exercise real authenticated TCP/QUIC service writes through a changed endpoint,
+exact retry/conflict/authorization refusal, restart with the updated snapshot and
+original application operation IDs. Shared-source unit checks cover existing
+views, generation/address bounds and local close. This advances209/P5 executable
+discovery; combined long-lived endpoint/tree movement and broader provider and
+platform acceptance remain open.
+
+209e verification correction: the first final suite exposed a fixture assumption.
+Before correcting node2's deliberately stale hint, an auto-routed read cannot
+find a leader elected on node2. Verify the unchanged initial application value
+through the fixture's known authenticated addresses, then restore the stale
+discovery bootstrap and exercise the same address update. This preserves the
+pre-submission refusal check and avoids assuming which voter wins the election;
+no production routing deadline or retry behavior changes.
 
 ### Slice209d implemented — restart children while metadata stays offline
 

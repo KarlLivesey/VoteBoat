@@ -79,6 +79,10 @@ pub fn targets(
 }
 
 pub fn load(path: &Path) -> Result<Vec<Endpoint>, Failure> {
+    parse(&read(path)?)
+}
+
+pub fn read(path: &Path) -> Result<String, Failure> {
     let mut bytes = Vec::new();
     std::fs::File::open(path)?
         .take(MAX_BYTES + 1)
@@ -86,7 +90,14 @@ pub fn load(path: &Path) -> Result<Vec<Endpoint>, Failure> {
     if bytes.len() as u64 > MAX_BYTES {
         return Err("command peers exceed 16 KiB".into());
     }
-    let mut lines = std::str::from_utf8(&bytes)?.lines();
+    Ok(String::from_utf8(bytes)?)
+}
+
+pub fn parse(text: &str) -> Result<Vec<Endpoint>, Failure> {
+    if text.len() as u64 > MAX_BYTES {
+        return Err("command peers exceed 16 KiB".into());
+    }
+    let mut lines = text.lines();
     if lines.next() != Some("voteboat-command-peers-v1") {
         return Err("expected voteboat-command-peers-v1 header".into());
     }
