@@ -24,7 +24,9 @@ pub(crate) mod codec;
 use codec::{decode, Command, DATA_HEADER};
 mod control_reads;
 mod cross_parent_adoption;
+mod locator_adoption;
 mod metadata_adoption;
+pub use locator_adoption::*;
 pub use metadata_adoption::{
     MetadataGrantStatus, OwnerMetadataAdoption, MAX_METADATA_ADOPTION_BYTES,
     METADATA_ADOPTING_ROUTED_SCHEMA,
@@ -163,6 +165,7 @@ pub struct RoutedApplication<A, P> {
     parent_adoption_limit: usize,
     cross_parent_adoption: bool,
     metadata_adoption: bool,
+    metadata_locator_adoption: bool,
     parent_adoptions: Vec<ParentAdoptionRecord>,
 }
 impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A, P> {
@@ -238,6 +241,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             parent_adoption_limit: 0,
             cross_parent_adoption: false,
             metadata_adoption: false,
+            metadata_locator_adoption: false,
             parent_adoptions: Vec::new(),
         })
     }
@@ -337,7 +341,9 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
     }
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         crate::raft::ReadinessRequirements {
-            application_schema: if self.metadata_adoption {
+            application_schema: if self.metadata_locator_adoption {
+                LOCATOR_ADOPTING_ROUTED_SCHEMA
+            } else if self.metadata_adoption {
                 METADATA_ADOPTING_ROUTED_SCHEMA
             } else if self.cross_parent_adoption {
                 CROSS_PARENT_ADOPTING_ROUTED_SCHEMA
@@ -922,7 +928,9 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.metadata_adoption {
+        if self.metadata_locator_adoption {
+            LOCATOR_ADOPTING_ROUTED_SCHEMA
+        } else if self.metadata_adoption {
             METADATA_ADOPTING_ROUTED_SCHEMA
         } else if self.cross_parent_adoption {
             CROSS_PARENT_ADOPTING_ROUTED_SCHEMA
@@ -972,7 +980,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.metadata_adoption {
+        bytes.extend(if self.metadata_locator_adoption {
+            b"VBROUT06"
+        } else if self.metadata_adoption {
             b"VBROUT05"
         } else if self.cross_parent_adoption {
             b"VBROUT04"
@@ -1045,7 +1055,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.metadata_adoption {
+                != if self.metadata_locator_adoption {
+                    b"VBROUT06"
+                } else if self.metadata_adoption {
                     b"VBROUT05"
                 } else if self.cross_parent_adoption {
                     b"VBROUT04"
@@ -1232,6 +1244,7 @@ where
                         r.take(n)?,
                         self.cross_parent_adoption,
                         self.metadata_adoption,
+                        self.metadata_locator_adoption,
                     )?;
                     let Some((initial, initial_index)) = initialized else {
                         return Err(ApplicationError::InvalidCheckpoint);

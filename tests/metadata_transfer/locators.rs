@@ -19,7 +19,7 @@ fn rid(n: u128) -> ResponsibilityIdentity {
         incarnation: ResponsibilityIncarnation::new(1).unwrap(),
     }
 }
-fn tree() -> [ResponsibilityManifest; 3] {
+pub(super) fn tree() -> [ResponsibilityManifest; 3] {
     let mut root = grant().into_input();
     root.parent = Some(ParentAuthority {
         responsibility: rid(50),
@@ -151,7 +151,7 @@ fn moved() -> Moved {
 fn update(m: &Moved, index: usize) -> MetadataLocatorUpdate {
     MetadataLocatorUpdate::new(m.tree[index].clone(), m.plan.clone(), m.activation).unwrap()
 }
-fn seeded(m: &ResponsibilityManifest, operations: usize) -> (Directory, Vec<LogEntry>) {
+pub(super) fn seeded(m: &ResponsibilityManifest, operations: usize) -> (Directory, Vec<LogEntry>) {
     let mut d = fresh_directory(m, operations);
     let entries = vec![
         entry(1, 1000, d.bootstrap_command(100000).unwrap()),

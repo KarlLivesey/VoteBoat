@@ -17,6 +17,8 @@ use super::*;
 use crate::routed::{
     parent_adoption::ParentAdoptionCommand, MAX_METADATA_ADOPTION_BYTES, MAX_PARENT_ADOPTIONS,
 };
+pub const LOCATOR_TRANSFER_TARGET_SCHEMA: u64 = 10;
+pub const LOCATOR_PARTIAL_TRANSFER_TARGET_SCHEMA: u64 = 11;
 pub const METADATA_TRANSFER_TARGET_SCHEMA: u64 = 8;
 pub const METADATA_PARTIAL_TRANSFER_TARGET_SCHEMA: u64 = 9;
 impl<A, P> TransferTarget<A, P>
@@ -47,6 +49,17 @@ where
         next.binding[..8].copy_from_slice(b"VBTSOWN6");
         Ok(next)
     }
+    /// Select before bootstrap and optional partial delegation.
+    #[allow(clippy::result_large_err)]
+    pub fn with_metadata_locator_adoption(
+        self,
+        maximum: usize,
+    ) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_metadata_authority_adoption(maximum)?;
+        next.metadata_locator_adoption = true;
+        next.binding[..8].copy_from_slice(b"VBTSOWN8");
+        Ok(next)
+    }
     pub(super) fn metadata_retirement_bound(&self) -> usize {
         22 + MAX_TARGET_ACTIVATION_BYTES + self.parent_limit * (60 + self.parent_command_bound())
     }
@@ -64,7 +77,11 @@ where
         bytes.extend(activation.status.index.to_le_bytes());
         bytes.extend((activation.bytes.len() as u32).to_le_bytes());
         bytes.extend(&activation.bytes);
-        bytes.extend(b"VBTPMRL1");
+        bytes.extend(if self.metadata_locator_adoption {
+            b"VBTPLRL1"
+        } else {
+            b"VBTPMRL1"
+        });
         bytes.extend(parents);
         Ok(bytes)
     }
@@ -91,7 +108,12 @@ where
             || previous <= imported.imported.index
             || previous >= fence
             || fence == u64::MAX
-            || r.take(8)? != b"VBTPMRL1"
+            || r.take(8)?
+                != if self.metadata_locator_adoption {
+                    b"VBTPLRL1"
+                } else {
+                    b"VBTPMRL1"
+                }
         {
             return Err(ApplicationError::InvalidCheckpoint);
         }
@@ -117,8 +139,12 @@ where
             if hash != parent::digest(operation, index, bytes).0 {
                 return Err(ApplicationError::InvalidCheckpoint);
             }
-            let command =
-                ParentAdoptionCommand::decode_metadata(bytes, true, self.metadata_adoption)?;
+            let command = ParentAdoptionCommand::decode_metadata(
+                bytes,
+                true,
+                self.metadata_adoption,
+                self.metadata_locator_adoption,
+            )?;
             if command.before() != &grant || command.encode(n)? != bytes {
                 return Err(ApplicationError::InvalidCheckpoint);
             }

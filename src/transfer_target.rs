@@ -30,7 +30,10 @@ use crate::{
 use std::mem::size_of;
 mod metadata;
 mod parent;
-pub use metadata::{METADATA_PARTIAL_TRANSFER_TARGET_SCHEMA, METADATA_TRANSFER_TARGET_SCHEMA};
+pub use metadata::{
+    LOCATOR_PARTIAL_TRANSFER_TARGET_SCHEMA, LOCATOR_TRANSFER_TARGET_SCHEMA,
+    METADATA_PARTIAL_TRANSFER_TARGET_SCHEMA, METADATA_TRANSFER_TARGET_SCHEMA,
+};
 mod partial;
 use crate::{routed::RetainedGrantStatus, scoped_source::ScopedExportStatus};
 pub use parent::PARENT_TRANSFER_TARGET_SCHEMA;
@@ -312,6 +315,7 @@ pub enum TargetQuery<Q> {
     RetainedGrant(OperationId),
     ParentAdoption(OperationId),
     MetadataAdoption(OperationId),
+    MetadataLocatorAdoption(OperationId),
     Status,
     Freeze,
     Data(RoutedQuery<Q>),
@@ -323,6 +327,7 @@ pub enum TargetRead<R> {
     RetainedGrant(Option<RetainedGrantStatus>),
     ParentAdoption(Option<ParentGrantStatus>),
     MetadataAdoption(Option<crate::routed::MetadataGrantStatus>),
+    MetadataLocatorAdoption(Option<crate::routed::MetadataLocatorGrantStatus>),
     Status(TargetStatus),
     Freeze(Option<SourceFreezeStatus>),
     NotActive,
@@ -362,6 +367,7 @@ pub struct TransferTarget<A, P> {
     frozen: Option<FreezeRecord>,
     parent_limit: usize,
     metadata_adoption: bool,
+    metadata_locator_adoption: bool,
     parents: Vec<parent::ParentRecord>,
     active_grant: ResponsibilityManifest,
     applied: u64,
@@ -453,6 +459,7 @@ where
             frozen: None,
             parent_limit: 0,
             metadata_adoption: false,
+            metadata_locator_adoption: false,
             parents: Vec::new(),
             applied: 0,
             partial: None,
@@ -770,6 +777,7 @@ where
                 bytes,
                 true,
                 self.metadata_adoption,
+                self.metadata_locator_adoption,
             )?;
             Ok(None)
         } else {
@@ -1206,7 +1214,13 @@ where
     P: PartitionPolicy + Clone,
 {
     fn schema_version(&self) -> u64 {
-        if self.metadata_adoption {
+        if self.metadata_locator_adoption {
+            if self.partial.is_some() {
+                LOCATOR_PARTIAL_TRANSFER_TARGET_SCHEMA
+            } else {
+                LOCATOR_TRANSFER_TARGET_SCHEMA
+            }
+        } else if self.metadata_adoption {
             if self.partial.is_some() {
                 METADATA_PARTIAL_TRANSFER_TARGET_SCHEMA
             } else {
@@ -1255,7 +1269,13 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut bytes = Vec::with_capacity(len);
-        bytes.extend(if self.metadata_adoption {
+        bytes.extend(if self.metadata_locator_adoption {
+            if self.partial.is_some() {
+                b"VBTRGT12"
+            } else {
+                b"VBTRGT11"
+            }
+        } else if self.metadata_adoption {
             if self.partial.is_some() {
                 b"VBTRGT10"
             } else {
@@ -1337,7 +1357,19 @@ where
         let mut r = Reader::new(bytes);
         let tag = r.take(8)?;
         let tag = if self.metadata_adoption {
-            if tag != if partial { b"VBTRGT10" } else { b"VBTRGT09" } {
+            if tag
+                != if self.metadata_locator_adoption {
+                    if partial {
+                        b"VBTRGT12"
+                    } else {
+                        b"VBTRGT11"
+                    }
+                } else if partial {
+                    b"VBTRGT10"
+                } else {
+                    b"VBTRGT09"
+                }
+            {
                 return Err(ApplicationError::UnsupportedSchema);
             }
             if partial {
@@ -1537,6 +1569,14 @@ where
                     Ok(TargetRead::ParentAdoption(self.parent_adoption(op)))
                 }
             }
+            TargetQuery::MetadataLocatorAdoption(op) => {
+                if !self.metadata_locator_adoption {
+                    return Err(ApplicationError::UnsupportedSchema);
+                }
+                Ok(TargetRead::MetadataLocatorAdoption(
+                    self.metadata_locator_adoption(op),
+                ))
+            }
             TargetQuery::MetadataAdoption(op) => {
                 if !self.metadata_adoption {
                     return Err(ApplicationError::UnsupportedSchema);
@@ -1573,6 +1613,7 @@ where
             TargetQuery::Status
             | TargetQuery::Freeze
             | TargetQuery::ParentAdoption(_)
+            | TargetQuery::MetadataLocatorAdoption(_)
             | TargetQuery::MetadataAdoption(_)
             | TargetQuery::ScopedFreeze(_)
             | TargetQuery::RetainedGrant(_) => Ok(0),
@@ -1591,6 +1632,7 @@ where
     fn read_result_bound(&self, query: &Self::Query) -> Result<usize, ApplicationError> {
         let nested = match query {
             TargetQuery::ParentAdoption(_)
+            | TargetQuery::MetadataLocatorAdoption(_)
             | TargetQuery::MetadataAdoption(_)
             | TargetQuery::ScopedFreeze(_)
             | TargetQuery::RetainedGrant(_) => 0,
@@ -1632,6 +1674,7 @@ where
             TargetRead::NotActive
             | TargetRead::Rejected(_)
             | TargetRead::ParentAdoption(_)
+            | TargetRead::MetadataLocatorAdoption(_)
             | TargetRead::MetadataAdoption(_)
             | TargetRead::ScopedFreeze(_)
             | TargetRead::RetainedGrant(_) => 0,
@@ -1749,6 +1792,21 @@ where
                     if let RouteTarget::Child(child) = &mut route.target {
                         if child.group == current.authority {
                             child.group = original.input().authority;
+                        }
+                    }
+                }
+            }
+            if self.metadata_locator_adoption {
+                // This is only a source-shape precheck. Retirement evidence
+                // must still replay every grant change to the exact final grant.
+                if let (ExecutionMode::Delegated(current), ExecutionMode::Delegated(prior)) =
+                    (&mut normalized.execution, &original.input().execution)
+                {
+                    for (a, b) in current.iter_mut().zip(prior) {
+                        if let (RouteTarget::Child(a), RouteTarget::Child(b)) =
+                            (&mut a.target, b.target)
+                        {
+                            a.group = b.group;
                         }
                     }
                 }

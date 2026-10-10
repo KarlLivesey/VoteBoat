@@ -36,7 +36,10 @@ pub use crate::routed::parent_slots::{
 };
 pub use adoption::{RetainedGrantAdoption, MAX_RETAINED_ADOPTION_BYTES};
 use parent::parent_command;
-pub use parent::{METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA, PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA};
+pub use parent::{
+    LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA, METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA,
+    PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA,
+};
 pub const SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 1;
 pub const BOUND_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 2;
 pub const RETAINED_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 3;
@@ -56,6 +59,7 @@ pub enum ScopedSourceQuery<Q> {
     Grant(OperationId),
     ParentAdoption(OperationId),
     MetadataAdoption(OperationId),
+    MetadataLocatorAdoption(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed observation is charged by read_result_bound.
@@ -65,6 +69,7 @@ pub enum ScopedSourceRead<R> {
     Grant(Option<RetainedGrantStatus>),
     ParentAdoption(Option<ParentGrantStatus>),
     MetadataAdoption(Option<MetadataGrantStatus>),
+    MetadataLocatorAdoption(Option<MetadataLocatorGrantStatus>),
 }
 #[derive(Clone)]
 struct FrozenExport {
@@ -89,6 +94,7 @@ pub struct ScopedTransferSource<A, P> {
     parent_limit: usize,
     parent_slots: bool,
     metadata_adoption: bool,
+    metadata_locator_adoption: bool,
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -148,6 +154,7 @@ where
             parent_limit: 0,
             parent_slots: false,
             metadata_adoption: false,
+            metadata_locator_adoption: false,
         })
     }
     /// Bind each scoped freeze to its exact retained-insertion intent before bootstrap.
@@ -384,7 +391,9 @@ where
         }
         let mut bytes =
             Vec::with_capacity(if self.parent_limit == 0 { 20 } else { 22 } + inner.len());
-        bytes.extend(if self.metadata_adoption {
+        bytes.extend(if self.metadata_locator_adoption {
+            b"VBSCOWN7"
+        } else if self.metadata_adoption {
             b"VBSCOWN6"
         } else if self.parent_slots {
             b"VBSCOWN5"
@@ -421,6 +430,7 @@ where
                 || bytes.starts_with(b"VBSCOWN4")
                 || bytes.starts_with(b"VBSCOWN5")
                 || bytes.starts_with(b"VBSCOWN6")
+                || bytes.starts_with(b"VBSCOWN7")
             {
                 if bytes != &self.bootstrap_command(bytes.len())? {
                     return Err(ApplicationError::InvalidCommand);
@@ -572,7 +582,9 @@ where
     pub fn readiness_requirements(&self) -> crate::raft::ReadinessRequirements {
         let inner = self.routed.readiness_requirements();
         crate::raft::ReadinessRequirements {
-            application_schema: if self.metadata_adoption {
+            application_schema: if self.metadata_locator_adoption {
+                LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA
+            } else if self.metadata_adoption {
                 METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA
             } else if self.parent_slots {
                 PARENT_SLOT_SCOPED_TRANSFER_SOURCE_SCHEMA
@@ -910,7 +922,9 @@ where
             return Err(ApplicationError::InvalidCheckpoint);
         }
         let mut out = Vec::with_capacity(len);
-        out.extend(if self.metadata_adoption {
+        out.extend(if self.metadata_locator_adoption {
+            b"VBSCCHK7"
+        } else if self.metadata_adoption {
             b"VBSCCHK6"
         } else if self.parent_slots {
             b"VBSCCHK5"
@@ -990,7 +1004,9 @@ where
         let restore = || -> Result<Self, ApplicationError> {
             let mut r = Reader::new(bytes);
             if r.take(8)?
-                != if self.metadata_adoption {
+                != if self.metadata_locator_adoption {
+                    b"VBSCCHK7"
+                } else if self.metadata_adoption {
                     b"VBSCCHK6"
                 } else if self.parent_slots {
                     b"VBSCCHK5"
@@ -1147,7 +1163,7 @@ where
                             crate::routed::parent_adoption::ParentAdoptionCommand::decode_scoped_metadata(
                                 command_bytes,
                                 next.parent_slots,
-                                next.metadata_adoption,
+                                next.metadata_adoption, next.metadata_locator_adoption
                             )?,
                         )?
                     } else {
@@ -1237,6 +1253,14 @@ where
                 }
                 Ok(ScopedSourceRead::ParentAdoption(self.parent_adoption(op)))
             }
+            ScopedSourceQuery::MetadataLocatorAdoption(op) => {
+                if !self.metadata_locator_adoption {
+                    return Err(ApplicationError::UnsupportedSchema);
+                }
+                Ok(ScopedSourceRead::MetadataLocatorAdoption(
+                    self.metadata_locator_adoption(op),
+                ))
+            }
             ScopedSourceQuery::MetadataAdoption(op) => {
                 if !self.metadata_adoption {
                     return Err(ApplicationError::UnsupportedSchema);
@@ -1273,6 +1297,7 @@ where
             ScopedSourceQuery::Frozen(_)
             | ScopedSourceQuery::Grant(_)
             | ScopedSourceQuery::ParentAdoption(_)
+            | ScopedSourceQuery::MetadataLocatorAdoption(_)
             | ScopedSourceQuery::MetadataAdoption(_) => Ok(0),
         }
     }
@@ -1286,6 +1311,7 @@ where
             ScopedSourceQuery::Frozen(_)
             | ScopedSourceQuery::Grant(_)
             | ScopedSourceQuery::ParentAdoption(_)
+            | ScopedSourceQuery::MetadataLocatorAdoption(_)
             | ScopedSourceQuery::MetadataAdoption(_) => 0,
         };
         size_of::<Self::ReadResult>()
@@ -1302,6 +1328,7 @@ where
             ScopedSourceRead::Frozen(_)
             | ScopedSourceRead::Grant(_)
             | ScopedSourceRead::ParentAdoption(_)
+            | ScopedSourceRead::MetadataLocatorAdoption(_)
             | ScopedSourceRead::MetadataAdoption(_) => Ok(0),
         }
     }

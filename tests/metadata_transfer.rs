@@ -501,3 +501,6 @@ mod adoption;
 
 #[path = "metadata_transfer/locators.rs"]
 mod locators;
+
+#[path = "metadata_transfer/owner_locators.rs"]
+mod owner_locators;

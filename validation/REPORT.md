@@ -4811,3 +4811,32 @@ Commands used --locked --offline and the stable toolchain. No native socket,
 physical power-loss or macOS result is claimed. Data-owner locator adoption,
 repeated metadata exports, native move composition and remaining P0–P7 requirements
 remain open. The full goal is active.
+
+## Slice156c2d — owner adoption of foreign locators, 10 October 2026
+
+Five new downstream cases cover routed6, retained-source7 and imported-full10 /
+imported-partial11 profiles. Actual deterministic metadata move phases and a
+foreign directory update precede owner adoption. Later split, retained handoff,
+imported writes/merge and retirement preserve data, retries, original activation,
+export bytes and metadata index domains. Empty-but-well-formed grant lineage
+cannot substitute for the original locator adoption during retirement. New
+status reads have fixed bounded results. Old profiles, bad observations, stale
+and pending updates, checkpoint corruption and partial batches refuse.
+
+Native ModelIo cuts every adoption-frame byte for all four owner families and
+every retirement-frame byte for the full/partial imported owners, plus sync and
+publication boundaries. Recovery reaches only the old or complete checkpoint
+state, then an exact original retry. No socket or hardware-power-loss claim.
+
+Executed with cargo +stable and --locked --offline:
+- all-feature tests: imported_parent4, metadata_transfer35, reparent_guards18,
+  reparenting14, retained_insertion38, retirement7, transfer_target9:125 pass;
+- core-only same targets:3/27/14/11/28/5/9:97 pass;
+- final changed owner-locator subset:5 all-feature and4 core-only pass;
+- all-feature/core-only all-target Clippy with -D warnings: pass;
+- formatting, git diff --check, inventory shape/conformance paths: pass,88 records.
+
+Fixture repairs retained original schema/configuration/operation-ID contracts.
+Merge continued to refuse conflicting data-operation histories. Repeated
+metadata exports and native TCP/QUIC authority-move composition remain open,
+alongside the other documented P0–P7 work. README is unchanged.

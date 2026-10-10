@@ -20,6 +20,7 @@ pub enum RoutedControlQuery<Q> {
     Fence,
     ParentAdoption(OperationId),
     MetadataAdoption(OperationId),
+    MetadataLocatorAdoption(OperationId),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 #[allow(clippy::large_enum_variant)] // Fixed observation is included in the read bound.
@@ -28,6 +29,7 @@ pub enum RoutedControlRead<R> {
     Fence(Option<OwnershipFence>),
     ParentAdoption(Option<ParentGrantStatus>),
     MetadataAdoption(Option<MetadataGrantStatus>),
+    MetadataLocatorAdoption(Option<MetadataLocatorGrantStatus>),
 }
 /// A read view, not another ownership guard or checkpoint format. Serving and
 /// foreign use still require the original Node quorum read and host authentication.
@@ -134,6 +136,9 @@ where
             RoutedControlQuery::ParentAdoption(op) => Ok(RoutedControlRead::ParentAdoption(
                 self.0.parent_adoption(op),
             )),
+            RoutedControlQuery::MetadataLocatorAdoption(op) => Ok(
+                RoutedControlRead::MetadataLocatorAdoption(self.0.metadata_locator_adoption(op)),
+            ),
             RoutedControlQuery::MetadataAdoption(op) => Ok(RoutedControlRead::MetadataAdoption(
                 self.0.metadata_adoption(op),
             )),
@@ -151,6 +156,7 @@ where
             RoutedControlQuery::Data(q) => self.0.query_bytes(q, max),
             RoutedControlQuery::Fence
             | RoutedControlQuery::ParentAdoption(_)
+            | RoutedControlQuery::MetadataLocatorAdoption(_)
             | RoutedControlQuery::MetadataAdoption(_) => Ok(0),
         }
     }
@@ -163,6 +169,7 @@ where
                 .ok_or(ApplicationError::ReceiptBudget)?,
             RoutedControlQuery::Fence
             | RoutedControlQuery::ParentAdoption(_)
+            | RoutedControlQuery::MetadataLocatorAdoption(_)
             | RoutedControlQuery::MetadataAdoption(_) => 0,
         };
         size_of::<Self::ReadResult>()
@@ -178,6 +185,7 @@ where
             RoutedControlRead::Data(r) => self.0.read_result_bytes(r, max),
             RoutedControlRead::Fence(_)
             | RoutedControlRead::ParentAdoption(_)
+            | RoutedControlRead::MetadataLocatorAdoption(_)
             | RoutedControlRead::MetadataAdoption(_) => Ok(0),
         }
     }

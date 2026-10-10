@@ -286,3 +286,11 @@ move phases, both boundary roles, combined parent/child updates, bounded reserve
 old-profile/refusal/replay checks and modeled native journal interruptions.
 Data-owner adoption of those locator results, repeated moves and native TCP/QUIC
 composition remain; this does not complete the metadata-movement requirement.
+
+Slice156c2d connects foreign locator updates to original, retained and imported
+full/partial owners through explicit immutable profiles. Deterministic actual
+move/update/adoption sequences preserve data and retry state through later
+original split, retained handoff, imported merge and retirement. Missing original
+locator history fails retirement, and native modeled journal cuts cover all four
+owner profiles plus both imported retirement formats. Repeated metadata exports
+and native TCP/QUIC authority-move composition remain open.

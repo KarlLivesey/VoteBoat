@@ -109,7 +109,9 @@ where
             self.partial = None;
             return Err((ApplicationError::InvalidCommand, self));
         }
-        self.binding[..8].copy_from_slice(if self.metadata_adoption {
+        self.binding[..8].copy_from_slice(if self.metadata_locator_adoption {
+            b"VBTSOWN9"
+        } else if self.metadata_adoption {
             b"VBTSOWN7"
         } else {
             b"VBTSOWN5"
@@ -372,8 +374,12 @@ where
             if restored.is_some() || self.partial_pending() {
                 return Err(ApplicationError::InvalidCommand);
             }
-            let command =
-                ParentAdoptionCommand::decode_scoped_metadata(bytes, true, self.metadata_adoption)?;
+            let command = ParentAdoptionCommand::decode_scoped_metadata(
+                bytes,
+                true,
+                self.metadata_adoption,
+                self.metadata_locator_adoption,
+            )?;
             let TargetOutcome::ParentAdopted(status) =
                 self.apply_parent_command::<()>(*op, entry.index, command)?
             else {
@@ -533,7 +539,9 @@ where
         bytes.extend(activation.status.index.to_le_bytes());
         bytes.extend((activation.bytes.len() as u32).to_le_bytes());
         bytes.extend(&activation.bytes);
-        bytes.extend(if self.metadata_adoption {
+        bytes.extend(if self.metadata_locator_adoption {
+            b"VBTPRTL3"
+        } else if self.metadata_adoption {
             b"VBTPRTL2"
         } else {
             b"VBTPRTL1"
@@ -580,7 +588,9 @@ where
         if previous <= imported.imported.index
             || previous >= fence_index
             || r.take(8)?
-                != if self.metadata_adoption {
+                != if self.metadata_locator_adoption {
+                    b"VBTPRTL3"
+                } else if self.metadata_adoption {
                     b"VBTPRTL2"
                 } else {
                     b"VBTPRTL1"
@@ -652,6 +662,7 @@ where
                     command,
                     true,
                     self.metadata_adoption,
+                    self.metadata_locator_adoption,
                 )?;
                 if change.before() != &grant || change.encode(len)? != command {
                     return Err(ApplicationError::InvalidCheckpoint);

@@ -28,6 +28,7 @@ pub(super) fn is_parent(bytes: &[u8]) -> bool {
     bytes.starts_with(b"VBRPAD01")
         || bytes.starts_with(b"VBXPAD01")
         || bytes.starts_with(b"VBMAAD01")
+        || bytes.starts_with(b"VBMLAD01")
 }
 // Retired owners never serve again. Their compact lineage permits a round trip
 // to the original parent while preserving every ownership/selector field.
@@ -104,6 +105,17 @@ where
             })
         })
     }
+    pub fn metadata_locator_adoption(
+        &self,
+        op: OperationId,
+    ) -> Option<crate::routed::MetadataLocatorGrantStatus> {
+        self.parents.iter().find_map(|r| match &r.command {
+            ParentAdoptionCommand::Locator(c) if r.status.operation == op => {
+                Some(c.status(r.status))
+            }
+            _ => None,
+        })
+    }
     pub fn grant(&self) -> &ResponsibilityManifest {
         &self.active_grant
     }
@@ -136,7 +148,12 @@ where
         if self.parent_limit == 0 {
             return Err(ApplicationError::UnsupportedSchema);
         }
-        let command = ParentAdoptionCommand::decode_metadata(bytes, true, self.metadata_adoption)?;
+        let command = ParentAdoptionCommand::decode_metadata(
+            bytes,
+            true,
+            self.metadata_adoption,
+            self.metadata_locator_adoption,
+        )?;
         self.apply_parent_command(op, index, command)
     }
     pub(super) fn apply_parent_command<R>(

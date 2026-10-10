@@ -16,6 +16,7 @@
 use super::*;
 use crate::routed::parent_adoption::ParentAdoptionCommand;
 pub const PARENT_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 4;
+pub const LOCATOR_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 7;
 pub const METADATA_SCOPED_TRANSFER_SOURCE_SCHEMA: u64 = 6;
 pub(super) fn parent_command(bytes: &[u8]) -> bool {
     bytes.starts_with(b"VBRPAD01")
@@ -23,6 +24,7 @@ pub(super) fn parent_command(bytes: &[u8]) -> bool {
         || bytes.starts_with(b"VBSLAD01")
         || bytes.starts_with(b"VBSXAD01")
         || bytes.starts_with(b"VBMAAD01")
+        || bytes.starts_with(b"VBMLAD01")
 }
 impl<A, P> ScopedTransferSource<A, P>
 where
@@ -63,6 +65,26 @@ where
         next.parent_slots = true;
         next.metadata_adoption = true;
         Ok(next)
+    }
+    /// Select before bootstrap after retained grants. Existing parent/metadata
+    /// records and locator updates share one bounded ordered history.
+    #[allow(clippy::result_large_err)]
+    pub fn with_metadata_locator_adoption(
+        self,
+        maximum: usize,
+    ) -> Result<Self, (ApplicationError, Self)> {
+        let mut next = self.with_metadata_authority_adoption(maximum)?;
+        next.metadata_locator_adoption = true;
+        Ok(next)
+    }
+    pub fn metadata_locator_adoption(&self, op: OperationId) -> Option<MetadataLocatorGrantStatus> {
+        self.adoptions.iter().find_map(|change| match change {
+            GrantChange::Parent {
+                status,
+                command: ParentAdoptionCommand::Locator(c),
+            } if status.operation == op => Some(c.status(*status)),
+            _ => None,
+        })
     }
     /// Original owner receipt plus source/destination metadata index provenance.
     pub fn metadata_adoption(&self, op: OperationId) -> Option<MetadataGrantStatus> {
@@ -189,6 +211,7 @@ where
             bytes,
             self.parent_slots,
             self.metadata_adoption,
+            self.metadata_locator_adoption,
         )?;
         let change = self.checked_parent(op, index, command)?;
         let GrantChange::Parent { status, .. } = change else {

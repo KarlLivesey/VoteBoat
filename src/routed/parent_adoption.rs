@@ -49,6 +49,7 @@ pub(crate) enum ParentAdoptionCommand {
     LocalSlots(ParentSlotAdoption),
     CrossSlots(CrossParentSlotAdoption),
     Metadata(OwnerMetadataAdoption),
+    Locator(OwnerMetadataLocatorAdoption),
 }
 impl ParentAdoptionCommand {
     pub fn decode_scoped(bytes: &[u8], slots: bool) -> Result<Self, ApplicationError> {
@@ -71,8 +72,11 @@ impl ParentAdoptionCommand {
         bytes: &[u8],
         cross: bool,
         metadata: bool,
+        locators: bool,
     ) -> Result<Self, ApplicationError> {
-        if metadata && bytes.starts_with(b"VBMAAD01") {
+        if locators && bytes.starts_with(b"VBMLAD01") {
+            OwnerMetadataLocatorAdoption::decode(bytes).map(Self::Locator)
+        } else if metadata && bytes.starts_with(b"VBMAAD01") {
             OwnerMetadataAdoption::decode(bytes).map(Self::Metadata)
         } else {
             Self::decode(bytes, cross)
@@ -82,8 +86,11 @@ impl ParentAdoptionCommand {
         bytes: &[u8],
         slots: bool,
         metadata: bool,
+        locators: bool,
     ) -> Result<Self, ApplicationError> {
-        if metadata && bytes.starts_with(b"VBMAAD01") {
+        if locators && bytes.starts_with(b"VBMLAD01") {
+            OwnerMetadataLocatorAdoption::decode(bytes).map(Self::Locator)
+        } else if metadata && bytes.starts_with(b"VBMAAD01") {
             OwnerMetadataAdoption::decode(bytes).map(Self::Metadata)
         } else {
             Self::decode_scoped(bytes, slots)
@@ -96,6 +103,7 @@ impl ParentAdoptionCommand {
             Self::LocalSlots(a) => a.encode(max),
             Self::CrossSlots(a) => a.encode(max),
             Self::Metadata(a) => a.encode(max),
+            Self::Locator(a) => a.encode(max),
         }
     }
     pub fn before(&self) -> &ResponsibilityManifest {
@@ -105,6 +113,7 @@ impl ParentAdoptionCommand {
             Self::LocalSlots(a) => a.before(),
             Self::CrossSlots(a) => a.before(),
             Self::Metadata(a) => a.before(),
+            Self::Locator(a) => a.before(),
         }
     }
     pub fn after(&self) -> ResponsibilityManifest {
@@ -114,6 +123,7 @@ impl ParentAdoptionCommand {
             Self::LocalSlots(a) => a.after(),
             Self::CrossSlots(a) => a.after(),
             Self::Metadata(a) => a.after(),
+            Self::Locator(a) => a.after(),
         }
     }
     pub fn metadata(&self) -> (OperationId, u64) {
@@ -125,6 +135,7 @@ impl ParentAdoptionCommand {
                 a.observation.decision.index,
             ),
             Self::CrossSlots(a) => (a.parent_publication.operation, a.parent_publication.index),
+            Self::Locator(a) => (a.observation().operation, a.observation().index),
             // The metadata operation is the original transfer ID, but this index
             // belongs to the new authority's activation, not the old source F.
             Self::Metadata(a) => (
@@ -254,6 +265,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             bytes,
             self.cross_parent_adoption,
             self.metadata_adoption,
+            self.metadata_locator_adoption,
         )
         .ok()?;
         self.parent_adoptions
@@ -274,6 +286,7 @@ impl<A: CheckpointStateMachine, P: PartitionPolicy + Clone> RoutedApplication<A,
             bytes,
             self.cross_parent_adoption,
             self.metadata_adoption,
+            self.metadata_locator_adoption,
         )?;
         if let Some(old) = self
             .parent_adoptions

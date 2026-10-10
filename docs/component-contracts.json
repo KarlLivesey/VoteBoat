@@ -2123,6 +2123,35 @@
         "tests/metadata_transfer/locators.rs"
       ],
       "scope": "Slice156c2c binds the exact foreign manifest and complete bounded move plan to host-authenticated original activation observations. All matching parent/child metadata locators change atomically with generation +1; concrete data ownership, epochs, application and selectors are preserved. Source/destination incarnations, reciprocal scope/epoch/identity links, stale views, active lifecycle reservations and partial/corrupt input are checked. The pre-bootstrap schema15 profile retains exact original outcomes and reconstructs all changes from the original command history; old profiles refuse the new command and checkpoint. Successful updates use a bounded existing control reserve with an explicit lifetime count, preserving unfinished publication reservations and ordinary-history limits. Fixed status carries original local operation/index and activation domains plus the complete command digest. Full plans exceeding the control command ceiling are rejected, never truncated. The separate pristine cache option requires a complete single-source/destination reference transformation and leaves data authorization to owners. Actual source/import/publication/activation with foreign parent/child references and a bridge with both boundary roles, cache refresh orders, replay/provenance/capacity/partial-state refusals and native modeled every-byte/sync/publication journal cuts are tested. Data-owner adoption of locator updates, repeated metadata exports and TCP/QUIC authority-move composition remain work."
+    },
+    {
+      "design_id": "C05/C15/C16/C23",
+      "public_contract": "OwnerMetadataLocatorAdoption / MetadataLocatorGrantStatus",
+      "operations": [
+        "new",
+        "update",
+        "metadata_configuration",
+        "observation",
+        "before",
+        "after",
+        "encode",
+        "decode",
+        "RoutedApplication::with_metadata_locator_adoption",
+        "RoutedApplication::metadata_locator_adoption",
+        "ScopedTransferSource::with_metadata_locator_adoption",
+        "ScopedTransferSource::metadata_locator_adoption",
+        "TransferTarget::with_metadata_locator_adoption",
+        "TransferTarget::metadata_locator_adoption",
+        "RoutedControlQuery::MetadataLocatorAdoption",
+        "ScopedSourceQuery::MetadataLocatorAdoption",
+        "TargetQuery::MetadataLocatorAdoption"
+      ],
+      "native": "Selected routed schema6, retained-source schema7 and imported full10/partial11 use the existing ordered bounded grant history, application, native journal and retirement contracts; no added worker, log or storage owner.",
+      "conformance": [
+        "tests/metadata_transfer.rs",
+        "tests/metadata_transfer/owner_locators.rs"
+      ],
+      "scope": "Slice156c2d carries the complete checked foreign locator update and its original directory operation/index/configuration. Exact authority, responsibility, generation, activation and command digest are validated; hosts authenticate original quorum observations. Old profiles refuse the new command and checkpoints. The selected profile preserves provider data, retry/outbox history, immutable bootstrap, exports and initial import/activation, with original locator and local owner receipts available together. Adoption shares the existing metadata control reserve and accepts only an exact current grant before a fence. Mixed ordered histories reconstruct on checkpoint replay. Imported full and partial retirement formats replay original grant commands and compare the resulting exact final grant; preliminary metadata normalization is not authority proof. Tests cover actual deterministic source/import/publication/activation and foreign directory update, original owner later split, retained owner later partial handoff, imported full/partial later merge and retirement, fixed bounded status reads, old profiles, stale/provenance/partial/checkpoint/capacity refusal and native every-byte adoption/retirement journal faults. Complete but missing locator history fails retirement. This is selected embedding and modeled native-journal evidence, not networked authority-move composition, physical power-loss or macOS validation. Repeated metadata exports and TCP/QUIC authority-move composition remain open."
     }
   ],
   "not_yet_implemented": [

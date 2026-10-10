@@ -2,8 +2,8 @@
 
 Source fencing, import, publication and destination activation are implemented
 for Rust embedding, including original/retained/imported owner metadata adoption
-and foreign directory/cache locator refresh. Owner adoption of foreign locator
-updates, repeated moves and native socket composition remain; an imported image alone does not authorize a new metadata group.
+and foreign directory/cache locator refresh and owner adoption. Repeated moves
+and native socket composition remain; an imported image alone does not authorize a new metadata group.
 
 `MetadataAuthoritySource` wraps a `LifecycleDirectory` before its first bootstrap
 and shares its existing Raft log, storage and runtime contracts. Construction
@@ -132,5 +132,29 @@ Select the cache's separate `with_metadata_locator_updates` option before admitt
 hints. It accepts only the complete same-authority reference transformation for
 one foreign source/destination pair. Partial authority refresh still refuses
 incompatible routes. This is a hint check, not data-owner grant adoption.
-Owner adoption of foreign locator results, a second metadata export and native
-TCP/QUIC authority-move composition remain work.
+A second metadata export and native TCP/QUIC authority-move composition remain work.
+
+To adopt a foreign locator result into a data owner, select
+`with_metadata_locator_adoption(maximum)` before bootstrap. It selects a distinct
+immutable profile and includes the earlier metadata/parent command families:
+
+| Owner | Schema | Bootstrap / checkpoint |
+| --- | --- | --- |
+| RoutedApplication | 6 | VBROWN06 / VBROUT06 |
+| ScopedTransferSource, after retained grants | 7 | VBSCOWN7 / VBSCCHK7 |
+| TransferTarget | 10 | VBTSOWN8 / VBTRGT11 |
+| TransferTarget, then partial delegation | 11 | VBTSOWN9 / VBTRGT12 |
+
+Construct `OwnerMetadataLocatorAdoption` from the complete update, its original
+`MetadataLocatorStatus` and directory configuration. Authenticate that original
+authority's quorum observation before submitting the command to the owner. The
+owner must hold the exact before grant; metadata references and generation change
+without changing data ownership, retries or exports. These commands share the
+existing bounded metadata/parent history reserve. Old profiles reject them.
+
+The `MetadataLocatorAdoption` query returns both the local owner receipt and the
+original directory observation. Original operation IDs and index domains survive
+retries, checkpoints and later fencing. Scoped retained changes interleave in the
+same history. Imported full/partial retirement uses new lineage tags VBTPLRL1 and
+VBTPRTL3, reconstructs the entire grant history and checks the exact final grant.
+A missing adoption cannot be replaced by simply normalizing metadata fields.
