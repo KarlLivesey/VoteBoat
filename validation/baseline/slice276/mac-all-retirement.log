@@ -1,0 +1,17 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/repo276)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.93s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal has been running for over 60 seconds
+unread phase 9/2000: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+unread phase 41/9001: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 181 filtered out; finished in 1024.44s

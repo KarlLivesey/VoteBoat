@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.57s
+     Running tests/native_member_startup.rs (target/debug/deps/native_member_startup-10232005ef270231)
+
+running 2 tests
+test tcp_native_snapshot_repair_recovers_compacted_joint ... ok
+test quic_native_snapshot_repair_recovers_compacted_joint ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 1.41s

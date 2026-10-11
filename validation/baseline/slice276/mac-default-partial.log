@@ -1,0 +1,84 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/routed.rs (target/debug/deps/routed-42b79c1d511c4246)
+
+running 4 tests
+test native::delegation::imported_partial::recovery::restart_expectation_includes_actual_campaign_noop_after_capture ... ok
+test native::delegation::imported_partial::recovery::restart_expectation_preserves_actual_committed_tail_and_original_retry ... ok
+partial TcpTls checkpoint=true group=1 operation=21
+partial TcpTls checkpoint=true group=1 operation=200
+partial TcpTls checkpoint=true group=21 operation=200
+partial TcpTls checkpoint=true group=20 operation=200
+partial TcpTls checkpoint=true group=21 operation=200
+partial TcpTls checkpoint=true group=1 operation=201
+partial TcpTls checkpoint=true group=20 operation=300
+partial TcpTls checkpoint=true group=21 operation=200
+partial TcpTls checkpoint=true group=1 operation=30
+partial TcpTls checkpoint=true group=1 operation=6000
+partial TcpTls checkpoint=true group=1 operation=2000
+partial TcpTls checkpoint=true group=30 operation=2000
+partial TcpTls checkpoint=true group=21 operation=2000
+partial TcpTls checkpoint=true group=30 operation=2000
+partial TcpTls checkpoint=true group=1 operation=2100
+partial TcpTls checkpoint=true group=1 operation=6001
+partial TcpTls checkpoint=true group=30 operation=2000
+partial TcpTls checkpoint=true group=21 operation=7000
+partial TcpTls checkpoint=true group=1 operation=31
+partial TcpTls checkpoint=true group=1 operation=6010
+partial TcpTls checkpoint=true group=1 operation=2001
+partial TcpTls checkpoint=true group=31 operation=2001
+partial TcpTls checkpoint=true group=21 operation=2001
+partial TcpTls checkpoint=true group=31 operation=2001
+partial TcpTls checkpoint=true group=1 operation=2101
+partial TcpTls checkpoint=true group=1 operation=6011
+partial TcpTls checkpoint=true group=31 operation=2001
+test native::delegation::imported_partial::tcp_partial_import_checkpoint has been running for over 60 seconds
+test native::delegation::imported_partial::tcp_partial_import_wal has been running for over 60 seconds
+partial TcpTls checkpoint=true group=21 operation=7001
+partial TcpTls checkpoint=true group=1 operation=6002
+partial TcpTls checkpoint=true group=1 operation=3000
+partial TcpTls checkpoint=true group=40 operation=3000
+partial TcpTls checkpoint=true group=21 operation=3000
+partial TcpTls checkpoint=true group=40 operation=3000
+partial TcpTls checkpoint=true group=1 operation=3001
+partial TcpTls checkpoint=true group=1 operation=6003
+partial TcpTls checkpoint=true group=40 operation=3000
+test native::delegation::imported_partial::tcp_partial_import_checkpoint ... ok
+partial TcpTls checkpoint=false group=1 operation=21
+partial TcpTls checkpoint=false group=1 operation=200
+partial TcpTls checkpoint=false group=21 operation=200
+partial TcpTls checkpoint=false group=20 operation=200
+partial TcpTls checkpoint=false group=21 operation=200
+partial TcpTls checkpoint=false group=1 operation=201
+partial TcpTls checkpoint=false group=20 operation=300
+partial TcpTls checkpoint=false group=21 operation=200
+partial TcpTls checkpoint=false group=1 operation=30
+partial TcpTls checkpoint=false group=1 operation=6000
+partial TcpTls checkpoint=false group=1 operation=2000
+partial TcpTls checkpoint=false group=30 operation=2000
+partial TcpTls checkpoint=false group=21 operation=2000
+partial TcpTls checkpoint=false group=30 operation=2000
+partial TcpTls checkpoint=false group=1 operation=2100
+partial TcpTls checkpoint=false group=1 operation=6001
+partial TcpTls checkpoint=false group=30 operation=2000
+partial TcpTls checkpoint=false group=21 operation=7000
+partial TcpTls checkpoint=false group=1 operation=31
+partial TcpTls checkpoint=false group=1 operation=6010
+partial TcpTls checkpoint=false group=1 operation=2001
+partial TcpTls checkpoint=false group=31 operation=2001
+partial TcpTls checkpoint=false group=21 operation=2001
+partial TcpTls checkpoint=false group=31 operation=2001
+partial TcpTls checkpoint=false group=1 operation=2101
+partial TcpTls checkpoint=false group=1 operation=6011
+partial TcpTls checkpoint=false group=31 operation=2001
+partial TcpTls checkpoint=false group=21 operation=7001
+partial TcpTls checkpoint=false group=1 operation=6002
+partial TcpTls checkpoint=false group=1 operation=3000
+partial TcpTls checkpoint=false group=40 operation=3000
+partial TcpTls checkpoint=false group=21 operation=3000
+partial TcpTls checkpoint=false group=40 operation=3000
+partial TcpTls checkpoint=false group=1 operation=3001
+partial TcpTls checkpoint=false group=1 operation=6003
+partial TcpTls checkpoint=false group=40 operation=3000
+test native::delegation::imported_partial::tcp_partial_import_wal ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 100 filtered out; finished in 158.14s

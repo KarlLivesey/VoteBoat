@@ -1,0 +1,10 @@
+fmt=0
+clippy_all=0
+clippy_default=0
+clippy_core=0
+clippy_native=0
+repair_all=0
+witness_all=0
+repair_default=0
+witness_default=0
+member_default=0

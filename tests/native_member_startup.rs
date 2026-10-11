@@ -142,9 +142,11 @@ fn cid(n: u64) -> ConfigurationId {
     ConfigurationId::new(n).unwrap()
 }
 fn root() -> PathBuf {
+    static NEXT_ROOT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     std::env::temp_dir().join(format!(
-        "voteboat-member-startup-{}-{}",
+        "voteboat-member-startup-{}-{}-{}",
         std::process::id(),
+        NEXT_ROOT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
         SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -402,9 +404,11 @@ fn pending_resources(n: &Service) -> String {
     let local = n.local();
     let core = local.owner.core(group()).unwrap();
     format!(
-        "node={:?} phase={:?} failure={:?} term={} config={:?} commit={} owner={:?} replica={:?} persistence={:?} clients={:?} reads={:?} results_drained={} outbound={:?} peers={:?} snapshots={:?}",
-        core.local_node(), n.state(), n.failure(), core.state().hard_state.term,
-        core.membership().id(), core.state().commit_index, local.owner.usage(),
+        "node={:?} phase={:?} failure={:?} role={:?} term={} config={:?} base={} commit={} last={} applied={} pending={} authorization={:?} owner={:?} replica={:?} persistence={:?} clients={:?} reads={:?} results_drained={} outbound={:?} peers={:?} snapshots={:?}",
+        core.local_node(), n.state(), n.failure(), core.role(), core.state().hard_state.term,
+        core.membership().id(), core.state().base_index(), core.state().commit_index,
+        core.state().last_index(), local.applications[&group()].applied_index(),
+        core.has_pending_dependency(), core.replication_authorization_status(), local.owner.usage(),
         n.replica_usage(), local.persistence.usage(), local.clients.usage(),
         local.reads.usage(), local.results.is_drained(), local.outbound.usage(),
         n.peers().map(|p| (p.usage(), p.connector_usage(), p.next_deadline())),
@@ -2192,7 +2196,8 @@ fn commit_repaired_write(
                         );
                     assert!(
                         step.error.is_none() || ingress_refusal,
-                        "protocol={protocol:?} step={step:?}"
+                        "protocol={protocol:?} step={step:?}; {}",
+                        pending_resources(n)
                     );
                 }
             }
@@ -2360,13 +2365,27 @@ fn outage_assert_old_view(n: &Service, expected: &GroupLog) {
     assert_eq!(state.snapshot, expected.snapshot);
     assert_eq!(state.snapshot_membership, expected.snapshot_membership);
 }
-fn outage_poll(nodes: &mut [Service], now: u64) -> Vec<usize> {
+struct OutageProgress {
+    refusals: Vec<usize>,
+    failed_sends: Vec<BTreeSet<NodeId>>,
+}
+fn outage_poll(nodes: &mut [Service], now: u64) -> OutageProgress {
     let mut refusals = Vec::with_capacity(nodes.len());
+    let mut failed_sends = Vec::with_capacity(nodes.len());
     for n in nodes {
         let mut refused = 0;
         let progress = n
             .poll(MonoTime(now), NodePollBudget::default())
             .unwrap_or_else(|error| panic!("outage poll: {error:?}; {}", pending_resources(n)));
+        failed_sends.push(
+            progress
+                .peers
+                .iter()
+                .flat_map(|p| &p.completions)
+                .filter(|c| c.result == voteboat::outbound::LocalSendResult::Failed)
+                .map(|c| c.ticket.peer)
+                .collect(),
+        );
         if let Some(replica) = progress.replica {
             for step in replica.steps {
                 // Old-view ingress and superseded authority replies can be
@@ -2384,8 +2403,12 @@ fn outage_poll(nodes: &mut [Service], now: u64) -> Vec<usize> {
         }
         refusals.push(refused);
     }
-    refusals
+    OutageProgress {
+        refusals,
+        failed_sends,
+    }
 }
+#[track_caller]
 fn outage_drive(
     nodes: &mut [Service],
     clock: &Instant,
@@ -2399,7 +2422,8 @@ fn outage_drive(
         }
         assert!(
             Instant::now() < deadline,
-            "promoted leader/witness fault timed out"
+            "promoted leader/witness fault timed out: {:?}",
+            nodes.iter().map(pending_resources).collect::<Vec<_>>()
         );
         std::thread::park_timeout(Duration::from_millis(1));
     }
@@ -2788,10 +2812,30 @@ fn restore_witness_authority(
         candidate,
         configuration: cid(12),
     };
-    check_unavailable_witness(older, clock, baseline, query);
+    let unavailable = check_unavailable_witness(older, clock, baseline, query);
     // Restore the actual witness store, never a reset/empty replacement. The
     // promoted leader remains down while the witness answers the fresh query.
     older.push(open_node(3));
+    // Opening a store does not complete the authenticated connection. After
+    // failed sends, wait for attach before queuing the fresh host retry.
+    outage_drive(older, clock, |ns| {
+        assert_eq!(witness_status(&ns[0]), ReplicationAuthorizationStatus::None);
+        outage_assert_old_view(&ns[0], baseline);
+        ns[0].peers().unwrap().roster().binding(node(3)).is_some()
+            && ns[1].peers().unwrap().roster().binding(node(1)).is_some()
+    });
+    older[0].control(group(), query).unwrap();
+    outage_drive(older, clock, |ns| {
+        matches!(
+            witness_status(&ns[0]),
+            ReplicationAuthorizationStatus::Pending { .. }
+        )
+    });
+    let ReplicationAuthorizationStatus::Pending { context: fresh, .. } = witness_status(&older[0])
+    else {
+        unreachable!()
+    };
+    assert_ne!(unavailable, fresh);
     if compacted_witness {
         // Missing historical membership prevents authenticating the request;
         // it yields WrongIdentity, not an authenticated negative reply. Poll
@@ -2805,7 +2849,7 @@ fn restore_witness_authority(
                 ReplicationAuthorizationStatus::Granted { .. }
             ));
             outage_assert_old_view(&older[0], baseline);
-            if refusals[1] > 0 {
+            if refusals.refusals[1] > 0 {
                 break;
             }
             assert!(
@@ -2930,7 +2974,7 @@ fn check_unavailable_witness(
     clock: &Instant,
     baseline: &GroupLog,
     query: NodeControl,
-) {
+) -> RequestContext {
     older[0].control(group(), query).unwrap();
     outage_drive(older, clock, |ns| {
         matches!(
@@ -2945,10 +2989,13 @@ fn check_unavailable_witness(
     else {
         unreachable!()
     };
-    // Witness and promoted leader are both unavailable. Repeated bounded polls
-    // cannot turn a routing hint or pending query into authority or a commit.
-    for _ in 0..50 {
-        outage_poll(older, clock.elapsed().as_millis() as u64);
+    // A real failed native send cannot turn the pending query into authority.
+    // Wait for the absent witness's output credits to drain before retrying.
+    let deadline = Instant::now() + Duration::from_secs(10);
+    let mut failed_witness_send = false;
+    loop {
+        let progress = outage_poll(older, clock.elapsed().as_millis() as u64);
+        failed_witness_send |= progress.failed_sends[0].contains(&node(3));
         assert!(!matches!(
             witness_status(&older[0]),
             ReplicationAuthorizationStatus::Granted { .. }
@@ -2958,6 +3005,14 @@ fn check_unavailable_witness(
             older[0].local().applications[&group()].read_applied(1),
             Ok(0)
         );
+        if failed_witness_send && older[0].local().outbound.peer_usage(node(3)).batches == 0 {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "absent witness send did not fail: {}",
+            pending_resources(&older[0])
+        );
         std::thread::park_timeout(Duration::from_millis(1));
     }
     older[0]
@@ -2966,16 +3021,5 @@ fn check_unavailable_witness(
     outage_drive(older, clock, |ns| {
         witness_status(&ns[0]) == ReplicationAuthorizationStatus::None
     });
-    older[0].control(group(), query).unwrap();
-    outage_drive(older, clock, |ns| {
-        matches!(
-            witness_status(&ns[0]),
-            ReplicationAuthorizationStatus::Pending { .. }
-        )
-    });
-    let ReplicationAuthorizationStatus::Pending { context: fresh, .. } = witness_status(&older[0])
-    else {
-        unreachable!()
-    };
-    assert_ne!(unavailable, fresh);
+    unavailable
 }

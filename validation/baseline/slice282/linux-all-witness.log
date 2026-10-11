@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/native_member_startup.rs (target/debug/deps/native_member_startup-10232005ef270231)
+
+running 2 tests
+test tcp_promoted_leader_loss_requires_retained_restored_witness ... ok
+test quic_promoted_leader_loss_requires_retained_restored_witness ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 7.69s

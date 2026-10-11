@@ -1,0 +1,1 @@
+full-launch-wrapper=1 (zsh readonly status; all-feature test summary 50 passed; no default test launched)

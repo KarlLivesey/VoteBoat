@@ -1,5 +1,16 @@
 # Baseline acceptance map
 
+Native member failed-send recovery: [slice284](../validation/baseline/slice284/README.md).
+Linux and Apple Silicon macOS each pass complete member all50/default27 with
+zero formatting/four strict Clippy profiles and668 before/terminal source guards.
+Actual failed native sends require executed cancellation and a restored
+authenticated connection before a fresh-context witness query; connection alone
+never grants authority. Old-view refusal, exact data/recovery and owned cleanup
+remain. Concurrent fixture paths now have unique process-local sequences.
+Failed282/283 and original276 are independent; the older compacted-Joint ingress
+error remains unreproduced. Full corrected lifecycle and executable admission
+recovery are next; broader P0–P7 acceptance stays open.
+
 Exact replica-bound recovery expectation: [slice273](../validation/baseline/slice273/README.md).
 Both hosts pass the original four TCP/QUIC WAL/checkpoint histories plus two
 actual-core tail regressions, and four additional regression executions each.

@@ -6560,3 +6560,15 @@ platform acceptance remains open: frozen276 reports two TCP member-repair
 failures, old262 is terminal62/5, old269 remains live and old251 retains46
 failures. No finite selected matrix certifies the full P0–P7 roadmap. See
 [281](baseline/slice281/README.md) and [275](baseline/slice275/README.md).
+
+Checkpoint284 qualifies complete native member startup on Linux and Apple
+Silicon macOS: all50/default27,77 executions per host. Formatting/four strict
+all-target Clippy profiles have zero diagnostics; all668 source inputs verify
+before/terminal. The witness history requires a real failed send during the
+outage, executed cancellation, authenticated reconnection and a fresh-context
+query with actual grant or compacted refusal. Original data/recovery/cleanup
+remain. Atomic fixture sequences address the observed Mac directory collisions.
+No production API, storage format, deadline or transport budget changes.
+Failed282/283 and original276 are retained independently; old compacted-Joint
+ingress remains unreproduced. Broader lifecycle/provider/platform and full
+P0–P7 remain open. See [284](baseline/slice284/README.md).

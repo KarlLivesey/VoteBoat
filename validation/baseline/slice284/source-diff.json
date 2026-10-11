@@ -1,0 +1,13 @@
+{
+  "baseCommit": "0ab9588f95a64fbc3332197b6a41f4dbef751349",
+  "beforeSlice": 283,
+  "afterSlice": 284,
+  "inputs": 668,
+  "changes": [
+    {
+      "path": "tests/native_member_startup.rs",
+      "before": "fa8971bccd1977900d634adc53699d8a0673e7bc065b5780a83eb02850a55060",
+      "after": "853c260fd88864d1deed037ce5205aa53aecb9d78d80410535d45f427bb9b2dd"
+    }
+  ]
+}

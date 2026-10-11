@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/repo282)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.99s
+     Running tests/native_member_startup.rs (/tmp/voteboat-macos-CzK1if/repo277/target/debug/deps/native_member_startup-9f948553a46d5bec)
+
+running 2 tests
+test tcp_native_snapshot_repair_recovers_compacted_joint ... ok
+test quic_native_snapshot_repair_recovers_compacted_joint ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 2.93s

@@ -1,0 +1,15 @@
+fmt=0
+clippy_all=0
+clippy_default=0
+clippy_core=0
+clippy_native=0
+startup\_all=101
+member\_all=101
+retirement\_all=0
+endpoint\_all=0
+partial\_all=0
+startup\_default=0
+member\_default=0
+retirement\_default=0
+endpoint\_default=0
+partial\_default=0

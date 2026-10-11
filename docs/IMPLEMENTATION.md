@@ -104,6 +104,14 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
+Checkpoint284 qualifies complete native member startup on Linux and Mac:
+all50/default27 pass per host with zero formatting/four strict Clippy profiles
+and668 frozen-input guards. Actual failed native witness sends require executed
+cancellation, restored authenticated connection and a fresh-context query; real
+grant/refusal, original data/recovery and cleanup remain mandatory. Concurrent
+member fixture roots now have an atomic sequence. Original276 compacted-Joint
+InvalidMessage is unreproduced and retained separately.
+
 Checkpoint281 qualifies native startup on Linux and Mac: complete startup
 all53/default38 plus focused drain all4/default2 pass on each host, with
 formatting/four strict Clippy profiles clean and668 frozen-input guards verified.
@@ -114,9 +122,9 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: native member repair qualification | Advance P4 safe recovery and P1 Rust embedding on Mac/Linux. | Exact frozen Mac276 TCP compacted-Joint ingress InvalidMessage and retained-witness progress failures. The witness-loss path uses the changed native default; snapshot repair supplies explicit timing. Preserve originals and identify actual failed transitions. | Diagnose each trigger separately, correct narrowly, retain old-view refusal, actual witness/store recovery and original data/retry/cleanup requirements; qualify affected scope on both hosts with zero strict diagnostics. |
-| Next: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Retained terminal262, still-running269, accepted273/274 and281, plus the open retirement progress evidence. Freeze source before execution. | Classify exact terminal failures and run the corrected complete lifecycle family on both hosts, retaining original phase cuts, source guards and strict checks. Selected passes do not explain unreproduced older timeouts. |
-| Following: configuration admission recovery diagnosis | Advance P4 usable membership administration on Mac/Linux. | Original Mac251 native_benchmark admission-journal failure and the actual queued-original/retry refusal reproduced279/280. Exact retained-record checking is private fixture evidence, not qualification of the executable driver. | Establish the executable driver's actual trigger/current durable state; any fix must preserve bounded admission, original operation/content, normal authorization, commitment/restart/owned cleanup and two-platform checks. |
+| Current: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Retained terminal262, still-running269, accepted273/274/281/284, plus the open retirement progress evidence. Freeze source before execution. | Classify exact terminal failures and run the corrected complete lifecycle family on both hosts, retaining original phase cuts, source guards and strict checks. Selected passes do not explain unreproduced older timeouts. |
+| Next: configuration admission recovery diagnosis | Advance P4 usable membership administration on Mac/Linux. | Original Mac251 native_benchmark admission-journal failure and the actual queued-original/retry refusal reproduced279/280. Exact retained-record checking is private fixture evidence, not qualification of the executable driver. | Establish the executable driver's actual trigger/current durable state; any fix must preserve bounded admission, original operation/content, normal authorization, commitment/restart/owned cleanup and two-platform checks. |
+| Following: baseline functional exit review | Identify the next complete user-visible feature path for P0–P6. | Current lifecycle and executable recovery evidence, component contracts and the acceptance map; performance/security remain later. | Separate implemented-but-unqualified behavior from absent features, select the smallest complete remaining feature path and record its API/state/restart acceptance before editing. Do not substitute a selected pass count for feature completion. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26948,3 +26956,107 @@ recovery. Old Mac269 remains live, old262 is terminal62/5 on its654-input image,
 and terminal251 retains its46 failures. Original-source failures and partial
 provider/combined-fault/P0–P7 obligations are not waived. Performance/security
 follow feature work; Windows/P8 remain deferred.
+
+282 schema before diagnostic edits: the current P4/P1 item has two distinct
+Mac276 TCP failures: compacted Joint recovery refuses ingress in
+commit_repaired_write, and retained-witness leader-loss times out in the shared
+outage driver. Original logs lack the witness caller/volatile state needed to
+identify its transition. Add track_caller and the existing actual per-node
+resource summary to that deadline assertion; extend the summary with actual
+role/base/last/applied/pending dependency and replication authorization. Include
+that same actual node summary with the unexpected repair OwnerStep. Keep both
+original predicates,10s/15s budgets, ingress refusal rules, data operations,
+provisioned identity, recovery and cleanup unchanged. No new production hook,
+synthesized event/receipt or waived InvalidMessage. Run only the two affected
+TCP/QUIC histories on separate frozen current-source checkouts (all4/default2),
+with668 guards and formatting/four strict profiles. The result must identify the
+next focused fix or explicitly retain an unreproduced cause; diagnostics alone
+close no member or full P0–P7 gate. Next remains corrected lifecycle, following
+executable configuration-admission recovery. Prior281 is concrete progress,
+accepted and pushed0ab9588 with full startup/focused matrices on both platforms.
+
+Terminal276 accounting correction: inspected original selected logs show partial
+all6/default4, not default3. The selected routed scope is16/all plus9/default;
+Linux total190 executions. The matching Mac matrix is now terminal with
+startup50/1 and member48/2 in all-feature mode, all remaining targets passing;
+total187 passed/3 failed. Its actual source guard and full terminal evidence are
+being retained separately. This corrects the prior handwritten189/8 accounting;
+it does not alter281's directly observed97 executions per host.
+
+282 focused terminal observation: Linux and Mac each pass repair all2/default1
+and retained-witness all2/default1, six executions per host. Formatting and all
+four strict Clippy profiles pass with zero diagnostics; all668 frozen inputs
+verify before/terminal. This does not reproduce or explain either original276
+member failure. Both occurred in the complete member target, so one complete
+member all/default matrix on this same diagnostic image is needed to test the
+original concurrent-suite context. Keep its source immutable, original budgets,
+strict ingress handling, recovery/cleanup predicates and provider paths intact.
+This broadening addresses the unresolved original context, not repeated passing
+focused tests. A passing full run remains evidence for this source, not a cause
+explanation or acceptance of the entire P4 roadmap.
+
+282 complete member observations: Linux summaries are50/all and27/default
+passing. Mac all47 pass/3 fail and default27 pass. The all-feature Mac witness
+failure is now located at restore_witness_authority's grant wait: old node1
+remains Pending, both stores Running without provider failure, current witness3
+is present, and there are no outgoing batches on node1 at timeout. That does
+not prove the original request's delivery outcome. The two checkpoint failures
+are actual AlreadyExists at initial directory creation, before recovery begins.
+The all-feature launch wrappers used zsh's read-only status name; they exited1
+after completed test summaries and never launched default. Separate corrected
+bash wrappers run only the previously unstarted default tests and verify all668
+inputs afterward. These wrapper errors and failed histories are preserved.
+
+283 schema before correction: root paths currently rely on PID plus wall-clock
+nanoseconds, which is not unique under concurrent Mac tests (actual282
+AlreadyExists;281 already demonstrated clock collisions separately). Add an
+owned atomic sequence to the member fixture allocator, as in accepted startup281.
+No production filesystem behavior or recovery path changes. For the witness
+history, the fresh query is currently queued while the witness is absent, before
+its potentially slow open. The public contract explicitly requires host expiry,
+cancellation and fresh-context retry; pending requests do not retry themselves.
+Move that fresh request after actual witness restoration and retain the original
+unavailable context for comparison. Strengthen the unavailable phase to observe
+actual native Failed delivery to the absent witness and empty witness outbound
+credits before cancellation; use normal NodeProgress, not a synthesized
+completion. The existing outage poll helper must retain those actual per-node
+send failures alongside ingress-refusal counts for this assertion. It changes
+no production effect or transport budget. Keep the10s phase deadline, exact
+old-view refusal/prefix checks, fresh-context matching, actual grant or compacted
+refusal, original acknowledged data, reopened native files and owned cleanup.
+Accept only full member all/default on both platforms with zero strict builds
+and frozen source guards. This qualifies explicit host recovery after failed
+native sends and concurrent fixture ownership; it does not yet prove the exact
+cause of original276 ingress InvalidMessage or every membership schedule.
+
+283 refinement from failed checks: forced unavailable sends are actually Failed
+and their witness output credits drain; cancellation executes normally. Linux
+then fails retained grant in all TCP/QUIC and default TCP; Mac all has the same
+two failures, with no directory collisions. Moving the fresh query after open
+alone is insufficient. PeerRoster::disconnected_send_deadline retains the prior
+failure_since until an authenticated attach, and PeerDriver::submit_sends marks
+new output Failed while that elapsed retry window is still active. The node
+startup result does not establish the connection. For284, after reopening witness3
+and while authority is still None, drive the existing normal peer reactor until
+both actual roster bindings exist for the exact1/3 connection; assert the old
+view/prefix and absence of a grant. Then queue the same fresh-context query.
+This is explicit host retry ordering through existing public APIs, not a hidden
+transport retry, longer deadline, relaxed grant predicate or inferred authority.
+Retain the forced actual failed-send observation and original native cold data/
+cleanup. Freeze this focused ordering correction and qualify full member all/
+default and four strict builds on both hosts. Preserve failed283 separately.
+
+284 final acceptance: complete member all50/default27 passes on Linux and Mac,
+77 executions per host. Native failed delivery, drained witness output credits,
+executed cancellation, actual authenticated1/3 attach and distinct fresh context
+are exercised before the exact grant/refusal and native recovery checks. Full
+runtimes are Linux10.30s/1.60s, Mac25.96s/13.44s; validation timings do not imply
+performance. Formatting/four strict Clippy profiles are clean;668 before/terminal
+guards verify.283 terminal results are74 pass/3 fail per host on its failed
+source;282 original diagnostics and wrapper failures remain independent. Root
+sequences correct actual Mac AlreadyExists; no production change or weakened
+acceptance. Macro review: P4/P1 explicit native host recovery and concurrent
+member qualification advance; next is full corrected P5/P6 lifecycle then P4
+executable admission recovery. Full P0–P7 and older unexplained events remain
+active, with performance/security later. Evidence:284, failed282/283; terminal
+276 now accurately records Linux190/0 and Mac187/3 with full source guards.
