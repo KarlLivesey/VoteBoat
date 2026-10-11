@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (<mac-repo268>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.45s
+     Running tests/routed.rs (target/debug/deps/routed-42b79c1d511c4246)
+
+running 3 tests
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::admitted_lookup_leadership_change_drains_before_fresh_authority ... ok
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 98 filtered out; finished in 75.87s
+

@@ -1,0 +1,36 @@
+   Compiling voteboat v0.1.0 (<mac-repo268>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.60s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup ... ok
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+
+thread 'native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen' (18149553) panicked at tests/routed/metadata_lookup.rs:309:5:
+assertion `left == right` failed
+  left: (Err(Unavailable), true)
+ right: (Err(Unavailable), false)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... FAILED
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+
+thread 'native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen' (18149552) panicked at tests/routed/metadata_lookup.rs:304:5:
+assertion `left == right` failed
+  left: (Err(Unavailable), true)
+ right: (Err(Unavailable), false)
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... FAILED
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::admitted_lookup_leadership_change_drains_before_fresh_authority ... ok
+
+failures:
+
+failures:
+    native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen
+    native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 177 filtered out; finished in 27.09s
+
+error: test failed, to rerun pass `--test routed`

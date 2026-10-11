@@ -28,7 +28,10 @@ fn request(g: u128) -> ManifestLookup {
         minimum_generation: None,
     }
 }
-type Lookup<A, M> = NativeManifestLookup<MappedManifestReadSource<Node<A>, M>>;
+#[path = "metadata_lookup/recovery.rs"]
+mod recovery;
+use recovery::{transient, AttemptSource};
+type Lookup<A, M> = NativeManifestLookup<AttemptSource<MappedManifestReadSource<Node<A>, M>>>;
 fn tick<A, M>(lookup: &mut Lookup<A, M>, others: &mut [Node<A>], clock: &Instant)
 where
     A: ProposalAdmission
@@ -46,11 +49,12 @@ where
         node.poll(now(clock), NodePollBudget::default()).unwrap();
     }
 }
-fn lookup<A, M>(
+fn lookup_once<A, M>(
     nodes: &mut Vec<Node<A>>,
     clock: &Instant,
     g: u128,
-) -> Result<ResponsibilityManifest, ManifestDiscoveryError>
+    cut: Option<NodeControl>,
+) -> (Result<ResponsibilityManifest, ManifestDiscoveryError>, bool)
 where
     A: ProposalAdmission
         + BoundedReadableStateMachine<Query = M::Query, ReadResult = M::ReadResult>
@@ -60,7 +64,7 @@ where
     M::ReadResult: Debug,
 {
     campaign(nodes, clock, g);
-    let source = MappedManifestReadSource::<_, M>::new(nodes.remove(0));
+    let source = AttemptSource::new(MappedManifestReadSource::<_, M>::new(nodes.remove(0)));
     let mut lookup = NativeManifestLookup::new(
         source,
         ManifestCacheLimits {
@@ -78,6 +82,14 @@ where
         lookup.lookup(q, now(clock)).unwrap_err(),
         ManifestDiscoveryError::Unavailable
     );
+    if let Some(control) = cut {
+        assert!(lookup.pending().is_some(), "cut requires an accepted read");
+        lookup
+            .source_mut()
+            .node_mut()
+            .control(group(g), control)
+            .unwrap();
+    }
     let deadline = Instant::now() + Duration::from_secs(15);
     let mut unavailable = false;
     while !lookup.is_drained() {
@@ -99,6 +111,8 @@ where
     if let Ok(manifest) = &result {
         verify_lookup(&mut lookup, nodes, clock, q, manifest);
     }
+    let retryable = lookup.source_mut().retryable;
+    drain_owned(&mut lookup, nodes, clock, deadline);
     lookup.close();
     nodes.insert(
         0,
@@ -107,7 +121,53 @@ where
             .unwrap_or_else(|_| panic!("pending lookup"))
             .into_node(),
     );
-    result
+    (result, retryable)
+}
+fn lookup<A, M>(
+    nodes: &mut Vec<Node<A>>,
+    clock: &Instant,
+    g: u128,
+) -> Result<ResponsibilityManifest, ManifestDiscoveryError>
+where
+    A: ProposalAdmission
+        + BoundedReadableStateMachine<Query = M::Query, ReadResult = M::ReadResult>
+        + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+    M: ManifestReadMapping,
+    M::ReadResult: Debug,
+{
+    for _ in 0..4 {
+        let (result, retryable) = lookup_once::<A, M>(nodes, clock, g, None);
+        if !retryable {
+            return result;
+        }
+        assert_eq!(result, Err(ManifestDiscoveryError::Unavailable));
+        assert!(nodes
+            .iter()
+            .all(|node| node.local().reads.usage().requests == 0));
+    }
+    panic!("group {g} metadata read repeatedly lost leadership");
+}
+fn drain_owned<A, M>(
+    lookup: &mut Lookup<A, M>,
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    deadline: Instant,
+) where
+    A: ProposalAdmission
+        + BoundedReadableStateMachine<Query = M::Query, ReadResult = M::ReadResult>
+        + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+    M: ManifestReadMapping,
+{
+    while lookup.source_mut().pending_reads() != 0 {
+        tick(lookup, nodes, clock);
+        assert!(
+            Instant::now() < deadline,
+            "original read ownership did not drain"
+        );
+    }
+    assert_eq!(lookup.source_mut().pending_reads(), 0);
 }
 fn verify_lookup<A, M>(
     lookup: &mut Lookup<A, M>,
@@ -162,22 +222,17 @@ fn verify_lookup<A, M>(
         }
         assert!(Instant::now() < deadline, "cancellation stalled");
     }
-    while lookup.source_mut().pending_reads() != 0 {
-        tick(lookup, nodes, clock);
-        assert!(
-            Instant::now() < deadline,
-            "retained cancellation did not drain"
-        );
-    }
-    assert_eq!(lookup.source_mut().pending_reads(), 0);
-    rejected_completion(lookup, nodes, clock, q);
+    drain_owned(lookup, nodes, clock, deadline);
+    rejected_completion(lookup, nodes, clock, q, None);
 }
 fn rejected_completion<A, M>(
     lookup: &mut Lookup<A, M>,
     nodes: &mut [Node<A>],
     clock: &Instant,
     q: ManifestLookup,
-) where
+    cut: Option<NodeControl>,
+) -> bool
+where
     A: ProposalAdmission
         + BoundedReadableStateMachine<Query = M::Query, ReadResult = M::ReadResult>
         + CheckpointStateMachine,
@@ -186,6 +241,13 @@ fn rejected_completion<A, M>(
     M::ReadResult: Debug,
 {
     let ticket = lookup.source_mut().submit(q).unwrap();
+    if let Some(control) = cut {
+        lookup
+            .source_mut()
+            .node_mut()
+            .control(q.locator.authority, control)
+            .unwrap();
+    }
     let mut wrong = ticket;
     wrong.sequence += 1;
     let deadline = Instant::now() + Duration::from_secs(15);
@@ -206,13 +268,18 @@ fn rejected_completion<A, M>(
         .node_mut()
         .complete_read(*rejected.completion)
         .unwrap();
-    let ReadOutcome::Read { barrier, result } = outcome else {
-        panic!("original read was lost")
-    };
-    assert_eq!(barrier.request(), ticket.request);
-    q.check(&M::manifest(result.unwrap()).unwrap().unwrap())
-        .unwrap();
-    assert_eq!(lookup.source_mut().pending_reads(), 0);
+    let retryable = transient(&outcome);
+    match outcome {
+        ReadOutcome::Read { barrier, result } => {
+            assert_eq!(barrier.request(), ticket.request);
+            q.check(&M::manifest(result.unwrap()).unwrap().unwrap())
+                .unwrap();
+        }
+        other if retryable => eprintln!("preserved original metadata outcome: {other:?}"),
+        other => panic!("unexpected original read outcome: {other:?}"),
+    }
+    drain_owned(lookup, nodes, clock, deadline);
+    retryable
 }
 fn run_lookup(protocol: NativePeerProtocol, checkpoint: bool) {
     let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
@@ -235,12 +302,12 @@ fn run_lookup(protocol: NativePeerProtocol, checkpoint: bool) {
     );
     let (plan, image) = freeze_initial(&env, &mut a);
     assert_eq!(
-        lookup::<_, MetadataPublishingManifestRead>(&mut a, &clock, 1),
+        lookup_once::<_, MetadataPublishingManifestRead>(&mut a, &clock, 1, None).0,
         Err(ManifestDiscoveryError::Unavailable)
     );
     let (mut b, template) = import_first(&env, &a, &plan, &image);
     assert_eq!(
-        lookup::<_, MetadataPublishingManifestRead>(&mut b, &clock, 9),
+        lookup_once::<_, MetadataPublishingManifestRead>(&mut b, &clock, 9, None).0,
         Err(ManifestDiscoveryError::Unavailable)
     );
     let activation = activate_first(&env, &mut a, &mut b, &template);
@@ -255,7 +322,7 @@ fn run_lookup(protocol: NativePeerProtocol, checkpoint: bool) {
     };
     let mut second = second_move(&env, &mut first);
     assert_eq!(
-        lookup::<_, MetadataPublishingManifestRead>(&mut first.nodes, &clock, 9),
+        lookup_once::<_, MetadataPublishingManifestRead>(&mut first.nodes, &clock, 9, None).0,
         Err(ManifestDiscoveryError::Unavailable)
     );
     let moved = lookup::<_, MetadataServingManifestRead>(&mut second.nodes, &clock, 11).unwrap();

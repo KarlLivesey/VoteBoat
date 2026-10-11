@@ -1,0 +1,53 @@
+    Checking voteboat v0.1.0 (<linux-repo>)
+error[E0277]: `<M as voteboat::routing::ManifestReadMapping>::ReadResult` doesn't implement `std::fmt::Debug`
+  --> tests/routed/metadata_lookup.rs:80:28
+   |
+80 | fn tick<A, M>(lookup: &mut Lookup<A, M>, others: &mut [Node<A>], clock: &Instant)
+   |                            ^^^^^^^^^^^^ the trait `std::fmt::Debug` is not implemented for `<M as voteboat::routing::ManifestReadMapping>::ReadResult`
+   |
+note: required for `Observed<MappedManifestReadSource<..., ...>>` to implement `voteboat::routing::ManifestReadSource`
+  --> tests/routed/metadata_lookup.rs:41:29
+   |
+41 | impl<S: ManifestReadSource> ManifestReadSource for Observed<S>
+   |                             ^^^^^^^^^^^^^^^^^^     ^^^^^^^^^^^
+42 | where
+43 |     S::ReadResult: Debug,
+   |                    ----- unsatisfied trait bound introduced here
+note: required by a bound in `voteboat::native::lookup_discovery::NativeManifestLookup`
+  --> src/native/lookup_discovery.rs:93:36
+   |
+93 | pub struct NativeManifestLookup<S: ManifestReadSource> {
+   |                                    ^^^^^^^^^^^^^^^^^^ required by this bound in `NativeManifestLookup`
+   = note: the full name for the type has been written to '<linux-repo>/target/debug/deps/routed-4853dfc9a9f32046.long-type-17866712226823825247.txt'
+   = note: consider using `--verbose` to print the full type name to the console
+help: consider further restricting the associated type
+   |
+86 |     M: ManifestReadMapping, <M as voteboat::routing::ManifestReadMapping>::ReadResult: std::fmt::Debug
+   |                             ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+error[E0599]: the method `source_mut` exists for mutable reference `&mut NativeManifestLookup<Observed<...>>`, but its trait bounds were not satisfied
+  --> tests/routed/metadata_lookup.rs:89:10
+   |
+32 |   struct Observed<S>(S);
+   |   ------------------ doesn't satisfy `_: ManifestReadSource`
+...
+88 | /     lookup
+89 | |         .source_mut()
+   | |         -^^^^^^^^^^ method cannot be called on `&mut NativeManifestLookup<Observed<...>>` due to unsatisfied trait bounds
+   | |_________|
+   |
+   |
+note: trait bound `<M as voteboat::routing::ManifestReadMapping>::ReadResult: std::fmt::Debug` was not satisfied
+  --> tests/routed/metadata_lookup.rs:43:20
+   |
+41 | impl<S: ManifestReadSource> ManifestReadSource for Observed<S>
+   |                             ------------------     -----------
+42 | where
+43 |     S::ReadResult: Debug,
+   |                    ^^^^^ unsatisfied trait bound introduced here
+   = note: the full name for the type has been written to '<linux-repo>/target/debug/deps/routed-4853dfc9a9f32046.long-type-14139837298575607366.txt'
+   = note: consider using `--verbose` to print the full type name to the console
+
+Some errors have detailed explanations: E0277, E0599.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `voteboat` (test "routed") due to 2 previous errors

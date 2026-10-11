@@ -17,8 +17,10 @@ service checks pass256. The original Mac delegation family finishes21/44;
 36 failures are retained-credit assertions and8 are existing-store collisions.
 Both causes have controlled259/260 corrections and the eight affected histories
 pass on both hosts. Corrected262 Linux finishes67/0 with source verification;
-Mac remains active with an Unavailable metadata-lookup failure. Complete
-corrected-family acceptance remains262 work.
+Mac remains active with an Unavailable metadata-lookup failure. Diagnostic268
+reproduces actual LeadershipChanged outcomes and corrects the caller assumptions
+with all/default4/0 and3/0 on both hosts. Full corrected69-history Linux269 is
+live; complete corrected-family acceptance remains separate work.
 
 | Requirement | Current implementation surface | Remaining acceptance or work |
 | --- | --- | --- |
@@ -32,7 +34,7 @@ corrected-family acceptance remains262 work.
 | R08 direct child commits | Routed owner proposals and parent-offline child histories. | Resolve Mac composed histories without adding an ancestor commit. |
 | R09 safe transitions | Joint membership, durable source fence, target import, publication, activation and retirement guards. | Actual Mac lifecycle failures and broader combined cuts remain; never treat an unknown phase as an applied cut. |
 | R10 honest outcomes | Admission, persistence, commit/application and exact ClientCompletion outcomes. | Retain unknown/same-ID semantics in every caller;254d adds an actual controlled native negative. |
-| R11 deterministic testing | Explicit events/effects/time, Counter history checking, actual-core replay/reduction263, delayed completions264, crash/sync/retry265 short-write/publication266 and read/cancel267 on both hosts. | Snapshot/timer schedules, broader worker/device composition, reference comparison and fuzzing remain wider validation work. |
+| R11 deterministic testing | Explicit events/effects/time, Counter history checking, actual-core replay/reduction263, delayed completions264, crash/sync/retry265, short-write/publication266 and read/cancel267 on both hosts. | Snapshot/timer schedules, broader worker/device composition, reference comparison and fuzzing remain wider validation work. |
 | R12 bounded overload | Explicit admission, buffer, queue, image, retention and recovery limits. | Wider disk-full and competing recovery/connection coverage remains. |
 | R13 native providers | Native WAL/snapshots, scheduler, multiplexed TCP/TLS and QUIC/codecs. | No external adapter is required or claimed. |
 | R14 public seams | Domain traits plus NodeParts/from_parts, injected native/host providers. | Complete reusable obligation coverage;108 inventory entries alone do not certify them. |

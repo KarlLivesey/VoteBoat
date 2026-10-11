@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (<mac-repo268>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.92s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::admitted_lookup_leadership_change_drains_before_fresh_authority ... ok
+unread phase 1/200: Unknown LeadershipChanged
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+unread phase 9/201: Unknown LeadershipChanged
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+unread phase 11/201: Unknown LeadershipChanged
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... ok
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 177 filtered out; finished in 158.05s
+

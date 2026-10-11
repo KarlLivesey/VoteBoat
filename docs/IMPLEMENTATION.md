@@ -104,21 +104,22 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint267: static mixed-host service256 remains selected completed
-evidence. Timer258 and scheduler261 replacement checks pass on both hosts.
-Original Mac254d finishes21/44; its two fixture causes have controlled259/260
-corrections. Corrected262's complete Linux delegation family now finishes67/0
-with terminal source verification. Its Mac run remains active and has reported
-an Unavailable failure in automatic metadata lookup after activation; the
-terminal result and cause remain pending. Actual-core schedules263–266 remain
-accepted. Current267 adds read/cancel authority to that same driver; selected
-checks do not imply a complete platform or roadmap pass.
+Current checkpoint268: static mixed-host service256 remains selected completed
+evidence; scheduler/timer and actual-core fault schedules267 are accepted.
+Corrected262 Linux finishes67/0 with terminal source verification. Its preserved
+Mac run is still active with an Unavailable metadata-read failure. Separate268
+diagnostics reproduce both caller assumptions with actual LeadershipChanged;
+the causal cleanup/retry correction and native controls pass all/default4/0
+and3/0 on both hosts, with formatting/four strict profiles zero.
+Corrected69-history Linux qualification269 now runs on frozen662-input source.
+These selected results
+do not certify the complete platform or roadmap.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current267: actual-core read/cancel schedules — accepted | Advance P0/R11 and P1 read authority through cancellation, partition, restart and fencing. | Existing core Read/CancelRead, issued ReadBarrier, public read_at_barrier and Counter;263–266 driver and native model. | Twenty-one replay checks, fresh quorum/one-use value9, isolated leader blocked while another quorum reaches12, cancellation/stale replies, NotApplied retry, restart/fence rejection, saved27-action replay; full Raft62/29/62/62 and strict zero both hosts. All checks are terminal and source-verified on both hosts. |
-| Next262: qualify complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Frozen independent sources; Linux67/0 terminal. Preserve the Mac terminal failure bodies and source identity before deciding corrections. | Full67-history family, source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
-| Following268: diagnose actual Mac metadata lookup failure | Advance P5/P6 usable recursive lookup without false availability or forced success. | Read original262 Unavailable at metadata_lookup.rs:247, activation/campaign/read contracts and retained completion ownership; distinguish caller assumption from provider failure. | Reproduce the named failure under unchanged operations, identify the causal boundary with bounded diagnostics, focused cause correction and retained negative assertions on both hosts; full family remains a separate gate. |
+| Current268: preserve/recover original metadata-read outcomes — accepted | Advance P5/P6 functional recursive lookup after actual leader changes. | Existing ManifestReadSource, exact read completions and Node cleanup; diagnostic Mac0/2 preserved separately. No production/provider changes. | Two original TCP/QUIC two-move/WAL/checkpoint histories plus two actual Campaign-cut regressions; known leadership-only retry after original slots drain, exact inactive/fenced one-attempt refusal, wrong-ticket preservation, fresh root metadata; both-host all/default4/3 and formatting/four strict profiles zero. |
+| Next262: capture terminal preserved delegation qualification | Keep P5/P6 failure evidence linked to its original source before replacement. | Independent frozen654-input Linux/Mac sources; Linux67/0 terminal, Mac live with a metadata-read failure. | Full67-history original family terminal results, source hashes and exact failure bodies. These older results cannot certify268's changed metadata fixtures. |
+| Following269: qualify the complete corrected69-history family | Advance P5/P6 macOS/Linux functional acceptance with the causal fixes composed. | Accepted268 source adds two real read-race controls; preserve completed262 source/results, use frozen independent builds. | Terminal all-feature69-history family on both hosts, original operation IDs/cuts/ownership/cold recovery retained, source verification and strict zero. Keep the full goal active while those background histories run. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26373,3 +26374,72 @@ at metadata_lookup.rs:247. Preserve the terminal result and diagnose that
 boundary next. Device-model acceptance remains distinct from physical disk,
 snapshot/timer/reference comparison and full-platform acceptance. Full P0–P7
 stays active; performance/security follow functional Linux/macOS work.
+
+268 schema: investigate the preserved Mac262 Unavailable at the active metadata
+lookup after first activation. Keep262/251 sources and processes untouched. A
+private diagnostic ManifestReadSource wrapper is needed to retain the actual
+read outcome before NativeAuthorityDiscovery intentionally maps unavailable
+outcomes to a discovery error; current fixture logs erase that cause. Delegate
+binding/admission/cancellation/completion ownership unchanged, emit only accepted
+submission refusals and terminal results, and keep the existing operation IDs,
+phase cuts, campaign/activation path and deadlines. Freeze/hash this diagnostic
+source separately from any correction. Read failure is not proof that activation
+was absent or that cached leadership can authorize a read. First reproduce the
+named TCP/QUIC two-move/reopen histories and identify the actual terminal class.
+Then make only the causal caller/provider correction, with a controlled negative
+and unchanged inactive/fenced assertions. Acceptance requires real fresh-quorum
+metadata after both moves/reopen, retained cancellation/wrong-completion checks,
+zero owned reads after completion, both-host focused histories and strict zero;
+full262-family acceptance remains separate. Advances P5/P6 functional lookup,
+not performance/security or broader physical-storage acceptance.
+
+268 diagnosis: frozen diagnostic661-input source passes Linux2/0 but Mac0/2
+(75.10s). QUIC's wrong-ticket refusal retains the exact original completion,
+whose terminal outcome is Unavailable(LeadershipChanged); the fixture's
+"original read was lost" assertion is false. TCP's moved authority11 lookup
+also returns the actual LeadershipChanged outcome, with one original owned
+read slot still awaiting cancellation cleanup. Preserve both raw failures and
+terminal hashes. Native discovery correctly refuses these reads; activation
+and fresh quorum are not bypassed. Correction schema: retain a private source
+classifier for only LeadershipChanged/NotLeader/ReadNotReady; positive fixture
+lookups may re-campaign/reissue at most four times only after original slots
+drain. Inactive/fenced lookups remain single attempts. Wrong-ticket checks must
+preserve/consume the exact original successful or known leadership-unavailable
+completion, then drain cleanup; an unavailable original is not a lost object.
+Add controlled native Campaign cuts after actual read admission for both paths,
+assert the exact unavailable classification, old ownership drained and a fresh
+read of the same authority succeeds. Keep all existing phase IDs, moves,
+checkpoint/WAL cuts, rejection assertions and15-second attempt deadlines.
+
+268 assertion correction: initial corrected Linux4/0 and controlled Mac2/0 pass,
+but adding a false retry-classification assertion to all inactive/fenced reads
+makes both Mac histories fail. Those attempts legitimately lose leadership
+before application execution and still return the exact required Unavailable.
+The original negative contract is one attempt with no read value, not mandatory
+application execution. Restore that exact negative assertion without adding
+retry there. Preserve the added-assertion failures separately (Mac2/2,27.09s),
+including terminal source hashes. Positive retries still require an actual known
+leadership class; application failures remain outside the retry classifier.
+
+269 Linux launch: the attached application-conformance worktree has terminal262
+67/0 evidence and source archive preserved before replacement. Frozen268 Rust
+inputs662 verify before the new all-feature delegation family, which announces
+69 tests. Its live handle is24923; leave source immutable until terminal. This
+is background qualification, not a passing result. Mac262/251 originals stay
+untouched; final Mac268 checks continue independently.
+
+268 acceptance: final all/default histories finish4/0 and3/0 on both hosts,
+including two original two-move/WAL/checkpoint histories and two controlled
+native Campaign-cut regressions. Actual unavailable authority is retained,
+original read ownership drains before retry, altered-ticket refusal preserves
+the exact original completion, and subsequent fresh reads return the same root
+manifest. Inactive/fenced reads retain one-attempt Unavailable assertions.
+No production/protocol/timer/public-seam changes. Formatting/four strict profiles
+are zero;662 Rust inputs verify before/after. Frozen diagnostic Mac0/2 supplies
+actual LeadershipChanged causes; diagnostic Linux2/0 and the separately added
+invalid-assertion Mac2/2 remain scoped evidence. See
+[268](../validation/baseline/slice268/README.md). Macro review advances P5/P6
+functional lookup without treating finite corrected fixtures as full-platform
+acceptance. Full corrected69-history Linux269 is live on immutable source;
+preserved Mac262/251 originals remain live and must retain terminal failure
+bodies. Full P0–P7 remains active; performance/security follow features.

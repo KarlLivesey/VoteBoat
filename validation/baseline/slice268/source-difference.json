@@ -1,0 +1,11 @@
+{
+  "base": "db48357",
+  "buildInputs": 662,
+  "changed": [
+    "tests/routed/metadata_lookup.rs"
+  ],
+  "added": [
+    "tests/routed/metadata_lookup/recovery.rs"
+  ],
+  "productionChanges": []
+}
