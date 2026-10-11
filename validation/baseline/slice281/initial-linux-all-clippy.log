@@ -1,0 +1,25 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0616]: field `admission` of struct `voteboat::runtime::ConfigurationTicket` is private
+   --> tests/startup/maintenance/membership_drain.rs:225:46
+    |
+225 |             if step.admission == Some(ticket.admission) {
+    |                                              ^^^^^^^^^ private field
+    |
+help: a method `admission` also exists, call it with parentheses
+    |
+225 |             if step.admission == Some(ticket.admission()) {
+    |                                                       ++
+
+error[E0616]: field `operation` of struct `voteboat::runtime::ConfigurationTicket` is private
+   --> tests/startup/maintenance/membership_drain.rs:226:56
+    |
+226 |                 assert_eq!(step.operation, Some(ticket.operation));
+    |                                                        ^^^^^^^^^ private field
+    |
+help: a method `operation` also exists, call it with parentheses
+    |
+226 |                 assert_eq!(step.operation, Some(ticket.operation()));
+    |                                                                 ++
+
+For more information about this error, try `rustc --explain E0616`.
+error: could not compile `voteboat` (test "startup") due to 2 previous errors

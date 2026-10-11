@@ -111,7 +111,13 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.open_with_peer_rotation_and_timers(rotation, TimerConfig::default(), app, wake, now)
+        self.open_with_peer_rotation_and_timers(
+            rotation,
+            super::NativeTimingProfile::default().timers(),
+            app,
+            wake,
+            now,
+        )
     }
     /// Explicit liveness timing with the same durable credential binding and cleanup.
     pub fn open_with_peer_rotation_and_timers<A>(
@@ -176,7 +182,13 @@ impl NativeMemberStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.open_with_peer_rotation_and_timers(rotation, TimerConfig::default(), app, wake, now)
+        self.open_with_peer_rotation_and_timers(
+            rotation,
+            super::NativeTimingProfile::default().timers(),
+            app,
+            wake,
+            now,
+        )
     }
     /// Explicit liveness timing with the same durable credential binding and cleanup.
     pub fn open_with_peer_rotation_and_timers<A>(

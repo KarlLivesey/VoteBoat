@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.16s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 17 }, operation: None, read: None, error: Some(WrongIdentity) }
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 18 }, operation: None, read: None, error: Some(WrongIdentity) }
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 17 }, operation: None, read: None, error: Some(WrongIdentity) }
+node 2 maintenance step OwnerStep { admission: None, proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(2) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 18 }, operation: None, read: None, error: Some(WrongIdentity) }
+
+thread 'maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation' (2171389) panicked at tests/startup/maintenance/membership_drain.rs:195:9:
+ConfigurationCompletion { ticket: ConfigurationTicket { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 1 }, operation: OperationId(19720) }, outcome: Unknown(LeadershipChanged) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation ... FAILED
+
+thread 'maintenance::membership_drain::final_leadership_uncertainty_keeps_original_quic_checkpoint_operation' (2171388) panicked at tests/startup/maintenance/membership_drain.rs:195:9:
+ConfigurationCompletion { ticket: ConfigurationTicket { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(3) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(77), incarnation: GroupIncarnation(4) }, sequence: 1 }, operation: OperationId(19720) }, outcome: Unknown(LeadershipChanged) }
+test maintenance::membership_drain::final_leadership_uncertainty_keeps_original_quic_checkpoint_operation ... FAILED
+
+failures:
+
+failures:
+    maintenance::membership_drain::final_leadership_uncertainty_keeps_original_quic_checkpoint_operation
+    maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 51 filtered out; finished in 2.36s
+
+error: test failed, to rerun pass `--test startup`

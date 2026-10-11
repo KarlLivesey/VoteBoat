@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running tests/startup.rs (target/debug/deps/startup-a1ac3465d4e8f43e)
+
+running 5 tests
+test timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection ... ok
+test timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application ... ok
+test timing_profile::native_defaults_plain_tcp_use_service_election_window ... ok
+test timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window ... ok
+test timing_profile::native_defaults_static_member_and_rotated_use_service_election_window ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 48 filtered out; finished in 4.62s

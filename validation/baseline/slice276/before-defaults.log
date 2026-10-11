@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.38s
+     Running tests/startup.rs (target/debug/deps/startup-4ccfec80a19dc07f)
+
+running 2 tests
+
+thread 'timing_profile::native_defaults_static_member_and_rotated_use_service_election_window' (1472959) panicked at tests/startup/timing_profile.rs:18:9:
+assertion `left == right` failed
+  left: Candidate
+ right: Follower
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'timing_profile::native_defaults_plain_tcp_use_service_election_window' (1472957) panicked at tests/startup/timing_profile.rs:18:9:
+assertion `left == right` failed
+  left: Candidate
+ right: Follower
+test timing_profile::native_defaults_static_member_and_rotated_use_service_election_window ... FAILED
+test timing_profile::native_defaults_plain_tcp_use_service_election_window ... FAILED
+
+failures:
+
+failures:
+    timing_profile::native_defaults_plain_tcp_use_service_election_window
+    timing_profile::native_defaults_static_member_and_rotated_use_service_election_window
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 48 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test startup`

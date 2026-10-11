@@ -1,0 +1,27 @@
+{
+  "baseline_slice": 275,
+  "candidate_slice": 276,
+  "baseline_inputs": 668,
+  "candidate_inputs": 668,
+  "changes": [
+    {
+      "path": "src/native/startup.rs",
+      "before": "135a7c0edbfae176e212d3308883e1b112ac0c0c59e10438f05380134c1ffeb3",
+      "after": "d8de189adfb598af3e565eba6e711e500547adacd3530cb8ab80695755b0b87a"
+    },
+    {
+      "path": "src/native/startup/peer_rotation.rs",
+      "before": "160cf5823783b79e2d3ad9dbddc5e757f80cc4f021377a348520a2dc9cc8968e",
+      "after": "e54b9b66da80147a20f13d1bfb1b0d79cbcc611ce5a1d32bec60c301087714ee"
+    },
+    {
+      "path": "tests/startup/timing_profile.rs",
+      "before": "7295ed494bcdd183e797810fddb35f896605cf59af190c3caec51b820bdf4480",
+      "after": "944e69c7ea7a6ebd885fea4ebe60392c5b2b3f53f3fb77e91c667a29ca0b17d1"
+    }
+  ],
+  "production_changed": [
+    "src/native/startup.rs",
+    "src/native/startup/peer_rotation.rs"
+  ]
+}

@@ -104,6 +104,9 @@ impl History {
             .collect();
     }
     fn poll(&mut self) {
+        self.poll_observed(|_| {});
+    }
+    fn poll_observed(&mut self, mut observe: impl FnMut(&OwnerStep)) {
         let now = MonoTime(self.clock.elapsed().as_millis() as u64);
         for (id, n) in self.nodes.iter_mut().enumerate() {
             let progress = if let Some(administration) = &self.administration {
@@ -117,8 +120,11 @@ impl History {
             }
             .unwrap();
             if let Some(replica) = progress.replica {
-                for step in replica.steps.iter().filter(|s| s.error.is_some()) {
-                    eprintln!("node {} maintenance step {step:?}", id + 1);
+                for step in &replica.steps {
+                    observe(step);
+                    if step.error.is_some() {
+                        eprintln!("node {} maintenance step {step:?}", id + 1);
+                    }
                 }
             }
         }

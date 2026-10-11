@@ -1,0 +1,14 @@
+{
+  "baseline_slice": 278,
+  "candidate_slice": 279,
+  "baseline_inputs": 668,
+  "candidate_inputs": 668,
+  "changes": [
+    {
+      "path": "tests/startup/maintenance/membership_drain.rs",
+      "before": "952f9929f2e85c5efb8f17fb2600b549598766284de0934c1704a0cfa826ee9b",
+      "after": "b610c83c775939167a55d450be1e587ae9ee9c05a9e0f81700092bf70acb7287"
+    }
+  ],
+  "production_changed": []
+}

@@ -218,7 +218,13 @@ impl NativeMemberStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.open_with_protocol_and_timers(protocol, TimerConfig::default(), app, wake, now)
+        self.open_with_protocol_and_timers(
+            protocol,
+            NativeTimingProfile::default().timers(),
+            app,
+            wake,
+            now,
+        )
     }
     /// Recover a member with explicit host liveness timing; no membership authority is added.
     pub fn open_with_protocol_and_timers<A>(
@@ -518,6 +524,8 @@ impl NativeStartup {
         }
         Ok(())
     }
+    /// Native TCP startup using the same default timing profile as the service.
+    /// Select host timer settings through `open_with_protocol_and_timers`.
     pub fn open<A>(
         self,
         app: A,
@@ -546,7 +554,11 @@ impl NativeStartup {
             let listener = TcpListener::bind(self.listen)?;
             build(
                 self,
-                (StartupAuthorization::Static, TimerConfig::default(), None),
+                (
+                    StartupAuthorization::Static,
+                    NativeTimingProfile::default().timers(),
+                    None,
+                ),
                 &mut application,
                 &mut cleanup,
                 wake,
@@ -564,7 +576,8 @@ impl NativeStartup {
             })
         })
     }
-    /// Explicit TCP/TLS or optional QUIC startup, using the same storage/recovery path.
+    /// Explicit TCP/TLS or optional QUIC startup, using the same storage/recovery path
+    /// and default native timing profile as the runnable service.
     /// QUIC binds one UDP socket and starts only the two storage workers.
     pub fn open_with_protocol<A>(
         self,
@@ -577,7 +590,13 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.open_with_protocol_and_timers(protocol, TimerConfig::default(), app, wake, now)
+        self.open_with_protocol_and_timers(
+            protocol,
+            NativeTimingProfile::default().timers(),
+            app,
+            wake,
+            now,
+        )
     }
     /// Explicit host liveness timing, validated before binding or opening files.
     /// Quorum, durable dependency ordering and authority gates are unchanged.

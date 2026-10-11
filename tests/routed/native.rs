@@ -32,6 +32,7 @@ use voteboat::{
         connect::*, log_store::*, node::*, routing::NativeManifestCache, startup::*,
         worker::ThreadWake,
     },
+    outbound::OutboundQueue,
     quorum::*,
     runtime::*,
 };
@@ -203,10 +204,33 @@ where
         if done(nodes) {
             return;
         }
-        assert!(
-            Instant::now() < deadline,
-            "native routed progress timed out"
-        );
+        let within_deadline = Instant::now() < deadline;
+        if !within_deadline {
+            for n in nodes.iter() {
+                for (group, app) in &n.local().applications {
+                    let core = n.local().owner.core(*group).unwrap();
+                    let log = core.state();
+                    eprintln!(
+                        "routed timeout node={:?} group={group:?} role={:?} hard={:?} revision={:?} base={} commit={} last={} applied={} pending={} clients={:?} replica={:?} outbound={:?} peers={:?}",
+                        core.local_node(), core.role(), log.hard_state, log.revision,
+                        log.base_index(), log.commit_index, log.last_index(),
+                        app.applied_index(), core.has_pending_dependency(),
+                        n.local().clients.usage(), n.replica_usage(), n.local().outbound.usage(),
+                        n.peers().map(|p| (p.usage(), p.roster().usage()))
+                    );
+                    if let Some(peers) = n.peers() {
+                        let bindings: Vec<_> = log
+                            .bootstrap
+                            .voter_stores
+                            .keys()
+                            .map(|id| (*id, peers.roster().binding(*id)))
+                            .collect();
+                        eprintln!("routed timeout peer bindings={bindings:?}");
+                    }
+                }
+            }
+        }
+        assert!(within_deadline, "native routed progress timed out");
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }

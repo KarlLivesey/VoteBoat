@@ -6543,3 +6543,20 @@ bytes, initial sandbox socket failures and before/after source guards are retain
 Prior pinned Counter retry state survives model and real-file rejection/restart.
 This is finite staged round-trip acceptance; frozen broader lifecycle/provider
 qualification and full P0–P7 remain open. See [slice271](baseline/slice271/README.md).
+
+
+Checkpoint281 qualifies complete native startup and selected membership drain on
+Linux/macOS: startup53/all plus38/default and drain4/all plus2/default,97
+executions per host. Formatting/four strict all-target builds and668 before/
+terminal guards verify. Native constructors now select the same existing timing
+profile as the service; generic/explicit host timers remain unchanged. Real queued
+cancellation is observed through its original OwnerStep, and actual Final
+uncertainty still requires original durable commitment/reopen/evacuation/retry.
+Earlier277–280 failures and initial compile-only281 are retained independently.
+
+Retirement diagnostic275 passes4/0 on each host without reproducing the old
+failure; copied old WAL inspection is capture-time durable state only. Full
+platform acceptance remains open: frozen276 reports two TCP member-repair
+failures, old262 is terminal62/5, old269 remains live and old251 retains46
+failures. No finite selected matrix certifies the full P0–P7 roadmap. See
+[281](baseline/slice281/README.md) and [275](baseline/slice275/README.md).

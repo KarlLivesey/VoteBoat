@@ -104,16 +104,19 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Checkpoint274 is accepted on Linux and Mac: the endpoint caller preserves actual
-accepted leadership uncertainty, while original retries remain strict. Both
-hosts pass 12 selected executions and formatting/four strict Clippy profiles.
-The current deliverable is the separate imported-retirement timeout diagnosis.
+Checkpoint281 qualifies native startup on Linux and Mac: complete startup
+all53/default38 plus focused drain all4/default2 pass on each host, with
+formatting/four strict Clippy profiles clean and668 frozen-input guards verified.
+Native convenience timing matches the service; original queued cancellation is
+observed through its actual OwnerStep before reconciliation, and real Final
+uncertainty still requires exact original durable commitment/reopen. Selected
+retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: imported-retirement timeout cause | Advance P5/P6 composed retirement on Mac/Linux. | Immutable Mac269 failure context and original phase; actual owner/core/peer state is needed to explain the deadline. | Isolate cause, fix narrowly, preserve original cuts and cold retry/fence/cleanup checks, qualify affected scope on both hosts without relaxing protocol checks. |
-| Next: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Terminal269/262 and accepted273/274 plus the retirement correction; freeze the final source before execution. | Classify exact terminal failures and run the corrected complete lifecycle family on both hosts, retaining source guards and strict checks. |
-| Following: configuration admission recovery diagnosis | Advance P4 usable membership administration on Mac/Linux. | Original Mac251 native_benchmark failure reports configuration admission journal capacity; qualify its relevance against current codec/admission contracts and source first. | Identify an actual failing trigger or record that the old failure no longer reproduces; any fix must retain bounded admission, durable configuration recovery, original requests and affected two-platform checks. |
+| Current: native member repair qualification | Advance P4 safe recovery and P1 Rust embedding on Mac/Linux. | Exact frozen Mac276 TCP compacted-Joint ingress InvalidMessage and retained-witness progress failures. The witness-loss path uses the changed native default; snapshot repair supplies explicit timing. Preserve originals and identify actual failed transitions. | Diagnose each trigger separately, correct narrowly, retain old-view refusal, actual witness/store recovery and original data/retry/cleanup requirements; qualify affected scope on both hosts with zero strict diagnostics. |
+| Next: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Retained terminal262, still-running269, accepted273/274 and281, plus the open retirement progress evidence. Freeze source before execution. | Classify exact terminal failures and run the corrected complete lifecycle family on both hosts, retaining original phase cuts, source guards and strict checks. Selected passes do not explain unreproduced older timeouts. |
+| Following: configuration admission recovery diagnosis | Advance P4 usable membership administration on Mac/Linux. | Original Mac251 native_benchmark admission-journal failure and the actual queued-original/retry refusal reproduced279/280. Exact retained-record checking is private fixture evidence, not qualification of the executable driver. | Establish the executable driver's actual trigger/current durable state; any fix must preserve bounded admission, original operation/content, normal authorization, commitment/restart/owned cleanup and two-platform checks. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26709,3 +26712,239 @@ helper. Older Mac269/262 remain live on their own frozen sources, and original
 Mac251 remains terminal with 46 failures. Full platform, provider and combined-
 fault obligations and P0–P7 remain open; tuning/security follow feature work,
 and Windows/P8 remain deferred.
+
+275 schema before diagnostic edits: the immutable Mac269 run has reported
+three imported-retirement timeouts: QUIC/checkpoint in an actual-unknown
+recovery campaign, QUIC/WAL at the phase's initial campaign, and TCP/checkpoint
+waiting for an original client result to apply on every replica. Its process
+and the older262 process are still live; their source images remain untouched.
+The original logs do not retain volatile role/dependency/client state at the
+failed wait. Copy the failed roots for native-WAL inspection without reopening
+or mutating originals. That recovery shows capture-time durable state, not the
+missing volatile state at the panic. A private timeout report in the existing
+routed drive helper is needed to diagnose the stalled transition. Report replica
+identity, group, role/term/vote, revision/base/commit/last, application applied
+boundary, pending dependency, clients and peer state from the actual owners
+before the existing assertion fires. Preserve the same deadline, poll budgets,
+phase cuts, original operations and completion ownership. No fabricated logs,
+new production API or relaxed progress condition. Run the affected original
+history on an independent frozen current-source checkout and require formatting
+and strict Clippy to stay clean. Use its actual result to choose any corrective
+edit; diagnostics alone do not accept retirement or full P0–P7. Current275
+advances P5/P6 composed retirement, next qualifies the corrected lifecycle
+family, and following establishes current relevance of the recorded P4
+configuration-admission failure.
+
+276 linked schema before edits: inspection during275 finds that native Rust
+convenience constructors select TimerConfig::default (the legacy50ms heartbeat,
+150–300ms election window), while the service and NativeTimingProfile::default
+select the already-defined throughput100ms/1000–2000ms profile. Align the five
+static/member/plain/peer-rotation native default paths with that explicit
+construction-time profile. Keep the deterministic runtime's generic default
+and every caller-supplied TimerConfig unchanged. This is P1/P2 usable embedding
+consistency, not a diagnosis or acceptance of the three275 timeouts. The
+immutable Mac275 image and its original15s wait remain intact. No quorum,
+durability, wire, persistent generation or recovery format changes. Restart
+selects local timer settings at construction; it grants no membership authority.
+Before changing production, demonstrate the old default advancing an actual
+native one-voter core before the documented service election minimum. The
+regression must exercise all five constructors, both TCP/QUIC where supported,
+real worker completions and owned store/socket cleanup. A small generic test
+helper is needed to inspect the same real native timer transition across the
+plain and service connector types; it must not create synthetic DurableLog.
+Check at supplied monotonic950ms, then drive at2000ms until the actual current-
+term no-op commits and applies. Recover member variants from actual created
+stores, preserving their required credential/wire setup. Explicit legacy timing
+must retain its earlier election behavior. Require complete startup tests and
+affected lifecycle histories, four strict profiles and frozen sources on both
+hosts before accepting the new defaults. Current linked work is275 retirement
+diagnosis plus276 embedding defaults; next is corrected full lifecycle
+qualification, following the recorded P4 configuration-admission failure.
+
+275 terminal diagnostic scope: Linux4/0 in75.29s and Mac4/0 in992.41s for the
+unchanged original imported-retirement family. Both668-input images verify before
+and at terminal; formatting and four strict Clippy profiles have zero diagnostics.
+The private report did not fire in either passing run. These results do not
+reproduce or explain the three old Mac269 retirement deadlines. Original failure
+roots were copied without reopening them; only separate working copies were
+recovered through NativeLogStore/FileLogIo. At capture, TCP/checkpoint had only
+the initial group1 bootstrap, with node1 commit2/last7, node2 commit6/last6 and
+node3 commit1/last2. QUIC/checkpoint had already retired/reclaimed source21 and
+committed its original retry; later group41 had the same operation44 committed
+on node1, present but uncommitted on node2, and absent on node3. These are
+capture-time durable states, not volatile state at the original timeout. They
+show that the failures need a common progress investigation before attributing
+them to retirement proof handling. Source guards also separate Mac269's old662
+inputs from the current668 image. The initial diagnostic snapshot raced a live
+formatter, was rejected by its source guard and was replaced after formatter
+completion; no accepted runtime history used that racy image.
+
+276 before/after local evidence so far: with the original production defaults,
+the two new default-constructor tests fail0/2 because the native core is already
+Candidate at950ms. The before manifest was captured and verified at terminal,
+not before that invocation; the old production files and test image are retained.
+After the five default selections change, all five timing-profile tests pass,
+including real static/member/rotated startup and recovery, current-term no-op
+commit/application and explicit legacy overrides. The complete all-feature
+startup target passes51/0. Local formatting/four strict Clippy profiles are clean.
+Broader affected lifecycle and independent frozen Mac checks are running; this is
+partial evidence, not acceptance of276 or retirement/platform/P0–P7 completion.
+
+277 schema before private fixture edits: frozen Mac276's complete startup target
+reports50/1, with the final membership-drain completion actually
+Unknown(LeadershipChanged), not Committed. That fixture already supplies explicit
+throughput timers, so it is not demonstrating the changed default constructor.
+Its final request may still commit; treating uncertainty as a rollback or merely
+as success would be wrong. Preserve the original joint/final records, operation
+19720, cancelled joint observation, three-replica durable final checks, evacuation,
+checkpoint/WAL reopen and original application retry. Add a controlled TCP/QUIC
+history that polls only the admitting owner until the actual original Final is
+locally durable and uncommitted, then campaigns that owner to generate an actual
+Unknown(LeadershipChanged). First require the extracted old Committed-only rule
+to fail on this real completion. The private completion assertion can then admit
+only that specific uncertainty, while the subsequent completion condition must
+require original-operation Final/configuration11 in every replica's committed
+prefix, including after native reopen. No fabricated completion, acknowledgement,
+synthetic WAL or relaxed deadline. A small private observation-cut enum and helper
+are needed to produce this actual ownership transition; no public API is added.
+Formatting/four strict profiles and original plus controlled histories on both
+hosts are the slice checks. This advances P4 durable membership evacuation; it
+is separate from Mac276's two member-repair failures and P5/P6 retirement cause.
+Mac276 remains immutable and running; Linux276 is terminal with zero failures in
+startup51/default37, member50/default27 and selected routed16/default8. The linked
+next work collects/fixes exact remaining Mac recovery triggers, then qualifies
+corrected whole lifecycle and recorded configuration-admission recovery.
+
+277 terminal focused results: Linux16/0; Mac15/1. Both hosts pass the original
+and controlled membership-drain histories (all4/default2), requiring actual
+Unknown(LeadershipChanged) for the deliberate cut and original-operation Final
+on every replica before and after reopen. Timing all5 passes on both hosts;
+Mac timing default is4/1 because explicit legacy startup returns filesystem/
+listener Other, while both default-constructor tests pass. No timing assertion
+fails in that invocation. Formatting/four strict profiles and668 before/terminal
+guards verify on both hosts. The real old Committed-only rule fails0/2 in the
+controlled Linux run with668 before/after guards. The complete277 matrix is not
+green; its failure is retained rather than relabelled as acceptance.
+
+278 schema before root allocator edit: startup's private root helper combines
+PID with SystemTime nanoseconds but has no unique allocation sequence. On the
+actual Mac, eight threads making160000 timestamp calls produce7845 unique values
+and152155 collisions. This demonstrates the naming primitive is not unique; it
+does not prove the opaque Other failure's exact cause, since that error omitted
+the root and original I/O detail. Add a process-local atomic sequence to each
+root name, preserving PID/timestamp for stale-process separation and keeping
+all durable store contents and normal owned cleanup unchanged. No new dependency,
+production API or weaker acceptance rule. Unique owned test roots are required
+for valid concurrent native provider checks, so this small prerequisite advances
+P1/P2 embedding qualification rather than a new feature milestone. Native default
+profiles and explicit overrides must still perform real elections/commit/apply
+and cleanup. Run complete startup all/default on Linux/Mac, with formatting/four
+strict profiles and frozen manifests. Reuse only the now-terminal Mac277 build
+cache via a distinct new source checkout; source277 and failed stores stay
+unchanged, and configurations that execute that cache remain sequential. Next
+investigates the two exact Mac276 member-repair failures; following qualifies
+corrected lifecycle/configuration admission, preserving the full P0–P7 goal.
+
+278 terminal results: complete startup passes Linux53/all plus38/default.
+Mac passes51/all with2 failures, and38/default with0 failures. Both failures
+are original and controlled QUIC membership-drain histories waiting for Joint
+commitment after cancelling observation; actual roles/terms and all commit5 are
+retained in the log. All timing-profile tests, including the explicit legacy
+startup that previously returned opaque Other, pass. This does not prove that
+old Other's exact cause. Formatting/four strict profiles and668 before/terminal
+guards verify on both hosts. The root allocator change is private; two-platform
+complete startup acceptance remains open. Source278 and failed stores remain
+immutable; Mac276's independent routed matrix still runs.
+
+279 schema before reconciliation edit: cancelling the original Joint ticket
+before execution ends observation, but does not guarantee durable admission or
+commitment. The original fixture instead waits for commitment without examining
+whether fresh authority must resubmit that same request. Reconcile through the
+existing MembershipDrainPlan::next and actual core membership: if the selected
+handoff voter lost leadership, use the existing actual election helper; only a
+returned Configure record exactly equal to the original planned Joint may be
+resubmitted under normal execution-time authorization. If Joint is already
+accepted, wait for its real committed prefix and follower catch-up; never submit
+Final during this original Joint cut. Bound election/submission actions and keep
+the original10s reconciliation deadline, checking it after nested operations.
+No new operation, synthesized status, weakened quorum, discarded ticket or
+rollback. Require exact committed original-operation Joint/configuration10 and
+target11 on all three replicas before checkpoint/WAL restart. Retain the original
+queued cancellation and both real Final leadership-loss cuts, all original
+application retries, evacuation and cleanup. The small private reconciliation
+helper is needed because actual CancelledWait is not a commit receipt. This
+advances usable P4 membership evacuation/P1 embedding. Run complete startup on
+both platforms and both TLS configurations with668 guards and four strict builds.
+Next diagnoses the two recorded member-repair failures, then corrected lifecycle/
+configuration-admission qualification; no broader milestone is claimed complete.
+
+279 failed check and focused refinement: local complete startup reports all49/4
+and default36/2. Reconciliation resubmits the exact original Joint while the
+cancelled original can still be queued; by execution the original is already
+recorded, so capacity preview returns configuration admission journal and the
+new ticket is NotProposed. This reproduces the recorded admission class instead
+of a missing-commit timeout. Do not treat it as successful new admission, skip
+capacity checks or alter journal grammar. The reconciliation-only observation
+path may consume that exact NotProposed refusal only when the actual admitting
+core's durable log contains the byte-equivalent original ConfigurationRecord and
+its current Joint identifies the same operation. Report that actual retained
+entry and keep requiring original Joint commitment on all three replicas. Other
+NonProposed outcomes or missing/different records remain fatal; ordinary and
+controlled Final observation rules stay strict. This private check is needed
+for the real queued-original/retry race, not a new provider seam. Preserve the
+10s reconciliation and four-action bounds, actual owned tickets, original cuts,
+reopen/retry/cleanup and zero lints. Qualify complete startup on both hosts and
+profiles; frozen279 logs/source stay retained independently. This advances the
+same P4/P1 deliverable and exposes, without yet closing, the old admission
+failure's relevance. Subsequent work still diagnoses separate member repairs and
+corrected lifecycle; full P0–P7 remains active.
+
+280 terminal refinement evidence: Linux complete startup53/all and38/default
+pass. Mac50/all with3 failures and37/default with1 failure all hit the original
+Joint reconciliation deadline; the retained-original admission guard is exercised
+without accepting arbitrary errors. No deadline or action bound is changed.
+Inspection of ConfigurationRequests confirms cancelled observer polling releases
+its observer while tracked effect-owner work can still be queued. The current
+helper mistakes that transient local absence for a reason to resubmit/elect.
+
+281 schema before polling refinement: preserve the queued cancellation cut and
+actual CancelledWait output, but collect the exact original ticket's OwnerStep
+from the same public native poll result before reconciliation decides its next
+action. A private History polling observer is needed to inspect this real
+admission completion without discarding any effects or changing native budgets.
+Match the full AdmissionTicket and original operation, and require either its
+actual proposed position or explicit execution refusal. Continue normal native
+polling/authorization and retain the existing10s observation deadline. After a
+real proposal, pending durability is represented by the core dependency and the
+plan must wait; after a real refusal, fresh original-plan resubmission can be
+considered. Never infer completion from queue emptiness or fabricate a receipt.
+The existing exact durable Joint/all-replica commitment, actual Final-unknown,
+restart/retry/evacuation/cleanup checks remain. First qualify only the four/all
+and two/default drain histories on both hosts with source guards and strict
+builds; broaden to complete startup only after that focused scope passes. This
+is a focused response to the actual cancelled-owner race, not another deadline
+increase or broad test rewrite. P4/P1 remain the linked milestone; member-repair
+and lifecycle qualification stay next, and the full goal remains active.
+
+281 final acceptance: the corrected source passes focused drain all4/default2
+and complete startup all53/default38 on Linux and Mac, for97 executions per
+host. Complete startup runtimes are Linux5.61s/4.91s and Mac45.68s/27.49s;
+these are validation runtimes, not performance measurements. Formatting and
+four strict all-target Clippy profiles have zero diagnostics. All668 source
+inputs verify before/terminal for both focused and full matrices. The initial
+compile-only image incorrectly accessed private ticket fields; it ran no native
+history and is retained separately. The final code uses public getters and the
+actual full AdmissionTicket/operation in its OwnerStep observation. Original
+queued cancellation, exact committed Joint, real Final unknown, cold original
+retry, evacuation and actual worker/store cleanup remain mandatory. Production
+changes are only the five local native default selections; public provider,
+wire/persistence/quorum contracts remain unchanged. Evidence:281; earlier failed
+277–280 sources/matrices are separate, not acceptance of this final source.
+Macro review: P1/P2 native embedding timing now matches the usable service, and
+the selected P4 evacuation history handles actual observation/queued-work races
+without claiming a new admission succeeded. Current work moves to the two exact
+native member repairs, then broader P5/P6 lifecycle and executable admission
+recovery. Old Mac269 remains live, old262 is terminal62/5 on its654-input image,
+and terminal251 retains its46 failures. Original-source failures and partial
+provider/combined-fault/P0–P7 obligations are not waived. Performance/security
+follow feature work; Windows/P8 remain deferred.

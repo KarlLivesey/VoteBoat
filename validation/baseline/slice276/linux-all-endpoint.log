@@ -1,0 +1,37 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.25s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 6 tests
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint ... ok
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (1969067) panicked at tests/routed/metadata_endpoint_discovery.rs:87:9:
+unexplained fresh duplicate
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (1969067) panicked at tests/routed/metadata_endpoint_discovery.rs:85:9:
+required original retry
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (1969067) panicked at tests/routed/metadata_endpoint_discovery.rs:87:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (1969067) panicked at tests/routed/metadata_endpoint_discovery.rs:85:9:
+required original retry
+test native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (1969068) panicked at tests/routed/metadata_endpoint_discovery.rs:87:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (1969068) panicked at tests/routed/metadata_endpoint_discovery.rs:85:9:
+required original retry
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (1969068) panicked at tests/routed/metadata_endpoint_discovery.rs:87:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (1969068) panicked at tests/routed/metadata_endpoint_discovery.rs:85:9:
+required original retry
+test native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 179 filtered out; finished in 28.71s

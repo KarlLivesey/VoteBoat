@@ -1,0 +1,19 @@
+{
+  "baseline_slice": 280,
+  "candidate_slice": 281,
+  "baseline_inputs": 668,
+  "candidate_inputs": 668,
+  "changes": [
+    {
+      "path": "tests/startup/maintenance.rs",
+      "before": "9fa19d5e554250a8ad85e045676aa811a5e2ee388057b4926d1919bdae0f52ab",
+      "after": "7bcd6e118b65276277cc39cbc19148441fac21c47e088fc9aca8ffa210eb8ea2"
+    },
+    {
+      "path": "tests/startup/maintenance/membership_drain.rs",
+      "before": "f0ab044ef2745b38d57e2b6c69b0dc1b741fc94268424c6f4f8ad27ffefb98ce",
+      "after": "298822474ca1e8a347491d90623b4e19feb8346e8fcd7f41a83dd121b51c7405"
+    }
+  ],
+  "production_changed": []
+}

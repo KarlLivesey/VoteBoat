@@ -1,0 +1,14 @@
+{
+  "baseline_slice": 274,
+  "candidate_slice": 275,
+  "baseline_inputs": 668,
+  "candidate_inputs": 668,
+  "changes": [
+    {
+      "path": "tests/routed/native.rs",
+      "before": "9be2772beb384c7e451faa06fae9761e162554aa467cf1c53f339e2e19a04439",
+      "after": "2fed0067d48e2e491a7a14432048daae22f9dc66022cf11eaf53b83fa41c5444"
+    }
+  ],
+  "production_changed": []
+}

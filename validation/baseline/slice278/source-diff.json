@@ -1,0 +1,14 @@
+{
+  "baseline_slice": 277,
+  "candidate_slice": 278,
+  "baseline_inputs": 668,
+  "candidate_inputs": 668,
+  "changes": [
+    {
+      "path": "tests/startup.rs",
+      "before": "73e3189c020474e7785280536f15a986e6c778098638fea64a04a8491dab4b3e",
+      "after": "22abcbfbcb527dbc5c7dfc924729b62ae4b982367f8b49eb7b2e74556d005721"
+    }
+  ],
+  "production_changed": []
+}

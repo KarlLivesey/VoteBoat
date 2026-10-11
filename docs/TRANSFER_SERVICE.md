@@ -5,8 +5,9 @@ uses a 100 ms heartbeat and elections in [1000,2000) ms; `edge` uses 250 ms and
 [1500,3000) ms; `legacy` uses 50 ms and [150,300) ms. Select once at startup, including
 recovery. This changes election/heartbeat scheduling, not quorum, synchronization
 or caller deadlines. These design-pack proposals are not performance guarantees.
-Rust hosts can use `NativeTimingProfile::Throughput.timers()` or supply their own
-validated `TimerConfig`; low-level startup defaults remain unchanged.
+Native Rust convenience constructors use the same `throughput` default. Hosts
+can select another profile or supply a validated `TimerConfig` through the
+explicit timer constructors. The generic runtime timer default remains unchanged.
 
 `voteboat-transfer` runs a provisioned metadata, source or target replica and
 provides authenticated `status`, `start` and `resume` commands. It uses the public

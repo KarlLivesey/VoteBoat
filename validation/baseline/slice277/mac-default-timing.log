@@ -1,0 +1,22 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/startup.rs (target/debug/deps/startup-20e50da6eeb44f4f)
+
+running 5 tests
+test timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection ... ok
+
+thread 'timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window' (18634597) panicked at tests/startup/timing_profile.rs:163:14:
+called `Result::unwrap()` on an `Err` value: NativeStartupRejected { reason: NativeStartupError { stage: "filesystem/listener", detail: "Other" }, .. }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application ... ok
+test timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window ... FAILED
+test timing_profile::native_defaults_plain_tcp_use_service_election_window ... ok
+test timing_profile::native_defaults_static_member_and_rotated_use_service_election_window ... ok
+
+failures:
+
+failures:
+    timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window
+
+test result: FAILED. 4 passed; 1 failed; 0 ignored; 0 measured; 33 filtered out; finished in 1.46s
+
+error: test failed, to rerun pass `--test startup`

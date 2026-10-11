@@ -107,9 +107,11 @@ fn group() -> GroupIdentity {
     }
 }
 fn root() -> PathBuf {
+    static NEXT_ROOT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     std::env::temp_dir().join(format!(
-        "voteboat-startup-{}-{}",
+        "voteboat-startup-{}-{}-{}",
         std::process::id(),
+        NEXT_ROOT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
         std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()

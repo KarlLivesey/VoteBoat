@@ -1,0 +1,37 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/repo275)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.25s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+unread phase 1/200: Unknown LeadershipChanged
+unread phase 20/300: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal has been running for over 60 seconds
+unread phase 40/1: Unknown LeadershipChanged
+unread phase 41/44: Unknown LeadershipChanged
+unread phase 1/700: Unknown LeadershipChanged
+unread phase 9/700: Unknown LeadershipChanged
+unread phase 9/700: Unknown LeadershipChanged
+unread phase 9/3000: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+unread phase 1/700: Unknown LeadershipChanged
+unread phase 30/1: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+unread phase 20/300: Unknown LeadershipChanged
+unread phase 1/700: Unknown LeadershipChanged
+unread phase 9/6002: Unknown LeadershipChanged
+unread phase 21/3000: Unknown LeadershipChanged
+unread phase 1/201: Unknown LeadershipChanged
+unread phase 9/6003: Unknown LeadershipChanged
+unread phase 40/44: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+unread phase 1/700: Unknown LeadershipChanged
+unread phase 21/1: Unknown LeadershipChanged
+unread phase 20/701: Unknown LeadershipChanged
+unread phase 9/2000: Unknown LeadershipChanged
+unread phase 30/9001: Unknown LeadershipChanged
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 181 filtered out; finished in 992.41s

@@ -1,0 +1,192 @@
+group=1 node=1 revision=LogRevision(174) term=77 vote=Some(NodeId(1)) base=0 commit=52 last=52 snapshot=None
+  command index=3 term=5 operation=OperationId(1000) bytes=40 committed=true
+  command index=7 term=15 operation=OperationId(1000) bytes=40 committed=true
+  command index=12 term=27 operation=OperationId(1001) bytes=166 committed=true
+  command index=15 term=31 operation=OperationId(1001) bytes=166 committed=true
+  command index=18 term=33 operation=OperationId(21) bytes=273 committed=true
+  command index=24 term=49 operation=OperationId(21) bytes=273 committed=true
+  command index=27 term=51 operation=OperationId(200) bytes=609 committed=true
+  command index=30 term=55 operation=OperationId(200) bytes=609 committed=true
+  command index=33 term=58 operation=OperationId(201) bytes=937 committed=true
+  command index=36 term=60 operation=OperationId(201) bytes=937 committed=true
+  command index=39 term=63 operation=OperationId(700) bytes=518 committed=true
+  command index=42 term=66 operation=OperationId(700) bytes=518 committed=true
+  command index=48 term=73 operation=OperationId(700) bytes=248 committed=true
+  command index=51 term=76 operation=OperationId(700) bytes=248 committed=true
+group=1 node=2 revision=LogRevision(176) term=77 vote=Some(NodeId(1)) base=0 commit=52 last=52 snapshot=None
+  command index=3 term=5 operation=OperationId(1000) bytes=40 committed=true
+  command index=7 term=15 operation=OperationId(1000) bytes=40 committed=true
+  command index=12 term=27 operation=OperationId(1001) bytes=166 committed=true
+  command index=15 term=31 operation=OperationId(1001) bytes=166 committed=true
+  command index=18 term=33 operation=OperationId(21) bytes=273 committed=true
+  command index=24 term=49 operation=OperationId(21) bytes=273 committed=true
+  command index=27 term=51 operation=OperationId(200) bytes=609 committed=true
+  command index=30 term=55 operation=OperationId(200) bytes=609 committed=true
+  command index=33 term=58 operation=OperationId(201) bytes=937 committed=true
+  command index=36 term=60 operation=OperationId(201) bytes=937 committed=true
+  command index=39 term=63 operation=OperationId(700) bytes=518 committed=true
+  command index=42 term=66 operation=OperationId(700) bytes=518 committed=true
+  command index=48 term=73 operation=OperationId(700) bytes=248 committed=true
+  command index=51 term=76 operation=OperationId(700) bytes=248 committed=true
+group=1 node=3 revision=LogRevision(169) term=77 vote=Some(NodeId(1)) base=0 commit=52 last=52 snapshot=None
+  command index=3 term=5 operation=OperationId(1000) bytes=40 committed=true
+  command index=7 term=15 operation=OperationId(1000) bytes=40 committed=true
+  command index=12 term=27 operation=OperationId(1001) bytes=166 committed=true
+  command index=15 term=31 operation=OperationId(1001) bytes=166 committed=true
+  command index=18 term=33 operation=OperationId(21) bytes=273 committed=true
+  command index=24 term=49 operation=OperationId(21) bytes=273 committed=true
+  command index=27 term=51 operation=OperationId(200) bytes=609 committed=true
+  command index=30 term=55 operation=OperationId(200) bytes=609 committed=true
+  command index=33 term=58 operation=OperationId(201) bytes=937 committed=true
+  command index=36 term=60 operation=OperationId(201) bytes=937 committed=true
+  command index=39 term=63 operation=OperationId(700) bytes=518 committed=true
+  command index=42 term=66 operation=OperationId(700) bytes=518 committed=true
+  command index=48 term=73 operation=OperationId(700) bytes=248 committed=true
+  command index=51 term=76 operation=OperationId(700) bytes=248 committed=true
+group=20 node=1 revision=LogRevision(89) term=35 vote=Some(NodeId(2)) base=0 commit=29 last=29 snapshot=None
+  command index=2 term=2 operation=OperationId(100) bytes=2342 committed=true
+  command index=4 term=10 operation=OperationId(100) bytes=2342 committed=true
+  command index=5 term=10 operation=OperationId(1) bytes=157 committed=true
+  command index=7 term=12 operation=OperationId(1) bytes=157 committed=true
+  command index=8 term=12 operation=OperationId(2) bytes=157 committed=true
+  command index=10 term=13 operation=OperationId(200) bytes=609 committed=true
+  command index=14 term=19 operation=OperationId(200) bytes=609 committed=true
+  command index=18 term=25 operation=OperationId(300) bytes=993 committed=true
+  command index=21 term=27 operation=OperationId(300) bytes=993 committed=true
+  command index=23 term=28 operation=OperationId(701) bytes=766 committed=true
+  command index=25 term=30 operation=OperationId(701) bytes=766 committed=true
+  command index=28 term=34 operation=OperationId(701) bytes=766 committed=true
+group=20 node=2 revision=LogRevision(88) term=35 vote=Some(NodeId(2)) base=0 commit=29 last=29 snapshot=None
+  command index=2 term=2 operation=OperationId(100) bytes=2342 committed=true
+  command index=4 term=10 operation=OperationId(100) bytes=2342 committed=true
+  command index=5 term=10 operation=OperationId(1) bytes=157 committed=true
+  command index=7 term=12 operation=OperationId(1) bytes=157 committed=true
+  command index=8 term=12 operation=OperationId(2) bytes=157 committed=true
+  command index=10 term=13 operation=OperationId(200) bytes=609 committed=true
+  command index=14 term=19 operation=OperationId(200) bytes=609 committed=true
+  command index=18 term=25 operation=OperationId(300) bytes=993 committed=true
+  command index=21 term=27 operation=OperationId(300) bytes=993 committed=true
+  command index=23 term=28 operation=OperationId(701) bytes=766 committed=true
+  command index=25 term=30 operation=OperationId(701) bytes=766 committed=true
+  command index=28 term=34 operation=OperationId(701) bytes=766 committed=true
+group=20 node=3 revision=LogRevision(90) term=35 vote=Some(NodeId(2)) base=0 commit=29 last=29 snapshot=None
+  command index=2 term=2 operation=OperationId(100) bytes=2342 committed=true
+  command index=4 term=10 operation=OperationId(100) bytes=2342 committed=true
+  command index=5 term=10 operation=OperationId(1) bytes=157 committed=true
+  command index=7 term=12 operation=OperationId(1) bytes=157 committed=true
+  command index=8 term=12 operation=OperationId(2) bytes=157 committed=true
+  command index=10 term=13 operation=OperationId(200) bytes=609 committed=true
+  command index=14 term=19 operation=OperationId(200) bytes=609 committed=true
+  command index=18 term=25 operation=OperationId(300) bytes=993 committed=true
+  command index=21 term=27 operation=OperationId(300) bytes=993 committed=true
+  command index=23 term=28 operation=OperationId(701) bytes=766 committed=true
+  command index=25 term=30 operation=OperationId(701) bytes=766 committed=true
+  command index=28 term=34 operation=OperationId(701) bytes=766 committed=true
+group=21 node=1 revision=LogRevision(141) term=45 vote=Some(NodeId(1)) base=0 commit=48 last=48 snapshot=None
+  command index=2 term=4 operation=OperationId(200) bytes=1771 committed=true
+  command index=5 term=7 operation=OperationId(200) bytes=1771 committed=true
+  command index=9 term=10 operation=OperationId(200) bytes=1935 committed=true
+  command index=12 term=13 operation=OperationId(200) bytes=1935 committed=true
+  command index=17 term=19 operation=OperationId(200) bytes=1025 committed=true
+  command index=20 term=21 operation=OperationId(200) bytes=1025 committed=true
+  command index=23 term=25 operation=OperationId(701) bytes=766 committed=true
+  command index=26 term=27 operation=OperationId(701) bytes=766 committed=true
+  command index=29 term=29 operation=OperationId(1) bytes=157 committed=true
+  command index=32 term=31 operation=OperationId(1) bytes=157 committed=true
+  command index=35 term=33 operation=OperationId(44) bytes=157 committed=true
+  command index=38 term=35 operation=OperationId(44) bytes=157 committed=true
+  command index=43 term=41 operation=OperationId(3000) bytes=612 committed=true
+  command index=46 term=43 operation=OperationId(3000) bytes=612 committed=true
+group=21 node=2 revision=LogRevision(141) term=45 vote=Some(NodeId(1)) base=0 commit=48 last=48 snapshot=None
+  command index=2 term=4 operation=OperationId(200) bytes=1771 committed=true
+  command index=5 term=7 operation=OperationId(200) bytes=1771 committed=true
+  command index=9 term=10 operation=OperationId(200) bytes=1935 committed=true
+  command index=12 term=13 operation=OperationId(200) bytes=1935 committed=true
+  command index=17 term=19 operation=OperationId(200) bytes=1025 committed=true
+  command index=20 term=21 operation=OperationId(200) bytes=1025 committed=true
+  command index=23 term=25 operation=OperationId(701) bytes=766 committed=true
+  command index=26 term=27 operation=OperationId(701) bytes=766 committed=true
+  command index=29 term=29 operation=OperationId(1) bytes=157 committed=true
+  command index=32 term=31 operation=OperationId(1) bytes=157 committed=true
+  command index=35 term=33 operation=OperationId(44) bytes=157 committed=true
+  command index=38 term=35 operation=OperationId(44) bytes=157 committed=true
+  command index=43 term=41 operation=OperationId(3000) bytes=612 committed=true
+  command index=46 term=43 operation=OperationId(3000) bytes=612 committed=true
+group=21 node=3 revision=LogRevision(142) term=45 vote=Some(NodeId(1)) base=0 commit=48 last=48 snapshot=None
+  command index=2 term=4 operation=OperationId(200) bytes=1771 committed=true
+  command index=5 term=7 operation=OperationId(200) bytes=1771 committed=true
+  command index=9 term=10 operation=OperationId(200) bytes=1935 committed=true
+  command index=12 term=13 operation=OperationId(200) bytes=1935 committed=true
+  command index=17 term=19 operation=OperationId(200) bytes=1025 committed=true
+  command index=20 term=21 operation=OperationId(200) bytes=1025 committed=true
+  command index=23 term=25 operation=OperationId(701) bytes=766 committed=true
+  command index=26 term=27 operation=OperationId(701) bytes=766 committed=true
+  command index=29 term=29 operation=OperationId(1) bytes=157 committed=true
+  command index=32 term=31 operation=OperationId(1) bytes=157 committed=true
+  command index=35 term=33 operation=OperationId(44) bytes=157 committed=true
+  command index=38 term=35 operation=OperationId(44) bytes=157 committed=true
+  command index=43 term=41 operation=OperationId(3000) bytes=612 committed=true
+  command index=46 term=43 operation=OperationId(3000) bytes=612 committed=true
+group=40 node=1 revision=LogRevision(46) term=16 vote=Some(NodeId(1)) base=0 commit=15 last=15 snapshot=None
+  command index=2 term=1 operation=OperationId(3000) bytes=1208 committed=true
+  command index=5 term=3 operation=OperationId(3000) bytes=1208 committed=true
+  command index=8 term=5 operation=OperationId(3000) bytes=1374 committed=true
+  command index=11 term=7 operation=OperationId(3000) bytes=1374 committed=true
+group=40 node=2 revision=LogRevision(45) term=16 vote=Some(NodeId(1)) base=0 commit=15 last=15 snapshot=None
+  command index=2 term=1 operation=OperationId(3000) bytes=1208 committed=true
+  command index=5 term=3 operation=OperationId(3000) bytes=1208 committed=true
+  command index=8 term=5 operation=OperationId(3000) bytes=1374 committed=true
+  command index=11 term=7 operation=OperationId(3000) bytes=1374 committed=true
+group=40 node=3 revision=LogRevision(46) term=16 vote=Some(NodeId(3)) base=0 commit=15 last=15 snapshot=None
+  command index=2 term=1 operation=OperationId(3000) bytes=1208 committed=true
+  command index=5 term=3 operation=OperationId(3000) bytes=1208 committed=true
+  command index=8 term=5 operation=OperationId(3000) bytes=1374 committed=true
+  command index=11 term=7 operation=OperationId(3000) bytes=1374 committed=true
+group=41 node=1 revision=LogRevision(39) term=10 vote=Some(NodeId(1)) base=0 commit=14 last=14 snapshot=None
+  command index=2 term=1 operation=OperationId(3000) bytes=1208 committed=true
+  command index=5 term=3 operation=OperationId(3000) bytes=1208 committed=true
+  command index=8 term=5 operation=OperationId(3000) bytes=1374 committed=true
+  command index=11 term=7 operation=OperationId(3000) bytes=1374 committed=true
+group=41 node=2 revision=LogRevision(39) term=10 vote=Some(NodeId(2)) base=0 commit=14 last=14 snapshot=None
+  command index=2 term=1 operation=OperationId(3000) bytes=1208 committed=true
+  command index=5 term=3 operation=OperationId(3000) bytes=1208 committed=true
+  command index=8 term=5 operation=OperationId(3000) bytes=1374 committed=true
+  command index=11 term=7 operation=OperationId(3000) bytes=1374 committed=true
+group=41 node=3 revision=LogRevision(39) term=10 vote=Some(NodeId(1)) base=0 commit=14 last=14 snapshot=None
+  command index=2 term=1 operation=OperationId(3000) bytes=1208 committed=true
+  command index=5 term=3 operation=OperationId(3000) bytes=1208 committed=true
+  command index=8 term=5 operation=OperationId(3000) bytes=1374 committed=true
+  command index=11 term=7 operation=OperationId(3000) bytes=1374 committed=true
+group=9 node=1 revision=LogRevision(132) term=60 vote=Some(NodeId(1)) base=0 commit=33 last=38 snapshot=None
+  command index=2 term=2 operation=OperationId(700) bytes=40 committed=true
+  command index=5 term=4 operation=OperationId(700) bytes=40 committed=true
+  command index=8 term=6 operation=OperationId(700) bytes=3247 committed=true
+  command index=11 term=8 operation=OperationId(700) bytes=3247 committed=true
+  command index=16 term=17 operation=OperationId(700) bytes=288 committed=true
+  command index=19 term=19 operation=OperationId(700) bytes=288 committed=true
+  command index=23 term=23 operation=OperationId(6002) bytes=674 committed=true
+  command index=26 term=25 operation=OperationId(6002) bytes=674 committed=true
+  command index=29 term=27 operation=OperationId(3000) bytes=560 committed=true
+  command index=32 term=29 operation=OperationId(3000) bytes=560 committed=true
+group=9 node=2 revision=LogRevision(129) term=60 vote=Some(NodeId(2)) base=0 commit=34 last=34 snapshot=None
+  command index=2 term=2 operation=OperationId(700) bytes=40 committed=true
+  command index=5 term=4 operation=OperationId(700) bytes=40 committed=true
+  command index=8 term=6 operation=OperationId(700) bytes=3247 committed=true
+  command index=11 term=8 operation=OperationId(700) bytes=3247 committed=true
+  command index=16 term=17 operation=OperationId(700) bytes=288 committed=true
+  command index=19 term=19 operation=OperationId(700) bytes=288 committed=true
+  command index=23 term=23 operation=OperationId(6002) bytes=674 committed=true
+  command index=26 term=25 operation=OperationId(6002) bytes=674 committed=true
+  command index=29 term=27 operation=OperationId(3000) bytes=560 committed=true
+  command index=32 term=29 operation=OperationId(3000) bytes=560 committed=true
+group=9 node=3 revision=LogRevision(133) term=61 vote=Some(NodeId(3)) base=0 commit=34 last=35 snapshot=None
+  command index=2 term=2 operation=OperationId(700) bytes=40 committed=true
+  command index=5 term=4 operation=OperationId(700) bytes=40 committed=true
+  command index=8 term=6 operation=OperationId(700) bytes=3247 committed=true
+  command index=11 term=8 operation=OperationId(700) bytes=3247 committed=true
+  command index=16 term=17 operation=OperationId(700) bytes=288 committed=true
+  command index=19 term=19 operation=OperationId(700) bytes=288 committed=true
+  command index=23 term=23 operation=OperationId(6002) bytes=674 committed=true
+  command index=26 term=25 operation=OperationId(6002) bytes=674 committed=true
+  command index=29 term=27 operation=OperationId(3000) bytes=560 committed=true
+  command index=32 term=29 operation=OperationId(3000) bytes=560 committed=true

@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.49s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 181 filtered out; finished in 50.07s

@@ -1,0 +1,6 @@
+group=1 node=1 revision=LogRevision(49) term=39 vote=Some(NodeId(1)) base=0 commit=2 last=7 snapshot=None
+  command index=2 term=6 operation=OperationId(1000) bytes=40 committed=true
+group=1 node=2 revision=LogRevision(51) term=39 vote=Some(NodeId(2)) base=0 commit=6 last=6 snapshot=None
+  command index=2 term=6 operation=OperationId(1000) bytes=40 committed=true
+group=1 node=3 revision=LogRevision(43) term=39 vote=Some(NodeId(3)) base=0 commit=1 last=2 snapshot=None
+  command index=2 term=6 operation=OperationId(1000) bytes=40 committed=false
