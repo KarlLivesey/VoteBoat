@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/runtime.rs (target/debug/deps/runtime-e870e96e24f97870)
+
+running 1 test
+replayed seed=1 actions=150 states=151
+test timer_replay::schedule::bounded_recorded_timer_file_replays_through_the_actual_owner ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 43 filtered out; finished in 0.03s
+

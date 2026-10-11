@@ -488,7 +488,9 @@
             {"file": "tests/runtime/timer_contract.rs", "symbol": "replacement_and_budget"},
             {"file": "tests/runtime/timer_contract.rs", "symbol": "poll_model"},
             {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"},
-            {"file": "tests/runtime.rs", "symbol": "expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns"}
+            {"file": "tests/runtime.rs", "symbol": "expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns"},
+            {"file": "tests/runtime/timer_replay.rs", "symbol": "timer_campaign_waits_for_real_wal_sync_and_original_completion"},
+            {"file": "tests/runtime/timer_replay/schedule.rs", "symbol": "recorded_timed_owner_schedules_replay_exact_native_states_and_counter_retries"}
           ],
           "remaining": ["Eight seeds of 128 sequential actions per provider and selected TimedShard integration do not prove all schedules, real-host responsiveness or the cause of platform liveness failures."]
         }

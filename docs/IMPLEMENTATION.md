@@ -104,17 +104,19 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint271: static mixed-host service256 remains usable. Codec
-recovery270 is accepted on Linux/Mac with422 targeted tests each and strict zero.
-The current slice closes an actual SnapshotCodec staged-byte round-trip gap;
-three regressions and 482 affected executions pass on each host, with strict zero.
-Corrected69-history lifecycle269 stays immutable and live on both platforms;
+Current checkpoint272: static mixed-host service256 remains usable. Codec
+recovery270 and exact staged snapshot payload271 are accepted on both hosts.
+The current slice adds actual timed-owner/WAL fault replay with six focused
+checks and32 encoded/decoded schedules. Both hosts pass376 full runtime/Raft
+executions plus one recorded-file replay, formatting/four strict profiles zero
+and666 frozen inputs before/after. Corrected69-history lifecycle269 is terminal
+69/0 on Linux; its matching Mac run stays immutable and live;
 older262/251 terminal evidence remains separate. Selected tests are not complete
 platform or roadmap acceptance.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current271: exact staged snapshot payload — accepted | Advance P0/R19/P1 replacement/checkpoint correctness before a sealed durability receipt. | Existing stage byte boundaries, CRC and root/pin ownership; preserved prior accepted changed bytes. No new format/API/provider. | Changed/truncated decoder rejection before sync/publication; prior pinned Counter checkpoint, retry IDs and stale admissions survive process/power-loss and real-file restart; transparent host codec; affected snapshot/worker/member/provider targets and four strict profiles on both hosts. |
+| Accepted272: timed-owner/WAL fault replay | Advance P0/P1/P2 combined timer/persistence correctness. | Existing AutoNode/TimedShard, native DeadlineQueue/FairScheduler and original store tickets; one shared private fulfillment helper. No production change. | Actual timer-origin vote withholding until sync/completion; expired held visit and independent group progress; both crash modes reject old owner and preserve Counter retries;32 exact encoded/decoded schedules and captured file replay; full runtime/Raft and four strict profiles on both hosts. |
 | Next269: finish corrected composed lifecycle qualification | Advance P5/P6 Mac/Linux functional acceptance with the causal metadata/cleanup fixes composed. | Frozen662-input Linux/Mac sources and original operation IDs/cuts; retain older262/251 sources and failures separately. | Full69-history terminal results, exact failure bodies and source verification, then focused cause fixes if required. Live progress is not completion. |
 | Following: next evidenced contract/combined-fault gap | Advance original P0–P7 exits while preserving usable service/embedding. | Actual terminal results plus R01–R19/C01–C24 ledger; choose a concrete missing behavior before helpers. | Specify API/state ownership/restart cases and bounded acceptance before edits; source-bound tests and strict zero on supported platforms. |
 
@@ -26556,3 +26558,50 @@ lifecycle result/cause collection. The observed original262 Mac failures are
 both automatic metadata-read histories, attributed to its older source;269 has
 no reported failure at this observation, but is not terminal. Full P0–P7 and
 broader platform/provider/fault exits remain active; tuning/security follow.
+
+272 schema before edits: cover actual timed-owner/persistence composition for
+R11/I03/I04/I07/I10/I11 (P0/P1/P2). Existing bare-core replay bypasses timers;
+existing AutoNode already assembles TimedShard/FairScheduler/DeadlineQueue with
+native WAL and Counter, but synchronously completes every persistence effect.
+Reuse that assembly and extract its unchanged effect fulfillment as a private
+helper so a test can retain one real timer-origin visit and accepted LogTicket.
+No production API/provider/protocol change is planned. The test owns the visit,
+original ticket, optional actual DurableLog and model journal; time is explicit.
+Written, synced and core-completed are separate cuts. No fabricated completion
+or new watermark is allowed. Crash drops owner/volatile state, recovers through
+NativeLogStore under a fresh session and invalidates the old visit/completion.
+Acceptance: timer-triggered campaign cannot emit votes before completion; timer
+expiry during a held dependency retains bounded work; group2 remains live while
+group1 is held; both crash modes preserve appropriate durable state and original
+Counter retries; recorded bounded time/partition/delivery schedules replay exact
+states. Shared effects helper is needed to exercise the actual owner without a
+parallel fulfillment implementation. Full runtime/Raft targets and strict four
+profiles on Linux/Mac are required. Current272 advances combined timer faults;
+next269 collects immutable full lifecycle terminal evidence; following adds the
+next demonstrated functional/combined-fault gap. Macro P0–P7 remains active,
+with performance/security after features and Windows/P8 deferred.
+
+272 acceptance: full runtime/Raft targets finish on both hosts. In Raft/runtime
+order, all62/44, default62/44, core29/29 and native62/44 give376 executions per
+host, zero failures. Each also reads the same captured seed1 file:150 actions/
+151 states, with an additional passing replay check. The six focused cases
+cover actual timer visits, held original WAL tickets, separate sync/completion,
+stale-owner refusal, independent-group progress and original Counter retries.
+Thirty-two schedules vary three time steps, crash mode and read IDs; this is
+finite native-majority/model-journal scope, not arbitrary physical faults.
+Formatting/four strict Clippy profiles are zero and666 inputs verify before/
+after both matrices. Metadata checker/tests pass;14 provider reviews/88 named
+operations remain partial. Production code is unchanged. Evidence: [272](../validation/baseline/slice272/README.md).
+Macro review: this adds the actual timed-owner path to P0/P1/P2 fault replay
+without another provider or protocol. Current mini item is accepted; the next
+remains corrected lifecycle269 terminal collection, followed by the next
+evidenced functional gap. Full P0–P7 stays active.
+
+269 Linux terminal qualification: all69 corrected native delegation histories
+pass with zero failures in2900.43s. All662 frozen inputs verify before/after
+and match slice268/178844a; terminal logs/exit/manifest are retained [here](../validation/baseline/slice269/README.md),
+with a local complete source archive. The matching Mac269 run is still live.
+Original Mac262 has reported failures in both automatic metadata-read histories
+on its older source; original Mac251 is separate. Do not transfer those failures
+or this Linux result to another image. This accepts the Linux family only and
+advances P5/P6 without closing the two-platform lifecycle milestone.

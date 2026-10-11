@@ -21,6 +21,9 @@ mod scheduler_contract;
 mod support;
 #[path = "runtime/timer_contract.rs"]
 mod timer_contract;
+#[cfg(feature = "native")]
+#[path = "runtime/timer_replay.rs"]
+mod timer_replay;
 use std::{
     cell::Cell,
     collections::{BTreeMap, BTreeSet, VecDeque},
@@ -1546,6 +1549,43 @@ impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNo
             reads: Vec::new(),
         }
     }
+    fn apply_effects(&mut self, visit: VisitTicket, now: MonoTime, effects: Vec<Effect>) {
+        let mut effects = VecDeque::from(effects);
+        while let Some(effect) = effects.pop_front() {
+            assert!(effects.len() < 128);
+            match effect {
+                Effect::Persist(update) => effects.extend(
+                    self.runtime
+                        .with_core(visit, now, |core| {
+                            persist_effect(core, &mut self.log, update)
+                        })
+                        .unwrap()
+                        .unwrap(),
+                ),
+                Effect::Send(m) => {
+                    assert!(self.messages.len() < 512);
+                    self.messages.push_back(m);
+                }
+                Effect::Committed(entries) => {
+                    self.apps
+                        .get_mut(&visit.group)
+                        .unwrap()
+                        .apply_batch(&entries)
+                        .unwrap();
+                }
+                Effect::ReadReady(barrier) => {
+                    let app = &self.apps[&visit.group];
+                    self.reads.push(
+                        self.runtime
+                            .with_core(visit, now, |core| read_at_barrier(core, &barrier, app, ()))
+                            .unwrap()
+                            .unwrap(),
+                    );
+                }
+                _ => panic!("this timer history does not compact"),
+            }
+        }
+    }
     fn drain(&mut self, now: MonoTime) -> bool {
         let mut progress = false;
         for _ in 0..16 {
@@ -1558,43 +1598,7 @@ impl<L: LogStore, Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> AutoNo
                 Err(RaftError::WrongIdentity | RaftError::InvalidMessage) => vec![],
                 Err(e) => panic!("unexpected event failure: {e:?}"),
             };
-            let mut effects = VecDeque::from(effects);
-            while let Some(effect) = effects.pop_front() {
-                assert!(effects.len() < 128);
-                match effect {
-                    Effect::Persist(update) => effects.extend(
-                        self.runtime
-                            .with_core(visit, now, |core| {
-                                persist_effect(core, &mut self.log, update)
-                            })
-                            .unwrap()
-                            .unwrap(),
-                    ),
-                    Effect::Send(m) => {
-                        assert!(self.messages.len() < 512);
-                        self.messages.push_back(m);
-                    }
-                    Effect::Committed(entries) => {
-                        self.apps
-                            .get_mut(&visit.group)
-                            .unwrap()
-                            .apply_batch(&entries)
-                            .unwrap();
-                    }
-                    Effect::ReadReady(barrier) => {
-                        let app = &self.apps[&visit.group];
-                        self.reads.push(
-                            self.runtime
-                                .with_core(visit, now, |core| {
-                                    read_at_barrier(core, &barrier, app, ())
-                                })
-                                .unwrap()
-                                .unwrap(),
-                        );
-                    }
-                    _ => panic!("this timer history does not compact"),
-                }
-            }
+            self.apply_effects(visit, now, effects);
             self.runtime.finish(visit).unwrap();
             progress = true;
         }

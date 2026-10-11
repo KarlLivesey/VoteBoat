@@ -1,0 +1,465 @@
+   Compiling voteboat v0.1.0 (<linux-conformance-repo>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.08s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 69 tests
+cross-authority insertion Quic checkpoint=true phase=Reserve
+cross-authority insertion Quic checkpoint=true phase=Intent
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+cross-authority insertion Quic checkpoint=true phase=Stage(21)
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal ... ok
+cross-authority insertion Quic checkpoint=true phase=Stage(22)
+cross-authority insertion Quic checkpoint=true phase=Fence
+cross-authority insertion Quic checkpoint=true phase=Import(21)
+cross-authority insertion Quic checkpoint=true phase=Import(22)
+cross-authority insertion Quic checkpoint=true phase=ChildPublication
+cross-authority insertion Quic checkpoint=true phase=ParentPublication
+test native::delegation::cancellation::quic_cancelled_delegation_replans_and_recovers_from_checkpoints has been running for over 60 seconds
+test native::delegation::cancellation::tcp_cancelled_delegation_replans_and_recovers_from_wal has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::imported_partial::quic_partial_import_checkpoint has been running for over 60 seconds
+test native::delegation::imported_partial::quic_partial_import_wal has been running for over 60 seconds
+test native::delegation::imported_partial::tcp_partial_import_checkpoint has been running for over 60 seconds
+test native::delegation::imported_partial::tcp_partial_import_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::recovery::admitted_lookup_leadership_change_drains_before_fresh_authority has been running for over 60 seconds
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal has been running for over 60 seconds
+cancellation Quic checkpoint=true phase=Reserve
+cancellation Quic checkpoint=true phase=Intent
+cancellation Quic checkpoint=true phase=Stage(21)
+cancellation Quic checkpoint=true phase=Stage(22)
+cancellation Quic checkpoint=true phase=Fence
+cancellation Quic checkpoint=true phase=Import(21)
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint has been running for over 60 seconds
+cancellation Quic checkpoint=true phase=Import(22)
+cancellation Quic checkpoint=true phase=ChildPublication
+cancellation Quic checkpoint=true phase=ParentPublication
+cancellation Quic checkpoint=true phase=Activate(21)
+cancellation Quic checkpoint=true phase=Activate(22)
+test native::delegation::cancellation::quic_cancelled_delegation_replans_and_recovers_from_checkpoints ... ok
+cancellation TcpTls checkpoint=false phase=Reserve
+cancellation TcpTls checkpoint=false phase=Intent
+cancellation TcpTls checkpoint=false phase=Stage(21)
+cancellation TcpTls checkpoint=false phase=Stage(22)
+cancellation TcpTls checkpoint=false phase=Fence
+cancellation TcpTls checkpoint=false phase=Import(21)
+cancellation TcpTls checkpoint=false phase=Import(22)
+cancellation TcpTls checkpoint=false phase=ChildPublication
+cancellation TcpTls checkpoint=false phase=ParentPublication
+cancellation TcpTls checkpoint=false phase=Activate(21)
+cancellation TcpTls checkpoint=false phase=Activate(22)
+test native::delegation::cancellation::tcp_cancelled_delegation_replans_and_recovers_from_wal ... ok
+cross-authority insertion TcpTls checkpoint=true phase=Reserve
+cross-authority insertion TcpTls checkpoint=true phase=Intent
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal has been running for over 60 seconds
+cross-authority insertion TcpTls checkpoint=true phase=Stage(21)
+cross-authority insertion TcpTls checkpoint=true phase=Stage(22)
+cross-authority insertion TcpTls checkpoint=true phase=Fence
+cross-authority insertion TcpTls checkpoint=true phase=Import(21)
+cross-authority insertion TcpTls checkpoint=true phase=Import(22)
+cross-authority insertion TcpTls checkpoint=true phase=ChildPublication
+cross-authority insertion TcpTls checkpoint=true phase=ParentPublication
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint ... ok
+cross-authority insertion TcpTls checkpoint=false phase=Reserve
+cross-authority insertion TcpTls checkpoint=false phase=Intent
+cross-authority insertion TcpTls checkpoint=false phase=Stage(21)
+cross-authority insertion TcpTls checkpoint=false phase=Stage(22)
+cross-authority insertion TcpTls checkpoint=false phase=Fence
+cross-authority insertion TcpTls checkpoint=false phase=Import(21)
+cross-authority insertion TcpTls checkpoint=false phase=Import(22)
+cross-authority insertion TcpTls checkpoint=false phase=ChildPublication
+cross-authority insertion TcpTls checkpoint=false phase=ParentPublication
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal ... ok
+partial Quic checkpoint=false group=1 operation=21
+partial Quic checkpoint=false group=1 operation=200
+partial Quic checkpoint=false group=21 operation=200
+partial Quic checkpoint=false group=20 operation=200
+partial Quic checkpoint=false group=21 operation=200
+partial Quic checkpoint=false group=1 operation=201
+partial Quic checkpoint=false group=20 operation=300
+partial Quic checkpoint=false group=21 operation=200
+partial Quic checkpoint=false group=1 operation=30
+partial Quic checkpoint=false group=1 operation=6000
+partial Quic checkpoint=false group=1 operation=2000
+partial Quic checkpoint=false group=30 operation=2000
+partial Quic checkpoint=false group=21 operation=2000
+partial Quic checkpoint=false group=30 operation=2000
+partial Quic checkpoint=false group=1 operation=2100
+partial Quic checkpoint=false group=1 operation=6001
+partial Quic checkpoint=false group=30 operation=2000
+partial Quic checkpoint=false group=21 operation=7000
+partial Quic checkpoint=false group=1 operation=31
+partial Quic checkpoint=false group=1 operation=6010
+partial Quic checkpoint=false group=1 operation=2001
+partial Quic checkpoint=false group=31 operation=2001
+partial Quic checkpoint=false group=21 operation=2001
+partial Quic checkpoint=false group=31 operation=2001
+partial Quic checkpoint=false group=1 operation=2101
+partial Quic checkpoint=false group=1 operation=6011
+partial Quic checkpoint=false group=31 operation=2001
+partial Quic checkpoint=false group=21 operation=7001
+partial Quic checkpoint=false group=1 operation=6002
+partial Quic checkpoint=false group=1 operation=3000
+partial Quic checkpoint=false group=40 operation=3000
+partial Quic checkpoint=false group=21 operation=3000
+partial Quic checkpoint=false group=40 operation=3000
+partial Quic checkpoint=false group=1 operation=3001
+partial Quic checkpoint=false group=1 operation=6003
+partial Quic checkpoint=false group=40 operation=3000
+test native::delegation::imported_partial::quic_partial_import_wal ... ok
+partial TcpTls checkpoint=true group=1 operation=21
+partial TcpTls checkpoint=true group=1 operation=200
+partial TcpTls checkpoint=true group=21 operation=200
+partial TcpTls checkpoint=true group=20 operation=200
+partial TcpTls checkpoint=true group=21 operation=200
+partial TcpTls checkpoint=true group=1 operation=201
+partial TcpTls checkpoint=true group=20 operation=300
+partial TcpTls checkpoint=true group=21 operation=200
+partial TcpTls checkpoint=true group=1 operation=30
+partial TcpTls checkpoint=true group=1 operation=6000
+partial TcpTls checkpoint=true group=1 operation=2000
+partial TcpTls checkpoint=true group=30 operation=2000
+partial TcpTls checkpoint=true group=21 operation=2000
+partial TcpTls checkpoint=true group=30 operation=2000
+partial TcpTls checkpoint=true group=1 operation=2100
+partial TcpTls checkpoint=true group=1 operation=6001
+partial TcpTls checkpoint=true group=30 operation=2000
+partial TcpTls checkpoint=true group=21 operation=7000
+partial TcpTls checkpoint=true group=1 operation=31
+partial TcpTls checkpoint=true group=1 operation=6010
+partial TcpTls checkpoint=true group=1 operation=2001
+partial TcpTls checkpoint=true group=31 operation=2001
+partial TcpTls checkpoint=true group=21 operation=2001
+partial TcpTls checkpoint=true group=31 operation=2001
+partial TcpTls checkpoint=true group=1 operation=2101
+partial TcpTls checkpoint=true group=1 operation=6011
+partial TcpTls checkpoint=true group=31 operation=2001
+partial TcpTls checkpoint=true group=21 operation=7001
+partial TcpTls checkpoint=true group=1 operation=6002
+partial TcpTls checkpoint=true group=1 operation=3000
+partial TcpTls checkpoint=true group=40 operation=3000
+partial TcpTls checkpoint=true group=21 operation=3000
+partial TcpTls checkpoint=true group=40 operation=3000
+partial TcpTls checkpoint=true group=1 operation=3001
+partial TcpTls checkpoint=true group=1 operation=6003
+partial TcpTls checkpoint=true group=40 operation=3000
+test native::delegation::imported_partial::tcp_partial_import_checkpoint ... ok
+cross-authority insertion Quic checkpoint=false phase=Reserve
+cross-authority insertion Quic checkpoint=false phase=Intent
+cross-authority insertion Quic checkpoint=false phase=Stage(21)
+cross-authority insertion Quic checkpoint=false phase=Stage(22)
+cross-authority insertion Quic checkpoint=false phase=Fence
+cross-authority insertion Quic checkpoint=false phase=Import(21)
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint has been running for over 60 seconds
+cross-authority insertion Quic checkpoint=false phase=Import(22)
+cross-authority insertion Quic checkpoint=false phase=ChildPublication
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal has been running for over 60 seconds
+cross-authority insertion Quic checkpoint=false phase=ParentPublication
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal ... ok
+partial Quic checkpoint=true group=1 operation=21
+partial Quic checkpoint=true group=1 operation=200
+partial Quic checkpoint=true group=21 operation=200
+partial Quic checkpoint=true group=20 operation=200
+partial Quic checkpoint=true group=21 operation=200
+partial Quic checkpoint=true group=1 operation=201
+partial Quic checkpoint=true group=20 operation=300
+partial Quic checkpoint=true group=21 operation=200
+partial Quic checkpoint=true group=1 operation=30
+partial Quic checkpoint=true group=1 operation=6000
+partial Quic checkpoint=true group=1 operation=2000
+partial Quic checkpoint=true group=30 operation=2000
+partial Quic checkpoint=true group=21 operation=2000
+partial Quic checkpoint=true group=30 operation=2000
+partial Quic checkpoint=true group=1 operation=2100
+partial Quic checkpoint=true group=1 operation=6001
+partial Quic checkpoint=true group=30 operation=2000
+partial Quic checkpoint=true group=21 operation=7000
+partial Quic checkpoint=true group=1 operation=31
+partial Quic checkpoint=true group=1 operation=6010
+partial Quic checkpoint=true group=1 operation=2001
+partial Quic checkpoint=true group=31 operation=2001
+partial Quic checkpoint=true group=21 operation=2001
+partial Quic checkpoint=true group=31 operation=2001
+partial Quic checkpoint=true group=1 operation=2101
+partial Quic checkpoint=true group=1 operation=6011
+partial Quic checkpoint=true group=31 operation=2001
+partial Quic checkpoint=true group=21 operation=7001
+partial Quic checkpoint=true group=1 operation=6002
+partial Quic checkpoint=true group=1 operation=3000
+partial Quic checkpoint=true group=40 operation=3000
+partial Quic checkpoint=true group=21 operation=3000
+partial Quic checkpoint=true group=40 operation=3000
+partial Quic checkpoint=true group=1 operation=3001
+partial Quic checkpoint=true group=1 operation=6003
+partial Quic checkpoint=true group=40 operation=3000
+test native::delegation::imported_partial::quic_partial_import_checkpoint ... ok
+partial TcpTls checkpoint=false group=1 operation=21
+partial TcpTls checkpoint=false group=1 operation=200
+partial TcpTls checkpoint=false group=21 operation=200
+partial TcpTls checkpoint=false group=20 operation=200
+partial TcpTls checkpoint=false group=21 operation=200
+partial TcpTls checkpoint=false group=1 operation=201
+partial TcpTls checkpoint=false group=20 operation=300
+partial TcpTls checkpoint=false group=21 operation=200
+partial TcpTls checkpoint=false group=1 operation=30
+partial TcpTls checkpoint=false group=1 operation=6000
+partial TcpTls checkpoint=false group=1 operation=2000
+partial TcpTls checkpoint=false group=30 operation=2000
+partial TcpTls checkpoint=false group=21 operation=2000
+partial TcpTls checkpoint=false group=30 operation=2000
+partial TcpTls checkpoint=false group=1 operation=2100
+partial TcpTls checkpoint=false group=1 operation=6001
+partial TcpTls checkpoint=false group=30 operation=2000
+partial TcpTls checkpoint=false group=21 operation=7000
+partial TcpTls checkpoint=false group=1 operation=31
+partial TcpTls checkpoint=false group=1 operation=6010
+partial TcpTls checkpoint=false group=1 operation=2001
+partial TcpTls checkpoint=false group=31 operation=2001
+partial TcpTls checkpoint=false group=21 operation=2001
+partial TcpTls checkpoint=false group=31 operation=2001
+partial TcpTls checkpoint=false group=1 operation=2101
+partial TcpTls checkpoint=false group=1 operation=6011
+partial TcpTls checkpoint=false group=31 operation=2001
+partial TcpTls checkpoint=false group=21 operation=7001
+partial TcpTls checkpoint=false group=1 operation=6002
+partial TcpTls checkpoint=false group=1 operation=3000
+partial TcpTls checkpoint=false group=40 operation=3000
+partial TcpTls checkpoint=false group=21 operation=3000
+partial TcpTls checkpoint=false group=40 operation=3000
+partial TcpTls checkpoint=false group=1 operation=3001
+partial TcpTls checkpoint=false group=1 operation=6003
+partial TcpTls checkpoint=false group=40 operation=3000
+test native::delegation::imported_partial::tcp_partial_import_wal ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... ok
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+preserved original metadata outcome: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal ... ok
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+metadata lookup lost leadership: Unavailable(LeadershipChanged)
+test native::delegation::metadata_moves::automatic_metadata::recovery::admitted_lookup_leadership_change_drains_before_fresh_authority ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors has been running for over 60 seconds
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors has been running for over 60 seconds
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints has been running for over 60 seconds
+test native::delegation::quic_delegated_split_recovers_every_phase_from_wal has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata has been running for over 60 seconds
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_checkpoints_and_original_observations has been running for over 60 seconds
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata has been running for over 60 seconds
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal ... ok
+delegated Quic checkpoint=true phase=Reserve
+delegated Quic checkpoint=true phase=Intent
+delegated Quic checkpoint=true phase=Stage(21)
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints has been running for over 60 seconds
+delegated Quic checkpoint=true phase=Stage(22)
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal has been running for over 60 seconds
+delegated Quic checkpoint=true phase=Fence
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints has been running for over 60 seconds
+delegated Quic checkpoint=true phase=Import(21)
+delegated Quic checkpoint=true phase=Import(22)
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal has been running for over 60 seconds
+test native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint has been running for over 60 seconds
+delegated Quic checkpoint=true phase=ChildPublication
+delegated Quic checkpoint=true phase=ParentPublication
+delegated Quic checkpoint=true phase=Activate(21)
+delegated Quic checkpoint=true phase=Activate(22)
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints ... ok
+delegated Quic checkpoint=false phase=Reserve
+delegated Quic checkpoint=false phase=Intent
+delegated Quic checkpoint=false phase=Stage(21)
+delegated Quic checkpoint=false phase=Stage(22)
+delegated Quic checkpoint=false phase=Fence
+delegated Quic checkpoint=false phase=Import(21)
+test native::delegation::retained::parent_moves::quic_imported_parent_move_wal has been running for over 60 seconds
+delegated Quic checkpoint=false phase=Import(22)
+delegated Quic checkpoint=false phase=ChildPublication
+delegated Quic checkpoint=false phase=ParentPublication
+delegated Quic checkpoint=false phase=Activate(21)
+delegated Quic checkpoint=false phase=Activate(22)
+test native::delegation::quic_delegated_split_recovers_every_phase_from_wal ... ok
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_wal has been running for over 60 seconds
+delegated repeated Quic checkpoint=false operation=202 phase=Reserve
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_wal has been running for over 60 seconds
+delegated repeated Quic checkpoint=false operation=202 phase=Intent
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint has been running for over 60 seconds
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_wal has been running for over 60 seconds
+test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_wal ... ok
+delegated repeated Quic checkpoint=false operation=202 phase=Stage(23)
+test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_wal ... ok
+delegated repeated Quic checkpoint=false operation=202 phase=Fence(21)
+test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+delegated repeated Quic checkpoint=false operation=202 phase=Fence(22)
+test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_wal ... ok
+delegated repeated Quic checkpoint=false operation=202 phase=Import(23)
+delegated repeated Quic checkpoint=false operation=202 phase=ChildPublication
+test native::delegation::retained_failed_store_does_not_poison_the_next_history has been running for over 60 seconds
+delegated repeated Quic checkpoint=false operation=202 phase=ParentPublication
+delegated repeated Quic checkpoint=false operation=202 phase=Activate(23)
+delegated repeated Quic checkpoint=false operation=204 phase=Reserve
+delegated repeated Quic checkpoint=false operation=204 phase=Intent
+delegated repeated Quic checkpoint=false operation=204 phase=Stage(24)
+delegated repeated Quic checkpoint=false operation=204 phase=Stage(25)
+delegated repeated Quic checkpoint=false operation=204 phase=Fence(23)
+delegated repeated Quic checkpoint=false operation=204 phase=Import(24)
+delegated repeated Quic checkpoint=false operation=204 phase=Import(25)
+delegated repeated Quic checkpoint=false operation=204 phase=ChildPublication
+delegated repeated Quic checkpoint=false operation=204 phase=ParentPublication
+delegated repeated Quic checkpoint=false operation=204 phase=Activate(24)
+delegated repeated Quic checkpoint=false operation=204 phase=Activate(25)
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+delegated repeated TcpTls checkpoint=true operation=202 phase=Reserve
+delegated repeated TcpTls checkpoint=true operation=202 phase=Intent
+delegated repeated TcpTls checkpoint=true operation=202 phase=Stage(23)
+delegated repeated TcpTls checkpoint=true operation=202 phase=Fence(21)
+delegated repeated TcpTls checkpoint=true operation=202 phase=Fence(22)
+delegated repeated TcpTls checkpoint=true operation=202 phase=Import(23)
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints has been running for over 60 seconds
+delegated repeated TcpTls checkpoint=true operation=202 phase=ChildPublication
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_wal has been running for over 60 seconds
+delegated repeated TcpTls checkpoint=true operation=202 phase=ParentPublication
+delegated repeated TcpTls checkpoint=true operation=202 phase=Activate(23)
+delegated repeated TcpTls checkpoint=true operation=204 phase=Reserve
+delegated repeated TcpTls checkpoint=true operation=204 phase=Intent
+delegated repeated TcpTls checkpoint=true operation=204 phase=Stage(24)
+delegated repeated TcpTls checkpoint=true operation=204 phase=Stage(25)
+delegated repeated TcpTls checkpoint=true operation=204 phase=Fence(23)
+delegated repeated TcpTls checkpoint=true operation=204 phase=Import(24)
+delegated repeated TcpTls checkpoint=true operation=204 phase=Import(25)
+delegated repeated TcpTls checkpoint=true operation=204 phase=ChildPublication
+delegated repeated TcpTls checkpoint=true operation=204 phase=ParentPublication
+delegated repeated TcpTls checkpoint=true operation=204 phase=Activate(24)
+delegated repeated TcpTls checkpoint=true operation=204 phase=Activate(25)
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations ... ok
+delegated repeated TcpTls checkpoint=false operation=202 phase=Reserve
+delegated repeated TcpTls checkpoint=false operation=202 phase=Intent
+delegated repeated TcpTls checkpoint=false operation=202 phase=Stage(23)
+delegated repeated TcpTls checkpoint=false operation=202 phase=Fence(21)
+delegated repeated TcpTls checkpoint=false operation=202 phase=Fence(22)
+delegated repeated TcpTls checkpoint=false operation=202 phase=Import(23)
+delegated repeated TcpTls checkpoint=false operation=202 phase=ChildPublication
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut has been running for over 60 seconds
+test native::delegation::unread_phase::unknown_completion_waits_for_actual_native_reservation_release has been running for over 60 seconds
+delegated repeated TcpTls checkpoint=false operation=202 phase=ParentPublication
+delegated repeated TcpTls checkpoint=false operation=202 phase=Activate(23)
+delegated repeated TcpTls checkpoint=false operation=204 phase=Reserve
+delegated repeated TcpTls checkpoint=false operation=204 phase=Intent
+delegated repeated TcpTls checkpoint=false operation=204 phase=Stage(24)
+delegated repeated TcpTls checkpoint=false operation=204 phase=Stage(25)
+delegated repeated TcpTls checkpoint=false operation=204 phase=Fence(23)
+delegated repeated TcpTls checkpoint=false operation=204 phase=Import(24)
+delegated repeated TcpTls checkpoint=false operation=204 phase=Import(25)
+delegated repeated TcpTls checkpoint=false operation=204 phase=ChildPublication
+delegated repeated TcpTls checkpoint=false operation=204 phase=ParentPublication
+delegated repeated TcpTls checkpoint=false operation=204 phase=Activate(24)
+delegated repeated TcpTls checkpoint=false operation=204 phase=Activate(25)
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_wal ... ok
+delegated repeated Quic checkpoint=true operation=202 phase=Reserve
+delegated repeated Quic checkpoint=true operation=202 phase=Intent
+delegated repeated Quic checkpoint=true operation=202 phase=Stage(23)
+delegated repeated Quic checkpoint=true operation=202 phase=Fence(21)
+delegated repeated Quic checkpoint=true operation=202 phase=Fence(22)
+delegated repeated Quic checkpoint=true operation=202 phase=Import(23)
+delegated repeated Quic checkpoint=true operation=202 phase=ChildPublication
+delegated repeated Quic checkpoint=true operation=202 phase=ParentPublication
+delegated repeated Quic checkpoint=true operation=202 phase=Activate(23)
+delegated repeated Quic checkpoint=true operation=204 phase=Reserve
+delegated repeated Quic checkpoint=true operation=204 phase=Intent
+delegated repeated Quic checkpoint=true operation=204 phase=Stage(24)
+delegated repeated Quic checkpoint=true operation=204 phase=Stage(25)
+delegated repeated Quic checkpoint=true operation=204 phase=Fence(23)
+delegated repeated Quic checkpoint=true operation=204 phase=Import(24)
+delegated repeated Quic checkpoint=true operation=204 phase=Import(25)
+delegated repeated Quic checkpoint=true operation=204 phase=ChildPublication
+delegated repeated Quic checkpoint=true operation=204 phase=ParentPublication
+delegated repeated Quic checkpoint=true operation=204 phase=Activate(24)
+delegated repeated Quic checkpoint=true operation=204 phase=Activate(25)
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints ... ok
+test native::delegation::retained_failed_store_does_not_poison_the_next_history ... ok
+delegated TcpTls checkpoint=true phase=Reserve
+delegated TcpTls checkpoint=true phase=Intent
+delegated TcpTls checkpoint=true phase=Stage(21)
+delegated TcpTls checkpoint=true phase=Stage(22)
+delegated TcpTls checkpoint=true phase=Fence
+delegated TcpTls checkpoint=true phase=Import(21)
+delegated TcpTls checkpoint=true phase=Import(22)
+delegated TcpTls checkpoint=true phase=ChildPublication
+delegated TcpTls checkpoint=true phase=ParentPublication
+delegated TcpTls checkpoint=true phase=Activate(21)
+delegated TcpTls checkpoint=true phase=Activate(22)
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints ... ok
+delegated TcpTls checkpoint=false phase=Reserve
+delegated TcpTls checkpoint=false phase=Intent
+delegated TcpTls checkpoint=false phase=Stage(21)
+delegated TcpTls checkpoint=false phase=Stage(22)
+delegated TcpTls checkpoint=false phase=Fence
+delegated TcpTls checkpoint=false phase=Import(21)
+delegated TcpTls checkpoint=false phase=Import(22)
+delegated TcpTls checkpoint=false phase=ChildPublication
+delegated TcpTls checkpoint=false phase=ParentPublication
+delegated TcpTls checkpoint=false phase=Activate(21)
+delegated TcpTls checkpoint=false phase=Activate(22)
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_wal ... ok
+unread phase 1/4243: Unknown LeadershipChanged
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut ... ok
+test native::delegation::unread_phase::unknown_completion_waits_for_actual_native_reservation_release ... ok
+
+test result: ok. 69 passed; 0 failed; 0 ignored; 0 measured; 112 filtered out; finished in 2900.43s
+

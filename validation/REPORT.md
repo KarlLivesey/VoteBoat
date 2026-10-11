@@ -1,5 +1,12 @@
 # Validation report
 
+Actual timed-owner/WAL replay: [slice272](baseline/slice272/README.md).
+Both hosts pass376 runtime/Raft executions plus the same captured150-action
+schedule, formatting/four strict profiles zero and666 verified inputs. Production
+is unchanged; this adds finite timer/persistence composition evidence to P0/P1/P2.
+Corrected lifecycle269 is [terminal69/0 on Linux](baseline/slice269/README.md);
+its matching Mac run and older-source terminal obligations remain open.
+
 Separate-host static service: [256](baseline/slice256/README.md). Two Linux
 replicas and one Mac pass TCP/TLS and QUIC original writes/quorum reads, a
 required Linux/Mac quorum, observed leader loss, same-ID duplicate retries,

@@ -714,9 +714,11 @@
       "native": "DeadlineQueue",
       "conformance": [
         "tests/runtime.rs",
-        "tests/runtime/timer_contract.rs"
+        "tests/runtime/timer_contract.rs",
+        "tests/runtime/timer_replay.rs",
+        "tests/runtime/timer_replay/schedule.rs"
       ],
-      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down."
+      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
     },
     {
       "design_id": "C10/C11",
@@ -737,9 +739,11 @@
       ],
       "native": "TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>",
       "conformance": [
-        "tests/runtime.rs"
+        "tests/runtime.rs",
+        "tests/runtime/timer_replay.rs",
+        "tests/runtime/timer_replay/schedule.rs"
       ],
-      "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change."
+      "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
     },
     {
       "design_id": "C10/C15",

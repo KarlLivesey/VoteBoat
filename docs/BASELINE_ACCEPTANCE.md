@@ -1,5 +1,12 @@
 # Baseline acceptance map
 
+Actual timed-owner/WAL replay: [slice272](../validation/baseline/slice272/README.md).
+Both hosts pass376 runtime/Raft executions plus the same captured150-action
+schedule, formatting/four strict profiles zero and666 verified inputs. Production
+is unchanged; this adds finite timer/persistence composition evidence to P0/P1/P2.
+Corrected lifecycle269 is [terminal69/0 on Linux](../validation/baseline/slice269/README.md);
+its matching Mac run and older-source terminal obligations remain open.
+
 Exact staged snapshot payload: [slice271](../validation/baseline/slice271/README.md).
 Sealing refuses a decoder that changes the staged application bytes, before sync
 or publication. Both hosts pass482 affected executions and four strict profiles,

@@ -1,5 +1,12 @@
 # Baseline audits
 
+Actual timed-owner/WAL replay: [slice272](../validation/baseline/slice272/README.md).
+Both hosts pass376 runtime/Raft executions plus the same captured150-action
+schedule, formatting/four strict profiles zero and666 verified inputs. Production
+is unchanged; this adds finite timer/persistence composition evidence to P0/P1/P2.
+Corrected lifecycle269 is [terminal69/0 on Linux](../validation/baseline/slice269/README.md);
+its matching Mac run and older-source terminal obligations remain open.
+
 R14/R19 update270: supplied LogCodec checkpoint dispatch is now controlled by
 the selected codec, with pre-replacement recognition checks. The actual prior
 reclaim-success/reopen-failure and both-host targeted acceptance are retained in
@@ -27,7 +34,7 @@ pass on both hosts. Corrected262 Linux finishes67/0 with source verification;
 Mac remains active with an Unavailable metadata-lookup failure. Diagnostic268
 reproduces actual LeadershipChanged outcomes and corrects the caller assumptions
 with all/default4/0 and3/0 on both hosts. Full corrected69-history Linux269 is
-live; complete corrected-family acceptance remains separate work.
+terminal69/0; matching Mac qualification remains active and separate work.
 
 | Requirement | Current implementation surface | Remaining acceptance or work |
 | --- | --- | --- |
