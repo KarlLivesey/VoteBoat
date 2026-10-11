@@ -970,7 +970,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
 | R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
 | R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
-| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;32 seeded schedules pass freshly. | General replayable/minimizable fault driver and reference-Raft comparison remain. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 adds32 replayed schedules and bounded reduction of an actual native WAL-model failure on both hosts. | Reordered storage-completion/snapshot/timer schedules, broader fault drivers and reference-Raft comparison remain. |
 | R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
 | R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
 | R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |
@@ -1126,8 +1126,11 @@ complete disk-full/recovery competition coverage. Scenario3's striped-group
 protocol is P8; its ordinary stale-completion obligations remain P0–P3.
 tests/raft.rs also executes32 seeds of256 actual-core actions with native WAL
 model power loss, partitions, reordered/duplicated messages and committed-prefix
-checks. This is a bounded majority schedule family. It does not establish a
-general schedule generator/minimizer, known-Raft differential runner or
+checks. Slice263 adds versioned exact-ID/byte schedule replay and bounded
+same-target deletion reduction with an actual defective-sync recovery negative,
+verified on both hosts. This remains a bounded synchronous-persistence majority
+schedule family. It does not establish a general asynchronous fault driver,
+known-Raft differential runner or
 general end-to-end linearizability checking across all applications. Slice164 now independently checks bounded Counter client histories including unknown outcomes and selected real service crashes/restarts. Those
 chapter11 validation obligations remain explicit rather than being replaced by
 a passing test count.
@@ -1146,7 +1149,8 @@ a passing test count.
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as
    a sustainable throughput improvement.
-3. Broaden chapter11 evidence: replayable/minimizable actual-core fault schedules,
+3. Broaden chapter11 beyond263's replayable/minimizable actual-core schedules:
+   reordered persistence completions, snapshots and timer-runtime actions,
    compatible-semantics reference-Raft comparison, fuzz coverage for WAL/RPC/
    snapshot/routing codecs, declared-scope partitioned histories, and the missing
    combined membership/lifecycle/storage schedules. Existing deterministic and

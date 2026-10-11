@@ -104,16 +104,17 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint255–259: static mixed-host service256 is selected completed
-evidence. The R01–R19 source audit255 separates implemented features from wider
-acceptance; existing timer checks258 pass all/core/native/default on both hosts
-with only an is_empty metadata correction. Preserved Linux254d finishes65/0;
-Mac's corresponding family remains live with failures. Isolated257 TCP/WAL
-passes unchanged on both hosts and does not identify the first failure.
+Current checkpoint263: static mixed-host service256 remains selected completed
+evidence. Timer258 and scheduler261 replacement checks pass on both hosts.
+Original Mac254d finishes21/44; the44 failures map to two separately controlled
+fixture assumptions corrected259/260. The eight affected260 histories now pass
+on both hosts. Complete corrected67-history qualification262 runs on independent
+frozen Linux/Mac sources. Actual-core replay/reduction263 is accepted below;
+selected checks do not imply a complete platform or roadmap pass.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current261: strengthen the existing scheduler replacement checker | Close missing P0/R14/R19 operation evidence using the current host/native providers while260 Mac recovery runs independently. | Existing ReadyScheduler contract/checker and exact GroupIdentity; no new provider, runtime or protocol. | Identical host/native modeled/scoped/refusal/fairness/lifetime assertions, three defective-provider negatives, all/core/native/default Linux/Mac profiles, named metadata tests and formatting/four strict profiles zero. |
+| Current263: actual-core replay and bounded failure reduction — accepted | Close a bounded P0/R11 debugging gap while lifecycle qualification runs independently. | Existing Raft Cluster/native WAL model, explicit owned action schedules and exact typed failure target; no new production engine. | Versioned text/malformed checks,32 deterministic replay schedules, actual false-sync failure reduced to six actions, retained full Raft target46/29/46/46 both hosts and formatting/four strict profiles zero. |
 | Next262: qualify the complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Terminal original Mac21/44 maps to36 retained-credit assertions and8 existing-store collisions;259/260 controlled negatives/corrections on both hosts. Use frozen independent corrected sources. | Full67-history family (original65 plus two controlled regressions), source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
 | Following: resolve the next actual full-platform failure or uncovered seam | Advance functional Linux/macOS and public Rust composition P0–P6. | Preserved original251 full Mac run and262 terminal results; inspect existing source/checkers before selecting an actual gap. | Cause-specific negative/correction with affected histories, or one missing reusable host/native obligation with a defective-provider negative; both-host evidence and strict zero, with partial scope explicit. |
 
@@ -26128,3 +26129,73 @@ Next262 qualifies the corrected full67 family (65 original plus two controlled
 regressions) on preserved independent Linux/Mac sources; do not rerun unchanged
 original sources or infer a full pass from the selected controls. Full P0–P7
 remains active; features/functional Linux/macOS first, performance/security later.
+
+262 qualification schema: run the existing corrected native delegation family,
+67 histories, on frozen independent Linux/Mac sources. API/data/format and all
+original transfer, fencing, activation, retry, checkpoint/WAL and ancestor-offline
+state transitions stay unchanged.259 only isolates fresh history store ownership;
+260 only waits for actual reservation release before original-ID recovery.
+Every successful history keeps its explicit abort/drain/join and cold-read checks;
+failed histories retain stores for diagnosis. No helper or protocol prerequisite
+is introduced. Reuse the now-idle managed Linux checkout after clean ff-only
+update; keep Mac's selected260 histories and original251 full run untouched.
+Acceptance: all67 terminal history results, zero failed/ignored and source hashes
+before/after on each host, retaining any new exact failure bodies. Complete the
+selected Mac260 target before starting its full family to avoid overlapping
+independent native fixture loads. Current261 both-host strict checks remain;
+new source changes require fresh relevant checks. This advances full P5/P6
+functional qualification; it does not certify arbitrary compositions or P7.
+
+263 schema: reuse the existing actual Raft Cluster and native WAL ModelIo for
+explicit replayable actions, rather than another consensus engine. A bounded
+versioned text schedule records exact proposal IDs/bytes and high-level message,
+partition, campaign/heartbeat and power-loss choices; opaque fresh store sessions
+are recreated, not reused as evidence. Decode rejects malformed/oversized inputs
+before execution. Replay records logical core logs, roles, applied prefixes and
+queue counts at each virtual action step. Restart compares the previously emitted
+committed prefix with actual recovered WAL state. A bounded deletion reducer keeps
+the same typed lost-prefix target (node/original operation), preserves IDs and
+reports whether its attempt budget permits one-removal minimality. A deliberately
+defective test-only JournalIo acknowledges sync without syncing, so an actual
+commit/power-loss schedule must trigger the prefix-loss detector and remain
+replayable after reduction. No production buffered mode or acceptable weak
+durability is introduced. All objects are in-memory owned test resources; a new
+replay starts fresh. Acceptance: exact text round trips and malformed rejection,
+32 seeded schedules with identical semantic replay, controlled defective-sync
+failure/reduction, retained existing Raft tests on Linux/Mac and strict zero.
+This closes a missing bounded R11/P0 debugging path, not the whole chapter11
+simulator: storage-completion reordering, snapshots, timer runtime, reference-
+Raft comparison and broader faults remain explicit. No performance/security
+work or prerequisite for the already usable static service is added.
+
+263 schema correction from the first check: false sync leaves a durable manifest
+selecting missing WAL bytes. NativeLogStore correctly refuses recovery with the
+exact Corrupt("durable log prefix missing") error before Raft can be restored.
+Keep that guard; classify this precise rejection with its original node/last
+committed operation and a separate failure-stage tag. The reducer must preserve
+that stage as well as the target identity, never accept an unrelated panic or
+generic storage error. A recovered-but-short prefix has a distinct tag. Retain
+the initial3/2 setup result; it is not the intended negative acceptance.
+
+260 affected-history acceptance is now terminal on both hosts: Linux insertion
+4/0 and deletion4/0; Mac insertion4/0 in1204.08s and deletion4/0 in198.48s.
+All original fault cuts, IDs, cold reads and owned cleanup remain; fixed Mac653
+source inputs verify after actual zero exits. Evidence:
+[Mac terminal histories](../validation/baseline/slice260/mac-histories/README.md).
+This completes260's affected-history mini plan. The full corrected67 family262
+is running independently on Linux and Mac; original251 Mac full remains live.
+
+263 acceptance: five codec/replay/reducer checks pass on both hosts, including
+32 seeded schedules replayed twice with exact original IDs/bytes. The actual
+false-sync recovery rejection reduces to six actions, preserving node2,
+operation7001 and the precise failure stage; every single-action removal loses
+that target, and removing defective sync behavior recovers successfully. Budget
+exhaustion preserves the target without claiming minimality. Complete existing
+Raft targets all/core/native/default finish46/29/46/46 on each host, zero failed
+or ignored; formatting/four strict profiles are zero. All657 Rust inputs verify
+at terminal; production and contracts remain unchanged. Evidence:
+[263](../validation/baseline/slice263/README.md). Macro review advances bounded
+P0/R11 functional debugging while preserving the usable service. Synchronous
+WAL-model schedules do not close snapshots, delayed storage completions, timer
+runtime, reference comparison or general chapter11 validation. Full P0–P7 stays
+active; feature/functional Linux/macOS first, performance/security later.

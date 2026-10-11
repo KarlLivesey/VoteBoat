@@ -1,0 +1,13 @@
+{
+  "base": "d6adc44",
+  "buildInputs": 657,
+  "changed": [
+    "tests/raft.rs"
+  ],
+  "added": [
+    "tests/raft/fault_schedule.rs",
+    "tests/raft/fault_schedule/codec.rs",
+    "tests/raft/fault_schedule/reduce.rs"
+  ],
+  "productionChanges": []
+}

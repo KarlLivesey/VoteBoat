@@ -1,0 +1,7 @@
+VBSIM 1 42
+campaign 1
+pump
+bad_sync 2
+write 1 7001 7
+pump
+power_loss 2

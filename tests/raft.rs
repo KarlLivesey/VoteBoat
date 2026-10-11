@@ -16,6 +16,9 @@
 mod campaigning;
 #[path = "raft/drain_coordinator.rs"]
 mod drain_coordinator;
+#[cfg(feature = "native")]
+#[path = "raft/fault_schedule.rs"]
+mod fault_schedule;
 #[path = "raft/leadership.rs"]
 mod leadership;
 mod support;
