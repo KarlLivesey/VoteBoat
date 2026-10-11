@@ -44,7 +44,10 @@ does not certify a hypothetical backend or permit an unverified live migration.
 Subgroup-backed logical voters and broader transactions are newly included in
 P8 and **not implemented**. Existing recursive quorums and outbox support do not
 implement them. Their protocol/model/recovery contracts must precede usable
-native features. Striped single-group WAL and representative-relay optimization
+native features. The [transaction protocol model311](../validation/baseline/slice311/README.md)
+now passes on Linux/Mac in four profiles, including actual weakened-rule
+counterexamples; replicated transaction applications/driver remain next.
+Striped single-group WAL and representative-relay optimization
 move to P9, along with the original performance gates and required research cost
 comparisons. Default research promotion remains gated by that evidence. Windows
 remains deferred. This goal completes only after its functional P0–P8 scope is

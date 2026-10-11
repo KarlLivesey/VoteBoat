@@ -15,8 +15,13 @@ with its original counter195/1 failure retained. No complete platform or P0–P7
 acceptance is claimed. Seeded parser, scoped client-history and shared connector
 evidence is archived in [301](baseline/slice301/README.md). Sustainable throughput
 at the original correctness/p99 gate moves to the user's later P9 phase. Newly
-included P8 logical-voter/transaction functionality has no implementation or
-acceptance evidence yet; this goal stops only after its functional qualification.
+included P8 logical-voter/transaction functionality has no native implementation
+yet. The [transaction protocol model311](baseline/slice311/README.md) passes8 tests
+in four profiles on each host, with126,818 states/827,613 transitions exhausted,
+actual weakening counterexamples and zero formatting/four strict profiles.
+This finite model assumes actual committed commands and trusted receipt origins;
+it is not native transaction or logical-voter acceptance. This goal stops only
+after functional P8 qualification, before P9 performance/P10 security.
 The records below describe their own historical sources and outcomes.
 
 Exact replica-bound recovery expectation: [slice273](baseline/slice273/README.md).

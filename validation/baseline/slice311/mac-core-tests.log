@@ -1,0 +1,21 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice311/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.04s
+     Running tests/transaction_model.rs (/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/deps/transaction_model-23f596ff78f37518)
+
+running 8 tests
+TimeoutAbort: [Timeout(0, 0)]: participant outcome has no matching coordinator decision
+UnstableDecision: [Send(Decide(0, Abort)), Deliver(0)]: durable coordinator decision changed
+test controls::checker_detects_timeout_abort_of_a_durable_prepared_participant ... ok
+test controls::conflicting_and_insufficient_prepares_record_abort_without_partial_effects ... ok
+test controls::lost_application_and_release_receipts_reconstruct_from_durable_outcomes ... ok
+PrematureRelease: [Send(Release(0, 0, Commit)), Deliver(0)]: participant released before exact AppliedAll
+test controls::checker_detects_reversal_of_the_original_replicated_decision ... ok
+test controls::real_phase_sequence_finishes_both_transfers_and_original_retries_do_not_reapply ... ok
+test controls::receipt_loss_restart_and_timeouts_keep_prepared_reads_blocked_until_exact_release ... ok
+test controls::checker_detects_release_before_exact_applied_all ... ok
+Report { states: 126818, edges: 827613, losses: 222264, restarts: 126415, finished_commit_states: 15774, finished_abort_states: 6964, two_commit_finished_states: 242, commit_abort_finished_states: 704, depth_limited: false, state_limited: false, exhausted: true }
+test bounded_two_transaction_durable_protocol_preserves_atomicity_and_locks ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.67s
+

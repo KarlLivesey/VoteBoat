@@ -147,9 +147,11 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | --- | --- | --- | --- |
 | Completed297: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294. | Actual original native tickets and reference Ready cuts, own-image process/power recovery, retries/reads, stale refusal and false-sync reduction pass both hosts. Selected schedules only; snapshots remain separate. |
 | Completed305: qualify the demonstrated shutdown correction | Preserve usable service shutdown while a legitimate original QUIC close remains owned. | Actual304 cap-defect control, existing inspection contracts and independent ownership review. | Keep the ten-second local-work cutoff, pin only settled original close timers, require actual drain/join and successful process exit. Affected targets pass Linux203/0 and Mac202/0, executable52/0 each, with four strict profiles zero. Original Mac302 cause remains unobserved; a silent pass does not establish it. |
-| Current302: finish baseline qualification and record feature exits | Establish the finite P0–P7 service/embedding qualification. | Original four-profile matrices, final305 affected-source evidence and finite301 source/provider review. | Linux is terminal5661/0 across four profiles; Mac remains live. Retain terminal results, resolve demonstrated failures and reuse unaffected evidence. Map original functional exits to actual evidence. No full-suite restart or optional engine; baseline acceptance alone does not finish newly included P8. |
-| Next310: define P8's usable protocol contracts | Establish the functional logical-voter/transaction scope and ordered bounded deliverables. | Chapters03/08/12/16/17 and current native/public application, persistence, quorum and lifecycle seams. Can prepare while302 runs. | Record parent promise/payload/response evidence, representative failover, nested recovery/configuration and transaction coordination/isolation/unknown-outcome semantics. Specify formal models, storage dependencies, native acceptance histories and completion criteria. No placeholder implementation or safety claim from an interface/model alone. Advances P8. |
-| Following: bounded atomic transaction | Deliver a real two-participant account transfer as the first usable P8 transaction feature. | Reviewed310 transaction contract, independent phase/locking model and existing public application/client/read/checkpoint composition. | Actual replicated coordinator decisions, participant prepares/locks, original phase IDs and restart/unknown-outcome recovery; native atomicity/isolation histories and public injection on Linux/macOS with zero lint. Static ownership and declared finite capacity are explicit. This first feature does not complete logical voters or all P8. |
+| Parallel302: finish baseline qualification and record feature exits | Establish the finite P0–P7 service/embedding qualification. | Original four-profile matrices, final305 affected-source evidence and finite301 source/provider review. | Linux is terminal5661/0 across four profiles; Mac remains live. Retain terminal results, resolve demonstrated failures and reuse unaffected evidence. Map original functional exits to actual evidence. No full-suite restart or optional engine; baseline acceptance alone does not finish newly included P8. |
+| Completed311: transaction protocol and independent model | Establish P8's durable atomicity/isolation contract before implementing phase commands. | Reviewed310 scope, chapters08/11 and actual Node client/read/application contracts. | Eight model tests pass in all four profiles on Linux/Mac;126,818 states/827,613 transitions exhaust the declared graph and three weakened rules produce actual counterexamples. Volatile observations and committed phase proofs are separate. Formatting/four strict profiles and714 source guards are clean. Model evidence alone implements no transaction engine. |
+| Current312: replicated transaction applications | Implement coordinator/participant state, account locks, immutable phase IDs, bounded admission/receipts and checkpoint recovery. | Qualified311 protocol/model and existing public application/client/read/checkpoint composition. | Atomic application/refusal, original-content retry, balance/lock invariants, bounded retention and restored phase/lock/outcome validation. Keep business intake separate from trusted internal protocol phase commands; no caller-supplied ready flags. Advances P8 transactions. |
+| Next313: native transaction driver and usable embedding | Deliver the complete bounded atomic transfer through actual networked groups. | Qualified312 applications and owned Node proposal/quorum-read tickets. | Driver obtains exact scoped phase observations, resumes original durable state after unknown/restart, and completes only after every participant applied/released. Native atomicity/isolation, partition/leader-loss/checkpoint recovery, downstream composition, joined cleanup and Linux/macOS checks must pass with zero lint. This first transaction feature does not complete logical voters or all P8. |
+| Following314: logical-voter refinement mapping and protocol gate | Define the remaining P8 parent-voter feature before native assembly. | Reviewed310 fixed composition and existing ordered log/quorum/configuration/recovery contracts; transactions313 develop independently. | Explicit child-committed-state to parent-voter mapping, scoped responses/payload availability, representative replacement and persisted/volatile recovery model. Deliberate personal-ballot/early-response/stale-context violations must be detected. Declare supported nesting/activation limits. This required protocol gate alone implements no logical-voter service. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28136,3 +28138,54 @@ boundary for this goal; P9 performance/P10 security stay on the later roadmap.
 Sensible efficiency remains an implementation constraint. P8 capabilities above
 are proposed, not implemented or qualified. Existing Mac302 runs unchanged;
 baseline acceptance and new P8 feature acceptance remain separate.
+
+Schema311 — transaction protocol model/provenance (P8): the pack explicitly
+requires transaction atomicity/isolation and formal transition evidence. Add one
+independent bounded model as that required gate, not another baseline prerequisite
+or a substitute for the engine. Data: two immutable transaction requests and two
+participant accounts; durable coordinator/participant phases are separate from
+lossy volatile commands/receipts. Prepared locks survive restart, account changes
+require the exact immutable decision, and release requires actual AppliedAll.
+Timeout/cancellation only loses observation. Canonical lock order and durable
+business refusal define progress under contention; unavailable decisions retain
+locks. Completion checks include independent invariants and actual counterexamples
+for weakened release/timeout/decision rules, with exact finite scope recorded.
+
+Source review311: ClientTicket scopes one original invocation to group/operation
+and router generation; ClientOutcome's receipt is not a remote certificate.
+ReadBarrier has private construction and binds group/configuration/term/request
+and a contiguous quorum-backed boundary. A trusted non-Byzantine host protocol
+driver must collect/consume actual Node outputs and correlate original immutable
+transaction/group/phase content before constructing internal phase commands.
+Business intake may not supply prepared/decision/applied-all flags or arbitrary
+positions. Restart re-reads replicated status; volatile tickets never reconstruct
+authority. This uses existing seams, without new signatures or a storage wrapper.
+Application state remains durable through existing ordered apply/checkpoint/WAL
+replay;311 proposes no change to consensus or storage contracts. Actual engine,
+native histories and logical-voter protocol remain unimplemented work.
+
+Contract refinement311: an Applied position's lack of ConfigurationId does not
+require freezing voter membership. Exact committed immutable phase records
+survive the already-qualified P4 membership protocol; fresh reads establish
+current authority under the effective configuration. Bind transaction groups
+and incarnations, correlate actual invocation store/session/ticket/content, and
+retain locks/decisions/dedup through membership snapshots. Static ownership is
+the initial transaction scope; a redundant frozen-voter configuration gate is
+not added. Restrict configuration context only if a later transaction explicitly
+depends on a physical assignment or particular configuration.
+
+Implemented311: the independent two-transfer/two-account graph exhausts126,818
+states and827,613 transitions, including receipt loss/restart and completed
+commit/commit and commit/abort states. Neither80-depth nor250,000-state ceiling
+is reached. The oracle is independent of protocol transitions/weakening mode;
+actual timeout-Abort, premature-release and decision-reversal controls each
+produce a concrete counterexample. Received observations are volatile, while
+Decided/AppliedAll/Finished retain their exact committed proofs. Inspection
+corrected an initially truncated depth40 search and an earlier durable-observation
+abstraction; only the final graph is qualified. Eight tests pass under all four
+profiles on Linux and Mac, formatting/four full-target strict profiles are zero,
+and714 before/terminal source guards match. Original Mac302 continues on a
+separate build without interruption. See [311](../validation/baseline/slice311/README.md).
+This completes the required bounded model gate, not a native transaction engine,
+general liveness proof or P8. The macro scope remains functional P8 followed by
+goal completion and a stop for the user's P9 planning; no tuning starts here.
