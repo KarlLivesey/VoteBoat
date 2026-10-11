@@ -51,6 +51,7 @@ pub mod scoped_source;
 pub mod secure;
 pub mod snapshot;
 pub mod snapshot_worker;
+pub mod transaction;
 pub mod transfer;
 pub mod transport;
 pub mod vote;

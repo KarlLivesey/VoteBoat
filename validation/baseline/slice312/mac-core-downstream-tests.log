@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice312/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.18s
+     Running tests/transaction_application.rs (/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/deps/transaction_application-929b3b756e41f3e0)
+
+running 6 tests
+test public_transfer_identity_and_phase_namespaces_preserve_exact_binding ... ok
+test invalid_profile_direction_amount_and_limits_refuse_before_application ... ok
+test pending_start_capacity_and_all_destination_phase_ids_are_reserved ... ok
+test public_role_incarnation_and_opening_account_configuration_are_enforced ... ok
+test public_application_receipts_reads_and_checkpoint_use_existing_contracts ... ok
+test public_failed_batches_and_restores_preserve_original_application ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

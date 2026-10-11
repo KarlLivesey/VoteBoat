@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice312/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.98s
+     Running unittests src/lib.rs (/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/deps/voteboat-5e6bd92568224565)
+
+running 11 tests
+test transaction::tests::refusal::insufficient_and_overflow_are_committed_business_outcomes_without_mutation ... ok
+test transaction::tests::refusal::refusal_abort_absent_tombstone_and_late_prepare_preserve_other_lock ... ok
+test transaction::tests::participant_status_binds_exact_destination_and_reverse_direction_is_supported ... ok
+test transaction::tests::admission::pending_whole_records_and_all_destination_phase_ids_reserve_terminal_capacity ... ok
+test transaction::tests::admission::new_protocol_phase_requires_original_binding_but_pending_start_reserves_it ... ok
+test transaction::tests::complete_capacity_one_retains_every_original_outcome_and_first_position ... ok
+test transaction::tests::admission::missing_account_and_incorrect_outer_operation_refuse_before_binding ... ok
+test transaction::tests::refusal::changed_phase_assertion_or_transaction_content_never_reapplies ... ok
+test transaction::tests::recovery::semantic_restore_rejects_unknown_version_capacity_incarnation_and_opening_accounts ... ok
+test transaction::tests::recovery::active_lock_checkpoint_and_suffix_reconstruct_original_atomic_phases ... ok
+test transaction::tests::recovery::malformed_batch_and_every_checkpoint_truncation_preserve_original_state ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 71 filtered out; finished in 0.03s
+

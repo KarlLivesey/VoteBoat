@@ -17,7 +17,7 @@ record claims that unimplemented phases already work.
 | P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
 | P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
 | P7 | Functional multi-lane assembly, batching/pipelining, reclamation and recovery throttling | Existing mechanisms and finite TCP/QUIC histories remain supported. The original chapter12 P7 throughput/p99 acceptance condition moves to P9; this reordering does not claim that condition passed. |
-| P8 | Subgroup-backed logical voters and broader transactions | Newly included functional scope; not implemented. Establish explicit protocol, evidence/capability and recovery contracts, model-check required transitions, then qualify usable native/public-interface paths on Linux/macOS. Performance-dependent research promotion remains P9. |
+| P8 | Subgroup-backed logical voters and broader transactions | Functional scope remains incomplete. Independent transaction model311 and replicated applications312 are qualified; actual driver and logical voters remain. Establish explicit protocol, evidence/capability and recovery contracts, model-check required transitions, then qualify usable native/public-interface paths on Linux/macOS. Performance-dependent research promotion remains P9. |
 | P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, striped single-group WAL, representative relays and other throughput projects. No automatic start after P8. |
 | P10 | Security review and hardening | Later separate phase, with the user's Daybreak review. Existing authentication, identity, bounded-resource and protocol-safety contracts remain required during feature work. |
 
@@ -104,7 +104,7 @@ solely for compatibility. Preserve explicit migration for already-written data.
 
 These are capability milestones, not a claim that every earlier phase is
 finished. The detailed phase table above remains the scope ledger. P8's functional
-scope is newly included and unimplemented. Online membership and split/merge do not block use of the
+scope remains incomplete: transaction applications are qualified; the driver and logical voters remain. Online membership and split/merge do not block use of the
 static service; no calendar estimate or completion percentage is inferred from
 the count of remaining milestones.
 
@@ -149,9 +149,10 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Completed305: qualify the demonstrated shutdown correction | Preserve usable service shutdown while a legitimate original QUIC close remains owned. | Actual304 cap-defect control, existing inspection contracts and independent ownership review. | Keep the ten-second local-work cutoff, pin only settled original close timers, require actual drain/join and successful process exit. Affected targets pass Linux203/0 and Mac202/0, executable52/0 each, with four strict profiles zero. Original Mac302 cause remains unobserved; a silent pass does not establish it. |
 | Parallel302: finish baseline qualification and record feature exits | Establish the finite P0–P7 service/embedding qualification. | Original four-profile matrices, final305 affected-source evidence and finite301 source/provider review. | Linux is terminal5661/0 across four profiles; Mac remains live. Retain terminal results, resolve demonstrated failures and reuse unaffected evidence. Map original functional exits to actual evidence. No full-suite restart or optional engine; baseline acceptance alone does not finish newly included P8. |
 | Completed311: transaction protocol and independent model | Establish P8's durable atomicity/isolation contract before implementing phase commands. | Reviewed310 scope, chapters08/11 and actual Node client/read/application contracts. | Eight model tests pass in all four profiles on Linux/Mac;126,818 states/827,613 transitions exhaust the declared graph and three weakened rules produce actual counterexamples. Volatile observations and committed phase proofs are separate. Formatting/four strict profiles and714 source guards are clean. Model evidence alone implements no transaction engine. |
-| Current312: replicated transaction applications | Implement coordinator/participant state, account locks, immutable phase IDs, bounded admission/receipts and checkpoint recovery. | Qualified311 protocol/model and existing public application/client/read/checkpoint composition. | Atomic application/refusal, original-content retry, balance/lock invariants, bounded retention and restored phase/lock/outcome validation. Keep business intake separate from trusted internal protocol phase commands; no caller-supplied ready flags. Advances P8 transactions. |
-| Next313: native transaction driver and usable embedding | Deliver the complete bounded atomic transfer through actual networked groups. | Qualified312 applications and owned Node proposal/quorum-read tickets. | Driver obtains exact scoped phase observations, resumes original durable state after unknown/restart, and completes only after every participant applied/released. Native atomicity/isolation, partition/leader-loss/checkpoint recovery, downstream composition, joined cleanup and Linux/macOS checks must pass with zero lint. This first transaction feature does not complete logical voters or all P8. |
-| Following314: logical-voter refinement mapping and protocol gate | Define the remaining P8 parent-voter feature before native assembly. | Reviewed310 fixed composition and existing ordered log/quorum/configuration/recovery contracts; transactions313 develop independently. | Explicit child-committed-state to parent-voter mapping, scoped responses/payload availability, representative replacement and persisted/volatile recovery model. Deliberate personal-ballot/early-response/stale-context violations must be detected. Declare supported nesting/activation limits. This required protocol gate alone implements no logical-voter service. |
+| Completed312: replicated transaction applications | Implement coordinator/participant state, account locks, immutable phase IDs, bounded admission/receipts and checkpoint recovery. Advances P8 transactions. | Qualified311 protocol/model and existing public application/client/read/checkpoint composition. | Eleven unit and six public downstream tests pass in each of four profiles on Linux/Mac; formatting/four strict Clippy profiles zero and730 frozen inputs match. Atomic application/refusal, original-content retry, lock/retention and restore checks pass. Actual Node provenance and network coordination remain313. |
+| Current313: native transaction driver and usable embedding | Deliver the complete bounded atomic transfer through actual networked groups. | Qualified312 applications and owned Node proposal/quorum-read tickets. | Driver obtains exact scoped phase observations, resumes original durable state after unknown/restart, and completes only after every participant applied/released. Native atomicity/isolation, partition/leader-loss/checkpoint recovery, downstream composition, joined cleanup and Linux/macOS checks must pass with zero lint. This first transaction feature does not complete logical voters or all P8. |
+| Next314: logical-voter refinement mapping and protocol gate | Define the remaining P8 parent-voter feature before native assembly. | Reviewed310 fixed composition and existing ordered log/quorum/configuration/recovery contracts; transactions313 develop independently. | Explicit child-committed-state to parent-voter mapping, scoped responses/payload availability, representative replacement and persisted/volatile recovery model. Deliberate personal-ballot/early-response/stale-context violations must be detected. Declare supported nesting/activation limits. This required protocol gate alone implements no logical-voter service. |
+| Following315: usable logical-voter native assembly | Advance P8 by composing actual replicated child groups into one ordered parent-voter path. | Qualified314 mapping/model, scoped payload/evidence and recovery contracts, existing Node/provider seams. | Actual durable child-backed parent responses, representative replacement, payload availability, configuration activation, old checkpoint/suffix recovery and stale-context refusal on Linux/Mac. Nested functional exit and remaining transaction scope must still be qualified before all P8 completes. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28189,3 +28190,99 @@ separate build without interruption. See [311](../validation/baseline/slice311/R
 This completes the required bounded model gate, not a native transaction engine,
 general liveness proof or P8. The macro scope remains functional P8 followed by
 goal completion and a stop for the user's P9 planning; no tuning starts here.
+
+Schema312 — replicated transfer applications (P8 transactions): introduce one
+concrete role-aware transaction application through the existing StateMachine,
+ProposalAdmission, bounded receipt/read and checkpoint contracts. Node's one-A
+map can then host coordinator and participant groups without another wrapper or
+hidden runtime. Bind a checked profile to one coordinator and two participant
+group incarnations; accounts/amounts/transaction identity and ten original phase
+operation IDs are immutable. Public business intake constructs Start/status/account
+requests; trusted internal commands alone implement subsequent protocol phases.
+Their bytes are not independent foreign-group certificates. Driver313 must derive
+them from actual scoped Applied completions or fresh quorum-backed retained status.
+
+Coordinator phases: Started → Decided(Commit/Abort) → AppliedAll → Finished.
+Participant prepare records a planned balance plus exclusive retained lock, or a
+durable business refusal. It changes no balance. Commit application changes the
+balance once and retains its lock; Abort changes none and creates a retained
+tombstone even from Absent/Refused. Release follows actual coordinator AppliedAll
+and removes only the original transaction's lock. Late Prepare cannot resurrect
+an abort. Canonical prepare order is independent of debit direction; supported
+account reads return Locked while a prepare/application owns the account. Timeout
+and canceled observation never decide or compensate. Fixed ownership is explicit;
+safe voter membership continues through existing P4, with fresh read authority.
+
+Reserve full records/phase outcomes for the coordinator's bounded lifetime N;
+each participant provision covers at least N, and no record/phase ID is evicted.
+Reject Start N+1 before participant work, including distinct pending bindings in
+the admission calculation. Terminal phases and exact retries remain possible at
+capacity. Validate per-destination phase IDs, operation/content conflicts and every
+group/account binding. Commands/checkpoints use named bounded versioned framing;
+apply/restore validate temporary state before publication. Persist full spec,
+phase/outcomes/positions, account balances/locks and applied boundary; validate
+lock correspondence and current locked arithmetic without equating released
+historical values with later balances. No consensus/storage/provider changes.
+Acceptance: contiguous atomic batches, exact retries/conflicts, contention/funds/
+overflow refusal, absent Abort/late Prepare, pending/capacity-at-N completion,
+checkpoint/suffix phase reconstruction and malformed restore preserve invariants;
+public downstream construction/admission/read/restore and all-target lint checks
+must pass on Linux/Mac. Native cross-group provenance and complete usable transfer
+remain313, rather than being claimed from these application tests.
+
+Refinement312: coordinator Start reserves all ten phase IDs by their destination
+group across retained and pending specs, not just its own four. This prevents a
+later participant alias from stranding an already prepared peer. The compact
+receipt distinguishes this invocation's applied index from the first retained
+phase index; dependent command bytes must always use the latter. Account metadata
+is fixed and supports pre-Start driver preflight, without a live balance read or
+global account directory. Checkpoint semantic validation replays retained first
+phase commands in checked unique position order from the exact configured opening
+accounts, then compares all reconstructed records/balances/locks with parsed
+state. Gaps advance the private replay boundary without allocating Noops. This
+validates local deterministic history; it does not authenticate foreign phase
+facts or replace313's actual Node provenance. Failed restore publishes nothing.
+
+Read ownership refinement312: strict full-target Clippy identified a large inline
+Status variant beside the small account result. Use an optional Box of exactly
+one fixed-size TransferStatus instead. The read router reserves inline result
+storage plus that one bounded allocation before execution; actual nested accounting
+checks the caller's limit. Account/absent status results allocate nothing. Ownership
+moves with the completed read and ordinary drop reclaims it. This changes only the
+new read API, not command/checkpoint bytes or phase states. Completion checks must
+measure the actual allocation charge, refuse an undersized nested limit and verify
+pure reads/restore; no lint suppression or threshold change is permitted.
+
+
+Implemented312 — terminal replicated transfer applications: one checked concrete
+TransferApplication implements the existing six application traits with bounded
+lifetime records, all-destination phase-ID reservations, durable account locks
+and refusal/tombstone semantics. Apply is atomic across a contiguous batch;
+current receipt indices and canonical first indices remain distinct. Checkpoint
+restore reconstructs original local phase history against exact configured
+opening accounts and publishes only on complete semantic equality. Public intake
+encodes Start and queries; subsequent internal commands are trusted assertions,
+not foreign certificates. Existing safe voter membership remains available.
+
+Actual integrated qualification: eleven unit and six public-only downstream tests
+pass in each all/default/core/native profile on Linux and Mac (68 repeated
+executions per host,17 distinct tests). Formatting and all four strict all-target
+Clippy profiles are zero;730 frozen compilation/test inputs match before/after
+both terminal0 runs. Isolated build paths preserve the live Mac302 sweep. The
+component inventory check passes. Initial codec visibility and large status enum
+failures have focused fixes and retained outputs; no lint threshold or persisted
+format was weakened. [312 evidence](../validation/baseline/slice312/README.md)
+records scope, failed checks, independent review and actual terminal logs.
+
+Macro review312: this completes the application gate for P8 transactions, not a
+networked transfer or P8. Mini plan advances to313's generic-provider Node driver
+and usable native embedding, then314's logical-voter mapping/model and315's
+native assembly. Each accepted phase must derive from original consumed Node
+results or fresh quorum status; local status is diagnostic. The read-only
+[313 schema](../validation/baseline/slice312/PLANNED_DRIVER_SCHEMA.md) sketches
+exclusive Node borrowing, bounded ticket ownership, exact retry/resume and actual
+cleanup without introducing another storage owner. Native transaction provenance,
+recovery histories and logical voters remain required. Original Mac302 remains
+live; its observed counter failure stays separate from the later305 correction.
+The goal remains active until qualified functional P8, then completes and stops
+for the user's optimization review. No P9 performance or P10 security starts.

@@ -1,0 +1,118 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0364]: `checkpoint` is private, and cannot be re-exported
+  --> src/transaction/codec.rs:19:29
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                             ^^^^^^^^^^
+   |
+note: consider marking `checkpoint` as `pub` in the imported module
+  --> src/transaction/codec.rs:19:29
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                             ^^^^^^^^^^
+
+error[E0364]: `checkpoint_bound` is private, and cannot be re-exported
+  --> src/transaction/codec.rs:19:41
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                                         ^^^^^^^^^^^^^^^^
+   |
+note: consider marking `checkpoint_bound` as `pub` in the imported module
+  --> src/transaction/codec.rs:19:41
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                                         ^^^^^^^^^^^^^^^^
+
+error[E0364]: `restore` is private, and cannot be re-exported
+  --> src/transaction/codec.rs:19:59
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                                                           ^^^^^^^
+   |
+note: consider marking `restore` as `pub` in the imported module
+  --> src/transaction/codec.rs:19:59
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                                                           ^^^^^^^
+
+error[E0603]: function import `checkpoint_bound` is private
+  --> src/transaction/traits.rs:48:36
+   |
+48 |             snapshot_bytes: codec::checkpoint_bound(self),
+   |                                    ^^^^^^^^^^^^^^^^ private function import
+   |
+note: the function import `checkpoint_bound` is defined here...
+  --> src/transaction/codec.rs:19:41
+   |
+19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+   |                                         ^^^^^^^^^^^^^^^^
+note: ...and refers to the function `checkpoint_bound` which is defined here
+  --> src/transaction/codec/checkpoint.rs:25:1
+   |
+25 | pub(super) fn checkpoint_bound(app: &TransferApplication) -> usize {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: import `checkpoint_bound` directly
+   |
+48 -             snapshot_bytes: codec::checkpoint_bound(self),
+48 +             snapshot_bytes: checkpoint::checkpoint_bound(self),
+   |
+
+error[E0603]: function import `checkpoint` is private
+   --> src/transaction/traits.rs:132:16
+    |
+132 |         codec::checkpoint(self, max_bytes)
+    |                ^^^^^^^^^^ private function import
+    |
+note: the function import `checkpoint` is defined here...
+   --> src/transaction/codec.rs:19:29
+    |
+ 19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+    |                             ^^^^^^^^^^
+note: ...and refers to the function `checkpoint` which is defined here
+   --> src/transaction/codec/checkpoint.rs:28:1
+    |
+ 28 | / pub(super) fn checkpoint(
+ 29 | |     app: &TransferApplication,
+ 30 | |     max: usize,
+ 31 | | ) -> Result<Vec<u8>, ApplicationError> {
+...   |
+ 70 | |     Ok(out)
+ 71 | | }
+    | |_^
+help: import `checkpoint` directly
+    |
+132 -         codec::checkpoint(self, max_bytes)
+132 +         checkpoint::checkpoint(self, max_bytes)
+    |
+
+error[E0603]: function import `restore` is private
+   --> src/transaction/traits.rs:140:16
+    |
+140 |         codec::restore(self, schema, applied_index, bytes)
+    |                ^^^^^^^ private function import
+    |
+note: the function import `restore` is defined here...
+   --> src/transaction/codec.rs:19:59
+    |
+ 19 | pub(super) use checkpoint::{checkpoint, checkpoint_bound, restore};
+    |                                                           ^^^^^^^
+note: ...and refers to the function `restore` which is defined here
+   --> src/transaction/codec/checkpoint.rs:78:1
+    |
+ 78 | / pub(super) fn restore(
+ 79 | |     app: &mut TransferApplication,
+ 80 | |     schema: u64,
+ 81 | |     applied: u64,
+...   |
+ 93 | |     Ok(())
+ 94 | | }
+    | |_^
+help: import `restore` directly
+    |
+140 -         codec::restore(self, schema, applied_index, bytes)
+140 +         checkpoint::restore(self, schema, applied_index, bytes)
+    |
+
+Some errors have detailed explanations: E0364, E0603.
+For more information about an error, try `rustc --explain E0364`.
+error: could not compile `voteboat` (lib test) due to 6 previous errors

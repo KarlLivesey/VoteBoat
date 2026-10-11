@@ -15,12 +15,17 @@ with its original counter195/1 failure retained. No complete platform or P0–P7
 acceptance is claimed. Seeded parser, scoped client-history and shared connector
 evidence is archived in [301](baseline/slice301/README.md). Sustainable throughput
 at the original correctness/p99 gate moves to the user's later P9 phase. Newly
-included P8 logical-voter/transaction functionality has no native implementation
+included P8 logical-voter/transaction functionality has no usable native engine
 yet. The [transaction protocol model311](baseline/slice311/README.md) passes8 tests
 in four profiles on each host, with126,818 states/827,613 transitions exhausted,
 actual weakening counterexamples and zero formatting/four strict profiles.
 This finite model assumes actual committed commands and trusted receipt origins;
-it is not native transaction or logical-voter acceptance. This goal stops only
+it is not native transaction or logical-voter acceptance.
+[Replicated transaction applications312](baseline/slice312/README.md) pass11 unit
+and6 public downstream tests per profile on each host; formatting/four strict
+profiles are zero and730 frozen inputs match before/terminal. This implements
+application primitives, with actual Node provenance/networked driver and logical
+voters still outstanding. This goal stops only
 after functional P8 qualification, before P9 performance/P10 security.
 The records below describe their own historical sources and outcomes.
 
@@ -6679,3 +6684,28 @@ Production dependency graphs are unchanged; reference dependencies are test-only
 Interrupted durability/checkpoint differential and broader fault/provider checks
 remain. Original Mac285 finishes73/0 all and40/0 default; the retained Linux
 shutdown failure remains unresolved. Feature-complete acceptance is not claimed.
+
+
+## Slice312 — replicated transaction applications, terminal Linux/macOS
+
+[Evidence](baseline/slice312/README.md): deterministic coordinator/participant
+applications, checked immutable transfer/phase bindings, whole-record capacity
+reservations, durable locks/refusal/absent Abort, original-content retry, bounded
+reads/receipts and checkpoint semantic reconstruction. Existing application,
+admission, read and checkpoint traits remain the composition path; no storage
+or runtime owner is added. Safe voter membership is supported; account ownership
+is fixed. Internal phase assertions are trusted, not foreign certificates.
+
+Both hosts pass eleven unit and six public downstream tests in all/default/core/
+native configurations,68 repeated executions per host. Formatting/four strict
+all-target Clippy profiles are zero and730 before/terminal frozen inputs match.
+Configurations run sequentially in isolated builds, separate from live Mac302.
+Initial visibility and large-enum lint failures are retained with focused fixes;
+boxed status allocation is fully charged. Inventory metadata passes. The read-only
+source review found no blocker within the application-only boundary.
+
+Actual driver receipt provenance, quorum status/resumption, native partition/
+leader-loss/checkpoint histories and logical voters remain unimplemented. This
+is affected-target application qualification, not a complete platform sweep,
+transaction engine or P8 completion. Goal stops after qualified functional P8
+for the user's P9 planning; performance/security work does not start here.
