@@ -3,7 +3,8 @@
 Current priority: usable, feature-complete Rust embedding and networked service
 on Linux and macOS. Current work covers feature sets only. Performance tuning
 is deferred; completing feature qualification does not automatically start it.
-Security review remains a separate later step.
+The current goal now includes functional P8 work and stops at its qualified
+completion. P9 performance and P10 security remain separate later phases.
 
 | Capability | Implemented path |
 | --- | --- |
@@ -28,7 +29,7 @@ multi-group history. Formatting and all four strict Clippy profiles are clean
 on both hosts. The public
 examples expose bounded profiles, and do not automate every library combination.
 
-The finite remaining acceptance is the current platform sweep and resolution
+The finite remaining baseline acceptance is the current platform sweep and resolution
 of any failures it demonstrates. The prepared batch adds seeded parser campaigns,
 per-bucket split client histories and shared connector assertions. The shutdown
 correction pins existing protocol ownership once; it changes no provider timer
@@ -40,9 +41,14 @@ Further reference checkpoint comparison, extra provider permutations and global
 orchestration are not new prerequisites for this feature milestone. External
 storage adapters still require implementation and conformance; the public seam
 does not certify a hypothetical backend or permit an unverified live migration.
-Cross-group transactions, logical voters, striped single-group WAL and Windows
-remain outside this release scope. P7 performance gates remain unmet in the full
-roadmap; finite passing tests are not an exhaustive safety proof.
+Subgroup-backed logical voters and broader transactions are newly included in
+P8 and **not implemented**. Existing recursive quorums and outbox support do not
+implement them. Their protocol/model/recovery contracts must precede usable
+native features. Striped single-group WAL and representative-relay optimization
+move to P9, along with the original performance gates and required research cost
+comparisons. Default research promotion remains gated by that evidence. Windows
+remains deferred. This goal completes only after its functional P0–P8 scope is
+qualified, then stops for the user's performance-planning review.
 
 Existing evidence includes the [mixed Linux/Mac service](../validation/baseline/slice256/README.md),
 [native snapshot recovery](../validation/baseline/slice294/README.md),

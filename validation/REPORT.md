@@ -14,7 +14,9 @@ published77c07ae Git tree match all705 inputs. Mac all-feature is still live
 with its original counter195/1 failure retained. No complete platform or P0–P7
 acceptance is claimed. Seeded parser, scoped client-history and shared connector
 evidence is archived in [301](baseline/slice301/README.md). Sustainable throughput
-at the original correctness/p99 gate remains P7 work after feature qualification.
+at the original correctness/p99 gate moves to the user's later P9 phase. Newly
+included P8 logical-voter/transaction functionality has no implementation or
+acceptance evidence yet; this goal stops only after its functional qualification.
 The records below describe their own historical sources and outcomes.
 
 Exact replica-bound recovery expectation: [slice273](baseline/slice273/README.md).

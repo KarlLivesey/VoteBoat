@@ -16,8 +16,20 @@ record claims that unimplemented phases already work.
 | P4 | Learner catch-up, joint membership/policy changes and snapshot membership recovery | Implemented readiness, joint/final activation, rollback/restart/resumption and authenticated Node/sample-service administration. Native startup284 and old-checkpoint/recovered-policy fault histories297 pass both hosts. Complete current service/lifecycle qualification remains302. |
 | P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
 | P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
-| P7 | Multiple local lanes, batching/pipelining, reclamation and recovery throttling | Mechanisms and finite TCP/QUIC benchmarks/cost attribution exist. Sustainable throughput improvement at the original fixed correctness/p99 budget remains unmet. Performance tuning is deferred; the current work covers feature sets only. The full P0–P7 goal stays active. |
-| P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates. |
+| P7 | Functional multi-lane assembly, batching/pipelining, reclamation and recovery throttling | Existing mechanisms and finite TCP/QUIC histories remain supported. The original chapter12 P7 throughput/p99 acceptance condition moves to P9; this reordering does not claim that condition passed. |
+| P8 | Subgroup-backed logical voters and broader transactions | Newly included functional scope; not implemented. Establish explicit protocol, evidence/capability and recovery contracts, model-check required transitions, then qualify usable native/public-interface paths on Linux/macOS. Performance-dependent research promotion remains P9. |
+| P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, striped single-group WAL, representative relays and other throughput projects. No automatic start after P8. |
+| P10 | Security review and hardening | Later separate phase, with the user's Daybreak review. Existing authentication, identity, bounded-resource and protocol-safety contracts remain required during feature work. |
+
+Goal boundary310: the user requests this goal to finish and stop when P8's
+functional work is implemented and qualified. P9/P10 are retained in the roadmap
+but excluded from this goal's completion boundary. Preserve sensible efficiency
+during implementation without starting a tuning project. The original design
+pack is unchanged: its P7 performance exit maps to P9 here, and its P8 optimization
+tracks also move to P9. Its logical-voter formal mapping, transition model and
+failure/recovery duties remain P8 requirements. Measured trade-offs required for
+normal/default research promotion remain explicit later gates; P8 functional
+completion alone does not claim those gates passed or enable a new default.
 
 [Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
 component catalogue entries to source/evidence and explicit unresolved work.
@@ -72,11 +84,10 @@ cause and revise this sketch before another material change.
 
 ### Macro plan
 
-Priority update232: finish baseline features and functional reliability on Linux
-and macOS first. The user explicitly defers performance tuning and security review
-to subsequent steps; Daybreak owns the security pass. P7 measurements and their
-original acceptance gates remain recorded, but are not prerequisites for this
-feature milestone. Protocol safety, durable recovery and bounded ownership remain
+Priority update310: finish functional features through P8 on Linux and macOS,
+then complete this goal and stop. P9 performance and P10 security are separate
+later phases; Daybreak owns the security pass. Original performance measurements
+and acceptance gates remain recorded in P9. Protocol safety, durable recovery and bounded ownership remain
 functional requirements. Public interfaces may change incompatibly while there
 are no users; update contracts and callers together rather than retain adapters
 solely for compatibility. Preserve explicit migration for already-written data.
@@ -87,11 +98,13 @@ solely for compatibility. Preserve explicit migration for already-written data.
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; recover elections, rollback and partial delivery with exact activation timing. | P4 mechanisms are implemented through public Node and authenticated sample administration. Native startup284 and interrupted older-checkpoint policy recovery297 provide selected Linux/Mac evidence; current full platform qualification remains302. |
 | Recursive responsibilities and routing | Resolve manifests, selectively place groups and route requests; cached child operation survives parent unavailability without an ancestor commit in the normal write path. | P5 mechanisms are implemented, including native creation/delegation/metadata movement and bounded directory/lookup service profiles. Complete current platform qualification remains302. Automatic global orchestration is deferred by chapter12. |
 | Split and merge | Move actual data with source fencing, import readiness and durable activation; preserve retry/outbox lineage and recover without two active owners. | P6 public mechanisms and bounded split/compatible-merge services are implemented. Selected phase/reopen, retirement and independent per-bucket client histories are recorded; complete current platform qualification remains302. |
-| Deferred measured tuning | Demonstrate sustainable throughput improvement at the original correctness/p99 budget, with attributable costs; tune batching, lanes, reclamation and recovery throttling from measurements. | P7 remains unmet in the full goal and outside the current feature-only work. Completing feature qualification does not automatically start tuning. Security review follows the user's separate Daybreak pass. |
+| Advanced functional composition | Run actual replicated subgroups as crash-recoverable parent voters and provide explicitly defined broader transaction semantics. | P8 is now in this goal. Public contracts and formal mapping/models precede native implementation; original promises, payload availability, transitions and transaction recovery must be qualified. Existing recursive policies or outbox support do not substitute for these features. |
+| Later measured tuning | Demonstrate sustainable throughput improvement at the original correctness/p99 budget, with attributable costs; evaluate striped WAL, representative relays and research trade-offs. | P9 remains unmet and outside this goal. After P8, stop so the user can consider optimization choices; no automatic tuning begins. |
+| Later security review | Review and harden the qualified feature set, preserving its functional and performance contracts. | P10 is separate later work with Daybreak; it does not postpone baseline identity/authentication or consensus safety. |
 
 These are capability milestones, not a claim that every earlier phase is
-finished. The detailed phase table above remains the scope ledger. P8 remains
-deferred research. Online membership and split/merge do not block use of the
+finished. The detailed phase table above remains the scope ledger. P8's functional
+scope is newly included and unimplemented. Online membership and split/merge do not block use of the
 static service; no calendar estimate or completion percentage is inferred from
 the count of remaining milestones.
 
@@ -104,15 +117,15 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Macro review306: chapter12's original deliverables and exit criteria remain the
-authority. The finite301 feature/provider audit, parser/scoped-history/connector
+Macro review310: chapter12's feature duties and chapter16's protocol gates remain
+the authority, with performance work moved to P9 by the user. The finite301 feature/provider audit, parser/scoped-history/connector
 checks and qualified305 service correction supersede stale primary summaries
 that listed those mechanisms as missing. Full current feature qualification is
 still the preserved302 sweep and any additional failures it demonstrates.
 Selected passing histories do not complete every phase or certify arbitrary
-providers. P7's sustainable improvement at the original correctness/p99 budget
-remains an explicit unmet full-goal requirement deferred from current work;
-P8/Windows and the separate security pass retain their stated scope.
+providers. Sustainable improvement at the original correctness/p99 budget remains
+unmet in P9, outside this goal. P8 functional work is newly in scope; Windows
+remains deferred and P10 security remains separate.
 
 Checkpoint284 qualifies complete native member startup on Linux and Mac:
 all50/default27 pass per host with zero formatting/four strict Clippy profiles
@@ -134,9 +147,9 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | --- | --- | --- | --- |
 | Completed297: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294. | Actual original native tickets and reference Ready cuts, own-image process/power recovery, retries/reads, stale refusal and false-sync reduction pass both hosts. Selected schedules only; snapshots remain separate. |
 | Completed305: qualify the demonstrated shutdown correction | Preserve usable service shutdown while a legitimate original QUIC close remains owned. | Actual304 cap-defect control, existing inspection contracts and independent ownership review. | Keep the ten-second local-work cutoff, pin only settled original close timers, require actual drain/join and successful process exit. Affected targets pass Linux203/0 and Mac202/0, executable52/0 each, with four strict profiles zero. Original Mac302 cause remains unobserved; a silent pass does not establish it. |
-| Current302: finish the preserved platform sweep | Establish the finite baseline service/embedding qualification. | Original four-profile matrices and final305 affected-source evidence. | Linux is terminal5661/0 across all four profiles; Mac remains live. Retain terminal results, resolve additional demonstrated failures with bounded corrections and reuse unaffected evidence; no full-suite restart or optional new engine. |
-| Next: feature milestone decision | Record whether the original feature exits are met for the implemented service/embedding scope. | Terminal302 profile results, qualified305 correction and the finite source/provider review301. | Match each required exit to actual evidence, retain historical/remaining failures, publish the current capability/limits record and mark only qualified milestones complete. The full P0–P7 goal remains active. |
-| Following: usable feature handoff | Make the qualified feature set straightforward to run and embed on Linux/macOS. | Feature milestone decision and the existing service quickstart, public examples and capability record. | Check that run/embed instructions match qualified APIs and supported profiles; fix concrete usability gaps and report any feature omissions. Keep the README concise and reuse existing evidence. Performance tuning remains deferred. |
+| Current302: finish baseline qualification and record feature exits | Establish the finite P0–P7 service/embedding qualification. | Original four-profile matrices, final305 affected-source evidence and finite301 source/provider review. | Linux is terminal5661/0 across four profiles; Mac remains live. Retain terminal results, resolve demonstrated failures and reuse unaffected evidence. Map original functional exits to actual evidence. No full-suite restart or optional engine; baseline acceptance alone does not finish newly included P8. |
+| Next310: define P8's usable protocol contracts | Establish the functional logical-voter/transaction scope and ordered bounded deliverables. | Chapters03/08/12/16/17 and current native/public application, persistence, quorum and lifecycle seams. Can prepare while302 runs. | Record parent promise/payload/response evidence, representative failover, nested recovery/configuration and transaction coordination/isolation/unknown-outcome semantics. Specify formal models, storage dependencies, native acceptance histories and completion criteria. No placeholder implementation or safety claim from an interface/model alone. Advances P8. |
+| Following: bounded atomic transaction | Deliver a real two-participant account transfer as the first usable P8 transaction feature. | Reviewed310 transaction contract, independent phase/locking model and existing public application/client/read/checkpoint composition. | Actual replicated coordinator decisions, participant prepares/locks, original phase IDs and restart/unknown-outcome recovery; native atomicity/isolation histories and public injection on Linux/macOS with zero lint. Static ownership and declared finite capacity are explicit. This first feature does not complete logical voters or all P8. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28089,3 +28102,37 @@ separately. All709 root compilation/test inputs match305. Formatting/full-target
 all-feature Clippy and diff whitespace checks are zero. This advances usable
 P0/P1/P4 instructions without new runtime code or performance work; Mac302
 continues independently. See [309](../validation/baseline/slice309/README.md).
+
+Schema310 — user-directed functional P8 and goal boundary: separate planning
+state from implemented evidence. Preserve original pack/history and native
+storage/core behavior. Reorder original performance acceptance and striped-WAL/
+relay optimization into P9; P10 is the later security pass. Include actual logical
+voters and broader transactions in P8. Stop this goal only after the functional
+scope and required protocol/model/native recovery gates pass. Default research
+promotion remains subject to chapter16's later measured comparisons. This slice
+changes plans only, not APIs, durable states, ownership or cleanup. Completion
+checks: current macro/mini/status/validation scope agrees, pending capabilities
+remain visibly unimplemented, and formatting/four strict profiles are zero.
+
+Reviewed310 P8 protocol deliverables (planned, unimplemented):
+
+| Track | Data/API and state shape | Ownership, recovery and acceptance |
+| --- | --- | --- |
+| Transactions: first usable slice | Immutable transaction ID/content, explicit coordinator and two participant group incarnations, account/amount and distinct persisted phase operation IDs. Coordinator: Started → Decided(Commit/Abort) → AppliedAll → Finished. Participant: Absent → Prepared → DecisionApplied → Released. Reuse public application/client/read/checkpoint contracts; no new Raft engine or generic storage wrapper. | A bounded host driver owns volatile tickets; replicated applications own decisions, locks and outcomes. Prepare changes no balance. Exact durable prepares permit Commit; only the original durable decision permits application. Retain account locks until every participant applied, then release from actual AppliedAll evidence. Timeout cannot infer Abort. Model concurrent transfers, receipt provenance and locked reads; execute native phase-loss, leader replacement, checkpoint/suffix restart, duplicates, business abort and unknown-outcome histories on both platforms. Canonical lock order and bounded refusal avoid an unbounded wait graph. Static ownership and finite retained records are explicit supported limits. |
+| Logical voters: protocol and fixed initial composition | Distinct logical voter/incarnation bound to a backing child group; keep physical representative/session separate. Child-replicated parent state includes parent identity/configuration, term/vote, ordered accepted payload/prefix, suffix generation, snapshot boundary and original response context. First usable assembly: one parent with three logical voters, each backed by a three-physical-voter child group. | Child commitment/application and recoverable payload must precede a scoped parent response. A personal representative ballot, Written completion or child admission is insufficient. Define a formal refinement mapping and independent transition model before native use. Representative replacement preserves promises and rejects stale authority; child quorum loss gives unavailability without physical-voter fallback. Native parent writes/reads/retries, child failover, own-image recovery and bounded drain must pass. This fixed subset is only the first logical-voter delivery. |
+| Logical voters: complete functional exit | Specify supported nesting/cycle/depth admission, parent/child configuration activation, representative fencing, nested snapshots and parent payload availability. Preserve one ordered parent log and contiguous durable/commit/apply boundaries. Unsupported overlapping transitions reject explicitly. | Model-check reconfiguration and persisted/volatile response transitions; execute actual parent/child joint changes, receipt loss, replacement, old checkpoints plus suffixes, unavailable inner quorum and stale incarnations. Keep public capability/format and lifetime contracts separate from physical-only assemblies. Finish the declared transaction scope too before reporting P8 complete. Performance comparisons/default promotion are P9 gates, not claimed evidence. |
+
+The two read-only reviews inspected chapters03/04/08/12/16/17 and current
+quorum/log/wire/application/Node contracts. They found no logical-voter protocol
+or cross-group transaction engine: recursive NodeId policies are physical-voter
+policies, and BucketCounter's retained outbox does not coordinate atomic writes.
+Typed WAL lane names also do not implement striping. Transaction composition can
+begin independently of the logical-voter protocol and without changing Raft/WAL;
+the first transaction feature is therefore the following mini deliverable.
+Do not count its fixed scope or a logical-voter model alone as all P8.
+
+Implemented310 planning: P0–P8 functional completion is now the explicit stopping
+boundary for this goal; P9 performance/P10 security stay on the later roadmap.
+Sensible efficiency remains an implementation constraint. P8 capabilities above
+are proposed, not implemented or qualified. Existing Mac302 runs unchanged;
+baseline acceptance and new P8 feature acceptance remain separate.

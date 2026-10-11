@@ -1,5 +1,11 @@
 # Baseline acceptance map
 
+Scope update310: this map retains the original baseline evidence. The user's
+current goal also includes newly planned P8 logical-voter/transaction features
+and stops at their functional qualification. P9 performance and P10 security
+remain later separate phases. See the current macro/mini plan in
+[IMPLEMENTATION.md](IMPLEMENTATION.md); no P8 implementation evidence is claimed.
+
 Current feature exit: [concise status](FEATURE_STATUS.md). The preserved705-input
 matrix302 is [terminal on Linux](../validation/baseline/slice302/linux/README.md):
 all1952/0,default1708/0,core775/0,native1226/0, with705 before/terminal and Git-tree
