@@ -162,7 +162,7 @@ are recorded in the [acceptance map](BASELINE_ACCEPTANCE.md). They do not
 establish arbitrary schedules, a current full-suite pass or performance guarantees.
 
 NativeStartup uses `tls.wire_version()` for its message codec, PeerRoster and
-TCP/TLS or QUIC connector. The default remains 1. Call
+TCP/TLS or QUIC connector. The default remains 1.
 `NativeTlsConfig::with_wire_version` supports versions 1–8; call it before opening to select an exact
 matching version on every peer; mismatches fail the encrypted identity hello
 before a session becomes Ready. Unsupported values reject at configuration

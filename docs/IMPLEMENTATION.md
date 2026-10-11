@@ -28067,3 +28067,25 @@ Implemented308: current work is feature-only on Linux/macOS. P7 performance
 requirements remain recorded but deferred, and feature qualification does not
 automatically initiate optimization. The following deliverable checks existing
 run/embed instructions and concrete feature usability rather than benchmarks.
+
+Schema309 — usable feature instructions (P0/P1/P4): preserve existing startup,
+service profiles and owned recovery/shutdown contracts. Correct stale platform
+statements only where terminal evidence proves the named path; keep broader
+membership, discovery and separate-host limits separate. Check the documented
+Rust embedding create/retry/new-operation sequence in a fresh owned directory.
+No API, state or ownership changes are proposed. Original operation IDs must
+survive recovery, new operations must advance a quorum-backed read and each
+invocation must drain/join. Cleanup removes only this successful demo's directory.
+Acceptance: expected values7/7/10, original retry duplicate, valid documentation
+links and zero formatting/strict Clippy; the original Mac matrix continues.
+
+Implemented309: corrected stale counter static-deployment, discovery and
+membership platform statements using terminal256/305 evidence and repaired
+Node wire-format wording. Manual Linux embedding create/recover/retry/new-write
+passes with values7/7/10, duplicate=true only for the original retry and actual
+workers_joined=true on each exit0. Explicit +stable selects installed rustc1.98.1;
+the unavailable named toolchain and sandbox listener preflights remain recorded
+separately. All709 root compilation/test inputs match305. Formatting/full-target
+all-feature Clippy and diff whitespace checks are zero. This advances usable
+P0/P1/P4 instructions without new runtime code or performance work; Mac302
+continues independently. See [309](../validation/baseline/slice309/README.md).

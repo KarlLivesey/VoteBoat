@@ -120,8 +120,11 @@ dials the larger, preventing duplicate connection direction choices. Recovery
 can use new addresses/names with the same authorized bootstrap/store identities;
 addresses cannot change membership or grant voting authority. By default, run client
 commands locally; configure the authenticated command endpoints below for remote use.
-Actual acceptance tests use explicitly configured non-default loopback endpoints.
-Separate-host deployment has not been exercised here.
+Acceptance tests use explicitly configured non-default loopback endpoints.
+The recorded [mixed Linux/macOS service](../validation/baseline/slice256/README.md)
+also exercises separate-host static membership over TCP/TLS and QUIC, including
+leader loss, cold recovery and original retries. It does not qualify every
+deployment or optional administration profile.
 
 ## Remote command endpoints
 
@@ -273,8 +276,9 @@ across its restart; client cache floors are not durable.
 
 Executable TCP/QUIC cluster tests use wildcard listeners and non-default loopback
 ports, verify access denial and TLS-name rejection, then preserve same-ID retries
-across leader loss, checkpoint and restart. Separate-machine and macOS execution
-remain distinct validation requirements.
+across leader loss, checkpoint and restart. These discovery histories pass on
+Linux and macOS in the [complete counter target](../validation/baseline/slice305/README.md).
+Separate-machine discovery remains distinct from the qualified static deployment.
 
 ## Recover an existing member journal
 
@@ -850,7 +854,9 @@ reopen all three native stores with the same plan and verify exactly one joint
 and final plus preserved counter deduplication. TCP uses an ordinary majority;
 QUIC also exercises a nested weighted policy. These are concrete promotion and
 restart histories, not full faulted add/enroll/promote/remove release evidence.
-macOS execution and separate-host validation remain outstanding.
+These promotion/restart histories also pass on macOS in the
+[complete counter target](../validation/baseline/slice305/README.md).
+Separate-host membership administration remains distinct acceptance work.
 
 ## Complete executable membership lifecycle evidence
 
