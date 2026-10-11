@@ -1,0 +1,70 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 4 tests
+cross-authority insertion Quic checkpoint=true phase=Reserve
+cross-authority insertion Quic checkpoint=true phase=Intent
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+cross-authority insertion Quic checkpoint=true phase=Stage(21)
+cross-authority insertion Quic checkpoint=true phase=Stage(22)
+cross-authority insertion Quic checkpoint=true phase=Fence
+cross-authority insertion Quic checkpoint=true phase=Import(21)
+cross-authority insertion Quic checkpoint=true phase=Import(22)
+unread phase 22/200: Unknown LeadershipChanged
+
+thread 'native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint' (17857183) panicked at tests/routed/unread_phase.rs:76:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint ... FAILED
+cross-authority insertion Quic checkpoint=false phase=Reserve
+cross-authority insertion Quic checkpoint=false phase=Intent
+cross-authority insertion Quic checkpoint=false phase=Stage(21)
+cross-authority insertion Quic checkpoint=false phase=Stage(22)
+cross-authority insertion Quic checkpoint=false phase=Fence
+cross-authority insertion Quic checkpoint=false phase=Import(21)
+cross-authority insertion Quic checkpoint=false phase=Import(22)
+cross-authority insertion Quic checkpoint=false phase=ChildPublication
+cross-authority insertion Quic checkpoint=false phase=ParentPublication
+unread phase 22/200: Unknown LeadershipChanged
+
+thread 'native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal' (17857184) panicked at tests/routed/unread_phase.rs:76:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal ... FAILED
+cross-authority insertion TcpTls checkpoint=true phase=Reserve
+cross-authority insertion TcpTls checkpoint=true phase=Intent
+unread phase 1/200: Unknown LeadershipChanged
+
+thread 'native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint' (17857185) panicked at tests/routed/unread_phase.rs:76:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint ... FAILED
+cross-authority insertion TcpTls checkpoint=false phase=Reserve
+cross-authority insertion TcpTls checkpoint=false phase=Intent
+cross-authority insertion TcpTls checkpoint=false phase=Stage(21)
+unread phase 21/200: Unknown LeadershipChanged
+
+thread 'native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal' (17857186) panicked at tests/routed/unread_phase.rs:76:9:
+assertion `left == right` failed
+  left: 1
+ right: 0
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal ... FAILED
+
+failures:
+
+failures:
+    native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint
+    native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal
+    native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint
+    native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 174 filtered out; finished in 778.48s
+
+error: test failed, to rerun pass `--test routed`

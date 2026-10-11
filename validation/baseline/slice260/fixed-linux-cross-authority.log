@@ -1,0 +1,50 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 4 tests
+cross-authority insertion TcpTls checkpoint=false phase=Reserve
+cross-authority insertion TcpTls checkpoint=false phase=Intent
+cross-authority insertion TcpTls checkpoint=false phase=Stage(21)
+cross-authority insertion TcpTls checkpoint=false phase=Stage(22)
+cross-authority insertion TcpTls checkpoint=false phase=Fence
+cross-authority insertion TcpTls checkpoint=false phase=Import(21)
+cross-authority insertion TcpTls checkpoint=false phase=Import(22)
+cross-authority insertion TcpTls checkpoint=false phase=ChildPublication
+cross-authority insertion TcpTls checkpoint=false phase=ParentPublication
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal has been running for over 60 seconds
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal ... ok
+cross-authority insertion Quic checkpoint=false phase=Reserve
+cross-authority insertion Quic checkpoint=false phase=Intent
+cross-authority insertion Quic checkpoint=false phase=Stage(21)
+cross-authority insertion Quic checkpoint=false phase=Stage(22)
+cross-authority insertion Quic checkpoint=false phase=Fence
+cross-authority insertion Quic checkpoint=false phase=Import(21)
+cross-authority insertion Quic checkpoint=false phase=Import(22)
+cross-authority insertion Quic checkpoint=false phase=ChildPublication
+cross-authority insertion Quic checkpoint=false phase=ParentPublication
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal ... ok
+cross-authority insertion TcpTls checkpoint=true phase=Reserve
+cross-authority insertion TcpTls checkpoint=true phase=Intent
+cross-authority insertion TcpTls checkpoint=true phase=Stage(21)
+cross-authority insertion TcpTls checkpoint=true phase=Stage(22)
+cross-authority insertion TcpTls checkpoint=true phase=Fence
+cross-authority insertion TcpTls checkpoint=true phase=Import(21)
+cross-authority insertion TcpTls checkpoint=true phase=Import(22)
+cross-authority insertion TcpTls checkpoint=true phase=ChildPublication
+cross-authority insertion TcpTls checkpoint=true phase=ParentPublication
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint ... ok
+cross-authority insertion Quic checkpoint=true phase=Reserve
+cross-authority insertion Quic checkpoint=true phase=Intent
+cross-authority insertion Quic checkpoint=true phase=Stage(21)
+cross-authority insertion Quic checkpoint=true phase=Stage(22)
+cross-authority insertion Quic checkpoint=true phase=Fence
+cross-authority insertion Quic checkpoint=true phase=Import(21)
+cross-authority insertion Quic checkpoint=true phase=Import(22)
+cross-authority insertion Quic checkpoint=true phase=ChildPublication
+cross-authority insertion Quic checkpoint=true phase=ParentPublication
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 175 filtered out; finished in 258.96s

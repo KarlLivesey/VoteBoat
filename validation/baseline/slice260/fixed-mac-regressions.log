@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (<mac-workspace>/repo260)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.64s
+     Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)
+
+running 2 tests
+unread phase 1/4243: Unknown LeadershipChanged
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut ... ok
+test native::delegation::unread_phase::unknown_completion_waits_for_actual_native_reservation_release ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 177 filtered out; finished in 7.44s

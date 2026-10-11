@@ -1,0 +1,8 @@
+{
+  "buildInputs": 653,
+  "changed": [
+    "tests/routed/unread_phase.rs"
+  ],
+  "productionChanges": [],
+  "note": "Only the native test fixture changes. Public complete/reconcile ownership remains unchanged."
+}

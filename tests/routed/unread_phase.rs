@@ -65,18 +65,33 @@ pub(super) fn write<A>(
                 assert_eq!(*e, ClientUnknown::LeadershipChanged);
             }
         }
-        let outcome = nodes[0]
-            .complete_client(completion)
-            .unwrap_or_else(|_| panic!("unread recovery completion rejected"));
-        assert!(matches!(
-            outcome,
-            ClientOutcome::NotProposed(voteboat::raft::RaftError::NotLeader)
-                | ClientOutcome::Unknown(ClientUnknown::LeadershipChanged)
-        ));
-        assert_eq!(nodes[0].local().clients.usage().requests, 0);
+        release_uncertain(nodes, clock, completion);
         campaign(nodes, clock, g);
     }
     panic!("group {g} operation {operation} repeatedly lost its applied unread cut");
+}
+
+fn release_uncertain<A>(
+    nodes: &mut [Node<A>],
+    clock: &Instant,
+    completion: ClientCompletion<A::Receipt>,
+) where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    let outcome = nodes[0]
+        .complete_client(completion)
+        .unwrap_or_else(|_| panic!("unread recovery completion rejected"));
+    assert!(matches!(
+        outcome,
+        ClientOutcome::NotProposed(voteboat::raft::RaftError::NotLeader)
+            | ClientOutcome::Unknown(ClientUnknown::LeadershipChanged)
+    ));
+    // Completing the exported unknown result does not clear an outstanding
+    // native dependency. Keep polling until the router actually releases it.
+    drive(nodes, clock, |ns| {
+        ns[0].local().clients.usage().requests == 0
+    });
 }
 
 fn terminal<A>(
@@ -106,6 +121,95 @@ where
     assert_eq!(completion.ticket(), ticket);
     assert_eq!(nodes[0].local().clients.usage().requests, 1);
     completion
+}
+
+fn pending_term_completion(
+    nodes: &mut [Node<Counter>],
+    clock: &Instant,
+    ticket: ClientTicket,
+) -> ClientCompletion<CounterReceipt> {
+    drive(&mut nodes[..1], clock, |ns| {
+        let core = ns[0].local().owner.core(ticket.group).unwrap();
+        !core.has_pending_dependency()
+            && core.state().entries.iter().any(|e| {
+                matches!(e.payload, EntryPayload::Command { operation, .. }
+                    if operation == ticket.operation && e.index > core.state().commit_index)
+            })
+    });
+    let term = nodes[0]
+        .local()
+        .owner
+        .core(ticket.group)
+        .unwrap()
+        .state()
+        .hard_state
+        .term;
+    nodes[0]
+        .control(ticket.group, NodeControl::Campaign)
+        .unwrap();
+    drive(&mut nodes[..1], clock, |ns| {
+        let core = ns[0].local().owner.core(ticket.group).unwrap();
+        core.role() == voteboat::raft::Role::Candidate && core.has_pending_dependency()
+    });
+    let core = nodes[0].local().owner.core(ticket.group).unwrap();
+    assert_eq!(core.role(), voteboat::raft::Role::Candidate);
+    assert_eq!(core.state().hard_state.term, term);
+    assert!(core.has_pending_dependency());
+    let completion = nodes[0].poll_client().unwrap();
+    assert_eq!(completion.ticket(), ticket);
+    assert!(matches!(
+        completion.outcome(),
+        ClientOutcome::Unknown(ClientUnknown::LeadershipChanged)
+    ));
+    assert_eq!(nodes[0].local().clients.usage().requests, 1);
+    completion
+}
+
+#[test]
+fn unknown_completion_waits_for_actual_native_reservation_release() {
+    let _history = NATIVE_HISTORY.lock().unwrap_or_else(|e| e.into_inner());
+    let clock = Instant::now();
+    let root = super::history_root(NativePeerProtocol::TcpTls, false);
+    let fresh = || Counter::new(64).unwrap();
+    let mut nodes = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Create),
+        &clock,
+        NativePeerProtocol::TcpTls,
+        fresh,
+    );
+    campaign(&mut nodes, &clock, 1);
+    let operation = OperationId::new(4244).unwrap();
+    let bytes = 9i64.to_le_bytes().to_vec();
+    let ticket = nodes[0]
+        .propose(ClientRequest {
+            group: group(1),
+            operation,
+            bytes: bytes.clone(),
+        })
+        .unwrap();
+    let completion = pending_term_completion(&mut nodes, &clock, ticket);
+    release_uncertain(&mut nodes, &clock, completion);
+    assert_eq!(nodes[0].local().clients.usage().requests, 0);
+    campaign(&mut nodes, &clock, 1);
+    let receipt = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes.clone());
+    assert_eq!(receipt.operation, operation);
+    assert_eq!(receipt.outcome, CounterOutcome::Value(9));
+    assert_eq!(read_recovering(&mut nodes, &clock, 1, ()), 9);
+    close(nodes, &clock, 1, || {});
+    let mut nodes = open(
+        configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+        &clock,
+        NativePeerProtocol::TcpTls,
+        fresh,
+    );
+    campaign(&mut nodes, &clock, 1);
+    let receipt = propose_recovering(&mut nodes, &clock, 1, operation.get(), bytes);
+    assert_eq!(receipt.operation, operation);
+    assert_eq!(receipt.outcome, CounterOutcome::Value(9));
+    assert!(receipt.duplicate);
+    assert_eq!(read_recovering(&mut nodes, &clock, 1, ()), 9);
+    close(nodes, &clock, 1, || {});
+    std::fs::remove_dir_all(root).unwrap();
 }
 
 fn lose_uncommitted(nodes: &mut [Node<Counter>], clock: &Instant, ticket: ClientTicket) {

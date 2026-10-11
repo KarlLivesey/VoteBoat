@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Selected native recovery correction: [slice260](../validation/baseline/slice260/README.md).
+Both hosts reproduce the retained-credit assumption at an actual pending native
+persistence cut; corrected unread-result regressions pass2/0 on each, including
+original cold retries and owned cleanup. Formatting/four strict profiles are zero.
+Eight affected histories pass on fixed Linux; their Mac equivalents remain
+running. Original broad Mac failures stay independent. The public
+complete/reconcile ownership contract is
+preserved, with no production change.
+
 Selected separate-host static service: [slice256](../validation/baseline/slice256/README.md).
 Two Linux replicas and one Mac pass TCP/TLS and QUIC writes/quorum reads,
 required Linux/Mac quorum, leader loss, original retries, complete cold reopen

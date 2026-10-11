@@ -22,7 +22,11 @@ retained separately and is not causal evidence. FileLogIo creates the selected
 store directory, so the corrected setup explicitly creates its parent first.
 
 The four affected real cross-authority TCP/QUIC WAL/checkpoint histories run
-separately on fixed Linux/Mac sources and remain pending at publication. This
+separately on fixed Linux/Mac sources. The Linux follow-up finishes4/0,259.80s;
+see [source-linked logs](linux-cross-authority/fixed-linux-cross-authority.log).
+The unchanged Mac follow-up finishes0/4 with the same unknown-result retained-
+credit assertion in every case; [260](../slice260/README.md) records its terminal
+body and investigates that distinct failure. This
 scope establishes the controlled root-isolation correction; it does not identify
 the first failure in the unchanged broad Mac family, classify every later failure
 as contamination or claim that either original Mac run now passes. Failed roots

@@ -1,0 +1,11 @@
+Diff in <linux-workspace>/tests/routed/unread_phase.rs:140:
+         .state()
+         .hard_state
+         .term;
+-    nodes[0].control(ticket.group, NodeControl::Campaign).unwrap();
++    nodes[0]
++        .control(ticket.group, NodeControl::Campaign)
++        .unwrap();
+     nodes[0]
+         .poll(
+             MonoTime(clock.elapsed().as_millis() as u64),

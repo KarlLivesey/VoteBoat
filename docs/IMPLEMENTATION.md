@@ -113,7 +113,7 @@ passes unchanged on both hosts and does not identify the first failure.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current259: isolate native delegation history stores | Prevent retained failed stores from contaminating later history construction; obtain trustworthy P5/P6 recovery evidence. | Actual old-root FileLogIo/LogStore AlreadyExists negative on each host; preserve original251/254d sources and failed files. | Unique exclusively created roots, original retained bytes unchanged, native regression on both hosts, four affected TCP/QUIC histories, source linkage and formatting/four strict profiles zero. |
+| Current260: wait for actual unknown-result reservation release | Correct a demonstrated native fixture assumption and obtain trustworthy P5/P6 recovery evidence. |259 root isolation; fresh Mac retained-credit failure; documented complete/reconcile ownership; controlled real native pre-persistence negative. Preserve original251/254d/259 sources. | Actual release before original-ID retry, old/fixed regression both hosts, affected cross-authority/deletion histories, cold receipts/explicit cleanup and formatting/four strict profiles zero. |
 | Next: classify and fix the first actual Mac lifecycle failure | Close a demonstrated functional P5/P6 failure while keeping static service usable. | Terminal original failure body or fresh isolated reproduction; distinguish root collisions from the first cause. | Cause-specific failing-before/passing-after check, original IDs/fault cuts/ownership rules preserved, relevant Linux/Mac histories and strict zero. An isolated pass cannot close an unreproduced failure. |
 | Following: close the next missing provider obligation | Advance public Rust composition P0/R14/R19 using existing contracts. | Source audit of existing shared checkers and named assertions; select an actual uncovered obligation after the lifecycle diagnosis. | One bounded real host/native checker with a defective-provider negative, relevant feature profiles on both hosts and strict zero; retain partial coverage explicitly. |
 
@@ -26037,3 +26037,53 @@ never removes an existing directory. Fixed regression passes1/0 on both hosts
 and compares retained original bytes before successful closed-store cleanup.
 Formatting/four strict profiles are zero on both. The four real affected
 cross-authority histories remain running, so259's mini-plan acceptance is pending.
+
+260 schema: fixed259 Linux cross-authority histories finish4/0; fresh Mac QUIC/
+checkpoint reports unread_phase:76 requests1 immediately after completing an
+Unknown(LeadershipChanged) envelope. ClientRouter::complete releases the exported
+result, but cleanup requires released AND terminal; reconcile retains the command
+reservation while the Raft core still has a pending dependency. This is the
+documented public ownership rule, not a demonstrated production leak. Extract
+the fixture's uncertain-result completion step so its exact old immediate-zero
+assertion can be tested against a real native queued term persistence dependency.
+The controlled test persists an uncommitted original Counter command, steps a
+higher-term Campaign in one Node poll (worker completions precede stepping), and
+exports the exact unknown envelope while the new dependency remains unobserved.
+Old completion must fail at its retained credit; corrected completion must drive
+the existing bounded poll path until actual release before campaigning/retrying
+the original ID/bytes. No forced release, new limit, deadline, outcome class or
+provider/protocol change. Applied envelopes still stay owned and unconsumed for
+the original abort cut. Test actual value/cold duplicate and explicit cleanup.
+Use a separate Mac260 checkout; never edit live251/254d/259 sources. Acceptance:
+controlled old/fixed evidence both hosts, affected cross-authority/deletion checks,
+source hashes and formatting/four strict profiles zero. Advances P5/P6 functional
+recovery and R10/R19; classification of the original broad failures remains open.
+
+260 controlled-setup correction: a single poll can still be finishing the prior
+visit, leaving Campaign queued and the core Leader. That setup failure is retained
+separately; it is not the target negative. Drive only the local node until the
+actual Campaign reaches Candidate with a pending dependency. Its durable hard
+term remains the old term until that dependency completes; do not demand a higher
+durable term while intentionally selecting the pre-completion cut. Export the
+already-published LeadershipChanged envelope before another node poll.
+
+260 selected acceptance: the real controlled old release step fails0/1 on
+Linux0.03s and Mac1.51s with requests1 after the exact unknown completion;
+653 source inputs verify at terminal. Corrected native regressions finish2/0
+on Linux0.22s and Mac7.44s, including actual release, retained applied cut,
+original value9/cold duplicate9 and explicit cleanup. Formatting/four strict
+profiles are zero on both. Only tests/routed/unread_phase.rs changes relative
+to61a6a2c; the documented public complete/reconcile contract remains unchanged.
+Four cross-authority plus four deletion histories per host are running on
+independent fixed sources, so their broader mini-plan acceptance is pending.
+Evidence: [260](../validation/baseline/slice260/README.md). No retrospective
+Mac full/family pass or universal failure classification. Full P0–P7 remains
+active, features/functional Linux/macOS first, performance/security later.
+
+260 follow-up: original root-isolated Mac259 finishes0/4 in778.48s; every case
+fails the same immediate requests1/0 assertion after LeadershipChanged. Actual
+process exit101 and original source verification are retained with the terminal
+body, separately from its earlier live snapshot. Fixed Linux cross-authority
+finishes4/0 in258.96s and deletion4/0 in10.32s; source verifies at terminal.
+The corresponding eight fixed Mac histories remain running. No broader original
+Mac251/254d certificate is inferred from the controlled native correction.
