@@ -54,7 +54,7 @@ first three-process executable now exposes that assembly. Generic startup
 the shared typed startup and configured endpoint path are described in Slices
 38–39 below. Separate-host deployment and operational packaging remain work.
 
-## Linked macro and mini plan — updated 10 October 2026
+## Linked macro and mini plan — updated 11 October 2026
 
 The macro plan tracks usable capabilities, not the number of internal slices.
 The mini plan covers the current deliverable and the next two, including their
@@ -111,7 +111,7 @@ Mac run is still active with an Unavailable metadata-read failure. Separate268
 diagnostics reproduce both caller assumptions with actual LeadershipChanged;
 the causal cleanup/retry correction and native controls pass all/default4/0
 and3/0 on both hosts, with formatting/four strict profiles zero.
-Corrected69-history Linux qualification269 now runs on frozen662-input source.
+Corrected69-history Linux/Mac qualification269 now runs on frozen662-input source.
 These selected results
 do not certify the complete platform or roadmap.
 
@@ -119,7 +119,7 @@ do not certify the complete platform or roadmap.
 | --- | --- | --- | --- |
 | Current268: preserve/recover original metadata-read outcomes — accepted | Advance P5/P6 functional recursive lookup after actual leader changes. | Existing ManifestReadSource, exact read completions and Node cleanup; diagnostic Mac0/2 preserved separately. No production/provider changes. | Two original TCP/QUIC two-move/WAL/checkpoint histories plus two actual Campaign-cut regressions; known leadership-only retry after original slots drain, exact inactive/fenced one-attempt refusal, wrong-ticket preservation, fresh root metadata; both-host all/default4/3 and formatting/four strict profiles zero. |
 | Next262: capture terminal preserved delegation qualification | Keep P5/P6 failure evidence linked to its original source before replacement. | Independent frozen654-input Linux/Mac sources; Linux67/0 terminal, Mac live with a metadata-read failure. | Full67-history original family terminal results, source hashes and exact failure bodies. These older results cannot certify268's changed metadata fixtures. |
-| Following269: qualify the complete corrected69-history family | Advance P5/P6 macOS/Linux functional acceptance with the causal fixes composed. | Accepted268 source adds two real read-race controls; preserve completed262 source/results, use frozen independent builds. | Terminal all-feature69-history family on both hosts, original operation IDs/cuts/ownership/cold recovery retained, source verification and strict zero. Keep the full goal active while those background histories run. |
+| Following269: complete corrected69-history qualification — running | Advance P5/P6 macOS/Linux functional acceptance with the causal fixes composed. | Accepted268 source adds two real read-race controls; preserve completed262 source/results, use frozen independent builds. | Terminal all-feature69-history family on both hosts, original operation IDs/cuts/ownership/cold recovery retained, source verification and strict zero. Keep the full goal active while those background histories run. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26443,3 +26443,11 @@ functional lookup without treating finite corrected fixtures as full-platform
 acceptance. Full corrected69-history Linux269 is live on immutable source;
 preserved Mac262/251 originals remain live and must retain terminal failure
 bodies. Full P0–P7 remains active; performance/security follow features.
+
+269 Mac launch: final268 acceptance is terminal4/0 plus3/0 and strict zero.
+Reuse its idle repo268 checkout without changing Rust inputs. A unique269
+manifest verifies all662 inputs before the all-feature family, which announces
+69 tests; its live handle is14022. Linux handle24923 uses the same manifest in
+the separate application-conformance worktree. Both code images match published
+178844a; leave them immutable until terminal. Original Mac262/251 processes
+remain separate. Launch and partial progress are not platform acceptance.
