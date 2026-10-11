@@ -1,0 +1,7 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running `target/divide-shutdown/build/debug/examples/embedded_transfer create target/divide-shutdown/transfer-demo tests/fixtures/tls submit 1 17 forward`
+transaction=TransactionId(1) outcome=Finished { transaction: TransactionId(1), decision: Commit, first_index: 5 }
+account1=Balance(983)
+account2=Balance(17)
+workers_joined=true; authoritative files retained

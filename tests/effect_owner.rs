@@ -1058,6 +1058,8 @@ mod peer_driver;
 #[path = "support/replica_driver.rs"]
 mod replica_driver;
 mod support;
+#[path = "support/transaction_driver.rs"]
+mod transaction_driver_conformance;
 use std::collections::{BTreeMap, VecDeque};
 use support::*;
 use voteboat::{application::*, identity::*, log::*, raft::*, runtime::*, worker::*};

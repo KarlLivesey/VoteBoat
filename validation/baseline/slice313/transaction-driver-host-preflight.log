@@ -1,0 +1,35 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.83s
+     Running tests/effect_owner.rs (target/divide-provider/build/debug/deps/effect_owner-2e123b8ee2a1b664)
+
+running 4 tests
+
+thread 'transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers' (728) panicked at tests/support/transaction_driver/fixture.rs:101:89:
+called `Result::unwrap()` on an `Err` value: SchedulerContract
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged' (729) panicked at tests/support/transaction_driver/fixture.rs:101:89:
+called `Result::unwrap()` on an `Err` value: SchedulerContract
+
+thread 'transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits' (731) panicked at tests/support/transaction_driver/fixture.rs:101:89:
+called `Result::unwrap()` on an `Err` value: SchedulerContract
+
+thread 'transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status' (730) panicked at tests/support/transaction_driver/fixture.rs:101:89:
+called `Result::unwrap()` on an `Err` value: SchedulerContract
+test transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers ... FAILED
+test transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged ... FAILED
+test transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status ... FAILED
+test transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits ... FAILED
+
+failures:
+
+failures:
+    transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers
+    transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged
+    transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status
+    transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits
+
+test result: FAILED. 0 passed; 4 failed; 0 ignored; 0 measured; 173 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

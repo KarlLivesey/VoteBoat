@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice313/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.86s
+     Running tests/effect_owner.rs (/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/deps/effect_owner-5360874e97cc807f)
+
+running 4 tests
+test transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status ... ok
+test transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged ... ok
+test transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits ... ok
+test transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 176 filtered out; finished in 0.04s
+

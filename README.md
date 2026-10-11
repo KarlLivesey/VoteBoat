@@ -15,6 +15,7 @@ cargo run --locked --example replicated_counter -- /tmp/voteboat-counter 1 7
 - [Authenticated split and recovery commands](docs/TRANSFER_SERVICE.md)
 - [TCP and QUIC](docs/QUIC_TRANSPORT.md)
 - [Rust embedding and node API](docs/NODE.md)
+- [Cross-group transactions and embedding](docs/TRANSACTIONS.md)
 - [Feature status](docs/FEATURE_STATUS.md) · [implementation record](docs/IMPLEMENTATION.md)
 - [Validation evidence](validation/REPORT.md)
 - [Local formatting, lint and test commands](docs/LOCAL_CHECKS.md)

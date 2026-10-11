@@ -1,0 +1,7 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice313/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.02s
+     Running `/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/build/debug/examples/embedded_transfer create /home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice313/results/linux-example-data tests/fixtures/tls submit 1 17 forward`
+transaction=TransactionId(1) outcome=Finished { transaction: TransactionId(1), decision: Commit, first_index: 5 }
+account1=Balance(983)
+account2=Balance(17)
+workers_joined=true; authoritative files retained

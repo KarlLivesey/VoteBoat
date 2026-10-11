@@ -1,10 +1,10 @@
-# Transaction applications
+# Transactions
 
-The first P8 transaction slice adds role-aware replicated applications for a
-bounded transfer between two account groups. The native protocol driver is the
-following deliverable; these applications alone do not provide a usable cross-group
-transaction service. [Implementation status](IMPLEMENTATION.md) records actual
-qualification separately from planned work.
+`TransferApplication` and `TransferDriver` compose a bounded transfer between two
+account groups through the existing public Node interfaces. The driver advances
+actual proposals and quorum reads; host-selected providers own storage and I/O.
+[Implementation status](IMPLEMENTATION.md) records platform qualification and the
+remaining P8 scope.
 
 Select `TransferApplication` in the existing public Node application map. A
 `TransferProfile` binds one coordinator and two distinct participant group
@@ -44,3 +44,39 @@ configured binding and reconstructs the local retained history before publishing
 state. The current invocation receipt index and original first phase index are
 separate: retries must reconstruct identical dependent command bytes. Application
 checkpoint/replay uses the existing selected log and snapshot contracts.
+
+## Rust embedding
+
+Attach `TransferDriver` to an exclusively borrowed slice of 1–64 compatible Nodes.
+Every profile group must be hosted, but each Node may host a different subset.
+Construction checks profile, role, immutable opening accounts and capacity before
+intake. The driver consumes those Nodes' client/read streams, so they must be
+drained at attachment. Allocate a fresh `TransferDriverGeneration` for every
+attachment under the same `RuntimeOwner`.
+
+Use `submit(spec)` for immutable business intake or `resume(transaction_id)` to
+recover the original spec through a fresh coordinator quorum read. Call `advance`
+with explicit time and budgets, then `poll_completion` and `complete` the original
+output. `Finished` reports the durable decision and original finish index.
+`Unknown` requires retry/resume; it never authorizes compensation. An absent
+coordinator record yields `Unknown(NoRetainedStart)`.
+
+`close` stops intake while accepted work continues. `stop_waiting` cancels local
+observations without changing the durable transaction. Continue progress and
+consume outputs until `is_drained`, then shut down and join the host's Nodes and
+providers. Dropping the driver performs no I/O or unlocking. `progress` is a local
+diagnostic, not a committed phase certificate.
+
+The standalone example uses one physical voter hosting all three durable groups:
+
+```sh
+cargo +stable run --locked --offline --example embedded_transfer -- \
+  create /tmp/voteboat-transfer tests/fixtures/tls submit 1 17 forward
+cargo +stable run --locked --offline --example embedded_transfer -- \
+  recover /tmp/voteboat-transfer tests/fixtures/tls resume 1
+```
+
+It retains authoritative files for recovery and prints fresh account reads and
+worker joins. Native acceptance separately exercises three physical replicas over
+TCP/TLS and QUIC. This example is not a remote transaction command service;
+broader transaction scope and logical voters remain P8 work.

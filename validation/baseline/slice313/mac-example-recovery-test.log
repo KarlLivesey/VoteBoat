@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice313/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.87s
+     Running unittests examples/embedded_transfer.rs (/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/examples/embedded_transfer-7e55981c265fbf9a)
+
+running 1 test
+recovery_workers_joined=true; authoritative files retained
+workers_joined=true; authoritative files retained
+test tests::accepted_start_abort_reclaims_real_workers_and_cold_reopens ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.48s
+

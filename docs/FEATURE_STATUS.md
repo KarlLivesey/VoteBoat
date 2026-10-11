@@ -42,14 +42,18 @@ orchestration are not new prerequisites for this feature milestone. External
 storage adapters still require implementation and conformance; the public seam
 does not certify a hypothetical backend or permit an unverified live migration.
 Subgroup-backed logical voters and broader transactions are newly included in
-P8 and **not yet usable native features**. Existing recursive quorums and outbox
+P8. Logical voters remain unimplemented; the first fixed transfer is now usable.
+Existing recursive quorums and outbox
 support do not implement them. Their protocol/model/recovery contracts precede
 native qualification. The [transaction protocol model311](../validation/baseline/slice311/README.md)
 now passes on Linux/Mac in four profiles, including actual weakened-rule
 counterexamples. [Replicated transaction applications312](../validation/baseline/slice312/README.md)
 now pass17 unit/downstream tests per profile on both hosts, with zero formatting
-and four strict Clippy profiles. The actual networked transaction driver and
-logical voters remain.
+and four strict Clippy profiles. The [actual Node driver313](../validation/baseline/slice313/README.md)
+passes124 affected test executions per host, including TCP/QUIC, unavailable quorum
+with retained locks, checkpoint/suffix resume, original results and joined cleanup;
+formatting/four strict profiles are zero. [Rust embedding](TRANSACTIONS.md) is usable.
+Remaining broader transaction scope and logical voters keep P8 incomplete.
 Striped single-group WAL and representative-relay optimization
 move to P9, along with the original performance gates and required research cost
 comparisons. Default research promotion remains gated by that evidence. Windows

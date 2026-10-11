@@ -53,6 +53,10 @@ name = "embedded_counter"
 required-features = ["tls"]
 
 [[example]]
+name = "embedded_transfer"
+required-features = ["tls"]
+
+[[example]]
 name = "native_benchmark"
 required-features = ["tls"]
 test = true

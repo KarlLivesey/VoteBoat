@@ -25,10 +25,12 @@ pub use status::*;
 mod admission;
 mod codec;
 mod command;
+mod driver;
 mod state;
 #[cfg(test)]
 mod tests;
 mod traits;
+pub use driver::*;
 
 use crate::{application::ApplicationError, identity::GroupIdentity};
 use command::Command;

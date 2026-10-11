@@ -17,7 +17,7 @@ record claims that unimplemented phases already work.
 | P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
 | P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
 | P7 | Functional multi-lane assembly, batching/pipelining, reclamation and recovery throttling | Existing mechanisms and finite TCP/QUIC histories remain supported. The original chapter12 P7 throughput/p99 acceptance condition moves to P9; this reordering does not claim that condition passed. |
-| P8 | Subgroup-backed logical voters and broader transactions | Functional scope remains incomplete. Independent transaction model311 and replicated applications312 are qualified; actual driver and logical voters remain. Establish explicit protocol, evidence/capability and recovery contracts, model-check required transitions, then qualify usable native/public-interface paths on Linux/macOS. Performance-dependent research promotion remains P9. |
+| P8 | Subgroup-backed logical voters and broader transactions | Functional scope remains incomplete. Independent transaction model311, replicated applications312 and actual Node driver313 are qualified on Linux/macOS. Logical voters and remaining broader transaction scope remain. Establish explicit protocol, evidence/capability and recovery contracts, model-check required transitions, then qualify usable native/public-interface paths. Performance-dependent research promotion remains P9. |
 | P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, striped single-group WAL, representative relays and other throughput projects. No automatic start after P8. |
 | P10 | Security review and hardening | Later separate phase, with the user's Daybreak review. Existing authentication, identity, bounded-resource and protocol-safety contracts remain required during feature work. |
 
@@ -104,7 +104,8 @@ solely for compatibility. Preserve explicit migration for already-written data.
 
 These are capability milestones, not a claim that every earlier phase is
 finished. The detailed phase table above remains the scope ledger. P8's functional
-scope remains incomplete: transaction applications are qualified; the driver and logical voters remain. Online membership and split/merge do not block use of the
+scope remains incomplete: the first actual transfer is qualified; logical voters
+and remaining broader transaction scope remain. Online membership and split/merge do not block use of the
 static service; no calendar estimate or completion percentage is inferred from
 the count of remaining milestones.
 
@@ -150,9 +151,10 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Parallel302: finish baseline qualification and record feature exits | Establish the finite P0–P7 service/embedding qualification. | Original four-profile matrices, final305 affected-source evidence and finite301 source/provider review. | Linux is terminal5661/0 across four profiles; Mac remains live. Retain terminal results, resolve demonstrated failures and reuse unaffected evidence. Map original functional exits to actual evidence. No full-suite restart or optional engine; baseline acceptance alone does not finish newly included P8. |
 | Completed311: transaction protocol and independent model | Establish P8's durable atomicity/isolation contract before implementing phase commands. | Reviewed310 scope, chapters08/11 and actual Node client/read/application contracts. | Eight model tests pass in all four profiles on Linux/Mac;126,818 states/827,613 transitions exhaust the declared graph and three weakened rules produce actual counterexamples. Volatile observations and committed phase proofs are separate. Formatting/four strict profiles and714 source guards are clean. Model evidence alone implements no transaction engine. |
 | Completed312: replicated transaction applications | Implement coordinator/participant state, account locks, immutable phase IDs, bounded admission/receipts and checkpoint recovery. Advances P8 transactions. | Qualified311 protocol/model and existing public application/client/read/checkpoint composition. | Eleven unit and six public downstream tests pass in each of four profiles on Linux/Mac; formatting/four strict Clippy profiles zero and730 frozen inputs match. Atomic application/refusal, original-content retry, lock/retention and restore checks pass. Actual Node provenance and network coordination remain313. |
-| Current313: native transaction driver and usable embedding | Deliver the complete bounded atomic transfer through actual networked groups. | Qualified312 applications and owned Node proposal/quorum-read tickets. | Driver obtains exact scoped phase observations, resumes original durable state after unknown/restart, and completes only after every participant applied/released. Native atomicity/isolation, partition/leader-loss/checkpoint recovery, downstream composition, joined cleanup and Linux/macOS checks must pass with zero lint. This first transaction feature does not complete logical voters or all P8. |
-| Next314: logical-voter refinement mapping and protocol gate | Define the remaining P8 parent-voter feature before native assembly. | Reviewed310 fixed composition and existing ordered log/quorum/configuration/recovery contracts; transactions313 develop independently. | Explicit child-committed-state to parent-voter mapping, scoped responses/payload availability, representative replacement and persisted/volatile recovery model. Deliberate personal-ballot/early-response/stale-context violations must be detected. Declare supported nesting/activation limits. This required protocol gate alone implements no logical-voter service. |
-| Following315: usable logical-voter native assembly | Advance P8 by composing actual replicated child groups into one ordered parent-voter path. | Qualified314 mapping/model, scoped payload/evidence and recovery contracts, existing Node/provider seams. | Actual durable child-backed parent responses, representative replacement, payload availability, configuration activation, old checkpoint/suffix recovery and stale-context refusal on Linux/Mac. Nested functional exit and remaining transaction scope must still be qualified before all P8 completes. |
+| Completed313: native transaction driver and usable embedding | Deliver the complete bounded transfer through actual networked groups. Advances P8 transactions. | Qualified312 applications and original Node proposal/quorum-read tickets. | Linux/macOS each pass124 affected executions (44 distinct), including actual TCP/QUIC histories, unpolled-peer quorum loss with locked state, graceful leader replacement, checkpoint/suffix recovery, host composition and joined recovery cleanup. Formatting/four strict profiles zero;755 frozen inputs match. Physical partition and abrupt process-crash claims are not established by these selected histories. This first feature does not complete all P8. |
+| Current314: logical-voter refinement mapping and protocol gate | Define the remaining P8 parent-voter feature before native assembly. | Reviewed310 fixed composition, proposed313 mapping/model schemas and existing ordered log/quorum/configuration/recovery contracts. | Explicit child-committed-state to parent-voter mapping, scoped response capsules/payload availability, representative replacement and persisted/volatile recovery model. Required weakened guards produce actual counterexamples. Resolve durable transition-intent authority and child eligibility timing; declare supported nesting/activation limits. This protocol gate alone implements no logical-voter service. |
+| Next315: usable logical-voter native assembly | Advance P8 by composing actual replicated child groups into one ordered parent-voter path. | Qualified314 mapping/model, scoped payload/evidence and recovery contracts, existing Node/provider seams. | Actual durable child-backed parent responses, representative replacement, payload availability, old checkpoint/suffix recovery, unavailable inner quorum and stale-context refusal on Linux/Mac. Public host substitution and actual drain/worker joins must pass with zero lint. Fixed one-level assembly alone does not finish P8. |
+| Following316: nested logical-voter lifecycle qualification | Advance P8 beyond the first fixed cohort with supported nesting and safe parent/child configuration activation. | Qualified315 native path,314 activation models and existing P4 membership/checkpoint contracts. | Enforced acyclic/depth-bounded construction, exact representative/configuration fences, declared serialized transition intents, actual nested checkpoint/suffix and joint/final fault histories on both hosts. Record remaining broader transaction scope separately before claiming all P8 complete. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28286,3 +28288,114 @@ recovery histories and logical voters remain required. Original Mac302 remains
 live; its observed counter failure stays separate from the later305 correction.
 The goal remains active until qualified functional P8, then completes and stops
 for the user's optimization review. No P9 performance or P10 security starts.
+
+Schema313 — actual Node transfer driver (P8): compose an exclusive bounded borrow
+of existing generic Nodes hosting TransferApplication; retain host ownership of
+providers, sockets, snapshots and WAL workers. NativeNode is only the embedding's
+specialization. No new storage owner or business observation-injection API.
+Checked driver limits bound active transactions, pending attempts and retained
+outputs. Constructor validates Running Nodes, empty client/read streams, the
+three exact profile incarnations and roles, fixed account metadata and participant
+whole-lifetime capacity before intake. Submit carries immutable TransferSpec;
+resume carries only the transaction ID and obtains its spec from a fresh actual
+coordinator status read. Read absence means unresolved, never an Abort decision.
+
+Each attempt retains its exact original Node slot, ClientTicket/ReadInvocationTicket,
+operation, step and command/query. Poll and consume the completion on that same
+Node exactly once; only consumed Applied or quorum-backed retained status can
+supply phase facts. Keep canonical first indices and original assertion bytes on
+retry. Scope every driver ticket/output to its originating driver invocation;
+stale/cross-driver outputs must not free another invocation's credits. Unexpected
+results supply no fact and require owned cleanup. Caller time is only progress
+input, never decision authority. Durable refusal permits Abort; Unknown, cancel,
+NotProposed, admission errors and timeouts do not.
+
+State progression is actual Start → canonical Prepare0/Prepare1 → replicated
+Decide → participant Apply both → coordinator AppliedAll → Release both → Finish.
+Only actual Finished yields terminal business success. Lost observations query
+fresh status and reconstruct the same original commands. Decided/AppliedAll/
+Finished resume their remaining monotone work; no compensation or early unlock.
+One pending attempt per transaction and bounded round-robin Node/transaction
+visits preserve backpressure. Close stops intake and continues accepted work;
+stop_waiting cancels observations, consumes terminal outputs and retains unresolved
+identity. Driver drain requires actual client/read ownership to drain before
+returning the borrow. Host then shuts down and joins selected workers; Drop does
+not synchronously drive I/O or erase retained transaction state.
+
+Acceptance313: generic public provider composition with native TCP/TLS and QUIC,
+complete commit/reverse direction/durable refusal and absent Abort, locked reads,
+capacity/credit cleanup, original-ID retries, actual lost phase observation,
+leader replacement, checkpoint plus suffix/cold resume and strict provenance
+controls. Freeze source for Linux/macOS affected targets, formatting and four
+strict Clippy profiles. Required existing model311 remains independent. This
+complete first transfer is not all broader transactions or logical voters; mini
+plan314/315 and remaining declared P8 functional exits remain required. The
+schema is planned work until actual evidence is recorded.
+
+Composition refinement313: three transaction group identities do not imply three
+physical Node handles or identical group assignment at every handle. Accept a
+bounded homogeneous Node cohort with selective hosted group inventories; validate
+consistent profile/role/opening-account/capacity metadata wherever a required
+group appears, and require each group to be present. The native acceptance uses
+three physical replicas hosting all three groups. A separate downstream fixture
+uses three valid single-voter group Nodes with host-supplied logical storage,
+workers, scheduler, timers and queue, exercising actual public completions in
+core-only builds. This proves provider composition for the driver, not networked
+quorum fault tolerance. Reuse the existing effect_owner target's providers rather
+than add another synthetic authority or provider framework.
+
+Protocol finding314 (planned logical-voter work): mapping only parent persistence
+through a child group is insufficient. Parent ReadAck/PreVote and other responses
+may have no persistence effect, so a former representative could emit cached
+responses after the child's committed representative fence. The required mapping
+must gate response release itself against a child-committed exact context capsule
+(parent incarnation/term/configuration/request, representative fence and matching
+prefix/payload). This is necessary for P8's crash-recoverable parent-voter contract,
+not a tuning helper. The independent314 oracle needs an actual worker-only stale
+ReadAck counterexample. Physical authenticated sessions remain distinct from the
+stable logical voter identity. No logical-voter implementation or validation is
+claimed from this planning finding; native315 depends on the reviewed mapping.
+
+Cleanup refinement313: the final review found that a provider error can put the
+example Node in RecoveryRequired. Checkpoint control then rejects Closed, so an
+early return would skip provider joins. The example must preserve that failure,
+select the actual Node recovery/drain path, consume owned client/read outputs and
+join the original selected workers. Normal checkpoint/drain remains the healthy
+path. Validate the focused failure path before freezing source; successful normal
+joins do not prove failure cleanup.
+
+Implemented313: the generic bounded TransferDriver uses existing selected Nodes
+and providers, preserving exact original tickets, command/query content and first
+phase indices. Canonical prepare order, actual consumed Applied/quorum status,
+immutable retries and monotone resume complete Start through Finish. Unknown or
+cancel supplies no decision; fresh attachment generation and retained output
+ownership prevent stale completion credit release. The standalone embedding is
+one physical voter/three groups, separate from the three-replica TCP/QUIC histories.
+
+Validation313: Linux and macOS each pass124 selected executions across four
+sequential profiles: transaction library19/19/12/12, public application6 each,
+host-provider driver4 each, native14 all/7 default, and actual accepted-Start
+abort/recovery/reopen example1. Core/native native targets are gated0, not runtime
+coverage. CLI create/exact retry/resume retain finish index5 and balances983/17;
+absent ID returns Unknown/exit1 after joined cleanup. Before/terminal755 input
+guards match each host and root; formatting/four strict all-target Clippy profiles
+are zero. The root110-contract catalogue check passes metadata/path validation.
+Independent review found no remaining concrete blocker after the focused recovery
+cleanup fix. Initial fixture capacity/wire-version failures and actual scope are
+retained in [313 evidence](../validation/baseline/slice313/README.md).
+
+Native quorum loss withholds polling of two actual original Node owners, preserves
+prepared locks without a decision, and resumes after fresh quorum repair. Leader
+replacement gracefully retires/joins/reopens the original leader. These do not
+establish physical packet partition or abrupt process/power crash. The original
+Mac302 sweep remains separate; no full platform acceptance or original-failure
+diagnosis is inferred from this affected feature matrix.
+
+Macro review313: the first usable transfer is qualified. Logical voters and the
+remaining broader transaction exit keep P8 incomplete. Mini plan advances to314
+mapping/independent models,315 actual child-backed voter assembly and316 supported
+nesting/configuration qualification. The proposed314 schemas identify response
+capsules for persistence-free acknowledgments, historical request semantics,
+durable overlap-intent authority and precise child eligibility timing. They are
+unimplemented plans, not proof or native evidence. This goal stays active until
+qualified functional P0–P8, then completes and stops before P9/P10.

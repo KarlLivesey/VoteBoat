@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice313/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.76s
+     Running unittests examples/embedded_transfer.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/build/debug/examples/embedded_transfer-4ca533ff216a2e5f)
+
+running 1 test
+recovery_workers_joined=true; authoritative files retained
+workers_joined=true; authoritative files retained
+test tests::accepted_start_abort_reclaims_real_workers_and_cold_reopens ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

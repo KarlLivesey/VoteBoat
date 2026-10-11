@@ -1,0 +1,5 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running `/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/examples/embedded_transfer recover /tmp/voteboat-macos-CzK1if/slice313/results/mac-example-data tests/fixtures/tls resume 99`
+transaction=TransactionId(99) outcome=Unknown { transaction: TransactionId(99), reason: NoRetainedStart }
+workers_joined=true; authoritative files retained
+Error: "unresolved; authoritative files retained, recover and resume ID"

@@ -1,0 +1,3 @@
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running `target/divide-shutdown/build/debug/examples/embedded_transfer create target/divide-shutdown/transfer-demo tests/fixtures/tls submit 1 17 forward`
+Error: NativeStartupError { stage: "configuration", detail: "\"multi-group count or member wire limit\"" }

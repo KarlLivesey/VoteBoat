@@ -4,7 +4,10 @@ Scope update310: this map retains the original baseline evidence. The user's
 current goal also includes newly planned P8 logical-voter/transaction features
 and stops at their functional qualification. P9 performance and P10 security
 remain later separate phases. See the current macro/mini plan in
-[IMPLEMENTATION.md](IMPLEMENTATION.md); no P8 implementation evidence is claimed.
+[IMPLEMENTATION.md](IMPLEMENTATION.md). The independent transaction model311 and
+replicated applications312 and actual Node driver313 are qualified on Linux/macOS.
+The first fixed transfer does not finish broader transactions, logical voters or
+complete P8 qualification.
 
 Current feature exit: [concise status](FEATURE_STATUS.md). The preserved705-input
 matrix302 is [terminal on Linux](../validation/baseline/slice302/linux/README.md):
@@ -1285,7 +1288,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, automatic cross-node credential coordination and broader revocation schedules remain; explicit executable peer rotation is supplied by207b1–b3. Unflagged loopback mode is explicitly trusted. |
 | C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Chapter17 permits related providers to share an implementation: neither a new trait per checksum helper nor optional compression is automatically a baseline blocker. |
 | C23 scope transfer | ScopeStateMachine/ScopeImage, native BucketCounter, source/target/lifecycle guards | Wider application/provider and recursive fault/retention coverage; core retains fence/publication/activation authority. |
-| C24 transactions | One-group ordered application commands | Cross-group transactions are unsupported P8, not a hidden baseline coordinator. |
+| C24 transactions | One-group ordered commands; qualified311 model,312 applications and313 actual Node driver/embedding on Linux/macOS | The first fixed two-participant transfer uses original Node provenance, actual TCP/QUIC quorums and retained recovery/cleanup. Remaining broader transaction scope and subgroup-backed logical voters keep P8 incomplete; no arbitrary transaction program or remote transaction command-service claim. |
 
 ## Invariants and scenario limits
 

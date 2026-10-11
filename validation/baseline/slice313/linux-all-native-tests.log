@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice313/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.85s
+     Running tests/transaction_driver.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/build/debug/deps/transaction_driver-04ea4842c5f803a1)
+
+running 14 tests
+test history::native_quic_commit_retry_reverse_and_durable_refusal ... ok
+test history::native_quic_lifetime_capacity_and_exact_retry ... ok
+test history::native_tcp_commit_retry_reverse_and_durable_refusal ... ok
+test history::native_tcp_lifetime_capacity_and_exact_retry ... ok
+test ownership::native_tcp_nonempty_stream_and_real_stale_driver_completion ... ok
+test ownership::native_quic_nonempty_stream_and_real_stale_driver_completion ... ok
+test recovery::native_quic_locked_refusal_absent_abort_and_leader_replacement ... ok
+test recovery::native_tcp_locked_refusal_absent_abort_and_leader_replacement ... ok
+test recovery::native_tcp_lost_prepare_checkpoint_suffix_and_cold_resume ... ok
+test recovery::native_tcp_lost_applied_all_release_and_finish_observations ... ok
+test recovery::native_quic_lost_applied_all_release_and_finish_observations ... ok
+test recovery::native_quic_lost_prepare_checkpoint_suffix_and_cold_resume ... ok
+test unavailable::native_quic_quorum_unavailable_keeps_locks_and_resumes_after_repair ... ok
+test unavailable::native_tcp_quorum_unavailable_keeps_locks_and_resumes_after_repair ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.41s
+

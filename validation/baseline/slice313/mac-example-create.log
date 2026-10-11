@@ -1,0 +1,7 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice313/repo)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.21s
+     Running `/tmp/voteboat-macos-CzK1if/diagnostic303-build/debug/examples/embedded_transfer create /tmp/voteboat-macos-CzK1if/slice313/results/mac-example-data tests/fixtures/tls submit 1 17 forward`
+transaction=TransactionId(1) outcome=Finished { transaction: TransactionId(1), decision: Commit, first_index: 5 }
+account1=Balance(983)
+account2=Balance(17)
+workers_joined=true; authoritative files retained

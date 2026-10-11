@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice313/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running tests/transaction_driver.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/build/debug/deps/transaction_driver-be155abcd2907a5f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

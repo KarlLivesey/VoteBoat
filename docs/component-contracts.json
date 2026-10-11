@@ -2786,6 +2786,14 @@
       "native": "Concrete deterministic coordinator/participant application selected through the existing public Node application map; existing log, snapshot and runtime providers remain authoritative.",
       "conformance": ["tests/transaction_application.rs", "src/transaction/tests.rs", "src/transaction/tests/admission.rs", "src/transaction/tests/refusal.rs", "src/transaction/tests/recovery.rs"],
       "scope": "Application primitives for one fixed coordinator and two canonical participant group incarnations, immutable transfer content and ten per-destination phase operation IDs. Whole-lifetime records reserve terminal progress and are never evicted. Coordinator Start scans retained/pending destination aliases; participant prepare retains a lock without balance mutation, Commit applies once, Abort from unprepared state retains a tombstone, and release removes only the original lock. Public business intake exposes only Start and queries; internal phase bytes are trusted assertions, not independently verified foreign certificates. Receipt current and first retained indices are separate. Queries and one fixed status allocation are accounted through existing bounded read contracts. Checkpoint restore reconstructs local retained first-phase history against exact opening accounts/profile/capacity and publishes only after complete semantic equality. This is a partial C24 implementation: actual Node provenance, networked coordination/recovery and usable cross-group transfer remain slice313. Safe P4 voter membership is not frozen; account ownership is fixed. No new storage owner, hidden runtime, schema migration, arbitrary transaction program, global scan or hypothetical-backend certification."
+    },
+    {
+      "design_id": "C24",
+      "public_contract": "TransferDriver / DriverTicket / DriverCompletion / DriverBudget",
+      "operations": ["new", "submit", "resume", "advance", "progress", "poll_completion", "complete", "usage", "failure", "close", "stop_waiting", "is_drained"],
+      "native": "Generic exclusive borrower of host-selected Nodes; NativeNode specialization uses the existing native WAL, snapshot, TCP/TLS and QUIC providers. Standalone embedded_transfer hosts three single-voter groups; native conformance separately uses three physical replicas.",
+      "conformance": ["tests/transaction_driver.rs", "tests/transaction_driver/history.rs", "tests/transaction_driver/recovery.rs", "tests/transaction_driver/ownership.rs", "tests/transaction_driver/unavailable.rs", "tests/support/transaction_driver.rs", "src/transaction/driver/tests.rs", "src/transaction/driver/tests/native.rs", "examples/embedded_transfer.rs"],
+      "scope": "Fixed two-participant account transfer with immutable phase IDs and original first indices. Actual consumed Node Applied outputs or fresh coordinator quorum status supply phase authority; local role/status remains diagnostic. Construction accepts 1..64 selectively hosted compatible Nodes and checks original account openings and lifetime capacities. Fresh host-allocated driver generation scopes tickets/completions. Bounded round-robin progress, exact opaque result correlation, returned stale outputs and original Node reservation drain preserve ownership. Unknown/cancel/timeout never decides Abort. Provider errors stop phase production and retain cleanup outputs. Driver Drop performs no I/O or compensation; the host owns Node recovery, shutdown and worker joins. Seven private mismatch controls consume actual opaque Node results; downstream tests use host providers in core-only builds. Platform qualification is recorded in docs/IMPLEMENTATION.md. Remote command-service orchestration, wider transaction profiles and logical voters remain P8 work. No second storage owner, hidden runtime or hypothetical-backend certification."
     }
   ],
   "not_yet_implemented": [
@@ -2794,7 +2802,7 @@
     "per-group-critical-path-tracing-and-external-exporters",
     "general-durable-authorization-audit",
     "optional-bounded-compression",
-    "cross-group-transaction-layer-P8",
+    "broader-cross-group-transaction-layer-P8",
     "automatic-global-placement-orchestration"
   ],
   "remaining_validation": [
