@@ -19,6 +19,8 @@ mod automatic_lookup;
 mod parent_independence;
 #[path = "publication_recovery.rs"]
 mod publication_recovery;
+#[path = "shutdown.rs"]
+mod shutdown;
 use std::{
     collections::{BTreeMap, BTreeSet},
     net::{TcpListener, UdpSocket},
@@ -161,46 +163,7 @@ where
 {
     let deadline = Instant::now() + Duration::from_secs(15);
     loop {
-        for n in nodes.iter_mut() {
-            let progress = n
-                .poll(
-                    MonoTime(clock.elapsed().as_millis() as u64),
-                    NodePollBudget {
-                        replica: ReplicaPollBudget {
-                            steps: 100,
-                            ..Default::default()
-                        },
-                        ..Default::default()
-                    },
-                )
-                .unwrap();
-            if let Some(p) = progress.replica {
-                for step in p.steps {
-                    // ReadRequests validates tracked cancellation completions.
-                    // A term change can already have cleared the read, making
-                    // its later CancelRead correctly return StaleRead.
-                    let cleared_read = step.admission.is_some()
-                        && step.operation.is_none()
-                        && step.read.is_none()
-                        && step.error == Some(voteboat::raft::RaftError::StaleRead);
-                    let read_refused = step.read.is_some()
-                        && matches!(
-                            step.error,
-                            Some(
-                                voteboat::raft::RaftError::NotLeader
-                                    | voteboat::raft::RaftError::ReadNotReady
-                            )
-                        );
-                    let proposal_refused = step.operation.is_some()
-                        && step.error == Some(voteboat::raft::RaftError::NotLeader);
-                    assert!(
-                        step.error.is_none() || cleared_read || read_refused || proposal_refused,
-                        "{:?}",
-                        step.error
-                    );
-                }
-            }
-        }
+        poll_nodes(nodes, clock);
         if done(nodes) {
             return;
         }
@@ -210,6 +173,53 @@ where
         }
         assert!(within_deadline, "native routed progress timed out");
         std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+
+fn poll_nodes<A>(nodes: &mut [Node<A>], clock: &Instant)
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    for n in nodes.iter_mut() {
+        let progress = n
+            .poll(
+                MonoTime(clock.elapsed().as_millis() as u64),
+                NodePollBudget {
+                    replica: ReplicaPollBudget {
+                        steps: 100,
+                        ..Default::default()
+                    },
+                    ..Default::default()
+                },
+            )
+            .unwrap();
+        if let Some(p) = progress.replica {
+            for step in p.steps {
+                // ReadRequests validates tracked cancellation completions.
+                // A term change can already have cleared the read, making
+                // its later CancelRead correctly return StaleRead.
+                let cleared_read = step.admission.is_some()
+                    && step.operation.is_none()
+                    && step.read.is_none()
+                    && step.error == Some(voteboat::raft::RaftError::StaleRead);
+                let read_refused = step.read.is_some()
+                    && matches!(
+                        step.error,
+                        Some(
+                            voteboat::raft::RaftError::NotLeader
+                                | voteboat::raft::RaftError::ReadNotReady
+                        )
+                    );
+                let proposal_refused = step.operation.is_some()
+                    && step.error == Some(voteboat::raft::RaftError::NotLeader);
+                assert!(
+                    step.error.is_none() || cleared_read || read_refused || proposal_refused,
+                    "{:?}",
+                    step.error
+                );
+            }
+        }
     }
 }
 
@@ -536,10 +546,7 @@ where
     for n in &mut nodes {
         n.begin_shutdown();
     }
-    drive(&mut nodes, clock, |ns| {
-        background();
-        ns.iter().all(|n| n.is_drained())
-    });
+    shutdown::drive(&mut nodes, clock, &mut background);
     nodes
         .into_iter()
         .map(|n| {

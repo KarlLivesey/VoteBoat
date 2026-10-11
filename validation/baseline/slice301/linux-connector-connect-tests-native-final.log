@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests/connect.rs (target/divide-membership/build/debug/deps/connect-d6c4795f767c8c6e)
+
+running 3 tests
+test connection_limits_and_poll_budgets_reject_excessive_work ... ok
+test conformance::host_connector_preserves_pending_ownership_under_refusal_and_close ... ok
+test downstream_connector_uses_public_tickets_and_local_secure_session_type ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

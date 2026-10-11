@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running tests/parser_campaign.rs (target/divide-conformance/parser-build/debug/deps/parser_campaign-88a7d3d5cfe23563)
+
+running 8 tests
+test generator::independent_crc_has_the_standard_castagnoli_vector ... ok
+routing-publication: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 479, refused: 1057, structured_overwrites: 384 }
+test routing::generated_routing_publication_mutations_preserve_checked_bucket_coverage ... ok
+wal-create-batch: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 434, refused: 1102, structured_overwrites: 384 }
+wal-acknowledged-recovery: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 312, refused: 1224, structured_overwrites: 384 }
+snapshot-published-manifest: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 403, refused: 1133, structured_overwrites: 384 }
+test snapshot::generated_published_snapshot_manifest_mutations_cannot_select_wrong_or_partial_data ... ok
+wal-manifest-recovery: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 312, refused: 1224, structured_overwrites: 384 }
+test wal::generated_acknowledged_wal_and_manifest_corruption_never_recovers_a_partial_prefix ... ok
+wal-update-batch: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 431, refused: 1105, structured_overwrites: 384 }
+test wal::generated_native_batch_mutations_reach_bounded_inner_decoders ... ok
+wal-interrupted-suffix: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 1230, refused: 306, structured_overwrites: 384 }
+test wal::generated_interrupted_unacknowledged_suffixes_recover_only_the_original_prefix ... ok
+snapshot-image: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 343, refused: 1193, structured_overwrites: 384 }
+test snapshot::generated_snapshot_image_mutations_validate_metadata_application_bounds_and_integrity ... ok
+rpc-v1-multiplex: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 301, refused: 1235, structured_overwrites: 384 }
+rpc-v8-multiplex: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 274, refused: 1262, structured_overwrites: 384 }
+rpc-v8-snapshot: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 310, refused: 1226, structured_overwrites: 384 }
+test wire::generated_rpc_mutations_enforce_framing_scope_and_public_reencoding ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s

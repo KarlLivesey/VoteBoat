@@ -20,6 +20,8 @@ use voteboat::{
     transfer_source::*,
     transfer_target::*,
 };
+#[path = "split/history.rs"]
+mod history;
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 enum Phase {
     Intent,
@@ -99,6 +101,7 @@ struct Split {
     parent: Vec<Node<LifecycleDirectory>>,
     source: Vec<Node<source_fixture::Source>>,
     targets: [Vec<Node<target_fixture::Target>>; 2],
+    history: history::Trace,
 }
 impl Split {
     fn new(protocol: NativePeerProtocol, checkpoint: bool) -> Self {
@@ -147,6 +150,7 @@ impl Split {
             protocol,
             checkpoint,
             metadata,
+            history: history::Trace::default(),
         };
         campaign(&mut result.parent, &result.clock, 1);
         propose_recovering(
@@ -176,20 +180,7 @@ impl Split {
             100,
             source_fixture::fresh().bootstrap_command(65536).unwrap(),
         );
-        propose_recovering(
-            &mut result.source,
-            &result.clock,
-            20,
-            1,
-            source_fixture::data(1, 7),
-        );
-        propose_recovering(
-            &mut result.source,
-            &result.clock,
-            20,
-            2,
-            source_fixture::data(200, 11),
-        );
+        history::seed(&mut result);
         result
     }
     fn observed(&mut self) -> Observed {
@@ -385,6 +376,21 @@ fn write_independent_children(rig: &mut Split) {
     for (i, key, old_op, value) in [(0, 1u8, 1, 7), (1, 200u8, 2, 11)] {
         let g = 21 + i as u128;
         campaign(&mut rig.targets[i], &rig.clock, g);
+        let invocation = rig.history.read(hint(key));
+        let TargetRead::Data(observed) = observe(
+            &mut rig.targets[i],
+            &rig.clock,
+            g,
+            TargetQuery::Data(RoutedQuery {
+                hint: hint(key),
+                key: vec![key],
+                query: vec![key],
+            }),
+        ) else {
+            panic!("activated target read")
+        };
+        rig.history.value(invocation, observed);
+        let invocation = rig.history.write(hint(key), old_op, value);
         let TargetOutcome::Applied(retry) =
             propose_recovering(&mut rig.targets[i], &rig.clock, g, old_op, data(key, value))
                 .outcome
@@ -393,6 +399,8 @@ fn write_independent_children(rig: &mut Split) {
         };
         assert!(retry.duplicate);
         assert_eq!(retry.outcome, BucketOutcome::Value(value));
+        rig.history.receipt(invocation, retry, true);
+        let invocation = rig.history.write(hint(key), 100 + old_op, 2);
         let TargetOutcome::Applied(write) = propose_recovering(
             &mut rig.targets[i],
             &rig.clock,
@@ -405,6 +413,23 @@ fn write_independent_children(rig: &mut Split) {
             panic!("write")
         };
         assert_eq!(write.outcome, BucketOutcome::Value(value + 2));
+        // Withhold this application reply from the history observer. The actual
+        // local result is consumed; this does not simulate packet-loss timing.
+        rig.history.receipt(invocation, write, false);
+        let invocation = rig.history.write(hint(key), 100 + old_op, 2);
+        let TargetOutcome::Applied(retry) = propose_recovering(
+            &mut rig.targets[i],
+            &rig.clock,
+            g,
+            100 + old_op,
+            data(key, 2),
+        )
+        .outcome
+        else {
+            panic!("unobserved reply retry")
+        };
+        assert!(retry.duplicate);
+        rig.history.receipt(invocation, retry, true);
     }
 }
 fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
@@ -440,19 +465,21 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
     assert_eq!(rig.observed(), original);
     for (i, key, value) in [(0, 1u8, 9), (1, 200u8, 13)] {
         let g = 21 + i as u128;
-        assert_eq!(
-            observe(
-                &mut rig.targets[i],
-                &rig.clock,
-                g,
-                TargetQuery::Data(RoutedQuery {
-                    hint: hint(key),
-                    key: vec![key],
-                    query: vec![key]
-                })
-            ),
-            TargetRead::Data(value)
-        );
+        let invocation = rig.history.read(hint(key));
+        let TargetRead::Data(observed) = observe(
+            &mut rig.targets[i],
+            &rig.clock,
+            g,
+            TargetQuery::Data(RoutedQuery {
+                hint: hint(key),
+                key: vec![key],
+                query: vec![key],
+            }),
+        ) else {
+            panic!("reopened bucket read")
+        };
+        assert_eq!(observed, value);
+        rig.history.value(invocation, observed);
         assert!(rig.targets[i]
             .iter()
             .all(|n| n.local().applications[&group(g)]
@@ -486,6 +513,7 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
         source,
         SourceRead::Data(RoutedRead::Rejected(RoutingError::Fenced))
     );
+    rig.history.verify();
     rig.close_all();
     std::fs::remove_dir_all(rig.root).unwrap();
 }

@@ -157,16 +157,20 @@ snapshot catch-up, writes, quorum reads, checkpoint/restart, fresh store session
 dedup retries and further writes, and explicitly drains/joins native workers.
 It now also physically cleans reclaimed WAL handles before reopening; see
 [WAL reclamation](WAL_RECLAMATION.md).
-These finite Linux histories do not establish arbitrary schedules, macOS
-execution, performance or online membership transitions.
+Selected Linux and macOS service, runtime, membership and recovery histories
+are recorded in the [acceptance map](BASELINE_ACCEPTANCE.md). They do not
+establish arbitrary schedules, a current full-suite pass or performance guarantees.
 
 NativeStartup uses `tls.wire_version()` for its message codec, PeerRoster and
 TCP/TLS or QUIC connector. The default remains 1. Call
-`NativeTlsConfig::with_wire_version` supports versions 1–5; call it before opening to select an exact
+`NativeTlsConfig::with_wire_version` supports versions 1–8; call it before opening to select an exact
 matching version on every peer; mismatches fail the encrypted identity hello
 before a session becomes Ready. Unsupported values reject at configuration
-selection. This is independent of persistent formats and does not enable online
-configuration ingress. The counter executable retains its default version 1.
+selection. This is independent of persistent formats. Online configuration uses
+the explicit membership/readiness and authorized administration contracts;
+selecting a wire format alone does not enable that ingress. The simple counter
+profile retains default version 1; configured administration profiles select
+their required supported format. See [wire formats](WIRE_FORMAT.md).
 
 Version 5 also selects the core's multi-batch learner repair during native
 assembly. A host using `Raft::with_batched_joint_repair` with the generic Node

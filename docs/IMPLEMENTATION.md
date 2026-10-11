@@ -123,9 +123,9 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
 | Completed297: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294. | Actual original native tickets and reference Ready cuts, own-image process/power recovery, retries/reads, stale refusal and false-sync reduction pass both hosts. Selected schedules only; snapshots remain separate. |
-| Current: differential checkpoint recovery | Advance P1/R01 snapshot and replay acceptance. | Interrupted log differential297 and existing actual native snapshot294; reference snapshot/publication and application data must come from its own durable image. | Exercise staged/publication/compaction restart cuts and original retries; compare restored application/dedup state without restoring either engine from the comparison oracle. Keep strict builds and bounded artifacts. |
-| Next: retained lifecycle failure correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285/288 failure and qualified typed inspection295. Slice297 proves two clean-close owner-release defects independently; their relationship to the old failure remains unproven. Original Mac285 is terminal73/0 all and40/0 default. | Capture the original failed provider predicate if the changed close path still fails. Preserve ownership/timer contracts and exact old evidence; do not infer causation from passing controlled tests or repeat unchanged healthy probes. |
-| Following: feature acceptance audit | Establish a concrete feature-complete exit for the Linux/macOS service and embedding. | Implemented roadmap evidence, completed mini deliverables and remaining baseline obligations. | Map every required baseline feature to source and meaningful checks; identify a finite list of missing feature/functional acceptance items. Keep arbitrary exhaustive testing, performance/security follow-up, P8 and Windows outside this feature exit. |
+| Current302/303: platform acceptance and exact shutdown diagnosis | Establish current-source Linux/macOS acceptance and identify the observed executable failure. | Frozen298–301 input and actual Mac302 counter target failure. | Complete the original sequential four-profile matrices with strict zero; separate diagnostic source/cache records actual ownership at the unchanged ten-second timeout. A silent pass does not explain a missing predicate. |
+| Next: fix and qualify demonstrated failures | Complete the smallest actual service/embedding correction. | Captured original local/peer ownership state and existing public contracts. | Fix only the observed cause, retain original timer/ownership requirements, add a causal control and rerun affected failed targets on both hosts. Reuse unrelated passing302 evidence; no blanket full-suite restart or optional new engine. |
+| Following: feature milestone decision and later tuning | Make the implemented service/embedding feature scope explicit, then advance P7 when functional acceptance closes. | Terminal302 evidence and source-anchored feature/provider reviews. | Publish a concise current capability/limits record; mark only qualified feature milestones complete. Preserve the full P0–P7 goal, original performance gates and deferred security/P8/Windows scope. Do not add optional testing projects as new feature prerequisites. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -27693,3 +27693,207 @@ it does not establish the missing provider state of original285/288. No fixed
 budget or production timer was changed to make this pass. Separate next work
 checks the fixture cleanup expectation against that exact original deadline.
 The810/0 affected-target acceptance is not a claim that the whole suite is clean.
+
+Schema298 — retained close-stage fixture expectation (P5/P6): the failed297
+state has no remaining client/read/result/owner/outbound/replica work and only
+one original authenticated QUIC provider waiting for a future protocol deadline.
+Keep ordinary drive15s unchanged. A separate close-only terminal stage may pin
+existing bindings/deadlines once if every retained peer has empty transport
+ownership/input, close_started, Closing/flushed and not protocol-drained.
+Unsupported inspection, unsettled local work, a fresh peer/binding or extended
+pinned deadline refuses this stage. Poll only until the maximum original pinned
+deadline, allow the bounded owner visit to observe that timer, and require actual
+is_drained before cleanup succeeds. Never infer drain from flush or elapsed time.
+This fixture-only correction tests the captured expectation, not a new production
+protocol or blanket deadline budget. Acceptance: original failing phase/retry/
+checkpoint history, positive/negative exact classifier controls and both-host
+strict checks. Preserve297's original failure and older causal limits separately.
+
+Schema298 supplement — controlled actual future close timer: use an
+authenticated native QUIC pair and real UDP with explicit virtual3500ms initial
+server delay, retaining the original binding. After hello/flush, wrap the client
+in its actual framed transport, drop the peer and close. At the ordinary15000ms
+cutoff inspect the real transport/session status and pin its future deadline
+through the same cleanup classifier/window. Metadata wrapping supplies only
+roster ownership, never synthetic provider state. The original timer must remain
+fixed; deadline-1 retains the owner, the exact deadline's bounded poll releases
+it only through actual Closed. Fresh work and changed timer remain refused.
+This causal control is needed because298's first wall-clock original history
+passes1/0 in59.22s without entering the conditional cleanup branch.
+
+Macro review298 — finite feature exit: a read-only source/evidence audit finds
+implemented mechanisms for the service/embedding, shared runtime, fixed recursive
+quorums, membership, routing/ownership and split/merge. Qualification remains
+unproven. Prioritize the demonstrated close expectation, one current platform
+service/operator/lifecycle matrix, recorded parser campaigns, a scoped promised-
+provider conformance review, declared-order partitioned history checks and current
+status consolidation. Do not convert every broader-test caveat into a new engine
+feature. Controlled known-majority comparison296/297 and native snapshot294 meet
+the named selected duties; further checkpoint differential is strengthening and
+may follow a concrete contradiction, not a new prerequisite. Full P7 remains
+active and unmet in the subsequent performance phase; security review/P8/Windows
+keep their existing scope. The audit will be published with source anchors.
+
+Schema299 — bounded public parser/recovery campaigns (P0/P1/P5 chapter11): run
+eight fixed seeds and192 generated cases per selected corpus, preserving exact
+seed/case/mode/input for a panic or contradictory parse. Modes include original,
+bit damage, truncation, bounded insertion/deletion/overwrite, hostile lengths and
+random blobs; inputs are bounded by original size plus32 bytes. Selected inner
+codec cases repair independently checked CRC32C to exercise payload decoding.
+Use public NativeLogCodec plus actual acknowledged NativeLogStore recovery,
+NativeWireCodec formats1/8 and snapshot RPC, NativeSnapshotCodec plus published
+native root recovery, and DirectoryCommand checked manifest/routing boundaries.
+Successful mutations must obey decoded public shapes/counts/limits and exact
+re-encoding semantics; valid changes may accept. Raw damaged acknowledged prefix
+must refuse, while interrupted suffix may retain original acknowledged state.
+Synthetic rechecksummed corruption is format testing, not durability truth or an
+authentication claim. Fresh bounded in-memory providers own each recovery case;
+no shared background owner or partial usable result escapes refusal. Feature-
+native families are gated, routing/generator run core-only. Acceptance: original
+success, actual generated positive/refusal activity, exact failure annotation,
+output/read budgets, all four profiles and both hosts with strict zero. This is
+a bounded seeded mutation/fuzz campaign, not exhaustive or coverage-guided fuzzing,
+allocator/RSS measurement or the later security pass.
+
+Schema300 — declared-order split client histories (P1/P5/P6 chapter11): extend
+existing actual native split/reopen histories rather than build another transfer
+engine. Record selected real proposal/read invocations and completions with their
+original responsibility, bucket, owning group/epoch and original operation/delta.
+A bounded independent Counter checker groups by the stable logical bucket within
+that responsibility, spanning the real ownership transition. It checks no
+aggregate cross-group counter or total order. Initial results, post-activation
+quorum reads, imported original retries, explicitly lost application reply and
+retry, fresh writes and cold-reopen reads come from the public Node path.
+Uncertainty records an intentionally unobserved actual reply, never rollback.
+The existing phase/fence/activation tests remain the authority oracle; the history
+checker supplies only application/real-time/dedup checking and no restored data.
+Negative controls alter an original duplicate outcome and wrongly fold two
+independent bucket counters; both must fail while the original tapes pass.
+Bound calls/search, retain original tape on failure and qualify TCP/QUIC WAL/
+checkpoint profiles on both hosts. Selected single-key bucket commands and
+uniquely scoped new IDs do not certify cross-group transactions or all apps.
+
+Schema301 — selected connector accepted-work conformance (P0/VB-011): run the
+same public PeerConnector assertions against the independent host and actual
+native TLS provider. An exact Accept request at time10/deadline90 has no external
+client, so it remains admitted until cancellation/close rather than racing Ready.
+Zero-budget observation, wrong-ticket cancel, oversized budget, backward poll
+and owned submission refusal must preserve pending ownership/time/credit and
+return exact rejected request fields. Close cancels admission but retains the
+original pending credit until its exact terminal poll; repeated polls are empty,
+new requests return Closed with original ownership. Native finish releases its
+listener and explicitly joins the dialer; the host closes only its selected view.
+No production or timer changes. Acceptance: common assertions and existing close/
+sharing tests, core/native feature gates, full strict zero and both-host selected
+qualification. This closes a demonstrated reusable-assertion gap, not arbitrary
+future-provider certification or another 108-component implementation project.
+
+Schema302 — final current-source functional acceptance (feature milestone):
+freeze the integrated production/test/example/build inputs once after298–301.
+Run one complete repository test sweep for all/default/core/native profiles on
+Linux and macOS, with each host's executable configurations sequential and
+independent host build directories. The existing service, startup, membership,
+directory, transfer and routed histories supply the user-visible acceptance;
+the new campaigns and shared assertions run within those same targets. Check
+input hashes before and after; preserve individual terminal logs and strict
+format/four-profile lint results. A failed target remains a failure while other
+targets continue; repair only its observed cause. Do not restart a quiet live
+test or add unrelated scenarios while this finite matrix runs. Cleanup remains
+owned by each actual fixture; elapsed time never implies a successful drain.
+No production/data migration, additional provider, consensus effect or security/
+performance acceptance is introduced by this qualification.
+
+Prepared298–301 — parallel bounded integration, awaiting current platform sweep:
+Linux shutdown controls pass5/0, including an actual future original QUIC timer;
+the selected original checkpoint history passes1/0 in59.22s without entering the
+conditional stage in that occurrence. Parser299 executes16,896 cases across11
+selected corpora:4,829 accept and12,067 refuse under public shape/recovery
+oracles; core routing/CRC controls pass2/0. Shared host/native connector301
+passes48 target executions across four profiles; formatting and all four strict
+Clippy profiles are clean. No production or dependency changes are in this batch.
+These selected worker results do not substitute for302's current platform matrix.
+Feature/provider read-only reviews found the connector shared-assertion gap,
+now implemented, and no second demonstrated production interface blocker.
+Independent scope checking300 records actual invocation/completion events and
+original values per logical responsibility/bucket through split/reopen; an
+application reply is intentionally withheld from its observer, not erased from
+the actual engine. Source fencing/activation checks retain their separate role.
+
+Implemented300 selected Linux check: all four actual TCP/QUIC WAL/checkpoint
+split/reopen histories pass4/0 in46.82s. Each records12 actual client calls,
+produces two independent bucket witnesses spanning original and activated
+owners, and rejects both a changed original retry result and folding the buckets
+into a fictional aggregate counter. Final cold-reopen read values are captured
+from actual public results. A separate read-only review found no scope/oracle
+blocker. This is single-key declared-bucket evidence, not multi-key transactions
+or actual network reply-loss scheduling. Frozen302 includes these final changes;
+Linux/macOS formatting and all four whole-repository strict Clippy profiles pass
+with zero diagnostics.705 root/frozen input hashes match, including Mac before
+execution; complete tests are live on both hosts. Terminal feature acceptance
+remains pending.
+
+Observed302 current Mac all-feature counter service:195/1 in193.45s. The exact
+failure is groups::authenticated_group_commands_quic_recover_independent_histories;
+node2 exits1 with the executable's ten-second shutdown timeout. No provider/local
+ownership predicate was printed, so298's routed cause is not established here.
+Linux's complete counter target passes197/0; platform-specific counts differ.
+Both frozen matrices continue rather than discard other terminal evidence.
+
+Schema303 — exact executable shutdown diagnostic (P0/P1/P2 feature acceptance):
+preserve302 untouched. In a separate copied source/build directory, add only
+timeout observations to the failed executable path: supplied MonoTime, Node
+state, local client/read/result/owner/persistence/outbound/checkpoint/snapshot
+ownership and every tracked peer's existing public drain status/binding/original
+protocol timer. Keep the ten-second executable and fifteen-second fixture budgets,
+poll order, shutdown state and source effects unchanged. Run only the exact
+failing multi-group QUIC history with isolated executable caches on each host;
+retain failure output and its patch/source hash. No missing timer/state is inferred
+from a later silent pass. This diagnostic is needed because the existing timeout
+does not distinguish local accepted work from a pure original protocol close.
+Any actual correction requires the observed cause, owned cleanup and a separate
+focused acceptance check; it does not restart passing302 targets or introduce a
+blanket timer extension.
+
+Observed303 exact diagnostic runs: Linux1/0 in11.49s and Mac1/0 in17.78s,
+neither printing timeout ownership state. These do not explain or fix302's
+original Mac failure. Isolated Mac formatting and all-target/all-feature strict
+Clippy are zero,705 before/terminal guards match; original302 source is unchanged.
+Preflight missing StateMachine trait import and the extra argument crossing the
+run_service line threshold were corrected only in the isolated diagnostic copy;
+no lint threshold was changed. Preserve those initial failures separately.
+
+Schema303 supplement — reproduce the original target context once: the two
+silent exact-history passes lack the parallel counter-service workload present
+in302. Run one complete all-feature counter-service target on the same isolated
+Mac diagnostic source/cache, retaining its existing tests/concurrency and the
+same timeout-only observer. This finite target recheck is needed to observe the
+actual failing owner under its original target context, not broaden acceptance
+or repeat an unchanged passing exact filter. Keep the full302 sweep running and
+retain its195/1 result. If this target is also silent, record non-reproduction
+rather than infer the missing cause or launch arbitrary further probes.
+
+Terminal303 context: the complete Mac all-feature counter target passes196/0
+in199.10s on the isolated observer-only image, with705 matching before/terminal
+hashes and no timeout-state dump. This confirms a later selected target pass,
+not the cause or correction of302's195/1. No blind repeat is scheduled. Keep
+the original failure and both silent exact/context outcomes; the frozen full
+Linux/Mac matrices remain live through their original handles. Only timeout
+observation changed in303, with no protocol budget, timer, drain or ownership
+change. Root production remains the original302 image.
+
+Schema304 — causal executable close-limit control (P0/P1/P2): use a separate
+copy of302, original advance_shutdown and actual native Service/Node providers.
+Supply monotonic test times and delay the real initial QUIC handshake to create
+a legitimate original close timer beyond the ordinary ten-second interval;
+test-only election settings may isolate this transport duty. No forged native
+binding, synthetic send completion or inferred drain may supply the predicate.
+At the ordinary cutoff record actual local/replica/connector/snapshot and peer
+ownership: a successful control requires all local work settled and only original
+authenticated Closing/flushed/not-drained timers still future. Exercise the
+unmodified executable guard against that actual owned Service and preserve its
+refusal; then poll and join/release only through actual original provider drain.
+The controller's wall-elapsed input and supplied monotonic time must represent
+the same intended interval explicitly. A discovered cap defect would justify
+a focused correction independently; it would not retrospectively explain302's
+unobserved Mac provider. If the predicate cannot be produced, retain that result
+without assuming it or creating a new stress-testing project.

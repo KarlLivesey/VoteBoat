@@ -1,0 +1,51 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.16s
+     Running tests/routed.rs (target/divide-reference/build/debug/deps/routed-94a0d082f8668bf1)
+
+running 4 tests
+split Quic checkpoint=true phase=Intent
+split Quic checkpoint=true phase=Stage(21)
+split Quic checkpoint=true phase=Stage(22)
+split Quic checkpoint=true phase=Fence
+split Quic checkpoint=true phase=Import(21)
+split Quic checkpoint=true phase=Import(22)
+split Quic checkpoint=true phase=Publish
+split Quic checkpoint=true phase=Activate(21)
+split Quic checkpoint=true phase=Activate(22)
+split scoped history: 12 calls, 2 bucket witnesses, changed duplicate/folded scope refused
+test native::split::quic_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+split Quic checkpoint=false phase=Intent
+split Quic checkpoint=false phase=Stage(21)
+split Quic checkpoint=false phase=Stage(22)
+split Quic checkpoint=false phase=Fence
+split Quic checkpoint=false phase=Import(21)
+split Quic checkpoint=false phase=Import(22)
+split Quic checkpoint=false phase=Publish
+split Quic checkpoint=false phase=Activate(21)
+split Quic checkpoint=false phase=Activate(22)
+split scoped history: 12 calls, 2 bucket witnesses, changed duplicate/folded scope refused
+test native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+split TcpTls checkpoint=false phase=Intent
+split TcpTls checkpoint=false phase=Stage(21)
+split TcpTls checkpoint=false phase=Stage(22)
+split TcpTls checkpoint=false phase=Fence
+split TcpTls checkpoint=false phase=Import(21)
+split TcpTls checkpoint=false phase=Import(22)
+split TcpTls checkpoint=false phase=Publish
+split TcpTls checkpoint=false phase=Activate(21)
+split TcpTls checkpoint=false phase=Activate(22)
+split scoped history: 12 calls, 2 bucket witnesses, changed duplicate/folded scope refused
+test native::split::tcp_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+split TcpTls checkpoint=true phase=Intent
+split TcpTls checkpoint=true phase=Stage(21)
+split TcpTls checkpoint=true phase=Stage(22)
+split TcpTls checkpoint=true phase=Fence
+split TcpTls checkpoint=true phase=Import(21)
+split TcpTls checkpoint=true phase=Import(22)
+split TcpTls checkpoint=true phase=Publish
+split TcpTls checkpoint=true phase=Activate(21)
+split TcpTls checkpoint=true phase=Activate(22)
+split scoped history: 12 calls, 2 bucket witnesses, changed duplicate/folded scope refused
+test native::split::tcp_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 186 filtered out; finished in 46.82s

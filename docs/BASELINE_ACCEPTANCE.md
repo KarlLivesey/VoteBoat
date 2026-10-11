@@ -1,5 +1,23 @@
 # Baseline acceptance map
 
+Current feature exit: [concise status](FEATURE_STATUS.md). The298–301 batch
+implements the finite parser, scoped-history and shared-connector acceptance
+gaps plus the captured shutdown fixture correction. One frozen705-input302
+functional matrix is running on Linux and macOS, with each host's four executable
+feature profiles sequential. Linux/macOS formatting/four strict Clippy profiles
+are zero; terminal functional/platform acceptance remains pending. Current Mac
+counter service is195/1 with one executable QUIC multi-group shutdown timeout;
+Linux counter is197/0 and directory22/0. Isolated303 observes that original
+failure without changing its timing; it does not replace or restart302. No new
+production feature or timer change is in that batch. Further reference checkpoint
+comparison is optional strengthening, not a newly required feature gate. The
+source-anchored feature/provider review found no second production interface
+blocker; partial metadata and finite tests remain bounded evidence.
+
+Completed selected preparation is archived in
+[slice301](../validation/baseline/slice301/README.md); current302 terminal
+platform acceptance remains pending, including the original Mac failure above.
+
 Parallel integration: [slice297](../validation/baseline/slice297/README.md).
 Linux/macOS each pass810 affected executions over four profiles: Raft,
 membership recovery, runtime timers, QUIC, transport and peers. Formatting and

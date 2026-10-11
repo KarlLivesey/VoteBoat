@@ -552,16 +552,22 @@ from becoming another connection's reply. All consensus/provider queues retain
 their own existing bounded credits and control reserves.
 
 Peer addresses and TLS names are configurable. Rust startup is generic over the
-application, while the CLI still selects a fixed three-voter counter bootstrap.
-Executable manifest discovery, a generic multi-group configuration loader, richer
-application protocols and operational packaging remain work. Counter deduplication and WAL capacity are
-bounded; manual checkpoints do not automatically reclaim physical WAL bytes.
-Online membership, recursive responsibilities and split/merge remain unfinished.
-Linux process tests cover leader loss, quorum loss, retry identity, checkpoints,
-restart, command limits and worker joins. Routing fault tests cover exact command
+application. The CLI supports bounded single- and multi-group counter profiles,
+opt-in membership administration, endpoint/manifest discovery and scheduled
+checkpoint/WAL reclamation. See the profile sections below and
+[multi-group startup](MULTI_GROUP_STARTUP.md). Recursive responsibility and
+split/merge APIs are implemented in Rust, with separate
+[directory](DIRECTORY_SERVICE.md) and [transfer](TRANSFER_SERVICE.md) sample
+executables. Not every profile combination is supported by the sample CLI.
+Counter deduplication and WAL capacity remain explicitly bounded.
+
+Linux/macOS evidence includes leader loss, quorum loss, retry identity,
+checkpoints/restart, command bounds and worker joins; the
+[acceptance map](BASELINE_ACCEPTANCE.md) identifies exact source and test scope.
+Current full service/lifecycle qualification remains open. Routing fault tests cover exact command
 preservation, unavailable/non-leader candidates, uncertain/malformed replies,
 non-retryable errors and an incomplete trickled reply that cannot extend the
-absolute deadline. macOS is a target but was not run here.
+absolute deadline.
 This is not a production consensus release or a performance claim.
 
 Run the service acceptance tests with:

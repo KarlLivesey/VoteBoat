@@ -1,0 +1,1912 @@
+diff --git a/tests/connect.rs b/tests/connect.rs
+index 9be1243..ca0d262 100644
+--- a/tests/connect.rs
++++ b/tests/connect.rs
+@@ -14,0 +15,2 @@
++#[path = "connect/conformance.rs"]
++mod conformance;
+diff --git a/tests/routed/native.rs b/tests/routed/native.rs
+index b58b6a3..7fdd575 100644
+--- a/tests/routed/native.rs
++++ b/tests/routed/native.rs
+@@ -21,0 +22,2 @@ mod publication_recovery;
++#[path = "shutdown.rs"]
++mod shutdown;
+@@ -164,40 +166 @@ where
+-        for n in nodes.iter_mut() {
+-            let progress = n
+-                .poll(
+-                    MonoTime(clock.elapsed().as_millis() as u64),
+-                    NodePollBudget {
+-                        replica: ReplicaPollBudget {
+-                            steps: 100,
+-                            ..Default::default()
+-                        },
+-                        ..Default::default()
+-                    },
+-                )
+-                .unwrap();
+-            if let Some(p) = progress.replica {
+-                for step in p.steps {
+-                    // ReadRequests validates tracked cancellation completions.
+-                    // A term change can already have cleared the read, making
+-                    // its later CancelRead correctly return StaleRead.
+-                    let cleared_read = step.admission.is_some()
+-                        && step.operation.is_none()
+-                        && step.read.is_none()
+-                        && step.error == Some(voteboat::raft::RaftError::StaleRead);
+-                    let read_refused = step.read.is_some()
+-                        && matches!(
+-                            step.error,
+-                            Some(
+-                                voteboat::raft::RaftError::NotLeader
+-                                    | voteboat::raft::RaftError::ReadNotReady
+-                            )
+-                        );
+-                    let proposal_refused = step.operation.is_some()
+-                        && step.error == Some(voteboat::raft::RaftError::NotLeader);
+-                    assert!(
+-                        step.error.is_none() || cleared_read || read_refused || proposal_refused,
+-                        "{:?}",
+-                        step.error
+-                    );
+-                }
+-            }
+-        }
++        poll_nodes(nodes, clock);
+@@ -215,0 +179,47 @@ where
++fn poll_nodes<A>(nodes: &mut [Node<A>], clock: &Instant)
++where
++    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++    A::Receipt: ApplicationReceipt,
++{
++    for n in nodes.iter_mut() {
++        let progress = n
++            .poll(
++                MonoTime(clock.elapsed().as_millis() as u64),
++                NodePollBudget {
++                    replica: ReplicaPollBudget {
++                        steps: 100,
++                        ..Default::default()
++                    },
++                    ..Default::default()
++                },
++            )
++            .unwrap();
++        if let Some(p) = progress.replica {
++            for step in p.steps {
++                // ReadRequests validates tracked cancellation completions.
++                // A term change can already have cleared the read, making
++                // its later CancelRead correctly return StaleRead.
++                let cleared_read = step.admission.is_some()
++                    && step.operation.is_none()
++                    && step.read.is_none()
++                    && step.error == Some(voteboat::raft::RaftError::StaleRead);
++                let read_refused = step.read.is_some()
++                    && matches!(
++                        step.error,
++                        Some(
++                            voteboat::raft::RaftError::NotLeader
++                                | voteboat::raft::RaftError::ReadNotReady
++                        )
++                    );
++                let proposal_refused = step.operation.is_some()
++                    && step.error == Some(voteboat::raft::RaftError::NotLeader);
++                assert!(
++                    step.error.is_none() || cleared_read || read_refused || proposal_refused,
++                    "{:?}",
++                    step.error
++                );
++            }
++        }
++    }
++}
++
+@@ -539,4 +549 @@ where
+-    drive(&mut nodes, clock, |ns| {
+-        background();
+-        ns.iter().all(|n| n.is_drained())
+-    });
++    shutdown::drive(&mut nodes, clock, &mut background);
+diff --git a/tests/routed/split.rs b/tests/routed/split.rs
+index 49a59e7..d84ad02 100644
+--- a/tests/routed/split.rs
++++ b/tests/routed/split.rs
+@@ -22,0 +23,2 @@ use voteboat::{
++#[path = "split/history.rs"]
++mod history;
+@@ -101,0 +104 @@ struct Split {
++    history: history::Trace,
+@@ -149,0 +153 @@ impl Split {
++            history: history::Trace::default(),
+@@ -179,14 +183 @@ impl Split {
+-        propose_recovering(
+-            &mut result.source,
+-            &result.clock,
+-            20,
+-            1,
+-            source_fixture::data(1, 7),
+-        );
+-        propose_recovering(
+-            &mut result.source,
+-            &result.clock,
+-            20,
+-            2,
+-            source_fixture::data(200, 11),
+-        );
++        history::seed(&mut result);
+@@ -387,0 +379,15 @@ fn write_independent_children(rig: &mut Split) {
++        let invocation = rig.history.read(hint(key));
++        let TargetRead::Data(observed) = observe(
++            &mut rig.targets[i],
++            &rig.clock,
++            g,
++            TargetQuery::Data(RoutedQuery {
++                hint: hint(key),
++                key: vec![key],
++                query: vec![key],
++            }),
++        ) else {
++            panic!("activated target read")
++        };
++        rig.history.value(invocation, observed);
++        let invocation = rig.history.write(hint(key), old_op, value);
+@@ -395,0 +402,2 @@ fn write_independent_children(rig: &mut Split) {
++        rig.history.receipt(invocation, retry, true);
++        let invocation = rig.history.write(hint(key), 100 + old_op, 2);
+@@ -407,0 +416,17 @@ fn write_independent_children(rig: &mut Split) {
++        // Withhold this application reply from the history observer. The actual
++        // local result is consumed; this does not simulate packet-loss timing.
++        rig.history.receipt(invocation, write, false);
++        let invocation = rig.history.write(hint(key), 100 + old_op, 2);
++        let TargetOutcome::Applied(retry) = propose_recovering(
++            &mut rig.targets[i],
++            &rig.clock,
++            g,
++            100 + old_op,
++            data(key, 2),
++        )
++        .outcome
++        else {
++            panic!("unobserved reply retry")
++        };
++        assert!(retry.duplicate);
++        rig.history.receipt(invocation, retry, true);
+@@ -443,13 +468,15 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
+-        assert_eq!(
+-            observe(
+-                &mut rig.targets[i],
+-                &rig.clock,
+-                g,
+-                TargetQuery::Data(RoutedQuery {
+-                    hint: hint(key),
+-                    key: vec![key],
+-                    query: vec![key]
+-                })
+-            ),
+-            TargetRead::Data(value)
+-        );
++        let invocation = rig.history.read(hint(key));
++        let TargetRead::Data(observed) = observe(
++            &mut rig.targets[i],
++            &rig.clock,
++            g,
++            TargetQuery::Data(RoutedQuery {
++                hint: hint(key),
++                key: vec![key],
++                query: vec![key],
++            }),
++        ) else {
++            panic!("reopened bucket read")
++        };
++        assert_eq!(observed, value);
++        rig.history.value(invocation, observed);
+@@ -488,0 +516 @@ fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {
++    rig.history.verify();
+diff --git a/tests/connect/conformance.rs b/tests/connect/conformance.rs
+new file mode 100644
+index 0000000..7593a7b
+--- /dev/null
++++ b/tests/connect/conformance.rs
+@@ -0,0 +1,171 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Unless explicitly acquired and licensed from Licensor under another license,
++// the contents of this file are subject to the Reciprocal Public License
++// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
++// not copy or use this file in either source code or executable form, except
++// in compliance with the terms and conditions of the RPL.
++//
++// All software distributed under the RPL is provided strictly on an "AS IS"
++// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
++// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
++// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
++// rights and limitations under the RPL.
++use super::*;
++use std::fmt::Debug;
++
++fn ownership(connector: &impl PeerConnector) -> (ConnectUsage, Option<MonoTime>) {
++    (connector.usage(), connector.next_deadline())
++}
++
++fn refused<C: PeerConnector>(
++    connector: &mut C,
++    request: ConnectRequest<C::Endpoint>,
++    now: MonoTime,
++    expected: ConnectError,
++) -> ConnectRequest<C::Endpoint>
++where
++    C::Endpoint: Clone + Debug + PartialEq,
++{
++    let ticket = request.ticket;
++    let deadline = request.deadline;
++    let direction = request.direction.clone();
++    let original = ownership(connector);
++    let rejection = connector.submit(request, now).unwrap_err();
++    assert_eq!(rejection.reason, expected);
++    assert_eq!(rejection.request.ticket, ticket);
++    assert_eq!(rejection.request.deadline, deadline);
++    match (direction, &rejection.request.direction) {
++        (ConnectDirection::Dial(endpoint), ConnectDirection::Dial(returned)) => {
++            assert_eq!(&endpoint, returned);
++        }
++        _ => panic!("original dial direction was replaced"),
++    }
++    assert_eq!(ownership(connector), original);
++    *rejection.request
++}
++
++fn pending_close<C: PeerConnector>(connector: &mut C, endpoint: C::Endpoint)
++where
++    C::Endpoint: Clone + Debug + PartialEq,
++{
++    let accepted = ticket(1, 2, 1);
++    let deadline = MonoTime(90);
++    assert_eq!(connector.local(), accepted.local);
++    assert_eq!(connector.usage(), ConnectUsage::default());
++    connector
++        .submit(
++            ConnectRequest {
++                ticket: accepted,
++                direction: ConnectDirection::Accept,
++                deadline,
++            },
++            MonoTime(10),
++        )
++        .unwrap();
++    let original = ownership(connector);
++    assert_eq!(original.0.requests, 1);
++    assert_eq!(original.1, Some(deadline));
++    let zero = ConnectPollBudget {
++        visits: 0,
++        socket_calls: 0,
++        completions: 0,
++        ..ConnectPollBudget::default()
++    };
++    // No client connects to the native listener, and zero budgets do not allow
++    // the host's immediate-success fixture to consume the accepted attempt.
++    assert!(connector.poll(MonoTime(11), zero).unwrap().is_empty());
++    assert!(!connector.cancel(ticket(1, 2, 2)));
++    assert_eq!(ownership(connector), original);
++    assert!(matches!(
++        connector.poll(
++            MonoTime(12),
++            ConnectPollBudget {
++                socket_calls: 1025,
++                ..zero
++            }
++        ),
++        Err(ConnectError::InvalidLimits)
++    ));
++    assert_eq!(ownership(connector), original);
++    assert!(connector.poll(MonoTime(11), zero).unwrap().is_empty());
++    assert_eq!(ownership(connector), original);
++    assert!(matches!(
++        connector.poll(MonoTime(10), zero),
++        Err(ConnectError::TimeWentBack)
++    ));
++    assert_eq!(ownership(connector), original);
++    let request = refused(
++        connector,
++        ConnectRequest {
++            ticket: ticket(1, 2, 2),
++            direction: ConnectDirection::Dial(endpoint),
++            deadline,
++        },
++        MonoTime(10),
++        ConnectError::TimeWentBack,
++    );
++    let request = refused(connector, request, MonoTime(11), ConnectError::Overloaded);
++    terminal_close(connector, request, accepted, zero);
++}
++
++fn terminal_close<C: PeerConnector>(
++    connector: &mut C,
++    request: ConnectRequest<C::Endpoint>,
++    accepted: ConnectTicket,
++    zero: ConnectPollBudget,
++) where
++    C::Endpoint: Clone + Debug + PartialEq,
++{
++    let original = connector.usage();
++    connector.close();
++    assert_eq!(connector.usage(), original);
++    assert!(!connector.is_drained());
++    let closed = ownership(connector);
++    assert!(connector.poll(MonoTime(11), zero).unwrap().is_empty());
++    assert_eq!(ownership(connector), closed);
++    let _request = refused(connector, request, MonoTime(11), ConnectError::Closed);
++    let mut terminal = connector
++        .poll(
++            MonoTime(11),
++            ConnectPollBudget {
++                completions: 1,
++                ..zero
++            },
++        )
++        .unwrap();
++    assert_eq!(terminal.len(), 1);
++    let completion = terminal.pop().unwrap();
++    assert_eq!(completion.ticket, accepted);
++    assert!(matches!(completion.result, Err(ConnectError::Cancelled)));
++    assert_eq!(connector.usage(), ConnectUsage::default());
++    assert_eq!(connector.next_deadline(), None);
++    assert!(connector.is_drained());
++    assert!(!connector.cancel(accepted));
++    assert!(connector
++        .poll(MonoTime(11), ConnectPollBudget::default())
++        .unwrap()
++        .is_empty());
++}
++
++#[test]
++fn host_connector_preserves_pending_ownership_under_refusal_and_close() {
++    let mut host = HostConnector {
++        pending: None,
++        generation: 0,
++        closed: false,
++        now: MonoTime(0),
++    };
++    pending_close(&mut host, ());
++}
++
++#[cfg(feature = "tls")]
++#[test]
++fn native_connector_preserves_pending_ownership_under_refusal_and_close() {
++    let mut connector = native::make(1, &[2], 1);
++    // The real listener remains idle: admission, refusal and cancellation are
++    // observed without guessing when a socket or handshake becomes ready.
++    pending_close(&mut connector, "127.0.0.1:1234".parse().unwrap());
++    native::finish(connector, 11);
++}
+diff --git a/tests/parser_campaign.rs b/tests/parser_campaign.rs
+new file mode 100644
+index 0000000..945086c
+--- /dev/null
++++ b/tests/parser_campaign.rs
+@@ -0,0 +1,17 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++#[path = "parser_campaign/generator.rs"]
++mod generator;
++#[path = "parser_campaign/routing.rs"]
++mod routing;
++#[cfg(feature = "native")]
++#[path = "parser_campaign/snapshot.rs"]
++mod snapshot;
++#[cfg(feature = "native")]
++mod support;
++#[cfg(feature = "native")]
++#[path = "parser_campaign/wal.rs"]
++mod wal;
++#[cfg(feature = "native")]
++#[path = "parser_campaign/wire.rs"]
++mod wire;
+diff --git a/tests/parser_campaign/generator.rs b/tests/parser_campaign/generator.rs
+new file mode 100644
+index 0000000..a44617e
+--- /dev/null
++++ b/tests/parser_campaign/generator.rs
+@@ -0,0 +1,142 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use std::panic::{catch_unwind, AssertUnwindSafe};
++
++pub(super) const SEEDS: [u64; 8] = [1, 7, 19, 43, 101, 257, 1021, 65537];
++const CASES: usize = 192;
++#[derive(Clone, Debug)]
++pub(super) struct Case {
++    pub(super) seed: u64,
++    pub(super) index: usize,
++    pub(super) mode: usize,
++    pub(super) bytes: Vec<u8>,
++}
++impl Case {
++    pub(super) fn original(&self) -> bool {
++        self.mode == 0
++    }
++    #[cfg(feature = "native")]
++    pub(super) fn integrity_damage(&self) -> bool {
++        matches!(self.mode, 1 | 2)
++    }
++    pub(super) fn repair(&self) -> bool {
++        matches!(self.mode, 5 | 6)
++    }
++}
++#[derive(Default, Debug)]
++pub(super) struct Counts {
++    accepted: usize,
++    refused: usize,
++    structured_overwrites: usize,
++}
++fn next(random: &mut u64) -> u64 {
++    *random = random
++        .wrapping_mul(6_364_136_223_846_793_005)
++        .wrapping_add(1);
++    *random
++}
++fn position(random: &mut u64, bound: usize) -> usize {
++    usize::try_from(next(random) % u64::try_from(bound).unwrap()).unwrap()
++}
++fn mutate(original: &[u8], fields: &[(usize, usize)], seed: u64, index: usize) -> Case {
++    let mut random = seed ^ (u64::try_from(index).unwrap() + 1).wrapping_mul(0x9e37_79b9_7f4a_7c15);
++    let mut bytes = original.to_vec();
++    let mode = index % 8;
++    let at = position(&mut random, original.len());
++    match mode {
++        0 => (),
++        1 => bytes[at] ^= 1 << (next(&mut random) % 8),
++        2 => bytes.truncate(at),
++        3 => {
++            let count = 1 + position(&mut random, 16);
++            let inserted = (0..count).map(|_| next(&mut random).to_le_bytes()[0]);
++            bytes.splice(at..at, inserted);
++        }
++        4 => {
++            bytes.drain(at..at + 1 + position(&mut random, bytes.len() - at));
++        }
++        5 => {
++            let count = 1 + position(&mut random, (bytes.len() - at).min(8));
++            for byte in &mut bytes[at..at + count] {
++                *byte = next(&mut random).to_le_bytes()[0];
++            }
++        }
++        6 => {
++            let (offset, width) = fields[position(&mut random, fields.len())];
++            let value = [0, 1, u64::MAX, u64::from(u32::MAX)][position(&mut random, 4)];
++            bytes[offset..offset + width].copy_from_slice(&value.to_le_bytes()[..width]);
++        }
++        _ => {
++            let length = position(&mut random, original.len() + 33);
++            bytes = (0..length)
++                .map(|_| next(&mut random).to_le_bytes()[0])
++                .collect();
++        }
++    }
++    Case {
++        seed,
++        index,
++        mode,
++        bytes,
++    }
++}
++pub(super) fn campaign(
++    name: &str,
++    original: &[u8],
++    fields: &[(usize, usize)],
++    mut check: impl FnMut(&Case) -> bool,
++) {
++    assert!(!original.is_empty());
++    assert!(fields
++        .iter()
++        .all(|(offset, width)| *width <= 8 && offset + width <= original.len()));
++    let mut counts = Counts::default();
++    for seed in SEEDS {
++        for index in 0..CASES {
++            let case = mutate(original, fields, seed, index);
++            assert!(case.bytes.len() <= original.len() + 32);
++            let before = case.bytes.clone();
++            let result = catch_unwind(AssertUnwindSafe(|| check(&case)));
++            let accepted = result.unwrap_or_else(|_| {
++                panic!(
++                    "{name} seed={} case={} mode={} bytes={:02x?}",
++                    case.seed, case.index, case.mode, case.bytes
++                )
++            });
++            assert_eq!(before, case.bytes, "borrowed parser input changed");
++            counts.accepted += usize::from(accepted);
++            counts.refused += usize::from(!accepted);
++            counts.structured_overwrites += usize::from(case.repair());
++        }
++    }
++    assert!(counts.accepted > 0 && counts.refused > 0);
++    assert_eq!(counts.accepted + counts.refused, SEEDS.len() * CASES);
++    println!(
++        "{name}: seeds={SEEDS:?} cases={} {counts:?}",
++        SEEDS.len() * CASES
++    );
++}
++pub(super) fn crc(bytes: &[u8]) -> u32 {
++    let mut value = !0_u32;
++    for byte in bytes {
++        value ^= u32::from(*byte);
++        for _ in 0..8 {
++            value = if value & 1 == 0 {
++                value >> 1
++            } else {
++                (value >> 1) ^ 0x82f6_3b78
++            };
++        }
++    }
++    !value
++}
++#[cfg(feature = "native")]
++pub(super) fn seal_tail(bytes: &mut [u8]) {
++    let end = bytes.len() - 4;
++    let checksum = crc(&bytes[..end]).to_le_bytes();
++    bytes[end..].copy_from_slice(&checksum);
++}
++#[test]
++fn independent_crc_has_the_standard_castagnoli_vector() {
++    assert_eq!(crc(b"123456789"), 0xe306_9283);
++}
+diff --git a/tests/parser_campaign/routing.rs b/tests/parser_campaign/routing.rs
+new file mode 100644
+index 0000000..eef30aa
+--- /dev/null
++++ b/tests/parser_campaign/routing.rs
+@@ -0,0 +1,106 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::generator::*;
++use voteboat::{
++    directory::DirectoryCommand, identity::*, placement::PlacementRequirements, routing::*,
++};
++fn group(id: u128) -> GroupIdentity {
++    GroupIdentity {
++        id: GroupId::new(id).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    }
++}
++fn fixture() -> DirectoryCommand {
++    DirectoryCommand {
++        expected: Some(RouteGeneration::new(1).unwrap()),
++        manifest: ResponsibilityManifest::new(ManifestInput {
++            responsibility: ResponsibilityIdentity {
++                id: ResponsibilityId::new(1).unwrap(),
++                incarnation: ResponsibilityIncarnation::new(1).unwrap(),
++            },
++            parent: None,
++            authority: group(1),
++            application: ApplicationAdapter {
++                id: ApplicationAdapterId::new(1).unwrap(),
++                version: 1,
++            },
++            scheme: PartitionScheme {
++                id: RoutingSchemeId::new(1).unwrap(),
++                version: 1,
++            },
++            scope: BucketRange::new(0, 256).unwrap(),
++            epoch: OwnershipEpoch::new(1).unwrap(),
++            generation: RouteGeneration::new(1).unwrap(),
++            placement: PlacementRequirements {
++                minimum_voting_domains: 3,
++                survive_any_single_domain_loss: true,
++            },
++            state: ResponsibilityState::Active,
++            execution: ExecutionMode::Partitioned(vec![
++                RouteEntry {
++                    scope: BucketRange::new(0, 128).unwrap(),
++                    target: RouteTarget::Group(group(2)),
++                },
++                RouteEntry {
++                    scope: BucketRange::new(128, 256).unwrap(),
++                    target: RouteTarget::Group(group(3)),
++                },
++            ]),
++        })
++        .unwrap(),
++    }
++}
++fn checked(command: &DirectoryCommand) {
++    let input = command.manifest.input();
++    assert_eq!(
++        ResponsibilityManifest::new(input.clone()).unwrap(),
++        command.manifest
++    );
++    let entries = match &input.execution {
++        ExecutionMode::Single(_) => return,
++        ExecutionMode::Partitioned(entries) | ExecutionMode::Delegated(entries) => entries,
++    };
++    assert!(entries.len() <= MAX_MANIFEST_ROUTES && entries.capacity() <= MAX_MANIFEST_ROUTES);
++    let mut end = input.scope.start();
++    for entry in entries {
++        assert_eq!(entry.scope.start(), end);
++        assert!(entry.scope.start() < entry.scope.end() && entry.scope.end() <= input.scope.end());
++        end = entry.scope.end();
++    }
++    assert_eq!(end, input.scope.end());
++}
++#[test]
++fn generated_routing_publication_mutations_preserve_checked_bucket_coverage() {
++    let original = fixture();
++    let bytes = original.encode(4096).unwrap();
++    assert_eq!(&bytes[142..144], &2_u16.to_le_bytes());
++    campaign(
++        "routing-publication",
++        &bytes,
++        &[
++            (16, 4),
++            (117, 2),
++            (119, 2),
++            (142, 2),
++            (144, 2),
++            (146, 2),
++            (173, 2),
++            (175, 2),
++        ],
++        |case| {
++            let result = DirectoryCommand::decode(&case.bytes);
++            if case.original() {
++                assert_eq!(result, Ok(original.clone()));
++            }
++            match result {
++                Ok(command) => {
++                    checked(&command);
++                    let encoded = command.encode(4096).unwrap();
++                    assert_eq!(DirectoryCommand::decode(&encoded), Ok(command));
++                    true
++                }
++                Err(_) => false,
++            }
++        },
++    );
++}
+diff --git a/tests/parser_campaign/snapshot.rs b/tests/parser_campaign/snapshot.rs
+new file mode 100644
+index 0000000..e0e17c8
+--- /dev/null
++++ b/tests/parser_campaign/snapshot.rs
+@@ -0,0 +1,182 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::{generator::*, support::*};
++use std::{cell::RefCell, io, rc::Rc};
++use voteboat::{native::snapshot_store::*, snapshot::*};
++fn limits() -> SnapshotLimits {
++    SnapshotLimits {
++        max_application_bytes: 128,
++        max_metadata_bytes: 1024,
++        max_chunk_bytes: 32,
++    }
++}
++fn metadata() -> SnapshotMetadata {
++    SnapshotMetadata {
++        bootstrap: bootstrap(1, 3),
++        membership: None,
++        index: 2,
++        term: 1,
++        application_schema: 1,
++    }
++}
++fn identity_of() -> SnapshotIdentity {
++    SnapshotIdentity {
++        store: identity(1),
++        group: group(1),
++    }
++}
++#[derive(Clone, Default)]
++struct Memory(Rc<RefCell<Device>>);
++#[derive(Clone, Default)]
++struct Device {
++    root: Vec<u8>,
++    slots: [Option<Vec<u8>>; 2],
++}
++impl SnapshotIo for Memory {
++    fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
++        let root = self.0.borrow().root.clone();
++        if root.is_empty() {
++            Err(io::ErrorKind::NotFound.into())
++        } else {
++            Ok(root)
++        }
++    }
++    fn read_slot(&mut self, slot: u8, limit: usize) -> io::Result<Vec<u8>> {
++        assert!(limit <= limits().max_file_bytes());
++        let device = self.0.borrow();
++        let bytes = device
++            .slots
++            .get(usize::from(slot))
++            .and_then(Option::as_ref)
++            .ok_or(io::ErrorKind::NotFound)?;
++        if bytes.len() > limit {
++            return Err(io::Error::other("slot exceeds requested read bound"));
++        }
++        Ok(bytes.clone())
++    }
++    fn begin_slot(&mut self, slot: u8, prefix: &[u8]) -> io::Result<()> {
++        self.0.borrow_mut().slots[usize::from(slot)] = Some(prefix.to_vec());
++        Ok(())
++    }
++    fn append_slot(&mut self, slot: u8, bytes: &[u8]) -> io::Result<()> {
++        self.0.borrow_mut().slots[usize::from(slot)]
++            .as_mut()
++            .unwrap()
++            .extend(bytes);
++        Ok(())
++    }
++    fn sync_slot(&mut self, _: u8) -> io::Result<()> {
++        Ok(())
++    }
++    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
++        self.0.borrow_mut().root = bytes.to_vec();
++        Ok(())
++    }
++}
++fn image() -> (Memory, Snapshot) {
++    let image = Memory::default();
++    let mut store = NativeSnapshotStore::create(image.clone(), identity_of(), limits()).unwrap();
++    let expected = Snapshot {
++        metadata: metadata(),
++        application: vec![7; 32],
++    };
++    let ticket = store
++        .begin(expected.metadata.clone(), expected.application.len())
++        .unwrap();
++    store.write_chunk(ticket, 0, &expected.application).unwrap();
++    let sealed = store.seal(ticket).unwrap();
++    store.publish(sealed).unwrap();
++    drop(store);
++    (image, expected)
++}
++fn encoded(snapshot: &Snapshot) -> Vec<u8> {
++    let mut bytes = NativeSnapshotCodec
++        .prefix(&snapshot.metadata, snapshot.application.len(), limits())
++        .unwrap();
++    bytes.extend(&snapshot.application);
++    bytes.extend(NativeSnapshotCodec.finish(&bytes, limits()).unwrap());
++    bytes
++}
++#[test]
++fn generated_snapshot_image_mutations_validate_metadata_application_bounds_and_integrity() {
++    let (_, expected) = image();
++    let original = encoded(&expected);
++    campaign(
++        "snapshot-image",
++        &original,
++        &[(8, 8), (16, 8), (24, 8), (32, 4), (36, 8)],
++        |case| {
++            let mut bytes = case.bytes.clone();
++            if case.repair() {
++                seal_tail(&mut bytes);
++            }
++            let result = NativeSnapshotCodec.decode(&bytes, limits());
++            if case.original() {
++                assert_eq!(result, Ok(expected.clone()));
++            }
++            if case.integrity_damage() {
++                assert!(result.is_err());
++            }
++            match result {
++                Ok(snapshot) => {
++                    snapshot.metadata.validate().unwrap();
++                    assert!(
++                        snapshot.application.len() <= limits().max_application_bytes
++                            && snapshot.application.capacity() <= limits().max_application_bytes
++                    );
++                    assert_eq!(
++                        NativeSnapshotCodec.decode(&encoded(&snapshot), limits()),
++                        Ok(snapshot)
++                    );
++                    true
++                }
++                Err(_) => false,
++            }
++        },
++    );
++}
++#[test]
++fn generated_published_snapshot_manifest_mutations_cannot_select_wrong_or_partial_data() {
++    let (image, expected) = image();
++    let original = image.0.borrow().clone();
++    campaign(
++        "snapshot-published-manifest",
++        &original.root,
++        &[
++            (8, 8),
++            (24, 8),
++            (32, 8),
++            (40, 8),
++            (64, 1),
++            (65, 1),
++            (66, 8),
++            (74, 8),
++        ],
++        |case| {
++            let mut device = original.clone();
++            device.root = case.bytes.clone();
++            if case.repair() {
++                seal_tail(&mut device.root);
++            }
++            let recovered = NativeSnapshotStore::recover(
++                Memory(Rc::new(RefCell::new(device))),
++                identity_of(),
++                limits(),
++            );
++            if case.original() {
++                assert!(recovered.is_ok());
++            }
++            if case.integrity_damage() {
++                assert!(recovered.is_err());
++            }
++            match recovered {
++                Ok(mut store) => {
++                    assert_eq!(store.identity(), identity_of());
++                    assert_eq!(store.load().unwrap(), Some(expected.clone()));
++                    true
++                }
++                Err(_) => false,
++            }
++        },
++    );
++}
+diff --git a/tests/parser_campaign/wal.rs b/tests/parser_campaign/wal.rs
+new file mode 100644
+index 0000000..37873f7
+--- /dev/null
++++ b/tests/parser_campaign/wal.rs
+@@ -0,0 +1,193 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::{generator::*, support::*};
++use voteboat::{log::*, native::log_store::*};
++fn limits() -> LogLimits {
++    LogLimits {
++        max_groups: 4,
++        max_entries_per_group: 8,
++        max_command_bytes: 64,
++        max_snapshot_bytes: 512,
++        max_batch_bytes: 4096,
++        max_batch_units: 8,
++        max_pending_units: 16,
++        max_wal_bytes: 16384,
++        control_reserve_bytes: 4096,
++    }
++}
++fn reseal(bytes: &mut [u8]) {
++    let header = crc(&bytes[..24]).to_le_bytes();
++    bytes[24..28].copy_from_slice(&header);
++    let end = bytes.len() - 16;
++    let footer = crc(&bytes[..end]).to_le_bytes();
++    bytes[end + 8..end + 12].copy_from_slice(&footer);
++}
++fn batch_corpus(mutations: Vec<LogMutation>, name: &str) {
++    let original = NativeLogCodec
++        .encode_batch(1, &mutations, limits())
++        .unwrap();
++    campaign(
++        name,
++        &original,
++        &[(8, 8), (16, 4), (20, 4), (32, 1)],
++        |case| {
++            let mut bytes = case.bytes.clone();
++            if case.repair() {
++                reseal(&mut bytes);
++            }
++            let result = NativeLogCodec.decode_batch(&bytes, limits());
++            if case.original() {
++                assert_eq!(result, Ok((1, mutations.clone())));
++            }
++            if case.integrity_damage() {
++                assert!(result.is_err());
++            }
++            match result {
++                Ok((sequence, mutations)) => {
++                    assert!(!mutations.is_empty() && mutations.len() <= limits().max_batch_units);
++                    let encoded = NativeLogCodec
++                        .encode_batch(sequence, &mutations, limits())
++                        .unwrap();
++                    assert!(encoded.len() <= limits().max_batch_bytes);
++                    assert_eq!(
++                        NativeLogCodec.decode_batch(&encoded, limits()),
++                        Ok((sequence, mutations))
++                    );
++                    true
++                }
++                Err(_) => false,
++            }
++        },
++    );
++}
++fn populated() -> (ModelIo, GroupLog) {
++    let image = ModelIo::default();
++    let mut store = NativeLogStore::create(image.clone(), identity(1), limits()).unwrap();
++    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
++    let initial = store.state(group(1)).unwrap();
++    append(
++        &mut store,
++        vec![update(
++            &initial,
++            1,
++            2,
++            Some(Suffix {
++                from: 1,
++                entries: vec![entry(1, 1, 7), entry(2, 1, 3)],
++            }),
++        )],
++    );
++    let expected = store.state(group(1)).unwrap();
++    drop(store);
++    (image, expected)
++}
++fn recover(log: Vec<u8>, manifest: Vec<u8>) -> Result<GroupLog, voteboat::contracts::StorageError> {
++    let image = ModelIo::default();
++    {
++        let mut device = image.0.borrow_mut();
++        device.log = log;
++        device.manifest = Some(manifest);
++    }
++    let store = NativeLogStore::recover(image, identity(1), limits())?;
++    assert_eq!(store.binding().session.get(), 2);
++    store.state(group(1))
++}
++#[test]
++fn generated_native_batch_mutations_reach_bounded_inner_decoders() {
++    batch_corpus(
++        vec![LogMutation::Create(bootstrap(1, 3))],
++        "wal-create-batch",
++    );
++    let (_, state) = populated();
++    let mut command = entry(3, 2, 7);
++    let EntryPayload::Command { bytes, .. } = &mut command.payload else {
++        unreachable!()
++    };
++    *bytes = vec![0x91; 16];
++    batch_corpus(
++        vec![update(
++            &state,
++            2,
++            3,
++            Some(Suffix {
++                from: 3,
++                entries: vec![command],
++            }),
++        )],
++        "wal-update-batch",
++    );
++}
++#[test]
++fn generated_acknowledged_wal_and_manifest_corruption_never_recovers_a_partial_prefix() {
++    let (image, expected) = populated();
++    let log = image.0.borrow().log.clone();
++    let manifest = image.0.borrow().manifest.clone().unwrap();
++    campaign(
++        "wal-acknowledged-recovery",
++        &log,
++        &[(16, 4), (20, 4)],
++        |case| {
++            let result = recover(case.bytes.clone(), manifest.clone());
++            if case.integrity_damage() {
++                assert!(result.is_err());
++            }
++            if case.original() {
++                assert_eq!(result, Ok(expected.clone()));
++            }
++            if let Ok(state) = &result {
++                assert_eq!(*state, expected);
++            }
++            result.is_ok()
++        },
++    );
++    campaign(
++        "wal-manifest-recovery",
++        &manifest,
++        &[(8, 8), (24, 8), (32, 8), (40, 8)],
++        |case| {
++            let result = recover(log.clone(), case.bytes.clone());
++            if case.integrity_damage() {
++                assert!(result.is_err());
++            }
++            if case.original() {
++                assert_eq!(result, Ok(expected.clone()));
++            }
++            if let Ok(state) = &result {
++                assert_eq!(*state, expected);
++            }
++            result.is_ok()
++        },
++    );
++}
++
++#[test]
++fn generated_interrupted_unacknowledged_suffixes_recover_only_the_original_prefix() {
++    let (image, expected) = populated();
++    let log = image.0.borrow().log.clone();
++    let manifest = image.0.borrow().manifest.clone().unwrap();
++    let next = NativeLogCodec
++        .encode_batch(3, &[update(&expected, 2, 2, None)], limits())
++        .unwrap();
++    campaign(
++        "wal-interrupted-suffix",
++        &next,
++        &[(16, 4), (20, 4)],
++        |case| {
++            let cut = usize::try_from(case.seed % u64::try_from(next.len()).unwrap())
++                .unwrap()
++                .wrapping_add(case.index)
++                % next.len();
++            let tail = &case.bytes[..cut.min(case.bytes.len())];
++            let mut bytes = log.clone();
++            bytes.extend(tail);
++            let result = recover(bytes, manifest.clone());
++            if case.original() {
++                assert_eq!(result, Ok(expected.clone()));
++            }
++            if let Ok(state) = &result {
++                assert_eq!(*state, expected);
++            }
++            result.is_ok()
++        },
++    );
++}
+diff --git a/tests/parser_campaign/wire.rs b/tests/parser_campaign/wire.rs
+new file mode 100644
+index 0000000..ce5ad89
+--- /dev/null
++++ b/tests/parser_campaign/wire.rs
+@@ -0,0 +1,127 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::{generator::*, support::*};
++use voteboat::{identity::*, log::*, native::wire::NativeWireCodec, raft::*, snapshot::*, wire::*};
++fn limits() -> WireLimits {
++    WireLimits {
++        max_frame_bytes: 8192,
++        max_messages: 8,
++        max_entries_per_message: 8,
++        max_command_bytes: 64,
++        max_snapshot_bytes: 512,
++        max_decoded_bytes: 32768,
++        ..WireLimits::default()
++    }
++}
++fn scope() -> WireScope {
++    WireScope {
++        from: node(1),
++        sender: HostLogStore::new(1).binding(),
++        to: node(2),
++    }
++}
++fn message(rpc: Rpc) -> Message {
++    Message {
++        group: group(1),
++        configuration: ConfigurationId::new(1).unwrap(),
++        from: node(1),
++        sender: scope().sender,
++        to: node(2),
++        term: 3,
++        context: RequestContext {
++            origin: scope().sender,
++            sequence: 7,
++        },
++        rpc,
++    }
++}
++fn reseal(bytes: &mut [u8]) {
++    let header = crc(&bytes[..20]).to_le_bytes();
++    bytes[20..24].copy_from_slice(&header);
++    seal_tail(bytes);
++}
++fn corpus(codec: NativeWireCodec, messages: Vec<Message>, name: &str) {
++    let original = codec.encode_batch(scope(), &messages).unwrap();
++    let mut wrong = scope();
++    wrong.to = node(3);
++    assert!(codec.decode_batch(wrong, &original).is_err());
++    campaign(
++        name,
++        &original,
++        &[(8, 2), (10, 2), (12, 4), (16, 4), (24, 4)],
++        |case| {
++            let mut bytes = case.bytes.clone();
++            if case.repair() {
++                reseal(&mut bytes);
++            }
++            if let Ok(length) = codec.frame_length(&bytes[..bytes.len().min(codec.header_bytes())])
++            {
++                assert!(length <= codec.limits().max_frame_bytes);
++            }
++            let decoded = codec.decode_batch(scope(), &bytes);
++            if case.original() {
++                assert_eq!(decoded, Ok(messages.clone()));
++            }
++            if case.integrity_damage() {
++                assert!(decoded.is_err());
++            }
++            match decoded {
++                Ok(messages) => {
++                    assert!(
++                        messages.len() <= limits().max_messages
++                            && messages.capacity() <= limits().max_messages
++                    );
++                    assert!(messages.iter().all(|message| scope().matches(message)));
++                    let encoded = codec.encode_batch(scope(), &messages).unwrap();
++                    assert!(encoded.len() <= limits().max_frame_bytes);
++                    assert_eq!(codec.decode_batch(scope(), &encoded), Ok(messages));
++                    true
++                }
++                Err(_) => false,
++            }
++        },
++    );
++}
++#[test]
++fn generated_rpc_mutations_enforce_framing_scope_and_public_reencoding() {
++    let messages = vec![
++        message(Rpc::Vote {
++            last_index: 1,
++            last_term: 1,
++        }),
++        message(Rpc::ReadProbe),
++        message(Rpc::Append {
++            previous_index: 0,
++            previous_term: 0,
++            entries: vec![entry(1, 1, 7), entry(2, 1, 3)],
++            leader_commit: 0,
++        }),
++        message(Rpc::ReadAck),
++    ];
++    corpus(
++        NativeWireCodec::new(limits()).unwrap(),
++        messages.clone(),
++        "rpc-v1-multiplex",
++    );
++    corpus(
++        NativeWireCodec::with_leadership_transfer(limits()).unwrap(),
++        messages,
++        "rpc-v8-multiplex",
++    );
++    corpus(
++        NativeWireCodec::with_leadership_transfer(limits()).unwrap(),
++        vec![message(Rpc::Snapshot {
++            snapshot: Box::new(Snapshot {
++                metadata: SnapshotMetadata {
++                    bootstrap: bootstrap(1, 3),
++                    membership: None,
++                    index: 2,
++                    term: 2,
++                    application_schema: 1,
++                },
++                application: vec![7; 24],
++            }),
++        })],
++        "rpc-v8-snapshot",
++    );
++}
+diff --git a/tests/routed/shutdown.rs b/tests/routed/shutdown.rs
+new file mode 100644
+index 0000000..afb2103
+--- /dev/null
++++ b/tests/routed/shutdown.rs
+@@ -0,0 +1,179 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Fixture-only terminal cleanup after all application/owned work has drained.
++use super::*;
++use voteboat::{
++    connect::ConnectUsage,
++    secure::{SessionBinding, SessionState},
++    snapshot_worker::SnapshotWorker,
++    transport::{PeerDrainStatus, TransportState, TransportUsage},
++    worker::PersistenceWorker,
++};
++#[path = "shutdown/contract.rs"]
++mod contract;
++#[cfg(feature = "quic")]
++#[path = "shutdown/long_rtt.rs"]
++mod long_rtt;
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++struct ProtocolClose {
++    binding: SessionBinding,
++    deadline: MonoTime,
++}
++impl ProtocolClose {
++    fn inspect(status: PeerDrainStatus) -> Option<Self> {
++        if !status.closed
++            || !status.authorized
++            || status.fenced
++            || status.retiring
++            || status.attempt.is_some()
++            || status.accepted.is_some()
++        {
++            return None;
++        }
++        let transport = status.transport?;
++        let session = transport.session?;
++        if status.binding != Some(transport.binding)
++            || status.peer.node != transport.binding.peer.node
++            || status.peer.store != transport.binding.peer.store.identity
++            || transport.state != TransportState::Draining
++            || transport.usage != TransportUsage::default()
++            || transport.received.is_some()
++            || transport.close_started != Some(true)
++            || session.state != SessionState::Closing
++            || !session.flushed
++            || session.close_started != Some(true)
++            || session.protocol_drained != Some(false)
++        {
++            return None;
++        }
++        Some(Self {
++            binding: transport.binding,
++            deadline: session.next_deadline?,
++        })
++    }
++}
++type Remaining = BTreeMap<(usize, NodeId), ProtocolClose>;
++struct ProtocolWindow {
++    original: Remaining,
++    end: MonoTime,
++}
++impl ProtocolWindow {
++    fn pin(original: Remaining, now: MonoTime) -> Option<Self> {
++        if original.is_empty() || original.values().any(|p| p.deadline <= now) {
++            return None;
++        }
++        let end = original.values().map(|p| p.deadline).max()?;
++        Some(Self { original, end })
++    }
++    fn retains(&self, remaining: &Remaining, polled_at: MonoTime) -> bool {
++        !remaining.is_empty()
++            && remaining.iter().all(|(key, close)| {
++                self.original.get(key) == Some(close) && polled_at < close.deadline
++            })
++    }
++}
++fn local_work_drained<A>(n: &Node<A>) -> bool
++where
++    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++    A::Receipt: ApplicationReceipt,
++{
++    let local = n.local();
++    n.state() == NodeState::Draining
++        && local.clients.is_drained()
++        && local.reads.is_drained()
++        && local.results.is_drained()
++        && local.owner.is_drained()
++        && local.persistence.is_drained()
++        && local.outbound.is_drained()
++        && n.replica_usage() == ReplicaDriverUsage::default()
++        && n.checkpoints().pending.is_empty()
++        && local
++            .snapshots
++            .as_ref()
++            .is_none_or(|s| s.router.is_drained() && s.worker.is_drained())
++        && n.peers().is_some_and(|p| {
++            p.usage() == PeerDriverUsage::default()
++                && p.connector_usage() == ConnectUsage::default()
++                && p.ingress().is_drained()
++        })
++}
++fn remaining<A>(nodes: &mut [Node<A>]) -> Option<Remaining>
++where
++    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++    A::Receipt: ApplicationReceipt,
++{
++    let mut pending = BTreeMap::new();
++    for (index, n) in nodes.iter_mut().enumerate() {
++        if n.is_drained() {
++            continue;
++        }
++        if !local_work_drained(n) {
++            return None;
++        }
++        let peers = n.peers()?.roster().tracked_peers().collect::<Vec<_>>();
++        for peer in peers {
++            let status = n.peer_drain_status(peer)?;
++            if status.transport.is_none() {
++                if status.binding.is_some()
++                    || status.attempt.is_some()
++                    || status.accepted.is_some()
++                    || status.retiring
++                    || !status.closed
++                    || status.fenced
++                {
++                    return None;
++                }
++            } else {
++                pending.insert((index, peer), ProtocolClose::inspect(status)?);
++            }
++        }
++    }
++    Some(pending)
++}
++#[track_caller]
++pub(super) fn drive<A>(nodes: &mut [Node<A>], clock: &Instant, background: &mut impl FnMut())
++where
++    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++    A::Receipt: ApplicationReceipt,
++{
++    let cutoff = Instant::now() + Duration::from_secs(15);
++    loop {
++        poll_nodes(nodes, clock);
++        background();
++        if nodes.iter().all(|n| n.is_drained()) {
++            return;
++        }
++        if Instant::now() >= cutoff {
++            break;
++        }
++        std::thread::park_timeout(Duration::from_millis(1));
++    }
++    let now = MonoTime(clock.elapsed().as_millis() as u64);
++    let window = remaining(nodes).and_then(|r| ProtocolWindow::pin(r, now));
++    let Some(window) = window else {
++        diagnose_shutdown(nodes, clock);
++        panic!("native routed progress timed out before settled protocol cleanup");
++    };
++    assert!(clock
++        .checked_add(Duration::from_millis(window.end.0))
++        .is_some());
++    eprintln!(
++        "routed close retained original protocol deadlines at {now:?}: {:?}",
++        window.original
++    );
++    loop {
++        let polled_at = MonoTime(clock.elapsed().as_millis() as u64);
++        poll_nodes(nodes, clock);
++        background();
++        if nodes.iter().all(|n| n.is_drained()) {
++            return;
++        }
++        let retained = remaining(nodes).is_some_and(|r| window.retains(&r, polled_at));
++        if !retained || polled_at >= window.end {
++            diagnose_shutdown(nodes, clock);
++            panic!("native routed original protocol close failed to drain");
++        }
++        std::thread::park_timeout(Duration::from_millis(1));
++    }
++}
+diff --git a/tests/routed/shutdown/contract.rs b/tests/routed/shutdown/contract.rs
+new file mode 100644
+index 0000000..ba7ad2a
+--- /dev/null
++++ b/tests/routed/shutdown/contract.rs
+@@ -0,0 +1,201 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::{
++    outbound::{MessageClass, OutboundBinding, SendTicket},
++    secure::{LocalIdentity, PeerIdentity, SessionDrainStatus},
++    transport::{ConnectTicket, ReceiveInfo, TransportDrainStatus},
++};
++fn captured() -> PeerDrainStatus {
++    // Exact decisive297 cutoff state: node3 -> peer1, original session15 and
++    // generation150000, with its real timer still3052ms in the future.
++    let local = |n| LocalIdentity {
++        node: support::node(n),
++        store: StoreBinding {
++            identity: support::identity(n.into()),
++            session: StoreSession::new(15).unwrap(),
++        },
++    };
++    let binding = SessionBinding {
++        local: local(3),
++        peer: local(1),
++        generation: SecureSessionGeneration::new(150000).unwrap(),
++        wire_version: 1,
++    };
++    PeerDrainStatus {
++        peer: PeerIdentity {
++            node: binding.peer.node,
++            store: binding.peer.store.identity,
++        },
++        closed: true,
++        fenced: false,
++        authorized: true,
++        retiring: false,
++        attempt: None,
++        binding: Some(binding),
++        accepted: None,
++        transport: Some(TransportDrainStatus {
++            binding,
++            state: TransportState::Draining,
++            usage: TransportUsage::default(),
++            received: None,
++            close_started: Some(true),
++            session: Some(SessionDrainStatus {
++                state: SessionState::Closing,
++                flushed: true,
++                next_deadline: Some(MonoTime(60926)),
++                close_started: Some(true),
++                protocol_drained: Some(false),
++            }),
++        }),
++    }
++}
++fn pending(close: ProtocolClose) -> Remaining {
++    [((2, support::node(1)), close)].into()
++}
++#[test]
++fn captured_future_close_timer_pins_the_original_cutoff_and_never_renews() {
++    let original = ProtocolClose::inspect(captured()).unwrap();
++    let window = ProtocolWindow::pin(pending(original), MonoTime(57874)).unwrap();
++    assert_eq!(window.end, MonoTime(60926));
++    assert_eq!(window.end.0 - 57874, 3052);
++    assert!(window.retains(&pending(original), MonoTime(60925)));
++    assert!(!window.retains(&pending(original), MonoTime(60926)));
++    assert!(!window.retains(&pending(original), MonoTime(70000)));
++    assert!(ProtocolWindow::pin(pending(original), MonoTime(60926)).is_none());
++    assert!(ProtocolWindow::pin(BTreeMap::new(), MonoTime(57874)).is_none());
++    let mut changed = original;
++    changed.deadline = MonoTime(60927);
++    assert!(!window.retains(&pending(changed), MonoTime(60925)));
++    changed = original;
++    changed.binding.generation = SecureSessionGeneration::new(150001).unwrap();
++    assert!(!window.retains(&pending(changed), MonoTime(60925)));
++    assert!(!window.retains(&[((1, support::node(1)), original)].into(), MonoTime(60925)));
++}
++#[test]
++fn settled_close_window_keeps_the_maximum_original_timer_after_another_owner_retires() {
++    let first = ProtocolClose::inspect(captured()).unwrap();
++    let mut second = first;
++    second.deadline = MonoTime(61926);
++    second.binding.peer.node = support::node(2);
++    let remaining = [
++        ((2, support::node(1)), first),
++        ((2, support::node(2)), second),
++    ]
++    .into();
++    let window = ProtocolWindow::pin(remaining, MonoTime(57874)).unwrap();
++    assert_eq!(window.end, MonoTime(61926));
++    let retired = [((2, support::node(2)), second)].into();
++    assert!(window.retains(&retired, MonoTime(60926)));
++    assert_eq!(window.end, MonoTime(61926));
++    assert!(!window.retains(&retired, MonoTime(61926)));
++    assert!(!window.retains(&BTreeMap::new(), MonoTime(60926)));
++}
++#[test]
++fn accepted_original_work_and_unsupported_protocol_detail_cannot_enter_cleanup() {
++    let original = captured();
++    let binding = original.binding.unwrap();
++    let ticket = SendTicket {
++        binding: OutboundBinding {
++            node: binding.local.node,
++            store: binding.local.store,
++            generation: OutboundGeneration::new(1).unwrap(),
++        },
++        peer: binding.peer.node,
++        sequence: 1,
++    };
++    let mut changed = original;
++    changed.accepted = Some(ticket);
++    assert!(ProtocolClose::inspect(changed).is_none());
++    assert_eq!(changed.accepted, Some(ticket));
++    changed = original;
++    changed.transport.as_mut().unwrap().usage.completion = true;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .usage
++        .receive_frame_bytes = 1;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .next_deadline = None;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .protocol_drained = None;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .flushed = false;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.transport.as_mut().unwrap().state = TransportState::Open;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.binding = None;
++    assert!(ProtocolClose::inspect(changed).is_none());
++}
++
++#[test]
++fn fresh_connection_unread_input_and_nonclosing_identity_refuse_cleanup() {
++    let original = captured();
++    let binding = original.binding.unwrap();
++    let mut changed = original;
++    changed.attempt = Some(ConnectTicket {
++        local: binding.local,
++        peer: original.peer,
++        generation: binding.generation,
++    });
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.transport.as_mut().unwrap().received = Some(ReceiveInfo {
++        connection: binding,
++        class: MessageClass::Control,
++        messages: 1,
++        bytes: 1,
++    });
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.peer.node = support::node(2);
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.closed = false;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.fenced = true;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.authorized = false;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .state = SessionState::Ready;
++    assert!(ProtocolClose::inspect(changed).is_none());
++}
+diff --git a/tests/routed/shutdown/long_rtt.rs b/tests/routed/shutdown/long_rtt.rs
+new file mode 100644
+index 0000000..2fc71bd
+--- /dev/null
++++ b/tests/routed/shutdown/long_rtt.rs
+@@ -0,0 +1,167 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::{
++    native::{
++        outbound::NativeOutbound,
++        quic::{NativeQuicSession, QuicSessionOptions},
++        transport::NativePeerTransport,
++        wire::NativeWireCodec,
++    },
++    outbound::OutboundBinding,
++    secure::{LocalIdentity, PeerIdentity, SecureSession, SessionLimits, SessionPollBudget},
++    transport::{PeerTransport, TransportLimits, TransportPollBudget},
++    wire::WireLimits,
++};
++type Channel = NativePeerTransport<NativeQuicSession, NativeWireCodec>;
++fn local(n: u64) -> LocalIdentity {
++    LocalIdentity {
++        node: support::node(n),
++        store: StoreBinding {
++            identity: support::identity(n.into()),
++            session: StoreSession::new(15).unwrap(),
++        },
++    }
++}
++fn await_packet(socket: &UdpSocket, source: std::net::SocketAddr) {
++    let end = Instant::now() + Duration::from_secs(2);
++    let mut bytes = [0; 1200];
++    loop {
++        match socket.peek_from(&mut bytes) {
++            Ok((n, from)) => {
++                assert!(n > 0);
++                assert_eq!(from, source);
++                return;
++            }
++            Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
++                assert!(
++                    Instant::now() < end,
++                    "actual encrypted UDP input must arrive"
++                );
++                std::thread::park_timeout(Duration::from_millis(1));
++            }
++            Err(e) => panic!("UDP readiness: {e}"),
++        }
++    }
++}
++fn long_rtt() -> (NativeQuicSession, u64) {
++    let a = UdpSocket::bind("127.0.0.1:0").unwrap();
++    let b = UdpSocket::bind("127.0.0.1:0").unwrap();
++    let observers = [a.try_clone().unwrap(), b.try_clone().unwrap()];
++    let addresses = [a.local_addr().unwrap(), b.local_addr().unwrap()];
++    let options = |n, peer, remote| QuicSessionOptions {
++        local: local(n),
++        peer: support::tls::peer(local(peer)),
++        remote,
++        generation: SecureSessionGeneration::new(150000).unwrap(),
++        limits: SessionLimits::default(),
++    };
++    let mut a = NativeQuicSession::client(
++        a,
++        &support::tls::configuration(3),
++        options(3, 1, addresses[1]),
++        MonoTime(0),
++    )
++    .unwrap();
++    let mut b = NativeQuicSession::server(
++        b,
++        &support::tls::configuration(1),
++        options(1, 3, addresses[0]),
++        MonoTime(0),
++    )
++    .unwrap();
++    let budget = SessionPollBudget::default();
++    assert!(a.poll(MonoTime(0), budget).unwrap().written_bytes > 0);
++    await_packet(&observers[1], addresses[0]);
++    let first = b.poll(MonoTime(3500), budget).unwrap();
++    if first.written_bytes > 0 {
++        await_packet(&observers[0], addresses[1]);
++    }
++    for now in 3501..5000 {
++        for (i, session) in [&mut a, &mut b].into_iter().enumerate() {
++            let progress = session.poll(MonoTime(now), budget).unwrap();
++            if progress.written_bytes > 0 {
++                await_packet(&observers[1 - i], addresses[i]);
++            }
++        }
++        if a.state() == SessionState::Ready
++            && b.state() == SessionState::Ready
++            && a.is_flushed()
++            && b.is_flushed()
++        {
++            assert_eq!(a.binding().unwrap().peer, local(1));
++            drop(b);
++            return (a, now);
++        }
++    }
++    panic!("controlled delayed actual handshake must complete");
++}
++fn inspected(channel: &mut Channel) -> PeerDrainStatus {
++    let transport = channel.drain_status();
++    // Roster flags are fixture metadata; every transport/session/timer field
++    // comes from the actual selected native provider via the public seam.
++    PeerDrainStatus {
++        peer: PeerIdentity {
++            node: transport.binding.peer.node,
++            store: transport.binding.peer.store.identity,
++        },
++        closed: true,
++        fenced: false,
++        authorized: true,
++        retiring: false,
++        attempt: None,
++        binding: Some(transport.binding),
++        accepted: None,
++        transport: Some(transport),
++    }
++}
++#[test]
++fn actual_native_long_rtt_close_retains_original_timer_past_fixture_cutoff() {
++    let (session, start) = long_rtt();
++    let queue = NativeOutbound::new(
++        OutboundBinding {
++            node: local(3).node,
++            store: local(3).store,
++            generation: OutboundGeneration::new(1).unwrap(),
++        },
++        Default::default(),
++    )
++    .unwrap();
++    let mut channel = NativePeerTransport::new(
++        session,
++        NativeWireCodec::new(WireLimits::default()).unwrap(),
++        &queue,
++        TransportLimits::default(),
++    )
++    .unwrap();
++    channel.close();
++    let budget = TransportPollBudget::default();
++    channel.poll(MonoTime(start), budget).unwrap();
++    let original = ProtocolClose::inspect(inspected(&mut channel)).unwrap();
++    let cutoff = MonoTime(start + 15000);
++    assert!(original.deadline > cutoff);
++    channel.poll(cutoff, budget).unwrap();
++    let at_cutoff = ProtocolClose::inspect(inspected(&mut channel)).unwrap();
++    assert_eq!(at_cutoff, original);
++    let pending = [((2, support::node(1)), at_cutoff)].into();
++    let window = ProtocolWindow::pin(pending, cutoff).unwrap();
++    assert_eq!(window.end, original.deadline);
++    let before = MonoTime(original.deadline.0 - 1);
++    channel.poll(before, budget).unwrap();
++    let retained = [(
++        (2, support::node(1)),
++        ProtocolClose::inspect(inspected(&mut channel)).unwrap(),
++    )]
++    .into();
++    assert!(window.retains(&retained, before));
++    assert!(!window.retains(&BTreeMap::new(), before));
++    assert_eq!(channel.state(), TransportState::Draining);
++    assert!(queue.is_drained());
++    channel.poll(original.deadline, budget).unwrap();
++    assert_eq!(channel.state(), TransportState::Closed);
++    assert_eq!(channel.usage(), TransportUsage::default());
++    assert!(channel.drain_status().session.is_none());
++    assert!(channel.take_send().is_none());
++    assert!(channel.take_received().is_none());
++    assert!(queue.is_drained());
++}
+diff --git a/tests/routed/split/history.rs b/tests/routed/split/history.rs
+new file mode 100644
+index 0000000..e68564d
+--- /dev/null
++++ b/tests/routed/split/history.rs
+@@ -0,0 +1,156 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++#[path = "../../support/history.rs"]
++mod checker;
++use checker::{Action, Call, CheckError, Reply};
++
++type Scope = (ResponsibilityIdentity, u16);
++#[derive(Clone, Debug)]
++struct ObservedCall {
++    hint: RouteHint,
++    call: Call,
++}
++#[derive(Clone, Debug, Default)]
++pub(super) struct Trace {
++    event: u64,
++    calls: Vec<ObservedCall>,
++}
++pub(super) struct Invocation {
++    hint: RouteHint,
++    action: Action,
++    event: u64,
++}
++impl Trace {
++    pub(super) fn write(&mut self, hint: RouteHint, operation: u128, delta: i64) -> Invocation {
++        self.begin(hint, Action::Write { operation, delta })
++    }
++    pub(super) fn read(&mut self, hint: RouteHint) -> Invocation {
++        self.begin(hint, Action::Read)
++    }
++    fn begin(&mut self, hint: RouteHint, action: Action) -> Invocation {
++        assert!(hint.scope.contains(hint.bucket));
++        self.event += 1;
++        Invocation {
++            hint,
++            action,
++            event: self.event,
++        }
++    }
++    pub(super) fn value(&mut self, invocation: Invocation, value: i64) {
++        self.finish(invocation, Reply::Value(value));
++    }
++    pub(super) fn receipt(
++        &mut self,
++        invocation: Invocation,
++        receipt: voteboat::bucket_counter::BucketReceipt,
++        observed: bool,
++    ) {
++        let Action::Write { operation, .. } = invocation.action else {
++            panic!("write receipt")
++        };
++        assert_eq!(receipt.operation.get(), operation);
++        let reply = if !observed {
++            Reply::Unknown
++        } else {
++            match receipt.outcome {
++                BucketOutcome::Value(value) => Reply::Value(value),
++                BucketOutcome::Overflow => Reply::Overflow,
++                BucketOutcome::OperationConflict => Reply::Conflict,
++            }
++        };
++        self.finish(invocation, reply);
++    }
++    fn finish(&mut self, invocation: Invocation, reply: Reply) {
++        self.event += 1;
++        self.calls.push(ObservedCall {
++            hint: invocation.hint,
++            call: Call {
++                invoked: invocation.event,
++                completed: self.event,
++                action: invocation.action,
++                reply,
++            },
++        });
++        assert!(self.calls.len() <= 32);
++    }
++    fn check(&self) -> Result<BTreeMap<Scope, Vec<usize>>, CheckError> {
++        let mut scopes: BTreeMap<Scope, Vec<Call>> = BTreeMap::new();
++        for entry in &self.calls {
++            scopes
++                .entry((entry.hint.responsibility, entry.hint.bucket))
++                .or_default()
++                .push(entry.call.clone());
++        }
++        scopes
++            .into_iter()
++            .map(|(scope, calls)| {
++                checker::check(&calls, checker::Limits::default()).map(|order| (scope, order))
++            })
++            .collect()
++    }
++    pub(super) fn verify(&self) {
++        let witnesses = self
++            .check()
++            .unwrap_or_else(|error| panic!("{error:?}: {self:#?}"));
++        assert_eq!(witnesses.len(), 2);
++        for bucket in [1, 200] {
++            let calls = self
++                .calls
++                .iter()
++                .filter(|entry| entry.hint.bucket == bucket)
++                .collect::<Vec<_>>();
++            let owners = calls
++                .iter()
++                .map(|entry| (entry.hint.group, entry.hint.epoch))
++                .collect::<BTreeSet<_>>();
++            assert_eq!(owners.len(), 2);
++            assert!(calls.iter().any(|entry| entry.call.reply == Reply::Unknown));
++            assert!(calls.iter().all(|entry| {
++                entry.hint.application == calls[0].hint.application
++                    && entry.hint.scheme == calls[0].hint.scheme
++            }));
++        }
++        let mut bad_duplicate = self.clone();
++        let duplicate = bad_duplicate
++            .calls
++            .iter_mut()
++            .find(|entry| {
++                entry.hint.epoch.get() == 2
++                    && matches!(entry.call.action, Action::Write { operation: 1, .. })
++            })
++            .unwrap();
++        duplicate.call.reply = Reply::Value(8);
++        assert_eq!(bad_duplicate.check(), Err(CheckError::NotLinearizable));
++        let folded = self
++            .calls
++            .iter()
++            .map(|entry| entry.call.clone())
++            .collect::<Vec<_>>();
++        assert_eq!(
++            checker::check(&folded, checker::Limits::default()),
++            Err(CheckError::NotLinearizable)
++        );
++        println!("split scoped history: {} calls, {} bucket witnesses, changed duplicate/folded scope refused",
++            self.calls.len(), witnesses.len());
++    }
++}
++
++pub(super) fn seed(rig: &mut Split) {
++    for (key, operation, delta) in [(1, 1, 7), (200, 2, 11)] {
++        let invocation = rig
++            .history
++            .write(source_fixture::hint(key), operation, delta);
++        let receipt = propose_recovering(
++            &mut rig.source,
++            &rig.clock,
++            20,
++            operation,
++            source_fixture::data(key, delta),
++        );
++        let RoutedOutcome::Applied(receipt) = receipt.outcome else {
++            panic!("source write")
++        };
++        rig.history.receipt(invocation, receipt, true);
++    }
++}

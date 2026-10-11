@@ -1,0 +1,95 @@
+   Compiling libc v0.2.190
+   Compiling proc-macro2 v1.0.107
+   Compiling cfg-if v1.0.5
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling bytes v1.12.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling shlex v2.0.1
+   Compiling rand_core v0.10.1
+   Compiling protobuf v2.28.0
+   Compiling zeroize v1.9.1
+   Compiling untrusted v0.9.0
+   Compiling memchr v2.8.3
+   Compiling once_cell v1.21.4
+   Compiling getrandom v0.4.3
+   Compiling cpufeatures v0.3.1
+   Compiling rustls v0.23.45
+   Compiling regex-syntax v0.8.11
+   Compiling thiserror v2.0.21
+   Compiling pin-project-lite v0.2.17
+   Compiling rustls-pki-types v1.15.1
+   Compiling cc v1.6.0
+   Compiling chacha20 v0.10.2
+   Compiling subtle v2.6.1
+   Compiling zerocopy v0.8.62
+   Compiling tracing-core v0.1.36
+   Compiling rand_pcg v0.10.2
+   Compiling rustc-hash v2.1.3
+   Compiling bitflags v1.3.2
+   Compiling tinyvec v1.13.3
+   Compiling lru-slab v0.1.3
+   Compiling slab v0.4.12
+   Compiling slog v2.7.0
+   Compiling thiserror v1.0.69
+   Compiling byteorder v1.5.0
+   Compiling aho-corasick v1.1.5
+   Compiling fxhash v0.2.1
+   Compiling tracing v0.1.44
+   Compiling syn v3.0.6
+   Compiling syn v2.0.119
+   Compiling ring v0.17.14
+   Compiling getrandom v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling rand v0.10.3
+   Compiling regex-automata v0.4.18
+   Compiling thiserror-impl v1.0.69
+   Compiling getset v0.1.7
+   Compiling thiserror-impl v2.0.21
+   Compiling protobuf-codegen v2.28.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling regex v1.13.1
+   Compiling rand_chacha v0.3.1
+   Compiling protobuf-build v0.14.1
+   Compiling rand v0.8.8
+   Compiling raft-proto v0.7.0
+   Compiling rustls-webpki v0.103.15
+   Compiling raft v0.7.0
+   Compiling quinn-proto v0.11.19
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.69s
+     Running tests/parser_campaign.rs (target/divide-conformance/parser-build/debug/deps/parser_campaign-88a7d3d5cfe23563)
+
+running 7 tests
+
+thread 'snapshot::generated_snapshot_image_mutations_validate_metadata_application_bounds_and_integrity' (2563) panicked at tests/parser_campaign/snapshot.rs:73:89:
+called `Result::unwrap()` on an `Err` value: Rejected("snapshot store already exists")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'snapshot::generated_published_snapshot_manifest_mutations_cannot_select_wrong_or_partial_data' (2562) panicked at tests/parser_campaign/snapshot.rs:73:89:
+called `Result::unwrap()` on an `Err` value: Rejected("snapshot store already exists")
+test generator::independent_crc_has_the_standard_castagnoli_vector ... ok
+test snapshot::generated_snapshot_image_mutations_validate_metadata_application_bounds_and_integrity ... FAILED
+test snapshot::generated_published_snapshot_manifest_mutations_cannot_select_wrong_or_partial_data ... FAILED
+routing-publication: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 479, refused: 1057, repaired: 384 }
+test routing::generated_routing_publication_mutations_preserve_checked_bucket_coverage ... ok
+wal-create-batch: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 434, refused: 1102, repaired: 384 }
+wal-acknowledged-recovery: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 312, refused: 1224, repaired: 384 }
+wal-update-batch: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 416, refused: 1120, repaired: 384 }
+test wal::generated_native_batch_mutations_reach_bounded_inner_decoders ... ok
+wal-manifest-recovery: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 312, refused: 1224, repaired: 384 }
+test wal::generated_acknowledged_wal_and_manifest_corruption_never_recovers_a_partial_prefix ... ok
+rpc-v1-multiplex: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 301, refused: 1235, repaired: 384 }
+rpc-v8-multiplex: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 274, refused: 1262, repaired: 384 }
+rpc-v8-snapshot: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 310, refused: 1226, repaired: 384 }
+test wire::generated_rpc_mutations_enforce_framing_scope_and_public_reencoding ... ok
+
+failures:
+
+failures:
+    snapshot::generated_published_snapshot_manifest_mutations_cannot_select_wrong_or_partial_data
+    snapshot::generated_snapshot_image_mutations_validate_metadata_application_bounds_and_integrity
+
+test result: FAILED. 5 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+error: test failed, to rerun pass `--test parser_campaign`

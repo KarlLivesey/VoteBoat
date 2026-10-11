@@ -1,0 +1,11 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.77s
+     Running tests/parser_campaign.rs (target/divide-conformance/parser-build/debug/deps/parser_campaign-ea3b1b4258c32cd2)
+
+running 2 tests
+test generator::independent_crc_has_the_standard_castagnoli_vector ... ok
+routing-publication: seeds=[1, 7, 19, 43, 101, 257, 1021, 65537] cases=1536 Counts { accepted: 479, refused: 1057, structured_overwrites: 384 }
+test routing::generated_routing_publication_mutations_preserve_checked_bucket_coverage ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

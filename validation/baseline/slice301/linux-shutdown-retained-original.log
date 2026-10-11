@@ -1,0 +1,18 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/routed.rs (target/divide-shutdown/build/debug/deps/routed-94a0d082f8668bf1)
+
+running 1 test
+delegated Quic checkpoint=true phase=Reserve
+delegated Quic checkpoint=true phase=Intent
+delegated Quic checkpoint=true phase=Stage(21)
+delegated Quic checkpoint=true phase=Stage(22)
+delegated Quic checkpoint=true phase=Fence
+delegated Quic checkpoint=true phase=Import(21)
+delegated Quic checkpoint=true phase=Import(22)
+delegated Quic checkpoint=true phase=ChildPublication
+delegated Quic checkpoint=true phase=ParentPublication
+delegated Quic checkpoint=true phase=Activate(21)
+delegated Quic checkpoint=true phase=Activate(22)
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 187 filtered out; finished in 59.22s

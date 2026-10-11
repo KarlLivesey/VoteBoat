@@ -1,0 +1,12 @@
+# Read-only shutdown298 review
+
+Reviewed tests/routed/native.rs, tests/routed/shutdown.rs, tests/routed/shutdown/contract.rs and Schema298 in docs/IMPLEMENTATION.md. No edits to root source/docs and no builds were performed.
+
+No concrete blocker found in the inspected source. The close-only stage is justified by current297 captured Closing/flushed/not-drained provider state with original deadline60926 at cutoff57874. It is separate from ordinary drive15s, with no production timer or completion change.
+
+- shutdown.rs:73 checks actual NodeState::Draining plus drained local client/read/result/owner/persistence/outbound work, default replica usage, empty checkpoint obligations, drained snapshot router/worker, default peer driver/connector usage and drained ingress. Consumer-held outputs or accepted local work therefore cannot qualify as protocol-only cleanup.
+- inspect at21 rejects attempts, original accepted sends, retiring/fenced/unauthorized peers, binding mismatch, non-Draining transport, any transport usage/input, missing close_started, non-Closing session, unflushed output and unsupported/already-drained protocol detail. Empty tracked peers without bindings/attempts/tickets/ownership are skipped; they cannot manufacture progress.
+- pin at59 requires nonempty future original deadlines. retains at66 compares exact original key/full SessionBinding/deadline and requires each remaining owner still before its original due time. Fresh active peers/bindings/extended deadlines fail; retired original owners may disappear without extending the pinned maximum.
+- drive at132 only succeeds through actual Node::is_drained. It polls the owner once before checking the pinned cutoff, permitting the due timer's actual bounded owner visit. It never reports success because flush/time elapsed, and it does not renew the window.
+
+Limits: contract tests exercise classifier/window captured metadata rather than a fully constructed held-client/worker/snapshot negative Node. Those local gate checks are direct public predicates and need the root original integration run to confirm the real composition. The pre-poll polled_at is a lower bound on times passed to per-node poll calls (each reads the same Instant afresh); that permits the bounded visit to observe the due timer but is not a physical scheduling latency promise. The loop's peer inspection and background work also take time; no claimed hard real-time cap follows. Newly passing298 must remain source-qualified and does not prove old285/288 had the same missing provider state.
