@@ -617,9 +617,10 @@
       "native": "NativeSnapshotCodec",
       "conformance": [
         "tests/snapshot.rs",
-        "tests/membership.rs"
+        "tests/membership.rs",
+        "tests/snapshot/codec.rs"
       ],
-      "scope": "Native VBSNAP01 static framing remains readable; VBSNAP02 adds bounded membership-checkpoint subformat 1 alongside original bootstrap/application data. Codec capability version 2 declares preservation plus legacy readability; version 1 is static-only. Exact metadata round-trip, CRC32C, versions, lengths/counts and checkpoint state validation fail closed. No cryptographic provenance claim."
+      "scope": "Native VBSNAP01 static framing remains readable; VBSNAP02 adds bounded membership-checkpoint subformat 1 alongside original bootstrap/application data. Codec capability version 2 declares preservation plus legacy readability; version 1 is static-only. Exact metadata round-trip, CRC32C, versions, lengths/counts and checkpoint state validation fail closed. No cryptographic provenance claim. Sealing independently compares decoded application bytes with the original staged payload before footer append/sync/publication. Model crash/power-loss and real-file restart cases retain the prior pinned Counter checkpoint and original-operation deduplication after a changed/truncated decode refusal. This is staged round-trip enforcement, not complete replacement-decoder certification."
     },
     {
       "design_id": "C05",

@@ -6519,3 +6519,11 @@ strict Clippy profiles clean. Before-fix successful reclamation followed by
 failed reopen is retained. This is scoped contract/recovery acceptance; broader
 frozen269 and older262/251 lifecycle runs remain separate and do not certify
 full-platform completion. See [slice270](baseline/slice270/README.md).
+
+Slice271 seals a snapshot only if the selected codec returns the original staged
+application bytes. Linux and macOS each pass482 affected executions across four
+profiles; formatting/four strict Clippy profiles are clean. Actual pre-fix altered
+bytes, initial sandbox socket failures and before/after source guards are retained.
+Prior pinned Counter retry state survives model and real-file rejection/restart.
+This is finite staged round-trip acceptance; frozen broader lifecycle/provider
+qualification and full P0–P7 remain open. See [slice271](baseline/slice271/README.md).

@@ -1,5 +1,18 @@
 # Baseline acceptance map
 
+Exact staged snapshot payload: [slice271](../validation/baseline/slice271/README.md).
+Sealing refuses a decoder that changes the staged application bytes, before sync
+or publication. Both hosts pass482 affected executions and four strict profiles,
+including old pinned Counter checkpoint/retry retention across rejection/restart.
+This closes the actual staged round-trip gap; broader decoder/provider obligations
+and full lifecycle qualification remain separate.
+
+Supplied checkpoint codec recovery: [slice270](../validation/baseline/slice270/README.md).
+The codec owns bounded prefix recognition; reclamation refuses images its recovery
+path cannot recognize. Native defaults and mandatory state checks remain. Linux
+and macOS each pass422 selected tests across four profiles with strict zero.
+This closes the evidenced codec dispatch gap, not all R14/R19 provider obligations.
+
 Metadata-read cleanup/recovery: [slice268](../validation/baseline/slice268/README.md).
 Diagnostic Mac failures retain actual LeadershipChanged completions. Corrected
 positive callers retry only known leadership refusal after original slots drain;

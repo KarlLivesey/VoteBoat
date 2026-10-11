@@ -104,22 +104,19 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint268: static mixed-host service256 remains selected completed
-evidence; scheduler/timer and actual-core fault schedules267 are accepted.
-Corrected262 Linux finishes67/0 with terminal source verification. Its preserved
-Mac run is still active with an Unavailable metadata-read failure. Separate268
-diagnostics reproduce both caller assumptions with actual LeadershipChanged;
-the causal cleanup/retry correction and native controls pass all/default4/0
-and3/0 on both hosts, with formatting/four strict profiles zero.
-Corrected69-history Linux/Mac qualification269 now runs on frozen662-input source.
-These selected results
-do not certify the complete platform or roadmap.
+Current checkpoint271: static mixed-host service256 remains usable. Codec
+recovery270 is accepted on Linux/Mac with422 targeted tests each and strict zero.
+The current slice closes an actual SnapshotCodec staged-byte round-trip gap;
+three regressions and 482 affected executions pass on each host, with strict zero.
+Corrected69-history lifecycle269 stays immutable and live on both platforms;
+older262/251 terminal evidence remains separate. Selected tests are not complete
+platform or roadmap acceptance.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current268: preserve/recover original metadata-read outcomes — accepted | Advance P5/P6 functional recursive lookup after actual leader changes. | Existing ManifestReadSource, exact read completions and Node cleanup; diagnostic Mac0/2 preserved separately. No production/provider changes. | Two original TCP/QUIC two-move/WAL/checkpoint histories plus two actual Campaign-cut regressions; known leadership-only retry after original slots drain, exact inactive/fenced one-attempt refusal, wrong-ticket preservation, fresh root metadata; both-host all/default4/3 and formatting/four strict profiles zero. |
-| Next262: capture terminal preserved delegation qualification | Keep P5/P6 failure evidence linked to its original source before replacement. | Independent frozen654-input Linux/Mac sources; Linux67/0 terminal, Mac live with a metadata-read failure. | Full67-history original family terminal results, source hashes and exact failure bodies. These older results cannot certify268's changed metadata fixtures. |
-| Following269: complete corrected69-history qualification — running | Advance P5/P6 macOS/Linux functional acceptance with the causal fixes composed. | Accepted268 source adds two real read-race controls; preserve completed262 source/results, use frozen independent builds. | Terminal all-feature69-history family on both hosts, original operation IDs/cuts/ownership/cold recovery retained, source verification and strict zero. Keep the full goal active while those background histories run. |
+| Current271: exact staged snapshot payload — accepted | Advance P0/R19/P1 replacement/checkpoint correctness before a sealed durability receipt. | Existing stage byte boundaries, CRC and root/pin ownership; preserved prior accepted changed bytes. No new format/API/provider. | Changed/truncated decoder rejection before sync/publication; prior pinned Counter checkpoint, retry IDs and stale admissions survive process/power-loss and real-file restart; transparent host codec; affected snapshot/worker/member/provider targets and four strict profiles on both hosts. |
+| Next269: finish corrected composed lifecycle qualification | Advance P5/P6 Mac/Linux functional acceptance with the causal metadata/cleanup fixes composed. | Frozen662-input Linux/Mac sources and original operation IDs/cuts; retain older262/251 sources and failures separately. | Full69-history terminal results, exact failure bodies and source verification, then focused cause fixes if required. Live progress is not completion. |
+| Following: next evidenced contract/combined-fault gap | Advance original P0–P7 exits while preserving usable service/embedding. | Actual terminal results plus R01–R19/C01–C24 ledger; choose a concrete missing behavior before helpers. | Specify API/state ownership/restart cases and bounded acceptance before edits; source-bound tests and strict zero on supported platforms. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26515,3 +26512,47 @@ codec/backend certification. Evidence: [270](../validation/baseline/slice270/REA
 The current mini deliverable is accepted; next remains terminal269 collection
 and focused fixes, then the next evidenced P0–P7 functional gap. Broader platform
 acceptance stays open and the original262/251 evidence is still separate.
+
+271 schema before edits: SnapshotCodec decode can change application bytes while
+preserving metadata and length, and NativeSnapshotStore currently seals that
+image. Close the actual staged-payload round-trip gap, advancing P0/R19/P1.
+The data/API shape and file formats stay unchanged: prefix + caller chunks +
+CRC footer. Stage already retains prefix length and expected payload length;
+compare decoded payload exactly with that staged byte range before appending the
+footer or syncing. No new helper/provider/generation is needed. A mismatch fences
+this store as existing codec failures do, with no sealed receipt/root publication;
+recovery retains the previous published root after a partial inactive-slot write.
+First retain actual accepted substituted bytes. Acceptance: altered/truncated
+payload refusal before sync/publication; original current/pinned root, application
+retry checkpoint and session/ticket semantics preserved after power loss;
+transparent host codec works with model and real files. Run affected snapshot/
+worker/member recovery tests on both platforms and four strict profiles zero.
+This checks staged payload preservation, not every possible replacement decoder
+behavior or malicious-provider security. Broader269/262/251 runs stay immutable.
+Linked mini plan: current271 closes this concrete snapshot seam using existing
+stage ownership; next269 collects full composed lifecycle terminal results;
+following closes the next evidenced contract/combined-fault gap. Both depend on
+source-bound results, original identities/cuts and scoped failure records, with
+macro P0–P7 remaining active and performance/security following features.
+
+271 validation environment: the first Linux broad run stops in member_recovery
+with40 passes/two failures: actual TCP listener and UDP socket creation return
+EPERM in the sandbox (member_recovery.rs1100/1136). Source verification, failure
+bodies and strict all-feature output are retained separately. This is not a
+snapshot result or a production regression diagnosis. Rerun the unchanged matrix
+with authorized localhost socket access; no source/assertion/budget changes.
+
+271 acceptance: three snapshot-codec regressions plus the full affected targets
+are terminal clean on Linux and Mac. In member_recovery/membership/provider/
+snapshot/worker order, all passes42/32/29/25/14; default41/32/29/25/14;
+core12/18/14/10/5; native40/32/29/25/14. Thus482 executions pass per host,
+zero failures. Formatting/four strict profiles are zero, with all664 inputs
+verified before/after each matrix. Metadata integrity/tests pass but14 reviews/
+88 operations remain partial. The first sandbox40/2 EPERM run and original
+accepted changed-byte negative remain separate. See [271](../validation/baseline/slice271/README.md).
+Macro review: P0/R19/P1 staged payload preservation is repaired without a new
+backend or format. The current mini item is accepted; next is the live269 full
+lifecycle result/cause collection. The observed original262 Mac failures are
+both automatic metadata-read histories, attributed to its older source;269 has
+no reported failure at this observation, but is not terminal. Full P0–P7 and
+broader platform/provider/fault exits remain active; tuning/security follow.

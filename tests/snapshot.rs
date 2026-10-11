@@ -250,6 +250,8 @@ mod native {
     use super::*;
     use std::{cell::RefCell, io, rc::Rc};
     use voteboat::native::snapshot_store::*;
+    #[path = "../snapshot/codec.rs"]
+    mod codec;
     #[derive(Clone, Copy, Debug, Default)]
     enum Failure {
         #[default]

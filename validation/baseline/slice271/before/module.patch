@@ -1,0 +1,13 @@
+diff --git a/tests/snapshot.rs b/tests/snapshot.rs
+index 63e4146..b63c1d7 100644
+--- a/tests/snapshot.rs
++++ b/tests/snapshot.rs
+@@ -250,6 +250,8 @@ mod native {
+     use super::*;
+     use std::{cell::RefCell, io, rc::Rc};
+     use voteboat::native::snapshot_store::*;
++    #[path = "../snapshot/codec.rs"]
++    mod codec;
+     #[derive(Clone, Copy, Debug, Default)]
+     enum Failure {
+         #[default]

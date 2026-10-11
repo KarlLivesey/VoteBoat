@@ -1,5 +1,12 @@
 # Baseline audits
 
+R14/R19 update270: supplied LogCodec checkpoint dispatch is now controlled by
+the selected codec, with pre-replacement recognition checks. The actual prior
+reclaim-success/reopen-failure and both-host targeted acceptance are retained in
+[slice270](../validation/baseline/slice270/README.md). SnapshotCodec staged-byte
+round-trip enforcement271 is now accepted with482 targeted executions on each
+host and strict zero; it does not close every provider obligation. The older feature review below retains its original scope.
+
 Latest service evidence: [slice256](../validation/baseline/slice256/README.md).
 Latest feature review: [slice255](#slice255--functional-checkpoint).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).

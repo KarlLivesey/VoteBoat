@@ -1,0 +1,11 @@
+{
+  "previous": "slice270",
+  "inputs": 664,
+  "added": [
+    "tests/snapshot/codec.rs"
+  ],
+  "changed": [
+    "src/native/snapshot_store.rs",
+    "tests/snapshot.rs"
+  ]
+}

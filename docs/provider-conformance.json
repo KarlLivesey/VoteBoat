@@ -659,6 +659,7 @@
           ],
           "obligation": "Only a complete exact stage can be synchronized and sealed. Sealing does not publish or supersede the old root. Reject stale and repeated seals.",
           "assertions": [
+            {"file": "tests/snapshot/codec.rs", "symbol": "changed_or_truncated_decode_fences_before_sync_and_preserves_pinned_retry_checkpoint"},
             {
               "file": "tests/provider_conformance/snapshot.rs",
               "symbol": "stage_identity_and_limits"

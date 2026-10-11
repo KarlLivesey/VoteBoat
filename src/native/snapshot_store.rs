@@ -162,6 +162,8 @@ impl SnapshotIo for FileSnapshotIo {
 /// Version 1 supports static metadata; version 2 also preserves membership bases
 /// and reads version-1 data. Prefix and finish must preserve
 /// metadata and enforce length/format/checksum bounds before decode allocation.
+/// Decoding must return the exact application bytes supplied through the stage's
+/// chunks; sealing verifies this round trip before synchronization.
 pub trait SnapshotCodec {
     fn format_version(&self) -> u32;
     fn prefix(
@@ -599,6 +601,7 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
         }
         let slot = stage.slot;
         let expected_length = stage.prefix_bytes + stage.expected;
+        let prefix_bytes = stage.prefix_bytes;
         let expected_checksum = stage.expected_checksum;
         let metadata = stage.metadata.clone();
         let mut body = match self.io.read_slot(slot, self.limits.max_file_bytes()) {
@@ -629,10 +632,12 @@ impl<I: SnapshotIo, C: SnapshotCodec> SnapshotStore for NativeSnapshotStore<I, C
             }
         };
         if snapshot.metadata != metadata
-            || snapshot.application.len() != self.stage.as_ref().unwrap().expected
+            || snapshot.application != body[prefix_bytes..expected_length]
         {
             self.fenced = true;
-            return Err(StorageError::Corrupt("snapshot codec changed metadata"));
+            return Err(StorageError::Corrupt(
+                "snapshot codec changed metadata/application",
+            ));
         }
         if let Err(e) = self
             .io
