@@ -1,0 +1,6 @@
+fmt=0
+clippy_all=0
+clippy_default=0
+clippy_core=0
+clippy_native=0
+checkpoint_shutdown=101

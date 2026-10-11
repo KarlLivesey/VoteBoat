@@ -207,6 +207,13 @@ where
         let within_deadline = Instant::now() < deadline;
         if !within_deadline {
             for n in nodes.iter() {
+                eprintln!(
+                    "routed timeout shutdown state={:?} clients_drained={} reads_drained={} read_usage={:?} results_drained={} result_usage={:?} owner_drained={} outbound_drained={} peers_drained={}",
+                    n.state(), n.local().clients.is_drained(), n.local().reads.is_drained(),
+                    n.local().reads.usage(), n.local().results.is_drained(), n.local().results.usage(),
+                    n.local().owner.is_drained(), n.local().outbound.is_drained(),
+                    n.peers().is_none_or(|p| p.is_drained()),
+                );
                 for (group, app) in &n.local().applications {
                     let core = n.local().owner.core(*group).unwrap();
                     let log = core.state();
@@ -498,6 +505,7 @@ fn directory_observation(
     }
     panic!("directory observation repeatedly unavailable")
 }
+#[track_caller]
 fn close<A>(
     mut nodes: Vec<Node<A>>,
     clock: &Instant,

@@ -1,13 +1,31 @@
 # Baseline acceptance map
 
+Public executable runner recovery: [slice287](../validation/baseline/slice287/README.md).
+Linux/macOS pass75 named executions each (all41/default34), strict four-profile
+Clippy/formatting zero and matching669 before/terminal input guards. Authenticated
+single/multi-group runners, interrupted source/runner, original-journal recovery,
+pending configuration/quorum loss/cold retries and bounded unknown observations
+are covered. Production is unchanged; broader pre-owner cancellation schedules
+and complete P4 remain separate. The lifecycle285 timeout is at parent shutdown,
+not its read helper; diagnostic288 retains that separate obligation.
+
 Shared-WAL coordinator cancellation recovery: [slice286](../validation/baseline/slice286/README.md).
 Linux/macOS pass9 related drain executions each with strict zero and669 verified
 inputs. Actual queued execution and public completion are both required before
 releasing a cancelled dispatch; local readiness does not substitute for the
 existing exact remote commitment check. The public CLI runner is a separate
 qualification. Focused285 receipt-loss checks pass3 per host; the corrected
-full73-test lifecycle family remains live, with a Linux checkpoint read timeout
-reported. Original Mac269 is terminal62/7 on its older662 inputs.
+full73-test Mac lifecycle family remains live. Linux is terminal72/1 all-feature
+and40/0 default, retaining the checkpoint parent-shutdown failure. Original
+Mac269 is terminal62/7 on its older662 inputs.
+
+Update288/289: Linux285 is terminal72/1 all-feature and40/0 default with668
+terminal input guard verified; Mac family is live. Fixture
+diagnostic288 reproduces the same parent close failure with one retained QUIC
+peer, while reads/results/owner/outbound are drained. Its Mac history passes1/0;
+both669 source guards and four strict profiles verify. Isolated instrumented289
+passes1/0 and does not reproduce or explain the blockage. No shutdown semantics,
+protocol deadlines or production interface changed.
 
 Native member failed-send recovery: [slice284](../validation/baseline/slice284/README.md).
 Linux and Apple Silicon macOS each pass complete member all50/default27 with

@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.21s
+     Running tests/counter_service.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/counter_service-65dd303b36a1d059)
+
+running 2 tests
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_quic ... ok
+test configuration_pending::pending_original_configuration_recovers_after_quorum_loss_tcp ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 195 filtered out; finished in 11.84s

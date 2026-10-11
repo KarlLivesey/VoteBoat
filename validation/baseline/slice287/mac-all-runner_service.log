@@ -1,0 +1,24 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/repo287)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.28s
+     Running tests/counter_service.rs (/tmp/voteboat-macos-CzK1if/repo276/target/debug/deps/counter_service-4a7126c9b497a5c5)
+
+running 17 tests
+test drain_runner::confirmation::caller_refuses_wrong_duplicate_and_unconfirmed_success_fields ... ok
+test drain_runner::confirmation::caller_repeats_original_identity_only_after_explicit_absent_record ... ok
+test drain_runner::confirmation::caller_bounds_unknown_invocations_and_preserves_terminal_refusals ... ok
+test drain_runner::runner_rejects_unauthorized_and_wrong_identity_without_drain ... ok
+test group_drain_runner::multi_group_runner_refuses_wrong_scope_identity_and_cancelled_intent ... ok
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_tcp ... ok
+test drain_runner::authenticated_runner_drives_membership_and_stops_source_quic ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_tcp ... ok
+test group_drain_runner::multi_group_runner_drives_distinct_targets_and_stops_source_quic ... ok
+test drain_runner::killed_runner_and_source_resume_original_durable_plan ... ok
+test drain_runner::follower::planned_runner_drains_original_source_after_leader_change_quic ... ok
+test drain_runner::historical::original_planned_drain_survives_another_election_tcp ... ok
+test drain_runner::follower::planned_runner_drains_original_source_after_leader_change_tcp ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_loss_tcp ... ok
+test drain_runner::historical::original_planned_drain_survives_another_election_quic ... ok
+test group_drain_runner::multi_group_runner_resumes_partial_membership_after_source_checkpoint_quic ... ok
+test drain_runner::killed_quic_runner_and_source_resume_original_durable_plan ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 179 filtered out; finished in 28.47s

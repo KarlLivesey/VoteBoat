@@ -1,0 +1,14 @@
+diff --git a/tests/routed/native.rs b/tests/routed/native.rs
+index ec49b673..34090d4 100644
+--- a/tests/routed/native.rs
++++ b/tests/routed/native.rs
+@@ -209,0 +210,7 @@ where
++                eprintln!(
++                    "routed timeout shutdown state={:?} clients_drained={} reads_drained={} read_usage={:?} results_drained={} result_usage={:?} owner_drained={} outbound_drained={} peers_drained={}",
++                    n.state(), n.local().clients.is_drained(), n.local().reads.is_drained(),
++                    n.local().reads.usage(), n.local().results.is_drained(), n.local().results.usage(),
++                    n.local().owner.is_drained(), n.local().outbound.is_drained(),
++                    n.peers().is_none_or(|p| p.is_drained()),
++                );
+@@ -500,0 +508 @@ fn directory_observation(
++#[track_caller]

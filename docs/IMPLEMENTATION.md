@@ -122,9 +122,78 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Terminal262 and269, accepted273/274/281/284/286 and focused285, plus open retirement progress evidence. Frozen corrected family285 is live on both hosts. | Classify exact failures and complete all73/default family matrices, retaining original phase cuts, source guards and strict checks. Linux has reported a checkpoint split read timeout; selected passes do not explain unreproduced older timeouts. |
-| Next: public membership runner recovery qualification | Advance P4 usable administration on Mac/Linux. | Original Mac251 admission-journal failures and accepted286 example/public coordinator correction; authenticated single/multi-group runner contracts and existing original-ID status/resume paths. | Check the public runner's cancellation/unknown/queued-owner boundary separately; any change must preserve bounded admission, original operation/content, real status/commit/restart and owned cleanup. Private example acceptance alone does not qualify a CLI workflow. |
-| Following: baseline functional exit review | Identify the next complete user-visible feature path for P0–P6. | Current lifecycle and executable recovery evidence, component contracts and the acceptance map; performance/security remain later. | Separate implemented-but-unqualified behavior from absent features, select the smallest complete remaining feature path and record its API/state/restart acceptance before editing. Do not substitute a selected pass count for feature completion. |
+| Current: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Terminal262 and269, accepted273/274/281/284/286/287 and focused285, plus open retirement progress evidence. Linux285 is terminal72/1 all-feature and40/0 default; Mac285 is live. Diagnostic288 is terminal Linux0/1 and Mac1/0. | Classify exact failures and complete all73/default family matrices, retaining original phase cuts, source guards and strict checks. Linux has reported a checkpoint split parent-shutdown timeout at native.rs514; selected passes do not explain unreproduced older timeouts. |
+| Next: resolve checkpoint parent peer shutdown | Advance P5/P6 owned shutdown/restart acceptance. | Full Linux285 all-feature72/1, Linux288's same parent peer drain failure, terminal/public runner287 and isolated QUIC trace289; observe Mac originals independently. | Identify the exact retained session/transport predicate, write a regression at that boundary and fix its cause without weakening successful send/ownership rules or expanding deadlines. Keep isolated passes and failed full schedules separate. |
+| Following: baseline functional exit review | Identify the next complete user-visible feature path for P0–P6. | Current lifecycle and accepted public executable recovery287, component contracts and the acceptance map; performance/security remain later. | Separate implemented-but-unqualified behavior from absent features, select the smallest complete remaining feature path and record its API/state/restart acceptance before editing. Do not substitute a selected pass count for feature completion or make optional orchestration a prerequisite. |
+
+Schema287 — public runner qualification (P4): retain the existing bound drain
+sequence, operation, configuration record and plan digest. An interrupted
+configuration request returns to original-source observation; a group runner
+checks configuration status before proposing another phase. The executable
+checks the live authenticated command before queued owner execution, then consumes
+configuration completions before admitting another request. Cancellation does
+not establish commitment. Service/source restart reconstructs state from the
+original WAL and drain journal; the runner owns only bounded connections and its
+unchanged total request/time budget. No production/API change is justified by
+the example correction alone. Acceptance: existing authenticated runner unit
+histories, complete single/multi-group executable runner histories and pending
+configuration cancellation/reopen histories on both hosts, all/default sequential,
+with strict four-profile checks and frozen source guards. Keep lifecycle285 live
+and isolated; its checkpoint parent-shutdown timeout is a separate unresolved failure.
+
+Schema288 — classify the recorded parent shutdown failure (P5/P6): extend only
+the routed fixture's existing deadline diagnostic with actual NodeState and
+public read/application-result usage and drain predicates. Propagate the close
+caller's location through the tracked drive boundary. The node still owns all
+accepted reads/results/worker and peer work; shutdown is Running → Quiescing →
+Draining → Drained under the existing public contract. Record which public
+predicate remains false instead of inferring a read or transport failure from
+peer bindings. No timeout, shutdown condition, cancellation policy or production
+API changes. Acceptance: formatting/four strict profiles remain zero; execute
+the original QUIC checkpoint split history on each host against a separate frozen
+image, retaining failures and source guards. A selected pass cannot explain or
+erase the original full-family failure. Wait for287's executable configurations
+to finish before reusing its independent caches;285 remains untouched.
+
+Implemented287 evidence — public executable recovery: both hosts pass75 named
+runner/configuration executions each (all41/default34), four strict Clippy profiles
+and formatting zero, with matching669 inputs verified before/terminal. Existing
+authenticated single/multi-group execution, runner/source loss, bound-journal
+restart, original-record quorum loss/cold retry and unit unknown/budget histories
+are qualified. The executable observes cancellation before live authorization;
+there is no evidence justifying a production copy of the example286 fix. Broader
+pre-owner schedules and complete P4 remain separate. Macro review: this closes
+the selected public runner deliverable and moves the next item to baseline exit
+review; lifecycle285 failure qualification is still current. See
+`validation/baseline/slice287/README.md` for the exact retained scope.
+
+Diagnostic288 reproduces the Linux parent close failure: nodes1/2 are Drained;
+node3 is Draining with clients/reads/results/owner/outbound drained, zero read and
+result usage and one retained QUIC peer to1. It reaches delegated.rs723, the
+original close_parent call, after Activate22. This identifies the blocking peer
+boundary but does not establish whether the roster, frame transport or secure
+session is responsible. Mac288 subsequently passes1/0 in495.84s;669 before/terminal
+input guards and formatting/four strict profiles verify on both hosts. This
+selected Mac pass does not explain the Linux blockage. Original Mac285 stays live.
+
+Schema289 diagnostic probe — on a separate frozen Linux copy only, report bounded
+once-per-second QUIC closing state (local/peer IDs, sending/writing flags, retained
+datagram length, local protocol close/drain state and next timer delay). No payload,
+credentials or crypto state is recorded. This temporary instrumentation is not
+an accepted production change and does not release resources, change timers or
+weaken successful send outcomes. Its purpose is to distinguish a stalled accepted
+send from a protocol close timer before designing the smallest shutdown fix.
+Acceptance is retained exact source/terminal guards, original history and actual
+closing evidence; any production fix requires a separate schema and regression.
+
+Trace289 is terminal Linux1/0 in40.44s with its exact pre-run manifest and terminal
+guard. The once-per-second instrumentation changes timing and did not reproduce
+the blockage: its observed closing protocols drained with no accepted stream or
+retained datagram. This is diagnostic evidence, not a fix or an explanation for
+original285/288. Production remains unchanged. Linux285's all-feature family is
+terminal72/1 in1150.33s; default passes40/0 in380.68s. The full Linux script exits101
+and its668-input terminal guard verifies. The Mac full family remains live. Macro review: the concrete
+peer shutdown failure is now the next deliverable before baseline exit review.
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical

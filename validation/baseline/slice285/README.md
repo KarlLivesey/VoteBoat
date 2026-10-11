@@ -12,8 +12,12 @@ original commitment, cold retry, exact data/outbox and replayed first-applicatio
 fresh receipt, and rejects a missing required duplicate. Formatting/four strict
 profiles pass, and668 inputs verify before/after these regressions.
 
-The corrected complete native delegation family is running73 all-feature tests
-on separate frozen Linux/Mac images, followed by default tests. It is not accepted
-yet. Linux has reported a QUIC checkpoint split read-progress timeout; the live
+The corrected native delegation family all-feature phase is terminal72/1 on
+Linux in1150.33s; default passes40/0 in380.68s. The complete Linux script exits101,
+with668 terminal inputs verified. The Mac full family remains live; complete
+family qualification is not accepted. [Terminal Linux logs](linux/README.md).
+The QUIC checkpoint split failure occurs in parent shutdown. Diagnostic288
+reproduces one retained QUIC peer with reads/results/owner/outbound drained;
+instrumented289 passes once without explaining the failure. Live original
 log/store/source remain separate. Original Mac269 is terminal62/7 on older662
 inputs. These selected regressions do not certify full lifecycle acceptance.

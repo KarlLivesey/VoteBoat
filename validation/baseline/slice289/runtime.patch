@@ -1,0 +1,25 @@
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -73,0 +74 @@
++    close_observation: Option<u64>,
+@@ -224,0 +226 @@
++            close_observation: None,
+@@ -635,0 +638,18 @@
++        if self.state == SessionState::Closing
++            && self
++                .close_observation
++                .is_none_or(|last| now.0.saturating_sub(last) >= 1000)
++        {
++            self.close_observation = Some(now.0);
++            let protocol = self.connection.as_mut().map(|(_, c)| {
++                (
++                    c.is_closed(),
++                    c.is_drained(),
++                    c.poll_timeout()
++                        .map(|deadline| deadline.saturating_duration_since(instant).as_millis()),
++                )
++            });
++            eprintln!("quic close probe local={:?} peer={:?} started={} sending={} writing={} pending={} protocol={protocol:?}",
++                self.options.local.node, self.options.peer.identity.node, self.close_started,
++                self.sending.is_some(), self.writing.is_some(), self.pending.len());
++        }
