@@ -14,6 +14,8 @@ mod publication;
 mod reads;
 #[path = "fault_schedule/reduce.rs"]
 mod reduce;
+#[path = "fault_schedule/snapshots.rs"]
+mod snapshots;
 
 const MAX_ACTIONS: usize = 512;
 const MAX_FAULT_BYTES: usize = 65536;
@@ -41,6 +43,7 @@ enum Action {
     Read(u64, u64),
     CancelRead(u64, u64),
     ServeCounter(u64, u64),
+    Snapshot(u64, snapshots::Operation),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Trace {
@@ -134,11 +137,14 @@ struct Point {
     reads: BTreeMap<u64, Vec<reads::Ready>>,
     read_floor: BTreeMap<u64, u64>,
     read_outcomes: Vec<reads::Attempt>,
+    snapshots: snapshots::Summary,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum FailureStage {
     DurableLogMissing,
     RecoveredPrefixLost,
+    SnapshotRecoveryLost,
+    SnapshotPublicationLost,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct LostPrefix {
@@ -151,6 +157,7 @@ struct Replay {
     cluster: Cluster<NativeLogStore<TraceIo>>,
     delayed: delayed::Dependencies,
     read_outcomes: Vec<reads::Attempt>,
+    snapshots: snapshots::Dependencies,
 }
 impl Replay {
     fn new() -> Self {
@@ -168,11 +175,13 @@ impl Replay {
             cluster,
             delayed: delayed::Dependencies::default(),
             read_outcomes: Vec::new(),
+            snapshots: snapshots::Dependencies::default(),
         }
     }
     fn restart(&mut self, id: u64, mode: crash::Mode) -> Result<(), LostPrefix> {
         let acknowledged = self.cluster.applied[&id].clone();
         self.discard_dependency(id);
+        self.discard_snapshot(id, mode);
         drop(self.cluster.replicas.remove(&id).unwrap());
         match mode {
             crash::Mode::PowerLoss => self.images[&id].device.0.borrow_mut().power_loss(),
@@ -197,6 +206,9 @@ impl Replay {
             }
             Err(error) => panic!("unexpected recovery failure: {error:?}"),
         };
+        if self.snapshots.has_image(id) {
+            return self.recover_snapshot(id, store, &acknowledged);
+        }
         let core = Raft::recover(
             node(id),
             store.binding(),
@@ -270,6 +282,7 @@ impl Replay {
             Action::Sync(id) => self.sync(id),
             Action::Complete(id) => self.complete(id),
             Action::Stale(id) => self.stale(id),
+            Action::Snapshot(id, operation) => self.snapshot_action(id, operation),
         }
         self.cluster.assert_safety();
         Ok(())
@@ -324,6 +337,7 @@ impl Replay {
                 .map(|(id, replica)| (*id, replica.core.read_request_floor()))
                 .collect(),
             read_outcomes: self.read_outcomes.clone(),
+            snapshots: self.snapshots.summary(),
         }
     }
 }

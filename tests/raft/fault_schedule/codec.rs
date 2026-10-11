@@ -54,7 +54,7 @@ fn unary(name: &str, id: u64) -> Result<Action, ()> {
         "fail_sync" => Action::FailSync(id),
         "publish_before" => Action::FailPublish(id, publication::PublishCut::Before),
         "publish_after" => Action::FailPublish(id, publication::PublishCut::After),
-        _ => return Err(()),
+        _ => Action::Snapshot(id, snapshots::Operation::parse(name)?),
     })
 }
 fn action(line: &str) -> Result<Action, ()> {
@@ -90,7 +90,16 @@ impl Trace {
     pub(super) fn encode(&self) -> String {
         assert_ne!(self.seed, 0);
         assert!(self.actions.len() <= MAX_ACTIONS);
-        let mut text = format!("VBSIM 1 {}\n", self.seed);
+        let version = if self
+            .actions
+            .iter()
+            .any(|a| matches!(a, Action::Snapshot(..)))
+        {
+            2
+        } else {
+            1
+        };
+        let mut text = format!("VBSIM {version} {}\n", self.seed);
         for action in &self.actions {
             match *action {
                 Action::Campaign(id) => writeln!(text, "campaign {id}"),
@@ -124,6 +133,7 @@ impl Trace {
                 Action::Read(id, request) => writeln!(text, "read {id} {request}"),
                 Action::CancelRead(id, request) => writeln!(text, "cancel_read {id} {request}"),
                 Action::ServeCounter(id, request) => writeln!(text, "serve_counter {id} {request}"),
+                Action::Snapshot(id, operation) => writeln!(text, "{} {id}", operation.name()),
             }
             .unwrap();
         }
@@ -135,7 +145,11 @@ impl Trace {
         }
         let mut lines = text.lines();
         let mut header = lines.next().ok_or(DecodeError::Header)?.split_whitespace();
-        if header.next() != Some("VBSIM") || header.next() != Some("1") {
+        if header.next() != Some("VBSIM") {
+            return Err(DecodeError::Header);
+        }
+        let version = header.next().ok_or(DecodeError::Header)?;
+        if !matches!(version, "1" | "2") {
             return Err(DecodeError::Header);
         }
         let seed: u64 = number(header.next()).map_err(|()| DecodeError::Header)?;
@@ -147,7 +161,11 @@ impl Trace {
             if actions.len() == MAX_ACTIONS {
                 return Err(DecodeError::Bounds);
             }
-            actions.push(action(line).map_err(|()| DecodeError::Action(i + 2))?);
+            let action = action(line).map_err(|()| DecodeError::Action(i + 2))?;
+            if version == "1" && matches!(action, Action::Snapshot(..)) {
+                return Err(DecodeError::Action(i + 2));
+            }
+            actions.push(action);
         }
         Ok(Self { seed, actions })
     }
@@ -195,7 +213,7 @@ fn all_actions_round_trip_with_original_ids_and_bytes() {
 fn malformed_and_oversized_traces_are_rejected_before_execution() {
     for input in [
         "",
-        "VBSIM 2 1",
+        "VBSIM 3 1",
         "VBSIM 1 0",
         "VBSIM 1 1 extra",
         "VBSIM 1 1\nunknown",

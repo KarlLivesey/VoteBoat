@@ -6620,3 +6620,16 @@ retains15 partial reviews/97 operations; the old count-expectation failure is
 preserved. The host fixture remains single-RPC with unsupported optional capacity;
 this is selected reusable C07/VB-011 evidence. Production is unchanged and the
 original lifecycle shutdown fault stays open. See [293](baseline/slice293/README.md).
+
+Checkpoint294 adds native snapshot phases to the actual-core fault replay.
+Linux/macOS each pass374 complete Raft/snapshot/snapshot-worker executions across
+four profiles (110/110/44/110), formatting and four strict Clippy profiles zero,
+and678 matching before/terminal/publication input guards. Nine new histories
+include16 seeded six-round schedules, process/power phase cuts, anchored roots,
+original retry/read, selected real follower installation and delayed WAL
+completion. A false seal-sync trace is reduced while retaining publication,
+actual compaction and power loss; verified recovery refuses to expose a voter.
+Correct sync passes. Preflight compile/lint errors and the first unanchored-root
+expectation failure are retained separately. No production/API changes; internal
+async snapshot cuts and broader reference/fuzz/lifecycle/P0–P7 remain open.
+See [294](baseline/slice294/README.md).

@@ -1,0 +1,29 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: usage of `contains_key` followed by `insert` on a `BTreeMap`
+   --> tests/raft/fault_schedule/snapshots.rs:159:9
+    |
+159 | /         if !self.images.contains_key(&id) {
+160 | |             let image = device::Image::default();
+161 | |             let provider =
+162 | |                 NativeSnapshotStore::create(image.clone(), snapshot_identity(id), limits())
+...   |
+165 | |             self.providers.insert(id, provider);
+166 | |         }
+    | |_________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#map_entry
+    = note: `-D clippy::map-entry` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::map_entry)]`
+help: try
+    |
+159 ~         if let std::collections::btree_map::Entry::Vacant(e) = self.images.entry(id) {
+160 +             let image = device::Image::default();
+161 +             let provider =
+162 +                 NativeSnapshotStore::create(image.clone(), snapshot_identity(id), limits())
+163 +                     .unwrap();
+164 +             e.insert(image);
+165 +             self.providers.insert(id, provider);
+166 +         }
+    |
+
+error: could not compile `voteboat` (test "raft") due to 1 previous error

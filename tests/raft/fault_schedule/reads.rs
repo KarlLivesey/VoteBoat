@@ -40,7 +40,7 @@ pub(super) struct Attempt {
     node: u64,
     request: u64,
     kind: Kind,
-    outcome: Outcome,
+    pub(super) outcome: Outcome,
 }
 impl Replay {
     pub(super) fn read_action(&mut self, id: u64, request: u64, kind: Kind) {
@@ -91,7 +91,11 @@ impl Replay {
                 .copied()
         });
         let outcome = if let Some(barrier) = barrier {
-            let application = crash::counter(self, id).0;
+            let application = if self.snapshots.has_image(id) {
+                self.snapshot_counter(id).unwrap()
+            } else {
+                crash::counter(self, id).0
+            };
             let before = self.point();
             match read_at_barrier(
                 &mut self.cluster.replicas.get_mut(&id).unwrap().core,

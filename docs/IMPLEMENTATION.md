@@ -122,9 +122,9 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: shared codec provisioning obligations | Advance P0/VB-011 and the composable Rust embedding milestone. | Functional review292 identifies native-only direct sizing/buffer assertions; existing host/native fixture_roundtrip checks only framing, decode and wrong-peer refusal. | Run the same exact sizing, borrowed-input, supplied-buffer and refusal assertions with independent host defaults and native implementations; defective providers must fail those assertions. Record limits of the selected fixture coverage and keep strict builds zero. |
-| Next: checkpoint parent peer shutdown correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285 all-feature72/1 and40/0 default, Linux288's retained peer failure;292 control establishes a possible long protocol close timer, but all three original-history probes pass. Mac285 stays live. | Observe original Mac terminal results and capture an actual failing retained provider predicate before its causal fix/regression. No Sent/ownership weakening or blanket deadline extension. Do not rerun unchanged passing probes as repairs. |
-| Following: generated snapshot/fault composition | Advance P0/P1 functional recovery acceptance after the reusable codec slice. | Existing actual-core replay263–272 and native snapshot/checkpoint contracts; review the absent snapshot action before changing their driver. | Extend an actual-core fault schedule with original snapshot identities, staged/durable/publication ownership, restart and acknowledged-operation checks; retain replay/reduction and a defective-provider negative. This is wider validation, not a new consensus protocol or performance prerequisite. |
+| Current: checkpoint parent peer shutdown correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285 all-feature72/1 and40/0 default, Linux288's retained peer failure;292 control establishes a possible long protocol close timer, but all three original-history probes pass. Mac285 stays live. | Observe original Mac terminal results and capture an actual failing retained provider predicate before its causal fix/regression. No Sent/ownership weakening or blanket deadline extension. Do not rerun unchanged passing probes as repairs. |
+| Next: remaining baseline acceptance audit | Advance the feature-complete Linux/macOS milestone. | Snapshot/fault294 is qualified; the original lifecycle result updates the requirement ledger independently. | Audit each P0–P6 exit and public provider against retained implementation and platform evidence; identify actual missing behavior and unqualified acceptance separately. Keep P7 performance and security review in their later phase. |
+| Following: compatible majority reference differential | Advance chapter11/R11 functional safety evidence for the service and embedding. | Audit the existing event/effect semantics and identify an independent reference with compatible majority, durability, membership and read boundaries before writing its driver. | Compare declared compatible histories against actual cores, retaining seeds, original identities, mismatches and reduction; qualify both platforms. Do not present an incompatible oracle or a flat-majority check as hierarchical quorum proof. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -27397,3 +27397,60 @@ all authenticated CLI runners. Macro review: P4 shared Multi-Raft host drain
 recovery advances while P5/P6 corrected family285 continues. Next is reviewing
 the corresponding public runner boundary, then the baseline functional exits;
 performance/security remain later, and full P0–P7 stays active. Evidence:286.
+
+Schema294 — actual-core snapshot fault replay (P0/P1): retain the original
+native WAL driver and full committed-history oracle, adding versioned trace
+operations for native snapshot begin/chunk/seal/publish/abort and public
+compaction. Each node owns one native snapshot provider, two bounded device
+slots, at most one staged ticket and its original bytes/offset. Seal synchronizes
+data/name; root publication is separately crash atomic. Process loss retains
+written bytes; power loss retains synchronized slots and the atomic root.
+Restart drops provider/admission state, reopens both actual native providers
+with new sessions, and uses public verified recovery into a fresh Counter.
+The committed-history oracle compares restored checkpoints, including dedup;
+it never supplies recovered application data. Old tickets must be rejected.
+The device helper is needed to cut real native snapshot operations between
+public phases; it adds no production provider or consensus seam. Local
+compaction and incoming installation use the existing synchronous public
+helpers: trace cuts occur around those calls, not inside their log barrier.
+Snapshot-required effects use actual pinned images and installation contracts.
+Acceptance: deterministic serialized/replayed snapshot histories, stage/seal/root
+process and power cuts, failed and lost-publication completions, original retry
+and stale-session checks, and a replayable/reduced false-seal-sync negative.
+Keep the earlier VBSIM1 histories unchanged; snapshot traces use VBSIM2. Run the
+complete Raft/snapshot targets and four strict profiles on both hosts. This does
+not qualify every asynchronous worker/remote-install cut or replace the remaining
+reference differential, fuzz, lifecycle and broader crash requirements.
+
+Schema294 refinement after the first fault run: public recovery restores from
+an unanchored publication when valid, then reconciles to the authoritative WAL
+reference. With no log anchor it releases that root; expecting subsequent
+compaction of the released root was an incorrect test assumption. Record the
+actual reopened root before reconciliation and assert its presence only after
+a lost post-publication completion. Distinguish missing unanchored publication
+from missing anchored checkpoint in the reducer target, so its negative keeps
+actual durable log compaction. No production contract changes are required.
+
+Implemented294 evidence — actual-core snapshot/fault composition: Linux and
+macOS each pass374 named executions across the complete Raft, snapshot and
+snapshot-worker targets: all110/default110/core44/native110. Formatting and all
+four strict all-target Clippy profiles are zero on both hosts;678 before/terminal
+input guards and current publication inputs match. Nine new histories cover
+process/power cuts at snapshot phases, abort and anchored replacement, failed
+seal and lost root completions, stale sessions, original Counter retry/read,
+actual pinned follower installation, delayed WAL completion after compaction,
+and16 seeded six-round schedules with asserted nonzero phases. Exact VBSIM2
+replay is checked; old VBSIM1 schedules are preserved. The defective seal-sync
+trace reduces to the original campaign/write, begin/chunk/false seal, publication,
+actual log compaction and power loss, rejected before a recovered voter is
+exposed. Correct sync passes the same history. The original compile/lint mistakes
+and first incorrect unanchored-root expectation are retained as preflight logs;
+they are not frozen acceptance runs. Production providers/APIs are unchanged.
+Macro review294: selected snapshot fault composition now advances P0/P1 recovery
+acceptance using the real native providers rather than a separate consensus
+model. The usable service/embedding interfaces remain intact. This is not all
+asynchronous installation/device cuts, a reference differential, fuzz closure,
+complete lifecycle acceptance or P0–P7 completion. The linked plan returns to
+the retained parent shutdown failure, then requirement audit and compatible
+reference comparison. Original Mac285 remains isolated and live. See
+`validation/baseline/slice294/README.md` for execution scope and retained evidence.

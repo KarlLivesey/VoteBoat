@@ -107,6 +107,8 @@ impl Replay {
                         Err(error) => panic!("unexpected persistence error: {error:?}"),
                     }
                 }
+            } else if self.snapshot_effect(id, &effect, &mut effects) {
+                // Native snapshot helpers certify their own synchronous phases.
             } else {
                 self.cluster.effects(id, vec![effect]);
             }

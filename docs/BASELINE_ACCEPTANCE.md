@@ -1100,7 +1100,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
 | R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
 | R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
-| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 replay/reduction,264 delayed/stale completions,265 crash/sync/Counter retry,266 short-write/publication recovery,267 read/cancel authority and272 actual timed-owner/WAL replay on both hosts. | Snapshot schedules, broader worker/device compositions and reference-Raft comparison remain. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 replay/reduction,264 delayed/stale completions,265 crash/sync/Counter retry,266 short-write/publication recovery,267 read/cancel authority and272 actual timed-owner/WAL replay on both hosts.294 adds staged native snapshot traces, verified anchored recovery, selected real follower installation and a reduced false-seal-sync negative on both hosts. | Broader snapshot/worker/device and combined lifecycle schedules, plus compatible reference-Raft comparison remain. |
 | R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
 | R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
 | R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |
@@ -1282,9 +1282,8 @@ a passing test count.
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as
    a sustainable throughput improvement.
-3. Broaden chapter11 beyond263–267's replayable/minimizable actual-core schedules:
-   broader worker/device composition, snapshots
-   and timer-runtime actions,
+3. Broaden chapter11 beyond263–272 and294's replayable/minimizable actual-core
+   WAL, timer and selected snapshot schedules: broader worker/device composition,
    compatible-semantics reference-Raft comparison, fuzz coverage for WAL/RPC/
    snapshot/routing codecs, declared-scope partitioned histories, and the missing
    combined membership/lifecycle/storage schedules. Existing deterministic and
@@ -1298,3 +1297,14 @@ P8 and Windows are deferred. Automatic global split/merge orchestration,
 busy-polling, custom allocators and particular external adapters are explicitly
 not prerequisites in the design. That does not defer the baseline behavior or
 validation obligations identified above.
+
+Checkpoint294 qualifies selected actual-core snapshot/fault replay on Linux/macOS:
+complete Raft/snapshot/snapshot-worker targets pass374 executions per host across
+four profiles, formatting/four strict Clippy profiles zero and678 matching frozen
+inputs. Native chunk/seal/root stages, anchored replacement/recovery, original
+Counter retries, stale sessions, selected follower installation and delayed WAL
+completion compose in exact VBSIM2 histories; an actually compacted false-sync
+negative is retained and reduced. Local compaction/incoming installation use
+synchronous public helpers, so internal async completion cuts are not qualified
+by these new traces. Full reference/fuzz/combined-fault and original lifecycle
+requirements remain. See [294](../validation/baseline/slice294/README.md).

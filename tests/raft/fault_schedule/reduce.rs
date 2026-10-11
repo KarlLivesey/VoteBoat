@@ -3,12 +3,12 @@
 use super::*;
 
 #[derive(Debug)]
-struct Reduction {
-    trace: Trace,
-    attempts: usize,
-    one_removal_minimal: bool,
+pub(super) struct Reduction {
+    pub(super) trace: Trace,
+    pub(super) attempts: usize,
+    pub(super) one_removal_minimal: bool,
 }
-fn minimize(trace: &Trace, target: &LostPrefix, budget: usize) -> Reduction {
+pub(super) fn minimize(trace: &Trace, target: &LostPrefix, budget: usize) -> Reduction {
     assert!(trace.actions.len() <= MAX_ACTIONS);
     assert!(budget <= 1024);
     assert_eq!(replay(trace).unwrap_err(), *target);

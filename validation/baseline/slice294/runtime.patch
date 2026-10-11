@@ -1,0 +1,1121 @@
+diff --git a/tests/raft/fault_schedule.rs b/tests/raft/fault_schedule.rs
+index 909d5de..1ddcaf0 100644
+--- a/tests/raft/fault_schedule.rs
++++ b/tests/raft/fault_schedule.rs
+@@ -16,0 +17,2 @@ mod reduce;
++#[path = "fault_schedule/snapshots.rs"]
++mod snapshots;
+@@ -43,0 +46 @@ enum Action {
++    Snapshot(u64, snapshots::Operation),
+@@ -136,0 +140 @@ struct Point {
++    snapshots: snapshots::Summary,
+@@ -141,0 +146,2 @@ enum FailureStage {
++    SnapshotRecoveryLost,
++    SnapshotPublicationLost,
+@@ -153,0 +160 @@ struct Replay {
++    snapshots: snapshots::Dependencies,
+@@ -170,0 +178 @@ impl Replay {
++            snapshots: snapshots::Dependencies::default(),
+@@ -175,0 +184 @@ impl Replay {
++        self.discard_snapshot(id, mode);
+@@ -199,0 +209,3 @@ impl Replay {
++        if self.snapshots.has_image(id) {
++            return self.recover_snapshot(id, store, &acknowledged);
++        }
+@@ -272,0 +285 @@ impl Replay {
++            Action::Snapshot(id, operation) => self.snapshot_action(id, operation),
+@@ -326,0 +340 @@ impl Replay {
++            snapshots: self.snapshots.summary(),
+diff --git a/tests/raft/fault_schedule/codec.rs b/tests/raft/fault_schedule/codec.rs
+index 341f49c..6db88b1 100644
+--- a/tests/raft/fault_schedule/codec.rs
++++ b/tests/raft/fault_schedule/codec.rs
+@@ -57 +57 @@ fn unary(name: &str, id: u64) -> Result<Action, ()> {
+-        _ => return Err(()),
++        _ => Action::Snapshot(id, snapshots::Operation::parse(name)?),
+@@ -93 +93,10 @@ impl Trace {
+-        let mut text = format!("VBSIM 1 {}\n", self.seed);
++        let version = if self
++            .actions
++            .iter()
++            .any(|a| matches!(a, Action::Snapshot(..)))
++        {
++            2
++        } else {
++            1
++        };
++        let mut text = format!("VBSIM {version} {}\n", self.seed);
+@@ -126,0 +136 @@ impl Trace {
++                Action::Snapshot(id, operation) => writeln!(text, "{} {id}", operation.name()),
+@@ -138 +148,5 @@ impl Trace {
+-        if header.next() != Some("VBSIM") || header.next() != Some("1") {
++        if header.next() != Some("VBSIM") {
++            return Err(DecodeError::Header);
++        }
++        let version = header.next().ok_or(DecodeError::Header)?;
++        if !matches!(version, "1" | "2") {
+@@ -150 +164,5 @@ impl Trace {
+-            actions.push(action(line).map_err(|()| DecodeError::Action(i + 2))?);
++            let action = action(line).map_err(|()| DecodeError::Action(i + 2))?;
++            if version == "1" && matches!(action, Action::Snapshot(..)) {
++                return Err(DecodeError::Action(i + 2));
++            }
++            actions.push(action);
+@@ -198 +216 @@ fn malformed_and_oversized_traces_are_rejected_before_execution() {
+-        "VBSIM 2 1",
++        "VBSIM 3 1",
+diff --git a/tests/raft/fault_schedule/delayed.rs b/tests/raft/fault_schedule/delayed.rs
+index d9cf8ef..c1127fa 100644
+--- a/tests/raft/fault_schedule/delayed.rs
++++ b/tests/raft/fault_schedule/delayed.rs
+@@ -109,0 +110,2 @@ impl Replay {
++            } else if self.snapshot_effect(id, &effect, &mut effects) {
++                // Native snapshot helpers certify their own synchronous phases.
+diff --git a/tests/raft/fault_schedule/reads.rs b/tests/raft/fault_schedule/reads.rs
+index b6bea7e..c0e1b4b 100644
+--- a/tests/raft/fault_schedule/reads.rs
++++ b/tests/raft/fault_schedule/reads.rs
+@@ -43 +43 @@ pub(super) struct Attempt {
+-    outcome: Outcome,
++    pub(super) outcome: Outcome,
+@@ -94 +94,5 @@ impl Replay {
+-            let application = crash::counter(self, id).0;
++            let application = if self.snapshots.has_image(id) {
++                self.snapshot_counter(id).unwrap()
++            } else {
++                crash::counter(self, id).0
++            };
+diff --git a/tests/raft/fault_schedule/reduce.rs b/tests/raft/fault_schedule/reduce.rs
+index 927b278..58142ed 100644
+--- a/tests/raft/fault_schedule/reduce.rs
++++ b/tests/raft/fault_schedule/reduce.rs
+@@ -6,4 +6,4 @@ use super::*;
+-struct Reduction {
+-    trace: Trace,
+-    attempts: usize,
+-    one_removal_minimal: bool,
++pub(super) struct Reduction {
++    pub(super) trace: Trace,
++    pub(super) attempts: usize,
++    pub(super) one_removal_minimal: bool,
+@@ -11 +11 @@ struct Reduction {
+-fn minimize(trace: &Trace, target: &LostPrefix, budget: usize) -> Reduction {
++pub(super) fn minimize(trace: &Trace, target: &LostPrefix, budget: usize) -> Reduction {
+diff --git a/tests/raft/fault_schedule/snapshots.rs b/tests/raft/fault_schedule/snapshots.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/fault_schedule/snapshots.rs
+@@ -0,0 +1,369 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::{
++    application::{CheckpointStateMachine, Counter, StateMachine},
++    contracts::StorageError,
++    native::snapshot_store::{NativeSnapshotStore, SnapshotIo},
++    snapshot::*,
++};
++#[path = "snapshots/device.rs"]
++mod device;
++#[path = "snapshots/effects.rs"]
++mod effects;
++#[path = "snapshots/histories.rs"]
++mod histories;
++#[path = "snapshots/recovery.rs"]
++mod recovery;
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub(super) enum Operation {
++    Begin,
++    Write,
++    Seal,
++    Publish,
++    Compact,
++    Abort,
++    Stale,
++    FailSync,
++    BadSync,
++    PublishBefore,
++    PublishAfter,
++}
++impl Operation {
++    pub(super) const ALL: [Self; 11] = [
++        Self::Begin,
++        Self::Write,
++        Self::Seal,
++        Self::Publish,
++        Self::Compact,
++        Self::Abort,
++        Self::Stale,
++        Self::FailSync,
++        Self::BadSync,
++        Self::PublishBefore,
++        Self::PublishAfter,
++    ];
++    pub(super) fn name(self) -> &'static str {
++        match self {
++            Self::Begin => "snapshot_begin",
++            Self::Write => "snapshot_write",
++            Self::Seal => "snapshot_seal",
++            Self::Publish => "snapshot_publish",
++            Self::Compact => "snapshot_compact",
++            Self::Abort => "snapshot_abort",
++            Self::Stale => "snapshot_stale",
++            Self::FailSync => "snapshot_fail_sync",
++            Self::BadSync => "snapshot_bad_sync",
++            Self::PublishBefore => "snapshot_publish_before",
++            Self::PublishAfter => "snapshot_publish_after",
++        }
++    }
++    pub(super) fn parse(name: &str) -> Result<Self, ()> {
++        Self::ALL.into_iter().find(|op| op.name() == name).ok_or(())
++    }
++}
++fn limits() -> SnapshotLimits {
++    SnapshotLimits {
++        max_application_bytes: MAX_FAULT_BYTES,
++        max_metadata_bytes: 4096,
++        max_chunk_bytes: 96,
++    }
++}
++fn fresh() -> Counter {
++    Counter::new(MAX_ACTIONS).unwrap()
++}
++fn snapshot_identity(id: u64) -> SnapshotIdentity {
++    SnapshotIdentity {
++        store: identity(u128::from(id)),
++        group: group(1),
++    }
++}
++struct Stage {
++    ticket: SnapshotTicket,
++    bytes: Vec<u8>,
++    offset: usize,
++    sealed: Option<SealedSnapshot>,
++}
++#[derive(Clone, Debug, Eq, PartialEq)]
++struct Phase {
++    ticket: SnapshotTicket,
++    offset: usize,
++    bytes: usize,
++    sealed: Option<SealedSnapshot>,
++}
++#[derive(Clone, Debug, Default, Eq, PartialEq)]
++pub(super) struct Counts {
++    pub(super) begins: usize,
++    pub(super) writes: usize,
++    pub(super) seals: usize,
++    pub(super) publishes: usize,
++    pub(super) compactions: usize,
++    pub(super) recoveries: usize,
++    pub(super) installs: usize,
++    pub(super) stale: usize,
++    pub(super) failures: usize,
++    pub(super) refused: usize,
++}
++#[derive(Clone, Debug, Default, Eq, PartialEq)]
++pub(super) struct Summary {
++    phases: BTreeMap<u64, Phase>,
++    bindings: BTreeMap<u64, StoreBinding>,
++    roots: BTreeMap<u64, Result<Option<SnapshotRef>, StorageError>>,
++    recovered_roots: BTreeMap<u64, Option<SnapshotRef>>,
++    pub(super) counts: Counts,
++}
++#[derive(Default)]
++pub(super) struct Dependencies {
++    images: BTreeMap<u64, device::Image>,
++    providers: BTreeMap<u64, NativeSnapshotStore<device::Image>>,
++    stages: BTreeMap<u64, Stage>,
++    previous: BTreeMap<u64, SnapshotTicket>,
++    incoming: BTreeMap<u64, Vec<LogEntry>>,
++    recovered_roots: BTreeMap<u64, Option<SnapshotRef>>,
++    counts: Counts,
++}
++impl Dependencies {
++    pub(super) fn has_image(&self, id: u64) -> bool {
++        self.images.contains_key(&id)
++    }
++    pub(super) fn summary(&self) -> Summary {
++        Summary {
++            phases: self
++                .stages
++                .iter()
++                .map(|(id, s)| {
++                    (
++                        *id,
++                        Phase {
++                            ticket: s.ticket,
++                            offset: s.offset,
++                            bytes: s.bytes.len(),
++                            sealed: s.sealed,
++                        },
++                    )
++                })
++                .collect(),
++            bindings: self
++                .providers
++                .iter()
++                .map(|(id, p)| (*id, p.binding()))
++                .collect(),
++            roots: self
++                .providers
++                .iter()
++                .map(|(id, p)| (*id, p.latest_reference()))
++                .collect(),
++            counts: self.counts.clone(),
++            recovered_roots: self.recovered_roots.clone(),
++        }
++    }
++    fn ensure(&mut self, id: u64) {
++        if let std::collections::btree_map::Entry::Vacant(entry) = self.images.entry(id) {
++            let image = device::Image::default();
++            let provider =
++                NativeSnapshotStore::create(image.clone(), snapshot_identity(id), limits())
++                    .unwrap();
++            entry.insert(image);
++            self.providers.insert(id, provider);
++        }
++    }
++}
++impl Replay {
++    pub(super) fn snapshot_counter(&mut self, id: u64) -> Result<Counter, CheckpointError> {
++        let mut counter = fresh();
++        let core = &self.cluster.replicas[&id].core;
++        if let Some(provider) = self.snapshots.providers.get_mut(&id) {
++            restore_application(core, &mut counter, provider)?;
++        } else {
++            counter.apply_batch(core.replay_committed())?;
++        }
++        Ok(counter)
++    }
++    pub(super) fn snapshot_action(&mut self, id: u64, operation: Operation) {
++        match operation {
++            Operation::Begin => self.snapshot_begin(id),
++            Operation::Write => self.snapshot_write(id),
++            Operation::Seal => self.snapshot_seal(id, device::Fault::None),
++            Operation::BadSync => self.snapshot_seal(id, device::Fault::FalseSync),
++            Operation::FailSync => self.snapshot_seal(id, device::Fault::Sync),
++            Operation::Publish => self.snapshot_publish(id, device::Fault::None),
++            Operation::PublishBefore => self.snapshot_publish(id, device::Fault::PublishBefore),
++            Operation::PublishAfter => self.snapshot_publish(id, device::Fault::PublishAfter),
++            Operation::Compact => self.snapshot_compact(id),
++            Operation::Abort => self.snapshot_abort(id),
++            Operation::Stale => self.snapshot_stale(id),
++        }
++    }
++    fn snapshot_begin(&mut self, id: u64) {
++        let core = &self.cluster.replicas[&id].core;
++        if core.has_pending_dependency() || core.is_fenced() || core.state().commit_index == 0 {
++            self.snapshots.counts.refused += 1;
++            return;
++        }
++        let Ok(application) = self.snapshot_counter(id) else {
++            self.snapshots.counts.refused += 1;
++            return;
++        };
++        self.snapshots.ensure(id);
++        let core = &self.cluster.replicas[&id].core;
++        let index = application.applied_index();
++        let metadata = SnapshotMetadata {
++            bootstrap: core.state().bootstrap.clone(),
++            membership: core.state().checkpoint_membership(index).unwrap(),
++            index,
++            term: core.state().term_at(index).unwrap(),
++            application_schema: application.schema_version(),
++        };
++        let bytes = application
++            .checkpoint(limits().max_application_bytes)
++            .unwrap();
++        match self
++            .snapshots
++            .providers
++            .get_mut(&id)
++            .unwrap()
++            .begin(metadata, bytes.len())
++        {
++            Ok(ticket) => {
++                assert!(self
++                    .snapshots
++                    .stages
++                    .insert(
++                        id,
++                        Stage {
++                            ticket,
++                            bytes,
++                            offset: 0,
++                            sealed: None,
++                        }
++                    )
++                    .is_none());
++                self.snapshots.previous.insert(id, ticket);
++                self.snapshots.counts.begins += 1;
++            }
++            Err(_) => self.snapshots.counts.refused += 1,
++        }
++    }
++    fn snapshot_write(&mut self, id: u64) {
++        let Some(stage) = self.snapshots.stages.get_mut(&id) else {
++            return;
++        };
++        if stage.sealed.is_some() || stage.offset == stage.bytes.len() {
++            return;
++        }
++        let end = (stage.offset + limits().max_chunk_bytes).min(stage.bytes.len());
++        match self.snapshots.providers.get_mut(&id).unwrap().write_chunk(
++            stage.ticket,
++            stage.offset,
++            &stage.bytes[stage.offset..end],
++        ) {
++            Ok(()) => {
++                stage.offset = end;
++                self.snapshots.counts.writes += 1;
++            }
++            Err(_) => self.snapshots.counts.failures += 1,
++        }
++    }
++    fn snapshot_seal(&mut self, id: u64, fault: device::Fault) {
++        let Some(stage) = self.snapshots.stages.get_mut(&id) else {
++            return;
++        };
++        if stage.sealed.is_some() || stage.offset != stage.bytes.len() {
++            return;
++        }
++        self.snapshots.images[&id].fault(fault);
++        match self
++            .snapshots
++            .providers
++            .get_mut(&id)
++            .unwrap()
++            .seal(stage.ticket)
++        {
++            Ok(sealed) => {
++                stage.sealed = Some(sealed);
++                self.snapshots.counts.seals += 1;
++            }
++            Err(_) => self.snapshots.counts.failures += 1,
++        }
++    }
++    fn snapshot_publish(&mut self, id: u64, fault: device::Fault) {
++        let Some(sealed) = self.snapshots.stages.get(&id).and_then(|s| s.sealed) else {
++            return;
++        };
++        self.snapshots.images[&id].fault(fault);
++        match self
++            .snapshots
++            .providers
++            .get_mut(&id)
++            .unwrap()
++            .publish(sealed)
++        {
++            Ok(receipt) => {
++                assert_eq!(receipt.sealed, sealed);
++                self.snapshots.stages.remove(&id);
++                self.snapshots.counts.publishes += 1;
++            }
++            Err(_) => self.snapshots.counts.failures += 1,
++        }
++    }
++    fn snapshot_compact(&mut self, id: u64) {
++        let Some(reference) = self
++            .snapshots
++            .providers
++            .get(&id)
++            .and_then(|p| p.latest_reference().ok())
++            .flatten()
++        else {
++            return;
++        };
++        let core = &self.cluster.replicas[&id].core;
++        if core.has_pending_dependency()
++            || core.is_fenced()
++            || reference.index <= core.state().base_index()
++        {
++            return;
++        }
++        let Ok(application) = self.snapshot_counter(id) else {
++            return;
++        };
++        let replica = self.cluster.replicas.get_mut(&id).unwrap();
++        match compact_replica(
++            &mut replica.core,
++            &mut replica.store,
++            self.snapshots.providers.get_mut(&id).unwrap(),
++            &application,
++            reference,
++        ) {
++            Ok(effects) => {
++                self.snapshots.counts.compactions += 1;
++                self.effects(id, effects);
++            }
++            Err(_) => self.snapshots.counts.failures += 1,
++        }
++    }
++    fn snapshot_abort(&mut self, id: u64) {
++        if let Some(stage) = self.snapshots.stages.get(&id) {
++            if self
++                .snapshots
++                .providers
++                .get_mut(&id)
++                .unwrap()
++                .abort(stage.ticket)
++                .is_ok()
++            {
++                self.snapshots.stages.remove(&id);
++            }
++        }
++    }
++    fn snapshot_stale(&mut self, id: u64) {
++        let Some(ticket) = self.snapshots.previous.get(&id).copied() else {
++            return;
++        };
++        let provider = self.snapshots.providers.get_mut(&id).unwrap();
++        if ticket.binding != provider.binding() {
++            assert_eq!(provider.abort(ticket), Err(StorageError::StaleTicket));
++            self.snapshots.counts.stale += 1;
++        }
++    }
++}
+diff --git a/tests/raft/fault_schedule/snapshots/device.rs b/tests/raft/fault_schedule/snapshots/device.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/fault_schedule/snapshots/device.rs
+@@ -0,0 +1,94 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::cell::RefCell;
++
++#[derive(Clone, Copy, Default)]
++pub(super) enum Fault {
++    #[default]
++    None,
++    Sync,
++    FalseSync,
++    PublishBefore,
++    PublishAfter,
++}
++#[derive(Default)]
++struct Device {
++    slots: [Option<Vec<u8>>; 2],
++    synced: [Option<Vec<u8>>; 2],
++    root: Option<Vec<u8>>,
++    fault: Fault,
++}
++#[derive(Clone, Default)]
++pub(super) struct Image(Rc<RefCell<Device>>);
++impl Image {
++    pub(super) fn fault(&self, fault: Fault) {
++        self.0.borrow_mut().fault = fault;
++    }
++    pub(super) fn crash(&self, mode: crash::Mode) {
++        let mut device = self.0.borrow_mut();
++        if matches!(mode, crash::Mode::PowerLoss) {
++            device.slots = device.synced.clone();
++        }
++        device.fault = Fault::None;
++    }
++}
++impl SnapshotIo for Image {
++    fn read_manifest(&mut self) -> io::Result<Vec<u8>> {
++        self.0
++            .borrow()
++            .root
++            .clone()
++            .ok_or(io::ErrorKind::NotFound.into())
++    }
++    fn read_slot(&mut self, slot: u8, limit: usize) -> io::Result<Vec<u8>> {
++        let device = self.0.borrow();
++        let bytes = device.slots[usize::from(slot)]
++            .as_ref()
++            .ok_or(io::ErrorKind::NotFound)?;
++        if bytes.len() > limit {
++            return Err(io::Error::other("snapshot budget"));
++        }
++        Ok(bytes.clone())
++    }
++    fn begin_slot(&mut self, slot: u8, prefix: &[u8]) -> io::Result<()> {
++        assert!(prefix.len() <= limits().max_file_bytes());
++        self.0.borrow_mut().slots[usize::from(slot)] = Some(prefix.to_vec());
++        Ok(())
++    }
++    fn append_slot(&mut self, slot: u8, bytes: &[u8]) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        let slot = device.slots[usize::from(slot)]
++            .as_mut()
++            .ok_or(io::ErrorKind::NotFound)?;
++        assert!(slot.len() + bytes.len() <= limits().max_file_bytes());
++        slot.extend_from_slice(bytes);
++        Ok(())
++    }
++    fn sync_slot(&mut self, slot: u8) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        match device.fault {
++            Fault::Sync => Err(io::Error::other("snapshot sync failed")),
++            Fault::FalseSync => Ok(()), // Explicit defective-provider negative only.
++            _ => {
++                device.synced[usize::from(slot)] = device.slots[usize::from(slot)].clone();
++                Ok(())
++            }
++        }
++    }
++    fn publish_manifest(&mut self, bytes: &[u8]) -> io::Result<()> {
++        let mut device = self.0.borrow_mut();
++        if matches!(device.fault, Fault::PublishBefore) {
++            return Err(io::Error::other("snapshot root before rename"));
++        }
++        // Atomic root publication includes the directory barrier. This device
++        // deliberately does not model cuts inside the filesystem implementation.
++        assert!(bytes.len() <= 256);
++        device.root = Some(bytes.to_vec());
++        if matches!(device.fault, Fault::PublishAfter) {
++            Err(io::Error::other("snapshot root completion lost"))
++        } else {
++            Ok(())
++        }
++    }
++}
+diff --git a/tests/raft/fault_schedule/snapshots/effects.rs b/tests/raft/fault_schedule/snapshots/effects.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/fault_schedule/snapshots/effects.rs
+@@ -0,0 +1,97 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++impl Replay {
++    pub(in crate::fault_schedule) fn snapshot_effect(
++        &mut self,
++        id: u64,
++        effect: &Effect,
++        queue: &mut VecDeque<Effect>,
++    ) -> bool {
++        let result = match effect {
++            Effect::SnapshotRequired {
++                to,
++                context,
++                reference,
++            } => {
++                let core = &self.cluster.replicas[&id].core;
++                supply_snapshot(
++                    core,
++                    self.snapshots.providers.get_mut(&id).unwrap(),
++                    *to,
++                    *context,
++                    *reference,
++                )
++            }
++            Effect::StageSnapshot(message) => self.stage_incoming_snapshot(id, message),
++            Effect::SnapshotInstalled(reference) => self.finish_incoming_snapshot(id, *reference),
++            _ => return false,
++        };
++        match result {
++            Ok(effects) => queue.extend(effects),
++            Err(_) => {
++                self.snapshots.counts.failures += 1;
++                if matches!(
++                    effect,
++                    Effect::StageSnapshot(_) | Effect::SnapshotInstalled(_)
++                ) {
++                    self.cluster
++                        .replicas
++                        .get_mut(&id)
++                        .unwrap()
++                        .core
++                        .storage_failed();
++                }
++            }
++        }
++        true
++    }
++    fn stage_incoming_snapshot(
++        &mut self,
++        id: u64,
++        message: &Message,
++    ) -> Result<Vec<Effect>, CheckpointError> {
++        let application = self.snapshot_counter(id)?;
++        self.snapshots.ensure(id);
++        // Retain source history only as an independent comparison oracle. The
++        // real image travels in the real Raft message and enters native storage.
++        let Rpc::Snapshot { snapshot } = &message.rpc else {
++            unreachable!()
++        };
++        let index = usize::try_from(snapshot.metadata.index).unwrap();
++        let expected = self.cluster.applied[&message.from.get()][..index].to_vec();
++        let replica = self.cluster.replicas.get_mut(&id).unwrap();
++        let effects = stage_snapshot_effect(
++            &mut replica.core,
++            &mut replica.store,
++            self.snapshots.providers.get_mut(&id).unwrap(),
++            &application,
++            message.clone(),
++        )?;
++        self.snapshots.incoming.insert(id, expected);
++        Ok(effects)
++    }
++    fn finish_incoming_snapshot(
++        &mut self,
++        id: u64,
++        reference: SnapshotRef,
++    ) -> Result<Vec<Effect>, CheckpointError> {
++        let replica = self.cluster.replicas.get_mut(&id).unwrap();
++        let mut application = fresh();
++        let effects = finish_snapshot_install(
++            &mut replica.core,
++            &replica.store,
++            self.snapshots.providers.get_mut(&id).unwrap(),
++            &mut application,
++            reference,
++        )?;
++        let mut expected = self.snapshots.incoming.remove(&id).unwrap();
++        assert!(expected.starts_with(&self.cluster.applied[&id]));
++        expected.extend(replica.core.replay_committed().iter().cloned());
++        recovery::assert_application(&application, &expected)?;
++        self.cluster.applied.insert(id, expected);
++        self.snapshots.counts.installs += 1;
++        Ok(effects)
++    }
++}
+diff --git a/tests/raft/fault_schedule/snapshots/histories.rs b/tests/raft/fault_schedule/snapshots/histories.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/fault_schedule/snapshots/histories.rs
+@@ -0,0 +1,346 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::application::CounterOutcome;
++
++fn op(id: u64, operation: Operation) -> Action {
++    Action::Snapshot(id, operation)
++}
++fn initial() -> Vec<Action> {
++    vec![
++        Action::Campaign(1),
++        Action::Pump,
++        Action::TryCounter(1, 9911, 9),
++        Action::Pump,
++    ]
++}
++fn phases(id: u64) -> [Action; 5] {
++    [
++        op(id, Operation::Begin),
++        op(id, Operation::Write),
++        op(id, Operation::Seal),
++        op(id, Operation::Publish),
++        op(id, Operation::Compact),
++    ]
++}
++fn execute(trace: &Trace) -> Replay {
++    let saved = trace.encode();
++    let decoded = Trace::decode(&saved).unwrap();
++    assert_eq!(decoded, *trace);
++    assert_eq!(replay(trace).unwrap(), replay(&decoded).unwrap(), "{saved}");
++    let mut run = Replay::new();
++    for action in &trace.actions {
++        run.action(action).unwrap();
++    }
++    run
++}
++fn assert_counter(run: &mut Replay, id: u64, value: i64) {
++    let application = run.snapshot_counter(id).unwrap();
++    assert_eq!(
++        application.read_applied(application.applied_index()),
++        Ok(value)
++    );
++    recovery::assert_application(&application, &run.cluster.applied[&id]).unwrap();
++}
++#[test]
++fn every_snapshot_phase_survives_process_and_power_loss_with_original_retry() {
++    for power in [false, true] {
++        for prefix in 1..=5 {
++            let mut actions = initial();
++            actions.extend(phases(1)[..prefix].iter().cloned());
++            actions.extend([
++                crash::cut(1, power),
++                op(1, Operation::Stale),
++                Action::Campaign(1),
++                Action::Pump,
++                Action::TryCounter(1, 9911, 9),
++                Action::Pump,
++                Action::Read(1, 100),
++                Action::Pump,
++                Action::ServeCounter(1, 100),
++            ]);
++            let mut run = execute(&Trace { seed: 294, actions });
++            assert_counter(&mut run, 1, 9);
++            assert_eq!(run.snapshots.counts.recoveries, 1);
++            assert_eq!(run.snapshots.counts.stale, 1);
++            assert!(run.snapshots.stages.is_empty());
++            assert_eq!(run.point().logs[&1].base_index() > 0, prefix == 5);
++            assert!(run
++                .read_outcomes
++                .iter()
++                .any(|a| a.outcome == reads::Outcome::Value(9)));
++            let replica = &run.cluster.replicas[&1];
++            let mut fresh_application = fresh();
++            let restored = restore_application(
++                &replica.core,
++                &mut fresh_application,
++                run.snapshots.providers.get_mut(&1).unwrap(),
++            )
++            .unwrap();
++            assert!(restored.replay_receipts.last().unwrap().duplicate);
++            assert_eq!(
++                restored.replay_receipts.last().unwrap().outcome,
++                CounterOutcome::Value(9)
++            );
++        }
++    }
++}
++#[test]
++fn failed_seal_and_lost_root_completions_recover_actual_published_state() {
++    for power in [false, true] {
++        for operation in [
++            Operation::FailSync,
++            Operation::PublishBefore,
++            Operation::PublishAfter,
++        ] {
++            let mut actions = initial();
++            actions.extend(phases(1)[..2].iter().cloned());
++            if operation != Operation::FailSync {
++                actions.push(op(1, Operation::Seal));
++            }
++            actions.push(op(1, operation));
++            actions.extend([
++                crash::cut(1, power),
++                op(1, Operation::Stale),
++                op(1, Operation::Compact),
++            ]);
++            let mut run = execute(&Trace { seed: 295, actions });
++            assert_counter(&mut run, 1, 9);
++            assert_eq!(run.snapshots.counts.failures, 1);
++            assert_eq!(run.snapshots.counts.stale, 1);
++            assert_eq!(run.point().logs[&1].base_index(), 0);
++            assert_eq!(
++                run.snapshots.recovered_roots[&1].is_some(),
++                operation == Operation::PublishAfter
++            );
++            assert_eq!(run.snapshots.providers[&1].latest_reference(), Ok(None));
++        }
++    }
++}
++#[test]
++fn a_replaced_snapshot_retains_the_old_log_anchor_through_every_new_phase_cut() {
++    for power in [false, true] {
++        for prefix in 1..=5 {
++            let mut actions = initial();
++            actions.extend(phases(1));
++            actions.extend([Action::TryCounter(1, 9912, 4), Action::Pump]);
++            let replacement = [
++                op(1, Operation::Begin),
++                op(1, Operation::Write),
++                op(1, Operation::Write),
++                op(1, Operation::Seal),
++                op(1, Operation::Publish),
++                op(1, Operation::Compact),
++            ];
++            actions.extend(replacement[..prefix].iter().cloned());
++            actions.push(crash::cut(1, power));
++            let mut run = execute(&Trace { seed: 296, actions });
++            assert_counter(&mut run, 1, 13);
++            assert_eq!(run.point().logs[&1].base_index(), 2);
++            assert_eq!(
++                run.snapshots.providers[&1]
++                    .latest_reference()
++                    .unwrap()
++                    .unwrap()
++                    .index,
++                2
++            );
++        }
++    }
++}
++#[test]
++fn lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operations() {
++    let mut actions = initial();
++    actions.extend([
++        Action::Isolate(3),
++        Action::TryCounter(1, 9912, 4),
++        Action::Pump,
++        op(1, Operation::Begin),
++        op(1, Operation::Write),
++        op(1, Operation::Write),
++        op(1, Operation::Seal),
++        op(1, Operation::Publish),
++        op(1, Operation::Compact),
++        Action::Heal,
++        Action::Heartbeat(1),
++        Action::DuplicateOldest,
++        Action::DeliverNewest,
++        Action::Pump,
++        Action::PowerLoss(3),
++        Action::Campaign(1),
++        Action::Pump,
++        Action::TryCounter(1, 9911, 9),
++        Action::Pump,
++    ]);
++    let mut run = execute(&Trace { seed: 297, actions });
++    assert!(run.snapshots.counts.installs > 0);
++    for id in 1..=3 {
++        assert_counter(&mut run, id, 13);
++    }
++    assert!(run.point().logs[&3].base_index() > 0);
++}
++#[test]
++fn false_snapshot_seal_sync_is_replayed_reduced_and_rejected_before_voting() {
++    let mut actions = initial();
++    actions.extend([
++        op(1, Operation::Begin),
++        op(1, Operation::Write),
++        op(1, Operation::BadSync),
++        op(1, Operation::Publish),
++        op(1, Operation::Compact),
++        Action::PowerLoss(1),
++    ]);
++    let trace = Trace { seed: 298, actions };
++    let target = LostPrefix {
++        node: 1,
++        operation: Some(OperationId::new(9911).unwrap()),
++        stage: FailureStage::SnapshotRecoveryLost,
++    };
++    assert_eq!(replay(&trace), Err(target.clone()));
++    let reduced = reduce::minimize(&trace, &target, 512);
++    assert!(reduced.one_removal_minimal);
++    assert!(reduced.attempts <= 512);
++    let saved = reduced.trace.encode();
++    assert_eq!(replay(&Trace::decode(&saved).unwrap()), Err(target.clone()));
++    for i in 0..reduced.trace.actions.len() {
++        let mut smaller = reduced.trace.clone();
++        smaller.actions.remove(i);
++        assert_ne!(replay(&smaller).err(), Some(target.clone()));
++    }
++    let mut correct = trace;
++    for action in &mut correct.actions {
++        if *action == op(1, Operation::BadSync) {
++            *action = op(1, Operation::Seal);
++        }
++    }
++    let mut run = execute(&correct);
++    assert_counter(&mut run, 1, 9);
++    eprintln!("minimized false snapshot-seal-sync trace:\n{saved}");
++}
++#[test]
++fn seeded_snapshot_network_and_restart_histories_replay_exactly_without_vacuous_phases() {
++    for seed in 1..=16u64 {
++        let mut actions = initial();
++        let mut random = seed;
++        for round in 0..6u64 {
++            random ^= random << 13;
++            random ^= random >> 7;
++            random ^= random << 17;
++            let id = random % 3 + 1;
++            actions.extend([
++                Action::Campaign(1),
++                Action::DuplicateOldest,
++                Action::DeliverNewest,
++                Action::Pump,
++                Action::TryCounter(1, 10000 + u128::from(round), 1),
++                Action::Pump,
++                op(id, Operation::Begin),
++            ]);
++            actions.extend((0..4).map(|_| op(id, Operation::Write)));
++            actions.extend([
++                op(id, Operation::Seal),
++                op(id, Operation::Publish),
++                op(id, Operation::Compact),
++                crash::cut(id, random & 1 == 0),
++                op(id, Operation::Stale),
++            ]);
++        }
++        let mut run = execute(&Trace { seed, actions });
++        assert_eq!(run.snapshots.counts.compactions, 6);
++        assert_eq!(run.snapshots.counts.recoveries, 6);
++        assert_eq!(run.snapshots.counts.stale, 6);
++        assert_eq!(run.snapshots.counts.failures, 0);
++        for id in 1..=3 {
++            assert_counter(&mut run, id, 15);
++        }
++    }
++}
++#[test]
++fn snapshot_trace_version_and_malformed_phases_are_rejected_before_execution() {
++    let trace = Trace {
++        seed: 299,
++        actions: Operation::ALL
++            .into_iter()
++            .map(|operation| op(1, operation))
++            .collect(),
++    };
++    let saved = trace.encode();
++    assert!(saved.starts_with("VBSIM 2 "));
++    assert_eq!(Trace::decode(&saved).unwrap(), trace);
++    for text in [
++        "VBSIM 1 1\nsnapshot_begin 1",
++        "VBSIM 2 1\nsnapshot_begin 0",
++        "VBSIM 2 1\nsnapshot_publish 4",
++        "VBSIM 2 1\nsnapshot_seal 1 extra",
++        "VBSIM 2 1\nsnapshot_unknown 1",
++        "VBSIM 3 1\nsnapshot_begin 1",
++    ] {
++        assert!(Trace::decode(text).is_err(), "{text}");
++    }
++}
++
++#[test]
++fn aborted_replacement_stage_preserves_actual_published_log_anchor() {
++    let mut actions = initial();
++    actions.extend(phases(1));
++    actions.extend([
++        Action::TryCounter(1, 9912, 4),
++        Action::Pump,
++        op(1, Operation::Begin),
++        op(1, Operation::Write),
++        op(1, Operation::Abort),
++        Action::PowerLoss(1),
++        op(1, Operation::Stale),
++    ]);
++    let mut run = execute(&Trace { seed: 300, actions });
++    assert_counter(&mut run, 1, 13);
++    assert!(run.snapshots.stages.is_empty());
++    assert_eq!(
++        run.snapshots.providers[&1]
++            .latest_reference()
++            .unwrap()
++            .unwrap()
++            .index,
++        2
++    );
++    assert_eq!(run.snapshots.counts.begins, 2);
++    assert_eq!(run.snapshots.counts.publishes, 1);
++    assert_eq!(run.snapshots.counts.stale, 1);
++}
++#[test]
++fn compacted_snapshot_composes_with_delayed_wal_completion_and_uncertain_original_retry() {
++    for power in [false, true] {
++        for synced in [false, true] {
++            let mut actions = initial();
++            actions.extend(phases(1));
++            actions.extend([
++                Action::Delay(1),
++                Action::TryCounter(1, 9912, 4),
++                op(1, Operation::Begin),
++            ]);
++            if synced {
++                actions.push(Action::Sync(1));
++            }
++            actions.extend([
++                crash::cut(1, power),
++                op(1, Operation::Stale),
++                Action::Campaign(1),
++            ]);
++            for _ in 0..4 {
++                actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
++            }
++            actions.push(Action::TryCounter(1, 9912, 4));
++            for _ in 0..4 {
++                actions.extend([Action::Sync(1), Action::Complete(1), Action::Pump]);
++            }
++            actions.extend([Action::PowerLoss(1), op(1, Operation::Stale)]);
++            let mut run = execute(&Trace { seed: 301, actions });
++            assert_counter(&mut run, 1, 13);
++            assert!(run.point().held.is_empty());
++            assert!(run.point().pending.is_empty());
++            assert_eq!(run.snapshots.counts.compactions, 1);
++            assert_eq!(run.snapshots.counts.recoveries, 2);
++            assert_eq!(run.snapshots.counts.refused, 1);
++        }
++    }
++}
+diff --git a/tests/raft/fault_schedule/snapshots/recovery.rs b/tests/raft/fault_schedule/snapshots/recovery.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/fault_schedule/snapshots/recovery.rs
+@@ -0,0 +1,87 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++fn lost(id: u64, acknowledged: &[LogEntry], anchored: bool) -> LostPrefix {
++    LostPrefix {
++        node: id,
++        operation: acknowledged
++            .iter()
++            .rev()
++            .find_map(|entry| match entry.payload {
++                EntryPayload::Command { operation, .. } => Some(operation),
++                _ => None,
++            }),
++        stage: if anchored {
++            FailureStage::SnapshotRecoveryLost
++        } else {
++            FailureStage::SnapshotPublicationLost
++        },
++    }
++}
++impl Replay {
++    pub(in crate::fault_schedule) fn discard_snapshot(&mut self, id: u64, mode: crash::Mode) {
++        self.snapshots.stages.remove(&id);
++        self.snapshots.providers.remove(&id);
++        self.snapshots.incoming.remove(&id);
++        if let Some(image) = self.snapshots.images.get(&id) {
++            image.crash(mode);
++        }
++    }
++    pub(in crate::fault_schedule) fn recover_snapshot(
++        &mut self,
++        id: u64,
++        store: NativeLogStore<TraceIo>,
++        acknowledged: &[LogEntry],
++    ) -> Result<(), LostPrefix> {
++        let failure = || {
++            lost(
++                id,
++                acknowledged,
++                store.state(group(1)).unwrap().snapshot.is_some(),
++            )
++        };
++        let mut provider = NativeSnapshotStore::recover(
++            self.snapshots.images[&id].clone(),
++            snapshot_identity(id),
++            limits(),
++        )
++        .map_err(|_| failure())?;
++        self.snapshots
++            .recovered_roots
++            .insert(id, provider.latest_reference().unwrap());
++        let mut application = fresh();
++        // These are the only recovery inputs: reopened native WAL, native
++        // snapshot device and a fresh application. The oracle is compared later.
++        let (core, _) =
++            recover_replica(node(id), group(1), &store, &mut provider, &mut application)
++                .map_err(|_| failure())?;
++        if core.state().commit_index < acknowledged.len() as u64 {
++            return Err(failure());
++        }
++        let mut expected = acknowledged.to_vec();
++        expected.extend(
++            core.replay_committed()
++                .iter()
++                .filter(|e| e.index > acknowledged.len() as u64)
++                .cloned(),
++        );
++        assert_application(&application, &expected).map_err(|_| failure())?;
++        self.cluster.applied.insert(id, expected);
++        self.cluster.replicas.insert(id, Replica { core, store });
++        self.snapshots.providers.insert(id, provider);
++        self.snapshots.counts.recoveries += 1;
++        Ok(())
++    }
++}
++pub(super) fn assert_application(
++    application: &Counter,
++    expected: &[LogEntry],
++) -> Result<(), CheckpointError> {
++    let mut oracle = fresh();
++    oracle.apply_batch(expected)?;
++    if application.checkpoint(MAX_FAULT_BYTES)? != oracle.checkpoint(MAX_FAULT_BYTES)? {
++        return Err(CheckpointError::InvalidBoundary);
++    }
++    Ok(())
++}

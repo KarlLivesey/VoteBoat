@@ -1,0 +1,69 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0624]: method `snapshot_effect` is private
+   --> tests/raft/fault_schedule/delayed.rs:110:28
+    |
+110 |               } else if self.snapshot_effect(id, &effect, &mut effects) {
+    |                              ^^^^^^^^^^^^^^^ private method
+    |
+   ::: tests/raft/fault_schedule/snapshots/effects.rs:6:5
+    |
+  6 | /     pub(super) fn snapshot_effect(
+  7 | |         &mut self,
+  8 | |         id: u64,
+  9 | |         effect: &Effect,
+ 10 | |         queue: &mut VecDeque<Effect>,
+ 11 | |     ) -> bool {
+    | |_____________- private method defined here
+
+error[E0616]: field `outcome` of struct `fault_schedule::reads::Attempt` is private
+  --> tests/raft/fault_schedule/snapshots/histories.rs:71:28
+   |
+71 |                 .any(|a| a.outcome == reads::Outcome::Value(9)));
+   |                            ^^^^^^^ private field
+
+error[E0277]: the trait bound `u128: std::convert::From<i32>` is not satisfied
+   --> tests/raft/fault_schedule/snapshots/histories.rs:233:47
+    |
+233 |                 Action::TryCounter(1, 10000 + u128::from(round), 1),
+    |                                               ^^^^ the trait `std::convert::From<i32>` is not implemented for `u128`
+    |
+    = help: `u128` implements trait `std::convert::From<T>`:
+              std::convert::From<bool>
+              std::convert::From<char>
+              std::convert::From<std::ascii::Char>
+              std::convert::From<std::net::Ipv6Addr>
+              std::convert::From<u16>
+              std::convert::From<u32>
+              std::convert::From<u64>
+              std::convert::From<u8>
+
+error[E0624]: method `discard_snapshot` is private
+   --> tests/raft/fault_schedule.rs:183:14
+    |
+183 |         self.discard_snapshot(id, mode);
+    |              ^^^^^^^^^^^^^^^^ private method
+    |
+   ::: tests/raft/fault_schedule/snapshots/recovery.rs:19:5
+    |
+ 19 |     pub(super) fn discard_snapshot(&mut self, id: u64, mode: crash::Mode) {
+    |     --------------------------------------------------------------------- private method defined here
+
+error[E0624]: method `recover_snapshot` is private
+   --> tests/raft/fault_schedule.rs:209:25
+    |
+209 |               return self.recover_snapshot(id, store, &acknowledged);
+    |                           ^^^^^^^^^^^^^^^^ private method
+    |
+   ::: tests/raft/fault_schedule/snapshots/recovery.rs:27:5
+    |
+ 27 | /     pub(super) fn recover_snapshot(
+ 28 | |         &mut self,
+ 29 | |         id: u64,
+ 30 | |         store: NativeLogStore<TraceIo>,
+ 31 | |         acknowledged: &[LogEntry],
+ 32 | |     ) -> Result<(), LostPrefix> {
+    | |_______________________________- private method defined here
+
+Some errors have detailed explanations: E0277, E0616, E0624.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `voteboat` (test "raft") due to 5 previous errors

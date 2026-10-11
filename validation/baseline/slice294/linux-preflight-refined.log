@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.96s
+     Running tests/raft.rs (target/slice287/build/debug/deps/raft-012fe3879bfff57d)
+
+running 7 tests
+test fault_schedule::snapshots::histories::snapshot_trace_version_and_malformed_phases_are_rejected_before_execution ... ok
+test fault_schedule::snapshots::histories::lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operations ... ok
+test fault_schedule::snapshots::histories::failed_seal_and_lost_root_completions_recover_actual_published_state ... ok
+minimized false snapshot-seal-sync trace:
+VBSIM 2 298
+campaign 1
+pump
+counter 1 9911 9
+pump
+snapshot_begin 1
+snapshot_write 1
+snapshot_bad_sync 1
+snapshot_publish 1
+snapshot_compact 1
+power_loss 1
+
+test fault_schedule::snapshots::histories::false_snapshot_seal_sync_is_replayed_reduced_and_rejected_before_voting ... ok
+test fault_schedule::snapshots::histories::a_replaced_snapshot_retains_the_old_log_anchor_through_every_new_phase_cut ... ok
+test fault_schedule::snapshots::histories::every_snapshot_phase_survives_process_and_power_loss_with_original_retry ... ok
+test fault_schedule::snapshots::histories::seeded_snapshot_network_and_restart_histories_replay_exactly_without_vacuous_phases ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 62 filtered out; finished in 0.51s
