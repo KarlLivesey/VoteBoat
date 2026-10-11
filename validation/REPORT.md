@@ -1,5 +1,21 @@
 # Validation report
 
+Current evidence: [feature status](../docs/FEATURE_STATUS.md) and
+[shutdown correction305](baseline/slice305/README.md). Complete corrected counter
+targets pass Linux203/0 and Mac202/0; executable52/0 each, focused discovery and
+connector inspection1/0 each. Formatting and all four strict Clippy profiles are
+zero on both hosts, with709 matching source guards. The actual native control
+proves the original cap defect and corrected ownership/drain behavior;302's
+unobserved original Mac cause remains separate.
+
+The original705-input platform sweep continues: Linux all-feature1952/0 is
+terminal, default/core/native remain in progress; Mac all-feature is still live
+with its original counter195/1 failure retained. No complete platform or P0–P7
+acceptance is claimed. Seeded parser, scoped client-history and shared connector
+evidence is archived in [301](baseline/slice301/README.md). Sustainable throughput
+at the original correctness/p99 gate remains P7 work after feature qualification.
+The records below describe their own historical sources and outcomes.
+
 Exact replica-bound recovery expectation: [slice273](baseline/slice273/README.md).
 Both hosts pass the original four TCP/QUIC WAL/checkpoint histories plus two
 actual-core tail regressions, and four additional regression executions each.
