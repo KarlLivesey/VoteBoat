@@ -1,7 +1,9 @@
 # Feature status
 
 Current priority: usable, feature-complete Rust embedding and networked service
-on Linux and macOS. Performance tuning and the security review follow afterward.
+on Linux and macOS. Current work covers feature sets only. Performance tuning
+is deferred; completing feature qualification does not automatically start it.
+Security review remains a separate later step.
 
 | Capability | Implemented path |
 | --- | --- |

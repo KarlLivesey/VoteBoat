@@ -16,7 +16,7 @@ record claims that unimplemented phases already work.
 | P4 | Learner catch-up, joint membership/policy changes and snapshot membership recovery | Implemented readiness, joint/final activation, rollback/restart/resumption and authenticated Node/sample-service administration. Native startup284 and old-checkpoint/recovered-policy fault histories297 pass both hosts. Complete current service/lifecycle qualification remains302. |
 | P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
 | P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
-| P7 | Multiple local lanes, batching/pipelining, reclamation and recovery throttling | Mechanisms and finite TCP/QUIC benchmarks/cost attribution exist. Sustainable throughput improvement at the original fixed correctness/p99 budget remains unmet. Performance tuning follows feature qualification; the full P0–P7 goal stays active. |
+| P7 | Multiple local lanes, batching/pipelining, reclamation and recovery throttling | Mechanisms and finite TCP/QUIC benchmarks/cost attribution exist. Sustainable throughput improvement at the original fixed correctness/p99 budget remains unmet. Performance tuning is deferred; the current work covers feature sets only. The full P0–P7 goal stays active. |
 | P8 | Logical voters, striped single-group WAL and broader transactions | Research, deferred behind separate protocol/proof gates. |
 
 [Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
@@ -87,7 +87,7 @@ solely for compatibility. Preserve explicit migration for already-written data.
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; recover elections, rollback and partial delivery with exact activation timing. | P4 mechanisms are implemented through public Node and authenticated sample administration. Native startup284 and interrupted older-checkpoint policy recovery297 provide selected Linux/Mac evidence; current full platform qualification remains302. |
 | Recursive responsibilities and routing | Resolve manifests, selectively place groups and route requests; cached child operation survives parent unavailability without an ancestor commit in the normal write path. | P5 mechanisms are implemented, including native creation/delegation/metadata movement and bounded directory/lookup service profiles. Complete current platform qualification remains302. Automatic global orchestration is deferred by chapter12. |
 | Split and merge | Move actual data with source fencing, import readiness and durable activation; preserve retry/outbox lineage and recover without two active owners. | P6 public mechanisms and bounded split/compatible-merge services are implemented. Selected phase/reopen, retirement and independent per-bucket client histories are recorded; complete current platform qualification remains302. |
-| Measured tuning and broader validation | Demonstrate sustainable throughput improvement at the original correctness/p99 budget, with attributable costs; tune batching, lanes, reclamation and recovery throttling from measurements. | P7 remains unmet in the full goal. Advance it after feature qualification; Linux/macOS remain targets and CI provides background feedback. Security review follows the user's separate Daybreak pass. |
+| Deferred measured tuning | Demonstrate sustainable throughput improvement at the original correctness/p99 budget, with attributable costs; tune batching, lanes, reclamation and recovery throttling from measurements. | P7 remains unmet in the full goal and outside the current feature-only work. Completing feature qualification does not automatically start tuning. Security review follows the user's separate Daybreak pass. |
 
 These are capability milestones, not a claim that every earlier phase is
 finished. The detailed phase table above remains the scope ledger. P8 remains
@@ -111,7 +111,7 @@ that listed those mechanisms as missing. Full current feature qualification is
 still the preserved302 sweep and any additional failures it demonstrates.
 Selected passing histories do not complete every phase or certify arbitrary
 providers. P7's sustainable improvement at the original correctness/p99 budget
-remains an explicit unmet full-goal requirement after feature qualification;
+remains an explicit unmet full-goal requirement deferred from current work;
 P8/Windows and the separate security pass retain their stated scope.
 
 Checkpoint284 qualifies complete native member startup on Linux and Mac:
@@ -136,7 +136,7 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Completed305: qualify the demonstrated shutdown correction | Preserve usable service shutdown while a legitimate original QUIC close remains owned. | Actual304 cap-defect control, existing inspection contracts and independent ownership review. | Keep the ten-second local-work cutoff, pin only settled original close timers, require actual drain/join and successful process exit. Affected targets pass Linux203/0 and Mac202/0, executable52/0 each, with four strict profiles zero. Original Mac302 cause remains unobserved; a silent pass does not establish it. |
 | Current302: finish the preserved platform sweep | Establish the finite baseline service/embedding qualification. | Original four-profile matrices and final305 affected-source evidence. | Linux is terminal5661/0 across all four profiles; Mac remains live. Retain terminal results, resolve additional demonstrated failures with bounded corrections and reuse unaffected evidence; no full-suite restart or optional new engine. |
 | Next: feature milestone decision | Record whether the original feature exits are met for the implemented service/embedding scope. | Terminal302 profile results, qualified305 correction and the finite source/provider review301. | Match each required exit to actual evidence, retain historical/remaining failures, publish the current capability/limits record and mark only qualified milestones complete. The full P0–P7 goal remains active. |
-| Following: P7 measured tuning | Establish sustainable improvement at the original correctness/p99 budget with attributable costs. | Qualified feature exits and the existing reproducible baseline/hardware/workload records. | Preserve the simple baseline, original latency gate and durability/recovery checks; measure repeatable committed/applied capacity and accept only demonstrated invariant-preserving improvements. No performance acceptance is claimed in advance. |
+| Following: usable feature handoff | Make the qualified feature set straightforward to run and embed on Linux/macOS. | Feature milestone decision and the existing service quickstart, public examples and capability record. | Check that run/embed instructions match qualified APIs and supported profiles; fix concrete usability gaps and report any feature omissions. Keep the README concise and reuse existing evidence. Performance tuning remains deferred. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28054,3 +28054,16 @@ shutdown305 retains separate affected-source evidence; no mixed-source full-pass
 claim follows. Original Mac handle74020 is confirmed live and advancing; only
 its original counter195/1 failure is observed so far. Full feature/platform and
 P7 acceptance remain open. No new runtime tests or production changes are added.
+
+Schema308 — feature-only priority: the user's renewed instruction restricts
+current work to feature sets. Keep the current platform qualification and the
+feature-exit decision, and replace the following tuning deliverable with usable
+feature handoff. This changes planning/documentation only: no API, state,
+ownership, restart or cleanup behavior changes. Acceptance is an aligned macro
+and current/next-two mini plan, explicit deferred performance scope and clean
+formatting/strict Clippy. Existing platform processes continue unchanged.
+
+Implemented308: current work is feature-only on Linux/macOS. P7 performance
+requirements remain recorded but deferred, and feature qualification does not
+automatically initiate optimization. The following deliverable checks existing
+run/embed instructions and concrete feature usability rather than benchmarks.
