@@ -28,6 +28,32 @@ Latest feature review: [slice255](#slice255--functional-checkpoint).
 Current requirement ledger: [acceptance map](BASELINE_ACCEPTANCE.md).
 Earlier reviews below retain their original revision and scope.
 
+## Slice292 — functional exit review
+
+Reviewed the current capability inventory and P0–P7 exits against the existing
+source/evidence map, now including public runner287 and shutdown291–292.
+This review identifies the next concrete missing reusable assertion; it does
+not certify completion from inventory entries or isolated passes.
+
+| Exit | Current source/evidence | What still prevents full acceptance |
+| --- | --- | --- |
+| P0: composable contracts and reviewed ownership | Public domain traits, NodeParts and independent host/native storage, application, scheduling, transport and timer checks. | Reusable obligations remain partial. tests/wire.rs shares frame/decode/scope checks, but direct sizing/provided-buffer checks are native-only; host defaults need those same assertions. Broader actual-core snapshot/fault schedules remain. |
+| P1: durable service, retries, reads and recovery | Native WAL/snapshot providers, actual-core replay263–272, service and separate-host256; public executable recovery287. | General device/application histories and current complete macOS execution are unproven. Targeted codec/snapshot fixes270–271 and later passes do not erase original full-suite failures. |
+| P2: shared runtime and overload isolation | Shared workers, multiplexed transports, hundred-group assembly, selected pressure/recovery and shared host/native ownership checks. | Wider competing receive/connection/recovery and current platform composition remain. Active-fraction/CPU tuning belongs to later P7. |
+| P3: recursive fixed quorum at all consensus sites | Policy/JointPolicy, Membership predicates/frontiers and existing intersection/nine-voter/election/read/commit tests. | Broader joint/log/term schedules are functional validation, not a missing recursive-policy implementation or permission for hot reload. |
+| P4: online membership and restart | Learner enrollment, readiness, joint/final state, exact configuration resumption, native member startup284, example drain286 and public runners287. | Wider combined new-voter/old-checkpoint and activation/refusal histories remain; broader platform qualification is not proved by those selected matrices. |
+| P5: recursive routing and independent children | Manifests, assignments, directory service, cached lookup, creation/delegation and native parent-offline histories. | Original recursive failures and current family285 remain separate source-bound obligations. Linux285 finishes72/1 all and40/0 default; Mac285 is verified live. |
+| P6: split/merge and retry lineage | Public scope/source/target/publication/activation/retirement contracts with actual native phase/reopen histories. | The Linux285/288 checkpoint parent shutdown stall remains unresolved.292 establishes a possible long close timer in a controlled schedule but captures no original failed provider. Wider combined phase/storage faults remain. |
+| P7: sustainable measured improvement | Existing benchmarks, attribution, shared batching, lanes and recovery/reclamation controls. | Original fixed correctness/p99 gate remains unmet. Performance tuning is the user's later phase and the full P0–P7 goal stays active. |
+
+Next implement shared exact codec sizing/buffer/refusal checks through the
+existing host/native public seam, with defective-provider negatives. This is
+VB-011 contract work for Rust embedding, not another codec or adapter. Keep the
+demonstrated shutdown fault open and observe the original Mac process rather
+than repeating unchanged healthy probes. Optional orchestration, third-party
+adapters, Windows/P8 and the later security review do not become new feature
+prerequisites.
+
 ## Slice255 — functional checkpoint
 
 Reviewedc408313 plus267's read/cancel evidence against chapter01 R01–R19

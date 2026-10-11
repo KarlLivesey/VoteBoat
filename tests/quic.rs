@@ -15,6 +15,8 @@
 #![cfg(feature = "quic")]
 #[path = "quic/chunk_progress.rs"]
 mod chunk_progress;
+#[path = "quic/closing_timer.rs"]
+mod closing_timer;
 #[path = "quic/frame_progress.rs"]
 mod frame_progress;
 mod support;

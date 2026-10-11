@@ -1,5 +1,12 @@
 # Baseline acceptance map
 
+Explicit QUIC close clock: [slice292](../validation/baseline/slice292/README.md).
+Linux/macOS pass the complete19-test target, strict four-profile Clippy/formatting
+zero and671 source guards. A delayed authenticated handshake yields a protocol
+close deadline beyond15s even after accepted hello output flushes; the session
+terminates at that original deadline. This control does not diagnose285/288's
+retained parent peer. Three silent original-history probes pass without capture.
+
 Native QUIC framed shutdown ownership: [slice291](../validation/baseline/slice291/README.md).
 Linux/macOS each pass the complete18-test QUIC target, with formatting/four
 strict all-target Clippy configurations zero and670 matching input guards.

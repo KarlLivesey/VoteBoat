@@ -6603,3 +6603,11 @@ close preserves original completions and unread input; peer loss returns exact
 failed ownership. Partial provider metadata integrity and its checker test pass.
 Production and deadline semantics are unchanged. Passing isolated probes289/290
 do not explain the original285/288 shutdown failure. See [291](baseline/slice291/README.md).
+
+Checkpoint292 checks explicit close time after a delayed authenticated QUIC
+handshake. Linux/macOS pass the complete19-test target, formatting/four strict
+Clippy profiles zero and671 source guards. With accepted hello output resolved,
+Closing can legitimately extend beyond15s and terminates at the original public
+protocol deadline. This is a controlled time-contract check, not a production
+change or diagnosis of the earlier stall. Three silent original-history probes
+pass without a failed-state capture and are stopped. See [292](baseline/slice292/README.md).

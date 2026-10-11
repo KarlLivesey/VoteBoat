@@ -122,9 +122,9 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Terminal262 and269, accepted273/274/281/284/286/287 and focused285, plus open retirement progress evidence. Linux285 is terminal72/1 all-feature and40/0 default; Mac285 is live. Diagnostic288 is terminal Linux0/1 and Mac1/0. | Classify exact failures and complete all73/default family matrices, retaining original phase cuts, source guards and strict checks. Linux has reported a checkpoint split parent-shutdown timeout at native.rs514; selected passes do not explain unreproduced older timeouts. |
-| Next: resolve checkpoint parent peer shutdown | Advance P5/P6 owned shutdown/restart acceptance. | Full Linux285 all-feature72/1, Linux288's same parent peer drain failure, terminal/public runner287 and isolated QUIC trace289; observe Mac originals independently. | Identify the exact retained session/transport predicate, write a regression at that boundary and fix its cause without weakening successful send/ownership rules or expanding deadlines. Keep isolated passes and failed full schedules separate. |
-| Following: baseline functional exit review | Identify the next complete user-visible feature path for P0–P6. | Current lifecycle and accepted public executable recovery287, component contracts and the acceptance map; performance/security remain later. | Separate implemented-but-unqualified behavior from absent features, select the smallest complete remaining feature path and record its API/state/restart acceptance before editing. Do not substitute a selected pass count for feature completion or make optional orchestration a prerequisite. |
+| Current: shared codec provisioning obligations | Advance P0/VB-011 and the composable Rust embedding milestone. | Functional review292 identifies native-only direct sizing/buffer assertions; existing host/native fixture_roundtrip checks only framing, decode and wrong-peer refusal. | Run the same exact sizing, borrowed-input, supplied-buffer and refusal assertions with independent host defaults and native implementations; defective providers must fail those assertions. Record limits of the selected fixture coverage and keep strict builds zero. |
+| Next: checkpoint parent peer shutdown correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285 all-feature72/1 and40/0 default, Linux288's retained peer failure;292 control establishes a possible long protocol close timer, but all three original-history probes pass. Mac285 stays live. | Observe original Mac terminal results and capture an actual failing retained provider predicate before its causal fix/regression. No Sent/ownership weakening or blanket deadline extension. Do not rerun unchanged passing probes as repairs. |
+| Following: generated snapshot/fault composition | Advance P0/P1 functional recovery acceptance after the reusable codec slice. | Existing actual-core replay263–272 and native snapshot/checkpoint contracts; review the absent snapshot action before changing their driver. | Extend an actual-core fault schedule with original snapshot identities, staged/durable/publication ownership, restart and acknowledged-operation checks; retain replay/reduction and a defective-provider negative. This is wider validation, not a new consensus protocol or performance prerequisite. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -246,6 +246,78 @@ The next independent deliverable is the baseline functional exit review while
 Mac285 continues. The unresolved parent shutdown remains a required correction,
 but another unchanged healthy probe would not advance it. Review the actual
 feature exits and contracts before choosing a new feature or diagnostic seam.
+
+Schema292 — capture the original close timer (P5/P6): the native session waits
+for Quinn's actual close/drain state after accepted output completes. The pinned
+provider sets its close timer to three current PTOs; a long sampled RTT could
+therefore exceed the fixture's15s progress assertion. This is only a hypothesis.
+Use a separate frozen image, retaining destruction-only290 diagnostics, and add
+one private diagnostic record at the existing first c.close call: caller time,
+actual next protocol timer delay and current RTT. Print that record only when
+a nonterminal closing session is destroyed after the original failure. No new
+poll logging, shutdown success condition, deadline or production API. This
+record is necessary to distinguish an undriven/retained timer from a timer that
+legitimately lies beyond the assertion. Execute at most three original exact
+checkpoint histories, stopping at the first failure, with generated/executed
+before-run and terminal source guards. A pass cannot diagnose the failure;
+only an actual failed-state capture supports a causal regression/fix. Keep
+Mac285's frozen run independent. Next is correcting the observed cause and its
+regression; following is baseline functional exit review. These remain linked
+to P5/P6 acceptance, not new static-service prerequisites.
+
+292 independent control: in a second frozen image, delay the actual first QUIC
+handshake datagram to3500ms of explicit caller time, then drive both real peers
+until authenticated and fully flushed. Remove the peer only after accepted
+output is resolved, close the surviving session and observe its actual public
+next_deadline. Check whether it is still Closing after15s and reaches Closed
+at that original deadline. Use physical datagram readiness observations, not
+sleeps to simulate network delay. This control tests the timer hypothesis without
+changing protocol settings or any existing acceptance horizon. It cannot by
+itself explain the original retained parent connection.
+
+292 diagnostic outcome: all three original Linux checkpoint histories pass
+in70.89s,73.76s and36.83s, with670 executed before/terminal input guards.
+No stalled close record is captured. Stop this probe; do not copy its private
+instrumentation into production or infer a causal fix from its passes.
+The independent delayed-handshake control closes at its original protocol
+deadline39022ms from start3502ms (35520ms later), remaining Closing at15s with
+fully resolved accepted output. Retain that control as a public native-session
+regression and qualify the complete QUIC target on both platforms with four
+strict configurations and fresh671-input guards. It verifies explicit time and
+owned cleanup behavior, not the original failure's cause. The control's first
+exploratory run had no separately executed before-run source guard; final frozen
+qualification supplies that evidence. Next: baseline functional exit review;
+following: the next concrete missing reusable provider obligation it identifies.
+Parent shutdown correction stays open pending evidence, without repeating these
+unchanged passing probes or inventing a new shutdown protocol.
+
+Implemented292: final frozen Linux/Mac each pass19/0 for the complete QUIC target,
+formatting/four strict all-target profiles zero, and671 before/terminal inputs
+verify. Current publication inputs match. The regression preserves the original
+QUIC close timer and explicit monotonic clock; no production API changed. See
+validation/baseline/slice292 and the separately scoped292-probe diagnostic.
+
+Functional review292 — P0–P6 user-visible capability surfaces already exist in
+the current source, but complete acceptance is unproven. The updated audit links
+each exit to those surfaces and distinguishes demonstrated lifecycle faults,
+reusable provider gaps and broader generated histories. P7 tuning/measurement
+and the security pass remain later; Windows/P8 and optional orchestration/adapters
+are outside the present feature milestone, not removed from the full P0–P7 goal.
+
+Schema293 — shared wire provisioning contract (P0/VB-011): retain the existing
+independent FixtureCodec and NativeWireCodec providers. Extract reusable assertions
+for pure encoded_length versus encode_batch, exact caller-provided encoding,
+borrowed original messages, header frame length and wrong scope/size refusal.
+Use the same fixtures with host default methods and native direct methods;
+feed defective sizing, supplied bytes and peer-scope implementations through
+those same assertions. No new provider/API, encoding format or message is needed.
+The helper is required because the existing native-only provisioning test does
+not exercise host defaults through the same obligation. Refusal may modify the
+destination, as documented; never require rollback of its bytes. Completion
+checks: full wire target in four feature configurations on both hosts, metadata
+anchors if reviewed, strict four-profile Clippy and formatting zero. This advances
+composable embedding and informs the next broader actual-core fault slice;
+the unresolved shutdown diagnostic stays independent.
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical

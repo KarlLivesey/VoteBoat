@@ -1,0 +1,44 @@
+   Compiling libc v0.2.190
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling cfg-if v1.0.5
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.26
+   Compiling quote v1.0.47
+   Compiling rand_core v0.10.1
+   Compiling zeroize v1.9.1
+   Compiling once_cell v1.21.4
+   Compiling getrandom v0.4.3
+   Compiling untrusted v0.9.0
+   Compiling thiserror v2.0.21
+   Compiling cpufeatures v0.3.1
+   Compiling rustls v0.23.45
+   Compiling subtle v2.6.1
+   Compiling pin-project-lite v0.2.17
+   Compiling tinyvec v1.13.3
+   Compiling lru-slab v0.1.3
+   Compiling bytes v1.12.1
+   Compiling rustls-pki-types v1.15.1
+   Compiling chacha20 v0.10.2
+   Compiling rand_pcg v0.10.2
+   Compiling rustc-hash v2.1.3
+   Compiling slab v0.4.12
+   Compiling tracing-core v0.1.36
+   Compiling cc v1.6.0
+   Compiling tracing v0.1.44
+   Compiling syn v3.0.6
+   Compiling ring v0.17.14
+   Compiling getrandom v0.2.17
+   Compiling rand v0.10.3
+   Compiling thiserror-impl v2.0.21
+   Compiling rustls-webpki v0.103.15
+   Compiling quinn-proto v0.11.19
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice292-timer/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.98s
+     Running tests/quic.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice291/build/debug/deps/quic-08ec27dd5beb7107)
+
+running 1 test
+controlled close start=3502 deadline=MonoTime(39022)
+test closing_timer::resolved_send_close_retains_actual_long_rtt_protocol_deadline ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 18 filtered out; finished in 0.00s
