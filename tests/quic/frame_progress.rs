@@ -10,10 +10,13 @@ use voteboat::{
 };
 
 type Transport = NativePeerTransport<NativeQuicSession, NativeWireCodec>;
+#[path = "frame_progress/shutdown.rs"]
+mod shutdown;
 struct Link {
     sender: Transport,
     receiver: Transport,
     queue: NativeOutbound,
+    receiver_queue: NativeOutbound,
     start: u64,
     last: [TransportProgress; 2],
     arrivals: Arrivals,
@@ -43,6 +46,7 @@ impl Link {
             receiver: NativePeerTransport::new(b, codec(), &other, TransportLimits::default())
                 .unwrap(),
             queue,
+            receiver_queue: other,
             start,
             last: [TransportProgress::default(); 2],
             arrivals,

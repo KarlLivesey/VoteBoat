@@ -1,0 +1,36 @@
+diff --git a/src/native/quic.rs b/src/native/quic.rs
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -638,0 +639,19 @@
++impl Drop for NativeQuicSession {
++    fn drop(&mut self) {
++        if self.state == SessionState::Closing {
++            let instant = self.instant().ok();
++            let protocol = self.connection.as_mut().map(|(_, c)| {
++                (
++                    c.is_closed(),
++                    c.is_drained(),
++                    c.poll_timeout()
++                        .zip(instant)
++                        .map(|(deadline, now)| deadline.saturating_duration_since(now).as_millis()),
++                )
++            });
++            eprintln!("quic retained at drop local={:?} peer={:?} session={:?} state={:?} started={} sending={} writing={} pending={} protocol={protocol:?}",
++                self.options.local.node, self.options.peer.identity.node, self.options.local.store.session,
++                self.state, self.close_started, self.sending.is_some(), self.writing.is_some(), self.pending.len());
++        }
++    }
++}
+diff --git a/src/native/transport.rs b/src/native/transport.rs
+--- a/src/native/transport.rs
++++ b/src/native/transport.rs
+@@ -648,0 +649,9 @@
++impl<S: SecureSession, C: WireCodec, P: BufferPool> Drop for NativePeerTransport<S, C, P> {
++    fn drop(&mut self) {
++        if self.state == TransportState::Draining {
++            eprintln!("transport retained at drop binding={:?} close_started={} sending={} completed={} received={} session={:?} flushed={}",
++                self.binding, self.close_started, self.sending.is_some(), self.completed.is_some(), self.received.is_some(),
++                self.session.as_ref().map(SecureSession::state), self.session.as_ref().is_some_and(SecureSession::is_flushed));
++        }
++    }
++}

@@ -6582,8 +6582,24 @@ cleanup remain. Before/initial/intermediate failures are retained separately.
 This does not qualify every authenticated runner. See [286](baseline/slice286/README.md).
 
 Lifecycle285's actual unknown/replayed first-receipt regression passes2/all and
-1/default per host, strict zero and668 guards. Its corrected full73-test family
-is still running on both platforms; Linux has reported a QUIC checkpoint read
-progress timeout. Original Mac269 is terminal62/7 on its older662-input image,
+1/default per host, strict zero and668 guards. Its corrected Linux full family
+is terminal72/1 all-feature and40/0 default; Mac remains live. The retained QUIC
+checkpoint timeout occurs during parent shutdown. Diagnostic288 reproduces the
+Linux retained peer with other owner/read/result queues drained; Mac288 passes.
+Original Mac269 is terminal62/7 on its older662-input image,
 with exact matching Linux/start/terminal guards. Full lifecycle and P0–P7 stay
 open. See [285](baseline/slice285/README.md) and [Mac269](baseline/slice269/mac/README.md).
+
+Checkpoint287 qualifies public executable recovery on both hosts:75 named
+executions each, all41/default34, strict four-profile Clippy and formatting zero,
+and669 matching source guards. Original authenticated single/multi-group runner
+journals, interrupted runners/sources and cold retries are exercised; broader
+pre-owner schedules remain open. See [287](baseline/slice287/README.md).
+
+Checkpoint291 adds three actual framed QUIC shutdown ownership histories.
+The complete target passes18/0 on Linux/macOS, with formatting/four strict
+Clippy profiles zero and670 before/terminal/publication input guards. Simultaneous
+close preserves original completions and unread input; peer loss returns exact
+failed ownership. Partial provider metadata integrity and its checker test pass.
+Production and deadline semantics are unchanged. Passing isolated probes289/290
+do not explain the original285/288 shutdown failure. See [291](baseline/slice291/README.md).

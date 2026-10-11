@@ -195,6 +195,58 @@ terminal72/1 in1150.33s; default passes40/0 in380.68s. The full Linux script exi
 and its668-input terminal guard verifies. The Mac full family remains live. Macro review: the concrete
 peer shutdown failure is now the next deliverable before baseline exit review.
 
+Schema290 diagnostic refinement — the per-poll289 trace changed timing and
+did not reproduce the failure. Use a fresh frozen Linux image with no progress
+logging: report retained transport/session state only from destruction after the
+original deadline failure. Record transport close_started and owned send/result/
+receive flags; QUIC reports its actual session state, close_started, sending/
+writing/datagram flags, protocol closed/drained state and next timer delay.
+Print only a nonterminal closing provider, never payload or credentials. No poll,
+timer, ownership or success condition changes. This temporary probe is needed to
+distinguish an unstarted frame close from a stalled session close without changing
+the failing progress path. Acceptance: the original history, generated before-run
+source manifest and terminal guard plus exact failure state. It is not a fix or
+an accepted provider API; a causal regression/fix follows only its actual evidence.
+
+Diagnostic290 passes Linux1/0 in71.53s; no nonterminal closing provider reaches
+destruction, so there is no failed-state capture or causal explanation. Its exact
+pre-run/terminal669 guards verify. Do not repeat this unchanged probe or copy its
+temporary Drop instrumentation into production.
+
+Schema291 — actual framed shutdown ownership (C06/C09, P5/P6): use the existing
+authenticated native QUIC frame fixture and retain both explicitly bound outbound
+queues. Admit one original batch in each direction before close; drive bounded
+real UDP/session/frame polls at selected fine/coarse virtual cadences. Both
+transports must become Closed, each original send completion must be Sent exactly
+once, and unread decoded messages must retain their original binding/content until
+the caller takes them. Queue credits remain owned until real completion. A second
+history cuts the peer after the sender's real plaintext progress but before any
+peer ACK; close must not claim Sent, the real terminal error must yield the exact
+original Failed completion, and consuming that completion releases only its own
+queue credit. No new production API, deadline or protocol behavior. Retaining the
+second fixture queue is necessary to check its original completion ownership;
+there is no additional runtime/provider. Acceptance: these three controlled
+histories and the affected QUIC target on Linux/Mac, all four strict profiles and
+source guards. Passing them does not resolve the original285/288 parent failure.
+
+Implemented291 evidence: all three new frame-shutdown histories pass per host;
+the complete native QUIC target passes18/0 on Linux and Mac. Formatting and all
+four strict all-target Clippy configurations have zero diagnostics on both;
+all670 before/terminal inputs verify and current publication inputs match.
+The partial PeerTransport review now names exact original-completion/queue-credit
+and unread-input assertions. Metadata integrity and its checker test pass;
+14 contracts/88 operations remain partial, not certification. Evidence is retained
+in validation/baseline/slice291 and291-before; destruction-only290 passes without
+capturing a stalled provider. No production/protocol/deadline change or resolution
+of the original285/288 parent close failure is claimed.
+
+Macro review291: these selected shutdown checks advance P5/P6 functional
+ownership acceptance without adding a prerequisite for the usable static service.
+The next independent deliverable is the baseline functional exit review while
+Mac285 continues. The unresolved parent shutdown remains a required correction,
+but another unchanged healthy probe would not advance it. Review the actual
+feature exits and contracts before choosing a new feature or diagnostic seam.
+
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
 mini-plan checkpoints below keep their original evidence scope.

@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/repo291-before)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.13s
+     Running tests/quic.rs (/tmp/voteboat-macos-CzK1if/repo276/target/debug/deps/quic-76c89f95a40a22d5)
+
+running 3 tests
+test frame_progress::shutdown::closing_partially_sent_frame_on_peer_loss_returns_original_failed_ownership ... ok
+test frame_progress::shutdown::simultaneous_frame_close_retains_original_sends_and_unread_input_coarse ... ok
+test frame_progress::shutdown::simultaneous_frame_close_retains_original_sends_and_unread_input_fine ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.03s

@@ -1,0 +1,11 @@
+diff --git a/tests/quic/frame_progress.rs b/tests/quic/frame_progress.rs
+index 57ce159..d8ccc26 100644
+--- a/tests/quic/frame_progress.rs
++++ b/tests/quic/frame_progress.rs
+@@ -12,0 +13,2 @@ type Transport = NativePeerTransport<NativeQuicSession, NativeWireCodec>;
++#[path = "frame_progress/shutdown.rs"]
++mod shutdown;
+@@ -16,0 +19 @@ struct Link {
++    receiver_queue: NativeOutbound,
+@@ -45,0 +49 @@ impl Link {
++            receiver_queue: other,

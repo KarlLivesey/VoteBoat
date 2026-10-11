@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Native QUIC framed shutdown ownership: [slice291](../validation/baseline/slice291/README.md).
+Linux/macOS each pass the complete18-test QUIC target, with formatting/four
+strict all-target Clippy configurations zero and670 matching input guards.
+Three added histories retain exact admitted sends and unread decoded input
+through simultaneous close, and original failed-send ownership on peer loss.
+Selected virtual-time real-UDP evidence strengthens C06/C09; it does not resolve
+the checkpoint parent peer stall or certify general provider shutdown. Temporary
+destruction-only290 passes without reproducing that stall.
+
 Public executable runner recovery: [slice287](../validation/baseline/slice287/README.md).
 Linux/macOS pass75 named executions each (all41/default34), strict four-profile
 Clippy/formatting zero and matching669 before/terminal input guards. Authenticated

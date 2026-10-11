@@ -387,7 +387,10 @@
       "runners": [
         {"file": "tests/native/shared_contract.rs", "symbol": "independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership"},
         {"file": "tests/native/shared_contract.rs", "symbol": "native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership"},
-        {"file": "tests/native/shared_contract.rs", "symbol": "shared_checker_detects_completion_before_local_flush"}
+        {"file": "tests/native/shared_contract.rs", "symbol": "shared_checker_detects_completion_before_local_flush"},
+        {"file": "tests/quic/frame_progress/shutdown.rs", "symbol": "simultaneous_frame_close_retains_original_sends_and_unread_input_fine"},
+        {"file": "tests/quic/frame_progress/shutdown.rs", "symbol": "simultaneous_frame_close_retains_original_sends_and_unread_input_coarse"},
+        {"file": "tests/quic/frame_progress/shutdown.rs", "symbol": "closing_partially_sent_frame_on_peer_loss_returns_original_failed_ownership"}
       ],
       "operations": [
         {
@@ -445,9 +448,12 @@
           "assertions": [
             {"file": "tests/native/shared_contract.rs", "symbol": "draining"},
             {"file": "tests/native/shared_contract.rs", "symbol": "abort_and_replacement"},
-            {"file": "tests/transport.rs", "symbol": "send_failure_and_transport_drop_release_pool_without_destroying_other_view"}
+            {"file": "tests/transport.rs", "symbol": "send_failure_and_transport_drop_release_pool_without_destroying_other_view"},
+            {"file": "tests/quic/frame_progress/shutdown.rs", "symbol": "simultaneous_frame_close_retains_original_sends_and_unread_input_fine"},
+            {"file": "tests/quic/frame_progress/shutdown.rs", "symbol": "simultaneous_frame_close_retains_original_sends_and_unread_input_coarse"},
+            {"file": "tests/quic/frame_progress/shutdown.rs", "symbol": "closing_partially_sent_frame_on_peer_loss_returns_original_failed_ownership"}
           ],
-          "remaining": ["Shared traces cover selected held-flush close and partial-write abort points. Drop/shared-pool observations are native-only; every channel-close failure, completed-slot/partial-read combination and arbitrary host cleanup schedule remains unproven."]
+          "remaining": ["Shared traces cover selected held-flush close and partial-write abort points. Native QUIC additionally covers simultaneous admitted-frame close with held original completions/unread decoded input and actual plaintext progress followed by peer loss. These finite virtual-time schedules do not explain the recorded parent-shutdown timeout. Drop/shared-pool observations are native-only; every channel-close failure, completed-slot/partial-read combination and arbitrary host cleanup schedule remains unproven."]
         }
       ]
     },
