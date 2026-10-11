@@ -15,6 +15,8 @@
 #[cfg(feature = "native")]
 #[path = "wire/leadership.rs"]
 mod leadership;
+#[path = "wire/shared_contract.rs"]
+mod shared_contract;
 mod support;
 use support::*;
 use voteboat::{identity::*, raft::*, wire::*};
@@ -83,20 +85,9 @@ impl WireCodec for FixtureCodec {
     }
 }
 fn fixture_roundtrip(codec: impl WireCodec, message: Message) {
-    let encoded = codec
-        .encode_batch(scope(), std::slice::from_ref(&message))
-        .unwrap();
-    assert_eq!(
-        codec.frame_length(&encoded[..codec.header_bytes()]),
-        Ok(encoded.len())
-    );
-    assert_eq!(codec.decode_batch(scope(), &encoded).unwrap(), [message]);
-    let mut wrong = scope();
-    wrong.sender.session = StoreSession::new(2).unwrap();
-    assert_eq!(
-        codec.decode_batch(wrong, &encoded),
-        Err(WireError::WrongPeer)
-    );
+    let messages = std::slice::from_ref(&message);
+    let encoded = shared_contract::provisioning(&codec, scope(), messages);
+    shared_contract::wrong_scope(&codec, scope(), messages, &encoded);
 }
 #[test]
 fn host_fixture_uses_only_public_wire_contract_without_native_features() {

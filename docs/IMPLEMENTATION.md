@@ -319,6 +319,30 @@ anchors if reviewed, strict four-profile Clippy and formatting zero. This advanc
 composable embedding and informs the next broader actual-core fault slice;
 the unresolved shutdown diagnostic stays independent.
 
+Implemented293: shared exact sizing/provided-buffer/scope assertions exercise
+host compatibility defaults and native direct methods, with three defective
+providers detected through those same assertions. Complete wire plus existing
+configuration-capacity targets pass72 executions per host across all/default/
+core/native profiles (23/23/4/22); formatting/four strict all-target Clippy profiles
+have zero diagnostics. All673 before/terminal inputs verify and current Rust
+publication inputs match. Metadata inventory108 and15 partial reviews/97 operations
+pass integrity checks; its27 direct checker cases pass after updating the old
+14/88 count expectation. That initial metadata failure is retained; no Rust matrix
+or lint waiver was needed. Existing configuration footprint/operation-history
+and refusal tests were included rather than inferred from a provider declaration.
+The host remains a single-RPC fixture and unsupported optional counting default;
+this is selected reusable contract evidence, not replacement certification.
+No production, wire, timer, storage or consensus change. Evidence:293.
+
+Macro review293: selected C07 provisioning is now shared through the public
+replacement seam, advancing P0/VB-011 and composable embedding. The next available
+work is actual-core snapshot/fault composition; inspect its existing replay,
+application checkpoint and native snapshot/recovery contracts before sketching
+that schema. Original parent shutdown correction stays open and Mac285 remains
+independent; unchanged passing probes are not repeated. Wider reusable provider
+coverage, full platform/lifecycle acceptance and P7 remain required by the full
+goal, with performance/security still following the functional feature milestone.
+
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
 mini-plan checkpoints below keep their original evidence scope.

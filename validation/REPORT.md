@@ -6611,3 +6611,12 @@ Closing can legitimately extend beyond15s and terminates at the original public
 protocol deadline. This is a controlled time-contract check, not a production
 change or diagnosis of the earlier stall. Three silent original-history probes
 pass without a failed-state capture and are stopped. See [292](baseline/slice292/README.md).
+
+Checkpoint293 adds shared host/native wire provisioning assertions and three
+defective-provider negatives. Linux/macOS pass72 complete wire/configuration-
+capacity executions each across four profiles, formatting/four strict Clippy
+profiles zero and673 source guards. The metadata checker passes27 cases and
+retains15 partial reviews/97 operations; the old count-expectation failure is
+preserved. The host fixture remains single-RPC with unsupported optional capacity;
+this is selected reusable C07/VB-011 evidence. Production is unchanged and the
+original lifecycle shutdown fault stays open. See [293](baseline/slice293/README.md).

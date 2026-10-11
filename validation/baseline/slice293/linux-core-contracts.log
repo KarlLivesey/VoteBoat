@@ -1,0 +1,34 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice293/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.92s
+     Running tests/configuration_capacity.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/configuration_capacity-ad59d2ed030414f0)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/wire.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/wire-b55f96139125af94)
+
+running 4 tests
+
+thread 'shared_contract::mutants::shared_assertions_detect_altered_supplied_bytes' (3889804) panicked at tests/wire/shared_contract.rs:17:5:
+assertion `left == right` failed
+  left: [73, 79, 83, 84]
+ right: [72, 79, 83, 84]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'shared_contract::mutants::shared_assertions_detect_false_encoded_size' (3889805) panicked at tests/wire/shared_contract.rs:14:5:
+assertion `left == right` failed
+  left: Ok(5)
+ right: Ok(4)
+
+thread 'shared_contract::mutants::shared_assertions_detect_scope_blind_encoding' (3889806) panicked at tests/wire/shared_contract.rs:50:5:
+assertion `left == right` failed
+  left: Ok([72, 79, 83, 84])
+ right: Err(WrongPeer)
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+test shared_contract::mutants::shared_assertions_detect_false_encoded_size ... ok
+test shared_contract::mutants::shared_assertions_detect_altered_supplied_bytes ... ok
+test shared_contract::mutants::shared_assertions_detect_scope_blind_encoding ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

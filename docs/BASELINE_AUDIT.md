@@ -46,9 +46,12 @@ not certify completion from inventory entries or isolated passes.
 | P6: split/merge and retry lineage | Public scope/source/target/publication/activation/retirement contracts with actual native phase/reopen histories. | The Linux285/288 checkpoint parent shutdown stall remains unresolved.292 establishes a possible long close timer in a controlled schedule but captures no original failed provider. Wider combined phase/storage faults remain. |
 | P7: sustainable measured improvement | Existing benchmarks, attribution, shared batching, lanes and recovery/reclamation controls. | Original fixed correctness/p99 gate remains unmet. Performance tuning is the user's later phase and the full P0–P7 goal stays active. |
 
-Next implement shared exact codec sizing/buffer/refusal checks through the
-existing host/native public seam, with defective-provider negatives. This is
-VB-011 contract work for Rust embedding, not another codec or adapter. Keep the
+Slice293 now implements shared exact codec sizing/buffer/refusal checks through
+the existing host/native public seam, with three defective-provider negatives.
+Complete wire/configuration-capacity targets pass72 per host across four profiles,
+strict zero and673 guards. This advances VB-011 contract work for Rust embedding;
+broader provider obligations remain. Next inspect actual-core snapshot/fault
+composition against the existing replay and checkpoint contracts. Keep the
 demonstrated shutdown fault open and observe the original Mac process rather
 than repeating unchanged healthy probes. Optional orchestration, third-party
 adapters, Windows/P8 and the later security review do not become new feature

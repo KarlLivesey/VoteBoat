@@ -1,5 +1,13 @@
 # Baseline acceptance map
 
+Shared wire provisioning: [slice293](../validation/baseline/slice293/README.md).
+Linux/macOS each pass72 wire/configuration-capacity executions across four feature
+profiles, strict Clippy/formatting zero and673 matching input guards. The same
+host/native assertions check exact sizing/supplied bytes, input reuse and scope/
+size refusal; three defective providers are detected. The15-contract/97-operation
+ledger remains partial, and its metadata checker passes27 cases. This does not
+certify an arbitrary replacement codec or close wider lifecycle/fault acceptance.
+
 Explicit QUIC close clock: [slice292](../validation/baseline/slice292/README.md).
 Linux/macOS pass the complete19-test target, strict four-profile Clippy/formatting
 zero and671 source guards. A delayed authenticated handshake yields a protocol

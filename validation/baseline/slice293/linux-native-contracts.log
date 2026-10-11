@@ -1,0 +1,51 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice293/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.47s
+     Running tests/configuration_capacity.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/configuration_capacity-287912287a27ddfc)
+
+running 4 tests
+test unsupported_formats_policy_limits_and_invalid_envelopes_reject ... ok
+test checkpoint_operation_history_is_charged_before_another_configuration ... ok
+test native_count_matches_real_frames_and_exact_decode_and_frame_boundaries ... ok
+test full_service_counter_retry_history_fits_selected_native_wire_versions ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+     Running tests/wire.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/wire-5ae5c28d61998215)
+
+running 18 tests
+test native::frame_command_entry_count_and_decoded_memory_limits_are_symmetric ... ok
+test native::valid_checksums_cannot_hide_unbounded_lengths_or_invalid_identity_and_entries ... ok
+
+thread 'shared_contract::mutants::shared_assertions_detect_false_encoded_size' (3894632) panicked at tests/wire/shared_contract.rs:14:5:
+assertion `left == right` failed
+  left: Ok(5)
+ right: Ok(4)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared_contract::mutants::shared_assertions_detect_false_encoded_size ... ok
+test native::wire_two_recursive_weighted_policy_survives_without_changing_bootstrap ... ok
+
+thread 'shared_contract::mutants::shared_assertions_detect_altered_supplied_bytes' (3894631) panicked at tests/wire/shared_contract.rs:17:5:
+assertion `left == right` failed
+  left: [73, 79, 83, 84]
+ right: [72, 79, 83, 84]
+test shared_contract::mutants::shared_assertions_detect_altered_supplied_bytes ... ok
+
+thread 'shared_contract::mutants::shared_assertions_detect_scope_blind_encoding' (3894633) panicked at tests/wire/shared_contract.rs:50:5:
+assertion `left == right` failed
+  left: Ok([72, 79, 83, 84])
+ right: Err(WrongPeer)
+test shared_contract::mutants::shared_assertions_detect_scope_blind_encoding ... ok
+test leadership::targeted_handoff_requires_wire8_and_roundtrips_u128_operation_and_exact_scope ... ok
+test native::wire_two_membership_base_rejects_invalid_history_and_operation_sets ... ok
+test native::authority_format_is_explicit_bounded_and_preserves_membership_payloads ... ok
+test native::native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip ... ok
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+test native::explicit_wire_two_roundtrips_all_configuration_phases_and_joint_final_snapshots ... ok
+test native::snapshot_policy_shape_weights_membership_and_payload_budgets_are_checked ... ok
+test native::wire_two_resource_limits_include_configurations_and_checkpoint_operation_history ... ok
+test native::readiness_format_checks_envelope_capabilities_and_explicit_version ... ok
+test native::every_single_bit_truncation_trailing_data_and_unknown_version_fail_closed ... ok
+test native::wire_two_maximum_checkpoint_operation_set_remains_bounded_and_lossless ... ok
+test native::wire_two_integrity_truncation_and_valid_crc_hostile_configuration_fields_fail_closed ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s

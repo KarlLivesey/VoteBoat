@@ -1,0 +1,78 @@
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index 835da88..02b2ead 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -892 +892,3 @@
+-        "tests/wire/leadership.rs"
++        "tests/wire/leadership.rs",
++        "tests/wire/shared_contract.rs",
++        "tests/wire/shared_contract/mutants.rs"
+@@ -894 +896 @@
+-      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1–5; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1–6 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets. Direct encoded_length/encode_into provision caller-owned frame slices; native sizing is allocation-free and encoding preserves canonical bytes. Host compatibility defaults use separately bounded temporary Vec encoding. Slice170 roundtrips the actual core older-term SnapshotAck { index: 0 } refusal through sizing, provided-buffer encoding and decoding in every wire format 1–7. This is not durable replication credit: exact boundary matching and higher-term persistence remain in the core, and the deterministic history verifies unchanged commit/application state and restart. Slice196a adds explicitly selected format8 TimeoutNow with a full u128 operation, exact envelope/context and current-term log boundary. Versions1–7 refuse this RPC. Native TLS/QUIC authenticate exact version8; NativeStartup selects matching codec and roster. This does not expose a durable maintenance command. New RPC encoding and session/native startup recovery are tested separately; a complete native leadership-transfer history remains196b."
++      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1–5; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1–6 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets. Direct encoded_length/encode_into provision caller-owned frame slices; native sizing is allocation-free and encoding preserves canonical bytes. Host compatibility defaults use separately bounded temporary Vec encoding. Slice170 roundtrips the actual core older-term SnapshotAck { index: 0 } refusal through sizing, provided-buffer encoding and decoding in every wire format 1–7. This is not durable replication credit: exact boundary matching and higher-term persistence remain in the core, and the deterministic history verifies unchanged commit/application state and restart. Slice196a adds explicitly selected format8 TimeoutNow with a full u128 operation, exact envelope/context and current-term log boundary. Versions1–7 refuse this RPC. Native TLS/QUIC authenticate exact version8; NativeStartup selects matching codec and roster. This does not expose a durable maintenance command. New RPC encoding and session/native startup recovery are tested separately; a complete native leadership-transfer history remains196b. Slice293 uses the same provisioning/scope assertions with the existing independent single-fixture host defaults and native direct methods: exact sizing/canonical supplied bytes, undersized/oversized refusal, original borrowed-input reuse and wrong-scope refusal. Three defective providers trip these shared assertions. This is selected reusable C07 evidence, not full alternative-codec certification, allocation/performance proof or new wire semantics."
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 149877e..b700e97 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -4,0 +5,44 @@
++    {
++      "public_contract": "WireCodec",
++      "status": "partial",
++      "runners": [
++        { "file": "tests/wire.rs", "symbol": "host_fixture_uses_only_public_wire_contract_without_native_features" },
++        { "file": "tests/wire.rs", "symbol": "native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip" },
++        { "file": "tests/wire/shared_contract/mutants.rs", "symbol": "shared_assertions_detect_false_encoded_size" },
++        { "file": "tests/wire/shared_contract/mutants.rs", "symbol": "shared_assertions_detect_altered_supplied_bytes" },
++        { "file": "tests/wire/shared_contract/mutants.rs", "symbol": "shared_assertions_detect_scope_blind_encoding" },
++        { "file": "tests/configuration_capacity.rs", "symbol": "native_count_matches_real_frames_and_exact_decode_and_frame_boundaries" },
++        { "file": "tests/configuration_capacity.rs", "symbol": "unsupported_formats_policy_limits_and_invalid_envelopes_reject" }
++      ],
++      "operations": [
++        {
++          "names": ["format_version", "header_bytes", "limits", "frame_length"],
++          "obligation": "The selected explicit format and declared independent limits identify a bounded frame; its validated prefix reports exactly that encoded frame length. Format capability never grants authenticated peer or consensus authority.",
++          "assertions": [
++            { "file": "tests/wire/shared_contract.rs", "symbol": "provisioning" },
++            { "file": "tests/configuration_capacity.rs", "symbol": "unsupported_formats_policy_limits_and_invalid_envelopes_reject" }
++          ],
++          "remaining": ["The host fixture is a single ReadProbe codec, not a full alternative format; wider independent provider framing/version/count/decoded-memory and malformed-prefix obligations remain. Native format/refusal tests are provider-specific and do not certify other codecs."]
++        },
++        {
++          "names": ["encode_batch", "encoded_length", "encode_into", "decode_batch"],
++          "obligation": "Sizing agrees with the encoded frame, exact caller-provided storage receives those same bytes, decoding preserves the original messages and wrong peer scope or destination size refuses before a frame may be sent. Original borrowed input remains usable after refusal; destination bytes need not roll back.",
++          "assertions": [
++            { "file": "tests/wire/shared_contract.rs", "symbol": "provisioning" },
++            { "file": "tests/wire/shared_contract.rs", "symbol": "wrong_scope" }
++          ],
++          "remaining": ["Selected shared fixture checks do not establish every RPC, malformed input, count/payload/decoded allocation limit or purity/performance guarantee for arbitrary replacements. Native direct provisioning and host compatibility defaults have different documented allocation behavior."]
++        },
++        {
++          "names": ["configuration_capacity"],
++          "obligation": "Unsupported host defaults refuse explicitly; supported native counting reports the selected frame/decoded footprint for the actual prospective membership and application envelope, including retained operation history. Capacity evidence is not proposal acceptance or durable commitment.",
++          "assertions": [
++            { "file": "tests/wire.rs", "symbol": "host_fixture_uses_only_public_wire_contract_without_native_features" },
++            { "file": "tests/configuration_capacity.rs", "symbol": "native_count_matches_real_frames_and_exact_decode_and_frame_boundaries" },
++            { "file": "tests/configuration_capacity.rs", "symbol": "checkpoint_operation_history_is_charged_before_another_configuration" },
++            { "file": "tests/configuration_capacity.rs", "symbol": "unsupported_formats_policy_limits_and_invalid_envelopes_reject" }
++          ],
++          "remaining": ["No independent host implementation of supported configuration counting is qualified here; broader membership/application envelope and injected provider-fault combinations remain. Declared capacity does not replace live application-envelope enforcement or exact scoped core commitment."]
++        }
++      ]
++    },
+diff --git a/validation/check-provider-conformance.test.mjs b/validation/check-provider-conformance.test.mjs
+index ec452d4..f1e378b 100644
+--- a/validation/check-provider-conformance.test.mjs
++++ b/validation/check-provider-conformance.test.mjs
+@@ -17,4 +17,4 @@ test('review counts only audited operations and retains unreviewed contracts', (
+-    assert.equal(report.reviewed_contracts, 14);
+-    assert.equal(report.reviewed_operations, 88);
+-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 14);
+-    for (const name of ['StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
++    assert.equal(report.reviewed_contracts, 15);
++    assert.equal(report.reviewed_operations, 97);
++    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 15);
++    for (const name of ['WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
+@@ -45,0 +46,3 @@ for (const [name, mutate] of [
++    ['missing wire operation', d => { review(d, 'WireCodec').operations.pop(); }],
++    ['missing wire assertion', d => { review(d, 'WireCodec').operations[0].assertions = []; }],
++    ['missing wire limitation', d => { review(d, 'WireCodec').operations[0].remaining = []; }],
