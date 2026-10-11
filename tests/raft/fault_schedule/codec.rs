@@ -40,6 +40,10 @@ fn action(line: &str) -> Result<Action, ()> {
         Some("heartbeat") => Action::Heartbeat(actor(words.next())?),
         Some("pump") => Action::Pump,
         Some("bad_sync") => Action::BadSync(actor(words.next())?),
+        Some("delay") => Action::Delay(actor(words.next())?),
+        Some("sync") => Action::Sync(actor(words.next())?),
+        Some("complete") => Action::Complete(actor(words.next())?),
+        Some("stale") => Action::Stale(actor(words.next())?),
         _ => return Err(()),
     };
     if words.next().is_some() {
@@ -67,6 +71,10 @@ impl Trace {
                 Action::Heartbeat(id) => writeln!(text, "heartbeat {id}"),
                 Action::Pump => writeln!(text, "pump"),
                 Action::BadSync(id) => writeln!(text, "bad_sync {id}"),
+                Action::Delay(id) => writeln!(text, "delay {id}"),
+                Action::Sync(id) => writeln!(text, "sync {id}"),
+                Action::Complete(id) => writeln!(text, "complete {id}"),
+                Action::Stale(id) => writeln!(text, "stale {id}"),
             }
             .unwrap();
         }
@@ -111,6 +119,10 @@ fn all_actions_round_trip_with_original_ids_and_bytes() {
             Action::Heartbeat(2),
             Action::Pump,
             Action::BadSync(3),
+            Action::Delay(1),
+            Action::Sync(2),
+            Action::Complete(3),
+            Action::Stale(1),
         ],
     };
     assert_eq!(Trace::decode(&trace.encode()).unwrap(), trace);
@@ -137,6 +149,10 @@ fn malformed_and_oversized_traces_are_rejected_before_execution() {
         "VBSIM 1 1\nwrite 1 4",
         "VBSIM 1 1\nheal\n\n",
         "VBSIM 1 1\npower_loss -1",
+        "VBSIM 1 1\ndelay 0",
+        "VBSIM 1 1\nsync 4",
+        "VBSIM 1 1\ncomplete 1 extra",
+        "VBSIM 1 1\nstale -1",
         "VBSIM 1 1\nλ",
     ] {
         assert!(Trace::decode(input).is_err(), "{input:?}");

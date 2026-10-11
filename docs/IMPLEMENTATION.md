@@ -104,19 +104,20 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint263: static mixed-host service256 remains selected completed
+Current checkpoint264: static mixed-host service256 remains selected completed
 evidence. Timer258 and scheduler261 replacement checks pass on both hosts.
 Original Mac254d finishes21/44; the44 failures map to two separately controlled
 fixture assumptions corrected259/260. The eight affected260 histories now pass
 on both hosts. Complete corrected67-history qualification262 runs on independent
-frozen Linux/Mac sources. Actual-core replay/reduction263 is accepted below;
+frozen Linux/Mac sources. Actual-core replay/reduction263 and delayed completion
+schedules264 are accepted below;
 selected checks do not imply a complete platform or roadmap pass.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current263: actual-core replay and bounded failure reduction — accepted | Close a bounded P0/R11 debugging gap while lifecycle qualification runs independently. | Existing Raft Cluster/native WAL model, explicit owned action schedules and exact typed failure target; no new production engine. | Versioned text/malformed checks,32 deterministic replay schedules, actual false-sync failure reduced to six actions, retained full Raft target46/29/46/46 both hosts and formatting/four strict profiles zero. |
+| Current264: independently delayed native storage barriers and completions — accepted | Extend P0/R11 recovery evidence to accepted-but-undurable writes, durable-but-unobserved writes and stale completion delivery. | Accepted263 trace/codec/reducer and existing public append/admitted/barrier/complete contracts; reuse the same actual core and WAL model. | Nine replay checks and full Raft targets50/29/50/50 on both hosts, including no-effect-before-completion, both power-loss cuts, either follower completing first and real stale tokens; formatting/four strict profiles zero. |
 | Next262: qualify the complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Terminal original Mac21/44 maps to36 retained-credit assertions and8 existing-store collisions;259/260 controlled negatives/corrections on both hosts. Use frozen independent corrected sources. | Full67-history family (original65 plus two controlled regressions), source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
-| Following: resolve the next actual full-platform failure or uncovered seam | Advance functional Linux/macOS and public Rust composition P0–P6. | Preserved original251 full Mac run and262 terminal results; inspect existing source/checkers before selecting an actual gap. | Cause-specific negative/correction with affected histories, or one missing reusable host/native obligation with a defective-provider negative; both-host evidence and strict zero, with partial scope explicit. |
+| Following265: process-crash and failed-barrier schedules | Advance P0/R11 and P1 recovery by distinguishing retained unsynced device bytes from power loss and handling real uncertain barrier failure. Prioritize an actual262/251 failure if it changes this dependency. | Existing native recovery, ModelIo device faults, public storage_failed and264 replay ownership; no new engine/provider. | Exact before/after-barrier cuts, no dependent effect after failed sync, cold recovery/original-ID history checks, replayable schedules, both-host full Raft checks and strict zero; partial device scope explicit. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26199,3 +26200,48 @@ P0/R11 functional debugging while preserving the usable service. Synchronous
 WAL-model schedules do not close snapshots, delayed storage completions, timer
 runtime, reference comparison or general chapter11 validation. Full P0–P7 stays
 active; feature/functional Linux/macOS first, performance/security later.
+
+264 schema: extend263's owned action schedule with Delay, Sync, Complete and
+Stale delivery for an exact node. Reuse the existing Cluster/core/native store;
+intercept only Persist effects when a node is explicitly delayed. Admission owns
+one exact LogTicket per node, but never manufactures a DurableLog. Sync calls the
+real store barrier and retains its returned completion; only Complete passes it
+to the core and allows dependent sends/application effects. Independent nodes
+can sync/complete in either order. One held dependency and one actual prior
+completion per node bound retained state. Busy event attempts are recorded as
+refusals; delivered messages can be lost while busy, so no liveness inference.
+Power loss discards an unsynced admission, preserves actual synced WAL data,
+recreates the store session and keeps a real old completion only for a rejected
+stale-delivery test. No synthetic successful ticket or force-release path.
+Semantic replay includes dependency stage and refusal counts, excluding opaque
+fresh sessions. Acceptance: exact vote-effect gate, unsynced/synced restart cuts,
+quorum progress with only a truly completed follower, stale token refusal without
+state/effect changes, bounded seeded replay and unchanged263 reducer behavior;
+full Raft tests plus formatting/four strict profiles on Linux/Mac. This is the
+small next chapter11 path, not another engine, runtime or new public seam.
+Snapshots, timer actions, device corruption and reference comparison remain.
+
+264 contract review: permit Busy only when the harness owns that node's actual
+held admission, preserving loud failure for unexplained refusal. WrongIdentity
+remains accepted only for received stale traffic, as in the original Cluster.
+Replay points also record actual core dependency presence, so stale delivery
+checks cover it as well as logs, roles, prefixes, queues and host-held stage.
+Keep the first passing build separately; final source needs fresh checks.
+
+264 acceptance: the actual delayed native path passes all nine replay/codec/
+reducer checks on both hosts. Admission and successful sync alone release no
+vote request; unsynced/synced power-loss cuts recover the correct term. Actual
+old-session and repeated completions are rejected with no observed state change.
+Either independently completed follower enables a genuine durable quorum; the
+original operation8801/value8 survives both quorum members' cold reopen while
+the other unsynced follower loses its write. Sixteen259-action delayed schedules
+replay identical states with at most three held dependencies; original26332-seed
+replay and six-action false-sync reduction remain intact. Full Raft targets
+all/core/native/default finish50/29/50/50 on each host, zero failed/ignored.
+Formatting/four strict profiles are zero;658 Rust inputs verify before/after
+the final runs. Initial passing checks remain separately source-scoped. Evidence:
+[264](../validation/baseline/slice264/README.md). Macro review advances P0/P1
+functional recovery debugging; production/contracts are unchanged. One pending
+update per node and synchronous barrier execution do not cover every asynchronous
+worker/device composition, process crash, failed sync, snapshot or timer action.
+Full P0–P7 remains active; performance/security follow feature/Linux/macOS work.

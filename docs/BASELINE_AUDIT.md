@@ -7,7 +7,7 @@ Earlier reviews below retain their original revision and scope.
 
 ## Slice255 — functional checkpoint
 
-Reviewedd6adc44 plus263's actual-core replay evidence against chapter01 R01–R19
+Reviewed440612b plus264's delayed-completion evidence against chapter01 R01–R19
 and the P0–P7 exits. This is a
 feature/evidence map, not release completion. Production differs from the
 source-preserved full Linux251 run only in the reviewed native manifest-source
@@ -30,7 +30,7 @@ pass on both hosts; complete corrected-family acceptance remains262 work.
 | R08 direct child commits | Routed owner proposals and parent-offline child histories. | Resolve Mac composed histories without adding an ancestor commit. |
 | R09 safe transitions | Joint membership, durable source fence, target import, publication, activation and retirement guards. | Actual Mac lifecycle failures and broader combined cuts remain; never treat an unknown phase as an applied cut. |
 | R10 honest outcomes | Admission, persistence, commit/application and exact ClientCompletion outcomes. | Retain unknown/same-ID semantics in every caller;254d adds an actual controlled native negative. |
-| R11 deterministic testing | Explicit events/effects/time, delayed persistence, Counter history checking and bounded actual-core text replay/reduction263 on both hosts. | Reordered storage-completion/snapshot/timer schedules, reference comparison and fuzzing remain wider validation work. |
+| R11 deterministic testing | Explicit events/effects/time, Counter history checking, actual-core text replay/reduction263 and independently delayed native completion schedules264 on both hosts. | Failed-barrier/process-crash/snapshot/timer schedules, broader worker/device composition, reference comparison and fuzzing remain wider validation work. |
 | R12 bounded overload | Explicit admission, buffer, queue, image, retention and recovery limits. | Wider disk-full and competing recovery/connection coverage remains. |
 | R13 native providers | Native WAL/snapshots, scheduler, multiplexed TCP/TLS and QUIC/codecs. | No external adapter is required or claimed. |
 | R14 public seams | Domain traits plus NodeParts/from_parts, injected native/host providers. | Complete reusable obligation coverage;108 inventory entries alone do not certify them. |

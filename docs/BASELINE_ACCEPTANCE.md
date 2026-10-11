@@ -1,5 +1,12 @@
 # Baseline acceptance map
 
+Actual-core replay and delayed completion checks:
+[slice264](../validation/baseline/slice264/README.md). Exact admitted/synced/
+completion gates, both power-loss cuts, either follower completing first and
+real stale-token refusal pass on Linux/Mac. Nine replay checks and full Raft
+targets50/29/50/50 pass; formatting/four strict profiles are zero. This is native
+WAL-model evidence, not complete chapter11 or full-platform acceptance.
+
 Shared scheduler replacement checks: [slice261](../validation/baseline/slice261/README.md).
 The actual host/native providers use identical scoped/fairness/refusal/lifetime/
 model assertions; three defective providers trip them. All/core/native/default
@@ -11,8 +18,9 @@ Selected native recovery correction: [slice260](../validation/baseline/slice260/
 Both hosts reproduce the retained-credit assumption at an actual pending native
 persistence cut; corrected unread-result regressions pass2/0 on each, including
 original cold retries and owned cleanup. Formatting/four strict profiles are zero.
-Eight affected histories pass on fixed Linux; their Mac equivalents remain
-running. Original broad Mac failures stay independent. The public
+Eight affected histories pass on both hosts; Mac terminal evidence is retained
+[separately](../validation/baseline/slice260/mac-histories/README.md). Complete
+corrected-family262 remains live. Original broad Mac failures stay independent. The public
 complete/reconcile ownership contract is
 preserved, with no production change.
 
@@ -970,7 +978,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
 | R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
 | R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
-| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 adds32 replayed schedules and bounded reduction of an actual native WAL-model failure on both hosts. | Reordered storage-completion/snapshot/timer schedules, broader fault drivers and reference-Raft comparison remain. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 adds32 replayed schedules and bounded reduction,264 adds independently delayed native barriers/completions, power-loss cuts and real stale-token refusal on both hosts. | Process-crash/failed-barrier/snapshot/timer schedules, broader worker/device compositions and reference-Raft comparison remain. |
 | R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
 | R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
 | R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |
@@ -1128,8 +1136,11 @@ tests/raft.rs also executes32 seeds of256 actual-core actions with native WAL
 model power loss, partitions, reordered/duplicated messages and committed-prefix
 checks. Slice263 adds versioned exact-ID/byte schedule replay and bounded
 same-target deletion reduction with an actual defective-sync recovery negative,
-verified on both hosts. This remains a bounded synchronous-persistence majority
-schedule family. It does not establish a general asynchronous fault driver,
+verified on both hosts. Slice264 separates admission, real barrier and completion
+delivery with independent node ordering, retained dependency stages and real
+stale completions. This remains a bounded majority WAL-model family with one
+pending update per node and synchronous barriers. It does not establish a general
+asynchronous worker/device fault driver,
 known-Raft differential runner or
 general end-to-end linearizability checking across all applications. Slice164 now independently checks bounded Counter client histories including unknown outcomes and selected real service crashes/restarts. Those
 chapter11 validation obligations remain explicit rather than being replaced by
@@ -1149,8 +1160,9 @@ a passing test count.
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as
    a sustainable throughput improvement.
-3. Broaden chapter11 beyond263's replayable/minimizable actual-core schedules:
-   reordered persistence completions, snapshots and timer-runtime actions,
+3. Broaden chapter11 beyond263/264's replayable/minimizable actual-core schedules:
+   process-crash/failed-barrier and broader worker/device composition, snapshots
+   and timer-runtime actions,
    compatible-semantics reference-Raft comparison, fuzz coverage for WAL/RPC/
    snapshot/routing codecs, declared-scope partitioned histories, and the missing
    combined membership/lifecycle/storage schedules. Existing deterministic and

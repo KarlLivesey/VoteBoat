@@ -1,0 +1,12 @@
+{
+  "base": "440612b",
+  "buildInputs": 658,
+  "changed": [
+    "tests/raft/fault_schedule.rs",
+    "tests/raft/fault_schedule/codec.rs"
+  ],
+  "added": [
+    "tests/raft/fault_schedule/delayed.rs"
+  ],
+  "productionChanges": []
+}

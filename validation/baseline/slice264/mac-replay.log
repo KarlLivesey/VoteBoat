@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (<mac-repo264>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.79s
+     Running tests/raft.rs (target/debug/deps/raft-6b922bf42bed553f)
+
+running 9 tests
+test fault_schedule::codec::all_actions_round_trip_with_original_ids_and_bytes ... ok
+test fault_schedule::codec::malformed_and_oversized_traces_are_rejected_before_execution ... ok
+test fault_schedule::delayed::power_loss_distinguishes_written_and_synced_unobserved_votes ... ok
+test fault_schedule::delayed::admitted_and_synced_votes_wait_for_actual_completion_delivery ... ok
+test fault_schedule::delayed::independently_completed_follower_is_required_for_a_real_durable_quorum ... ok
+test fault_schedule::reduce::exhausted_reduction_budget_preserves_the_same_failure_without_claiming_minimality ... ok
+minimized actual prefix-loss trace:
+VBSIM 1 42
+campaign 1
+pump
+bad_sync 2
+write 1 7001 7
+pump
+power_loss 2
+
+test fault_schedule::reduce::actual_false_sync_prefix_loss_is_replayed_and_minimized ... ok
+test fault_schedule::delayed::delayed_completion_schedules_replay_with_bounded_pending_ownership ... ok
+test fault_schedule::recorded_seeded_schedules_replay_the_same_actual_core_states ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 41 filtered out; finished in 1.03s
+

@@ -4,6 +4,8 @@ use super::*;
 use std::{cell::Cell, io, rc::Rc};
 #[path = "fault_schedule/codec.rs"]
 mod codec;
+#[path = "fault_schedule/delayed.rs"]
+mod delayed;
 #[path = "fault_schedule/reduce.rs"]
 mod reduce;
 
@@ -20,6 +22,10 @@ enum Action {
     Heartbeat(u64),
     Pump,
     BadSync(u64),
+    Delay(u64),
+    Sync(u64),
+    Complete(u64),
+    Stale(u64),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Trace {
@@ -101,6 +107,10 @@ struct Point {
     roles: BTreeMap<u64, Role>,
     applied: BTreeMap<u64, Vec<LogEntry>>,
     queued: usize,
+    held: BTreeMap<u64, delayed::Phase>,
+    pending: BTreeSet<u64>,
+    busy: usize,
+    stale_rejected: usize,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum FailureStage {
@@ -116,6 +126,7 @@ struct LostPrefix {
 struct Replay {
     images: BTreeMap<u64, TraceIo>,
     cluster: Cluster<NativeLogStore<TraceIo>>,
+    delayed: delayed::Dependencies,
 }
 impl Replay {
     fn new() -> Self {
@@ -128,10 +139,15 @@ impl Replay {
             )
             .unwrap()
         });
-        Self { images, cluster }
+        Self {
+            images,
+            cluster,
+            delayed: delayed::Dependencies::default(),
+        }
     }
     fn restart(&mut self, id: u64) -> Result<(), LostPrefix> {
         let acknowledged = self.cluster.applied[&id].clone();
+        self.discard_dependency(id);
         drop(self.cluster.replicas.remove(&id).unwrap());
         self.images[&id].device.0.borrow_mut().power_loss();
         self.images[&id].bad_sync.set(false);
@@ -189,10 +205,10 @@ impl Replay {
     }
     fn action(&mut self, action: &Action) -> Result<(), LostPrefix> {
         match *action {
-            Action::Campaign(id) => self.cluster.act(id, Event::Campaign),
+            Action::Campaign(id) => self.step_event(id, Event::Campaign),
             Action::TryWrite(id, operation, byte) => {
                 if self.cluster.replicas[&id].core.role() == Role::Leader {
-                    self.cluster.act(
+                    self.step_event(
                         id,
                         Event::Propose {
                             operation: OperationId::new(operation).unwrap(),
@@ -205,7 +221,7 @@ impl Replay {
             Action::Heal => self.cluster.heal(),
             Action::DeliverNewest => {
                 if let Some(message) = self.cluster.messages.pop_back() {
-                    self.cluster.deliver(message);
+                    self.deliver(message);
                 }
             }
             Action::DuplicateOldest => {
@@ -214,9 +230,15 @@ impl Replay {
                 }
             }
             Action::PowerLoss(id) => self.restart(id)?,
-            Action::Heartbeat(id) => self.cluster.act(id, Event::Heartbeat),
-            Action::Pump => self.cluster.pump(),
+            Action::Heartbeat(id) => self.step_event(id, Event::Heartbeat),
+            Action::Pump => self.pump(),
             Action::BadSync(id) => self.images[&id].bad_sync.set(true),
+            Action::Delay(id) => {
+                self.delayed.nodes.insert(id);
+            }
+            Action::Sync(id) => self.sync(id),
+            Action::Complete(id) => self.complete(id),
+            Action::Stale(id) => self.stale(id),
         }
         self.cluster.assert_safety();
         Ok(())
@@ -237,6 +259,16 @@ impl Replay {
                 .collect(),
             applied: self.cluster.applied.clone(),
             queued: self.cluster.messages.len(),
+            held: self.delayed.phases(),
+            pending: self
+                .cluster
+                .replicas
+                .iter()
+                .filter(|(_, replica)| replica.core.has_pending_dependency())
+                .map(|(id, _)| *id)
+                .collect(),
+            busy: self.delayed.busy,
+            stale_rejected: self.delayed.stale_rejected,
         }
     }
 }
