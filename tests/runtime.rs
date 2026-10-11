@@ -16,6 +16,8 @@
 mod campaign_delay;
 #[path = "runtime/campaigning.rs"]
 mod campaigning;
+#[path = "runtime/scheduler_contract.rs"]
+mod scheduler_contract;
 mod support;
 #[path = "runtime/timer_contract.rs"]
 mod timer_contract;

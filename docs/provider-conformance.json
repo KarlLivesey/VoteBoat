@@ -3,6 +3,136 @@
   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
   "reviews": [
     {
+      "public_contract": "ReadyScheduler",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/runtime/scheduler_contract.rs",
+          "symbol": "host_scheduler_obligations"
+        },
+        {
+          "file": "tests/runtime/scheduler_contract.rs",
+          "symbol": "native_scheduler_obligations"
+        },
+        {
+          "file": "tests/runtime/scheduler_contract.rs",
+          "symbol": "shared_assertions_detect_incarnation_blind_cancel"
+        },
+        {
+          "file": "tests/runtime/scheduler_contract.rs",
+          "symbol": "shared_assertions_detect_destructive_refusal"
+        },
+        {
+          "file": "tests/runtime/scheduler_contract.rs",
+          "symbol": "shared_assertions_detect_unfair_front_insertion"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "capacity",
+            "len",
+            "is_empty"
+          ],
+          "obligation": "Declared capacity stays stable; exact queued identities determine length and emptiness. Pop and exact cancellation release their slots. Fresh construction is empty; dropping one logical queue does not consume another queue readiness.",
+          "assertions": [
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "atomic_refusal"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "modeled_traces"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "instance_lifetime"
+            }
+          ],
+          "remaining": [
+            "Selected capacity-three queues and independent instances do not establish allocation behavior at every native capacity or host executors shared across shards."
+          ]
+        },
+        {
+          "names": [
+            "enqueue"
+          ],
+          "obligation": "Readiness is coalesced for the exact group incarnation. Duplicate enqueue is idempotent at capacity and preserves order; overload leaves accepted readiness intact. A popped ready group re-enqueues at the tail.",
+          "assertions": [
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "atomic_refusal"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "fair_requeue"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "modeled_traces"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "shared_assertions_detect_destructive_refusal"
+            }
+          ],
+          "remaining": [
+            "Eight seeds of256 sequential actions per provider and32 requeue rounds do not establish every runtime schedule or responsiveness of arbitrary host callbacks."
+          ]
+        },
+        {
+          "names": [
+            "pop"
+          ],
+          "obligation": "Transfer and remove one queued exact identity; tail requeue fairly serves continuously ready groups. Empty pop returns None without changing length.",
+          "assertions": [
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "atomic_refusal"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "fair_requeue"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "modeled_traces"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "shared_assertions_detect_unfair_front_insertion"
+            }
+          ],
+          "remaining": [
+            "The checker follows the existing FIFO/tail readiness contract; it is not full Shard owner/visit or timer progress conformance."
+          ]
+        },
+        {
+          "names": [
+            "cancel"
+          ],
+          "obligation": "Cancel only the exact queued group incarnation, idempotently. A stale or absent identity cannot remove another incarnation readiness.",
+          "assertions": [
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "scoped_cancel"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "modeled_traces"
+            },
+            {
+              "file": "tests/runtime/scheduler_contract.rs",
+              "symbol": "shared_assertions_detect_incarnation_blind_cancel"
+            }
+          ],
+          "remaining": [
+            "Two selected incarnations and finite traces do not cover every group/owner reincarnation or combined Shard construction/recovery failure."
+          ]
+        }
+      ]
+    },
+    {
       "public_contract": "StateMachine",
       "status": "partial",
       "runners": [

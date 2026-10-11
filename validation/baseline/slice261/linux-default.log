@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (<linux-workspace>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.16s
+     Running tests/runtime.rs (target/debug/deps/runtime-a56851332d31954b)
+
+running 5 tests
+test scheduler_contract::shared_assertions_detect_unfair_front_insertion ... ok
+test scheduler_contract::shared_assertions_detect_destructive_refusal ... ok
+test scheduler_contract::shared_assertions_detect_incarnation_blind_cancel ... ok
+test scheduler_contract::host_scheduler_obligations ... ok
+test scheduler_contract::native_scheduler_obligations ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 33 filtered out; finished in 0.00s

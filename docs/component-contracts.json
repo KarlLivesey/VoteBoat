@@ -686,11 +686,13 @@
         "enqueue",
         "pop",
         "cancel",
-        "len"
+        "len",
+        "is_empty"
       ],
       "native": "FairScheduler",
       "conformance": [
-        "tests/runtime.rs"
+        "tests/runtime.rs",
+        "tests/runtime/scheduler_contract.rs"
       ],
       "scope": "Unique bounded readiness with fair requeue; Shard owns cores and enforces item/byte/time visits, ingress credits and scoped single-owner access. Caller-driven, no hidden threads."
     },

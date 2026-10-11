@@ -1,5 +1,12 @@
 # Baseline acceptance map
 
+Shared scheduler replacement checks: [slice261](../validation/baseline/slice261/README.md).
+The actual host/native providers use identical scoped/fairness/refusal/lifetime/
+model assertions; three defective providers trip them. All/core/native/default
+profiles finish5/4/5/5 on each host; named metadata tests24/0 and formatting/four
+strict profiles are zero.14 partial reviews now name88 operations. Production
+is unchanged; finite queue checks do not certify every replacement seam.
+
 Selected native recovery correction: [slice260](../validation/baseline/slice260/README.md).
 Both hosts reproduce the retained-credit assumption at an actual pending native
 persistence cut; corrected unread-result regressions pass2/0 on each, including
@@ -17,7 +24,9 @@ check; recursive Mac failures, full platform/provider coverage and P7 remain.
 Production matches91576fa, with source-linked temporary test observation only.
 The exact namespace diagnostic passes both in isolation without explaining its
 earlier Mac failure. Preserved Linux254d finishes65/0; the corresponding Mac
-family remains live with reported failures. Their source scopes remain separate.
+family finishes21/44. Its44 terminal bodies map to36 retained-credit assertions
+and8 existing-store collisions; both have controlled259/260 corrections, with
+fresh complete-family acceptance still pending. Their source scopes stay separate.
 
 Latest source audit: [R01–R19](BASELINE_AUDIT.md#slice255--functional-checkpoint).
 Existing timer contract checks pass selected all/core/native/default profiles

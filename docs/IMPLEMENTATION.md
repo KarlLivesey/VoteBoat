@@ -113,9 +113,9 @@ passes unchanged on both hosts and does not identify the first failure.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current260: wait for actual unknown-result reservation release | Correct a demonstrated native fixture assumption and obtain trustworthy P5/P6 recovery evidence. |259 root isolation; fresh Mac retained-credit failure; documented complete/reconcile ownership; controlled real native pre-persistence negative. Preserve original251/254d/259 sources. | Actual release before original-ID retry, old/fixed regression both hosts, affected cross-authority/deletion histories, cold receipts/explicit cleanup and formatting/four strict profiles zero. |
-| Next: classify and fix the first actual Mac lifecycle failure | Close a demonstrated functional P5/P6 failure while keeping static service usable. | Terminal original failure body or fresh isolated reproduction; distinguish root collisions from the first cause. | Cause-specific failing-before/passing-after check, original IDs/fault cuts/ownership rules preserved, relevant Linux/Mac histories and strict zero. An isolated pass cannot close an unreproduced failure. |
-| Following: close the next missing provider obligation | Advance public Rust composition P0/R14/R19 using existing contracts. | Source audit of existing shared checkers and named assertions; select an actual uncovered obligation after the lifecycle diagnosis. | One bounded real host/native checker with a defective-provider negative, relevant feature profiles on both hosts and strict zero; retain partial coverage explicitly. |
+| Current261: strengthen the existing scheduler replacement checker | Close missing P0/R14/R19 operation evidence using the current host/native providers while260 Mac recovery runs independently. | Existing ReadyScheduler contract/checker and exact GroupIdentity; no new provider, runtime or protocol. | Identical host/native modeled/scoped/refusal/fairness/lifetime assertions, three defective-provider negatives, all/core/native/default Linux/Mac profiles, named metadata tests and formatting/four strict profiles zero. |
+| Next262: qualify the complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Terminal original Mac21/44 maps to36 retained-credit assertions and8 existing-store collisions;259/260 controlled negatives/corrections on both hosts. Use frozen independent corrected sources. | Full67-history family (original65 plus two controlled regressions), source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
+| Following: resolve the next actual full-platform failure or uncovered seam | Advance functional Linux/macOS and public Rust composition P0–P6. | Preserved original251 full Mac run and262 terminal results; inspect existing source/checkers before selecting an actual gap. | Cause-specific negative/correction with affected histories, or one missing reusable host/native obligation with a defective-provider negative; both-host evidence and strict zero, with partial scope explicit. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26087,3 +26087,44 @@ body, separately from its earlier live snapshot. Fixed Linux cross-authority
 finishes4/0 in258.96s and deletion4/0 in10.32s; source verifies at terminal.
 The corresponding eight fixed Mac histories remain running. No broader original
 Mac251/254d certificate is inferred from the controlled native correction.
+
+261 schema: ReadyScheduler already has public six-operation readiness semantics
+and a shared HostReady/FairScheduler short checker. Reuse those providers and
+extend their checker, rather than add a scheduler/runtime. Add exact-incarnation
+cancellation, duplicate-at-capacity/idempotent order, atomic overload refusal,
+fair tail requeue, empty pop, independent instance/drop and bounded deterministic
+model traces. Defective cancellation, refusal and front-requeue providers must
+trip the same assertions. The queue owns only readiness identities; no core,
+timer, durable state, external resource or async completion is introduced. Fresh
+construction starts empty; cancellation of an old incarnation cannot remove a
+new incarnation. The inventory omits the already-public default is_empty; add
+its name and one partial operation review with actual checker anchors. Purpose:
+complete missing P0/R14/R19 replacement evidence while260 Mac recovery runs on
+immutable independent sources. Acceptance: host/native/defective-provider checks
+in all/core/native/default profiles on both hosts, metadata checker tests and
+formatting/four strict profiles zero. Keep wider sharing/Shard integration and
+provider construction limits explicit, not certified by a queue-only checker.
+
+261 acceptance: existing host/native scheduler providers pass the same scoped,
+atomic-refusal, fair-requeue, modeled and instance-lifetime assertions. Three
+actual defective public-trait providers trip the intended assertions. All/core/
+native/default profiles finish5/4/5/5 on both hosts, zero failed/ignored. Named
+metadata tests24/0 and formatting/four strict profiles are zero.654 Rust inputs
+and separate metadata inputs verify at terminal; production remains unchanged.
+The existing is_empty default is now inventoried; one partial six-operation
+review makes14 reviews/88 operations among108 inventory entries. Evidence:
+[261](../validation/baseline/slice261/README.md). Finite capacity-three queues,
+eight256-action traces and32 requeue rounds do not certify every provider or
+whole Shard lifecycle. Macro review advances public Rust replacement evidence
+on P0/R14/R19 while preserving usable static service256 and P5/P6 recovery work.
+
+Original254d Mac family is now terminal21/44,4031.40s, with original source
+verified after exit101. All44 failure bodies classify exactly:36 immediate
+retained-credit assertions after LeadershipChanged,8 existing-store startup
+collisions. Those match the separately controlled259/260 assumptions; they do
+not constitute fresh complete-family acceptance. Original files remain. Evidence:
+[terminal Mac family](../validation/baseline/slice254d/mac-family/README.md).
+Next262 qualifies the corrected full67 family (65 original plus two controlled
+regressions) on preserved independent Linux/Mac sources; do not rerun unchanged
+original sources or infer a full pass from the selected controls. Full P0–P7
+remains active; features/functional Linux/macOS first, performance/security later.

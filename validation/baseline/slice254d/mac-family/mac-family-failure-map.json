@@ -1,0 +1,275 @@
+{
+  "passed": 21,
+  "failed": 44,
+  "seconds": 4031.4,
+  "counts": {
+    "unknown-result retained credit": 36,
+    "existing store": 8
+  },
+  "rows": [
+    {
+      "test": "native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::imported_partial::quic_partial_import_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::imported_partial::quic_partial_import_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::imported_partial::tcp_partial_import_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::imported_partial::tcp_partial_import_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::quic_delegated_split_recovers_every_phase_from_wal",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::quic_imported_parent_move_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::quic_retained_parent_move_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::tcp_retained_parent_move_wal",
+      "cause": "unknown-result retained credit",
+      "site": "tests/routed/unread_phase.rs:76:9",
+      "assertion": "assertion `left == right` failed"
+    },
+    {
+      "test": "native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    },
+    {
+      "test": "native::delegation::tcp_delegated_split_recovers_every_phase_from_wal",
+      "cause": "existing store",
+      "site": "tests/routed/native.rs:151:33",
+      "assertion": "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }"
+    }
+  ]
+}

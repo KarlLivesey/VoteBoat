@@ -1,0 +1,4 @@
+docs/component-contracts.json: OK
+docs/provider-conformance.json: OK
+validation/check-provider-conformance.mjs: OK
+validation/check-provider-conformance.test.mjs: OK

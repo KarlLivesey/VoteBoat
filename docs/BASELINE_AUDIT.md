@@ -7,13 +7,16 @@ Earlier reviews below retain their original revision and scope.
 
 ## Slice255 — functional checkpoint
 
-Reviewed7fc57d0 plus258's timer metadata correction against chapter01 R01–R19
+Reviewedf2467a9 plus261's scheduler evidence against chapter01 R01–R19
 and the P0–P7 exits. This is a
 feature/evidence map, not release completion. Production differs from the
 source-preserved full Linux251 run only in the reviewed native manifest-source
 handoff adapters. The core below remains source-identical to that run; the
 new source seam has its own254 acceptance. Current static separate-host TCP/QUIC
-service checks pass256. Mac recursive recovery failures remain active257 work.
+service checks pass256. The original Mac delegation family finishes21/44;
+36 failures are retained-credit assertions and8 are existing-store collisions.
+Both causes have controlled259/260 corrections; complete corrected-family
+acceptance remains262 work.
 
 | Requirement | Current implementation surface | Remaining acceptance or work |
 | --- | --- | --- |
@@ -35,7 +38,7 @@ service checks pass256. Mac recursive recovery failures remain active257 work.
 | R16 optional availability | Public core modules; native/tls/quic compile gates and four strict build profiles. | Runtime evidence remains configuration-specific; all features cannot cover disabled branches. |
 | R17 persistence contract | LogStore batches/barriers/ranges, typed append/truncate/compact mutations, snapshots and recovery. | Backend/device conformance and explicit migration; generic byte read/write is insufficient. |
 | R18 authoritative store | Explicit store bindings and checked NodeParts assembly. | Backend migration remains explicit; no hidden parallel native WAL. |
-| R19 replacement contracts | Scoped identities, exact tickets, bounds, ownership/cancellation and stale-completion checks. | Provider metadata has13 partial reviews/82 named operations after258;95 inventory entries have no such review. Unreviewed metadata does not imply absent tests; coverage still needs inspection. |
+| R19 replacement contracts | Scoped identities, exact tickets, bounds, ownership/cancellation and stale-completion checks. | Provider metadata has14 partial reviews/88 named operations after261;94 inventory entries have no such review. Unreviewed metadata does not imply absent tests; coverage still needs inspection. |
 
 Public source points include [NodeParts](../src/runtime/node.rs),
 [LogStore](../src/log.rs), [timers/scheduler](../src/runtime.rs),

@@ -33,7 +33,8 @@ Final653 build inputs verify on both. Inventory108 and13 partial reviews/81
 operations metadata remain unchanged; selected evidence does not certify providers.
 The full affected65-history native delegation family finishes65/0 on Linux;
 see [terminal family scope](linux-family/README.md). Mac's corresponding family
-remains live with reported failures on its own unchanged source. Neither result
+finishes21/44 on its own unchanged source; see [terminal Mac family](mac-family/README.md).
+Neither result
 is certified by the focused five tests. The unrelated
 original created-source Mac run finishes3/1 with a QUIC/WAL readiness timeout at
 operation1002; its causal terminal state remains next work. Preserved original251

@@ -1,0 +1,10 @@
+{
+  "buildInputs": 654,
+  "changed": [
+    "tests/runtime.rs"
+  ],
+  "added": [
+    "tests/runtime/scheduler_contract.rs"
+  ],
+  "productionChanges": []
+}
