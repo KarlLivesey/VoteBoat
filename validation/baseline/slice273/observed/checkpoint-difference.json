@@ -1,0 +1,17 @@
+{
+  "scope": "partial emitted failure from live Mac269; not a terminal suite result",
+  "sourceRevision": "178844a",
+  "sourceInputs": 662,
+  "failedTest": "native::delegation::imported_partial::tcp_partial_import_checkpoint",
+  "sourceLocation": "tests/routed/imported_partial.rs:113:13",
+  "leftBytes": 7400,
+  "rightBytes": 7400,
+  "leftAppliedIndex": "46",
+  "rightAppliedIndex": "44",
+  "differentByteOffsets": [
+    8
+  ],
+  "equalAfterAppliedIndex": true,
+  "leftSha256": "3d7edc91f63091846c66e7fb92e570d4d233a67ef1287d5748aab15f7e72bbe1",
+  "rightSha256": "f2e2f7fd4cf76e3ddff7c02d58e29276ca6ee9a4a1784a09cb919cd6e3f3c3e5"
+}

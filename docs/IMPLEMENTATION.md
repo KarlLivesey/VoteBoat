@@ -104,21 +104,20 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint272: static mixed-host service256 remains usable. Codec
-recovery270 and exact staged snapshot payload271 are accepted on both hosts.
-The current slice adds actual timed-owner/WAL fault replay with six focused
-checks and32 encoded/decoded schedules. Both hosts pass376 full runtime/Raft
-executions plus one recorded-file replay, formatting/four strict profiles zero
-and666 frozen inputs before/after. Corrected69-history lifecycle269 is terminal
-69/0 on Linux; its matching Mac run stays immutable and live;
-older262/251 terminal evidence remains separate. Selected tests are not complete
-platform or roadmap acceptance.
+Current checkpoint273: timer/WAL replay272 is accepted on both hosts and
+pushed6946a39. Linux corrected lifecycle269 is terminal69/0; Mac269 remains
+live with three reported failures. Its imported-partial checkpoint comparison
+has identical7400-byte content except applied index46 versus44. Match exact
+replica identities and the final actual committed WAL prefix before comparing
+recovered applications; do not normalize or discard checkpoint fields. The
+corrected six-case family now passes on both hosts, with four additional
+regression executions each and formatting/four strict profiles zero.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Accepted272: timed-owner/WAL fault replay | Advance P0/P1/P2 combined timer/persistence correctness. | Existing AutoNode/TimedShard, native DeadlineQueue/FairScheduler and original store tickets; one shared private fulfillment helper. No production change. | Actual timer-origin vote withholding until sync/completion; expired held visit and independent group progress; both crash modes reject old owner and preserve Counter retries;32 exact encoded/decoded schedules and captured file replay; full runtime/Raft and four strict profiles on both hosts. |
-| Next269: finish corrected composed lifecycle qualification | Advance P5/P6 Mac/Linux functional acceptance with the causal metadata/cleanup fixes composed. | Frozen662-input Linux/Mac sources and original operation IDs/cuts; retain older262/251 sources and failures separately. | Full69-history terminal results, exact failure bodies and source verification, then focused cause fixes if required. Live progress is not completion. |
-| Following: next evidenced contract/combined-fault gap | Advance original P0–P7 exits while preserving usable service/embedding. | Actual terminal results plus R01–R19/C01–C24 ledger; choose a concrete missing behavior before helpers. | Specify API/state ownership/restart cases and bounded acceptance before edits; source-bound tests and strict zero on supported platforms. |
+| Accepted273: exact restart expectation from retained application and final durable tail | Advance P5/P6 recovery qualification without rejecting legitimate committed progress. | Existing application clone/apply contracts and actual stores returned by owner abort; original identities/cuts. | Key retained apps and final logs by NodeId; contiguous replay from captured applied boundary through actual commit; exact reopened log and checkpoint equality; actual-core no-op/command-tail regressions and affected native histories on Linux/Mac; formatting/four strict profiles zero. |
+| Next: endpoint original-write duplicate qualification | Advance P5 functional endpoint migration. | Mac269 reports operation3 duplicate=true where fixture demanded false; inspect exact unknown outcome and original content, preserving the two existing duplicate checks. | Controlled actual authority-loss/committed retry evidence; require original IDs/content/outcomes and unchanged outbox count; repeat only known uncertainty. |
+| Following: imported-retirement timeout cause | Advance P5/P6 composed retirement. | Live immutable Mac269 terminal/failure context and exact original phase; no deadline increase or protocol relaxation. | Reproduce/isolate cause, fix narrowly, retain original cuts and cold retry/fence/cleanup assertions, then qualify affected scope on both platforms. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26605,3 +26604,55 @@ Original Mac262 has reported failures in both automatic metadata-read histories
 on its older source; original Mac251 is separate. Do not transfer those failures
 or this Linux result to another image. This accepts the Linux family only and
 advances P5/P6 without closing the two-platform lifecycle milestone.
+
+273 schema before edits: Mac269's imported partial checkpoint equality fails at
+Run::restart:7400 bytes agree except the applied boundary46 versus44. The fixture
+captures application bytes before aborting native owners, then compares them
+positionally against new nodes in configuration order. Campaign selects/swaps
+a ready leader, so positions are not replica identity. Accepted native log work
+may also finish while abort returns owned stores; original application capture
+is therefore not the terminal durable boundary. Keep the original unread phase
+and immediate owner abort. Capture cloned applications by NodeId, use the actual
+returned GroupLog per NodeId and replay only its contiguous committed tail after
+the captured applied index. Assert the old applied boundary remains covered by
+the log, tail reaches its exact commit, and reopening returns that exact log
+and exact expected checkpoint. No byte masking, new authority or fabricated
+durability is allowed. A private expectation helper is needed to share those
+checks between Run::restart and actual-core regressions. Crash here means owner
+abort with accepted worker completion, not physical power loss. Acceptance adds
+real native store/core campaign-noop and Counter-tail/retry histories and runs
+the original imported-partial TCP/QUIC WAL/checkpoint family. Preserve the emitted
+269 log/source manifest independently; the still-live image is not edited.
+Mini273/next endpoint/following retirement link directly to P5/P6 Mac recovery;
+P0–P7 stays active, tuning/security after features and Windows/P8 deferred.
+
+251 Mac terminal collection during273: the unchanged original full all-feature
+no-fail-fast run finishes all=101, with1779 passed/46 failed/zero ignored across
+90 summaries. Failed targets are quic13/2, routed135/36, transfer_service27/6
+and native_benchmark32/2. Every failed test name and full body is retained
+[here](../validation/baseline/slice251/mac/README.md). All647 source inputs verify
+before/after and equal the original Linux251 manifest; Mac's checkout Git HEAD
+and stable1.98.0 environment stay separately recorded. Its original formatting/
+four strict profiles were zero. This is failed original-source evidence, not a
+current-source outcome or a diagnosis that later targeted fixes cover all46.
+Mac269/262 remain separate live runs; selected273 corrects an actual new269
+checkpoint expectation. Full platform acceptance and P0–P7 stay open.
+
+273 acceptance: Linux and Mac each finish the original four imported-partial
+TCP/QUIC WAL/checkpoint histories plus two actual-core regressions:6/0 in
+36.37s and390.67s respectively. Both also pass the two regressions in all and
+default configurations, for10 executions per host. Formatting/four strict
+all-target profiles are zero and667 build inputs verify before checks, after
+regressions and at family terminal. Source differs from6946a39 only in the
+imported_partial fixture and its new private recovery companion; production is
+unchanged. Exact whole checkpoints and returned/recovered GroupLogs agree per
+NodeId after applying actual contiguous committed tails; no bytes, operation IDs
+or phase cuts were discarded. The original emitted Mac269 assertion preserves
+7400-byte images differing only at applied index46/44, with its own662-input
+source guard. See [273](../validation/baseline/slice273/README.md).
+Macro review: selected P5/P6 restart expectation is repaired and qualified,
+without changing the ownership/storage protocol. Next is the actual endpoint
+duplicate/uncertainty assertion; following is the imported-retirement timeout.
+Mac269/262 remain live independently, and original Mac251 is terminal1779/46
+with full source-bound failures retained. This selected acceptance does not
+close all Mac failures, provider obligations, combined fault gates or P0–P7.

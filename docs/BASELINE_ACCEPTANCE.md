@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Exact replica-bound recovery expectation: [slice273](../validation/baseline/slice273/README.md).
+Both hosts pass the original four TCP/QUIC WAL/checkpoint histories plus two
+actual-core tail regressions, and four additional regression executions each.
+Formatting/four strict profiles are zero;667 inputs verify throughout. The
+fixture now compares complete per-node recovery against actual committed tails,
+with production unchanged. Endpoint retry/retirement timeout qualification is
+next. Original [Mac251 full suite](../validation/baseline/slice251/mac/README.md)
+is terminal1779/46 on its own647-input source; current Mac269/262 stay separate.
+
 Actual timed-owner/WAL replay: [slice272](../validation/baseline/slice272/README.md).
 Both hosts pass376 runtime/Raft executions plus the same captured150-action
 schedule, formatting/four strict profiles zero and666 verified inputs. Production
@@ -1029,7 +1038,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
 | R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
 | R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
-| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 replay/reduction,264 delayed/stale completions,265 crash/sync/Counter retry,266 short-write/publication recovery and267 read/cancel authority on both hosts. | Snapshot/timer schedules, broader worker/device compositions and reference-Raft comparison remain. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 replay/reduction,264 delayed/stale completions,265 crash/sync/Counter retry,266 short-write/publication recovery,267 read/cancel authority and272 actual timed-owner/WAL replay on both hosts. | Snapshot schedules, broader worker/device compositions and reference-Raft comparison remain. |
 | R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
 | R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
 | R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |

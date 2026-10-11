@@ -1,5 +1,14 @@
 # Baseline audits
 
+Exact replica-bound recovery expectation: [slice273](../validation/baseline/slice273/README.md).
+Both hosts pass the original four TCP/QUIC WAL/checkpoint histories plus two
+actual-core tail regressions, and four additional regression executions each.
+Formatting/four strict profiles are zero;667 inputs verify throughout. The
+fixture now compares complete per-node recovery against actual committed tails,
+with production unchanged. Endpoint retry/retirement timeout qualification is
+next. Original [Mac251 full suite](../validation/baseline/slice251/mac/README.md)
+is terminal1779/46 on its own647-input source; current Mac269/262 stay separate.
+
 Actual timed-owner/WAL replay: [slice272](../validation/baseline/slice272/README.md).
 Both hosts pass376 runtime/Raft executions plus the same captured150-action
 schedule, formatting/four strict profiles zero and666 verified inputs. Production
@@ -38,7 +47,7 @@ terminal69/0; matching Mac qualification remains active and separate work.
 
 | Requirement | Current implementation surface | Remaining acceptance or work |
 | --- | --- | --- |
-| R01 crash-fault consensus | Raft event/effect core, durable LogStore/PersistenceWorker, snapshots and native service. | Wider combined faults; original Mac full run remains live with failures. |
+| R01 crash-fault consensus | Raft event/effect core, durable LogStore/PersistenceWorker, snapshots and native service. | Wider combined faults; original Mac251 is terminal1779/46 with four failed targets, preserved separately. |
 | R02 recursive responsibilities | Manifest parent authorities, delegation, insertion, deletion, reparenting and recursive lookup. | Resolve actual Mac recursive history failures; selected histories are not arbitrary composition proof. |
 | R03 multiple execution lanes | Partitioned manifests, independent groups, source/target split and compatible merge. | Broader recursive deployment and recovery; no cross-lane total order is promised. |
 | R04 hierarchical quorum | Policy/JointPolicy and Membership::is_satisfied/frontier. Self-vote, received vote, read and commit sites inspected again. | Broader transition schedules; voter/learner counts found in allocation sizing are not quorum predicates. |
@@ -48,7 +57,7 @@ terminal69/0; matching Mac qualification remains active and separate work.
 | R08 direct child commits | Routed owner proposals and parent-offline child histories. | Resolve Mac composed histories without adding an ancestor commit. |
 | R09 safe transitions | Joint membership, durable source fence, target import, publication, activation and retirement guards. | Actual Mac lifecycle failures and broader combined cuts remain; never treat an unknown phase as an applied cut. |
 | R10 honest outcomes | Admission, persistence, commit/application and exact ClientCompletion outcomes. | Retain unknown/same-ID semantics in every caller;254d adds an actual controlled native negative. |
-| R11 deterministic testing | Explicit events/effects/time, Counter history checking, actual-core replay/reduction263, delayed completions264, crash/sync/retry265, short-write/publication266 and read/cancel267 on both hosts. | Snapshot/timer schedules, broader worker/device composition, reference comparison and fuzzing remain wider validation work. |
+| R11 deterministic testing | Explicit events/effects/time, Counter history checking, actual-core replay/reduction263, delayed completions264, crash/sync/retry265, short-write/publication266, read/cancel267 and actual timed-owner/WAL replay272 on both hosts. | Snapshot schedules, broader worker/device composition, reference comparison and fuzzing remain wider validation work. |
 | R12 bounded overload | Explicit admission, buffer, queue, image, retention and recovery limits. | Wider disk-full and competing recovery/connection coverage remains. |
 | R13 native providers | Native WAL/snapshots, scheduler, multiplexed TCP/TLS and QUIC/codecs. | No external adapter is required or claimed. |
 | R14 public seams | Domain traits plus NodeParts/from_parts, injected native/host providers. | Complete reusable obligation coverage;108 inventory entries alone do not certify them. |

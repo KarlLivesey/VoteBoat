@@ -1,0 +1,387 @@
+{
+  "scope": "Exact panic extracts from original Mac251; categories and current-source fixes are not inferred",
+  "failures": [
+    {
+      "test": "chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls",
+      "panic": [
+        "thread 'chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls' (17041713) panicked at tests/quic/chunk_progress.rs:62:5:",
+        "original chunk still unacknowledged",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        ""
+      ]
+    },
+    {
+      "test": "handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate",
+      "panic": [
+        "thread 'handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate' (17041719) panicked at tests/quic.rs:693:5:",
+        "assertion `left == right` failed",
+        "  left: 0",
+        " right: 1200"
+      ]
+    },
+    {
+      "test": "native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline",
+      "panic": [
+        "thread 'native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline' (17042128) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        ""
+      ]
+    },
+    {
+      "test": "native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules",
+      "panic": [
+        "thread 'native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules' (17042159) panicked at tests/routed/native.rs:364:29:",
+        "read invocation rejected",
+        ""
+      ]
+    },
+    {
+      "test": "native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint",
+      "panic": [
+        "thread 'native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint' (17042123) panicked at tests/routed/lookup_discovery.rs:81:9:",
+        "automatic lookup stalled",
+        ""
+      ]
+    },
+    {
+      "test": "native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules",
+      "panic": [
+        "thread 'native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules' (17042521) panicked at tests/routed/native.rs:364:29:",
+        "read invocation rejected",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint",
+      "panic": [
+        "thread 'native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint' (17053341) panicked at tests/routed/deletion.rs:340:17:",
+        "assertion failed: propose_recovering(&mut self.parent, &self.clock, g, op, b).duplicate",
+        ""
+      ]
+    },
+    {
+      "test": "native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal",
+      "panic": [
+        "thread 'native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal' (17042660) panicked at tests/routed/creation_source.rs:147:5:",
+        "native routed progress timed out",
+        ""
+      ]
+    },
+    {
+      "test": "native::creation::quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage",
+      "panic": [
+        "thread 'native::creation::quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage' (17042291) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint",
+      "panic": [
+        "thread 'native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint' (17496485) panicked at tests/routed/retained.rs:301:9:",
+        "reservation",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint",
+      "panic": [
+        "thread 'native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint' (17320813) panicked at tests/routed/native.rs:290:10:",
+        "called `Result::unwrap()` on an `Err` value: ClientRejected { reason: Consensus(NotLeader), request: ClientRequest { group: GroupIdentity { id: GroupId(100), incarnation: GroupIncarnation(1) }, operation: OperationId(1001), bytes: [86, 66, 68, 67, 77, 68, 48, 49, 0, 0, 0, 0, 0, 0, 0, 0, 233, 0, 0, 0, 86, 66, 77, 65, 78, 48, 48, 49, 244, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 88, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 2, 1, 0, 0, 0, 0, 1, 1, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0] } }",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations",
+      "panic": [
+        "thread 'native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations' (17269830) panicked at tests/routed/reparenting.rs:247:9:",
+        "assertion failed: retry.duplicate",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata",
+      "panic": [
+        "thread 'native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata' (17271529) panicked at tests/routed/reparenting.rs:247:9:",
+        "assertion failed: retry.duplicate",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint",
+      "panic": [
+        "thread 'native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint' (17334961) panicked at tests/routed/retained_parent.rs:822:32:",
+        "called `Option::unwrap()` on a `None` value",
+        ""
+      ]
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint",
+      "panic": [
+        "thread 'native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint' (17367299) panicked at tests/routed/retained.rs:619:9:",
+        "assertion `left == right` failed",
+        "  left: Facts { parent: Some(ParentFacts { manifest: ResponsibilityManifest(ManifestInput { responsibility: ResponsibilityIdentity { id: ResponsibilityId(500), incarnation: ResponsibilityIncarnation(1) }, parent: Some(ParentAuthority { responsibility [long assertion line omitted here; full bytes in all.log]",
+        " right: Facts { parent: Some(ParentFacts { manifest: ResponsibilityManifest(ManifestInput { responsibility: ResponsibilityIdentity { id: ResponsibilityId(500), incarnation: ResponsibilityIncarnation(1) }, parent: Some(ParentAuthority { responsibility [long assertion line omitted here; full bytes in all.log]"
+      ]
+    },
+    {
+      "test": "native::delegation::retained::parent_moves::tcp_retained_parent_move_wal",
+      "panic": [
+        "thread 'native::delegation::retained::parent_moves::tcp_retained_parent_move_wal' (17412905) panicked at tests/routed/retained.rs:619:9:",
+        "assertion `left == right` failed",
+        "  left: Facts { parent: Some(ParentFacts { manifest: ResponsibilityManifest(ManifestInput { responsibility: ResponsibilityIdentity { id: ResponsibilityId(500), incarnation: ResponsibilityIncarnation(1) }, parent: Some(ParentAuthority { responsibility [long assertion line omitted here; full bytes in all.log]",
+        " right: Facts { parent: Some(ParentFacts { manifest: ResponsibilityManifest(ManifestInput { responsibility: ResponsibilityIdentity { id: ResponsibilityId(500), incarnation: ResponsibilityIncarnation(1) }, parent: Some(ParentAuthority { responsibility [long assertion line omitted here; full bytes in all.log]"
+      ]
+    },
+    {
+      "test": "native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_unread_result_from_wal",
+      "panic": [
+        "thread 'native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_unread_result_from_wal' (17632263) panicked at tests/routed/creation_source.rs:147:5:",
+        "native routed progress timed out",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_checkpoint",
+      "panic": [
+        "thread 'native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_checkpoint' (17772216) panicked at tests/routed/creation_source.rs:147:5:",
+        "native routed progress timed out",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_wal",
+      "panic": [
+        "thread 'native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_wal' (17831596) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_checkpoint",
+      "panic": [
+        "thread 'native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_checkpoint' (17861755) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_wal",
+      "panic": [
+        "thread 'native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_wal' (17897169) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::nested::tcp_nested_insertion_recovers_unread_phases_from_wal",
+      "panic": [
+        "thread 'native::insertion::nested::tcp_nested_insertion_recovers_unread_phases_from_wal' (17979736) panicked at tests/routed/creation_source.rs:147:5:",
+        "native routed progress timed out",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::quic_insertion_recovers_unread_phases_from_checkpoint",
+      "panic": [
+        "thread 'native::insertion::quic_insertion_recovers_unread_phases_from_checkpoint' (18003931) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::quic_insertion_recovers_unread_phases_from_wal",
+      "panic": [
+        "thread 'native::insertion::quic_insertion_recovers_unread_phases_from_wal' (18022541) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::tcp_insertion_recovers_unread_phases_from_checkpoint",
+      "panic": [
+        "thread 'native::insertion::tcp_insertion_recovers_unread_phases_from_checkpoint' (18054882) panicked at tests/routed/creation_source.rs:147:5:",
+        "native routed progress timed out",
+        ""
+      ]
+    },
+    {
+      "test": "native::insertion::tcp_insertion_recovers_unread_phases_from_wal",
+      "panic": [
+        "thread 'native::insertion::tcp_insertion_recovers_unread_phases_from_wal' (18081028) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::merge::quic_merge_resumes_partial_fences_and_every_phase_from_wal_status",
+      "panic": [
+        "thread 'native::merge::quic_merge_resumes_partial_fences_and_every_phase_from_wal_status' (18091538) panicked at tests/routed/native.rs:434:5:",
+        "native routed progress timed out",
+        ""
+      ]
+    },
+    {
+      "test": "native::quic_child_writes_checkpoint_and_restart_without_parent_commits",
+      "panic": [
+        "thread 'native::quic_child_writes_checkpoint_and_restart_without_parent_commits' (18152955) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        ""
+      ]
+    },
+    {
+      "test": "native::quic_target_staging_and_inline_import_survive_checkpoint_reopen",
+      "panic": [
+        "thread 'native::quic_target_staging_and_inline_import_survive_checkpoint_reopen' (18177330) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        ""
+      ]
+    },
+    {
+      "test": "native::quic_target_staging_and_inline_import_survive_wal_reopen",
+      "panic": [
+        "thread 'native::quic_target_staging_and_inline_import_survive_wal_reopen' (18184801) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        ""
+      ]
+    },
+    {
+      "test": "native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort",
+      "panic": [
+        "thread 'native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort' (18222232) panicked at tests/routed/split_membership.rs:217:9:",
+        "assertion failed: Instant::now() < deadline",
+        ""
+      ]
+    },
+    {
+      "test": "native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery",
+      "panic": [
+        "thread 'native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery' (18222504) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners",
+      "panic": [
+        "thread 'native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners' (18233132) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::split::repeat::quic_repeated_transfer_preserves_activated_sources_through_wal_reopen",
+      "panic": [
+        "thread 'native::split::repeat::quic_repeated_transfer_preserves_activated_sources_through_wal_reopen' (18233535) panicked at tests/routed/native.rs:151:33:",
+        "startup: NativeStartupError { stage: \"filesystem/listener\", detail: \"AlreadyExists\" }",
+        ""
+      ]
+    },
+    {
+      "test": "native::tcp_child_writes_checkpoint_and_restart_without_parent_commits",
+      "panic": [
+        "thread 'native::tcp_child_writes_checkpoint_and_restart_without_parent_commits' (18243440) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        ""
+      ]
+    },
+    {
+      "test": "native::tcp_target_activation_preserves_retries_through_checkpoint_reopen",
+      "panic": [
+        "thread 'native::tcp_target_activation_preserves_retries_through_checkpoint_reopen' (18247768) panicked at tests/routed/native.rs:364:29:",
+        "read invocation rejected",
+        ""
+      ]
+    },
+    {
+      "test": "native::tcp_target_staging_and_inline_import_survive_checkpoint_reopen",
+      "panic": [
+        "thread 'native::tcp_target_staging_and_inline_import_survive_checkpoint_reopen' (18261667) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        ""
+      ]
+    },
+    {
+      "test": "native::tcp_target_staging_and_inline_import_survive_wal_reopen",
+      "panic": [
+        "thread 'native::tcp_target_staging_and_inline_import_survive_wal_reopen' (18280070) panicked at tests/routed/native.rs:248:56:",
+        "called `Result::unwrap()` on an `Err` value: LeadershipChanged",
+        "",
+        ""
+      ]
+    },
+    {
+      "test": "interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic",
+      "panic": [
+        "thread 'interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic' (18319182) panicked at tests/transfer_service/initialization.rs:30:35:",
+        "1 grant:  Error: \"ERR Application(NotApplied)\\n\"",
+        "",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace"
+      ]
+    },
+    {
+      "test": "peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic",
+      "panic": [
+        "thread 'peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic' (18319188) panicked at tests/transfer_service/initialization.rs:30:35:",
+        "1 grant:  Error: \"ERR Application(NotApplied)\\n\"",
+        "",
+        ""
+      ]
+    },
+    {
+      "test": "peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp",
+      "panic": [
+        "thread 'peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp' (18319190) panicked at tests/transfer_service/initialization.rs:30:35:",
+        "1 grant:  Error: \"ERR Application(NotApplied)\\n\"",
+        "",
+        ""
+      ]
+    },
+    {
+      "test": "initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data",
+      "panic": [
+        "thread 'initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data' (18319176) panicked at tests/transfer_service/initialization.rs:30:35:",
+        "1 grant:  Error: \"ERR Application(NotApplied)\\n\"",
+        "",
+        ""
+      ]
+    },
+    {
+      "test": "initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts",
+      "panic": [
+        "thread 'initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts' (18319179) panicked at tests/transfer_service/initialization.rs:30:35:",
+        "1 grant:  Error: \"ERR Application(NotApplied)\\n\"",
+        "",
+        ""
+      ]
+    },
+    {
+      "test": "retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint",
+      "panic": [
+        "thread 'retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint' (18319957) panicked at tests/transfer_service.rs:289:17:",
+        "shutdown join timeout",
+        "",
+        ""
+      ]
+    },
+    {
+      "test": "shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress",
+      "panic": [
+        "thread 'shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress' (18337746) panicked at examples/benchmark/shared_drain.rs:418:17:",
+        "ConfigurationCompletion { ticket: ConfigurationTicket { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, sequence: 2 }, operation: OperationId(201) }, outcome: NotProposed(Configuration(TransportCapacity(Wire(InvalidMessage(\"configuration admission journal\"))))) }",
+        "note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace",
+        ""
+      ]
+    },
+    {
+      "test": "shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress",
+      "panic": [
+        "thread 'shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress' (18337748) panicked at examples/benchmark/shared_drain.rs:418:17:",
+        "ConfigurationCompletion { ticket: ConfigurationTicket { admission: AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, sequence: 2 }, operation: OperationId(201) }, outcome: NotProposed(Configuration(TransportCapacity(Wire(InvalidMessage(\"configuration admission journal\"))))) }",
+        "",
+        ""
+      ]
+    }
+  ]
+}

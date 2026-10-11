@@ -1,0 +1,11 @@
+{
+  "previous": "6946a39",
+  "inputs": 667,
+  "added": [
+    "tests/routed/imported_partial/recovery.rs"
+  ],
+  "changed": [
+    "tests/routed/imported_partial.rs"
+  ],
+  "production_changed": []
+}

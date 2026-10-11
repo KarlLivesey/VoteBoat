@@ -1,0 +1,92 @@
+{
+  "source": "647-input source-preserved Mac251 (manifest matches slice251 Linux)",
+  "result": "all=101",
+  "summaries": 90,
+  "passed": 1779,
+  "failed": 46,
+  "ignored": 0,
+  "failedTargets": [
+    {
+      "target": "Running tests/quic.rs (target/debug/deps/quic-76c89f95a40a22d5)",
+      "status": "FAILED",
+      "passed": 13,
+      "failed": 2,
+      "ignored": 0,
+      "failed_tests": [
+        "chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls",
+        "handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate"
+      ]
+    },
+    {
+      "target": "Running tests/routed.rs (target/debug/deps/routed-a384754f719b1e79)",
+      "status": "FAILED",
+      "passed": 135,
+      "failed": 36,
+      "ignored": 0,
+      "failed_tests": [
+        "native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint",
+        "native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline",
+        "native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules",
+        "native::creation::quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage",
+        "native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules",
+        "native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal",
+        "native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint",
+        "native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations",
+        "native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata",
+        "native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint",
+        "native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint",
+        "native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint",
+        "native::delegation::retained::parent_moves::tcp_retained_parent_move_wal",
+        "native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint",
+        "native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_unread_result_from_wal",
+        "native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_checkpoint",
+        "native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_wal",
+        "native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_checkpoint",
+        "native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_wal",
+        "native::insertion::nested::tcp_nested_insertion_recovers_unread_phases_from_wal",
+        "native::insertion::quic_insertion_recovers_unread_phases_from_checkpoint",
+        "native::insertion::quic_insertion_recovers_unread_phases_from_wal",
+        "native::insertion::tcp_insertion_recovers_unread_phases_from_checkpoint",
+        "native::insertion::tcp_insertion_recovers_unread_phases_from_wal",
+        "native::merge::quic_merge_resumes_partial_fences_and_every_phase_from_wal_status",
+        "native::quic_child_writes_checkpoint_and_restart_without_parent_commits",
+        "native::quic_target_staging_and_inline_import_survive_checkpoint_reopen",
+        "native::quic_target_staging_and_inline_import_survive_wal_reopen",
+        "native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort",
+        "native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery",
+        "native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners",
+        "native::split::repeat::quic_repeated_transfer_preserves_activated_sources_through_wal_reopen",
+        "native::tcp_child_writes_checkpoint_and_restart_without_parent_commits",
+        "native::tcp_target_activation_preserves_retries_through_checkpoint_reopen",
+        "native::tcp_target_staging_and_inline_import_survive_checkpoint_reopen",
+        "native::tcp_target_staging_and_inline_import_survive_wal_reopen"
+      ]
+    },
+    {
+      "target": "Running tests/transfer_service.rs (target/debug/deps/transfer_service-2d6b92747d4c6151)",
+      "status": "FAILED",
+      "passed": 27,
+      "failed": 6,
+      "ignored": 0,
+      "failed_tests": [
+        "initialization::quic_initialization_recovers_lost_receipts_and_checkpointed_data",
+        "initialization::tcp_initialization_recovers_lost_bootstrap_and_grant_receipts",
+        "interrupt::recovery::metadata_readiness_reselects_after_sampled_authority_stalls_quic",
+        "peer_credentials::peer_rotation_preserves_split_roles_and_restart_quic",
+        "peer_credentials::peer_rotation_preserves_split_roles_and_restart_tcp",
+        "retirement::quic_retirement_recovers_unread_proposal_and_retired_checkpoint"
+      ]
+    },
+    {
+      "target": "Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-3dbd6b316992b02e)",
+      "status": "FAILED",
+      "passed": 32,
+      "failed": 2,
+      "ignored": 0,
+      "failed_tests": [
+        "shared::drain::quic_shared_wal_drain_resumes_mixed_checkpoint_progress",
+        "shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress"
+      ]
+    }
+  ]
+}

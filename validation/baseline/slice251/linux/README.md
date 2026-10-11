@@ -1,5 +1,9 @@
 # Slice251 — terminal Linux full suite
 
+Later collection: [original Mac251 is now terminal](../mac/README.md), with1779
+passes/46 failures on its own647-input image. The older observation below keeps
+its capture scope; this Linux result does not establish Mac acceptance.
+
 The source-preserved Linux run at ba67c8c finished successfully:
 
 ```sh

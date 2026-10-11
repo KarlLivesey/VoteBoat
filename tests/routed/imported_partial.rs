@@ -14,6 +14,8 @@
 // rights and limitations under the RPL.
 use super::super::{creation, creation_source, insertion};
 use super::*;
+#[path = "imported_partial/recovery.rs"]
+mod recovery;
 use voteboat::{
     bucket_counter::{encode_add, BucketCounter, BucketOutcome},
     group_creation::*,
@@ -99,22 +101,28 @@ impl Run {
         if self.checkpoint {
             compact(nodes, &self.clock, g);
         }
-        let before: Vec<_> = nodes
+        let before: BTreeMap<_, _> = nodes
             .iter()
             .map(|n| {
-                n.local().applications[&group(g)]
-                    .checkpoint(4_000_000)
-                    .unwrap()
+                (
+                    n.local().owner.core(group(g)).unwrap().local_node(),
+                    n.local().applications[&group(g)].clone(),
+                )
             })
             .collect();
-        creation::abandon(std::mem::take(nodes), g);
+        let logs = creation::abandon(std::mem::take(nodes), g);
         *nodes = self.open(g, NativeOpenMode::Recover, factory);
-        for (n, expected) in nodes.iter().zip(before) {
+        assert_eq!(nodes.len(), before.len());
+        for n in nodes.iter() {
+            let core = n.local().owner.core(group(g)).unwrap();
+            let id = core.local_node();
+            assert_eq!(core.state(), &logs[&id]);
+            let expected = recovery::expected(&before[&id], &logs[&id]);
             assert_eq!(
                 n.local().applications[&group(g)]
                     .checkpoint(4_000_000)
                     .unwrap(),
-                expected
+                expected.checkpoint(4_000_000).unwrap()
             );
         }
     }

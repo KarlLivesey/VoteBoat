@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.17s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 2 tests
+test native::delegation::imported_partial::recovery::restart_expectation_preserves_actual_committed_tail_and_original_retry ... ok
+test native::delegation::imported_partial::recovery::restart_expectation_includes_actual_campaign_noop_after_capture ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 181 filtered out; finished in 0.04s
+

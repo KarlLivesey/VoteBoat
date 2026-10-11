@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (<mac-repo273>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 18.81s
+     Running tests/routed.rs (target/debug/deps/routed-42b79c1d511c4246)
+
+running 2 tests
+test native::delegation::imported_partial::recovery::restart_expectation_includes_actual_campaign_noop_after_capture ... ok
+test native::delegation::imported_partial::recovery::restart_expectation_preserves_actual_committed_tail_and_original_retry ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 101 filtered out; finished in 0.01s
+

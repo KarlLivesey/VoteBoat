@@ -1,5 +1,14 @@
 # Validation report
 
+Exact replica-bound recovery expectation: [slice273](baseline/slice273/README.md).
+Both hosts pass the original four TCP/QUIC WAL/checkpoint histories plus two
+actual-core tail regressions, and four additional regression executions each.
+Formatting/four strict profiles are zero;667 inputs verify throughout. The
+fixture now compares complete per-node recovery against actual committed tails,
+with production unchanged. Endpoint retry/retirement timeout qualification is
+next. Original [Mac251 full suite](baseline/slice251/mac/README.md)
+is terminal1779/46 on its own647-input source; current Mac269/262 stay separate.
+
 Actual timed-owner/WAL replay: [slice272](baseline/slice272/README.md).
 Both hosts pass376 runtime/Raft executions plus the same captured150-action
 schedule, formatting/four strict profiles zero and666 verified inputs. Production
