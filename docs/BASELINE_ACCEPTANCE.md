@@ -1,5 +1,12 @@
 # Baseline acceptance map
 
+Fresh read/cancel authority: [slice267](../validation/baseline/slice267/README.md).
+Fresh quorum, one-use tokens, stale replies/cancellation, lagging application,
+restart/fencing and exact27-action replay pass through existing core/Counter
+contracts. Twenty-one replay checks and full Raft62/29/62/62 pass on both hosts;
+formatting/four strict profiles are zero. This remains finite native device-model
+evidence, separate from physical runtime and complete platform acceptance.
+
 Short-write and ambiguous publication recovery:
 [slice266](../validation/baseline/slice266/README.md). Actual append errors across
 28 cases and both manifest cuts/crash modes preserve withheld effects and
@@ -994,7 +1001,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
 | R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
 | R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
-| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 replay/reduction,264 delayed/stale completions,265 crash/sync/Counter retry and266 short-write/publication recovery on both hosts. | Read/cancel/snapshot/timer schedules, broader worker/device compositions and reference-Raft comparison remain. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 replay/reduction,264 delayed/stale completions,265 crash/sync/Counter retry 266 short-write/publication recovery and267 read/cancel authority on both hosts. | Snapshot/timer schedules, broader worker/device compositions and reference-Raft comparison remain. |
 | R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
 | R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
 | R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |
@@ -1176,8 +1183,8 @@ a passing test count.
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as
    a sustainable throughput improvement.
-3. Broaden chapter11 beyond263–266's replayable/minimizable actual-core schedules:
-   read/cancel and broader worker/device composition, snapshots
+3. Broaden chapter11 beyond263–267's replayable/minimizable actual-core schedules:
+   broader worker/device composition, snapshots
    and timer-runtime actions,
    compatible-semantics reference-Raft comparison, fuzz coverage for WAL/RPC/
    snapshot/routing codecs, declared-scope partitioned histories, and the missing

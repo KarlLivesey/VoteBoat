@@ -1,0 +1,38 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running tests/raft.rs (target/debug/deps/raft-6b922bf42bed553f)
+
+running 1 test
+composed read/cancel trace:
+VBSIM 1 267
+campaign 1
+pump
+counter 1 9911 9
+pump
+read 1 1
+newest
+cancel_read 1 1
+read 1 2
+pump
+serve_counter 1 2
+serve_counter 1 2
+read 1 3
+pump
+process_crash 1
+serve_counter 1 3
+campaign 1
+pump
+serve_counter 1 3
+read 1 4
+isolate 1
+pump
+serve_counter 1 4
+cancel_read 1 4
+heal
+read 1 5
+pump
+serve_counter 1 5
+
+test fault_schedule::reads::read_cancel_crash_and_partition_schedule_replays_exact_authority ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 61 filtered out; finished in 0.01s
+

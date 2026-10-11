@@ -68,7 +68,7 @@ impl Replay {
             Err(error) => panic!("unexpected scheduled event error: {error:?}"),
         }
     }
-    fn effects(&mut self, id: u64, effects: Vec<Effect>) {
+    pub(super) fn effects(&mut self, id: u64, effects: Vec<Effect>) {
         let mut effects = VecDeque::from(effects);
         while let Some(effect) = effects.pop_front() {
             if let Effect::Persist(update) = effect {

@@ -36,42 +36,49 @@ fn cut(word: Option<&str>) -> Result<usize, ()> {
         Err(())
     }
 }
+fn request(word: Option<&str>) -> Result<u64, ()> {
+    ReadRequestId::new(number(word)?).map(|r| r.get()).ok_or(())
+}
+fn unary(name: &str, id: u64) -> Result<Action, ()> {
+    Ok(match name {
+        "campaign" => Action::Campaign(id),
+        "isolate" => Action::Isolate(id),
+        "power_loss" => Action::PowerLoss(id),
+        "heartbeat" => Action::Heartbeat(id),
+        "bad_sync" => Action::BadSync(id),
+        "delay" => Action::Delay(id),
+        "sync" => Action::Sync(id),
+        "complete" => Action::Complete(id),
+        "stale" => Action::Stale(id),
+        "process_crash" => Action::ProcessCrash(id),
+        "fail_sync" => Action::FailSync(id),
+        "publish_before" => Action::FailPublish(id, publication::PublishCut::Before),
+        "publish_after" => Action::FailPublish(id, publication::PublishCut::After),
+        _ => return Err(()),
+    })
+}
 fn action(line: &str) -> Result<Action, ()> {
     let mut words = line.split_whitespace();
-    let action = match words.next() {
-        Some("campaign") => Action::Campaign(actor(words.next())?),
-        Some("write") => {
+    let action = match words.next().ok_or(())? {
+        "write" => {
             let id = actor(words.next())?;
             let operation = operation(words.next())?;
             Action::TryWrite(id, operation, number(words.next())?)
         }
-        Some("counter") => Action::TryCounter(
+        "counter" => Action::TryCounter(
             actor(words.next())?,
             operation(words.next())?,
             number(words.next())?,
         ),
-        Some("isolate") => Action::Isolate(actor(words.next())?),
-        Some("heal") => Action::Heal,
-        Some("newest") => Action::DeliverNewest,
-        Some("duplicate") => Action::DuplicateOldest,
-        Some("power_loss") => Action::PowerLoss(actor(words.next())?),
-        Some("heartbeat") => Action::Heartbeat(actor(words.next())?),
-        Some("pump") => Action::Pump,
-        Some("bad_sync") => Action::BadSync(actor(words.next())?),
-        Some("delay") => Action::Delay(actor(words.next())?),
-        Some("sync") => Action::Sync(actor(words.next())?),
-        Some("complete") => Action::Complete(actor(words.next())?),
-        Some("stale") => Action::Stale(actor(words.next())?),
-        Some("process_crash") => Action::ProcessCrash(actor(words.next())?),
-        Some("fail_sync") => Action::FailSync(actor(words.next())?),
-        Some("short_write") => Action::ShortWrite(actor(words.next())?, cut(words.next())?),
-        Some("publish_before") => {
-            Action::FailPublish(actor(words.next())?, publication::PublishCut::Before)
-        }
-        Some("publish_after") => {
-            Action::FailPublish(actor(words.next())?, publication::PublishCut::After)
-        }
-        _ => return Err(()),
+        "heal" => Action::Heal,
+        "newest" => Action::DeliverNewest,
+        "duplicate" => Action::DuplicateOldest,
+        "pump" => Action::Pump,
+        "short_write" => Action::ShortWrite(actor(words.next())?, cut(words.next())?),
+        "read" => Action::Read(actor(words.next())?, request(words.next())?),
+        "cancel_read" => Action::CancelRead(actor(words.next())?, request(words.next())?),
+        "serve_counter" => Action::ServeCounter(actor(words.next())?, request(words.next())?),
+        name => unary(name, actor(words.next())?)?,
     };
     if words.next().is_some() {
         Err(())
@@ -114,6 +121,9 @@ impl Trace {
                 Action::FailPublish(id, publication::PublishCut::After) => {
                     writeln!(text, "publish_after {id}")
                 }
+                Action::Read(id, request) => writeln!(text, "read {id} {request}"),
+                Action::CancelRead(id, request) => writeln!(text, "cancel_read {id} {request}"),
+                Action::ServeCounter(id, request) => writeln!(text, "serve_counter {id} {request}"),
             }
             .unwrap();
         }
@@ -168,6 +178,9 @@ fn all_actions_round_trip_with_original_ids_and_bytes() {
             Action::ShortWrite(2, MAX_FAULT_BYTES),
             Action::FailPublish(1, publication::PublishCut::Before),
             Action::FailPublish(3, publication::PublishCut::After),
+            Action::Read(1, u64::MAX),
+            Action::CancelRead(2, 1),
+            Action::ServeCounter(3, 2),
         ],
     };
     assert_eq!(Trace::decode(&trace.encode()).unwrap(), trace);
@@ -206,6 +219,9 @@ fn malformed_and_oversized_traces_are_rejected_before_execution() {
         "VBSIM 1 1\nshort_write 0 1",
         "VBSIM 1 1\npublish_before 4",
         "VBSIM 1 1\npublish_after 1 extra",
+        "VBSIM 1 1\nread 1 0",
+        "VBSIM 1 1\ncancel_read 0 1",
+        "VBSIM 1 1\nserve_counter 1 18446744073709551616",
         "VBSIM 1 1\nλ",
     ] {
         assert!(Trace::decode(input).is_err(), "{input:?}");

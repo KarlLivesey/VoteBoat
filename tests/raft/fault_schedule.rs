@@ -10,6 +10,8 @@ mod crash;
 mod delayed;
 #[path = "fault_schedule/publication.rs"]
 mod publication;
+#[path = "fault_schedule/reads.rs"]
+mod reads;
 #[path = "fault_schedule/reduce.rs"]
 mod reduce;
 
@@ -36,6 +38,9 @@ enum Action {
     FailSync(u64),
     ShortWrite(u64, usize),
     FailPublish(u64, publication::PublishCut),
+    Read(u64, u64),
+    CancelRead(u64, u64),
+    ServeCounter(u64, u64),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Trace {
@@ -126,6 +131,9 @@ struct Point {
     fenced_refused: usize,
     append_failures: usize,
     publish_failures: usize,
+    reads: BTreeMap<u64, Vec<reads::Ready>>,
+    read_floor: BTreeMap<u64, u64>,
+    read_outcomes: Vec<reads::Attempt>,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum FailureStage {
@@ -142,6 +150,7 @@ struct Replay {
     images: BTreeMap<u64, TraceIo>,
     cluster: Cluster<NativeLogStore<TraceIo>>,
     delayed: delayed::Dependencies,
+    read_outcomes: Vec<reads::Attempt>,
 }
 impl Replay {
     fn new() -> Self {
@@ -158,6 +167,7 @@ impl Replay {
             images,
             cluster,
             delayed: delayed::Dependencies::default(),
+            read_outcomes: Vec::new(),
         }
     }
     fn restart(&mut self, id: u64, mode: crash::Mode) -> Result<(), LostPrefix> {
@@ -248,6 +258,9 @@ impl Replay {
                 self.images[&id].device.0.borrow_mut().fault = Fault::Append(cut);
             }
             Action::FailPublish(id, cut) => self.fail_publish(id, cut),
+            Action::Read(id, request) => self.read_action(id, request, reads::Kind::Begin),
+            Action::CancelRead(id, request) => self.read_action(id, request, reads::Kind::Cancel),
+            Action::ServeCounter(id, request) => self.serve_counter(id, request),
             Action::Heartbeat(id) => self.step_event(id, Event::Heartbeat),
             Action::Pump => self.pump(),
             Action::BadSync(id) => self.images[&id].bad_sync.set(true),
@@ -298,6 +311,19 @@ impl Replay {
             fenced_refused: self.delayed.fenced_refused,
             append_failures: self.delayed.append_failures,
             publish_failures: self.delayed.publish_failures,
+            reads: self
+                .cluster
+                .reads
+                .iter()
+                .map(|(id, barriers)| (*id, barriers.iter().map(reads::Ready::from).collect()))
+                .collect(),
+            read_floor: self
+                .cluster
+                .replicas
+                .iter()
+                .map(|(id, replica)| (*id, replica.core.read_request_floor()))
+                .collect(),
+            read_outcomes: self.read_outcomes.clone(),
         }
     }
 }

@@ -104,20 +104,21 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint266: static mixed-host service256 remains selected completed
+Current checkpoint267: static mixed-host service256 remains selected completed
 evidence. Timer258 and scheduler261 replacement checks pass on both hosts.
-Original Mac254d finishes21/44; the44 failures map to two separately controlled
-fixture assumptions corrected259/260. The eight affected260 histories now pass
-on both hosts. Complete corrected67-history qualification262 runs on independent
-frozen Linux/Mac sources. Actual-core replay/reduction263 and delayed completion
-schedules264, crash/failure/retry265 and short-write/publication266 are accepted below;
-selected checks do not imply a complete platform or roadmap pass.
+Original Mac254d finishes21/44; its two fixture causes have controlled259/260
+corrections. Corrected262's complete Linux delegation family now finishes67/0
+with terminal source verification. Its Mac run remains active and has reported
+an Unavailable failure in automatic metadata lookup after activation; the
+terminal result and cause remain pending. Actual-core schedules263–266 remain
+accepted. Current267 adds read/cancel authority to that same driver; selected
+checks do not imply a complete platform or roadmap pass.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current266: short-write and manifest-publication schedules — accepted | Advance P0/R11 and P1 recovery by resolving partial admission and ambiguous commit publication without false success. | Existing actual core/store, ModelIo append/publication faults,265 ownership/Counter helpers; no new engine/provider. | Seventeen replay checks,28 append cases, both publication cuts/crash modes, original Counter9911/value9 retry/cold recovery, saved29-action replay and full Raft targets58/29/58/58 both hosts; formatting/four strict profiles zero. |
-| Next262: qualify the complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Terminal original Mac21/44 maps to36 retained-credit assertions and8 existing-store collisions;259/260 controlled negatives/corrections on both hosts. Use frozen independent corrected sources. | Full67-history family (original65 plus two controlled regressions), source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
-| Following267: actual-core read/cancel fault actions or the next platform failure | Advance P0/R11 and P1 fresh read authority while preserving P5/P6 platform acceptance. | Terminal262/251 failures take priority; otherwise inspect existing Event::Read/CancelRead, ReadBarrier and Cluster read collection before extending the same driver. | No read success from cached leadership or quorum loss, exact cancellation/stale-response behavior, replayed read evidence and original Counter value checks; both-host full targets/strict zero, declared scope explicit. |
+| Current267: actual-core read/cancel schedules — accepted | Advance P0/R11 and P1 read authority through cancellation, partition, restart and fencing. | Existing core Read/CancelRead, issued ReadBarrier, public read_at_barrier and Counter;263–266 driver and native model. | Twenty-one replay checks, fresh quorum/one-use value9, isolated leader blocked while another quorum reaches12, cancellation/stale replies, NotApplied retry, restart/fence rejection, saved27-action replay; full Raft62/29/62/62 and strict zero both hosts. All checks are terminal and source-verified on both hosts. |
+| Next262: qualify complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Frozen independent sources; Linux67/0 terminal. Preserve the Mac terminal failure bodies and source identity before deciding corrections. | Full67-history family, source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
+| Following268: diagnose actual Mac metadata lookup failure | Advance P5/P6 usable recursive lookup without false availability or forced success. | Read original262 Unavailable at metadata_lookup.rs:247, activation/campaign/read contracts and retained completion ownership; distinguish caller assumption from provider failure. | Reproduce the named failure under unchanged operations, identify the causal boundary with bounded diagnostics, focused cause correction and retained negative assertions on both hosts; full family remains a separate gate. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26332,3 +26333,43 @@ device-model recovery while preserving usable service and ongoing P5/P6 family
 qualification. Production/protocols are unchanged; snapshots, timer actions,
 reference comparison and broader worker/physical-device compositions remain.
 Full P0–P7 stays active; performance/security follow functional Linux/macOS work.
+
+267 schema: add Read, CancelRead and ServeCounter actions to the same actual
+core driver. Use checked nonzero ReadRequestId values and the existing core
+Read/CancelRead/finish_read plus public read_at_barrier/Counter contracts. Keep
+issued actual barriers in the existing Cluster collection for one-use and stale
+token tests; canonical replay records group/configuration/term/request/index,
+excluding opaque context sessions. Record real begin/cancel refusals separately
+from serve outcomes; no barrier means a harness NoBarrier outcome, not a forged
+core error or read value. Serve reconstructs the actual Counter applied prefix
+and consumes only an issued original token. Known read refusals must leave
+observed state unchanged; all other errors remain loud. Tokens are bounded by
+the512-action schedule; fresh recovery clears core authority while retained
+old tokens remain only for rejection. Existing ownership/queue bounds stay.
+Acceptance: fresh quorum and one-use read value9, isolated cached leader cannot
+serve after another quorum advances to12, cancelled pending/ready probes and
+old replies cannot recreate authority, lagging application gets NotApplied
+without consuming the token, restart/fence invalidates old authority, exact
+composed read/cancel/crash schedule replay, retained263–266 checks and both-host
+full Raft/strict zero. Split the growing trace parser into unary and structured
+command cases while preserving malformed rejection; this keeps the grammar
+bounded and readable without weakening lint limits. Advances P0/R11/P1 read
+authority; no production/protocol/public-seam change or broader read proof.
+
+267 acceptance: all21 replay/codec/reducer checks pass on both hosts. New reads
+require fresh quorum and are one-use; the isolated cached leader cannot serve
+while another quorum advances Counter9 to12. Pending/ready cancellation rejects
+old replies and reused request IDs. NotApplied leaves the original token usable;
+restart, re-election and failed-sync fencing reject old authority. A saved
+27-action schedule replays identical canonical barriers and actual outcomes.
+Full Raft targets all/core/native/default finish62/29/62/62 each, zero failed or
+ignored; formatting/four strict profiles are zero.661 Rust inputs verify before
+and after full-target runs. Focused1/0 captures retain exact schedule bytes.
+Evidence: [267](../validation/baseline/slice267/README.md). Macro review advances
+P0/R11 and P1 read authority using existing contracts without production or
+protocol changes. Corrected262's full Linux family is terminal67/0 with source
+verification; its Mac run remains active and has an actual Unavailable failure
+at metadata_lookup.rs:247. Preserve the terminal result and diagnose that
+boundary next. Device-model acceptance remains distinct from physical disk,
+snapshot/timer/reference comparison and full-platform acceptance. Full P0–P7
+stays active; performance/security follow functional Linux/macOS work.

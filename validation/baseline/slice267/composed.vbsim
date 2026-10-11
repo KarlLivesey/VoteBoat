@@ -1,0 +1,28 @@
+VBSIM 1 267
+campaign 1
+pump
+counter 1 9911 9
+pump
+read 1 1
+newest
+cancel_read 1 1
+read 1 2
+pump
+serve_counter 1 2
+serve_counter 1 2
+read 1 3
+pump
+process_crash 1
+serve_counter 1 3
+campaign 1
+pump
+serve_counter 1 3
+read 1 4
+isolate 1
+pump
+serve_counter 1 4
+cancel_read 1 4
+heal
+read 1 5
+pump
+serve_counter 1 5

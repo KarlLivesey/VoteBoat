@@ -1,0 +1,13 @@
+{
+  "base": "c408313",
+  "buildInputs": 661,
+  "changed": [
+    "tests/raft/fault_schedule.rs",
+    "tests/raft/fault_schedule/codec.rs",
+    "tests/raft/fault_schedule/delayed.rs"
+  ],
+  "added": [
+    "tests/raft/fault_schedule/reads.rs"
+  ],
+  "productionChanges": []
+}
