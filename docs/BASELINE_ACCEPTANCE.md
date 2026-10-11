@@ -1,22 +1,25 @@
 # Baseline acceptance map
 
-Current feature exit: [concise status](FEATURE_STATUS.md). The298–301 batch
-implements the finite parser, scoped-history and shared-connector acceptance
-gaps plus the captured shutdown fixture correction. One frozen705-input302
-functional matrix is running on Linux and macOS, with each host's four executable
-feature profiles sequential. Linux/macOS formatting/four strict Clippy profiles
-are zero; terminal functional/platform acceptance remains pending. Current Mac
-counter service is195/1 with one executable QUIC multi-group shutdown timeout;
-Linux counter is197/0 and directory22/0. Isolated303 observes that original
-failure without changing its timing; it does not replace or restart302. No new
-production feature or timer change is in that batch. Further reference checkpoint
-comparison is optional strengthening, not a newly required feature gate. The
-source-anchored feature/provider review found no second production interface
-blocker; partial metadata and finite tests remain bounded evidence.
+Current feature exit: [concise status](FEATURE_STATUS.md). The preserved705-input
+matrix302 continues sequential default/core/native tests after Linux all-feature
+passes1952/0; Mac all-feature remains live. Its original Mac counter195/1 timeout
+has no ownership observations; silent diagnostic303 passes do not explain it.
+Controlled304 independently proves that the executable's ten-second cap refuses
+a settled original future QUIC close. Correction305 retains only original
+authenticated empty/flushed close bindings/timers after local work and the actual
+connector drain, without changing provider timers or consensus. Final709-input
+checks pass the complete counter target Linux203/0 and Mac202/0, including that
+multi-group history; executable52/0 each, focused discovery1/0 and PeerDriver1/0
+each. Formatting/four strict all-target Clippy profiles are zero on both; source
+guards match. This qualifies the correction, not complete platform acceptance
+or the unobserved original cause. No full matrix restart or optional new feature
+prerequisite is added. Original failures and bounded evidence remain retained.
 
 Completed selected preparation is archived in
-[slice301](../validation/baseline/slice301/README.md); current302 terminal
-platform acceptance remains pending, including the original Mac failure above.
+[slice301](../validation/baseline/slice301/README.md) and the shutdown correction
+[slice305](../validation/baseline/slice305/README.md). Current302 terminal platform
+acceptance remains pending; its original705-source failure stays separate from
+the corrected709-source results.
 
 Parallel integration: [slice297](../validation/baseline/slice297/README.md).
 Linux/macOS each pass810 affected executions over four profiles: Raft,

@@ -294,8 +294,21 @@ fn waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure
             .poll(now, ConnectPollBudget::default())
             .unwrap()
             .is_empty());
-        c.close();
-        c.poll(now, ConnectPollBudget::default()).unwrap();
-        assert!(c.is_drained());
+        finish_owned_lookup(&mut c, now);
     }
+}
+
+fn finish_owned_lookup(c: &mut DiscoveryConnector<Connector, Driver>, now: MonoTime) {
+    // Consuming the exact connection terminal does not complete the
+    // separately owned host lookup, even though every usage counter is zero.
+    assert_eq!(c.usage(), ConnectUsage::default());
+    assert!(c.discovery_mut().pending);
+    assert!(!c.is_drained());
+    c.close();
+    assert_eq!(c.usage(), ConnectUsage::default());
+    assert!(c.discovery_mut().pending);
+    assert!(!c.is_drained());
+    c.poll(now, ConnectPollBudget::default()).unwrap();
+    assert!(!c.discovery_mut().pending);
+    assert!(c.is_drained());
 }

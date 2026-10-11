@@ -8,6 +8,10 @@ use std::{
 };
 use voteboat::{raft::*, secure::PeerIdentity};
 
+#[cfg(feature = "quic")]
+#[path = "operator_shutdown/close_limit.rs"]
+mod close_limit;
+
 static NEXT: AtomicU64 = AtomicU64::new(0);
 struct Harness {
     root: std::path::PathBuf,
@@ -188,13 +192,10 @@ fn history(protocol: NativePeerProtocol) {
         h.nodes[0].control(setup::group(), NodeControl::Campaign),
         Err(NodeError::Closed)
     );
-    assert!(h.nodes[0]
-        .local()
-        .owner
-        .core(setup::group())
-        .unwrap()
-        .leadership_transfer()
-        .is_some());
+    assert_local_work_refuses_protocol_window(
+        &mut h.nodes[0],
+        MonoTime(h.clock.elapsed().as_millis() as u64),
+    );
     let result = advance_leadership(
         &mut h.nodes[0],
         &mut connection,
@@ -220,6 +221,44 @@ fn history(protocol: NativePeerProtocol) {
     );
     h.close(); // Join/release actual native resources even for the old failure.
     assert_eq!(result, Ok(()));
+}
+
+#[track_caller]
+fn assert_local_work_refuses_protocol_window(service: &mut Service, now: MonoTime) {
+    let accepted = service
+        .local()
+        .owner
+        .core(setup::group())
+        .unwrap()
+        .leadership_transfer()
+        .expect("the original accepted transfer remains pending");
+    let mut controller = shutdown::Shutdown {
+        started: Some(
+            Instant::now()
+                .checked_sub(Duration::from_millis(10001))
+                .unwrap(),
+        ),
+        ..shutdown::Shutdown::default()
+    };
+    let refusal = controller
+        .advance(service, false, now)
+        .unwrap_err()
+        .to_string();
+    assert_eq!(
+        refusal,
+        "shutdown timed out; recover durable state on restart"
+    );
+    assert!(controller.protocol.is_none());
+    assert_eq!(service.state(), NodeState::Quiescing);
+    assert_eq!(
+        service
+            .local()
+            .owner
+            .core(setup::group())
+            .unwrap()
+            .leadership_transfer(),
+        Some(accepted)
+    );
 }
 #[test]
 fn queued_operator_cancellation_drains_after_admission_closes_tcp() {

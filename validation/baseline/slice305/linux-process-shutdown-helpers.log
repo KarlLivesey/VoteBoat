@@ -1,0 +1,13 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.47s
+     Running tests/counter_service.rs (target/divide-membership/build/debug/deps/counter_service-4ea2388b5d42bc7d)
+
+running 6 tests
+test shutdown::checked_margin_and_instant_overflow_refuse_instead_of_wrapping ... ok
+test shutdown::exact_complete_positive_report_parses_without_consuming_partial_lines ... ok
+test shutdown::malformed_zero_and_decimal_overflow_reports_grant_no_window ... ok
+test shutdown::ordinary_cap_and_equality_are_preserved_for_short_reports ... ok
+test shutdown::sibling_windows_are_independent_and_only_a_valid_report_can_pin ... ok
+test shutdown::repeated_and_fresh_reports_cannot_renew_the_first_pinned_window ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 197 filtered out; finished in 0.00s

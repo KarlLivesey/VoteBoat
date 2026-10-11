@@ -1,0 +1,7 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/bin/counter_service.rs (target/divide-shutdown/build/debug/deps/voteboat_counter-8697cf27270e7531)
+
+running 1 test
+test operator_shutdown::queued_operator_cancellation_drains_after_admission_closes_quic ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 51 filtered out; finished in 0.14s

@@ -15,16 +15,21 @@ on Linux and macOS. Performance tuning and the security review follow afterward.
 | Replaceable infrastructure | Public application, storage, transport and runtime seams with native and downstream test providers |
 
 These mechanisms are implemented. The current Linux/macOS acceptance sweep is
-still running; **feature-complete qualification is not yet claimed**. The current
-Mac counter-service target has one QUIC multi-group shutdown failure under
-investigation; Linux passes its complete counter target. The public
+still running; **feature-complete qualification is not yet claimed**. Linux's
+complete all-feature sweep passes1,952 tests. A controlled shutdown policy defect
+is corrected: the service respects an empty QUIC connection's original close
+timer after application work settles. The corrected complete counter target
+passes203 tests on Linux and202 on Mac, including the previously failing Mac
+multi-group history. Formatting and all four strict Clippy profiles are clean
+on both hosts. The public
 examples expose bounded profiles, and do not automate every library combination.
 
 The finite remaining acceptance is the current platform sweep and resolution
 of any failures it demonstrates. The prepared batch adds seeded parser campaigns,
-per-bucket split client histories, shared connector assertions and a correction
-to the shutdown fixture's handling of an original protocol close timer. It changes
-no production timer or consensus rule. See the linked plan and actual evidence
+per-bucket split client histories and shared connector assertions. The shutdown
+correction pins existing protocol ownership once; it changes no provider timer
+or consensus rule. The original Mac failure lacked ownership observations, so
+its precise internal cause remains unknown. See the linked plan and actual evidence
 in [IMPLEMENTATION.md](IMPLEMENTATION.md).
 
 Further reference checkpoint comparison, extra provider permutations and global

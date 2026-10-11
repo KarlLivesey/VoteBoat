@@ -321,6 +321,11 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     pub fn connector_usage(&self) -> ConnectUsage {
         self.parts.connector.usage()
     }
+    /// Actual provider ownership state, including pending discovery work that
+    /// need not occupy a connection-request counter. Does not drain the roster.
+    pub fn connector_is_drained(&self) -> bool {
+        self.parts.connector.is_drained()
+    }
     /// Current credential generation, separate from connection generations.
     pub fn credential_generation(&self) -> Option<crate::authorization::CredentialGeneration>
     where

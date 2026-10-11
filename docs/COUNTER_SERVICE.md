@@ -470,6 +470,12 @@ A successful `quit` response acknowledges shutdown intake. Wait for each process
 `stopped ... workers_joined=true` line and successful exit to establish completion.
 Shutdown drains admitted work and explicitly joins WAL/snapshot workers and the
 TCP dial worker when selected.
+Application work has a ten-second shutdown limit. After it settles, an empty
+QUIC connection may still own its original protocol close timer. In that case
+the service prints `shutdown waiting_for_peer_close_ms=N` once and continues
+polling to that original deadline. This progress line does not establish drain;
+successful exit after the worker joins does. New work or a changed timer cannot
+extend that wait.
 An unsuccessful exit requires recovery of authoritative files; it does not claim
 healthy drain. `recover` never creates a missing store, and `create` refuses an
 existing store. Restart using the same directories and node IDs:

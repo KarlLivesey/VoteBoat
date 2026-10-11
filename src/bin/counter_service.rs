@@ -78,6 +78,8 @@ mod service_access;
 mod service_setup;
 #[path = "support/counter_setup.rs"]
 mod setup;
+#[path = "support/shutdown.rs"]
+mod shutdown;
 use diagnostics::Diagnostics;
 #[path = "support/peer_metrics.rs"]
 mod peer_metrics;
@@ -535,8 +537,7 @@ fn run_service(
         listener.local_addr()?
     );
     let mut connection: Option<Connection> = None;
-    let mut quit = false;
-    let mut shutdown_started = None;
+    let (mut quit, mut shutdown) = (false, shutdown::Shutdown::default());
     let mut leadership = leadership_set::Leaders::new(&service);
     loop {
         let time = now(start);
@@ -609,11 +610,7 @@ fn run_service(
             quit,
         )?;
         advance_administration(&mut service, &mut administration, &mut connection, quit)?;
-        advance_shutdown(
-            &mut service,
-            quit && connection.is_none(),
-            &mut shutdown_started,
-        )?;
+        shutdown.advance(&mut service, quit && connection.is_none(), time)?;
         if service.is_drained() {
             break;
         }
@@ -673,20 +670,6 @@ fn advance_leadership(
     }
     leadership.advance_cancel(service, connection);
     leadership.tick(service, quit)
-}
-fn advance_shutdown(
-    service: &mut Service,
-    requested: bool,
-    started: &mut Option<Instant>,
-) -> Result<(), Failure> {
-    if requested && started.is_none() {
-        service.begin_shutdown();
-        *started = Some(Instant::now());
-    }
-    if !service.is_drained() && started.is_some_and(|t| t.elapsed() > Duration::from_secs(10)) {
-        return Err("shutdown timed out; recover durable state on restart".into());
-    }
-    Ok(())
 }
 fn advance_administration(
     service: &mut Service,

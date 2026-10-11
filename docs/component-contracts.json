@@ -156,6 +156,7 @@
         "peer_drain_status",
         "ingress",
         "connector_usage",
+        "connector_is_drained",
         "next_deadline",
         "disconnect",
         "poll",
@@ -166,7 +167,7 @@
         "into_parts",
         "into_recovery"
       ],
-      "native": "Fixed bounded peer reactor owns selected PeerConnector, PeerTransportFactory, PeerRoster, IngressRouter and route hints; native histories select native connector/factory/transport",
+      "native": "Fixed bounded peer reactor owns selected PeerConnector, PeerTransportFactory, PeerRoster, IngressRouter and route hints; native histories select native connector/factory/transport. connector_is_drained inspects selected provider ownership, including discovery work absent from connection counters; it does not drain the roster.",
       "conformance": [
         "tests/support/peer_driver.rs",
         "tests/support/peer_receive_fairness.rs",

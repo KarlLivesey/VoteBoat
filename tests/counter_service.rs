@@ -97,6 +97,8 @@ mod preparing_command;
 mod quorum;
 #[path = "counter_service/read_failover.rs"]
 mod read_failover;
+#[path = "counter_service/shutdown.rs"]
+mod shutdown;
 #[path = "counter_service/timing.rs"]
 mod timing;
 #[path = "counter_service/write_recovery.rs"]
@@ -458,29 +460,32 @@ impl Cluster {
                 self.ok(id, &["quit"]);
             }
         }
-        let deadline = Instant::now() + Duration::from_secs(15);
-        for i in 0..self.children.len() {
-            if self.children[i].is_some() {
-                loop {
-                    if let Some(status) = self.children[i].as_mut().unwrap().try_wait().unwrap() {
-                        assert!(
-                            status.success(),
-                            "node {} exit {status}: {}",
-                            i + 1,
-                            self.service_log(i + 1)
-                        );
-                        break;
-                    }
+        let mut windows = vec![shutdown::Window::new(Instant::now()); self.children.len()];
+        while self.children.iter().any(Option::is_some) {
+            for (i, window) in windows.iter_mut().enumerate() {
+                let Some(child) = &mut self.children[i] else {
+                    continue;
+                };
+                if let Some(status) = child.try_wait().unwrap() {
                     assert!(
-                        Instant::now() < deadline,
-                        "node {} shutdown timeout: {}",
+                        status.success(),
+                        "node {} exit {status}: {}",
                         i + 1,
                         self.service_log(i + 1)
                     );
-                    std::thread::sleep(Duration::from_millis(10));
+                    self.children[i] = None;
+                    continue;
                 }
-                self.children[i] = None;
+                let log = self.service_log(i + 1);
+                let now = Instant::now();
+                window.observe(now, &log);
+                assert!(
+                    window.permits(now),
+                    "node {} shutdown timeout: {log}",
+                    i + 1
+                );
             }
+            std::thread::sleep(Duration::from_millis(10));
         }
     }
     fn service_log(&self, id: usize) -> String {

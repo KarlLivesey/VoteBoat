@@ -6,6 +6,7 @@ use super::*;
 fn authenticated_reconnect_starts_a_fresh_disconnected_output_interval() {
     let mut f = Fixture::new();
     f.attach();
+    assert!(f.driver.as_ref().unwrap().connector_is_drained());
     f.driver
         .as_mut()
         .unwrap()
@@ -41,8 +42,10 @@ fn authenticated_reconnect_starts_a_fresh_disconnected_output_interval() {
     assert!(f.outbound.is_drained());
     // The host still owns a pending connector receipt after output resolves.
     // Permit its terminal delivery so close can drain that separate lifetime.
+    assert!(!f.driver.as_ref().unwrap().connector_is_drained());
     f.connect.borrow_mut().ready = true;
     f.close(1100);
+    assert!(f.driver.as_ref().unwrap().connector_is_drained());
 }
 
 #[test]

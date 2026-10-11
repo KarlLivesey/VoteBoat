@@ -123,8 +123,8 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
 | Completed297: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294. | Actual original native tickets and reference Ready cuts, own-image process/power recovery, retries/reads, stale refusal and false-sync reduction pass both hosts. Selected schedules only; snapshots remain separate. |
-| Current302/303: platform acceptance and exact shutdown diagnosis | Establish current-source Linux/macOS acceptance and identify the observed executable failure. | Frozen298–301 input and actual Mac302 counter target failure. | Complete the original sequential four-profile matrices with strict zero; separate diagnostic source/cache records actual ownership at the unchanged ten-second timeout. A silent pass does not explain a missing predicate. |
-| Next: fix and qualify demonstrated failures | Complete the smallest actual service/embedding correction. | Captured original local/peer ownership state and existing public contracts. | Fix only the observed cause, retain original timer/ownership requirements, add a causal control and rerun affected failed targets on both hosts. Reuse unrelated passing302 evidence; no blanket full-suite restart or optional new engine. |
+| Current305: qualify the demonstrated shutdown correction | Preserve usable service shutdown while a legitimate original QUIC close remains owned. | Actual304 cap-defect control, existing inspection contracts and independent ownership review. | Keep the ten-second local-work cutoff, pin only settled original close timers, require actual drain/join and successful process exit. Complete affected Linux/Mac targets and four strict profiles. Original Mac302 cause remains unobserved; a silent pass does not establish it. |
+| Next302: finish the preserved platform sweep | Establish the finite baseline service/embedding qualification. | Original four-profile matrices and final305 affected-source evidence. | Retain terminal results from each profile, resolve any additional demonstrated failures with bounded corrections, and reuse unaffected evidence. Linux all-feature is1952/0; no full-suite restart or optional new engine. |
 | Following: feature milestone decision and later tuning | Make the implemented service/embedding feature scope explicit, then advance P7 when functional acceptance closes. | Terminal302 evidence and source-anchored feature/provider reviews. | Publish a concise current capability/limits record; mark only qualified feature milestones complete. Preserve the full P0–P7 goal, original performance gates and deferred security/P8/Windows scope. Do not add optional testing projects as new feature prerequisites. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
@@ -27897,3 +27897,98 @@ the same intended interval explicitly. A discovered cap defect would justify
 a focused correction independently; it would not retrospectively explain302's
 unobserved Mac provider. If the predicate cannot be produced, retain that result
 without assuming it or creating a new stress-testing project.
+
+Implemented304 isolated native control: two actual QUIC Service/Nodes retain
+their original authenticated bindings and timers. After local/accepted work
+settles, at close+10001ms the original executable refuses shutdown while the
+remaining original timer39033 is still future at13506. At39032 the same timer
+is retained; actual polling39033 drains, joins both Nodes and releases sockets
+and directories. The defect-exposure control passes1/0; formatting and strict
+all-target/all-feature Clippy are zero. This independently proves the cap-policy
+defect;302's unobserved Mac cause remains unresolved. Evidence is retained in
+target/slice304/control-results.md and control-original.log.
+
+Schema305 — respect original protocol ownership at executable shutdown
+(P0/P1/P2 usable service): keep the ordinary ten-second local-work cutoff. At
+that cutoff permit only actual Draining Nodes with settled local/replica/
+persistence/checkpoint/snapshot/connector/ingress work and authenticated,
+flushed, empty Closing peers. Pin each original full binding and strictly
+future provider deadline once. The remaining set may only shrink; new work,
+bindings or timers refuse rather than renew the window. Poll normally until
+actual is_drained, or refuse if original ownership fails to drain by its timer.
+Checked wall-time representability bounds waiting; no forced completion,
+timer shortening, accepted-send changes or new consensus/storage effects.
+A private executable lifecycle helper holds this state, using existing public
+inspection contracts. At first pin emit one operator progress line:
+`shutdown waiting_for_peer_close_ms=N`, where N is the maximum original timer
+minus the already supplied poll time. This is needed so the process fixture's
+old fifteen-second waiter does not reject a valid owned close. Its per-child
+waiter pins at most one reported interval plus the existing five-second
+exit/join margin, observes all children together, and still requires actual
+successful exit; malformed/repeated lines cannot extend it. Failed exits keep
+their original logs and normal fixture cleanup.
+Acceptance:304's actual native history accepts the settled future timer after
+the change, retains its exact original pin until the timer, actually drains and
+joins; refusal controls cover work, fresh identity/timer and unsupported status.
+Run affected executable/service targets on Linux and Mac in separate caches,
+formatting and all four strict whole-repository profiles. Preserve original302
+matrix and failure. No claim about302's cause follows from a silent pass.
+
+Mini plan305: current deliverable fixes this demonstrated cap defect; dependency
+is304's actual native control and existing inspection contracts; completion is
+controlled before/after plus affected platform checks and zero lint. Next:
+finish the already running302 matrix and qualify only concrete failures against
+the corrected image (same service milestone). Following: record the finite
+feature acceptance decision from terminal evidence, then advance the separate
+P7 performance milestone; no speculative validation prerequisites are added.
+
+Schema305 review correction: ConnectUsage alone omits an owned canceled
+discovery read. Expose the existing connector's actual is_drained predicate
+through PeerDriver's inspection API and require it for the pure-close exception.
+This narrow observation is needed for the stated no-local-work predicate; it
+does not introduce a provider or change connector completion/cleanup semantics.
+Retain a focused discovery-owned-work control and existing successful native
+close control; do not infer connector drain from counters or expand the roadmap.
+
+Implemented305 focused Linux controls: actual two-Node QUIC shutdown now accepts
+the original future timer39033 at13506, pins binding/deadline once, retains it
+at39032, and actually drains/joins/releases after polling39033. It emits one
+25527ms progress interval. Actual held accepted-transfer controls refuse the
+pure-close exception in TCP and QUIC, retain original work, then complete their
+normal cancellation and owned cleanup. Five classifier/window controls cover
+accepted/unread/unsupported work, original identity/timer, strict expiry,
+monotone retirement and supplied time. Six process-window controls pass without
+renewal, retaining actual exit requirements. Discovery and PeerDriver controls
+each pass1/0, with zero counters still refusing unresolved owned discovery and
+original connector receipt respectively. These use deterministic host discovery
+schedules, not a claim of a native discovery-delay executable history.
+Review found no remaining concrete predicate blocker after requiring the actual
+connector drain state. Worker final formatting/all-feature strict checks are
+zero. Initial missing import/registration and27/25 test complexity were retained;
+the latter required one focused assertion helper, no lint or schedule weakening.
+The root305 Linux preflight independently refused that27/25 snapshot before
+runtime tests; its logs and709-input manifest are preserved. Final source was
+refrozen once after the cause fix. Linux/Mac affected executable/service checks
+and four strict profiles now run on that final709-input image, separately from
+original302. Neither305 nor silent303 retrospectively identifies302's missing
+Mac owner state.
+
+Observed302 Linux complete all-feature suite:1952 passed/0 failed over91 target
+summaries, Cargo exit0 and tests_all=0 recorded. It advances to default/core/native
+sequentially; the original full goal and current platform acceptance remain open.
+
+Qualified305 final709-input Linux/Mac image: complete counter service203/0 in
+106.41s on Linux and202/0 in196.68s on Mac, including the original Mac multi-group
+QUIC history; complete executable unit target52/0 on each. Focused discovery and
+actual PeerDriver host inspection each1/0 per host. Formatting and four strict
+all-target Clippy profiles are zero; before/terminal and root input guards match.
+The first root PeerDriver command named runtime rather than effect_owner and
+selected0; that log remains, is not counted, and a separate exact target recheck
+requires one actual passed test on both hosts. No runtime/full-suite rerun follows
+that selector correction. Controlled before/after304 evidence, held local-work
+refusals and original unchanged binding/timer ownership are retained in305's
+archive. The runtime patch applies to77c07ae; no provider timers, durability
+evidence, consensus semantics or lint thresholds changed. This qualifies the
+demonstrated correction and affected service paths, not complete302 acceptance
+or the original unobserved Mac cause. Remaining finite feature work is terminal
+original platform evidence and any additional failures it actually demonstrates.

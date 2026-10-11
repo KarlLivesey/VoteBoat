@@ -1,0 +1,1269 @@
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index a0f6555..567f06a 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -156,6 +156,7 @@
+         "peer_drain_status",
+         "ingress",
+         "connector_usage",
++        "connector_is_drained",
+         "next_deadline",
+         "disconnect",
+         "poll",
+@@ -166,7 +167,7 @@
+         "into_parts",
+         "into_recovery"
+       ],
+-      "native": "Fixed bounded peer reactor owns selected PeerConnector, PeerTransportFactory, PeerRoster, IngressRouter and route hints; native histories select native connector/factory/transport",
++      "native": "Fixed bounded peer reactor owns selected PeerConnector, PeerTransportFactory, PeerRoster, IngressRouter and route hints; native histories select native connector/factory/transport. connector_is_drained inspects selected provider ownership, including discovery work absent from connection counters; it does not drain the roster.",
+       "conformance": [
+         "tests/support/peer_driver.rs",
+         "tests/support/peer_receive_fairness.rs",
+diff --git a/src/bin/counter_service.rs b/src/bin/counter_service.rs
+index f613783..1b5db58 100644
+--- a/src/bin/counter_service.rs
++++ b/src/bin/counter_service.rs
+@@ -78,6 +78,8 @@ mod service_access;
+ mod service_setup;
+ #[path = "support/counter_setup.rs"]
+ mod setup;
++#[path = "support/shutdown.rs"]
++mod shutdown;
+ use diagnostics::Diagnostics;
+ #[path = "support/peer_metrics.rs"]
+ mod peer_metrics;
+@@ -535,8 +537,7 @@ fn run_service(
+         listener.local_addr()?
+     );
+     let mut connection: Option<Connection> = None;
+-    let mut quit = false;
+-    let mut shutdown_started = None;
++    let (mut quit, mut shutdown) = (false, shutdown::Shutdown::default());
+     let mut leadership = leadership_set::Leaders::new(&service);
+     loop {
+         let time = now(start);
+@@ -609,11 +610,7 @@ fn run_service(
+             quit,
+         )?;
+         advance_administration(&mut service, &mut administration, &mut connection, quit)?;
+-        advance_shutdown(
+-            &mut service,
+-            quit && connection.is_none(),
+-            &mut shutdown_started,
+-        )?;
++        shutdown.advance(&mut service, quit && connection.is_none(), time)?;
+         if service.is_drained() {
+             break;
+         }
+@@ -674,20 +671,6 @@ fn advance_leadership(
+     leadership.advance_cancel(service, connection);
+     leadership.tick(service, quit)
+ }
+-fn advance_shutdown(
+-    service: &mut Service,
+-    requested: bool,
+-    started: &mut Option<Instant>,
+-) -> Result<(), Failure> {
+-    if requested && started.is_none() {
+-        service.begin_shutdown();
+-        *started = Some(Instant::now());
+-    }
+-    if !service.is_drained() && started.is_some_and(|t| t.elapsed() > Duration::from_secs(10)) {
+-        return Err("shutdown timed out; recover durable state on restart".into());
+-    }
+-    Ok(())
+-}
+ fn advance_administration(
+     service: &mut Service,
+     administration: &mut Option<administration_set::Administrations>,
+diff --git a/src/bin/support/operator_shutdown.rs b/src/bin/support/operator_shutdown.rs
+index c7bcc38..a49e3ce 100644
+--- a/src/bin/support/operator_shutdown.rs
++++ b/src/bin/support/operator_shutdown.rs
+@@ -8,6 +8,10 @@ use std::{
+ };
+ use voteboat::{raft::*, secure::PeerIdentity};
+
++#[cfg(feature = "quic")]
++#[path = "operator_shutdown/close_limit.rs"]
++mod close_limit;
++
+ static NEXT: AtomicU64 = AtomicU64::new(0);
+ struct Harness {
+     root: std::path::PathBuf,
+@@ -188,13 +192,10 @@ fn history(protocol: NativePeerProtocol) {
+         h.nodes[0].control(setup::group(), NodeControl::Campaign),
+         Err(NodeError::Closed)
+     );
+-    assert!(h.nodes[0]
+-        .local()
+-        .owner
+-        .core(setup::group())
+-        .unwrap()
+-        .leadership_transfer()
+-        .is_some());
++    assert_local_work_refuses_protocol_window(
++        &mut h.nodes[0],
++        MonoTime(h.clock.elapsed().as_millis() as u64),
++    );
+     let result = advance_leadership(
+         &mut h.nodes[0],
+         &mut connection,
+@@ -221,6 +222,44 @@ fn history(protocol: NativePeerProtocol) {
+     h.close(); // Join/release actual native resources even for the old failure.
+     assert_eq!(result, Ok(()));
+ }
++
++#[track_caller]
++fn assert_local_work_refuses_protocol_window(service: &mut Service, now: MonoTime) {
++    let accepted = service
++        .local()
++        .owner
++        .core(setup::group())
++        .unwrap()
++        .leadership_transfer()
++        .expect("the original accepted transfer remains pending");
++    let mut controller = shutdown::Shutdown {
++        started: Some(
++            Instant::now()
++                .checked_sub(Duration::from_millis(10001))
++                .unwrap(),
++        ),
++        ..shutdown::Shutdown::default()
++    };
++    let refusal = controller
++        .advance(service, false, now)
++        .unwrap_err()
++        .to_string();
++    assert_eq!(
++        refusal,
++        "shutdown timed out; recover durable state on restart"
++    );
++    assert!(controller.protocol.is_none());
++    assert_eq!(service.state(), NodeState::Quiescing);
++    assert_eq!(
++        service
++            .local()
++            .owner
++            .core(setup::group())
++            .unwrap()
++            .leadership_transfer(),
++        Some(accepted)
++    );
++}
+ #[test]
+ fn queued_operator_cancellation_drains_after_admission_closes_tcp() {
+     history(NativePeerProtocol::TcpTls);
+diff --git a/src/runtime/peers.rs b/src/runtime/peers.rs
+index 7bde738..12cb16d 100644
+--- a/src/runtime/peers.rs
++++ b/src/runtime/peers.rs
+@@ -321,6 +321,11 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
+     pub fn connector_usage(&self) -> ConnectUsage {
+         self.parts.connector.usage()
+     }
++    /// Actual provider ownership state, including pending discovery work that
++    /// need not occupy a connection-request counter. Does not drain the roster.
++    pub fn connector_is_drained(&self) -> bool {
++        self.parts.connector.is_drained()
++    }
+     /// Current credential generation, separate from connection generations.
+     pub fn credential_generation(&self) -> Option<crate::authorization::CredentialGeneration>
+     where
+diff --git a/tests/counter_service.rs b/tests/counter_service.rs
+index b973d1e..e6679d0 100644
+--- a/tests/counter_service.rs
++++ b/tests/counter_service.rs
+@@ -97,6 +97,8 @@ mod preparing_command;
+ mod quorum;
+ #[path = "counter_service/read_failover.rs"]
+ mod read_failover;
++#[path = "counter_service/shutdown.rs"]
++mod shutdown;
+ #[path = "counter_service/timing.rs"]
+ mod timing;
+ #[path = "counter_service/write_recovery.rs"]
+@@ -458,29 +460,32 @@ impl Cluster {
+                 self.ok(id, &["quit"]);
+             }
+         }
+-        let deadline = Instant::now() + Duration::from_secs(15);
+-        for i in 0..self.children.len() {
+-            if self.children[i].is_some() {
+-                loop {
+-                    if let Some(status) = self.children[i].as_mut().unwrap().try_wait().unwrap() {
+-                        assert!(
+-                            status.success(),
+-                            "node {} exit {status}: {}",
+-                            i + 1,
+-                            self.service_log(i + 1)
+-                        );
+-                        break;
+-                    }
++        let mut windows = vec![shutdown::Window::new(Instant::now()); self.children.len()];
++        while self.children.iter().any(Option::is_some) {
++            for (i, window) in windows.iter_mut().enumerate() {
++                let Some(child) = &mut self.children[i] else {
++                    continue;
++                };
++                if let Some(status) = child.try_wait().unwrap() {
+                     assert!(
+-                        Instant::now() < deadline,
+-                        "node {} shutdown timeout: {}",
++                        status.success(),
++                        "node {} exit {status}: {}",
+                         i + 1,
+                         self.service_log(i + 1)
+                     );
+-                    std::thread::sleep(Duration::from_millis(10));
++                    self.children[i] = None;
++                    continue;
+                 }
+-                self.children[i] = None;
++                let log = self.service_log(i + 1);
++                let now = Instant::now();
++                window.observe(now, &log);
++                assert!(
++                    window.permits(now),
++                    "node {} shutdown timeout: {log}",
++                    i + 1
++                );
+             }
++            std::thread::sleep(Duration::from_millis(10));
+         }
+     }
+     fn service_log(&self, id: usize) -> String {
+diff --git a/tests/discovery/driven.rs b/tests/discovery/driven.rs
+index 8e6cc38..dc09e3b 100644
+--- a/tests/discovery/driven.rs
++++ b/tests/discovery/driven.rs
+@@ -294,8 +294,21 @@ fn waiting_cancel_and_deadline_keep_exact_terminal_ownership_across_poll_failure
+             .poll(now, ConnectPollBudget::default())
+             .unwrap()
+             .is_empty());
+-        c.close();
+-        c.poll(now, ConnectPollBudget::default()).unwrap();
+-        assert!(c.is_drained());
++        finish_owned_lookup(&mut c, now);
+     }
+ }
++
++fn finish_owned_lookup(c: &mut DiscoveryConnector<Connector, Driver>, now: MonoTime) {
++    // Consuming the exact connection terminal does not complete the
++    // separately owned host lookup, even though every usage counter is zero.
++    assert_eq!(c.usage(), ConnectUsage::default());
++    assert!(c.discovery_mut().pending);
++    assert!(!c.is_drained());
++    c.close();
++    assert_eq!(c.usage(), ConnectUsage::default());
++    assert!(c.discovery_mut().pending);
++    assert!(!c.is_drained());
++    c.poll(now, ConnectPollBudget::default()).unwrap();
++    assert!(!c.discovery_mut().pending);
++    assert!(c.is_drained());
++}
+diff --git a/tests/support/peer_driver_disconnected.rs b/tests/support/peer_driver_disconnected.rs
+index 0656628..e66cc57 100644
+--- a/tests/support/peer_driver_disconnected.rs
++++ b/tests/support/peer_driver_disconnected.rs
+@@ -6,6 +6,7 @@ use super::*;
+ fn authenticated_reconnect_starts_a_fresh_disconnected_output_interval() {
+     let mut f = Fixture::new();
+     f.attach();
++    assert!(f.driver.as_ref().unwrap().connector_is_drained());
+     f.driver
+         .as_mut()
+         .unwrap()
+@@ -41,8 +42,10 @@ fn authenticated_reconnect_starts_a_fresh_disconnected_output_interval() {
+     assert!(f.outbound.is_drained());
+     // The host still owns a pending connector receipt after output resolves.
+     // Permit its terminal delivery so close can drain that separate lifetime.
++    assert!(!f.driver.as_ref().unwrap().connector_is_drained());
+     f.connect.borrow_mut().ready = true;
+     f.close(1100);
++    assert!(f.driver.as_ref().unwrap().connector_is_drained());
+ }
+
+ #[test]
+diff --git a/src/bin/support/shutdown.rs b/src/bin/support/shutdown.rs
+new file mode 100644
+index 0000000..1ef35a7
+--- /dev/null
++++ b/src/bin/support/shutdown.rs
+@@ -0,0 +1,194 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Keep the ordinary work cutoff while respecting an original protocol close.
++use super::{Failure, Service};
++use std::{
++    collections::{BTreeMap, BTreeSet},
++    time::{Duration, Instant},
++};
++use voteboat::{
++    connect::ConnectUsage,
++    identity::NodeId,
++    outbound::OutboundQueue,
++    runtime::{MonoTime, NodeState, PeerDriverUsage, ReplicaDriverUsage},
++    secure::{SessionBinding, SessionState},
++    snapshot_worker::SnapshotWorker,
++    transport::{PeerDrainStatus, TransportState, TransportUsage},
++    worker::PersistenceWorker,
++};
++
++#[cfg(test)]
++#[path = "shutdown/contract.rs"]
++mod contract;
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub(super) struct ProtocolClose {
++    pub(super) binding: SessionBinding,
++    pub(super) deadline: MonoTime,
++}
++impl ProtocolClose {
++    fn inspect(status: PeerDrainStatus) -> Option<Self> {
++        if !status.closed
++            || !status.authorized
++            || status.fenced
++            || status.retiring
++            || status.attempt.is_some()
++            || status.accepted.is_some()
++        {
++            return None;
++        }
++        let transport = status.transport?;
++        let session = transport.session?;
++        if status.binding != Some(transport.binding)
++            || status.peer.node != transport.binding.peer.node
++            || status.peer.store != transport.binding.peer.store.identity
++            || transport.state != TransportState::Draining
++            || transport.usage != TransportUsage::default()
++            || transport.received.is_some()
++            || transport.close_started != Some(true)
++            || session.state != SessionState::Closing
++            || !session.flushed
++            || session.close_started != Some(true)
++            || session.protocol_drained != Some(false)
++        {
++            return None;
++        }
++        Some(Self {
++            binding: transport.binding,
++            deadline: session.next_deadline?,
++        })
++    }
++}
++type Remaining = BTreeMap<NodeId, ProtocolClose>;
++pub(super) struct ProtocolWindow {
++    pub(super) original: Remaining,
++    pub(super) end: MonoTime,
++    live: BTreeSet<NodeId>,
++    polled_at: MonoTime,
++}
++impl ProtocolWindow {
++    fn pin(original: Remaining, now: MonoTime) -> Option<Self> {
++        if original.is_empty() || original.values().any(|p| p.deadline <= now) {
++            return None;
++        }
++        let end = original.values().map(|p| p.deadline).max()?;
++        Instant::now().checked_add(Duration::from_millis(end.0.checked_sub(now.0)?))?;
++        let live = original.keys().copied().collect();
++        Some(Self {
++            original,
++            end,
++            live,
++            polled_at: now,
++        })
++    }
++    fn retains(&mut self, remaining: &Remaining, now: MonoTime) -> bool {
++        let valid = now >= self.polled_at
++            && now < self.end
++            && !remaining.is_empty()
++            && remaining.iter().all(|(key, close)| {
++                self.live.contains(key)
++                    && self.original.get(key) == Some(close)
++                    && now < close.deadline
++            });
++        if valid {
++            self.live.retain(|key| remaining.contains_key(key));
++            self.polled_at = now;
++        }
++        valid
++    }
++}
++fn local_work_drained(service: &Service) -> bool {
++    let local = service.local();
++    service.state() == NodeState::Draining
++        && local.clients.is_drained()
++        && local.reads.is_drained()
++        && local.results.is_drained()
++        && local.owner.is_drained()
++        && local.persistence.is_drained()
++        && local.persistence.usage() == Default::default()
++        && local.outbound.is_drained()
++        && service.replica_usage() == ReplicaDriverUsage::default()
++        && service.checkpoints().pending.is_empty()
++        && local.snapshots.as_ref().is_none_or(|s| {
++            s.router.is_drained()
++                && s.worker.is_drained()
++                && s.router.usage() == Default::default()
++                && s.worker.usage() == Default::default()
++        })
++        && service.peers().is_some_and(|p| {
++            p.usage() == PeerDriverUsage::default()
++                && p.connector_usage() == ConnectUsage::default()
++                && p.connector_is_drained()
++                && p.ingress().is_drained()
++                && p.roster().usage().connecting == 0
++        })
++}
++fn remaining(service: &mut Service) -> Option<Remaining> {
++    if !local_work_drained(service) {
++        return None;
++    }
++    let peers = service
++        .peers()?
++        .roster()
++        .tracked_peers()
++        .collect::<Vec<_>>();
++    let mut pending = BTreeMap::new();
++    for peer in peers {
++        let status = service.peer_drain_status(peer)?;
++        if status.transport.is_none() {
++            if status.binding.is_some()
++                || status.attempt.is_some()
++                || status.accepted.is_some()
++                || status.retiring
++                || !status.closed
++                || status.fenced
++            {
++                return None;
++            }
++        } else {
++            pending.insert(peer, ProtocolClose::inspect(status)?);
++        }
++    }
++    (service.peers()?.roster().usage().connections == pending.len()).then_some(pending)
++}
++
++#[derive(Default)]
++pub(super) struct Shutdown {
++    pub(super) started: Option<Instant>,
++    pub(super) protocol: Option<ProtocolWindow>,
++}
++impl Shutdown {
++    pub(super) fn advance(
++        &mut self,
++        service: &mut Service,
++        requested: bool,
++        now: MonoTime,
++    ) -> Result<(), Failure> {
++        if requested && self.started.is_none() {
++            service.begin_shutdown();
++            self.started = Some(Instant::now());
++        }
++        if service.is_drained()
++            || !self
++                .started
++                .is_some_and(|t| t.elapsed() > Duration::from_secs(10))
++        {
++            return Ok(());
++        }
++        let pending =
++            remaining(service).ok_or("shutdown timed out; recover durable state on restart")?;
++        if let Some(window) = &mut self.protocol {
++            if window.retains(&pending, now) {
++                return Ok(());
++            }
++        } else if let Some(window) = ProtocolWindow::pin(pending, now) {
++            println!(
++                "shutdown waiting_for_peer_close_ms={}",
++                window.end.0 - now.0
++            );
++            self.protocol = Some(window);
++            return Ok(());
++        }
++        Err("shutdown timed out; recover durable state on restart".into())
++    }
++}
+diff --git a/src/bin/support/shutdown/contract.rs b/src/bin/support/shutdown/contract.rs
+new file mode 100644
+index 0000000..b1c1f85
+--- /dev/null
++++ b/src/bin/support/shutdown/contract.rs
+@@ -0,0 +1,225 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::identity::{
++    OutboundGeneration, SecureSessionGeneration, StoreBinding, StoreId, StoreIdentity,
++    StoreIncarnation, StoreSession,
++};
++fn node(id: u64) -> NodeId {
++    NodeId::new(id).unwrap()
++}
++fn identity(id: u128) -> StoreIdentity {
++    StoreIdentity {
++        id: StoreId::new(id).unwrap(),
++        incarnation: StoreIncarnation::new(1).unwrap(),
++    }
++}
++use voteboat::{
++    outbound::{MessageClass, OutboundBinding, SendTicket},
++    secure::{LocalIdentity, PeerIdentity, SessionDrainStatus},
++    transport::{ConnectTicket, ReceiveInfo, TransportDrainStatus},
++};
++fn captured() -> PeerDrainStatus {
++    // Exact decisive297 cutoff state: node3 -> peer1, original session15 and
++    // generation150000, with its real timer still3052ms in the future.
++    let local = |n| LocalIdentity {
++        node: node(n),
++        store: StoreBinding {
++            identity: identity(n.into()),
++            session: StoreSession::new(15).unwrap(),
++        },
++    };
++    let binding = SessionBinding {
++        local: local(3),
++        peer: local(1),
++        generation: SecureSessionGeneration::new(150000).unwrap(),
++        wire_version: 1,
++    };
++    PeerDrainStatus {
++        peer: PeerIdentity {
++            node: binding.peer.node,
++            store: binding.peer.store.identity,
++        },
++        closed: true,
++        fenced: false,
++        authorized: true,
++        retiring: false,
++        attempt: None,
++        binding: Some(binding),
++        accepted: None,
++        transport: Some(TransportDrainStatus {
++            binding,
++            state: TransportState::Draining,
++            usage: TransportUsage::default(),
++            received: None,
++            close_started: Some(true),
++            session: Some(SessionDrainStatus {
++                state: SessionState::Closing,
++                flushed: true,
++                next_deadline: Some(MonoTime(60926)),
++                close_started: Some(true),
++                protocol_drained: Some(false),
++            }),
++        }),
++    }
++}
++fn pending(close: ProtocolClose) -> Remaining {
++    [(node(1), close)].into()
++}
++#[test]
++fn captured_future_close_timer_pins_the_original_cutoff_and_never_renews() {
++    let original = ProtocolClose::inspect(captured()).unwrap();
++    let mut window = ProtocolWindow::pin(pending(original), MonoTime(57874)).unwrap();
++    assert_eq!(window.end, MonoTime(60926));
++    assert_eq!(window.end.0 - 57874, 3052);
++    assert!(window.retains(&pending(original), MonoTime(60925)));
++    assert!(!window.retains(&pending(original), MonoTime(60926)));
++    assert!(!window.retains(&pending(original), MonoTime(70000)));
++    assert!(ProtocolWindow::pin(pending(original), MonoTime(60926)).is_none());
++    assert!(ProtocolWindow::pin(BTreeMap::new(), MonoTime(57874)).is_none());
++    let mut changed = original;
++    changed.deadline = MonoTime(60927);
++    assert!(!window.retains(&pending(changed), MonoTime(60925)));
++    changed = original;
++    changed.binding.generation = SecureSessionGeneration::new(150001).unwrap();
++    assert!(!window.retains(&pending(changed), MonoTime(60925)));
++    assert!(!window.retains(&[(node(3), original)].into(), MonoTime(60925)));
++}
++#[test]
++fn settled_close_window_keeps_the_maximum_original_timer_after_another_owner_retires() {
++    let first = ProtocolClose::inspect(captured()).unwrap();
++    let mut second = first;
++    second.deadline = MonoTime(61926);
++    second.binding.peer.node = node(2);
++    let remaining = [(node(1), first), (node(2), second)].into();
++    let mut window = ProtocolWindow::pin(remaining, MonoTime(57874)).unwrap();
++    assert_eq!(window.end, MonoTime(61926));
++    let retired = [(node(2), second)].into();
++    assert!(window.retains(&retired, MonoTime(60926)));
++    assert_eq!(window.end, MonoTime(61926));
++    assert!(!window.retains(&retired, MonoTime(61926)));
++    assert!(!window.retains(&BTreeMap::new(), MonoTime(60926)));
++}
++#[test]
++fn an_observed_retired_peer_cannot_return_or_move_the_poll_time_backwards() {
++    let first = ProtocolClose::inspect(captured()).unwrap();
++    let mut second = first;
++    second.deadline = MonoTime(61926);
++    second.binding.peer.node = node(2);
++    let original = [(node(1), first), (node(2), second)].into();
++    let mut window = ProtocolWindow::pin(original, MonoTime(57874)).unwrap();
++    let remaining = [(node(2), second)].into();
++    assert!(window.retains(&remaining, MonoTime(59000)));
++    assert!(!window.retains(&remaining, MonoTime(58999)));
++    assert!(!window.retains(&window.original.clone(), MonoTime(59001)));
++    assert!(window.retains(&remaining, MonoTime(59001)));
++    assert_eq!(window.end, MonoTime(61926));
++}
++#[test]
++fn accepted_original_work_and_unsupported_protocol_detail_cannot_enter_cleanup() {
++    let original = captured();
++    let binding = original.binding.unwrap();
++    let ticket = SendTicket {
++        binding: OutboundBinding {
++            node: binding.local.node,
++            store: binding.local.store,
++            generation: OutboundGeneration::new(1).unwrap(),
++        },
++        peer: binding.peer.node,
++        sequence: 1,
++    };
++    let mut changed = original;
++    changed.accepted = Some(ticket);
++    assert!(ProtocolClose::inspect(changed).is_none());
++    assert_eq!(changed.accepted, Some(ticket));
++    changed = original;
++    changed.transport.as_mut().unwrap().usage.completion = true;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .usage
++        .receive_frame_bytes = 1;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .next_deadline = None;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .protocol_drained = None;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .flushed = false;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.transport.as_mut().unwrap().state = TransportState::Open;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.binding = None;
++    assert!(ProtocolClose::inspect(changed).is_none());
++}
++
++#[test]
++fn fresh_connection_unread_input_and_nonclosing_identity_refuse_cleanup() {
++    let original = captured();
++    let binding = original.binding.unwrap();
++    let mut changed = original;
++    changed.attempt = Some(ConnectTicket {
++        local: binding.local,
++        peer: original.peer,
++        generation: binding.generation,
++    });
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.transport.as_mut().unwrap().received = Some(ReceiveInfo {
++        connection: binding,
++        class: MessageClass::Control,
++        messages: 1,
++        bytes: 1,
++    });
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.peer.node = node(2);
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.closed = false;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.fenced = true;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed.authorized = false;
++    assert!(ProtocolClose::inspect(changed).is_none());
++    changed = original;
++    changed
++        .transport
++        .as_mut()
++        .unwrap()
++        .session
++        .as_mut()
++        .unwrap()
++        .state = SessionState::Ready;
++    assert!(ProtocolClose::inspect(changed).is_none());
++}
+diff --git a/src/bin/support/operator_shutdown/close_limit.rs b/src/bin/support/operator_shutdown/close_limit.rs
+new file mode 100644
+index 0000000..1711d47
+--- /dev/null
++++ b/src/bin/support/operator_shutdown/close_limit.rs
+@@ -0,0 +1,375 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::{
++    connect::ConnectUsage,
++    outbound::OutboundQueue,
++    quorum::{Limits, Policy, Tree},
++    secure::{SessionBinding, SessionState},
++    snapshot_worker::SnapshotWorker,
++    transport::{PeerDrainStatus, TransportState, TransportUsage},
++};
++
++struct DelayedPeers {
++    root: std::path::PathBuf,
++    addresses: [SocketAddr; 2],
++    relay: UdpSocket,
++    nodes: Vec<Service>,
++}
++impl DelayedPeers {
++    fn new() -> Self {
++        let root = std::env::temp_dir().join(format!(
++            "voteboat-close-limit-{}-{}",
++            std::process::id(),
++            NEXT.fetch_add(1, Ordering::Relaxed)
++        ));
++        std::fs::create_dir(&root).unwrap();
++        let sockets = [
++            UdpSocket::bind("127.0.0.1:0").unwrap(),
++            UdpSocket::bind("127.0.0.1:0").unwrap(),
++        ];
++        let addresses = sockets.each_ref().map(|s| s.local_addr().unwrap());
++        let relay = UdpSocket::bind("127.0.0.1:0").unwrap();
++        relay.set_nonblocking(true).unwrap();
++        drop(sockets);
++        let tls = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/tls");
++        let nodes = (1..=2)
++            .map(|id| {
++                let mut config = setup::configuration(
++                    &root.join(id.to_string()),
++                    id,
++                    1,
++                    &tls,
++                    true,
++                    setup::PeerInput::Legacy(None),
++                )
++                .unwrap()
++                .startup;
++                config.listen = addresses[id as usize - 1];
++                config.bootstrap.voter_stores.retain(|n, _| n.get() <= 2);
++                config.bootstrap.policy = Policy::new(
++                    Tree::Majority(
++                        config
++                            .bootstrap
++                            .voter_stores
++                            .keys()
++                            .copied()
++                            .map(Tree::Voter)
++                            .collect(),
++                    ),
++                    Limits::default(),
++                )
++                .unwrap();
++                config.peers.retain(|n, _| n.get() <= 2);
++                for peer in config.peers.values_mut() {
++                    peer.address = relay.local_addr().unwrap();
++                }
++                config.tls = config.tls.with_wire_version(8).unwrap();
++                let app =
++                    counter_application::Application::new(setup::application().unwrap(), true)
++                        .unwrap();
++                // Isolate actual transport ownership from election traffic;
++                // all provider handshake, close and poll budgets stay original.
++                config
++                    .open_with_protocol_and_timers(
++                        NativePeerProtocol::Quic,
++                        TimerConfig {
++                            heartbeat_ms: 50,
++                            election_min_ms: 100_000,
++                            election_spread_ms: 1000,
++                            expirations_per_poll: 32,
++                        },
++                        app,
++                        std::sync::Arc::new(voteboat::native::worker::ThreadWake::current()),
++                        MonoTime(0),
++                    )
++                    .unwrap()
++            })
++            .collect();
++        Self {
++            root,
++            addresses,
++            relay,
++            nodes,
++        }
++    }
++    fn forward(&self) {
++        let mut bytes = [0; 65536];
++        for _ in 0..256 {
++            let (size, from) = match self.relay.recv_from(&mut bytes) {
++                Ok(packet) => packet,
++                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => return,
++                Err(e) => panic!("actual UDP relay: {e}"),
++            };
++            let target = if from == self.addresses[0] {
++                self.addresses[1]
++            } else {
++                assert_eq!(from, self.addresses[1]);
++                self.addresses[0]
++            };
++            assert_eq!(self.relay.send_to(&bytes[..size], target).unwrap(), size);
++        }
++        panic!("bounded UDP relay visit exhausted");
++    }
++    fn poll(&mut self, now: MonoTime) {
++        self.forward();
++        for node in &mut self.nodes {
++            let progress = node.poll(now, NodePollBudget::default()).unwrap();
++            if let Some(replica) = progress.replica {
++                assert!(
++                    replica.steps.iter().all(|s| s.error.is_none()),
++                    "{:?}",
++                    replica.steps
++                );
++            }
++        }
++        self.forward();
++        std::thread::park_timeout(Duration::from_micros(50));
++    }
++    fn delayed_handshake(&mut self) -> u64 {
++        let end = Instant::now() + Duration::from_secs(2);
++        let mut bytes = [0; 65536];
++        let size = loop {
++            self.nodes[0]
++                .poll(MonoTime(0), NodePollBudget::default())
++                .unwrap();
++            match self.relay.recv_from(&mut bytes) {
++                Ok((size, from)) => {
++                    assert_eq!(from, self.addresses[0]);
++                    assert!(size > 0);
++                    break size;
++                }
++                Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
++                    assert!(
++                        Instant::now() < end,
++                        "actual client initial packet must arrive"
++                    );
++                    std::thread::park_timeout(Duration::from_millis(1));
++                }
++                Err(e) => panic!("actual first packet: {e}"),
++            }
++        };
++        // The original encrypted packet is physically held here until the
++        // actual accept-side node first processes it at supplied time 3500.
++        self.relay
++            .send_to(&bytes[..size], self.addresses[1])
++            .unwrap();
++        self.nodes[1]
++            .poll(MonoTime(3500), NodePollBudget::default())
++            .unwrap();
++        for now in 3501..5000 {
++            self.poll(MonoTime(now));
++            if self.nodes.iter_mut().enumerate().all(|(index, node)| {
++                node.peer_drain_status(NodeId::new(2 - index as u64).unwrap())
++                    .and_then(|p| p.transport)
++                    .and_then(|t| t.session)
++                    .is_some_and(|s| s.state == SessionState::Ready && s.flushed)
++            }) {
++                return now;
++            }
++        }
++        panic!("actual two-node delayed handshake must authenticate");
++    }
++    fn finish(
++        mut self,
++        original: &BTreeMap<(usize, NodeId), Close>,
++        controller: &mut shutdown::Shutdown,
++        target: usize,
++    ) {
++        for deadline in original
++            .values()
++            .map(|p| p.deadline)
++            .collect::<std::collections::BTreeSet<_>>()
++        {
++            let before = MonoTime(deadline.0 - 1);
++            self.poll(before);
++            let pending = retained(&mut self.nodes, before);
++            assert!(pending
++                .iter()
++                .all(|(key, close)| original.get(key) == Some(close)));
++            controller
++                .advance(&mut self.nodes[target], true, before)
++                .unwrap();
++            assert_pin(controller, original, target);
++            for _ in 0..1000 {
++                self.poll(deadline);
++                if self.nodes.iter().all(Service::is_drained) {
++                    break;
++                }
++            }
++        }
++        assert!(
++            self.nodes.iter().all(Service::is_drained),
++            "actual provider close must drain"
++        );
++        let end = original.values().map(|close| close.deadline).max().unwrap();
++        controller
++            .advance(&mut self.nodes[target], true, end)
++            .unwrap();
++        for node in self.nodes {
++            setup::join(node).unwrap();
++        }
++        for address in self.addresses {
++            drop(UdpSocket::bind(address).unwrap());
++        }
++        std::fs::remove_dir_all(self.root).unwrap();
++    }
++}
++
++fn assert_pin(
++    controller: &shutdown::Shutdown,
++    original: &BTreeMap<(usize, NodeId), Close>,
++    target: usize,
++) {
++    let pin = controller.protocol.as_ref().unwrap();
++    let expected = original.iter().filter(|((index, _), _)| *index == target);
++    assert_eq!(pin.original.len(), expected.clone().count());
++    let end = expected
++        .clone()
++        .map(|(_, close)| close.deadline)
++        .max()
++        .unwrap();
++    for ((_, peer), close) in expected {
++        let actual = pin.original.get(peer).unwrap();
++        assert_eq!(actual.binding, close.binding);
++        assert_eq!(actual.deadline, close.deadline);
++    }
++    assert_eq!(pin.end, end);
++}
++
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++struct Close {
++    binding: SessionBinding,
++    deadline: MonoTime,
++}
++fn close(status: PeerDrainStatus) -> Option<Close> {
++    if !status.closed
++        || !status.authorized
++        || status.fenced
++        || status.retiring
++        || status.attempt.is_some()
++        || status.accepted.is_some()
++    {
++        return None;
++    }
++    let transport = status.transport?;
++    let session = transport.session?;
++    if status.binding != Some(transport.binding)
++        || status.peer.node != transport.binding.peer.node
++        || status.peer.store != transport.binding.peer.store.identity
++        || transport.state != TransportState::Draining
++        || transport.usage != TransportUsage::default()
++        || transport.received.is_some()
++        || transport.close_started != Some(true)
++        || session.state != SessionState::Closing
++        || !session.flushed
++        || session.close_started != Some(true)
++        || session.protocol_drained != Some(false)
++    {
++        return None;
++    }
++    Some(Close {
++        binding: transport.binding,
++        deadline: session.next_deadline?,
++    })
++}
++fn settled(node: &Service) {
++    let local = node.local();
++    assert_eq!(node.state(), NodeState::Draining);
++    assert!(local.clients.is_drained());
++    assert!(local.reads.is_drained());
++    assert!(local.results.is_drained());
++    assert!(local.owner.is_drained());
++    assert!(local.persistence.is_drained());
++    assert_eq!(local.persistence.usage(), Default::default());
++    assert!(local.outbound.is_drained());
++    assert_eq!(node.replica_usage(), ReplicaDriverUsage::default());
++    assert!(node.checkpoints().pending.is_empty());
++    let snapshots = local.snapshots.as_ref().unwrap();
++    assert!(snapshots.router.is_drained());
++    assert!(snapshots.worker.is_drained());
++    assert_eq!(snapshots.router.usage(), Default::default());
++    assert_eq!(snapshots.worker.usage(), Default::default());
++    let peers = node.peers().unwrap();
++    assert_eq!(peers.usage(), PeerDriverUsage::default());
++    assert_eq!(peers.connector_usage(), ConnectUsage::default());
++    assert!(peers.connector_is_drained());
++    assert!(peers.ingress().is_drained());
++    assert_eq!(peers.roster().usage().connecting, 0);
++}
++fn retained(nodes: &mut [Service], now: MonoTime) -> BTreeMap<(usize, NodeId), Close> {
++    let mut remaining = BTreeMap::new();
++    for (index, node) in nodes.iter_mut().enumerate() {
++        if node.is_drained() {
++            continue;
++        }
++        settled(node);
++        let peers = node
++            .peers()
++            .unwrap()
++            .roster()
++            .tracked_peers()
++            .collect::<Vec<_>>();
++        for peer in peers {
++            let status = node.peer_drain_status(peer).unwrap();
++            eprintln!(
++                "actual Service node {} cutoff {now:?}: {status:?}",
++                index + 1
++            );
++            let original =
++                close(status).expect("only original authenticated protocol close may remain");
++            assert!(original.deadline > now);
++            remaining.insert((index, peer), original);
++        }
++        assert_eq!(
++            node.peers().unwrap().roster().usage().connections,
++            remaining.keys().filter(|(n, _)| *n == index).count()
++        );
++    }
++    assert!(!remaining.is_empty());
++    remaining
++}
++#[test]
++fn executable_retains_actual_settled_future_quic_close() {
++    let mut h = DelayedPeers::new();
++    let start = h.delayed_handshake();
++    for node in &mut h.nodes {
++        node.begin_shutdown();
++    }
++    for _ in 0..1000 {
++        h.poll(MonoTime(start));
++        if h.nodes.iter().all(|n| n.state() != NodeState::Quiescing) {
++            break;
++        }
++    }
++    for _ in 0..100 {
++        h.poll(MonoTime(start));
++    }
++    let at_close = retained(&mut h.nodes, MonoTime(start));
++    let cutoff = MonoTime(start + 10001);
++    for _ in 0..100 {
++        h.poll(cutoff);
++    }
++    let original = retained(&mut h.nodes, cutoff);
++    assert!(original
++        .iter()
++        .all(|(key, close)| at_close.get(key) == Some(close)));
++    let target = original.keys().next().unwrap().0;
++    // Supplied provider time and the executable's explicit wall-start input
++    // both represent the same intended ten-second-and-one-ms close interval.
++    let mut controller = shutdown::Shutdown {
++        started: Some(
++            Instant::now()
++                .checked_sub(Duration::from_millis(10001))
++                .unwrap(),
++        ),
++        ..shutdown::Shutdown::default()
++    };
++    controller
++        .advance(&mut h.nodes[target], true, cutoff)
++        .unwrap();
++    assert!(!h.nodes[target].is_drained());
++    assert_eq!(retained(&mut h.nodes, cutoff), original);
++    assert_pin(&controller, &original, target);
++    h.finish(&original, &mut controller, target);
++}
+diff --git a/tests/counter_service/shutdown.rs b/tests/counter_service/shutdown.rs
+new file mode 100644
+index 0000000..0385e4c
+--- /dev/null
++++ b/tests/counter_service/shutdown.rs
+@@ -0,0 +1,164 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++// Unless explicitly acquired and licensed from Licensor under another license,
++// the contents of this file are subject to the Reciprocal Public License
++// ("RPL") Version 1.5, or subsequent versions as allowed by the RPL, and You may
++// not copy or use this file in either source code or executable form, except
++// in compliance with the terms and conditions of the RPL.
++//
++// All software distributed under the RPL is provided strictly on an "AS IS"
++// basis, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, AND LICENSOR
++// HEREBY DISCLAIMS ALL SUCH WARRANTIES, INCLUDING WITHOUT LIMITATION, ANY
++// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
++// ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
++// rights and limitations under the RPL.
++use std::time::{Duration, Instant};
++
++const PREFIX: &str = "shutdown waiting_for_peer_close_ms=";
++const ORDINARY: Duration = Duration::from_secs(15);
++const JOIN_MARGIN: Duration = Duration::from_secs(5);
++
++fn reported_interval(line: &str) -> Option<Duration> {
++    let decimal = line.strip_suffix('\n')?.strip_prefix(PREFIX)?;
++    if decimal.is_empty() || !decimal.bytes().all(|b| b.is_ascii_digit()) {
++        return None;
++    }
++    let millis = decimal.parse::<u64>().ok()?;
++    (millis > 0).then(|| Duration::from_millis(millis))
++}
++
++fn reported_deadline(observed: Instant, interval: Duration) -> Option<Instant> {
++    observed.checked_add(interval.checked_add(JOIN_MARGIN)?)
++}
++
++#[derive(Clone, Copy)]
++pub(super) struct Window {
++    ordinary: Instant,
++    reported: Option<Instant>,
++}
++impl Window {
++    pub(super) fn new(started: Instant) -> Self {
++        Self {
++            ordinary: started
++                .checked_add(ORDINARY)
++                .expect("representable ordinary process shutdown deadline"),
++            reported: None,
++        }
++    }
++    pub(super) fn observe(&mut self, now: Instant, log: &str) {
++        if self.reported.is_some() {
++            return;
++        }
++        self.reported = log.split_inclusive('\n').find_map(|line| {
++            reported_interval(line).and_then(|interval| reported_deadline(now, interval))
++        });
++    }
++    fn deadline(self) -> Instant {
++        self.reported
++            .map_or(self.ordinary, |end| end.max(self.ordinary))
++    }
++    pub(super) fn permits(self, now: Instant) -> bool {
++        now < self.deadline()
++    }
++}
++
++#[test]
++fn exact_complete_positive_report_parses_without_consuming_partial_lines() {
++    assert_eq!(
++        reported_interval("shutdown waiting_for_peer_close_ms=6001\n"),
++        Some(Duration::from_millis(6001))
++    );
++    assert_eq!(
++        reported_interval("shutdown waiting_for_peer_close_ms=0001\n"),
++        Some(Duration::from_millis(1))
++    );
++    assert!(reported_interval("shutdown waiting_for_peer_close_ms=6001").is_none());
++}
++
++#[test]
++fn malformed_zero_and_decimal_overflow_reports_grant_no_window() {
++    for line in [
++        "shutdown waiting_for_peer_close_ms=\n",
++        "shutdown waiting_for_peer_close_ms=0\n",
++        "shutdown waiting_for_peer_close_ms=+1\n",
++        "shutdown waiting_for_peer_close_ms=-1\n",
++        "shutdown waiting_for_peer_close_ms=1.0\n",
++        "shutdown waiting_for_peer_close_ms=1 \n",
++        "shutdown waiting_for_peer_close_ms=1 extra\n",
++        "shutdown waiting_for_peer_close_ms=１\n",
++        "shutdown waiting_for_peer_close_ms=18446744073709551616\n",
++        "other shutdown waiting_for_peer_close_ms=1\n",
++    ] {
++        assert!(reported_interval(line).is_none(), "{line:?}");
++        let start = Instant::now();
++        let mut window = Window::new(start);
++        window.observe(start, line);
++        assert_eq!(window.deadline(), start + ORDINARY);
++        assert!(window.reported.is_none());
++    }
++}
++
++#[test]
++fn ordinary_cap_and_equality_are_preserved_for_short_reports() {
++    let start = Instant::now();
++    let mut window = Window::new(start);
++    assert!(window.permits(start + ORDINARY - Duration::from_millis(1)));
++    assert!(!window.permits(start + ORDINARY));
++    window.observe(start, "shutdown waiting_for_peer_close_ms=1\n");
++    assert_eq!(window.deadline(), start + ORDINARY);
++    let mut equal = Window::new(start);
++    equal.observe(
++        start + Duration::from_secs(9),
++        "shutdown waiting_for_peer_close_ms=1000\n",
++    );
++    assert_eq!(equal.deadline(), start + ORDINARY);
++    assert!(!equal.permits(start + ORDINARY));
++}
++
++#[test]
++fn repeated_and_fresh_reports_cannot_renew_the_first_pinned_window() {
++    let start = Instant::now();
++    let mut window = Window::new(start);
++    let first = "shutdown waiting_for_peer_close_ms=6000\n";
++    window.observe(start + Duration::from_secs(10), first);
++    let deadline = start + Duration::from_secs(21);
++    assert_eq!(window.deadline(), deadline);
++    window.observe(start + Duration::from_secs(12), first);
++    window.observe(
++        start + Duration::from_secs(13),
++        "shutdown waiting_for_peer_close_ms=900000\n",
++    );
++    assert_eq!(window.deadline(), deadline);
++    assert!(window.permits(deadline - Duration::from_millis(1)));
++    assert!(!window.permits(deadline));
++}
++
++#[test]
++fn checked_margin_and_instant_overflow_refuse_instead_of_wrapping() {
++    let start = Instant::now();
++    assert!(reported_deadline(start, Duration::MAX).is_none());
++    let instant_overflow = Duration::from_secs(u64::MAX - JOIN_MARGIN.as_secs());
++    assert!(instant_overflow.checked_add(JOIN_MARGIN).is_some());
++    assert!(reported_deadline(start, instant_overflow).is_none());
++}
++
++#[test]
++fn sibling_windows_are_independent_and_only_a_valid_report_can_pin() {
++    let start = Instant::now();
++    let mut windows = [Window::new(start); 3];
++    let observed = start + Duration::from_secs(10);
++    windows[0].observe(
++        observed,
++        "shutdown waiting_for_peer_close_ms=oops\n\
++shutdown waiting_for_peer_close_ms=12000\n\
++shutdown waiting_for_peer_close_ms=999000\n",
++    );
++    windows[1].observe(observed, "shutdown waiting_for_peer_close_ms=oops\n");
++    windows[2].observe(observed, "shutdown waiting_for_peer_close_ms=12000");
++    assert!(windows[0].permits(start + ORDINARY));
++    assert!(!windows[1].permits(start + ORDINARY));
++    assert!(!windows[2].permits(start + ORDINARY));
++    windows[2].observe(observed, "shutdown waiting_for_peer_close_ms=12000\n");
++    assert_eq!(windows[2].deadline(), windows[0].deadline());
++    assert!(!windows[1].permits(start + ORDINARY));
++}
