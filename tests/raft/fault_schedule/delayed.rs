@@ -20,6 +20,8 @@ pub(super) struct Dependencies {
     pub(super) stale_rejected: usize,
     pub(super) sync_failures: usize,
     pub(super) fenced_refused: usize,
+    pub(super) append_failures: usize,
+    pub(super) publish_failures: usize,
 }
 impl Dependencies {
     pub(super) fn phases(&self) -> BTreeMap<u64, Phase> {
@@ -72,10 +74,16 @@ impl Replay {
             if let Effect::Persist(update) = effect {
                 let replica = self.cluster.replicas.get_mut(&id).unwrap();
                 if self.delayed.nodes.contains(&id) {
-                    let tickets = replica
+                    let tickets = match replica
                         .store
                         .append_batch(vec![LogMutation::Update(update)])
-                        .unwrap();
+                    {
+                        Ok(tickets) => tickets,
+                        Err(error) => {
+                            self.failed_append(id, error);
+                            break;
+                        }
+                    };
                     assert_eq!(tickets.len(), 1);
                     replica.core.admitted(tickets[0]).unwrap();
                     assert!(self
@@ -90,9 +98,14 @@ impl Replay {
                         )
                         .is_none());
                 } else {
-                    effects.extend(
-                        persist_effect(&mut replica.core, &mut replica.store, update).unwrap(),
-                    );
+                    match persist_effect(&mut replica.core, &mut replica.store, update) {
+                        Ok(more) => effects.extend(more),
+                        Err(RaftError::Storage(error)) => {
+                            self.failed_append(id, error);
+                            break;
+                        }
+                        Err(error) => panic!("unexpected persistence error: {error:?}"),
+                    }
                 }
             } else {
                 self.cluster.effects(id, vec![effect]);
@@ -153,14 +166,28 @@ impl Replay {
         }
     }
     pub(super) fn fail_sync(&mut self, id: u64) {
+        if self.failed_barrier(id, Fault::Sync, "failed sync") {
+            self.delayed.sync_failures += 1;
+        }
+    }
+    pub(super) fn fail_publish(&mut self, id: u64, cut: publication::PublishCut) {
+        let (fault, message) = match cut {
+            publication::PublishCut::Before => (Fault::PublishBefore, "before rename"),
+            publication::PublishCut::After => (Fault::PublishAfter, "after rename"),
+        };
+        if self.failed_barrier(id, fault, message) {
+            self.delayed.publish_failures += 1;
+        }
+    }
+    fn failed_barrier(&mut self, id: u64, fault: Fault, message: &str) -> bool {
         if let Some(held) = self.delayed.held.get(&id) {
             if held.completion.is_none() {
-                self.images[&id].device.0.borrow_mut().fault = Fault::Sync;
+                self.images[&id].device.0.borrow_mut().fault = fault;
                 let replica = self.cluster.replicas.get_mut(&id).unwrap();
                 assert_eq!(
                     replica.store.barrier(&[held.ticket]),
                     Err(voteboat::contracts::StorageError::Uncertain(
-                        "failed sync".to_owned()
+                        message.to_owned()
                     ))
                 );
                 replica.core.storage_failed();
@@ -170,9 +197,29 @@ impl Replay {
                     Err(voteboat::contracts::StorageError::Fenced)
                 );
                 self.delayed.held.remove(&id);
-                self.delayed.sync_failures += 1;
+                return true;
             }
         }
+        false
+    }
+    fn failed_append(&mut self, id: u64, error: voteboat::contracts::StorageError) {
+        assert!(matches!(
+            self.images[&id].device.0.borrow().fault,
+            Fault::Append(_)
+        ));
+        assert_eq!(
+            error,
+            voteboat::contracts::StorageError::Uncertain("short write".to_owned())
+        );
+        let replica = self.cluster.replicas.get_mut(&id).unwrap();
+        replica.core.storage_failed();
+        assert!(replica.core.is_fenced());
+        assert_eq!(
+            replica.store.state(group(1)),
+            Err(voteboat::contracts::StorageError::Fenced)
+        );
+        assert!(!self.delayed.held.contains_key(&id));
+        self.delayed.append_failures += 1;
     }
     pub(super) fn discard_dependency(&mut self, id: u64) {
         if let Some(held) = self.delayed.held.remove(&id) {

@@ -8,7 +8,7 @@ pub(super) enum Mode {
     Process,
     PowerLoss,
 }
-fn cut(id: u64, power_loss: bool) -> Action {
+pub(super) fn cut(id: u64, power_loss: bool) -> Action {
     if power_loss {
         Action::PowerLoss(id)
     } else {
@@ -17,7 +17,7 @@ fn cut(id: u64, power_loss: bool) -> Action {
 }
 // Fixed three-node history: term, leader entry and commit can each own one
 // local dependency. This drains actual returned completions, never force-releases.
-fn finish_local(run: &mut Replay, id: u64) {
+pub(super) fn finish_local(run: &mut Replay, id: u64) {
     for _ in 0..4 {
         run.action(&Action::Sync(id)).unwrap();
         run.action(&Action::Complete(id)).unwrap();
@@ -28,12 +28,12 @@ fn finish_local(run: &mut Replay, id: u64) {
     }
     panic!("fixed local history did not drain its actual dependencies");
 }
-fn counter(run: &Replay, id: u64) -> (Counter, Vec<CounterReceipt>) {
+pub(super) fn counter(run: &Replay, id: u64) -> (Counter, Vec<CounterReceipt>) {
     let mut counter = Counter::new(4).unwrap();
     let receipts = counter.apply_batch(&run.cluster.applied[&id]).unwrap();
     (counter, receipts)
 }
-fn assert_original_counter(run: &Replay, id: u64) {
+pub(super) fn assert_original_counter(run: &Replay, id: u64) {
     let (application, receipts) = counter(run, id);
     assert_eq!(application.read_applied(application.applied_index()), Ok(9));
     assert_eq!(receipts.iter().filter(|r| !r.duplicate).count(), 1);

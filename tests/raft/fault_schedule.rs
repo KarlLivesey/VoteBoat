@@ -8,10 +8,13 @@ mod codec;
 mod crash;
 #[path = "fault_schedule/delayed.rs"]
 mod delayed;
+#[path = "fault_schedule/publication.rs"]
+mod publication;
 #[path = "fault_schedule/reduce.rs"]
 mod reduce;
 
 const MAX_ACTIONS: usize = 512;
+const MAX_FAULT_BYTES: usize = 65536;
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum Action {
     Campaign(u64),
@@ -31,6 +34,8 @@ enum Action {
     Stale(u64),
     ProcessCrash(u64),
     FailSync(u64),
+    ShortWrite(u64, usize),
+    FailPublish(u64, publication::PublishCut),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Trace {
@@ -119,6 +124,8 @@ struct Point {
     fenced: BTreeSet<u64>,
     sync_failures: usize,
     fenced_refused: usize,
+    append_failures: usize,
+    publish_failures: usize,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum FailureStage {
@@ -236,6 +243,11 @@ impl Replay {
             Action::PowerLoss(id) => self.restart(id, crash::Mode::PowerLoss)?,
             Action::ProcessCrash(id) => self.restart(id, crash::Mode::Process)?,
             Action::FailSync(id) => self.fail_sync(id),
+            Action::ShortWrite(id, cut) => {
+                assert!(cut <= MAX_FAULT_BYTES);
+                self.images[&id].device.0.borrow_mut().fault = Fault::Append(cut);
+            }
+            Action::FailPublish(id, cut) => self.fail_publish(id, cut),
             Action::Heartbeat(id) => self.step_event(id, Event::Heartbeat),
             Action::Pump => self.pump(),
             Action::BadSync(id) => self.images[&id].bad_sync.set(true),
@@ -284,6 +296,8 @@ impl Replay {
                 .collect(),
             sync_failures: self.delayed.sync_failures,
             fenced_refused: self.delayed.fenced_refused,
+            append_failures: self.delayed.append_failures,
+            publish_failures: self.delayed.publish_failures,
         }
     }
 }

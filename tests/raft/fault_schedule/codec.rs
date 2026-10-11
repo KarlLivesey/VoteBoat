@@ -28,6 +28,14 @@ fn operation(word: Option<&str>) -> Result<u128, ()> {
         Ok(operation)
     }
 }
+fn cut(word: Option<&str>) -> Result<usize, ()> {
+    let cut = number(word)?;
+    if cut <= MAX_FAULT_BYTES {
+        Ok(cut)
+    } else {
+        Err(())
+    }
+}
 fn action(line: &str) -> Result<Action, ()> {
     let mut words = line.split_whitespace();
     let action = match words.next() {
@@ -56,6 +64,13 @@ fn action(line: &str) -> Result<Action, ()> {
         Some("stale") => Action::Stale(actor(words.next())?),
         Some("process_crash") => Action::ProcessCrash(actor(words.next())?),
         Some("fail_sync") => Action::FailSync(actor(words.next())?),
+        Some("short_write") => Action::ShortWrite(actor(words.next())?, cut(words.next())?),
+        Some("publish_before") => {
+            Action::FailPublish(actor(words.next())?, publication::PublishCut::Before)
+        }
+        Some("publish_after") => {
+            Action::FailPublish(actor(words.next())?, publication::PublishCut::After)
+        }
         _ => return Err(()),
     };
     if words.next().is_some() {
@@ -92,6 +107,13 @@ impl Trace {
                 Action::Stale(id) => writeln!(text, "stale {id}"),
                 Action::ProcessCrash(id) => writeln!(text, "process_crash {id}"),
                 Action::FailSync(id) => writeln!(text, "fail_sync {id}"),
+                Action::ShortWrite(id, cut) => writeln!(text, "short_write {id} {cut}"),
+                Action::FailPublish(id, publication::PublishCut::Before) => {
+                    writeln!(text, "publish_before {id}")
+                }
+                Action::FailPublish(id, publication::PublishCut::After) => {
+                    writeln!(text, "publish_after {id}")
+                }
             }
             .unwrap();
         }
@@ -143,6 +165,9 @@ fn all_actions_round_trip_with_original_ids_and_bytes() {
             Action::ProcessCrash(2),
             Action::FailSync(3),
             Action::TryCounter(1, u128::MAX, i64::MIN),
+            Action::ShortWrite(2, MAX_FAULT_BYTES),
+            Action::FailPublish(1, publication::PublishCut::Before),
+            Action::FailPublish(3, publication::PublishCut::After),
         ],
     };
     assert_eq!(Trace::decode(&trace.encode()).unwrap(), trace);
@@ -177,6 +202,10 @@ fn malformed_and_oversized_traces_are_rejected_before_execution() {
         "VBSIM 1 1\nfail_sync 0",
         "VBSIM 1 1\ncounter 1 0 9",
         "VBSIM 1 1\ncounter 1 1 9223372036854775808",
+        "VBSIM 1 1\nshort_write 1 65537",
+        "VBSIM 1 1\nshort_write 0 1",
+        "VBSIM 1 1\npublish_before 4",
+        "VBSIM 1 1\npublish_after 1 extra",
         "VBSIM 1 1\nλ",
     ] {
         assert!(Trace::decode(input).is_err(), "{input:?}");

@@ -1,0 +1,40 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/raft.rs (target/debug/deps/raft-6b922bf42bed553f)
+
+running 1 test
+composed append/publication trace:
+VBSIM 1 266
+short_write 1 31
+campaign 1
+process_crash 1
+delay 1
+campaign 1
+publish_before 1
+power_loss 1
+campaign 1
+publish_after 1
+power_loss 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+power_loss 1
+stale 1
+
+test fault_schedule::publication::short_write_and_manifest_failures_share_exact_composed_replay ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 57 filtered out; finished in 0.01s
+
