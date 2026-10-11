@@ -8,8 +8,9 @@ zero on both hosts, with709 matching source guards. The actual native control
 proves the original cap defect and corrected ownership/drain behavior;302's
 unobserved original Mac cause remains separate.
 
-The original705-input platform sweep continues: Linux all-feature1952/0 is
-terminal, default/core/native remain in progress; Mac all-feature is still live
+The original705-input platform sweep is [terminal on Linux](baseline/slice302/linux/README.md):
+all1952/0,default1708/0,core775/0,native1226/0. Before/terminal source guards and the
+published77c07ae Git tree match all705 inputs. Mac all-feature is still live
 with its original counter195/1 failure retained. No complete platform or P0–P7
 acceptance is claimed. Seeded parser, scoped client-history and shared connector
 evidence is archived in [301](baseline/slice301/README.md). Sustainable throughput

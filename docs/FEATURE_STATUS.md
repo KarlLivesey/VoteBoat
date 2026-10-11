@@ -16,7 +16,9 @@ on Linux and macOS. Performance tuning and the security review follow afterward.
 
 These mechanisms are implemented. The current Linux/macOS acceptance sweep is
 still running; **feature-complete qualification is not yet claimed**. Linux's
-complete all-feature sweep passes1,952 tests. A controlled shutdown policy defect
+original complete four-profile sweep passes5,661 test executions with zero
+failures ([terminal evidence](../validation/baseline/slice302/linux/README.md)).
+A controlled shutdown policy defect
 is corrected: the service respects an empty QUIC connection's original close
 timer after application work settles. The corrected complete counter target
 passes203 tests on Linux and202 on Mac, including the previously failing Mac

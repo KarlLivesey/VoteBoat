@@ -1,0 +1,31 @@
+{
+  "source_base": "77c07ae67aae861b34d07edf6878f49595e7ab53",
+  "inputs": 705,
+  "total_executions": 5661,
+  "profiles": [
+    {
+      "profile": "all",
+      "passed": 1952,
+      "failed": 0,
+      "target_summaries": 91
+    },
+    {
+      "profile": "default",
+      "passed": 1708,
+      "failed": 0,
+      "target_summaries": 91
+    },
+    {
+      "profile": "core",
+      "passed": 775,
+      "failed": 0,
+      "target_summaries": 86
+    },
+    {
+      "profile": "native",
+      "passed": 1226,
+      "failed": 0,
+      "target_summaries": 87
+    }
+  ]
+}

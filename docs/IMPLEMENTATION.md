@@ -134,7 +134,7 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | --- | --- | --- | --- |
 | Completed297: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294. | Actual original native tickets and reference Ready cuts, own-image process/power recovery, retries/reads, stale refusal and false-sync reduction pass both hosts. Selected schedules only; snapshots remain separate. |
 | Completed305: qualify the demonstrated shutdown correction | Preserve usable service shutdown while a legitimate original QUIC close remains owned. | Actual304 cap-defect control, existing inspection contracts and independent ownership review. | Keep the ten-second local-work cutoff, pin only settled original close timers, require actual drain/join and successful process exit. Affected targets pass Linux203/0 and Mac202/0, executable52/0 each, with four strict profiles zero. Original Mac302 cause remains unobserved; a silent pass does not establish it. |
-| Current302: finish the preserved platform sweep | Establish the finite baseline service/embedding qualification. | Original four-profile matrices and final305 affected-source evidence. | Retain terminal results from each profile, resolve any additional demonstrated failures with bounded corrections, and reuse unaffected evidence. Linux all-feature is1952/0; no full-suite restart or optional new engine. |
+| Current302: finish the preserved platform sweep | Establish the finite baseline service/embedding qualification. | Original four-profile matrices and final305 affected-source evidence. | Linux is terminal5661/0 across all four profiles; Mac remains live. Retain terminal results, resolve additional demonstrated failures with bounded corrections and reuse unaffected evidence; no full-suite restart or optional new engine. |
 | Next: feature milestone decision | Record whether the original feature exits are met for the implemented service/embedding scope. | Terminal302 profile results, qualified305 correction and the finite source/provider review301. | Match each required exit to actual evidence, retain historical/remaining failures, publish the current capability/limits record and mark only qualified milestones complete. The full P0–P7 goal remains active. |
 | Following: P7 measured tuning | Establish sustainable improvement at the original correctness/p99 budget with attributable costs. | Qualified feature exits and the existing reproducible baseline/hardware/workload records. | Preserve the simple baseline, original latency gate and durability/recovery checks; measure repeatable committed/applied capacity and accept only demonstrated invariant-preserving improvements. No performance acceptance is claimed in advance. |
 
@@ -28029,3 +28029,28 @@ historical records and the design pack are preserved. Source inspection confirms
 public NodeParts/configuration APIs, recursive quorum cases and scope/transfer
 types; no runtime changes or additional tests. Formatting/all-feature strict
 checks are zero; publication runs the enabled four-profile pre-push hook.
+
+Schema307 — publish terminal Linux platform qualification (P0–P6 feature exit):
+archive only completed original302 Linux results under a Linux-specific directory,
+with original script,705-input source manifest and before/terminal guards. Verify
+that every input matches the published77c07ae Git tree; preserve its relationship
+to the separately qualified305 correction instead of calling705 current709.
+Aggregate actual Rust target summaries alongside all four Cargo exits; do not
+count filtered0 selections as coverage or live Mac logs as complete. Keep raw
+and normalized hashes, command/profile scope and pending Mac/P7 status explicit.
+No production/API/state/ownership changes or new test execution is needed.
+Acceptance:1952/1708/775/1226 pass with0 failures, all Cargo exits0,705 input
+guards/base-tree matches and publication formatting/four strict profiles zero.
+Mac's original live handle continues unchanged; further acceptance depends on
+its terminal evidence and any additional demonstrated failure.
+
+Implemented307 Linux terminal302: all1952/0,default1708/0,core775/0,native1226/0;
+all four Cargo exits0, terminal=0 and formatting/four strict profiles zero.
+The705 before/terminal inputs also match the published77c07ae Git tree exactly.
+Archive302/linux retains5,661 executions over355 target/configuration summaries
+(including empty/doc summaries), script, source guards and raw/normalized hashes.
+These are repeated profile executions, not5,661 distinct tests. Current709-source
+shutdown305 retains separate affected-source evidence; no mixed-source full-pass
+claim follows. Original Mac handle74020 is confirmed live and advancing; only
+its original counter195/1 failure is observed so far. Full feature/platform and
+P7 acceptance remain open. No new runtime tests or production changes are added.

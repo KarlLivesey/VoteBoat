@@ -1,8 +1,9 @@
 # Baseline acceptance map
 
 Current feature exit: [concise status](FEATURE_STATUS.md). The preserved705-input
-matrix302 continues sequential default/core/native tests after Linux all-feature
-passes1952/0; Mac all-feature remains live. Its original Mac counter195/1 timeout
+matrix302 is [terminal on Linux](../validation/baseline/slice302/linux/README.md):
+all1952/0,default1708/0,core775/0,native1226/0, with705 before/terminal and Git-tree
+input matches. Mac all-feature remains live. Its original Mac counter195/1 timeout
 has no ownership observations; silent diagnostic303 passes do not explain it.
 Controlled304 independently proves that the executable's ten-second cap refuses
 a settled original future QUIC close. Correction305 retains only original
