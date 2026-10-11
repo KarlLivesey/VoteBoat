@@ -104,20 +104,20 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint264: static mixed-host service256 remains selected completed
+Current checkpoint265: static mixed-host service256 remains selected completed
 evidence. Timer258 and scheduler261 replacement checks pass on both hosts.
 Original Mac254d finishes21/44; the44 failures map to two separately controlled
 fixture assumptions corrected259/260. The eight affected260 histories now pass
 on both hosts. Complete corrected67-history qualification262 runs on independent
 frozen Linux/Mac sources. Actual-core replay/reduction263 and delayed completion
-schedules264 are accepted below;
+schedules264 and crash/failure/retry schedules265 are accepted below;
 selected checks do not imply a complete platform or roadmap pass.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current264: independently delayed native storage barriers and completions — accepted | Extend P0/R11 recovery evidence to accepted-but-undurable writes, durable-but-unobserved writes and stale completion delivery. | Accepted263 trace/codec/reducer and existing public append/admitted/barrier/complete contracts; reuse the same actual core and WAL model. | Nine replay checks and full Raft targets50/29/50/50 on both hosts, including no-effect-before-completion, both power-loss cuts, either follower completing first and real stale tokens; formatting/four strict profiles zero. |
+| Current265: process-crash and failed-barrier schedules — accepted | Advance P0/R11 and P1 recovery by separating retained device bytes from power loss and resolving real uncertain barrier failure. | Native recovery, ModelIo faults, public storage_failed, Counter and264 replay ownership; no new engine/provider. | Thirteen replay checks, before/after-sync cuts, no effects after failed sync, exact Counter9911/value9 retry/cold-recovery checks and full Raft targets54/29/54/54 on both hosts; formatting/four strict profiles zero. |
 | Next262: qualify the complete corrected delegation family | Close demonstrated P5/P6 functional recovery failures while keeping static service usable. | Terminal original Mac21/44 maps to36 retained-credit assertions and8 existing-store collisions;259/260 controlled negatives/corrections on both hosts. Use frozen independent corrected sources. | Full67-history family (original65 plus two controlled regressions), source-linked terminal results both hosts, original IDs/fault cuts/ownership/cold recovery preserved and strict zero. Selected passes cannot close the full family. |
-| Following265: process-crash and failed-barrier schedules | Advance P0/R11 and P1 recovery by distinguishing retained unsynced device bytes from power loss and handling real uncertain barrier failure. Prioritize an actual262/251 failure if it changes this dependency. | Existing native recovery, ModelIo device faults, public storage_failed and264 replay ownership; no new engine/provider. | Exact before/after-barrier cuts, no dependent effect after failed sync, cold recovery/original-ID history checks, replayable schedules, both-host full Raft checks and strict zero; partial device scope explicit. |
+| Following266: resolve the next actual platform failure or extend partial-write/publication replay | Advance P0/P1 recovery and P5/P6 platform acceptance while preserving the usable service. | Terminal262/251 results take priority; otherwise reuse265's actual core/store ownership and existing ModelIo append/publication faults. Inspect each contract before edits. | Cause-specific negative/correction and affected histories, or explicit real short-write/publication cuts with no false success, restart/original-ID recovery and replay; both-host evidence and strict zero, device scope explicit. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26245,3 +26245,50 @@ functional recovery debugging; production/contracts are unchanged. One pending
 update per node and synchronous barrier execution do not cover every asynchronous
 worker/device composition, process crash, failed sync, snapshot or timer action.
 Full P0–P7 remains active; performance/security follow feature/Linux/macOS work.
+
+265 schema: extend the same actual-core/native-WAL schedule with ProcessCrash
+and FailSync. ProcessCrash drops core/store ownership and resets transient fault
+injection while retaining complete device bytes; PowerLoss still resets bytes
+to the synchronized image. Native recovery may adopt a complete unsynced frame
+and synchronize it before returning: retained unknown work is legal, but no
+old acknowledgement may escape before the original required completion.
+FailSync operates only on a held written dependency, injects ModelIo's real sync
+error into the real barrier, verifies Uncertain("failed sync"), fences the core
+through storage_failed and releases its failed admission without manufacturing
+a completion. Further events must get actual Fenced; restart resets the fault
+and creates a fresh store session. Semantic points include fencing and failure/
+refusal counts. Preserve one prior actual completion for stale rejection.
+Add an exact eight-byte Counter command action to test recovery and original-ID
+reproposal with the existing Counter StateMachine; consensus log entries may
+repeat an ID, while application dedup must apply it once. A bounded test-only
+local completion drain is needed for the fixed three-node re-election/proposal
+path; it drives actual tickets, not a forced result. Acceptance: process/power
+cuts before/after sync, no vote effects after failed sync, real store/core
+fencing, Counter original-ID receipts/value9 after both recovery modes and full
+cold restart, exact text replay of a composed two-failure schedule, retained
+263/264 checks and full Raft targets/strict zero on both hosts. No production
+protocol, worker or public seam changes. Device-model scope is explicit; physical
+macOS/Linux disk faults, snapshots and reference comparison remain broader work.
+
+265 setup correction: Raft does not expose a binding getter. Compare fresh
+sessions through the existing public LogStore::binding contract used for core
+recovery; do not add a production getter for a private test. Preserve the initial
+compile failure separately; it supplies no fault/recovery evidence.
+
+265 acceptance: all13 replay/codec/reducer checks pass on both hosts. Process
+crash retains complete unsynced vote bytes and native recovery synchronizes them;
+power loss discards them. Both preserve synced votes and produce fresh sessions
+without releasing the old core's withheld effects. Actual failed sync returns
+Uncertain, fences store/core and prevents votes. Original Counter9911/delta9 is
+retained or lost according to the selected fault, then retries apply once with
+value9, including full three-replica cold recovery and another duplicate. A saved
+37-action/two-failure schedule replays exact observed states. Full Raft targets
+all/core/native/default finish54/29/54/54 on each host, zero failed/ignored;
+formatting/four strict profiles are zero.659 Rust inputs verify before/after.
+Evidence: [265](../validation/baseline/slice265/README.md). Macro review advances
+P0/P1 functional recovery and the existing Counter composition without changing
+production/protocols. These are native-store device-model checks, not physical
+disk-failure or whole-platform acceptance. Complete lifecycle262/251 remains
+live; broader writes/publication/snapshot/timer/reference schedules remain.
+The full P0–P7 goal stays active with performance/security after functional
+Linux/macOS features.

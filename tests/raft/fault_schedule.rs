@@ -4,6 +4,8 @@ use super::*;
 use std::{cell::Cell, io, rc::Rc};
 #[path = "fault_schedule/codec.rs"]
 mod codec;
+#[path = "fault_schedule/crash.rs"]
+mod crash;
 #[path = "fault_schedule/delayed.rs"]
 mod delayed;
 #[path = "fault_schedule/reduce.rs"]
@@ -14,6 +16,7 @@ const MAX_ACTIONS: usize = 512;
 enum Action {
     Campaign(u64),
     TryWrite(u64, u128, u8),
+    TryCounter(u64, u128, i64),
     Isolate(u64),
     Heal,
     DeliverNewest,
@@ -26,6 +29,8 @@ enum Action {
     Sync(u64),
     Complete(u64),
     Stale(u64),
+    ProcessCrash(u64),
+    FailSync(u64),
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Trace {
@@ -111,6 +116,9 @@ struct Point {
     pending: BTreeSet<u64>,
     busy: usize,
     stale_rejected: usize,
+    fenced: BTreeSet<u64>,
+    sync_failures: usize,
+    fenced_refused: usize,
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum FailureStage {
@@ -145,11 +153,14 @@ impl Replay {
             delayed: delayed::Dependencies::default(),
         }
     }
-    fn restart(&mut self, id: u64) -> Result<(), LostPrefix> {
+    fn restart(&mut self, id: u64, mode: crash::Mode) -> Result<(), LostPrefix> {
         let acknowledged = self.cluster.applied[&id].clone();
         self.discard_dependency(id);
         drop(self.cluster.replicas.remove(&id).unwrap());
-        self.images[&id].device.0.borrow_mut().power_loss();
+        match mode {
+            crash::Mode::PowerLoss => self.images[&id].device.0.borrow_mut().power_loss(),
+            crash::Mode::Process => self.images[&id].device.0.borrow_mut().fault = Fault::None,
+        }
         self.images[&id].bad_sync.set(false);
         let store = match NativeLogStore::recover(
             self.images[&id].clone(),
@@ -206,16 +217,9 @@ impl Replay {
     fn action(&mut self, action: &Action) -> Result<(), LostPrefix> {
         match *action {
             Action::Campaign(id) => self.step_event(id, Event::Campaign),
-            Action::TryWrite(id, operation, byte) => {
-                if self.cluster.replicas[&id].core.role() == Role::Leader {
-                    self.step_event(
-                        id,
-                        Event::Propose {
-                            operation: OperationId::new(operation).unwrap(),
-                            bytes: vec![byte],
-                        },
-                    );
-                }
+            Action::TryWrite(id, operation, byte) => self.try_propose(id, operation, vec![byte]),
+            Action::TryCounter(id, operation, delta) => {
+                self.try_propose(id, operation, delta.to_le_bytes().to_vec());
             }
             Action::Isolate(id) => self.cluster.partition(&[id]),
             Action::Heal => self.cluster.heal(),
@@ -229,7 +233,9 @@ impl Replay {
                     self.cluster.messages.push_back(message);
                 }
             }
-            Action::PowerLoss(id) => self.restart(id)?,
+            Action::PowerLoss(id) => self.restart(id, crash::Mode::PowerLoss)?,
+            Action::ProcessCrash(id) => self.restart(id, crash::Mode::Process)?,
+            Action::FailSync(id) => self.fail_sync(id),
             Action::Heartbeat(id) => self.step_event(id, Event::Heartbeat),
             Action::Pump => self.pump(),
             Action::BadSync(id) => self.images[&id].bad_sync.set(true),
@@ -269,6 +275,15 @@ impl Replay {
                 .collect(),
             busy: self.delayed.busy,
             stale_rejected: self.delayed.stale_rejected,
+            fenced: self
+                .cluster
+                .replicas
+                .iter()
+                .filter(|(_, replica)| replica.core.is_fenced())
+                .map(|(id, _)| *id)
+                .collect(),
+            sync_failures: self.delayed.sync_failures,
+            fenced_refused: self.delayed.fenced_refused,
         }
     }
 }

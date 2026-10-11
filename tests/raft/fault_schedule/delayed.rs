@@ -18,6 +18,8 @@ pub(super) struct Dependencies {
     previous: BTreeMap<u64, DurableLog>,
     pub(super) busy: usize,
     pub(super) stale_rejected: usize,
+    pub(super) sync_failures: usize,
+    pub(super) fenced_refused: usize,
 }
 impl Dependencies {
     pub(super) fn phases(&self) -> BTreeMap<u64, Phase> {
@@ -37,6 +39,17 @@ impl Dependencies {
     }
 }
 impl Replay {
+    pub(super) fn try_propose(&mut self, id: u64, operation: u128, bytes: Vec<u8>) {
+        if self.cluster.replicas[&id].core.role() == Role::Leader {
+            self.step_event(
+                id,
+                Event::Propose {
+                    operation: OperationId::new(operation).unwrap(),
+                    bytes,
+                },
+            );
+        }
+    }
     pub(super) fn step_event(&mut self, id: u64, event: Event) {
         let delivery = matches!(&event, Event::Receive(_));
         match self.cluster.replicas.get_mut(&id).unwrap().core.step(event) {
@@ -46,6 +59,10 @@ impl Replay {
                 self.delayed.busy += 1;
             }
             Err(RaftError::WrongIdentity) if delivery => (),
+            Err(RaftError::Fenced) => {
+                assert!(self.cluster.replicas[&id].core.is_fenced());
+                self.delayed.fenced_refused += 1;
+            }
             Err(error) => panic!("unexpected scheduled event error: {error:?}"),
         }
     }
@@ -135,6 +152,28 @@ impl Replay {
             self.effects(id, effects);
         }
     }
+    pub(super) fn fail_sync(&mut self, id: u64) {
+        if let Some(held) = self.delayed.held.get(&id) {
+            if held.completion.is_none() {
+                self.images[&id].device.0.borrow_mut().fault = Fault::Sync;
+                let replica = self.cluster.replicas.get_mut(&id).unwrap();
+                assert_eq!(
+                    replica.store.barrier(&[held.ticket]),
+                    Err(voteboat::contracts::StorageError::Uncertain(
+                        "failed sync".to_owned()
+                    ))
+                );
+                replica.core.storage_failed();
+                assert!(replica.core.is_fenced());
+                assert_eq!(
+                    replica.store.state(group(1)),
+                    Err(voteboat::contracts::StorageError::Fenced)
+                );
+                self.delayed.held.remove(&id);
+                self.delayed.sync_failures += 1;
+            }
+        }
+    }
     pub(super) fn discard_dependency(&mut self, id: u64) {
         if let Some(held) = self.delayed.held.remove(&id) {
             if let Some(completion) = held.completion {
@@ -145,6 +184,11 @@ impl Replay {
     pub(super) fn stale(&mut self, id: u64) {
         if let Some(completion) = self.delayed.previous.get(&id) {
             let before = self.point();
+            let expected = if self.cluster.replicas[&id].core.is_fenced() {
+                RaftError::Fenced
+            } else {
+                RaftError::WrongCompletion
+            };
             assert_eq!(
                 self.cluster
                     .replicas
@@ -152,7 +196,7 @@ impl Replay {
                     .unwrap()
                     .core
                     .complete(completion),
-                Err(RaftError::WrongCompletion)
+                Err(expected)
             );
             assert_eq!(self.point(), before);
             self.delayed.stale_rejected += 1;

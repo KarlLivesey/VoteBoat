@@ -1,5 +1,13 @@
 # Baseline acceptance map
 
+Process-crash and failed-sync recovery:
+[slice265](../validation/baseline/slice265/README.md). The actual native store/core
+distinguishes retained complete frames from power loss, fences real failed
+barriers and preserves Counter9911/value9 through original-ID retries and cold
+recovery. Thirteen replay checks and full Raft targets54/29/54/54 pass on both
+hosts; formatting/four strict profiles are zero. This remains device-model
+evidence, separate from physical runtime and complete lifecycle acceptance.
+
 Actual-core replay and delayed completion checks:
 [slice264](../validation/baseline/slice264/README.md). Exact admitted/synced/
 completion gates, both power-loss cuts, either follower completing first and
@@ -978,7 +986,7 @@ It includes32 seeds of256 actual-core fault actions, not exhaustive scheduling.
 | R08 no ancestor commit | Direct owner proposals/check_owner, cached child writes with stopped metadata authorities. | Broader outage/migration combinations remain; no root transaction counter is added. |
 | R09 safe transitions | Membership journal/readiness, source fencing, import/publication/activation/retirement and nested movement. | Selected native cuts exist; full combined failure matrix and operator workflow remain. |
 | R10 distinct outcomes | AdmissionTicket, LogTicket/worker durability, commit/apply effects, ClientCompletion and explicit unknown outcomes. | Maintain downstream conformance and unknown-outcome history coverage as surfaces grow. |
-| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 adds32 replayed schedules and bounded reduction,264 adds independently delayed native barriers/completions, power-loss cuts and real stale-token refusal on both hosts. | Process-crash/failed-barrier/snapshot/timer schedules, broader worker/device compositions and reference-Raft comparison remain. |
+| R11 deterministic core | Event/effect Raft and host-controlled storage/delivery/time;263 adds32 replayed schedules/reduction,264 delayed completion/stale-token cuts,265 process-crash/failed-sync and original-ID Counter recovery on both hosts. | Partial-write/publication/snapshot/timer schedules, broader worker/device compositions and reference-Raft comparison remain. |
 | R12 bounded overload | Explicit queue/byte/request/image/retention budgets; pressure, maintenance and recovery tests. | Wider disk-full/control/recovery and receive/connection fairness coverage remain. |
 | R13 native providers first | Native storage, scheduling, multiplexed TCP/TLS/QUIC and codecs behind public contracts. | No external adapter is required or claimed. |
 | R14 public integration seams | Public contracts, NodeParts and native/host tests; catalogue C01–C24 below. | Complete reusable contract-obligation matrix; a listed trait alone is insufficient evidence. |
@@ -1160,8 +1168,8 @@ a passing test count.
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as
    a sustainable throughput improvement.
-3. Broaden chapter11 beyond263/264's replayable/minimizable actual-core schedules:
-   process-crash/failed-barrier and broader worker/device composition, snapshots
+3. Broaden chapter11 beyond263–265's replayable/minimizable actual-core schedules:
+   partial-write/publication and broader worker/device composition, snapshots
    and timer-runtime actions,
    compatible-semantics reference-Raft comparison, fuzz coverage for WAL/RPC/
    snapshot/routing codecs, declared-scope partitioned histories, and the missing

@@ -1,0 +1,15 @@
+    Checking voteboat v0.1.0 (<linux-repo>)
+error[E0599]: no method named `binding` found for struct `voteboat::raft::Raft` in the current scope
+  --> tests/raft/fault_schedule/crash.rs:58:53
+   |
+58 |             let old = run.cluster.replicas[&1].core.binding();
+   |                                                     ^^^^^^^ private field, not a method
+
+error[E0599]: no method named `binding` found for struct `voteboat::raft::Raft` in the current scope
+  --> tests/raft/fault_schedule/crash.rs:68:55
+   |
+68 |             let fresh = run.cluster.replicas[&1].core.binding();
+   |                                                       ^^^^^^^ private field, not a method
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "raft") due to 2 previous errors

@@ -20,18 +20,28 @@ fn actor(word: Option<&str>) -> Result<u64, ()> {
         Err(())
     }
 }
+fn operation(word: Option<&str>) -> Result<u128, ()> {
+    let operation = number(word)?;
+    if operation == 0 {
+        Err(())
+    } else {
+        Ok(operation)
+    }
+}
 fn action(line: &str) -> Result<Action, ()> {
     let mut words = line.split_whitespace();
     let action = match words.next() {
         Some("campaign") => Action::Campaign(actor(words.next())?),
         Some("write") => {
             let id = actor(words.next())?;
-            let operation: u128 = number(words.next())?;
-            if operation == 0 {
-                return Err(());
-            }
+            let operation = operation(words.next())?;
             Action::TryWrite(id, operation, number(words.next())?)
         }
+        Some("counter") => Action::TryCounter(
+            actor(words.next())?,
+            operation(words.next())?,
+            number(words.next())?,
+        ),
         Some("isolate") => Action::Isolate(actor(words.next())?),
         Some("heal") => Action::Heal,
         Some("newest") => Action::DeliverNewest,
@@ -44,6 +54,8 @@ fn action(line: &str) -> Result<Action, ()> {
         Some("sync") => Action::Sync(actor(words.next())?),
         Some("complete") => Action::Complete(actor(words.next())?),
         Some("stale") => Action::Stale(actor(words.next())?),
+        Some("process_crash") => Action::ProcessCrash(actor(words.next())?),
+        Some("fail_sync") => Action::FailSync(actor(words.next())?),
         _ => return Err(()),
     };
     if words.next().is_some() {
@@ -63,6 +75,9 @@ impl Trace {
                 Action::TryWrite(id, operation, byte) => {
                     writeln!(text, "write {id} {operation} {byte}")
                 }
+                Action::TryCounter(id, operation, delta) => {
+                    writeln!(text, "counter {id} {operation} {delta}")
+                }
                 Action::Isolate(id) => writeln!(text, "isolate {id}"),
                 Action::Heal => writeln!(text, "heal"),
                 Action::DeliverNewest => writeln!(text, "newest"),
@@ -75,6 +90,8 @@ impl Trace {
                 Action::Sync(id) => writeln!(text, "sync {id}"),
                 Action::Complete(id) => writeln!(text, "complete {id}"),
                 Action::Stale(id) => writeln!(text, "stale {id}"),
+                Action::ProcessCrash(id) => writeln!(text, "process_crash {id}"),
+                Action::FailSync(id) => writeln!(text, "fail_sync {id}"),
             }
             .unwrap();
         }
@@ -123,6 +140,9 @@ fn all_actions_round_trip_with_original_ids_and_bytes() {
             Action::Sync(2),
             Action::Complete(3),
             Action::Stale(1),
+            Action::ProcessCrash(2),
+            Action::FailSync(3),
+            Action::TryCounter(1, u128::MAX, i64::MIN),
         ],
     };
     assert_eq!(Trace::decode(&trace.encode()).unwrap(), trace);
@@ -153,6 +173,10 @@ fn malformed_and_oversized_traces_are_rejected_before_execution() {
         "VBSIM 1 1\nsync 4",
         "VBSIM 1 1\ncomplete 1 extra",
         "VBSIM 1 1\nstale -1",
+        "VBSIM 1 1\nprocess_crash 4",
+        "VBSIM 1 1\nfail_sync 0",
+        "VBSIM 1 1\ncounter 1 0 9",
+        "VBSIM 1 1\ncounter 1 1 9223372036854775808",
         "VBSIM 1 1\nλ",
     ] {
         assert!(Trace::decode(input).is_err(), "{input:?}");

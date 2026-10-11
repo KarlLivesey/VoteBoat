@@ -1,0 +1,38 @@
+VBSIM 1 265
+delay 1
+campaign 1
+fail_sync 1
+heartbeat 1
+process_crash 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+fail_sync 1
+process_crash 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+power_loss 1
+stale 1
