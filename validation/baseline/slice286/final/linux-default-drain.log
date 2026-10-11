@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.33s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-0a4bb6de7dd0a077)
+
+running 3 tests
+test shared::drain::recovery::tcp_cancelled_wait_retains_queued_owner_admission ... ok
+test shared::drain::tcp_shared_wal_drain_resumes_mixed_group_progress ... ok
+test shared::drain::tcp_mixed_voter_and_learner_assignments_resume_together ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 25 filtered out; finished in 17.39s

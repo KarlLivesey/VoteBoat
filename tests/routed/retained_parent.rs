@@ -290,27 +290,27 @@ impl Moves {
     fn write(&mut self, h: RouteHint, id: u128, delta: i64, duplicate: bool) {
         let bytes = data(h, self.family.key(), delta);
         let clock = self.base.clock;
-        let receipt = match self.family {
+        let (receipt, uncertain) = match self.family {
             Family::Retained => {
                 campaign(&mut self.base.source, &clock, 20);
-                let RoutedOutcome::Applied(r) =
-                    propose_recovering(&mut self.base.source, &clock, 20, id, bytes).outcome
-                else {
+                let (receipt, uncertain) =
+                    propose_recovering_observed(&mut self.base.source, &clock, 20, id, bytes);
+                let RoutedOutcome::Applied(r) = receipt.outcome else {
                     panic!("retained write")
                 };
-                r
+                (r, uncertain)
             }
             Family::Imported => {
                 campaign(&mut self.base.target, &clock, 21);
-                let TargetOutcome::Applied(r) =
-                    propose_recovering(&mut self.base.target, &clock, 21, id, bytes).outcome
-                else {
+                let (receipt, uncertain) =
+                    propose_recovering_observed(&mut self.base.target, &clock, 21, id, bytes);
+                let TargetOutcome::Applied(r) = receipt.outcome else {
                     panic!("imported write")
                 };
-                r
+                (r, uncertain)
             }
         };
-        assert_eq!(receipt.duplicate, duplicate);
+        assert_bucket_duplicate(&receipt, id, duplicate, uncertain);
     }
     fn adoption(&mut self) -> Option<ParentGrantStatus> {
         match self.family {

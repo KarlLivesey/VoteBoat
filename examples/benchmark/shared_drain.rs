@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 //! Real shared-WAL Nodes exercising the public bounded drain coordinator.
 use super::*;
+#[path = "shared_drain/recovery.rs"]
+mod recovery;
 use voteboat::{
     drain::*,
     membership::*,
@@ -83,9 +85,11 @@ fn plan(bootstraps: &[Bootstrap]) -> MembershipDrainPlan {
 }
 impl Harness {
     fn new(protocol: NativePeerProtocol, mixed: bool) -> Self {
+        static NEXT_ROOT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         let root = std::env::temp_dir().join(format!(
-            "voteboat-multi-drain-{}-{protocol:?}-{}",
+            "voteboat-multi-drain-{}-{protocol:?}-{}-{}",
             std::process::id(),
+            NEXT_ROOT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -212,17 +216,26 @@ impl Harness {
             .collect()
     }
     fn poll(&mut self) {
+        self.poll_observed(|_, _| {});
+    }
+    fn poll_observed(&mut self, mut observe: impl FnMut(usize, &OwnerStep)) {
         let now = MonoTime(self.clock.elapsed().as_millis() as u64);
-        for n in &mut self.nodes {
-            n.poll_with_configuration_authorization(
-                now,
-                NodePollBudget::default(),
-                |core, proposal| {
-                    let g = core.state().bootstrap.group;
-                    self.authorization[&g].authorize(g, core.membership(), proposal)
-                },
-            )
-            .unwrap();
+        for (index, n) in self.nodes.iter_mut().enumerate() {
+            let progress = n
+                .poll_with_configuration_authorization(
+                    now,
+                    NodePollBudget::default(),
+                    |core, proposal| {
+                        let g = core.state().bootstrap.group;
+                        self.authorization[&g].authorize(g, core.membership(), proposal)
+                    },
+                )
+                .unwrap();
+            if let Some(replica) = progress.replica {
+                for step in &replica.steps {
+                    observe(index, step);
+                }
+            }
         }
         std::thread::park_timeout(Duration::from_millis(1));
     }
@@ -386,7 +399,21 @@ impl Harness {
 }
 enum WaitKind {
     Transfer(NodeId),
-    Configuration(ConfigurationTicket),
+    Configuration(ConfigurationWait),
+}
+struct ConfigurationWait {
+    ticket: ConfigurationTicket,
+    executed: bool,
+    completed: bool,
+}
+impl ConfigurationWait {
+    fn new(ticket: ConfigurationTicket) -> Self {
+        Self {
+            ticket,
+            executed: false,
+            completed: false,
+        }
+    }
 }
 struct Pending {
     ticket: DrainDispatchTicket,
@@ -412,7 +439,7 @@ impl Driver {
                 let at = self
                     .pending
                     .iter()
-                    .position(|p| matches!(p.kind,WaitKind::Configuration(t) if t==result.ticket))
+                    .position(|p| matches!(&p.kind,WaitKind::Configuration(wait) if wait.ticket==result.ticket))
                     .unwrap();
                 assert_eq!(self.pending[at].owner, i);
                 assert!(
@@ -426,19 +453,21 @@ impl Driver {
                     ),
                     "{result:?}"
                 );
-                self.coordinator
-                    .finish(&self.pending.remove(at).ticket)
-                    .unwrap();
+                let WaitKind::Configuration(wait) = &mut self.pending[at].kind else {
+                    unreachable!()
+                };
+                assert!(!wait.completed);
+                wait.completed = true;
             }
         }
         let mut index = 0;
         while index < self.pending.len() {
             let p = &self.pending[index];
-            let ready = match p.kind {
+            let ready = match &p.kind {
                 WaitKind::Transfer(target) => h
                     .leader(p.ticket.group())
-                    .is_some_and(|i| h.core(i, p.ticket.group()).local_node() == target),
-                WaitKind::Configuration(_) => false,
+                    .is_some_and(|i| h.core(i, p.ticket.group()).local_node() == *target),
+                WaitKind::Configuration(wait) => wait.executed && wait.completed,
             };
             if ready {
                 self.coordinator
@@ -449,8 +478,25 @@ impl Driver {
             }
         }
     }
+    fn observe(&mut self, owner: usize, step: &OwnerStep) {
+        for pending in &mut self.pending {
+            let WaitKind::Configuration(wait) = &mut pending.kind else {
+                continue;
+            };
+            if step.admission != Some(wait.ticket.admission()) {
+                continue;
+            }
+            assert_eq!(pending.owner, owner);
+            assert_eq!(step.operation, Some(wait.ticket.operation()));
+            assert!(
+                step.proposed.is_some() || step.error == Some(RaftError::NotLeader),
+                "{step:?}"
+            );
+            wait.executed = true;
+        }
+    }
     fn tick(&mut self, h: &mut Harness, partial: bool) {
-        h.poll();
+        h.poll_observed(|owner, step| self.observe(owner, step));
         self.complete(h);
         let batch = self
             .coordinator
@@ -509,7 +555,7 @@ impl Driver {
                         h.nodes[owner].cancel_configuration(ticket).unwrap();
                         self.lost = true;
                     }
-                    WaitKind::Configuration(ticket)
+                    WaitKind::Configuration(ConfigurationWait::new(ticket))
                 }
                 _ => panic!("non-dispatch action"),
             };
@@ -576,12 +622,14 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
         .membership_drain_ready(&h.plan, &h.journal)
         .unwrap()
         || !driver.pending.is_empty()
+        || !(1..=h.bootstraps.len()).all(|g| committed(&h, g, 3))
     {
         driver.tick(&mut h, false);
         assert!(
             Instant::now() < deadline,
-            "resumed drain timeout: {}",
-            h.root.display()
+            "resumed drain timeout: {}, progress: {:?}",
+            h.root.display(),
+            h.progress()
         );
     }
     for g in 1..=h.bootstraps.len() {

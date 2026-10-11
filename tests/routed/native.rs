@@ -292,6 +292,22 @@ enum ProposalFailure {
     NotLeader,
     Unknown(ClientUnknown),
 }
+fn assert_bucket_duplicate(
+    receipt: &voteboat::bucket_counter::BucketReceipt,
+    operation: u128,
+    duplicate: bool,
+    uncertain: bool,
+) {
+    assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
+    if duplicate {
+        assert!(receipt.duplicate, "required original retry");
+    } else {
+        assert!(
+            !receipt.duplicate || uncertain,
+            "unexplained fresh duplicate"
+        );
+    }
+}
 // Only an accepted unknown outcome can explain a duplicate first observation.
 fn propose_recovering_observed<A>(
     nodes: &mut [Node<A>],

@@ -1,0 +1,34 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice285/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.77s
+     Running tests/routed.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/routed-653534aeca8f938d)
+
+running 2 tests
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (953756) panicked at tests/routed/native.rs:305:9:
+unexplained fresh duplicate
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (953756) panicked at tests/routed/native.rs:303:9:
+required original retry
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (953756) panicked at tests/routed/native.rs:305:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry' (953756) panicked at tests/routed/native.rs:303:9:
+required original retry
+test native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (953757) panicked at tests/routed/native.rs:305:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (953757) panicked at tests/routed/native.rs:303:9:
+required original retry
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (953757) panicked at tests/routed/native.rs:305:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (953757) panicked at tests/routed/native.rs:303:9:
+required original retry
+test native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 183 filtered out; finished in 1.48s

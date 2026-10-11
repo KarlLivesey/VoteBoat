@@ -1,0 +1,81 @@
+diff --git a/tests/routed/delegation_repeat.rs b/tests/routed/delegation_repeat.rs
+index 0595b2a..eaf78c1 100644
+--- a/tests/routed/delegation_repeat.rs
++++ b/tests/routed/delegation_repeat.rs
+@@ -591,3 +591,3 @@ impl Moves {
+-        let TargetOutcome::Applied(r) =
+-            propose_recovering(self.nodes(g), &clock, g, operation, data(m, key, delta)).outcome
+-        else {
++        let (receipt, uncertain) =
++            propose_recovering_observed(self.nodes(g), &clock, g, operation, data(m, key, delta));
++        let TargetOutcome::Applied(r) = receipt.outcome else {
+@@ -597 +597 @@ impl Moves {
+-        assert_eq!(r.duplicate, duplicate);
++        assert_bucket_duplicate(&r, operation, duplicate, uncertain);
+diff --git a/tests/routed/metadata_endpoint_discovery.rs b/tests/routed/metadata_endpoint_discovery.rs
+index d8e271f..70e805a 100644
+--- a/tests/routed/metadata_endpoint_discovery.rs
++++ b/tests/routed/metadata_endpoint_discovery.rs
+@@ -79 +78,0 @@ fn assert_write(
+-    assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
+@@ -84,8 +83 @@ fn assert_write(
+-    if duplicate {
+-        assert!(receipt.duplicate, "required original retry");
+-    } else {
+-        assert!(
+-            !receipt.duplicate || uncertain,
+-            "unexplained fresh duplicate"
+-        );
+-    }
++    assert_bucket_duplicate(receipt, operation, duplicate, uncertain);
+diff --git a/tests/routed/native.rs b/tests/routed/native.rs
+index 8942b3e..ec49b673 100644
+--- a/tests/routed/native.rs
++++ b/tests/routed/native.rs
+@@ -294,0 +295,16 @@ enum ProposalFailure {
++fn assert_bucket_duplicate(
++    receipt: &voteboat::bucket_counter::BucketReceipt,
++    operation: u128,
++    duplicate: bool,
++    uncertain: bool,
++) {
++    assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
++    if duplicate {
++        assert!(receipt.duplicate, "required original retry");
++    } else {
++        assert!(
++            !receipt.duplicate || uncertain,
++            "unexplained fresh duplicate"
++        );
++    }
++}
+diff --git a/tests/routed/retained_parent.rs b/tests/routed/retained_parent.rs
+index 1ab1d84..ef81df9 100644
+--- a/tests/routed/retained_parent.rs
++++ b/tests/routed/retained_parent.rs
+@@ -293 +293 @@ impl Moves {
+-        let receipt = match self.family {
++        let (receipt, uncertain) = match self.family {
+@@ -296,3 +296,3 @@ impl Moves {
+-                let RoutedOutcome::Applied(r) =
+-                    propose_recovering(&mut self.base.source, &clock, 20, id, bytes).outcome
+-                else {
++                let (receipt, uncertain) =
++                    propose_recovering_observed(&mut self.base.source, &clock, 20, id, bytes);
++                let RoutedOutcome::Applied(r) = receipt.outcome else {
+@@ -301 +301 @@ impl Moves {
+-                r
++                (r, uncertain)
+@@ -305,3 +305,3 @@ impl Moves {
+-                let TargetOutcome::Applied(r) =
+-                    propose_recovering(&mut self.base.target, &clock, 21, id, bytes).outcome
+-                else {
++                let (receipt, uncertain) =
++                    propose_recovering_observed(&mut self.base.target, &clock, 21, id, bytes);
++                let TargetOutcome::Applied(r) = receipt.outcome else {
+@@ -310 +310 @@ impl Moves {
+-                r
++                (r, uncertain)
+@@ -313 +313 @@ impl Moves {
+-        assert_eq!(receipt.duplicate, duplicate);
++        assert_bucket_duplicate(&receipt, id, duplicate, uncertain);

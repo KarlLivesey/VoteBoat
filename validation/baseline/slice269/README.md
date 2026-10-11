@@ -15,11 +15,14 @@ cargo +stable test --locked --offline --all-features --test routed native::deleg
 record is zero. The source manifest binds this older image independently of the
 current main branch. Raw and normalized artifact hashes are retained in linux/.
 
-The matching Mac run is still active and has reported an imported-partial
-checkpoint equality failure, an endpoint-write duplicate mismatch and an
-imported-retirement progress timeout. Exact terminal qualification remains
-pending; the checkpoint case is being checked on separate source273. This is Linux-only
-qualification, not completed two-platform lifecycle acceptance. Older Mac262
+The matching Mac run is terminal:62 passed/7 failed, exit101, in11334.05s.
+Its662-input start/terminal guards verify and match Linux's original manifest.
+Failures are imported-partial checkpoint equality, endpoint-write duplicate,
+three imported-retirement progress assertions, repeated-move duplicate and
+retained-parent duplicate. Corrections273/274/285 and diagnostics275 retain
+their separate sources; the current corrected family285 is still running.
+This is Linux-only qualification of this older image, not completed two-platform
+lifecycle acceptance. [Mac terminal evidence](mac/README.md). Older Mac262
 and [terminal Mac251](../slice251/mac/README.md) retain their own source images
 and failure obligations; their
 failures must not be attributed to this corrected image. Later codec fixes270/271

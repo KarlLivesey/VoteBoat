@@ -1,5 +1,14 @@
 # Baseline acceptance map
 
+Shared-WAL coordinator cancellation recovery: [slice286](../validation/baseline/slice286/README.md).
+Linux/macOS pass9 related drain executions each with strict zero and669 verified
+inputs. Actual queued execution and public completion are both required before
+releasing a cancelled dispatch; local readiness does not substitute for the
+existing exact remote commitment check. The public CLI runner is a separate
+qualification. Focused285 receipt-loss checks pass3 per host; the corrected
+full73-test lifecycle family remains live, with a Linux checkpoint read timeout
+reported. Original Mac269 is terminal62/7 on its older662 inputs.
+
 Native member failed-send recovery: [slice284](../validation/baseline/slice284/README.md).
 Linux and Apple Silicon macOS each pass complete member all50/default27 with
 zero formatting/four strict Clippy profiles and668 before/terminal source guards.

@@ -1,0 +1,215 @@
+diff --git a/examples/benchmark/shared_drain.rs b/examples/benchmark/shared_drain.rs
+index fd64df1..3b0b2fe 100644
+--- a/examples/benchmark/shared_drain.rs
++++ b/examples/benchmark/shared_drain.rs
+@@ -4,0 +5,2 @@ use super::*;
++#[path = "shared_drain/recovery.rs"]
++mod recovery;
+@@ -85,0 +88 @@ impl Harness {
++        static NEXT_ROOT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+@@ -87 +90 @@ impl Harness {
+-            "voteboat-multi-drain-{}-{protocol:?}-{}",
++            "voteboat-multi-drain-{}-{protocol:?}-{}-{}",
+@@ -88,0 +92 @@ impl Harness {
++            NEXT_ROOT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+@@ -214,0 +219,3 @@ impl Harness {
++        self.poll_observed(|_, _| {});
++    }
++    fn poll_observed(&mut self, mut observe: impl FnMut(usize, &OwnerStep)) {
+@@ -216,10 +223,16 @@ impl Harness {
+-        for n in &mut self.nodes {
+-            n.poll_with_configuration_authorization(
+-                now,
+-                NodePollBudget::default(),
+-                |core, proposal| {
+-                    let g = core.state().bootstrap.group;
+-                    self.authorization[&g].authorize(g, core.membership(), proposal)
+-                },
+-            )
+-            .unwrap();
++        for (index, n) in self.nodes.iter_mut().enumerate() {
++            let progress = n
++                .poll_with_configuration_authorization(
++                    now,
++                    NodePollBudget::default(),
++                    |core, proposal| {
++                        let g = core.state().bootstrap.group;
++                        self.authorization[&g].authorize(g, core.membership(), proposal)
++                    },
++                )
++                .unwrap();
++            if let Some(replica) = progress.replica {
++                for step in &replica.steps {
++                    observe(index, step);
++                }
++            }
+@@ -389 +402,15 @@ enum WaitKind {
+-    Configuration(ConfigurationTicket),
++    Configuration(ConfigurationWait),
++}
++struct ConfigurationWait {
++    ticket: ConfigurationTicket,
++    executed: bool,
++    completed: bool,
++}
++impl ConfigurationWait {
++    fn new(ticket: ConfigurationTicket) -> Self {
++        Self {
++            ticket,
++            executed: false,
++            completed: false,
++        }
++    }
+@@ -415 +442 @@ impl Driver {
+-                    .position(|p| matches!(p.kind,WaitKind::Configuration(t) if t==result.ticket))
++                    .position(|p| matches!(&p.kind,WaitKind::Configuration(wait) if wait.ticket==result.ticket))
+@@ -429,3 +456,5 @@ impl Driver {
+-                self.coordinator
+-                    .finish(&self.pending.remove(at).ticket)
+-                    .unwrap();
++                let WaitKind::Configuration(wait) = &mut self.pending[at].kind else {
++                    unreachable!()
++                };
++                assert!(!wait.completed);
++                wait.completed = true;
+@@ -437 +466 @@ impl Driver {
+-            let ready = match p.kind {
++            let ready = match &p.kind {
+@@ -440,2 +469,2 @@ impl Driver {
+-                    .is_some_and(|i| h.core(i, p.ticket.group()).local_node() == target),
+-                WaitKind::Configuration(_) => false,
++                    .is_some_and(|i| h.core(i, p.ticket.group()).local_node() == *target),
++                WaitKind::Configuration(wait) => wait.executed && wait.completed,
+@@ -451,0 +481,17 @@ impl Driver {
++    fn observe(&mut self, owner: usize, step: &OwnerStep) {
++        for pending in &mut self.pending {
++            let WaitKind::Configuration(wait) = &mut pending.kind else {
++                continue;
++            };
++            if step.admission != Some(wait.ticket.admission()) {
++                continue;
++            }
++            assert_eq!(pending.owner, owner);
++            assert_eq!(step.operation, Some(wait.ticket.operation()));
++            assert!(
++                step.proposed.is_some() || step.error == Some(RaftError::NotLeader),
++                "{step:?}"
++            );
++            wait.executed = true;
++        }
++    }
+@@ -453 +499 @@ impl Driver {
+-        h.poll();
++        h.poll_observed(|owner, step| self.observe(owner, step));
+@@ -512 +558 @@ impl Driver {
+-                    WaitKind::Configuration(ticket)
++                    WaitKind::Configuration(ConfigurationWait::new(ticket))
+@@ -578,0 +625 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
++        || !(1..=h.bootstraps.len()).all(|g| committed(&h, g, 3))
+@@ -583,2 +630,3 @@ fn history(protocol: NativePeerProtocol, mixed: bool) {
+-            "resumed drain timeout: {}",
+-            h.root.display()
++            "resumed drain timeout: {}, progress: {:?}",
++            h.root.display(),
++            h.progress()
+diff --git a/examples/benchmark/shared_drain/recovery.rs b/examples/benchmark/shared_drain/recovery.rs
+new file mode 100644
+index 0000000..7cc14d0
+--- /dev/null
++++ b/examples/benchmark/shared_drain/recovery.rs
+@@ -0,0 +1,95 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++fn history(protocol: NativePeerProtocol) {
++    let mut h = Harness::new(protocol, false);
++    h.nodes[1]
++        .control(group_id(1), NodeControl::Campaign)
++        .unwrap();
++    h.wait(|h| h.leader(group_id(1)) == Some(1));
++    let mut driver = Driver::new(h.plan.clone());
++    let mut batch = driver
++        .coordinator
++        .poll(&h.journal, 1, |g| (g == group_id(1)).then(|| h.core(1, g)))
++        .unwrap();
++    assert!(batch.errors.is_empty());
++    assert_eq!(batch.requests.len(), 1);
++    let dispatch = batch.requests.pop().unwrap();
++    let MembershipDrainAction::Configure(record) = dispatch.action else {
++        panic!("original Joint dispatch")
++    };
++    assert_eq!(record, h.plan.groups()[0].change.joint);
++    let requirements = h.nodes[1].local().applications[&group_id(1)]
++        .deployment_requirements()
++        .unwrap();
++    let ticket = h.nodes[1]
++        .configure(ConfigurationRequest {
++            group: group_id(1),
++            proposal: ConfigurationProposal {
++                record,
++                requirements,
++                readiness: vec![],
++            },
++        })
++        .unwrap();
++    h.nodes[1].cancel_configuration(ticket).unwrap();
++    driver.pending.push(Pending {
++        ticket: dispatch.ticket,
++        owner: 1,
++        kind: WaitKind::Configuration(ConfigurationWait::new(ticket)),
++    });
++    driver.complete(&mut h);
++    assert_eq!(h.core(1, group_id(1)).membership().id().get(), 1);
++    assert!(!h.core(1, group_id(1)).has_pending_dependency());
++    assert_eq!(
++        driver.pending.len(),
++        1,
++        "cancelled wait is still queued work"
++    );
++    assert_eq!(driver.coordinator.in_flight(), 1);
++    let batch = driver
++        .coordinator
++        .poll(&h.journal, 1, |g| (g == group_id(1)).then(|| h.core(1, g)))
++        .unwrap();
++    assert!(batch.errors.is_empty() && batch.requests.is_empty());
++    let deadline = Instant::now() + Duration::from_secs(25);
++    while !h.nodes[0]
++        .membership_drain_ready(&h.plan, &h.journal)
++        .unwrap()
++        || !driver.pending.is_empty()
++        || !(1..=3).all(|g| committed(&h, g, 3))
++    {
++        driver.tick(&mut h, false);
++        assert!(
++            Instant::now() < deadline,
++            "queued cancellation recovery: {:?}",
++            h.progress()
++        );
++    }
++    assert!((1..=3).all(|g| committed(&h, g, 3)));
++    h.reopen();
++    h.wait(|h| {
++        h.nodes[0]
++            .membership_drain_ready(&h.plan, &h.journal)
++            .unwrap()
++            && (1..=3).all(|g| committed(h, g, 3))
++    });
++    assert!((1..=3).all(|g| committed(&h, g, 3)));
++    for g in 1..=3 {
++        h.write(group_id(g), 100 + g as u128, 7, true, 7);
++    }
++    close(std::mem::take(&mut h.nodes), &h.clock).unwrap();
++    std::fs::remove_dir_all(&h.root).unwrap();
++}
++
++#[test]
++fn tcp_cancelled_wait_retains_queued_owner_admission() {
++    history(NativePeerProtocol::TcpTls);
++}
++
++#[cfg(feature = "quic")]
++#[test]
++fn quic_cancelled_wait_retains_queued_owner_admission() {
++    history(NativePeerProtocol::Quic);
++}

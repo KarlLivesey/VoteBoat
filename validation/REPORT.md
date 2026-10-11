@@ -6572,3 +6572,18 @@ No production API, storage format, deadline or transport budget changes.
 Failed282/283 and original276 are retained independently; old compacted-Joint
 ingress remains unreproduced. Broader lifecycle/provider/platform and full
 P0–P7 remain open. See [284](baseline/slice284/README.md).
+
+Checkpoint286 qualifies the shared-WAL example drain driver on Linux/macOS:
+six/all and three/default pass on each, with four strict builds and formatting
+zero and669 before/terminal input guards. The driver retains cancelled queued
+work until exact owner execution and public completion; its existing deadline
+now includes the already-required all-replica Final check. Real cold retry and
+cleanup remain. Before/initial/intermediate failures are retained separately.
+This does not qualify every authenticated runner. See [286](baseline/slice286/README.md).
+
+Lifecycle285's actual unknown/replayed first-receipt regression passes2/all and
+1/default per host, strict zero and668 guards. Its corrected full73-test family
+is still running on both platforms; Linux has reported a QUIC checkpoint read
+progress timeout. Original Mac269 is terminal62/7 on its older662-input image,
+with exact matching Linux/start/terminal guards. Full lifecycle and P0–P7 stay
+open. See [285](baseline/slice285/README.md) and [Mac269](baseline/slice269/mac/README.md).

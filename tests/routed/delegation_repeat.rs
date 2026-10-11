@@ -588,13 +588,13 @@ impl Moves {
     ) {
         let clock = self.base.clock;
         campaign(self.nodes(g), &clock, g);
-        let TargetOutcome::Applied(r) =
-            propose_recovering(self.nodes(g), &clock, g, operation, data(m, key, delta)).outcome
-        else {
+        let (receipt, uncertain) =
+            propose_recovering_observed(self.nodes(g), &clock, g, operation, data(m, key, delta));
+        let TargetOutcome::Applied(r) = receipt.outcome else {
             panic!("write")
         };
         assert_eq!(r.outcome, BucketOutcome::Value(value));
-        assert_eq!(r.duplicate, duplicate);
+        assert_bucket_duplicate(&r, operation, duplicate, uncertain);
     }
 }
 fn interrupted(protocol: NativePeerProtocol, checkpoint: bool) {

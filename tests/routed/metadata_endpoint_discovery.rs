@@ -76,19 +76,11 @@ fn assert_write(
     let RoutedOutcome::Applied(receipt) = &routed.outcome else {
         panic!("{routed:?}")
     };
-    assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
     assert_eq!(
         receipt.outcome,
         voteboat::bucket_counter::BucketOutcome::Value(expected)
     );
-    if duplicate {
-        assert!(receipt.duplicate, "required original retry");
-    } else {
-        assert!(
-            !receipt.duplicate || uncertain,
-            "unexplained fresh duplicate"
-        );
-    }
+    assert_bucket_duplicate(receipt, operation, duplicate, uncertain);
 }
 fn refresh(
     env: &Environment<'_>,

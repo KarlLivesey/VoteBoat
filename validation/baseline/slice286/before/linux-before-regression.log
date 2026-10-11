@@ -1,0 +1,28 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.97s
+     Running unittests examples/native_benchmark.rs (target/debug/examples/native_benchmark-d9d4fa436bde7d93)
+
+running 2 tests
+
+thread 'shared::drain::recovery::tcp_cancelled_wait_retains_queued_owner_admission' (1061513) panicked at examples/benchmark/shared_drain/recovery.rs:45:5:
+assertion `left == right` failed: cancelled wait is still queued work
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test shared::drain::recovery::tcp_cancelled_wait_retains_queued_owner_admission ... FAILED
+
+thread 'shared::drain::recovery::quic_cancelled_wait_retains_queued_owner_admission' (1061512) panicked at examples/benchmark/shared_drain/recovery.rs:45:5:
+assertion `left == right` failed: cancelled wait is still queued work
+  left: 0
+ right: 1
+test shared::drain::recovery::quic_cancelled_wait_retains_queued_owner_admission ... FAILED
+
+failures:
+
+failures:
+    shared::drain::recovery::quic_cancelled_wait_retains_queued_owner_admission
+    shared::drain::recovery::tcp_cancelled_wait_retains_queued_owner_admission
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `--example native_benchmark`

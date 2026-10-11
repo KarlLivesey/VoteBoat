@@ -122,8 +122,8 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Retained terminal262, still-running269, accepted273/274/281/284, plus the open retirement progress evidence. Freeze source before execution. | Classify exact terminal failures and run the corrected complete lifecycle family on both hosts, retaining original phase cuts, source guards and strict checks. Selected passes do not explain unreproduced older timeouts. |
-| Next: configuration admission recovery diagnosis | Advance P4 usable membership administration on Mac/Linux. | Original Mac251 native_benchmark admission-journal failure and the actual queued-original/retry refusal reproduced279/280. Exact retained-record checking is private fixture evidence, not qualification of the executable driver. | Establish the executable driver's actual trigger/current durable state; any fix must preserve bounded admission, original operation/content, normal authorization, commitment/restart/owned cleanup and two-platform checks. |
+| Current: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Terminal262 and269, accepted273/274/281/284/286 and focused285, plus open retirement progress evidence. Frozen corrected family285 is live on both hosts. | Classify exact failures and complete all73/default family matrices, retaining original phase cuts, source guards and strict checks. Linux has reported a checkpoint split read timeout; selected passes do not explain unreproduced older timeouts. |
+| Next: public membership runner recovery qualification | Advance P4 usable administration on Mac/Linux. | Original Mac251 admission-journal failures and accepted286 example/public coordinator correction; authenticated single/multi-group runner contracts and existing original-ID status/resume paths. | Check the public runner's cancellation/unknown/queued-owner boundary separately; any change must preserve bounded admission, original operation/content, real status/commit/restart and owned cleanup. Private example acceptance alone does not qualify a CLI workflow. |
 | Following: baseline functional exit review | Identify the next complete user-visible feature path for P0–P6. | Current lifecycle and executable recovery evidence, component contracts and the acceptance map; performance/security remain later. | Separate implemented-but-unqualified behavior from absent features, select the smallest complete remaining feature path and record its API/state/restart acceptance before editing. Do not substitute a selected pass count for feature completion. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
@@ -27060,3 +27060,123 @@ member qualification advance; next is full corrected P5/P6 lifecycle then P4
 executable admission recovery. Full P0–P7 and older unexplained events remain
 active, with performance/security later. Evidence:284, failed282/283; terminal
 276 now accurately records Linux190/0 and Mac187/3 with full source guards.
+
+285 schema before lifecycle correction: prior284 is accepted/pushed eb0ffb9,
+with77 member executions and zero strict builds per host. Original Mac269 PID42543
+is still live on its older662-input image; its current log additionally reports
+QUIC repeated-move WAL and QUIC retained-parent checkpoint duplicate=true versus
+expected=false. Both write callers discard propose_recovering_observed's actual
+accepted-unknown flag by using propose_recovering, unlike corrected endpoint274.
+Keep the original operation, bytes, outcome/value, required duplicate retries,
+exact persisted state, outbox cardinality, no-dual-owner phase cuts and cleanup.
+Carry the actual flag through these two existing write paths. Extract endpoint's
+existing operation/duplicate assertion into one private shared BucketReceipt
+assertion so retained-source, transferred-target and endpoint writes obey the
+same rule: a required retry must be duplicate; a fresh duplicate needs an actual
+accepted Unknown(LeadershipChanged), never merely NotLeader. This shared helper
+is needed to avoid divergent acceptance rules for the same receipt contract;
+no production API, durability, deadline, capacity or refusal rule changes.
+The existing endpoint274 native regression already forces an actual queued/WAL
+unknown, checks original commitment, replayed first-application fresh receipt,
+exact value/outbox and rejects missing required retries; rerun it against the
+shared assertion before broader affected families. Then run repeated movement
+and retained/imported parent movement WAL/checkpoint TCP/QUIC on frozen source,
+with four strict profiles and source guards on both platforms. Old262/269 logs
+remain independent. The current P5/P6 lifecycle milestone advances; next is
+executable configuration admission, following baseline functional exit review.
+
+286 schema before executable-driver regression:285's actual unknown-receipt
+regressions pass on Linux; its corrected full lifecycle family is running on
+separate frozen Linux/Mac images. Proceed independently to the next planned P4
+item. Original Mac251 benchmark drain failures are operation201/ticket2 with
+NotProposed TransportCapacity(Wire InvalidMessage(configuration admission
+journal)). The shared-WAL example Driver immediately finishes a coordinator
+dispatch on CancelledWait although cancellation only ends observation and its
+owner admission remains queued. Plan.next already waits on actual core pending
+durability, but queued-not-executed work is not a core dependency yet. Add a
+controlled native regression first: obtain the real group1 dispatch, admit its
+original Joint, cancel before any owner poll, consume the actual cancelled wait,
+and require the coordinator slot stay owned until that exact admission executes.
+The original Driver should fail this assertion. Then track both actual owner
+execution and public completion in the existing pending configuration record.
+Harness.poll_observed must expose normal public NodeProgress OwnerSteps to that
+private example driver while preserving its authorization, worker progress and
+budgets. Match exact full AdmissionTicket, operation and owner; release only
+when both observations exist. No new production API or capacity/error waiver.
+The regression must then finish the original multi-group plan, require exact
+all-replica final commitment, cold shared-WAL retry/data and owned cleanup over
+TCP/QUIC. Run original four drain histories plus this controlled regression on
+both hosts, with strict builds and source guards; do not declare public service
+admission qualified from a private fixture alone. P4 host/coordinator composition
+advances; full P5/P6 checks continue independently and baseline exit review stays
+next. Original251 remains independent of these frozen source images.
+
+286 pre-fix acceptance contradiction: both controlled Linux TCP/QUIC histories
+fail0/2 at the required retained pending slot immediately after the real cancelled
+wait is consumed, before any owner poll. Before669-input image/terminal guards
+are retained. Correct the actual Driver with executed/completed flags; match the
+full public ticket and operation in actual OwnerStep. Only real proposal or
+known NotLeader execution refusal can finish the cancelled work; other execution
+errors including capacity/journal remain fatal. Native initial directory names
+also add an atomic sequence, preventing the clock-only collision pattern already
+observed on Mac282 when these new histories run concurrently. That is fixture
+ownership, not an inferred fix for the original admission failure. Normal polls,
+configuration authorization, coordinator limit2, deadlines and shared-WAL recovery
+remain. Driver release now requires public completion and execution independently.
+
+286 focused follow-up: the corrected Driver retains the real cancelled queued
+admission and completes the original plan. Linux's four original drain histories
+pass; both new all-feature regressions and the default regression then fail an
+immediate cold readiness assertion after reopen. The public readiness contract
+also requires owned-work quiescence: restore_drain queues suppression gates, so
+reopen is not synchronous readiness. Replace that immediate assertion with the
+existing20s bounded native wait for the same readiness predicate, preserving exact
+all-replica committed Final and original cold data/retry checks. Driver, budgets
+and production remain unchanged. Preserve this initial image/matrix separately,
+then freeze final286 and run the complete six/all three/default drain family on
+both hosts plus zero strict builds. This is the observed asynchronous cleanup
+boundary, not an admission-error allowance or a deadline extension.
+
+286 second observed boundary: initial Mac all2 pass/4 fail and default1 pass/2
+fail. Besides the immediate new cold readiness checks, existing histories fail
+the subsequent all-replica Final assertion. Their loop waits only for local
+source membership_drain_ready and empty driver pending slots. The public contract
+explicitly makes readiness local durable/quiescent evidence, not current remote
+availability; coordinator completion may precede another replica's commit
+notification. The required all-replica predicate must be in the same resumed
+25s loop before asserting it, rather than assumed from local readiness. Add it
+to the original loop and controlled regression's loop without changing either
+25s deadline. The cold20s wait also includes the already-required exact all3
+Final predicate. Include actual progress in timeout messages. Keep local source
+readiness, original remote commitment, retries, source shutdown and cleanup.
+Final286 Linux already passes9/0; its matching frozen Mac run remains separate.
+Do not infer that passing source diagnosed an older failing event. Freeze the
+complete-predicate image independently and accept only its9-history two-platform
+matrix with strict zero and source guards. No production/core API change.
+
+285 focused terminal acceptance: actual endpoint unknown/replay/cold retry
+regressions pass2/all and1/default per host, three executions each. Formatting/
+four strict profiles are zero;668 before/after-regression inputs verify.
+The shared assertion is used by the two affected parent/repeated-target callers
+without treating mere NotLeader as accepted uncertainty. Full corrected family
+is73 all-feature tests on separate frozen Linux/Mac images, followed by default;
+both runs remain active. Linux has reported a QUIC checkpoint split read-progress
+timeout at native.rs514 with actual core/resource diagnostics. No full family
+acceptance is claimed. Original Mac269 is now terminal62/7, exit101,11334.05s;
+its662-input guards verify and match the retained Linux manifest. Those failures
+remain source-bound, including the two duplicate callers being checked285.
+
+286 final acceptance: the complete related shared-WAL drain family passes6/all
+and3/default on each host,9 executions each. Actual queued cancellation first
+fails0/2 on Linux before the Driver correction; original admission then remains
+owned until execution/completion, with exact all-replica Final and actual native
+cold original retry afterward. Initial source fails Linux6/3 and Mac3/6 over9;
+the cold-wait image passes Linux9/0 and Mac7/2; final exact-predicate image passes
+9/0 per host. Formatting/four strict profiles are zero and all669 inputs verify
+before/terminal. Existing25s phase deadlines and20s cold native wait remain.
+No production core/API/format/capacity changes or journal-error waiver. These
+are example-driver/public contract composition checks, not qualification of
+all authenticated CLI runners. Macro review: P4 shared Multi-Raft host drain
+recovery advances while P5/P6 corrected family285 continues. Next is reviewing
+the corresponding public runner boundary, then the baseline functional exits;
+performance/security remain later, and full P0–P7 stays active. Evidence:286.
