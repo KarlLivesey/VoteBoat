@@ -98,6 +98,20 @@ pub struct PeerRosterUsage {
     pub connecting: usize,
     pub reserved_bytes: usize,
 }
+/// Bounded snapshot for one known peer. This grants no receive/send ownership,
+/// connection authority or permission to remove retained work.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct PeerDrainStatus {
+    pub peer: PeerIdentity,
+    pub closed: bool,
+    pub fenced: bool,
+    pub authorized: bool,
+    pub retiring: bool,
+    pub attempt: Option<ConnectTicket>,
+    pub binding: Option<SessionBinding>,
+    pub accepted: Option<SendTicket>,
+    pub transport: Option<TransportDrainStatus>,
+}
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PeerPoll {
     Progress {
@@ -498,6 +512,20 @@ impl<P: PeerTransport> PeerRoster<P> {
                 .peers
                 .values()
                 .all(|p| p.attempt.is_none() && p.transport.is_none())
+    }
+    pub fn drain_status(&mut self, peer: NodeId) -> Option<PeerDrainStatus> {
+        let p = self.peers.get_mut(&peer)?;
+        Some(PeerDrainStatus {
+            peer: p.identity,
+            closed: self.closed,
+            fenced: self.fenced,
+            authorized: p.authorized,
+            retiring: p.retiring,
+            attempt: p.attempt.as_ref().map(|a| a.ticket),
+            binding: p.binding,
+            accepted: p.accepted,
+            transport: p.transport.as_mut().map(PeerTransport::drain_status),
+        })
     }
     /// After complete shutdown, hand off the next unused generation to a
     /// replacement roster. Concurrent rosters need disjoint host-reserved ranges.

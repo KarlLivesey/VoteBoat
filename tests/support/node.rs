@@ -2043,3 +2043,50 @@ fn transport_capacity_cases(
         ),
     ]
 }
+
+#[test]
+fn node_drain_inspection_keeps_owner_and_peer_progress_under_the_original_driver() {
+    let mut local = boat(parts(1, false));
+    assert!(local.peer_drain_status(node(2)).is_none());
+    let mut node_with_peers = boat(parts(3, true));
+    let core = node_with_peers
+        .local()
+        .owner
+        .core(group(1))
+        .unwrap()
+        .state()
+        .clone();
+    let usage = node_with_peers.peers().unwrap().usage();
+    for _ in 0..3 {
+        let status = node_with_peers.peer_drain_status(node(2)).unwrap();
+        assert_eq!(status.peer.node, node(2));
+        assert!(!status.closed);
+        assert!(status.transport.is_none());
+        assert!(status.attempt.is_none());
+        assert_eq!(node_with_peers.peers().unwrap().usage(), usage);
+        assert_eq!(
+            *node_with_peers
+                .local()
+                .owner
+                .core(group(1))
+                .unwrap()
+                .state(),
+            core
+        );
+    }
+    assert!(node_with_peers.peer_drain_status(node(99)).is_none());
+    node_with_peers.begin_shutdown();
+    for time in 0..10 {
+        node_with_peers
+            .poll(MonoTime(time), NodePollBudget::default())
+            .unwrap();
+        if node_with_peers.is_drained() {
+            break;
+        }
+    }
+    assert!(node_with_peers.is_drained());
+    let status = node_with_peers.peer_drain_status(node(2)).unwrap();
+    assert!(status.closed);
+    assert!(status.transport.is_none());
+    assert!(node_with_peers.is_drained());
+}

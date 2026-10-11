@@ -1,0 +1,14 @@
+fmt=0
+clippy_all=0
+clippy_default=0
+clippy_core=0
+clippy_native=0
+contracts_all=0
+wrappers_all=0
+contracts_default=0
+wrappers_default=0
+contracts_core=0
+wrappers_core=0
+contracts_native=0
+wrappers_native=0
+original_history=0

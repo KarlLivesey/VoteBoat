@@ -73,6 +73,7 @@
         "failure",
         "local",
         "peers",
+        "peer_drain_status",
         "replica_usage",
         "propose",
         "read",
@@ -152,6 +153,7 @@
         "limits",
         "usage",
         "roster",
+        "peer_drain_status",
         "ingress",
         "connector_usage",
         "next_deadline",
@@ -950,6 +952,7 @@
         "read_plaintext",
         "write_plaintext",
         "is_flushed",
+        "drain_status",
         "close",
         "revoke"
       ],
@@ -957,9 +960,11 @@
       "conformance": [
         "tests/secure.rs",
         "tests/quic.rs",
-        "tests/quic/chunk_progress.rs"
+        "tests/quic/chunk_progress.rs",
+        "tests/quic/closing_timer.rs",
+        "tests/native/drain_status.rs"
       ],
-      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1–4 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport."
+      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1–4 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport. Slice295 adds non-owning drain_status with unsupported protocol fields absent by default, exact Box/GuardedSession forwarding, and native QUIC original timer/close/drained state. Inspection never supplies send completion or permission to drop work."
     },
     {
       "design_id": "C06",
@@ -975,12 +980,14 @@
         "take_send",
         "received_info",
         "take_received",
+        "drain_status",
         "close",
         "abort"
       ],
       "native": "NativePeerTransport<S: SecureSession, C: WireCodec>",
       "conformance": [
         "tests/native/poll_progress.rs",
+        "tests/native/drain_status.rs",
         "tests/quic/frame_progress.rs",
         "tests/native/shared_contract.rs",
         "tests/transport.rs",
@@ -989,7 +996,7 @@
         "tests/effect_owner.rs",
         "tests/native/shared_lifetimes.rs"
       ],
-      "scope": "Contract 2 exact receive metadata and authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; bounded decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice163 composes two connections sharing admission and buffer providers, using one generic history for independent downstream and native admission/buffer implementations; both still use NativePeerTransport. Partial I/O, protected control progress, abort versus unconsumed completion credits, stale replacement-generation rejection, sibling resumption and final exact release are checked. Host sessions are test attestations, not additional cryptographic evidence. Slice218 separately reviews all twelve PeerTransport operations through shared selected histories against an independent logical-frame Host transport and NativePeerTransport over controlled HostSessions. Three groups per original ticket, partial bytes, held flush, immutable receive ordering, terminal slots, zero/finite/invalid budgets, close/abort and original versus replacement queue ownership are checked. An intentionally early completion is detected. This is a partial public-contract review, not independent encrypted framing, OS scheduling or a macOS liveness correction. Slice219 advances plaintext-triggered session output/credit within the original whole-visit I/O budget by using one remaining-budget follow-through poll. Independent buffered HostSession checks cover zero/exhausted budgets, exact summed progress, overreports on either call and failure preserving original tickets plus validated input. Actual default-limit three-group QUIC frames fail the selected coarse-cadence completion profile before correction and pass afterward; no stream/ACK/timer or public ownership contract is relaxed. This finite virtual-cadence evidence does not establish macOS responsiveness or the P7 fixed-latency gate."
+      "scope": "Contract 2 exact receive metadata and authenticated connection-level multiplexed frames, bounded prefix-first receive allocation, one pending/terminal send and one decoded receive, separate channel/plaintext poll budgets and original outbound-batch ownership until buffer release. Explicit security capability and boxed provider forwarding. Partial I/O, backpressure, failure and close tests. Real three-node/100-group TCP/TLS plus actual-WAL worker/restart history now traverses PeerRoster, including quiescent reconnection. NativePeerConnector now provides bounded listener/dial/TLS establishment; bounded decoded ingress now uses IngressRouter; ClientRouter supplies proposal/result ownership; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice163 composes two connections sharing admission and buffer providers, using one generic history for independent downstream and native admission/buffer implementations; both still use NativePeerTransport. Partial I/O, protected control progress, abort versus unconsumed completion credits, stale replacement-generation rejection, sibling resumption and final exact release are checked. Host sessions are test attestations, not additional cryptographic evidence. Slice218 separately reviews all twelve PeerTransport operations through shared selected histories against an independent logical-frame Host transport and NativePeerTransport over controlled HostSessions. Three groups per original ticket, partial bytes, held flush, immutable receive ordering, terminal slots, zero/finite/invalid budgets, close/abort and original versus replacement queue ownership are checked. An intentionally early completion is detected. This is a partial public-contract review, not independent encrypted framing, OS scheduling or a macOS liveness correction. Slice219 advances plaintext-triggered session output/credit within the original whole-visit I/O budget by using one remaining-budget follow-through poll. Independent buffered HostSession checks cover zero/exhausted budgets, exact summed progress, overreports on either call and failure preserving original tickets plus validated input. Actual default-limit three-group QUIC frames fail the selected coarse-cadence completion profile before correction and pass afterward; no stream/ACK/timer or public ownership contract is relaxed. This finite virtual-cadence evidence does not establish macOS responsiveness or the P7 fixed-latency gate. Slice295 adds non-owning drain_status with compatibility defaults, exact boxed forwarding and native frame/session ownership inspection; Node/PeerDriver/PeerRoster expose bounded single-peer observation without polling or release authority."
     },
     {
       "design_id": "C06/C15",
@@ -999,6 +1006,7 @@
         "local",
         "usage",
         "binding",
+        "drain_status",
         "received_info",
         "next_deadline",
         "attempt_deadline",

@@ -965,3 +965,59 @@ fn assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_withou
         Err(PeerRosterError::Closed)
     );
 }
+
+#[test]
+fn drain_inspection_retains_original_roster_ticket_through_close_and_retirement() {
+    let mut roster = roster(limits());
+    assert!(roster.drain_status(node(99)).is_none());
+    let connect = roster.due_connections(MonoTime(0), 1).unwrap()[0];
+    assert_eq!(
+        roster.drain_status(connect.peer.node).unwrap().attempt,
+        Some(connect)
+    );
+    let host = Host::new(connect, 1);
+    let control = host.control.clone();
+    control.lock().unwrap().blocked = true;
+    roster.attach(connect, host, MonoTime(0)).unwrap();
+    let mut queue = queue();
+    let send = send(&mut queue, connect.peer.node);
+    let ticket = send.ticket;
+    roster.submit(send).unwrap();
+    roster.close();
+    let usage = roster.usage();
+    for _ in 0..3 {
+        let status = roster.drain_status(connect.peer.node).unwrap();
+        assert!(status.closed);
+        assert!(!status.fenced);
+        assert!(!status.retiring);
+        assert_eq!(status.accepted, Some(ticket));
+        let transport = status.transport.unwrap();
+        assert_eq!(status.binding, Some(transport.binding));
+        assert_eq!(transport.state, TransportState::Draining);
+        assert!(transport.usage.sending);
+        assert!(transport.session.is_none());
+        assert_eq!(roster.usage(), usage);
+        assert_eq!(queue.usage().batches, 1);
+        assert_eq!(control.lock().unwrap().polls, 0);
+    }
+    control.lock().unwrap().fail = true;
+    roster
+        .poll(MonoTime(1), 1, TransportPollBudget::default())
+        .unwrap();
+    let status = roster.drain_status(connect.peer.node).unwrap();
+    assert!(status.retiring);
+    assert_eq!(status.accepted, Some(ticket));
+    assert_eq!(status.transport.unwrap().state, TransportState::Failed);
+    assert!(!roster.is_drained());
+    let done = roster.take_send(connect.peer.node).unwrap().unwrap();
+    assert_eq!(done.batch.ticket, ticket);
+    assert_eq!(done.result, LocalSendResult::Failed);
+    queue.complete(done.batch, done.result).unwrap();
+    assert_eq!(queue.usage().batches, 0);
+    assert!(roster.is_drained());
+    assert!(roster
+        .drain_status(connect.peer.node)
+        .unwrap()
+        .transport
+        .is_none());
+}

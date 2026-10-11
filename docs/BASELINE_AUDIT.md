@@ -42,7 +42,7 @@ not certify completion from inventory entries or isolated passes.
 | P2: shared runtime and overload isolation | Shared workers, multiplexed transports, hundred-group assembly, selected pressure/recovery and shared host/native ownership checks. | Wider competing receive/connection/recovery and current platform composition remain. Active-fraction/CPU tuning belongs to later P7. |
 | P3: recursive fixed quorum at all consensus sites | Policy/JointPolicy, Membership predicates/frontiers and existing intersection/nine-voter/election/read/commit tests. | Broader joint/log/term schedules are functional validation, not a missing recursive-policy implementation or permission for hot reload. |
 | P4: online membership and restart | Learner enrollment, readiness, joint/final state, exact configuration resumption, native member startup284, example drain286 and public runners287. | Wider combined new-voter/old-checkpoint and activation/refusal histories remain; broader platform qualification is not proved by those selected matrices. |
-| P5: recursive routing and independent children | Manifests, assignments, directory service, cached lookup, creation/delegation and native parent-offline histories. | Original recursive failures and current family285 remain separate source-bound obligations. Linux285 finishes72/1 all and40/0 default; Mac285 is verified live. |
+| P5: recursive routing and independent children | Manifests, assignments, directory service, cached lookup, creation/delegation and native parent-offline histories. | Original recursive failures and current family285 remain separate source-bound obligations. Linux285 finishes72/1 all and40/0 default; Mac285 is terminal73/0 all and40/0 default with original668-input guards. |
 | P6: split/merge and retry lineage | Public scope/source/target/publication/activation/retirement contracts with actual native phase/reopen histories. | The Linux285/288 checkpoint parent shutdown stall remains unresolved.292 establishes a possible long close timer in a controlled schedule but captures no original failed provider. Wider combined phase/storage faults remain. |
 | P7: sustainable measured improvement | Existing benchmarks, attribution, shared batching, lanes and recovery/reclamation controls. | Original fixed correctness/p99 gate remains unmet. Performance tuning is the user's later phase and the full P0–P7 goal stays active. |
 
@@ -640,3 +640,39 @@ retained failed attempts and explicitly pending full-suite/platform checks.
 The latest completed CI38015646068 also exposed a client-target configuration
 leadership-change assumption; its fixture correction preserves exact operations
 and does not add automatic admin retry to the CLI.
+
+## Slice295 — remaining functional exits and next comparison contract
+
+Re-read chapters01/11/12/17 and the public component ledger after294. P0–P6
+have implemented user-facing mechanisms; that does not prove their complete
+failure/ownership acceptance. Shared wire provisioning293 and selected real-core
+snapshot schedules294 close the two concrete validation gaps listed by292.
+The retained parent drain failure is still uncorrected:295's original checkpoint
+history passes on Linux in41.03s and Mac in547.43s without a failed-state capture.
+New public inspection makes the failing boundary
+observable through the existing selected providers; it is not a protocol fix.
+
+| Gate | Evidence needed next | Status at this review |
+| --- | --- | --- |
+| P0/R14/R19/VB-011 composition | Reusable assertions for each promised provider operation, with actual native and independent host ownership/refusal histories. |15 partial reviews/98 operations after the added transport inspection obligation; the inventory's108 entries are references, not108 certified providers. |
+| P1/R01/R11/chapter11 | Compatible known-Raft comparison, broader crash/application histories, declared-scope history checks and decoder fuzz, alongside verified native replay. |294 adds selected native snapshot replay/reduction; no known-Raft differential or general fuzz execution is claimed. |
+| P2/R07/R12 | Broader shared-resource/recovery fairness and current platform compositions. | Implemented shared runtime/overload controls; selected tests do not establish every active fraction or recovery pressure combination. Performance measurements stay in later P7. |
+| P3/P4/R04/R09 | Current joint-policy, rollback, old-checkpoint and election/storage compositions. | Recursive-policy integration and membership mechanisms exist. Full combined failure schedules remain separate from a missing feature. |
+| P5/P6/R02/R05/R08/R09 | Retained shutdown predicate capture, its causal regression/fix, broader original lineage and phase/storage recovery. | Linux285/288 failures remain; newer isolated passes do not erase them. Original Mac285 finishes73/0 all and40/0 default on its unmodified source;668 guards match. |
+| P7 | Sustainable improvement against the original correctness/p99 workload. | Unmet and explicitly the user's later phase; security review is also later. P8/Windows remain deferred. |
+
+The next available chapter11 comparison uses an isolated ordinary-majority
+reference, not a replacement production engine. Candidate: TiKV raft-rs0.7.0,
+reviewed from its [tagged implementation](https://github.com/tikv/raft-rs/tree/v0.7.0)
+and [RawNode/Ready source](https://raw.githubusercontent.com/tikv/raft-rs/v0.7.0/src/raw_node.rs).
+Its persisted-message split and ordered Ready advancement must be honored;
+inspection of the selected version is not an executed comparison or dependency
+addition. Keep reference dependencies confined to tests. Define compatible
+external campaigns, commands, partitions, storage completion and crash cuts;
+compare committed command prefixes, original IDs/application results and quorum
+read outcomes at settled barriers. Preserve each engine's own message queue and
+required durability; wire traces and no-op indices need not match. Reject a
+semantic mismatch rather than modifying VoteBoat to resemble the reference.
+Hierarchical voting and arbitrary membership/snapshot combinations need their
+own evidence after the compatible baseline. No reference code is copied into
+the production core and no external adapter is introduced by this review.

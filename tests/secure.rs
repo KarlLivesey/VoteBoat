@@ -79,6 +79,25 @@ fn production_rejects_simulation_even_with_ready_identity() {
         Err(SessionError::InsecureProvider)
     );
 }
+
+#[test]
+fn default_boxed_session_inspection_reports_unsupported_protocol_without_progress() {
+    let mut session: Box<dyn SecureSession> = Box::new(Simulator);
+    let expected = SessionDrainStatus {
+        state: SessionState::Ready,
+        flushed: true,
+        next_deadline: None,
+        close_started: None,
+        protocol_drained: None,
+    };
+    for _ in 0..3 {
+        assert_eq!(session.drain_status(), expected);
+    }
+    assert_eq!(
+        session.poll(MonoTime(0), SessionPollBudget::default()),
+        Ok(SessionProgress::default())
+    );
+}
 #[test]
 fn session_limits_and_poll_budgets_are_checked_without_native_provider() {
     assert!(SessionLimits::default().validate().is_ok());

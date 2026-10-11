@@ -1308,3 +1308,15 @@ negative is retained and reduced. Local compaction/incoming installation use
 synchronous public helpers, so internal async completion cuts are not qualified
 by these new traces. Full reference/fuzz/combined-fault and original lifecycle
 requirements remain. See [294](../validation/baseline/slice294/README.md).
+
+Checkpoint295 qualifies non-owning peer/session/transport drain inspection:
+Linux/macOS each pass250 contract/wrapper executions across four profiles,
+formatting/four strict Clippy profiles zero and679 matching source guards.
+Boxed/native ownership and original QUIC deadlines are preserved. The original
+checkpoint history passes once per host without failed-state capture, so the
+Linux285/288 fault remains unresolved. The original Mac285 full family is now
+terminal73/0 all and40/0 default, with668 matching guards and strict zero; its
+three focused regressions also pass. Compatible reference comparison remains
+next; no full lifecycle or P0–P7 completion claim.
+See [295](../validation/baseline/slice295/README.md) and
+[Mac285 terminal](../validation/baseline/slice285/mac-final/README.md).

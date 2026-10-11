@@ -694,6 +694,15 @@ impl SecureSession for NativeQuicSession {
             && self.writing.is_none()
             && self.pending.is_empty()
     }
+    fn drain_status(&mut self) -> SessionDrainStatus {
+        SessionDrainStatus {
+            state: self.state,
+            flushed: self.is_flushed(),
+            next_deadline: self.next_deadline(),
+            close_started: Some(self.close_started),
+            protocol_drained: self.connection.as_ref().map(|(_, c)| c.is_drained()),
+        }
+    }
     fn close(&mut self) {
         if matches!(self.state, SessionState::Handshaking | SessionState::Ready) {
             self.state = SessionState::Closing;

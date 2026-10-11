@@ -289,6 +289,10 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
     pub fn roster(&self) -> &PeerRoster<F::Transport> {
         &self.parts.roster
     }
+    /// Inspect only; the driver remains the exclusive owner of peer progress.
+    pub fn peer_drain_status(&mut self, peer: NodeId) -> Option<PeerDrainStatus> {
+        self.parts.roster.drain_status(peer)
+    }
     pub(super) fn configuration_capacity(
         &self,
         core: &Raft,

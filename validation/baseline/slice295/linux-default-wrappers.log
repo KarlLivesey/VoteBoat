@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice295/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.03s
+     Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/effect_owner-02cbcaa7ef995f89)
+
+running 2 tests
+test node_facade::node_drain_inspection_keeps_owner_and_peer_progress_under_the_original_driver ... ok
+test peer_driver::closed::driver_drain_inspection_preserves_accepted_original_ticket_until_actual_completion ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 179 filtered out; finished in 0.00s

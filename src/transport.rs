@@ -141,6 +141,17 @@ pub struct TransportUsage {
     pub sending: bool,
     pub completion: bool,
 }
+/// Observation only: slots remain owned until the existing take/complete path.
+/// A missing session/close field means unsupported inspection, not drained work.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct TransportDrainStatus {
+    pub binding: SessionBinding,
+    pub state: TransportState,
+    pub usage: TransportUsage,
+    pub received: Option<ReceiveInfo>,
+    pub session: Option<SessionDrainStatus>,
+    pub close_started: Option<bool>,
+}
 #[derive(Debug)]
 pub struct TransportRejected {
     pub reason: TransportError,
@@ -237,6 +248,18 @@ pub trait PeerTransport {
     fn state(&self) -> TransportState;
     fn limits(&self) -> TransportLimits;
     fn usage(&self) -> TransportUsage;
+    /// Non-owning inspection; may query provider timer caches but cannot poll,
+    /// take, abort, release buffers or grant authority to abandon accepted work.
+    fn drain_status(&mut self) -> TransportDrainStatus {
+        TransportDrainStatus {
+            binding: self.binding(),
+            state: self.state(),
+            usage: self.usage(),
+            received: self.received_info(),
+            session: None,
+            close_started: None,
+        }
+    }
     fn submit(&mut self, batch: OutboundBatch) -> Result<(), TransportRejected>;
     fn poll(
         &mut self,
@@ -268,6 +291,9 @@ impl<P: PeerTransport + ?Sized> PeerTransport for Box<P> {
     }
     fn usage(&self) -> TransportUsage {
         (**self).usage()
+    }
+    fn drain_status(&mut self) -> TransportDrainStatus {
+        (**self).drain_status()
     }
     fn submit(&mut self, batch: OutboundBatch) -> Result<(), TransportRejected> {
         (**self).submit(batch)

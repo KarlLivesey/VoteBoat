@@ -129,6 +129,19 @@ impl<S: SecureSession, V: SessionValidity> SecureSession for GuardedSession<S, V
     fn is_flushed(&self) -> bool {
         self.check().is_ok() && self.session.is_flushed()
     }
+    fn drain_status(&mut self) -> SessionDrainStatus {
+        if self.check().is_err() {
+            SessionDrainStatus {
+                state: SessionState::Failed,
+                flushed: false,
+                next_deadline: None,
+                close_started: None,
+                protocol_drained: None,
+            }
+        } else {
+            self.session.drain_status()
+        }
+    }
     fn close(&mut self) {
         self.session.close();
     }

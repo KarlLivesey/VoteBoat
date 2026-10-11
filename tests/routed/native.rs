@@ -20,7 +20,7 @@ mod parent_independence;
 #[path = "publication_recovery.rs"]
 mod publication_recovery;
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     net::{TcpListener, UdpSocket},
     path::Path,
     sync::Arc,
@@ -206,18 +206,31 @@ where
         }
         let within_deadline = Instant::now() < deadline;
         if !within_deadline {
-            for n in nodes.iter() {
-                eprintln!(
+            diagnose_shutdown(nodes, clock);
+        }
+        assert!(within_deadline, "native routed progress timed out");
+        std::thread::park_timeout(Duration::from_millis(1));
+    }
+}
+
+fn diagnose_shutdown<A>(nodes: &mut [Node<A>], clock: &Instant)
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    for n in nodes.iter_mut() {
+        let mut peer_ids = BTreeSet::new();
+        eprintln!(
                     "routed timeout shutdown state={:?} clients_drained={} reads_drained={} read_usage={:?} results_drained={} result_usage={:?} owner_drained={} outbound_drained={} peers_drained={}",
                     n.state(), n.local().clients.is_drained(), n.local().reads.is_drained(),
                     n.local().reads.usage(), n.local().results.is_drained(), n.local().results.usage(),
                     n.local().owner.is_drained(), n.local().outbound.is_drained(),
                     n.peers().is_none_or(|p| p.is_drained()),
                 );
-                for (group, app) in &n.local().applications {
-                    let core = n.local().owner.core(*group).unwrap();
-                    let log = core.state();
-                    eprintln!(
+        for (group, app) in &n.local().applications {
+            let core = n.local().owner.core(*group).unwrap();
+            let log = core.state();
+            eprintln!(
                         "routed timeout node={:?} group={group:?} role={:?} hard={:?} revision={:?} base={} commit={} last={} applied={} pending={} clients={:?} replica={:?} outbound={:?} peers={:?}",
                         core.local_node(), core.role(), log.hard_state, log.revision,
                         log.base_index(), log.commit_index, log.last_index(),
@@ -225,20 +238,24 @@ where
                         n.local().clients.usage(), n.replica_usage(), n.local().outbound.usage(),
                         n.peers().map(|p| (p.usage(), p.roster().usage()))
                     );
-                    if let Some(peers) = n.peers() {
-                        let bindings: Vec<_> = log
-                            .bootstrap
-                            .voter_stores
-                            .keys()
-                            .map(|id| (*id, peers.roster().binding(*id)))
-                            .collect();
-                        eprintln!("routed timeout peer bindings={bindings:?}");
-                    }
-                }
+            peer_ids.extend(log.bootstrap.voter_stores.keys().copied());
+            if let Some(peers) = n.peers() {
+                let bindings: Vec<_> = log
+                    .bootstrap
+                    .voter_stores
+                    .keys()
+                    .map(|id| (*id, peers.roster().binding(*id)))
+                    .collect();
+                eprintln!("routed timeout peer bindings={bindings:?}");
             }
         }
-        assert!(within_deadline, "native routed progress timed out");
-        std::thread::park_timeout(Duration::from_millis(1));
+        for peer in peer_ids {
+            let status = n.peer_drain_status(peer);
+            eprintln!(
+                "routed timeout now={:?} peer={peer:?} drain={status:?}",
+                MonoTime(clock.elapsed().as_millis() as u64)
+            );
+        }
     }
 }
 #[track_caller]

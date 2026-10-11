@@ -82,3 +82,36 @@ fn invalid_binding_at_submit_still_fences_the_driver() {
     );
     assert!(f.driver.as_ref().unwrap().is_failed());
 }
+
+#[test]
+fn driver_drain_inspection_preserves_accepted_original_ticket_until_actual_completion() {
+    let mut f = Fixture::new();
+    f.attach();
+    let control = f.transports.borrow()[&node(2)].clone();
+    control.borrow_mut().blocked = true;
+    let ticket = f.enqueue(2);
+    assert_eq!(f.poll(0).unwrap().sends, 1);
+    f.driver.as_mut().unwrap().close();
+    let usage = f.driver.as_ref().unwrap().usage();
+    for _ in 0..3 {
+        let status = f
+            .driver
+            .as_mut()
+            .unwrap()
+            .peer_drain_status(node(2))
+            .unwrap();
+        assert!(status.closed);
+        assert_eq!(status.accepted, Some(ticket));
+        assert!(status.transport.unwrap().usage.sending);
+        assert_eq!(f.outbound.usage().batches, 1);
+        assert_eq!(f.driver.as_ref().unwrap().usage(), usage);
+    }
+    control.borrow_mut().blocked = false;
+    let done = f.poll(1).unwrap();
+    assert!(done
+        .completions
+        .iter()
+        .any(|c| c.ticket == ticket && c.result == LocalSendResult::Sent));
+    assert_eq!(f.outbound.usage().batches, 0);
+    f.close(1);
+}

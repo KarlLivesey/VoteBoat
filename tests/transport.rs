@@ -83,6 +83,13 @@ fn transport_limits_are_available_without_native_dependencies() {
         fn abort(&mut self) {}
     }
     let mut host: Box<dyn PeerTransport> = Box::new(Host);
+    let inspection = host.drain_status();
+    assert_eq!(inspection.binding, binding(1, 2));
+    assert_eq!(inspection.state, TransportState::Closed);
+    assert_eq!(inspection.usage, TransportUsage::default());
+    assert!(inspection.received.is_none() && inspection.session.is_none());
+    assert_eq!(inspection.close_started, None);
+    assert_eq!(host.drain_status(), inspection);
     assert_eq!(
         host.poll(MonoTime(0), TransportPollBudget::default())
             .unwrap(),
@@ -107,6 +114,8 @@ fn binding(from: u64, to: u64) -> voteboat::secure::SessionBinding {
 }
 #[cfg(feature = "native")]
 mod native {
+    #[path = "drain_status.rs"]
+    mod drain_status;
     use super::*;
     mod poll_progress;
     mod shared_contract;
@@ -220,6 +229,15 @@ mod native {
         }
         fn is_flushed(&self) -> bool {
             self.outgoing.lock().unwrap().flushed
+        }
+        fn drain_status(&mut self) -> SessionDrainStatus {
+            SessionDrainStatus {
+                state: self.state(),
+                flushed: self.is_flushed(),
+                next_deadline: Some(MonoTime(73)),
+                close_started: Some(self.state != SessionState::Ready),
+                protocol_drained: None,
+            }
         }
         fn close(&mut self) {
             self.outgoing.lock().unwrap().clean = true;

@@ -147,6 +147,17 @@ pub struct SessionProgress {
     pub became_ready: bool,
 }
 
+/// Non-owning diagnostic snapshot. Protocol fields may be unsupported; a
+/// deadline is a scheduling hint in caller time, never closure/delivery proof.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct SessionDrainStatus {
+    pub state: SessionState,
+    pub flushed: bool,
+    pub next_deadline: Option<MonoTime>,
+    pub close_started: Option<bool>,
+    pub protocol_drained: Option<bool>,
+}
+
 /// The provider supplies established authenticated cryptography, mutual peer
 /// identity binding and nonblocking plaintext I/O. `binding` appears only after
 /// authentication and protocol/store-session exchange. Peer store identity must
@@ -182,6 +193,18 @@ pub trait SecureSession {
     fn read_plaintext(&mut self, bytes: &mut [u8]) -> Result<usize, SessionError>;
     fn write_plaintext(&mut self, bytes: &[u8]) -> Result<usize, SessionError>;
     fn is_flushed(&self) -> bool;
+    /// Inspect retained state without I/O, completion or ownership transfer.
+    /// Mutable access permits a provider to query its timer cache. This method
+    /// does not drive the timer or change close/flush semantics.
+    fn drain_status(&mut self) -> SessionDrainStatus {
+        SessionDrainStatus {
+            state: self.state(),
+            flushed: self.is_flushed(),
+            next_deadline: None,
+            close_started: None,
+            protocol_drained: None,
+        }
+    }
     fn close(&mut self);
     fn revoke(&mut self);
 }
@@ -227,6 +250,9 @@ impl<S: SecureSession + ?Sized> SecureSession for Box<S> {
     }
     fn is_flushed(&self) -> bool {
         (**self).is_flushed()
+    }
+    fn drain_status(&mut self) -> SessionDrainStatus {
+        (**self).drain_status()
     }
     fn close(&mut self) {
         (**self).close();

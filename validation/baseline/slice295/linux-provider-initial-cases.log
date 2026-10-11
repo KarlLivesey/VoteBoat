@@ -1,0 +1,56 @@
+✖ review counts only audited operations and retains unreviewed contracts (9.095269ms)
+✔ rejects unknown contract (2.2063ms)
+✔ rejects unknown operation (2.749743ms)
+✔ rejects missing operation (1.517444ms)
+✔ rejects duplicate operation (1.421514ms)
+✔ rejects missing assertion (1.511433ms)
+✔ rejects missing function (1.565114ms)
+✔ rejects missing test (1.483972ms)
+✔ rejects escaping path (2.106002ms)
+✔ rejects false completion claim (1.878023ms)
+✔ rejects missing limitation (1.865659ms)
+✔ rejects missing snapshot operation (1.973222ms)
+✔ rejects missing retention assertion (2.151758ms)
+✔ rejects missing admission operation (2.862815ms)
+✔ rejects missing admission assertion (2.691172ms)
+✔ rejects missing timer operation (1.421695ms)
+✔ rejects missing timer assertion (1.321395ms)
+✔ rejects missing timer limitation (1.514199ms)
+✔ rejects missing transport operation (1.224132ms)
+✔ rejects missing transport assertion (0.922805ms)
+✔ rejects missing transport limitation (1.194747ms)
+✔ rejects missing wire operation (0.486585ms)
+✔ rejects missing wire assertion (0.404311ms)
+✔ rejects missing wire limitation (0.394873ms)
+✔ rejects missing buffer operation (3.065647ms)
+✔ rejects missing buffer assertion (2.849069ms)
+✔ rejects missing buffer limitation (2.903461ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 26
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.367605
+
+✖ failing tests:
+
+test at validation/check-provider-conformance.test.mjs:15:1
+✖ review counts only audited operations and retains unreviewed contracts (9.095269ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  98 !== 97
+
+      at TestContext.<anonymous> (file:///home/karllivesey/Documents/ChatGPT/VoteBoat/validation/check-provider-conformance.test.mjs:18:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.start (node:internal/test_runner/test:1262:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 98,
+    expected: 97,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

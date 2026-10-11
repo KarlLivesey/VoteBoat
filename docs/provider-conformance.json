@@ -438,6 +438,16 @@
       ],
       "operations": [
         {
+          "names": ["drain_status"],
+          "obligation": "Expose a non-owning snapshot of binding, lifecycle state, retained send/completion/decoded ownership and supported session/close details. Inspection cannot poll I/O, transfer work, complete a ticket or authorize closure. Compatibility defaults report unsupported protocol details as absent; boxes preserve overrides.",
+          "assertions": [
+            {"file": "tests/transport.rs", "symbol": "transport_limits_are_available_without_native_dependencies"},
+            {"file": "tests/native/drain_status.rs", "symbol": "drain_inspection_preserves_exact_frame_slots_and_boxed_session_override"},
+            {"file": "tests/peers.rs", "symbol": "drain_inspection_retains_original_roster_ticket_through_close_and_retirement"}
+          ],
+          "remaining": ["Selected independent host defaults and native framed transport over controlled host sessions retain actual original tickets and read/write counts. Protocol details are optional. Real QUIC inspection checks the original delayed close timer, but these observations neither certify arbitrary provider reports nor diagnose the earlier lifecycle stall without a failed-state capture."]
+        },
+        {
           "names": ["security", "binding", "state", "limits", "usage"],
           "obligation": "Expose the selected authenticated connection identity, lifecycle state and finite frame/decoded ceilings. Report retained send/completion/decoded ownership separately. Aborted accepted work releases its transport frame before its original queue lease.",
           "assertions": [

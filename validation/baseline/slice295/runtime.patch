@@ -1,0 +1,550 @@
+diff --git a/src/native/quic.rs b/src/native/quic.rs
+index fa6a97c..de60c13 100644
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -696,0 +697,9 @@ impl SecureSession for NativeQuicSession {
++    fn drain_status(&mut self) -> SessionDrainStatus {
++        SessionDrainStatus {
++            state: self.state,
++            flushed: self.is_flushed(),
++            next_deadline: self.next_deadline(),
++            close_started: Some(self.close_started),
++            protocol_drained: self.connection.as_ref().map(|(_, c)| c.is_drained()),
++        }
++    }
+diff --git a/src/native/transport.rs b/src/native/transport.rs
+index e852fae..c909fad 100644
+--- a/src/native/transport.rs
++++ b/src/native/transport.rs
+@@ -444,0 +445,10 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeer
++    fn drain_status(&mut self) -> TransportDrainStatus {
++        TransportDrainStatus {
++            binding: self.binding,
++            state: self.state,
++            usage: self.usage(),
++            received: self.received_info(),
++            session: self.session.as_mut().map(SecureSession::drain_status),
++            close_started: Some(self.close_started),
++        }
++    }
+diff --git a/src/runtime/node.rs b/src/runtime/node.rs
+index 3b35e00..062b723 100644
+--- a/src/runtime/node.rs
++++ b/src/runtime/node.rs
+@@ -379,0 +380,5 @@ where
++    /// Non-owning diagnostics, including while draining. Does not poll the node
++    /// or grant mutable access to its roster, providers or accepted work.
++    pub fn peer_drain_status(&mut self, peer: NodeId) -> Option<crate::transport::PeerDrainStatus> {
++        self.peers.as_mut()?.peer_drain_status(peer)
++    }
+diff --git a/src/runtime/peers.rs b/src/runtime/peers.rs
+index aeaf8a4..7bde738 100644
+--- a/src/runtime/peers.rs
++++ b/src/runtime/peers.rs
+@@ -291,0 +292,4 @@ impl<C: PeerConnector, F: PeerTransportFactory<C::Session>> PeerDriver<C, F> {
++    /// Inspect only; the driver remains the exclusive owner of peer progress.
++    pub fn peer_drain_status(&mut self, peer: NodeId) -> Option<PeerDrainStatus> {
++        self.parts.roster.drain_status(peer)
++    }
+diff --git a/src/secure.rs b/src/secure.rs
+index 93defec..0e81c6b 100644
+--- a/src/secure.rs
++++ b/src/secure.rs
+@@ -149,0 +150,11 @@ pub struct SessionProgress {
++/// Non-owning diagnostic snapshot. Protocol fields may be unsupported; a
++/// deadline is a scheduling hint in caller time, never closure/delivery proof.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub struct SessionDrainStatus {
++    pub state: SessionState,
++    pub flushed: bool,
++    pub next_deadline: Option<MonoTime>,
++    pub close_started: Option<bool>,
++    pub protocol_drained: Option<bool>,
++}
++
+@@ -184,0 +196,12 @@ pub trait SecureSession {
++    /// Inspect retained state without I/O, completion or ownership transfer.
++    /// Mutable access permits a provider to query its timer cache. This method
++    /// does not drive the timer or change close/flush semantics.
++    fn drain_status(&mut self) -> SessionDrainStatus {
++        SessionDrainStatus {
++            state: self.state(),
++            flushed: self.is_flushed(),
++            next_deadline: None,
++            close_started: None,
++            protocol_drained: None,
++        }
++    }
+@@ -230,0 +254,3 @@ impl<S: SecureSession + ?Sized> SecureSession for Box<S> {
++    fn drain_status(&mut self) -> SessionDrainStatus {
++        (**self).drain_status()
++    }
+diff --git a/src/secure/validity.rs b/src/secure/validity.rs
+index ba5766f..d8eaf41 100644
+--- a/src/secure/validity.rs
++++ b/src/secure/validity.rs
+@@ -131,0 +132,13 @@ impl<S: SecureSession, V: SessionValidity> SecureSession for GuardedSession<S, V
++    fn drain_status(&mut self) -> SessionDrainStatus {
++        if self.check().is_err() {
++            SessionDrainStatus {
++                state: SessionState::Failed,
++                flushed: false,
++                next_deadline: None,
++                close_started: None,
++                protocol_drained: None,
++            }
++        } else {
++            self.session.drain_status()
++        }
++    }
+diff --git a/src/transport.rs b/src/transport.rs
+index ba901b4..1f5d2fc 100644
+--- a/src/transport.rs
++++ b/src/transport.rs
+@@ -143,0 +144,11 @@ pub struct TransportUsage {
++/// Observation only: slots remain owned until the existing take/complete path.
++/// A missing session/close field means unsupported inspection, not drained work.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub struct TransportDrainStatus {
++    pub binding: SessionBinding,
++    pub state: TransportState,
++    pub usage: TransportUsage,
++    pub received: Option<ReceiveInfo>,
++    pub session: Option<SessionDrainStatus>,
++    pub close_started: Option<bool>,
++}
+@@ -239,0 +251,12 @@ pub trait PeerTransport {
++    /// Non-owning inspection; may query provider timer caches but cannot poll,
++    /// take, abort, release buffers or grant authority to abandon accepted work.
++    fn drain_status(&mut self) -> TransportDrainStatus {
++        TransportDrainStatus {
++            binding: self.binding(),
++            state: self.state(),
++            usage: self.usage(),
++            received: self.received_info(),
++            session: None,
++            close_started: None,
++        }
++    }
+@@ -271,0 +295,3 @@ impl<P: PeerTransport + ?Sized> PeerTransport for Box<P> {
++    fn drain_status(&mut self) -> TransportDrainStatus {
++        (**self).drain_status()
++    }
+diff --git a/src/transport/peers.rs b/src/transport/peers.rs
+index 581403f..bf64e6d 100644
+--- a/src/transport/peers.rs
++++ b/src/transport/peers.rs
+@@ -100,0 +101,14 @@ pub struct PeerRosterUsage {
++/// Bounded snapshot for one known peer. This grants no receive/send ownership,
++/// connection authority or permission to remove retained work.
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++pub struct PeerDrainStatus {
++    pub peer: PeerIdentity,
++    pub closed: bool,
++    pub fenced: bool,
++    pub authorized: bool,
++    pub retiring: bool,
++    pub attempt: Option<ConnectTicket>,
++    pub binding: Option<SessionBinding>,
++    pub accepted: Option<SendTicket>,
++    pub transport: Option<TransportDrainStatus>,
++}
+@@ -501,0 +516,14 @@ impl<P: PeerTransport> PeerRoster<P> {
++    pub fn drain_status(&mut self, peer: NodeId) -> Option<PeerDrainStatus> {
++        let p = self.peers.get_mut(&peer)?;
++        Some(PeerDrainStatus {
++            peer: p.identity,
++            closed: self.closed,
++            fenced: self.fenced,
++            authorized: p.authorized,
++            retiring: p.retiring,
++            attempt: p.attempt.as_ref().map(|a| a.ticket),
++            binding: p.binding,
++            accepted: p.accepted,
++            transport: p.transport.as_mut().map(PeerTransport::drain_status),
++        })
++    }
+diff --git a/tests/peers.rs b/tests/peers.rs
+index 928fab1..4e5b42f 100644
+--- a/tests/peers.rs
++++ b/tests/peers.rs
+@@ -967,0 +968,56 @@ fn assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_withou
++
++#[test]
++fn drain_inspection_retains_original_roster_ticket_through_close_and_retirement() {
++    let mut roster = roster(limits());
++    assert!(roster.drain_status(node(99)).is_none());
++    let connect = roster.due_connections(MonoTime(0), 1).unwrap()[0];
++    assert_eq!(
++        roster.drain_status(connect.peer.node).unwrap().attempt,
++        Some(connect)
++    );
++    let host = Host::new(connect, 1);
++    let control = host.control.clone();
++    control.lock().unwrap().blocked = true;
++    roster.attach(connect, host, MonoTime(0)).unwrap();
++    let mut queue = queue();
++    let send = send(&mut queue, connect.peer.node);
++    let ticket = send.ticket;
++    roster.submit(send).unwrap();
++    roster.close();
++    let usage = roster.usage();
++    for _ in 0..3 {
++        let status = roster.drain_status(connect.peer.node).unwrap();
++        assert!(status.closed);
++        assert!(!status.fenced);
++        assert!(!status.retiring);
++        assert_eq!(status.accepted, Some(ticket));
++        let transport = status.transport.unwrap();
++        assert_eq!(status.binding, Some(transport.binding));
++        assert_eq!(transport.state, TransportState::Draining);
++        assert!(transport.usage.sending);
++        assert!(transport.session.is_none());
++        assert_eq!(roster.usage(), usage);
++        assert_eq!(queue.usage().batches, 1);
++        assert_eq!(control.lock().unwrap().polls, 0);
++    }
++    control.lock().unwrap().fail = true;
++    roster
++        .poll(MonoTime(1), 1, TransportPollBudget::default())
++        .unwrap();
++    let status = roster.drain_status(connect.peer.node).unwrap();
++    assert!(status.retiring);
++    assert_eq!(status.accepted, Some(ticket));
++    assert_eq!(status.transport.unwrap().state, TransportState::Failed);
++    assert!(!roster.is_drained());
++    let done = roster.take_send(connect.peer.node).unwrap().unwrap();
++    assert_eq!(done.batch.ticket, ticket);
++    assert_eq!(done.result, LocalSendResult::Failed);
++    queue.complete(done.batch, done.result).unwrap();
++    assert_eq!(queue.usage().batches, 0);
++    assert!(roster.is_drained());
++    assert!(roster
++        .drain_status(connect.peer.node)
++        .unwrap()
++        .transport
++        .is_none());
++}
+diff --git a/tests/quic/closing_timer.rs b/tests/quic/closing_timer.rs
+index 1cf5985..e44d4e7 100644
+--- a/tests/quic/closing_timer.rs
++++ b/tests/quic/closing_timer.rs
+@@ -38,0 +39 @@ fn resolved_send_close_retains_actual_long_rtt_protocol_deadline() {
++    let mut a: Box<dyn SecureSession> = Box::new(a);
+@@ -42 +43,7 @@ fn resolved_send_close_retains_actual_long_rtt_protocol_deadline() {
+-    let deadline = a.next_deadline().unwrap();
++    let status = a.drain_status();
++    let deadline = status.next_deadline.unwrap();
++    assert_eq!(status.state, SessionState::Closing);
++    assert!(status.flushed);
++    assert_eq!(status.close_started, Some(true));
++    assert_eq!(status.protocol_drained, Some(false));
++    assert_eq!(a.drain_status(), status);
+@@ -51 +58,3 @@ fn resolved_send_close_retains_actual_long_rtt_protocol_deadline() {
+-    assert_eq!(a.next_deadline(), None);
++    let closed = a.drain_status();
++    assert_eq!(closed.next_deadline, None);
++    assert_eq!(closed.protocol_drained, Some(true));
+diff --git a/tests/routed/native.rs b/tests/routed/native.rs
+index 34090d4..b58b6a3 100644
+--- a/tests/routed/native.rs
++++ b/tests/routed/native.rs
+@@ -23 +23 @@ use std::{
+-    collections::BTreeMap,
++    collections::{BTreeMap, BTreeSet},
+@@ -209,2 +209,15 @@ where
+-            for n in nodes.iter() {
+-                eprintln!(
++            diagnose_shutdown(nodes, clock);
++        }
++        assert!(within_deadline, "native routed progress timed out");
++        std::thread::park_timeout(Duration::from_millis(1));
++    }
++}
++
++fn diagnose_shutdown<A>(nodes: &mut [Node<A>], clock: &Instant)
++where
++    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
++    A::Receipt: ApplicationReceipt,
++{
++    for n in nodes.iter_mut() {
++        let mut peer_ids = BTreeSet::new();
++        eprintln!(
+@@ -217,4 +230,4 @@ where
+-                for (group, app) in &n.local().applications {
+-                    let core = n.local().owner.core(*group).unwrap();
+-                    let log = core.state();
+-                    eprintln!(
++        for (group, app) in &n.local().applications {
++            let core = n.local().owner.core(*group).unwrap();
++            let log = core.state();
++            eprintln!(
+@@ -228,10 +241,9 @@ where
+-                    if let Some(peers) = n.peers() {
+-                        let bindings: Vec<_> = log
+-                            .bootstrap
+-                            .voter_stores
+-                            .keys()
+-                            .map(|id| (*id, peers.roster().binding(*id)))
+-                            .collect();
+-                        eprintln!("routed timeout peer bindings={bindings:?}");
+-                    }
+-                }
++            peer_ids.extend(log.bootstrap.voter_stores.keys().copied());
++            if let Some(peers) = n.peers() {
++                let bindings: Vec<_> = log
++                    .bootstrap
++                    .voter_stores
++                    .keys()
++                    .map(|id| (*id, peers.roster().binding(*id)))
++                    .collect();
++                eprintln!("routed timeout peer bindings={bindings:?}");
+@@ -240,2 +252,7 @@ where
+-        assert!(within_deadline, "native routed progress timed out");
+-        std::thread::park_timeout(Duration::from_millis(1));
++        for peer in peer_ids {
++            let status = n.peer_drain_status(peer);
++            eprintln!(
++                "routed timeout now={:?} peer={peer:?} drain={status:?}",
++                MonoTime(clock.elapsed().as_millis() as u64)
++            );
++        }
+diff --git a/tests/secure.rs b/tests/secure.rs
+index 6bbaaee..b06d734 100644
+--- a/tests/secure.rs
++++ b/tests/secure.rs
+@@ -81,0 +82,19 @@ fn production_rejects_simulation_even_with_ready_identity() {
++
++#[test]
++fn default_boxed_session_inspection_reports_unsupported_protocol_without_progress() {
++    let mut session: Box<dyn SecureSession> = Box::new(Simulator);
++    let expected = SessionDrainStatus {
++        state: SessionState::Ready,
++        flushed: true,
++        next_deadline: None,
++        close_started: None,
++        protocol_drained: None,
++    };
++    for _ in 0..3 {
++        assert_eq!(session.drain_status(), expected);
++    }
++    assert_eq!(
++        session.poll(MonoTime(0), SessionPollBudget::default()),
++        Ok(SessionProgress::default())
++    );
++}
+diff --git a/tests/support/node.rs b/tests/support/node.rs
+index 7243bf2..2d6b704 100644
+--- a/tests/support/node.rs
++++ b/tests/support/node.rs
+@@ -2045,0 +2046,47 @@ fn transport_capacity_cases(
++
++#[test]
++fn node_drain_inspection_keeps_owner_and_peer_progress_under_the_original_driver() {
++    let mut local = boat(parts(1, false));
++    assert!(local.peer_drain_status(node(2)).is_none());
++    let mut node_with_peers = boat(parts(3, true));
++    let core = node_with_peers
++        .local()
++        .owner
++        .core(group(1))
++        .unwrap()
++        .state()
++        .clone();
++    let usage = node_with_peers.peers().unwrap().usage();
++    for _ in 0..3 {
++        let status = node_with_peers.peer_drain_status(node(2)).unwrap();
++        assert_eq!(status.peer.node, node(2));
++        assert!(!status.closed);
++        assert!(status.transport.is_none());
++        assert!(status.attempt.is_none());
++        assert_eq!(node_with_peers.peers().unwrap().usage(), usage);
++        assert_eq!(
++            *node_with_peers
++                .local()
++                .owner
++                .core(group(1))
++                .unwrap()
++                .state(),
++            core
++        );
++    }
++    assert!(node_with_peers.peer_drain_status(node(99)).is_none());
++    node_with_peers.begin_shutdown();
++    for time in 0..10 {
++        node_with_peers
++            .poll(MonoTime(time), NodePollBudget::default())
++            .unwrap();
++        if node_with_peers.is_drained() {
++            break;
++        }
++    }
++    assert!(node_with_peers.is_drained());
++    let status = node_with_peers.peer_drain_status(node(2)).unwrap();
++    assert!(status.closed);
++    assert!(status.transport.is_none());
++    assert!(node_with_peers.is_drained());
++}
+diff --git a/tests/support/peer_driver_closed.rs b/tests/support/peer_driver_closed.rs
+index 61f6740..c04cde8 100644
+--- a/tests/support/peer_driver_closed.rs
++++ b/tests/support/peer_driver_closed.rs
+@@ -84,0 +85,33 @@ fn invalid_binding_at_submit_still_fences_the_driver() {
++
++#[test]
++fn driver_drain_inspection_preserves_accepted_original_ticket_until_actual_completion() {
++    let mut f = Fixture::new();
++    f.attach();
++    let control = f.transports.borrow()[&node(2)].clone();
++    control.borrow_mut().blocked = true;
++    let ticket = f.enqueue(2);
++    assert_eq!(f.poll(0).unwrap().sends, 1);
++    f.driver.as_mut().unwrap().close();
++    let usage = f.driver.as_ref().unwrap().usage();
++    for _ in 0..3 {
++        let status = f
++            .driver
++            .as_mut()
++            .unwrap()
++            .peer_drain_status(node(2))
++            .unwrap();
++        assert!(status.closed);
++        assert_eq!(status.accepted, Some(ticket));
++        assert!(status.transport.unwrap().usage.sending);
++        assert_eq!(f.outbound.usage().batches, 1);
++        assert_eq!(f.driver.as_ref().unwrap().usage(), usage);
++    }
++    control.borrow_mut().blocked = false;
++    let done = f.poll(1).unwrap();
++    assert!(done
++        .completions
++        .iter()
++        .any(|c| c.ticket == ticket && c.result == LocalSendResult::Sent));
++    assert_eq!(f.outbound.usage().batches, 0);
++    f.close(1);
++}
+diff --git a/tests/transport.rs b/tests/transport.rs
+index a63ce30..f0f4e33 100644
+--- a/tests/transport.rs
++++ b/tests/transport.rs
+@@ -85,0 +86,7 @@ fn transport_limits_are_available_without_native_dependencies() {
++    let inspection = host.drain_status();
++    assert_eq!(inspection.binding, binding(1, 2));
++    assert_eq!(inspection.state, TransportState::Closed);
++    assert_eq!(inspection.usage, TransportUsage::default());
++    assert!(inspection.received.is_none() && inspection.session.is_none());
++    assert_eq!(inspection.close_started, None);
++    assert_eq!(host.drain_status(), inspection);
+@@ -109,0 +117,2 @@ mod native {
++    #[path = "drain_status.rs"]
++    mod drain_status;
+@@ -223,0 +233,9 @@ mod native {
++        fn drain_status(&mut self) -> SessionDrainStatus {
++            SessionDrainStatus {
++                state: self.state(),
++                flushed: self.is_flushed(),
++                next_deadline: Some(MonoTime(73)),
++                close_started: Some(self.state != SessionState::Ready),
++                protocol_drained: None,
++            }
++        }
+diff --git a/tests/native/drain_status.rs b/tests/native/drain_status.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/native/drain_status.rs
+@@ -0,0 +1,95 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++#[test]
++fn drain_inspection_preserves_exact_frame_slots_and_boxed_session_override() {
++    let (a, b) = sessions(7);
++    let (input, output) = (a.incoming.clone(), a.outgoing.clone());
++    output.lock().unwrap().flushed = false;
++    let mut queue_a = queue(1);
++    let queue_b = queue(2);
++    let a: Box<dyn SecureSession> = Box::new(a);
++    let mut a: Box<dyn PeerTransport> = Box::new(
++        NativePeerTransport::new(a, codec(), &queue_a, TransportLimits::default()).unwrap(),
++    );
++    let mut b = NativePeerTransport::new(b, codec(), &queue_b, TransportLimits::default()).unwrap();
++    let original = message(1, 2, 42);
++    let send = batch(&mut queue_a, vec![original.clone()]);
++    let ticket = send.ticket;
++    a.submit(send).unwrap();
++    for _ in 0..1000 {
++        poll(&mut *a);
++        poll(&mut b);
++        if b.received_info().is_some() {
++            break;
++        }
++    }
++    let received = b.received_info().expect("original frame must be decoded");
++    a.close();
++    let io = (input.lock().unwrap().reads, output.lock().unwrap().writes);
++    for _ in 0..3 {
++        let status = a.drain_status();
++        assert_eq!(status.binding, binding(1, 2));
++        assert_eq!(status.state, TransportState::Draining);
++        assert!(status.usage.sending);
++        assert!(!status.usage.completion);
++        assert_eq!(status.close_started, Some(false));
++        let session = status.session.unwrap();
++        assert_eq!(session.state, SessionState::Ready);
++        assert!(!session.flushed);
++        assert_eq!(session.next_deadline, Some(MonoTime(73)));
++        assert_eq!(b.drain_status().received, Some(received));
++        assert_eq!(queue_a.usage().batches, 1);
++    }
++    assert_eq!(
++        (input.lock().unwrap().reads, output.lock().unwrap().writes),
++        io
++    );
++    output.lock().unwrap().flushed = true;
++    poll(&mut *a);
++    let status = a.drain_status();
++    assert!(!status.usage.sending);
++    assert!(status.usage.completion);
++    assert_eq!(queue_a.usage().batches, 1);
++    let done = a.take_send().unwrap();
++    assert_eq!(done.batch.ticket, ticket);
++    assert_eq!(done.batch.messages, vec![original.clone()]);
++    assert_eq!(done.result, LocalSendResult::Sent);
++    queue_a.complete(done.batch, done.result).unwrap();
++    assert_eq!(queue_a.usage().batches, 0);
++    assert!(a.take_send().is_none());
++    assert_eq!(b.take_received().unwrap().messages, vec![original]);
++    assert!(b.take_received().is_none());
++}
++struct Validity(Arc<std::sync::atomic::AtomicBool>);
++impl SessionValidity for Validity {
++    fn validate(&self) -> Result<(), SessionError> {
++        if self.0.load(std::sync::atomic::Ordering::Relaxed) {
++            Ok(())
++        } else {
++            Err(SessionError::Revoked)
++        }
++    }
++}
++#[test]
++fn guarded_inspection_forwards_timer_but_does_not_drive_or_revoke_the_channel() {
++    let (session, _) = sessions(7);
++    let output = session.outgoing.clone();
++    let valid = Arc::new(std::sync::atomic::AtomicBool::new(true));
++    let mut session = GuardedSession::new(session, Validity(valid.clone()))
++        .unwrap_or_else(|_| panic!("valid host session"));
++    assert_eq!(session.drain_status().next_deadline, Some(MonoTime(73)));
++    valid.store(false, std::sync::atomic::Ordering::Relaxed);
++    let status = session.drain_status();
++    assert_eq!(status.state, SessionState::Failed);
++    assert!(!status.flushed);
++    assert_eq!(status.next_deadline, None);
++    assert!(!output.lock().unwrap().broken);
++    assert!(!output.lock().unwrap().clean);
++    assert_eq!(output.lock().unwrap().writes, 0);
++    assert_eq!(
++        session.poll(MonoTime(0), SessionPollBudget::default()),
++        Err(SessionError::Revoked)
++    );
++}

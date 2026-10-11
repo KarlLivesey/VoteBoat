@@ -1,0 +1,100 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice295/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.37s
+     Running tests/peers.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/peers-f63391f3c55e06e8)
+
+running 19 tests
+test bounded_attempts_timeout_backoff_and_stale_ready_connections ... ok
+test construction_exhaustion_and_rejection_preserve_resources ... ok
+test invalid_send_completion_fences_without_releasing_queue_credits ... ok
+test outbound_priority_reordering_does_not_make_an_older_dispatch_stale ... ok
+test authentication_scope_limits_session_rollback_and_duplicate_attach_are_rejected ... ok
+test fair_visits_and_aggregate_capacity_bound_connection_resources ... ok
+test drained_roster_hands_off_fresh_generations_and_rejects_old_ready_work ... ok
+test generation_range_exhaustion_never_hides_partially_issued_tickets ... ok
+test drain_inspection_retains_original_roster_ticket_through_close_and_retirement ... ok
+test assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_without_mutation ... ok
+test failed_connection_holds_original_send_and_capacity_until_exact_completion ... ok
+test prospective_assignments_keep_other_groups_without_admitting_input ... ok
+test malformed_peer_messages_and_capacity_cannot_enter_ingress ... ok
+test shutdown_drains_accepted_send_and_invalidates_pending_connection_ticket ... ok
+test changed_provider_limits_are_retired_before_further_external_polling ... ok
+test receives_are_scoped_and_obsolete_input_is_discarded_before_reconnect ... ok
+test revoked_sends_keep_exact_credits_and_same_store_reenrollment_keeps_session_floor ... ok
+test membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready ... ok
+test store_replacement_requires_handoff_and_rejection_preserves_live_binding ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/quic.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/quic-0752745ab528bad1)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/secure.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/secure-03661c8b9774a056)
+
+running 15 tests
+test default_boxed_session_inspection_reports_unsupported_protocol_without_progress ... ok
+test production_rejects_simulation_even_with_ready_identity ... ok
+test session_limits_and_poll_budgets_are_checked_without_native_provider ... ok
+test tls::oversized_fragmented_handshake_stops_at_exact_ciphertext_ceiling ... ok
+test tls::invalid_credentials_and_limits_fail_before_session_admission ... ok
+test tls::exact_certificate_pin_is_required_beyond_valid_ca ... ok
+test tls::deadline_backward_time_zero_budget_and_revocation_latch ... ok
+test tls::server_requires_a_client_certificate ... ok
+test tls::clean_closure_drains_data_and_unclean_eof_fails ... ok
+test tls::tls_rejects_untrusted_root_and_wrong_dns_name ... ok
+test tls::authenticated_hello_cannot_choose_a_different_node_or_store ... ok
+test tls::mutual_tls_short_io_binds_recovered_sessions_and_bounds_plaintext ... ok
+test tls::real_tcp_selects_wire_three_and_rejects_a_different_peer_version ... ok
+test tls::explicit_wire_versions_are_exact_authenticated_and_do_not_mutate_shared_configs ... ok
+test tls::real_tcp_tls_transfers_wire_frames_and_connection_rotation_is_isolated ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/transport.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/transport-7d716b3a32401c82)
+
+running 37 tests
+test native::construction_and_submission_reject_insecure_incompatible_and_stale_bindings ... ok
+test native::drain_status::guarded_inspection_forwards_timer_but_does_not_drive_or_revoke_the_channel ... ok
+test native::downstream_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::close_drains_send_abort_fails_it_and_completed_input_survives_failure ... ok
+test native::drain_status::drain_inspection_preserves_exact_frame_slots_and_boxed_session_override ... ok
+test native::downstream_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::malformed_or_partial_frame_never_leaks_a_message ... ok
+test native::native_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::exhausted_pool_returns_original_send_and_retries_receive_without_reading ... ok
+test native::excessive_original_vector_capacity_is_returned_before_encoding ... ok
+test native::malformed_encoding_returns_original_batch_and_pool_credits ... ok
+test native::malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session ... ok
+test native::native_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::invalid_header_is_rejected_before_large_frame_allocation ... ok
+test native::owner_factory_refuses_insufficient_full_duplex_quota_without_leasing ... ok
+test native::poll_progress::exhausted_and_zero_session_budgets_do_not_add_follow_through_polls ... ok
+test native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget ... ok
+test native::public_host_queue_and_single_fixture_codec_compose_with_native_driver ... ok
+test native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch ... ok
+test native::policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release ... ok
+test native::receive_growth_failure_releases_partial_frame_and_closes_channel ... ok
+test native::shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing ... ok
+test native::send_completion_waits_for_channel_flush_and_failure_releases_buffers ... ok
+test native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget ... ok
+
+thread 'native::shared_contract::shared_checker_detects_completion_before_local_flush' (1282742) panicked at tests/native/shared_contract.rs:152:5:
+local flush was bypassed
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing ... ok
+test transport_limits_are_available_without_native_dependencies ... ok
+test native::send_failure_and_transport_drop_release_pool_without_destroying_other_view ... ok
+test native::shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits ... ok
+test native::short_io_preserves_batch_and_queue_credits_until_terminal_consumption ... ok
+test native::shared_contract::independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership ... ok
+test native::shared_contract::shared_checker_detects_completion_before_local_flush ... ok
+test native::unread_batch_stops_next_frame_and_does_not_starve_opposite_direction ... ok
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::zero_and_single_call_budgets_preserve_bidirectional_progress ... ok
+test native::shared_contract::native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership ... ok
+test native::actual_tcp_tls_driver_transfers_both_directions_under_backpressure ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s

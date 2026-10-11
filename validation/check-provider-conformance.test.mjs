@@ -15,7 +15,7 @@ const review = (value, name = 'LogStore') => value.reviews.find(row => row.publi
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
     assert.equal(report.reviewed_contracts, 15);
-    assert.equal(report.reviewed_operations, 97);
+    assert.equal(report.reviewed_operations, 98);
     assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 15);
     for (const name of ['WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
@@ -43,6 +43,9 @@ for (const [name, mutate] of [
     ['missing transport operation', d => { review(d, 'PeerTransport').operations.pop(); }],
     ['missing transport assertion', d => { review(d, 'PeerTransport').operations[0].assertions = []; }],
     ['missing transport limitation', d => { review(d, 'PeerTransport').operations[0].remaining = []; }],
+    ['missing transport inspection', d => { review(d, 'PeerTransport').operations = review(d, 'PeerTransport').operations.filter(o => !o.names.includes('drain_status')); }],
+    ['missing inspection assertion', d => { review(d, 'PeerTransport').operations.find(o => o.names.includes('drain_status')).assertions = []; }],
+    ['missing inspection limitation', d => { review(d, 'PeerTransport').operations.find(o => o.names.includes('drain_status')).remaining = []; }],
     ['missing wire operation', d => { review(d, 'WireCodec').operations.pop(); }],
     ['missing wire assertion', d => { review(d, 'WireCodec').operations[0].assertions = []; }],
     ['missing wire limitation', d => { review(d, 'WireCodec').operations[0].remaining = []; }],

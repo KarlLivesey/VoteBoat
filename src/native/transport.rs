@@ -442,6 +442,16 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
     }
 }
 impl<S: SecureSession, C: WireCodec, P: BufferPool> PeerTransport for NativePeerTransport<S, C, P> {
+    fn drain_status(&mut self) -> TransportDrainStatus {
+        TransportDrainStatus {
+            binding: self.binding,
+            state: self.state,
+            usage: self.usage(),
+            received: self.received_info(),
+            session: self.session.as_mut().map(SecureSession::drain_status),
+            close_started: Some(self.close_started),
+        }
+    }
     fn security(&self) -> SessionSecurity {
         SessionSecurity::Authenticated
     }

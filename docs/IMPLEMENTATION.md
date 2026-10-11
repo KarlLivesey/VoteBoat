@@ -122,9 +122,9 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: checkpoint parent peer shutdown correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285 all-feature72/1 and40/0 default, Linux288's retained peer failure;292 control establishes a possible long protocol close timer, but all three original-history probes pass. Mac285 stays live. | Observe original Mac terminal results and capture an actual failing retained provider predicate before its causal fix/regression. No Sent/ownership weakening or blanket deadline extension. Do not rerun unchanged passing probes as repairs. |
-| Next: remaining baseline acceptance audit | Advance the feature-complete Linux/macOS milestone. | Snapshot/fault294 is qualified; the original lifecycle result updates the requirement ledger independently. | Audit each P0–P6 exit and public provider against retained implementation and platform evidence; identify actual missing behavior and unqualified acceptance separately. Keep P7 performance and security review in their later phase. |
-| Following: compatible majority reference differential | Advance chapter11/R11 functional safety evidence for the service and embedding. | Audit the existing event/effect semantics and identify an independent reference with compatible majority, durability, membership and read boundaries before writing its driver. | Compare declared compatible histories against actual cores, retaining seeds, original identities, mismatches and reduction; qualify both platforms. Do not present an incompatible oracle or a flat-majority check as hierarchical quorum proof. |
+| Current: compatible majority reference differential | Advance chapter11/R11 functional safety evidence for the service and embedding. | Audit295 and reviewed raft-rs0.7.0 RawNode/Ready semantics; keep reference integration test-only and define compatible external actions before adding dependencies. | Compare actual cores at settled command/read boundaries while honoring both persistence contracts. Retain seeds, original IDs, mismatches and reduction; qualify both platforms. Flat-majority comparison does not certify hierarchy. |
+| Next: differential interrupted durability and checkpoint recovery | Advance P1/R01 acknowledged-operation recovery acceptance. | The independent baseline comparison and actual native replay294; each reference's storage/snapshot advancement must represent the same declared fault model. | Exercise accepted/written/synced/completion and checkpoint restart cuts with original retries; compare durable/application outcomes without recovering either engine from the oracle. Preserve counterexamples and strict builds. |
+| Following: retained lifecycle failure correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285/288 failure; typed inspection295 is qualified, but matching original histories pass on both hosts without a failed-state capture. Original Mac285 is terminal73/0 all and40/0 default on its original image. | Inspect retained failures and capture the actual retained provider predicate before a causal fix/regression. No ownership/timer weakening, blanket deadline extension or unchanged healthy probes. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -27454,3 +27454,53 @@ complete lifecycle acceptance or P0–P7 completion. The linked plan returns to
 the retained parent shutdown failure, then requirement audit and compatible
 reference comparison. Original Mac285 remains isolated and live. See
 `validation/baseline/slice294/README.md` for execution scope and retained evidence.
+
+Schema295 — inspect the retained peer drain predicate (P5/P6 and C06/C09): add
+non-owning public SessionDrainStatus/TransportDrainStatus snapshots and a bounded
+single-peer roster/driver inspection. Compatibility defaults report existing
+state/usage with unsupported protocol internals absent. Box forwarding preserves
+provider overrides; native framed transport reports its retained send/completion,
+receive and selected session, and native QUIC reports its original monotonic
+protocol deadline/close-start/drained state. Inspection drives no I/O, transfers
+no batch or admission, grants no delivery/closure authority and changes no timer,
+budget, close predicate or cleanup policy. The roster reports original identity,
+accepted ticket and retirement state; it does not remove or complete work.
+The helper is required because the actual288 failure stops at peers_drained=false
+with one retained connection, while per-poll/Drop probes passed and cannot explain
+that failure. Query only the fixture's deadline failure path, with no steady-state
+logging. Acceptance: host defaults and overrides through boxed providers;
+repeat inspection preserves exact send/receive ownership and permits original
+completion; actual QUIC delayed close exposes the unchanged deadline; roster
+inspection preserves an accepted ticket through close/retirement. Run complete
+secure/transport/peers/native/QUIC targets and four strict profiles on both hosts.
+Execute one original failing checkpoint history against frozen images; retain
+any actual predicate capture and preserve an unexplained pass as such. Original
+Mac285 remains live/immutable. The next deliverable is its causal fix if captured,
+otherwise the independent requirement audit proceeds without unchanged probes.
+
+Implemented295 evidence — non-owning drain inspection: Linux/macOS each pass250
+contract/wrapper executions (all92/default73/core25/native60), including complete
+secure, transport, peers and QUIC targets and two focused Node/Driver wrappers.
+Formatting/four strict all-target profiles are zero on both hosts;679 inputs
+match before, after contracts and terminal, and current publication inputs match.
+Boxed provider overrides retain the original protocol deadline and frame slots;
+repeated inspection neither polls nor releases accepted tickets, decoded input
+or credits. Guarded inspection reports invalidity without driving revocation;
+subsequent public poll still enforces it. Native delayed QUIC close reports its
+original deadline and actual protocol drain while retaining the existing policy.
+The failure-only routed diagnostic reports original roster/frame/session state.
+One original checkpoint history passes per host (Linux41.03s/Mac547.43s) without
+failed-state capture. This does not explain or fix Linux285/288. Preflight import
+and metadata-count failures are retained separately; no lint waiver, timer or
+ownership weakening. Provider metadata records15 partial reviews/98 operations;
+its30 checker cases pass. Source inventory108 is not full provider certification.
+Macro review295: usable service/embedding gain inspection through replaceable
+providers; the next independent P1/chapter11 exit is the compatible reference
+comparison in the linked mini plan. Original Mac285 is now terminal:73/0 all in
+15694.15s and40/0 default in7200.94s, plus three focused executions. Its formatting/
+four strict profiles are zero and668 source/regression/terminal guards match the
+original retained image. This broader Mac pass does not erase the original Linux
+failure or certify all lifecycle acceptance. Full P0–P7 remains active; broader
+fault/conformance and later performance/security gates remain. See
+`validation/baseline/slice295/README.md` and
+`validation/baseline/slice285/mac-final/README.md`.

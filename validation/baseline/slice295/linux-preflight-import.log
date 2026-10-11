@@ -1,0 +1,13 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0432]: unresolved import `std::BTreeSet`
+  --> tests/routed/native.rs:28:5
+   |
+28 |     BTreeSet,
+   |     ^^^^^^^^ no `BTreeSet` in the root
+   |
+   = help: consider importing this struct instead:
+           std::collections::BTreeSet
+   = note: struct `crate::native::delegation::metadata_moves::endpoint_discovery::source::connector::BTreeSet` exists but is inaccessible
+
+For more information about this error, try `rustc --explain E0432`.
+error: could not compile `voteboat` (test "routed") due to 1 previous error

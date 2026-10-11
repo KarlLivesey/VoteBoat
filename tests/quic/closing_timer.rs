@@ -36,10 +36,17 @@ fn resolved_send_close_retains_actual_long_rtt_protocol_deadline() {
     assert_eq!(a.binding().unwrap().peer, local(2));
     assert_eq!(b.binding().unwrap().peer, local(1));
     drop(b);
+    let mut a: Box<dyn SecureSession> = Box::new(a);
     a.close();
     a.poll(MonoTime(start), SessionPollBudget::default())
         .unwrap();
-    let deadline = a.next_deadline().unwrap();
+    let status = a.drain_status();
+    let deadline = status.next_deadline.unwrap();
+    assert_eq!(status.state, SessionState::Closing);
+    assert!(status.flushed);
+    assert_eq!(status.close_started, Some(true));
+    assert_eq!(status.protocol_drained, Some(false));
+    assert_eq!(a.drain_status(), status);
     assert!(deadline.0 > start + 15000);
     a.poll(MonoTime(start + 15000), SessionPollBudget::default())
         .unwrap();
@@ -48,5 +55,7 @@ fn resolved_send_close_retains_actual_long_rtt_protocol_deadline() {
     a.poll(deadline, SessionPollBudget::default()).unwrap();
     assert_eq!(a.state(), SessionState::Closed);
     assert!(a.is_flushed());
-    assert_eq!(a.next_deadline(), None);
+    let closed = a.drain_status();
+    assert_eq!(closed.next_deadline, None);
+    assert_eq!(closed.protocol_drained, Some(true));
 }

@@ -6633,3 +6633,15 @@ Correct sync passes. Preflight compile/lint errors and the first unanchored-root
 expectation failure are retained separately. No production/API changes; internal
 async snapshot cuts and broader reference/fuzz/lifecycle/P0–P7 remain open.
 See [294](baseline/slice294/README.md).
+
+Checkpoint295 qualifies non-owning peer/session/transport drain inspection:
+Linux/macOS each pass250 contract/wrapper executions across four profiles,
+formatting/four strict Clippy profiles zero and679 matching source guards.
+Boxed/native ownership and original QUIC deadlines are preserved. The original
+checkpoint history passes once per host without failed-state capture, so the
+Linux285/288 fault remains unresolved. The original Mac285 full family is now
+terminal73/0 all and40/0 default, with668 matching guards and strict zero; its
+three focused regressions also pass. Compatible reference comparison remains
+next; no full lifecycle or P0–P7 completion claim.
+See [295](baseline/slice295/README.md) and
+[Mac285 terminal](baseline/slice285/mac-final/README.md).

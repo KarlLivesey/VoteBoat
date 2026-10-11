@@ -377,6 +377,11 @@ where
     pub fn peers(&self) -> Option<&PeerDriver<C, F>> {
         self.peers.as_ref()
     }
+    /// Non-owning diagnostics, including while draining. Does not poll the node
+    /// or grant mutable access to its roster, providers or accepted work.
+    pub fn peer_drain_status(&mut self, peer: NodeId) -> Option<crate::transport::PeerDrainStatus> {
+        self.peers.as_mut()?.peer_drain_status(peer)
+    }
     /// Replace prepared peer credentials through the selected provider. The
     /// host must authorize and persist the rollout; this is not a Raft proposal.
     pub fn replace_peer_credentials(
