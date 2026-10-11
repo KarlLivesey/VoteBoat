@@ -1,0 +1,2 @@
+tests/member_recovery/older_checkpoint.rs: OK
+tests/member_recovery/older_checkpoint/election_rollback.rs: OK

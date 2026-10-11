@@ -1,0 +1,1856 @@
+diff --git a/src/native/quic.rs b/src/native/quic.rs
+index de60c13..0da6b46 100644
+--- a/src/native/quic.rs
++++ b/src/native/quic.rs
+@@ -327 +327,4 @@ impl NativeQuicSession {
+-                        self.state = SessionState::Closed;
++                        // Quinn still owns the close response and drain timer.
++                        // A final-budget read must not make the next poll skip
++                        // that work. EOF remains readable through peer_closed.
++                        self.state = SessionState::Closing;
+diff --git a/src/native/transport.rs b/src/native/transport.rs
+index c909fad..16ed412 100644
+--- a/src/native/transport.rs
++++ b/src/native/transport.rs
+@@ -368 +367,0 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
+-            self.session.take();
+@@ -370 +369,5 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
+-            self.state = TransportState::Closed;
++            // Clean EOF can precede the secure provider's protocol drain.
++            // Retain its response/timer owner until its real Closed state;
++            // the end of this poll still releases an already-closed provider.
++            self.state = TransportState::Draining;
++            self.start_close();
+diff --git a/tests/member_recovery/older_checkpoint.rs b/tests/member_recovery/older_checkpoint.rs
+index 2e4b26c..ab57bf6 100644
+--- a/tests/member_recovery/older_checkpoint.rs
++++ b/tests/member_recovery/older_checkpoint.rs
+@@ -381,0 +382,4 @@ mod native;
++
++#[cfg(feature = "native")]
++#[path = "older_checkpoint/election_rollback.rs"]
++mod election_rollback;
+diff --git a/tests/quic.rs b/tests/quic.rs
+index eb86c7f..4934d66 100644
+--- a/tests/quic.rs
++++ b/tests/quic.rs
+@@ -21,0 +22,2 @@ mod frame_progress;
++#[path = "quic/peer_close.rs"]
++mod peer_close;
+diff --git a/tests/quic/frame_progress/shutdown.rs b/tests/quic/frame_progress/shutdown.rs
+index 7d62f83..9917bd5 100644
+--- a/tests/quic/frame_progress/shutdown.rs
++++ b/tests/quic/frame_progress/shutdown.rs
+@@ -81,0 +82,96 @@ fn simultaneous_frame_close_retains_original_sends_and_unread_input_coarse() {
++fn received_close_progress(link: &mut Link, original: &Message) -> (bool, bool) {
++    let status = link.receiver.drain_status();
++    let closing = status
++        .session
++        .is_some_and(|s| s.state == SessionState::Closing);
++    if closing && status.received.is_some() {
++        let received = link.receiver.take_received().unwrap();
++        assert_eq!(received.connection, link.receiver.binding());
++        assert_eq!(received.messages.as_slice(), std::slice::from_ref(original));
++        assert!(link.receiver.take_received().is_none());
++    }
++    let retained = status.state == TransportState::Draining;
++    if retained {
++        let session = status.session.expect("EOF must retain its protocol owner");
++        assert_eq!(session.state, SessionState::Closing);
++        assert_eq!(session.protocol_drained, Some(false));
++        assert!(session.next_deadline.is_some());
++    }
++    (closing, retained)
++}
++
++#[test]
++fn clean_peer_eof_retains_framed_session_until_real_protocol_drain() {
++    let mut link = Link::new();
++    let original = message(1);
++    let ticket = link.queue.submit(vec![original.clone()]).unwrap();
++    link.sender
++        .submit(link.queue.poll(1).pop().unwrap())
++        .unwrap();
++    let mut elapsed = 0;
++    for time in 0..500 {
++        elapsed = time;
++        link.poll(time);
++        if link.sender.usage().completion && link.receiver.received_info().is_some() {
++            break;
++        }
++    }
++    let done = link.sender.take_send().unwrap();
++    assert_eq!(done.batch.ticket, ticket);
++    assert_eq!(
++        done.batch.messages.as_slice(),
++        std::slice::from_ref(&original)
++    );
++    assert_eq!(done.result, LocalSendResult::Sent);
++    link.queue.complete(done.batch, done.result).unwrap();
++    assert!(link.queue.is_drained());
++    // Keep decoded input unread until after the actual authenticated peer close.
++    link.sender.close();
++    let budget = TransportPollBudget {
++        session: SessionPollBudget {
++            io_calls: 1,
++            read_bytes: 1200,
++            write_bytes: 1200,
++        },
++        ..TransportPollBudget::default()
++    };
++    let mut retained = false;
++    let mut peer_closed = false;
++    let mut response = false;
++    for time in elapsed + 1..elapsed + 5000 {
++        for (index, transport) in [&mut link.sender, &mut link.receiver]
++            .into_iter()
++            .enumerate()
++        {
++            let progress = transport.poll(MonoTime(link.start + time), budget).unwrap();
++            assert!(progress.session.io_calls <= 1);
++            link.arrivals.emitted(index, progress.session.written_bytes);
++            if index == 1 && peer_closed {
++                response |= progress.session.written_bytes > 0;
++            }
++        }
++        let (closing, draining) = received_close_progress(&mut link, &original);
++        peer_closed |= closing;
++        retained |= draining;
++        if link.receiver.state() == TransportState::Closed
++            && link.sender.state() == TransportState::Closed
++        {
++            break;
++        }
++    }
++    assert!(
++        retained,
++        "the original framed EOF must expose retained close work"
++    );
++    assert!(
++        response,
++        "the retained framed provider must send the actual close response"
++    );
++    for transport in [&mut link.sender, &mut link.receiver] {
++        assert_eq!(transport.state(), TransportState::Closed);
++        assert_eq!(transport.usage(), TransportUsage::default());
++        assert!(transport.take_send().is_none());
++        assert!(transport.drain_status().session.is_none());
++    }
++}
++
+diff --git a/tests/raft/reference.rs b/tests/raft/reference.rs
+index 63c47d4..b053a57 100644
+--- a/tests/raft/reference.rs
++++ b/tests/raft/reference.rs
+@@ -9,0 +10,4 @@ mod host;
++#[path = "reference/native_host.rs"]
++mod native_host;
++#[path = "reference/persistence.rs"]
++mod persistence;
+@@ -24,0 +29,18 @@ enum Action {
++    Persistence(u64, Persistence),
++}
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++enum Phase {
++    Accepted,
++    Written,
++    Synced,
++}
++#[derive(Clone, Copy, Debug, Eq, PartialEq)]
++enum Persistence {
++    Hold,
++    Write,
++    Sync,
++    Complete,
++    ProcessCrash,
++    PowerLoss,
++    Stale,
++    LieReferenceSync,
+@@ -38,0 +61,6 @@ struct Evidence {
++    holds: usize,
++    storage_writes: usize,
++    barriers: usize,
++    completions: usize,
++    restarts: usize,
++    stale_checks: usize,
+@@ -45,0 +74,3 @@ enum Mismatch {
++    Action(u64),
++    NativeRecovery(u64, u128),
++    ReferenceRecovery(u64, u128),
+@@ -54 +85 @@ struct Comparison {
+-    native: Cluster<NativeLogStore<ModelIo>>,
++    native: native_host::Native,
+@@ -61 +92 @@ impl Comparison {
+-            native: Cluster::new(bootstrap(1, 3), native),
++            native: native_host::Native::new(),
+@@ -66,2 +97,2 @@ impl Comparison {
+-    fn pump(&mut self) {
+-        self.native.pump();
++    fn pump(&mut self) -> Result<(), Mismatch> {
++        self.native.pump()?;
+@@ -68,0 +100 @@ impl Comparison {
++        Ok(())
+@@ -73 +105 @@ impl Comparison {
+-                self.native.act(id, Event::Campaign);
++                self.native.act(id, Event::Campaign)?;
+@@ -80 +112 @@ impl Comparison {
+-                if self.native.replicas[&id].core.role() != Role::Leader
++                if self.native.cluster.replicas[&id].core.role() != Role::Leader
+@@ -91 +123 @@ impl Comparison {
+-                );
++                )?;
+@@ -96 +128 @@ impl Comparison {
+-                self.native.partition(&[id]);
++                self.native.cluster.partition(&[id]);
+@@ -101 +133 @@ impl Comparison {
+-                self.native.heal();
++                self.native.cluster.heal();
+@@ -104 +136 @@ impl Comparison {
+-            Action::Pump => self.pump(),
++            Action::Pump => self.pump()?,
+@@ -106 +138 @@ impl Comparison {
+-                self.native.act(id, Event::Heartbeat);
++                self.native.act(id, Event::Heartbeat)?;
+@@ -114,0 +147 @@ impl Comparison {
++            Action::Persistence(id, operation) => self.persistence(id, operation)?,
+@@ -116 +149 @@ impl Comparison {
+-        self.native.assert_safety();
++        self.native.cluster.assert_safety();
+@@ -132 +165 @@ impl Comparison {
+-        self.native.applied[&id]
++        self.native.cluster.applied[&id]
+@@ -145 +178 @@ impl Comparison {
+-        app.apply_batch(&self.native.applied[&id]).unwrap();
++        app.apply_batch(&self.native.cluster.applied[&id]).unwrap();
+@@ -149 +182,3 @@ impl Comparison {
+-        if self.native.replicas[&id].core.role() != Role::Leader || !self.reference.is_leader(id) {
++        if self.native.cluster.replicas[&id].core.role() != Role::Leader
++            || !self.reference.is_leader(id)
++        {
+@@ -152 +187 @@ impl Comparison {
+-        self.native.act(id, read_request(request));
++        self.native.act(id, read_request(request))?;
+@@ -154 +189 @@ impl Comparison {
+-        self.pump();
++        self.pump()?;
+@@ -156,0 +192 @@ impl Comparison {
++            .cluster
+@@ -168 +204 @@ impl Comparison {
+-                &mut self.native.replicas.get_mut(&id).unwrap().core,
++                &mut self.native.cluster.replicas.get_mut(&id).unwrap().core,
+@@ -188 +224 @@ impl Comparison {
+-            );
++            )?;
+diff --git a/tests/raft/reference/codec.rs b/tests/raft/reference/codec.rs
+index 755ff7d..2e0528c 100644
+--- a/tests/raft/reference/codec.rs
++++ b/tests/raft/reference/codec.rs
+@@ -6 +6,10 @@ impl Trace {
+-        let mut text = format!("VBDIF1 {}\n", self.seed);
++        let version = if self
++            .actions
++            .iter()
++            .any(|a| matches!(a, Action::Persistence(..)))
++        {
++            2
++        } else {
++            1
++        };
++        let mut text = format!("VBDIF{version} {}\n", self.seed);
+@@ -17,0 +27,3 @@ impl Trace {
++                Action::Persistence(id, operation) => {
++                    format!("{} {id}", persistence_tag(*operation))
++                }
+@@ -35 +47 @@ impl Trace {
+-        let ["VBDIF1", seed] = header.as_slice() else {
++        let [version @ ("VBDIF1" | "VBDIF2"), seed] = header.as_slice() else {
+@@ -47 +59 @@ impl Trace {
+-            actions.push(decode_action(line)?);
++            actions.push(decode_action(line, *version == "VBDIF2")?);
+@@ -52 +64 @@ impl Trace {
+-fn decode_action(line: &str) -> Result<Action, &'static str> {
++fn decode_action(line: &str, persistence: bool) -> Result<Action, &'static str> {
+@@ -75,0 +88 @@ fn decode_action(line: &str) -> Result<Action, &'static str> {
++        [tag, id] if persistence => Action::Persistence(node_id(id)?, parse_persistence(tag)?),
+@@ -78,0 +92,25 @@ fn decode_action(line: &str) -> Result<Action, &'static str> {
++fn persistence_tag(operation: Persistence) -> &'static str {
++    match operation {
++        Persistence::Hold => "hold",
++        Persistence::Write => "persist_write",
++        Persistence::Sync => "sync",
++        Persistence::Complete => "complete",
++        Persistence::ProcessCrash => "process_crash",
++        Persistence::PowerLoss => "power_loss",
++        Persistence::Stale => "stale",
++        Persistence::LieReferenceSync => "lie_sync",
++    }
++}
++fn parse_persistence(tag: &str) -> Result<Persistence, &'static str> {
++    match tag {
++        "hold" => Ok(Persistence::Hold),
++        "persist_write" => Ok(Persistence::Write),
++        "sync" => Ok(Persistence::Sync),
++        "complete" => Ok(Persistence::Complete),
++        "process_crash" => Ok(Persistence::ProcessCrash),
++        "power_loss" => Ok(Persistence::PowerLoss),
++        "stale" => Ok(Persistence::Stale),
++        "lie_sync" => Ok(Persistence::LieReferenceSync),
++        _ => Err("persistence action"),
++    }
++}
+diff --git a/tests/raft/reference/histories.rs b/tests/raft/reference/histories.rs
+index 851f836..6fbf543 100644
+--- a/tests/raft/reference/histories.rs
++++ b/tests/raft/reference/histories.rs
+@@ -73 +73 @@ fn known_majority_reference_matches_original_commands_retries_partition_repair_a
+-fn reduce(mut trace: Trace, target: &Mismatch) -> Trace {
++pub(super) fn reduce(mut trace: Trace, target: &Mismatch) -> Trace {
+@@ -118 +118 @@ fn differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_acti
+-        b"VBDIF2 1\n".as_slice(),
++        b"VBDIF3 1\n".as_slice(),
+diff --git a/tests/raft/reference/host.rs b/tests/raft/reference/host.rs
+index 59730cc..b212b40 100644
+--- a/tests/raft/reference/host.rs
++++ b/tests/raft/reference/host.rs
+@@ -7 +7 @@ use raft_reference::{
+-    Config, RawNode, StateRole,
++    Config, RawNode, Ready, StateRole,
+@@ -8,0 +9,3 @@ use raft_reference::{
++#[path = "host/persistence.rs"]
++mod persistence;
++use persistence::{finish, Disk, Held};
+@@ -14,0 +18,6 @@ struct Replica {
++    disk: Disk,
++    held: Option<Held>,
++    paused: bool,
++    epoch: u64,
++    previous: Option<(u64, u64)>,
++    bad_sync: bool,
+@@ -40,0 +50,6 @@ impl Reference {
++                        disk: Disk::default(),
++                        held: None,
++                        paused: false,
++                        epoch: 1,
++                        previous: None,
++                        bad_sync: false,
+@@ -54,0 +70,3 @@ impl Reference {
++        if self.replicas[&id].held.is_some() {
++            return;
++        }
+@@ -58,0 +77,3 @@ impl Reference {
++        if self.replicas[&id].held.is_some() {
++            return;
++        }
+@@ -69,0 +91,3 @@ impl Reference {
++        if self.replicas[&id].held.is_some() {
++            return;
++        }
+@@ -73,0 +98,3 @@ impl Reference {
++        if self.replicas[&id].held.is_some() {
++            return;
++        }
+@@ -84,0 +112,3 @@ impl Reference {
++            if replica.held.is_some() {
++                break;
++            }
+@@ -87 +117 @@ impl Reference {
+-            let mut ready = replica.core.ready();
++            let ready = replica.core.ready();
+@@ -93,16 +123,6 @@ impl Reference {
+-            // This host models successful atomic durable persistence per Ready.
+-            // Even optional commit-only hard-state writes are persisted here.
+-            // No persisted message or advancement escapes before these writes.
+-            let store = replica.core.raft.raft_log.store.clone();
+-            {
+-                let mut disk = store.wl();
+-                disk.append(ready.entries()).unwrap();
+-                if let Some(hard) = ready.hs() {
+-                    disk.set_hardstate(hard.clone());
+-                }
+-            }
+-            self.messages.extend(ready.take_messages());
+-            self.messages.extend(ready.take_persisted_messages());
+-            for read in ready.take_read_states() {
+-                let request = u64::from_le_bytes(read.request_ctx.as_slice().try_into().unwrap());
+-                assert!(replica.reads.insert(request, read.index).is_none());
++            if replica.paused {
++                replica.held = Some(Held {
++                    ready,
++                    phase: Phase::Accepted,
++                });
++                break;
+@@ -110,8 +130,3 @@ impl Reference {
+-            apply(&mut replica.applied, ready.take_committed_entries());
+-            let mut light = replica.core.advance(ready);
+-            if let Some(commit) = light.commit_index() {
+-                store.wl().mut_hard_state().commit = commit;
+-            }
+-            self.messages.extend(light.take_messages());
+-            apply(&mut replica.applied, light.take_committed_entries());
+-            replica.core.advance_apply();
++            replica.write_ready(&ready);
++            replica.sync_image();
++            finish(replica, ready, &mut self.messages);
+@@ -126 +141,3 @@ impl Reference {
+-            if !self.blocked.contains(&(message.from, message.to)) {
++            if !self.blocked.contains(&(message.from, message.to))
++                && self.replicas[&message.to].held.is_none()
++            {
+diff --git a/tests/runtime/timer_contract.rs b/tests/runtime/timer_contract.rs
+index 02960af..2fe6f86 100644
+--- a/tests/runtime/timer_contract.rs
++++ b/tests/runtime/timer_contract.rs
+@@ -3,0 +4,6 @@ use super::*;
++#[path = "timer_contract/isolation.rs"]
++mod isolation;
++#[path = "timer_contract/mutants.rs"]
++mod mutants;
++#[path = "timer_contract/polling.rs"]
++mod polling;
+diff --git a/tests/member_recovery/older_checkpoint/election_rollback.rs b/tests/member_recovery/older_checkpoint/election_rollback.rs
+new file mode 100644
+index 0000000..48c251d
+--- /dev/null
++++ b/tests/member_recovery/older_checkpoint/election_rollback.rs
+@@ -0,0 +1,311 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Actual append rollback and durable elections over an older learner checkpoint.
++use super::*;
++use voteboat::native::{log_store::*, snapshot_store::*};
++
++fn rollback_request() -> Message {
++    let sender = StoreBinding {
++        identity: identity(1),
++        session: StoreSession::new(1).unwrap(),
++    };
++    Message {
++        group: group(1),
++        configuration: cid(3),
++        from: node(1),
++        to: node(4),
++        sender,
++        term: 2,
++        context: RequestContext {
++            origin: sender,
++            sequence: 71,
++        },
++        rpc: Rpc::Append {
++            previous_index: 4,
++            previous_term: 1,
++            entries: vec![LogEntry {
++                index: 5,
++                term: 2,
++                payload: EntryPayload::Noop,
++            }],
++            leader_commit: 4,
++        },
++    }
++}
++
++fn replacement(core: &mut Raft) -> LogUpdate {
++    assert_eq!(core.membership().id(), cid(4));
++    let effects = core.step(Event::Receive(rollback_request())).unwrap();
++    let [Effect::Persist(update)] = effects.as_slice() else {
++        panic!("rollback must not release an append acknowledgement before persistence")
++    };
++    assert_eq!(core.membership().id(), cid(3));
++    assert_eq!(core.state().membership().unwrap().id(), cid(4));
++    assert_eq!(core.step(Event::Campaign), Err(RaftError::Busy));
++    assert_eq!(core.state().commit_index, 4);
++    assert_eq!(update.suffix.as_ref().unwrap().from, 5);
++    update.clone()
++}
++
++fn recovered(
++    log: &impl LogStore,
++    snapshots: &mut impl SnapshotRetention,
++    final_retained: bool,
++) -> (Raft, Counter) {
++    let mut app = Counter::new(16).unwrap();
++    let (core, replay) =
++        recover_member_replica(node(4), group(1), log, snapshots, &mut app).unwrap();
++    assert_eq!(replay.checkpoint_index, 2);
++    assert_eq!(core.state().commit_index, 4);
++    assert_eq!(core.state().base_index(), 2);
++    assert_eq!(core.state().last_index(), 5);
++    assert_eq!(app.read_applied(4), Ok(10));
++    assert!(core.local_voter());
++    assert_eq!(
++        core.membership().id(),
++        cid(if final_retained { 4 } else { 3 })
++    );
++    assert_eq!(core.membership().joint().is_some(), !final_retained);
++    assert_eq!(
++        core.state()
++            .configuration_status(OperationId::new(3).unwrap())
++            .unwrap()
++            .resume_action(),
++        if final_retained {
++            ConfigurationResumeAction::WaitForCommit
++        } else {
++            ConfigurationResumeAction::Finalize(ConfigurationRecord {
++                operation: OperationId::new(3).unwrap(),
++                expected: cid(3),
++                change: ConfigurationChange::Final { id: cid(4) },
++            })
++        }
++    );
++    (core, app)
++}
++
++/// Matching committed history is a fixture premise; ballots below are actual
++/// core transitions with native persistence, not fixture durability tokens.
++fn ballot(request: Message, final_retained: bool) -> Message {
++    let mut log = NativeLogStore::create(
++        ModelIo::default(),
++        identity(request.to.get() as u128),
++        LogLimits::default(),
++    )
++    .unwrap();
++    append(&mut log, vec![LogMutation::Create(bootstrap(1, 3))]);
++    record(
++        &mut log,
++        2,
++        ConfigurationChange::Learners(configuration(2, &[1, 2, 3], &[4, 5])),
++        1,
++    );
++    command(&mut log, 900, 7);
++    command(&mut log, 901, 3);
++    advance(&mut log, Stage::FinalAccepted);
++    let mut peer = Raft::recover_member(
++        request.to,
++        log.binding(),
++        log.state(group(1)).unwrap(),
++        log.limits(),
++    )
++    .unwrap();
++    if !final_retained {
++        let mut rollback = rollback_request();
++        rollback.to = request.to;
++        // Voter2 can receive voter1's request. For voter1 use the same exact
++        // authorized prefix from voter2, avoiding a self-addressed ingress.
++        if rollback.to == node(1) {
++            rollback.from = node(2);
++            rollback.sender.identity = identity(2);
++            rollback.context.origin = rollback.sender;
++        }
++        let effects = peer.step(Event::Receive(rollback)).unwrap();
++        persist(&mut peer, &mut log, effects);
++    }
++    let effects = peer.step(Event::Receive(request)).unwrap();
++    assert_eq!(peer.state().hard_state.voted_for, None);
++    let effects = persist(&mut peer, &mut log, effects);
++    let [Effect::Send(reply)] = effects.as_slice() else {
++        panic!("exact durable ballot")
++    };
++    assert!(matches!(reply.rpc, Rpc::Voted { granted: true }));
++    assert_eq!(peer.state().hard_state.voted_for, Some(node(4)));
++    assert_eq!(log.state(group(1)).unwrap(), *peer.state());
++    reply.clone()
++}
++
++fn elect(core: &mut Raft, log: &mut impl LogStore, final_retained: bool) {
++    let effects = core.step(Event::Campaign).unwrap();
++    assert_eq!(core.role(), Role::Candidate);
++    assert_eq!(core.state().hard_state.voted_for, None);
++    assert_eq!(core.step(Event::Campaign), Err(RaftError::Busy));
++    let requests = persist(core, log, effects);
++    assert_eq!(core.role(), Role::Candidate);
++    assert_eq!(
++        core.state().ballot_origin.unwrap().configuration,
++        cid(if final_retained { 4 } else { 3 })
++    );
++    let request = |id| {
++        requests
++            .iter()
++            .find_map(|effect| match effect {
++                Effect::Send(message)
++                    if message.to == node(id) && matches!(message.rpc, Rpc::Vote { .. }) =>
++                {
++                    Some(message.clone())
++                }
++                _ => None,
++            })
++            .unwrap()
++    };
++    let first = ballot(request(1), final_retained);
++    if !final_retained {
++        let mut stale = first.clone();
++        stale.configuration = cid(4);
++        assert_eq!(
++            core.step(Event::Receive(stale)),
++            Err(RaftError::WrongIdentity)
++        );
++        assert_eq!(core.role(), Role::Candidate);
++    }
++    let mut effects = core.step(Event::Receive(first)).unwrap();
++    if !final_retained {
++        assert!(
++            effects.is_empty(),
++            "new-only majority cannot elect under Joint"
++        );
++        assert_eq!(core.role(), Role::Candidate);
++        effects = core
++            .step(Event::Receive(ballot(request(2), false)))
++            .unwrap();
++    }
++    assert_eq!(core.role(), Role::Leader);
++    assert_eq!(core.state().last_index(), 5);
++    assert_eq!(core.step(Event::Campaign), Err(RaftError::Busy));
++    let _replication = persist(core, log, effects);
++    assert_eq!(core.role(), Role::Leader);
++    assert_eq!(core.state().hard_state.voted_for, Some(node(4)));
++    assert_eq!(core.state().last_index(), 6);
++    assert_eq!(core.state().commit_index, 4);
++}
++
++#[test]
++fn old_checkpoint_final_rollback_native_faults_restore_the_actual_election_policy() {
++    let source = ModelIo::default();
++    let mut baseline =
++        NativeLogStore::create(source.clone(), identity(4), LogLimits::default()).unwrap();
++    let mut images = snapshots();
++    let original = old_checkpoint(&mut baseline, &mut images);
++    advance(&mut baseline, Stage::FinalAccepted);
++    let before = source.0.borrow().synced.clone();
++    let manifest = source.0.borrow().manifest.clone();
++    let (mut core, _) = recovered(&baseline, &mut images, true);
++    let update = replacement(&mut core);
++    let effects = persist_effect(&mut core, &mut baseline, update).unwrap();
++    assert!(matches!(
++        effects.as_slice(),
++        [Effect::Send(Message {
++            rpc: Rpc::Appended {
++                success: true,
++                matching_index: 5
++            },
++            ..
++        })]
++    ));
++    let frame_bytes = source.0.borrow().synced.len() - before.len();
++    eprintln!(
++        "old-checkpoint rollback: frame_bytes={frame_bytes}, fault_schedules={}",
++        frame_bytes + 4
++    );
++    for fault in (0..=frame_bytes).map(Fault::Append).chain([
++        Fault::Sync,
++        Fault::PublishBefore,
++        Fault::PublishAfter,
++    ]) {
++        let io = ModelIo::default();
++        {
++            let mut device = io.0.borrow_mut();
++            device.log = before.clone();
++            device.synced = before.clone();
++            device.manifest = manifest.clone();
++        }
++        let mut log =
++            NativeLogStore::recover(io.clone(), identity(4), LogLimits::default()).unwrap();
++        let mut snapshots = images.clone();
++        let (mut core, _) = recovered(&log, &mut snapshots, true);
++        let update = replacement(&mut core);
++        io.0.borrow_mut().fault = fault;
++        assert!(
++            persist_effect(&mut core, &mut log, update).is_err(),
++            "{fault:?}"
++        );
++        assert!(core.is_fenced());
++        drop(core);
++        drop(log);
++        io.0.borrow_mut().power_loss();
++        let mut log = NativeLogStore::recover(io, identity(4), LogLimits::default()).unwrap();
++        assert_eq!(log.state(group(1)).unwrap().snapshot, Some(original));
++        let final_retained = !matches!(fault, Fault::PublishBefore | Fault::PublishAfter);
++        let (mut core, mut app) = recovered(&log, &mut snapshots, final_retained);
++        elect(&mut core, &mut log, final_retained);
++        retry(&mut app);
++    }
++}
++
++#[test]
++fn old_checkpoint_public_rollback_survives_file_reclaim_and_election_reopen() {
++    let root = std::env::temp_dir().join(format!(
++        "voteboat-old-election-{}-{}",
++        std::process::id(),
++        std::time::SystemTime::now()
++            .duration_since(std::time::UNIX_EPOCH)
++            .unwrap()
++            .as_nanos()
++    ));
++    std::fs::create_dir_all(&root).unwrap();
++    let snapshot_identity = SnapshotIdentity {
++        store: identity(4),
++        group: group(1),
++    };
++    let mut log = NativeLogStore::create(
++        FileLogIo::create(root.join("wal")).unwrap(),
++        identity(4),
++        LogLimits::default(),
++    )
++    .unwrap();
++    let mut images = NativeSnapshotStore::create(
++        FileSnapshotIo::create(root.join("snapshots")).unwrap(),
++        snapshot_identity,
++        SnapshotLimits::default(),
++    )
++    .unwrap();
++    let original = old_checkpoint(&mut log, &mut images);
++    advance(&mut log, Stage::FinalAccepted);
++    let (mut core, _) = recovered(&log, &mut images, true);
++    let update = replacement(&mut core);
++    persist_effect(&mut core, &mut log, update).unwrap();
++    assert_eq!(core.membership().id(), cid(3));
++    log.reclaim(log.limits().max_wal_bytes).unwrap();
++    drop(log);
++    drop(images);
++    let mut log = NativeLogStore::recover(
++        FileLogIo::open(root.join("wal")).unwrap(),
++        identity(4),
++        LogLimits::default(),
++    )
++    .unwrap();
++    let mut images = NativeSnapshotStore::recover(
++        FileSnapshotIo::open(root.join("snapshots")).unwrap(),
++        snapshot_identity,
++        SnapshotLimits::default(),
++    )
++    .unwrap();
++    assert_eq!(log.state(group(1)).unwrap().snapshot, Some(original));
++    let (mut core, mut app) = recovered(&log, &mut images, false);
++    elect(&mut core, &mut log, false);
++    retry(&mut app);
++    drop(log);
++    drop(images);
++    std::fs::remove_dir_all(root).unwrap();
++}
+diff --git a/tests/quic/peer_close.rs b/tests/quic/peer_close.rs
+new file mode 100644
+index 0000000..15c02ee
+--- /dev/null
++++ b/tests/quic/peer_close.rs
+@@ -0,0 +1,61 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++#[test]
++fn clean_peer_close_at_last_io_call_retains_response_and_protocol_timer() {
++    let ((mut a, mut b), arrivals) =
++        configured_pair_with(1, 1, SessionLimits::default(), Arrivals::capture);
++    let start = arrivals.ready(&mut a, &mut b);
++    a.close();
++    let budget = SessionPollBudget {
++        io_calls: 1,
++        read_bytes: 1200,
++        write_bytes: 1200,
++    };
++    let mut received_at = None;
++    for time in start..start + 100 {
++        let progress = a.poll(MonoTime(time), budget).unwrap();
++        arrivals.emitted(0, progress.written_bytes);
++        let progress = b.poll(MonoTime(time), budget).unwrap();
++        arrivals.emitted(1, progress.written_bytes);
++        if b.state() != SessionState::Ready {
++            assert!(progress.read_bytes > 0);
++            assert_eq!(progress.written_bytes, 0);
++            received_at = Some(time);
++            break;
++        }
++    }
++    let received_at = received_at.expect("actual authenticated peer close must arrive");
++    let status = b.drain_status();
++    // EOF denies fresh writes; it does not remove the original protocol owner
++    // before that owner can send its queued close response with a fresh budget.
++    assert_eq!(b.read_plaintext(&mut [0; 1]), Ok(0));
++    assert_eq!(
++        b.write_plaintext(b"after peer close"),
++        Err(SessionError::Closed)
++    );
++    let mut response = false;
++    for time in received_at + 1..received_at + 100 {
++        let progress = b.poll(MonoTime(time), budget).unwrap();
++        assert!(progress.io_calls <= 1);
++        assert!(progress.read_bytes <= 1200 && progress.written_bytes <= 1200);
++        arrivals.emitted(1, progress.written_bytes);
++        response |= progress.written_bytes > 0;
++        let progress = a.poll(MonoTime(time), budget).unwrap();
++        arrivals.emitted(0, progress.written_bytes);
++        if response {
++            break;
++        }
++    }
++    assert!(response, "clean EOF must not strand Quinn's close response");
++    assert_eq!(status.state, SessionState::Closing, "{status:?}");
++    assert_eq!(status.protocol_drained, Some(false));
++    assert!(status.next_deadline.is_some());
++    assert_eq!(b.state(), SessionState::Closing);
++    let deadline = b.drain_status().next_deadline.unwrap();
++    b.poll(deadline, budget).unwrap();
++    assert_eq!(b.state(), SessionState::Closed);
++    assert_eq!(b.drain_status().protocol_drained, Some(true));
++    assert_eq!(b.next_deadline(), None);
++}
+diff --git a/tests/raft/reference/host/persistence.rs b/tests/raft/reference/host/persistence.rs
+new file mode 100644
+index 0000000..96125f5
+--- /dev/null
++++ b/tests/raft/reference/host/persistence.rs
+@@ -0,0 +1,187 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use raft_reference::eraftpb::HardState as ReferenceHardState;
++
++#[derive(Clone, Default)]
++struct Image {
++    entries: Vec<Entry>,
++    hard: ReferenceHardState,
++}
++#[derive(Default)]
++pub(super) struct Disk {
++    written: Image,
++    durable: Image,
++}
++pub(super) struct Held {
++    pub(super) ready: Ready,
++    pub(super) phase: Phase,
++}
++impl Replica {
++    pub(super) fn write_ready(&mut self, ready: &Ready) {
++        let store = self.core.raft.raft_log.store.clone();
++        let mut cache = store.wl();
++        cache.append(ready.entries()).unwrap();
++        if let Some(first) = ready.entries().first() {
++            let from = usize::try_from(first.index - 1).unwrap();
++            assert!(from <= self.disk.written.entries.len());
++            self.disk.written.entries.truncate(from);
++            self.disk.written.entries.extend_from_slice(ready.entries());
++        }
++        if let Some(hard) = ready.hs() {
++            cache.set_hardstate(hard.clone());
++            self.disk.written.hard = hard.clone();
++        }
++        assert!(self.disk.written.entries.len() <= MAX_ACTIONS * 4);
++    }
++    pub(super) fn sync_image(&mut self) {
++        if !self.bad_sync {
++            self.disk.durable = self.disk.written.clone();
++        }
++    }
++}
++pub(super) fn finish(
++    replica: &mut Replica,
++    mut ready: Ready,
++    messages: &mut VecDeque<ReferenceMessage>,
++) {
++    messages.extend(ready.take_messages());
++    messages.extend(ready.take_persisted_messages());
++    for read in ready.take_read_states() {
++        let request = u64::from_le_bytes(read.request_ctx.as_slice().try_into().unwrap());
++        assert!(replica.reads.insert(request, read.index).is_none());
++    }
++    apply(&mut replica.applied, ready.take_committed_entries());
++    let mut light = replica.core.advance(ready);
++    if let Some(commit) = light.commit_index() {
++        replica
++            .core
++            .raft
++            .raft_log
++            .store
++            .wl()
++            .mut_hard_state()
++            .commit = commit;
++        replica.disk.written.hard.commit = commit;
++        // This host durably stores LightReady commit-only state before an
++        // application result can escape, matching its declared fault contract.
++        replica.sync_image();
++    }
++    messages.extend(light.take_messages());
++    apply(&mut replica.applied, light.take_committed_entries());
++    replica.core.advance_apply();
++}
++impl Reference {
++    pub(in super::super) fn hold(&mut self, id: u64) {
++        self.replicas.get_mut(&id).unwrap().paused = true;
++    }
++    pub(in super::super) fn phase(&self, id: u64) -> Option<Phase> {
++        self.replicas[&id].held.as_ref().map(|held| held.phase)
++    }
++    pub(in super::super) fn write_pending(&mut self, id: u64) -> Result<(), Mismatch> {
++        let replica = self.replicas.get_mut(&id).unwrap();
++        let mut held = replica.held.take().ok_or(Mismatch::Action(id))?;
++        if held.phase != Phase::Accepted {
++            replica.held = Some(held);
++            return Err(Mismatch::Action(id));
++        }
++        replica.write_ready(&held.ready);
++        held.phase = Phase::Written;
++        replica.held = Some(held);
++        Ok(())
++    }
++    pub(in super::super) fn sync(&mut self, id: u64) -> Result<(), Mismatch> {
++        let replica = self.replicas.get_mut(&id).unwrap();
++        let held = replica.held.as_mut().ok_or(Mismatch::Action(id))?;
++        if held.phase != Phase::Written {
++            return Err(Mismatch::Action(id));
++        }
++        held.phase = Phase::Synced;
++        replica.sync_image();
++        Ok(())
++    }
++    pub(in super::super) fn complete(&mut self, id: u64) -> Result<(), Mismatch> {
++        let replica = self.replicas.get_mut(&id).unwrap();
++        let held = replica.held.take().ok_or(Mismatch::Action(id))?;
++        if held.phase != Phase::Synced {
++            replica.held = Some(held);
++            return Err(Mismatch::Action(id));
++        }
++        replica.paused = false;
++        replica.previous = Some((replica.epoch, held.ready.number()));
++        finish(replica, held.ready, &mut self.messages);
++        self.ready(id);
++        Ok(())
++    }
++    pub(in super::super) fn lie_sync(&mut self, id: u64) {
++        self.replicas.get_mut(&id).unwrap().bad_sync = true;
++    }
++    pub(in super::super) fn restart(&mut self, id: u64, power: bool) -> Result<(), Mismatch> {
++        let original = self.commands(id);
++        let old = self.replicas.remove(&id).unwrap();
++        let previous = old
++            .held
++            .as_ref()
++            .map(|held| (old.epoch, held.ready.number()))
++            .or(old.previous);
++        let image = if power {
++            old.disk.durable
++        } else {
++            old.disk.written
++        };
++        let epoch = old.epoch.checked_add(1).unwrap();
++        // No shared MemStorage clone survives restart. Own selected bytes and
++        // HardState build a new provider; the comparison oracle supplies nothing.
++        let store = MemStorage::new_with_conf_state((vec![1, 2, 3], vec![]));
++        {
++            let mut disk = store.wl();
++            disk.append(&image.entries).unwrap();
++            disk.set_hardstate(image.hard.clone());
++        }
++        let logger = slog::Logger::root(slog::Discard, slog::o!());
++        let config = Config {
++            id,
++            max_uncommitted_size: 65536,
++            ..Config::default()
++        };
++        let replica = Replica {
++            core: RawNode::new(&config, store, &logger).unwrap(),
++            applied: Vec::new(),
++            reads: BTreeMap::new(),
++            corrupted_value: false,
++            disk: Disk {
++                written: image.clone(),
++                durable: image,
++            },
++            held: None,
++            paused: false,
++            epoch,
++            previous,
++            bad_sync: false,
++        };
++        self.replicas.insert(id, replica);
++        self.ready(id);
++        let restored = self.commands(id);
++        if !restored.starts_with(&original) {
++            let operation = original
++                .iter()
++                .zip(restored.iter().map(Some).chain(std::iter::repeat(None)))
++                .find(|(old, new)| Some(*old) != *new)
++                .unwrap()
++                .0
++                 .0;
++            return Err(Mismatch::ReferenceRecovery(id, operation));
++        }
++        Ok(())
++    }
++    pub(in super::super) fn stale(&mut self, id: u64) -> Result<(), Mismatch> {
++        let replica = &self.replicas[&id];
++        let (epoch, _) = replica.previous.ok_or(Mismatch::Action(id))?;
++        // The host owns Ready callbacks. RawNode numbers restart from one;
++        // reject the old owner before calling any advancement on the new core.
++        if epoch == replica.epoch {
++            return Err(Mismatch::Action(id));
++        }
++        Ok(())
++    }
++}
+diff --git a/tests/raft/reference/native_host.rs b/tests/raft/reference/native_host.rs
+new file mode 100644
+index 0000000..5a3c4eb
+--- /dev/null
++++ b/tests/raft/reference/native_host.rs
+@@ -0,0 +1,271 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++enum Held {
++    Accepted(LogUpdate),
++    Written(LogTicket),
++    Synced(DurableLog),
++}
++
++pub(super) struct Native {
++    pub(super) cluster: Cluster<NativeLogStore<ModelIo>>,
++    images: BTreeMap<u64, ModelIo>,
++    paused: BTreeSet<u64>,
++    held: BTreeMap<u64, Held>,
++    previous: BTreeMap<u64, DurableLog>,
++}
++
++impl Native {
++    pub(super) fn new() -> Self {
++        let images: BTreeMap<_, _> = (1..=3).map(|id| (id, ModelIo::default())).collect();
++        let cluster = Cluster::new(bootstrap(1, 3), |id| {
++            NativeLogStore::create(
++                images[&id].clone(),
++                identity(u128::from(id)),
++                LogLimits::default(),
++            )
++            .unwrap()
++        });
++        Self {
++            cluster,
++            images,
++            paused: BTreeSet::new(),
++            held: BTreeMap::new(),
++            previous: BTreeMap::new(),
++        }
++    }
++
++    pub(super) fn act(&mut self, id: u64, event: Event) -> Result<(), Mismatch> {
++        let delivery = matches!(event, Event::Receive(_));
++        let replica = self
++            .cluster
++            .replicas
++            .get_mut(&id)
++            .ok_or(Mismatch::Action(id))?;
++        match replica.core.step(event) {
++            Ok(effects) => self.effects(id, effects),
++            Err(RaftError::Busy) if self.held.contains_key(&id) => Ok(()),
++            Err(RaftError::WrongIdentity) if delivery => Ok(()),
++            Err(_) => Err(Mismatch::Action(id)),
++        }
++    }
++
++    fn effects(&mut self, id: u64, effects: Vec<Effect>) -> Result<(), Mismatch> {
++        let mut pending = VecDeque::from(effects);
++        while let Some(effect) = pending.pop_front() {
++            match effect {
++                Effect::Persist(update) if self.paused.contains(&id) => {
++                    if self.held.contains_key(&id) {
++                        return Err(Mismatch::Action(id));
++                    }
++                    self.held.insert(id, Held::Accepted(update));
++                }
++                Effect::Persist(update) => {
++                    let replica = self
++                        .cluster
++                        .replicas
++                        .get_mut(&id)
++                        .ok_or(Mismatch::Action(id))?;
++                    let more = persist_effect(&mut replica.core, &mut replica.store, update)
++                        .map_err(|_| Mismatch::Action(id))?;
++                    pending.extend(more);
++                }
++                Effect::Send(_) | Effect::Committed(_) | Effect::ReadReady(_) => {
++                    self.cluster.effects(id, vec![effect]);
++                }
++                _ => return Err(Mismatch::Action(id)),
++            }
++        }
++        self.cluster.assert_safety();
++        Ok(())
++    }
++
++    pub(super) fn pump(&mut self) -> Result<(), Mismatch> {
++        let mut count = 0;
++        while let Some(message) = self.cluster.messages.pop_front() {
++            count += 1;
++            if count >= 100_000 {
++                return Err(Mismatch::Action(message.to.get()));
++            }
++            if !self
++                .cluster
++                .blocked
++                .contains(&(message.from.get(), message.to.get()))
++            {
++                self.act(message.to.get(), Event::Receive(message))?;
++            }
++        }
++        Ok(())
++    }
++
++    pub(super) fn phase(&self, id: u64) -> Option<Phase> {
++        self.held.get(&id).map(|held| match held {
++            Held::Accepted(_) => Phase::Accepted,
++            Held::Written(_) => Phase::Written,
++            Held::Synced(_) => Phase::Synced,
++        })
++    }
++
++    pub(super) fn hold(&mut self, id: u64) {
++        self.paused.insert(id);
++    }
++
++    pub(super) fn write_pending(&mut self, id: u64) -> Result<(), Mismatch> {
++        let Some(Held::Accepted(update)) = self.held.get(&id) else {
++            return Err(Mismatch::Action(id));
++        };
++        let update = update.clone();
++        let replica = self
++            .cluster
++            .replicas
++            .get_mut(&id)
++            .ok_or(Mismatch::Action(id))?;
++        let tickets = replica
++            .store
++            .append_batch(vec![LogMutation::Update(update)])
++            .map_err(|_| Mismatch::Action(id))?;
++        let [ticket] = tickets.as_slice() else {
++            return Err(Mismatch::Action(id));
++        };
++        replica
++            .core
++            .admitted(*ticket)
++            .map_err(|_| Mismatch::Action(id))?;
++        self.held.insert(id, Held::Written(*ticket));
++        Ok(())
++    }
++
++    pub(super) fn sync(&mut self, id: u64) -> Result<(), Mismatch> {
++        let Some(Held::Written(ticket)) = self.held.get(&id) else {
++            return Err(Mismatch::Action(id));
++        };
++        let replica = self
++            .cluster
++            .replicas
++            .get_mut(&id)
++            .ok_or(Mismatch::Action(id))?;
++        let completion = replica
++            .store
++            .barrier(&[*ticket])
++            .map_err(|_| Mismatch::Action(id))?;
++        self.held.insert(id, Held::Synced(completion));
++        Ok(())
++    }
++
++    pub(super) fn complete(&mut self, id: u64) -> Result<(), Mismatch> {
++        if !matches!(self.held.get(&id), Some(Held::Synced(_))) {
++            return Err(Mismatch::Action(id));
++        }
++        let Some(Held::Synced(completion)) = self.held.remove(&id) else {
++            return Err(Mismatch::Action(id));
++        };
++        self.paused.remove(&id);
++        let replica = self
++            .cluster
++            .replicas
++            .get_mut(&id)
++            .ok_or(Mismatch::Action(id))?;
++        let effects = replica
++            .core
++            .complete(&completion)
++            .map_err(|_| Mismatch::Action(id))?;
++        self.previous.insert(id, completion);
++        self.effects(id, effects)
++    }
++
++    pub(super) fn restart(&mut self, id: u64, power: bool) -> Result<(), Mismatch> {
++        let acknowledged = self
++            .cluster
++            .applied
++            .get(&id)
++            .ok_or(Mismatch::Action(id))?
++            .clone();
++        let replica = self
++            .cluster
++            .replicas
++            .remove(&id)
++            .ok_or(Mismatch::Action(id))?;
++        let old_session = replica.store.binding().session.get();
++        drop(replica);
++        if let Some(Held::Synced(completion)) = self.held.remove(&id) {
++            self.previous.insert(id, completion);
++        }
++        self.paused.remove(&id);
++        let image = self.images.get(&id).ok_or(Mismatch::Action(id))?;
++        if power {
++            image.0.borrow_mut().power_loss();
++        }
++        let first_operation = acknowledged.iter().find_map(operation).unwrap_or(0);
++        let store = NativeLogStore::recover(
++            image.clone(),
++            identity(u128::from(id)),
++            LogLimits::default(),
++        )
++        .map_err(|_| Mismatch::NativeRecovery(id, first_operation))?;
++        if Some(store.binding().session.get()) != old_session.checked_add(1) {
++            return Err(Mismatch::Action(id));
++        }
++        let state = store.state(group(1)).map_err(|_| Mismatch::Action(id))?;
++        let core = Raft::recover(node(id), store.binding(), state, store.limits())
++            .map_err(|_| Mismatch::NativeRecovery(id, first_operation))?;
++        preserve_commands(id, &acknowledged, core.replay_committed())?;
++        self.cluster
++            .applied
++            .insert(id, core.replay_committed().to_vec());
++        self.cluster.reads.remove(&id);
++        self.cluster.replicas.insert(id, Replica { core, store });
++        self.cluster.assert_safety();
++        Ok(())
++    }
++
++    pub(super) fn stale(&mut self, id: u64) -> Result<(), Mismatch> {
++        let completion = self.previous.get(&id).ok_or(Mismatch::Action(id))?;
++        let replica = self
++            .cluster
++            .replicas
++            .get_mut(&id)
++            .ok_or(Mismatch::Action(id))?;
++        let before = (
++            replica.core.state().clone(),
++            replica.core.role(),
++            replica.core.has_pending_dependency(),
++        );
++        if replica.core.complete(completion) != Err(RaftError::WrongCompletion) {
++            return Err(Mismatch::Action(id));
++        }
++        let after = (
++            replica.core.state().clone(),
++            replica.core.role(),
++            replica.core.has_pending_dependency(),
++        );
++        if before != after {
++            return Err(Mismatch::Action(id));
++        }
++        Ok(())
++    }
++}
++
++fn operation(entry: &LogEntry) -> Option<u128> {
++    match entry.payload {
++        EntryPayload::Command { operation, .. } => Some(operation.get()),
++        _ => None,
++    }
++}
++
++fn preserve_commands(
++    id: u64,
++    acknowledged: &[LogEntry],
++    recovered: &[LogEntry],
++) -> Result<(), Mismatch> {
++    let mut recovered = recovered.iter().filter(|entry| operation(entry).is_some());
++    for original in acknowledged
++        .iter()
++        .filter(|entry| operation(entry).is_some())
++    {
++        if recovered.next() != Some(original) {
++            return Err(Mismatch::NativeRecovery(id, operation(original).unwrap()));
++        }
++    }
++    Ok(())
++}
+diff --git a/tests/raft/reference/persistence.rs b/tests/raft/reference/persistence.rs
+new file mode 100644
+index 0000000..edcca2d
+--- /dev/null
++++ b/tests/raft/reference/persistence.rs
+@@ -0,0 +1,260 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++impl Comparison {
++    pub(super) fn persistence(&mut self, id: u64, operation: Persistence) -> Result<(), Mismatch> {
++        match operation {
++            Persistence::Hold => {
++                self.native.hold(id);
++                self.reference.hold(id);
++                self.evidence.holds += 1;
++            }
++            Persistence::Write => {
++                self.native.write_pending(id)?;
++                self.reference.write_pending(id)?;
++                self.evidence.storage_writes += 1;
++            }
++            Persistence::Sync => {
++                self.native.sync(id)?;
++                self.reference.sync(id)?;
++                self.evidence.barriers += 1;
++            }
++            Persistence::Complete => {
++                self.native.complete(id)?;
++                self.reference.complete(id)?;
++                self.evidence.completions += 1;
++            }
++            Persistence::ProcessCrash | Persistence::PowerLoss => {
++                let power = operation == Persistence::PowerLoss;
++                self.native.restart(id, power)?;
++                self.reference.restart(id, power)?;
++                self.evidence.restarts += 1;
++            }
++            Persistence::Stale => {
++                self.native.stale(id)?;
++                self.reference.stale(id)?;
++                self.evidence.stale_checks += 1;
++            }
++            Persistence::LieReferenceSync => self.reference.lie_sync(id),
++        }
++        if self.native.phase(id) != self.reference.phase(id) {
++            return Err(Mismatch::Action(id));
++        }
++        Ok(())
++    }
++}
++fn stage(id: u64, operation: Persistence) -> Action {
++    Action::Persistence(id, operation)
++}
++fn settle(actions: &mut Vec<Action>, leader: u64) {
++    actions.extend([
++        Action::Pump,
++        Action::Heartbeat(leader),
++        Action::Pump,
++        Action::Check,
++    ]);
++}
++fn base(id: u64, operation: u128) -> Vec<Action> {
++    let mut actions = vec![Action::Campaign(id)];
++    settle(&mut actions, id);
++    actions.push(Action::Write(id, operation, 7));
++    settle(&mut actions, id);
++    actions
++}
++#[test]
++fn accepted_written_and_synced_original_commands_match_after_process_and_power_cuts() {
++    for id in 1..=3 {
++        for phase in [Phase::Accepted, Phase::Written, Phase::Synced] {
++            for power in [false, true] {
++                let operation = u128::from(id) * 100;
++                let mut actions = base(id, operation);
++                actions.extend([
++                    stage(id, Persistence::Hold),
++                    Action::Write(id, operation + 1, 3),
++                ]);
++                if phase != Phase::Accepted {
++                    actions.push(stage(id, Persistence::Write));
++                }
++                if phase == Phase::Synced {
++                    actions.push(stage(id, Persistence::Sync));
++                }
++                actions.push(stage(
++                    id,
++                    if power {
++                        Persistence::PowerLoss
++                    } else {
++                        Persistence::ProcessCrash
++                    },
++                ));
++                if phase == Phase::Synced {
++                    actions.push(stage(id, Persistence::Stale));
++                }
++                actions.push(Action::Campaign(id));
++                settle(&mut actions, id);
++                actions.push(Action::Write(id, operation + 1, 3));
++                settle(&mut actions, id);
++                actions.push(Action::Read(id, 71));
++                let trace = Trace { seed: id, actions };
++                let observation = replay(&trace).unwrap_or_else(|error| {
++                    panic!("{error:?}\n{}", String::from_utf8(trace.encode()).unwrap())
++                });
++                assert_eq!(
++                    replay(&Trace::decode(&trace.encode()).unwrap()),
++                    Ok(observation.clone())
++                );
++                assert!(observation.values.values().all(|value| *value == 10));
++                assert_eq!(observation.evidence.holds, 1);
++                assert_eq!(
++                    observation.evidence.storage_writes,
++                    usize::from(phase != Phase::Accepted)
++                );
++                assert_eq!(
++                    observation.evidence.barriers,
++                    usize::from(phase == Phase::Synced)
++                );
++                assert_eq!(
++                    observation.evidence.stale_checks,
++                    usize::from(phase == Phase::Synced)
++                );
++                assert_eq!(observation.evidence.restarts, 1);
++                assert_eq!(observation.evidence.reads, 1);
++            }
++        }
++    }
++}
++#[test]
++fn original_follower_acknowledgements_wait_for_explicit_durability_completion() {
++    let mut run = Comparison::new();
++    for action in [
++        Action::Campaign(1),
++        Action::Pump,
++        Action::Heartbeat(1),
++        Action::Pump,
++        Action::Check,
++        stage(2, Persistence::Hold),
++        stage(3, Persistence::Hold),
++        Action::Write(1, 501, 7),
++        Action::Pump,
++    ] {
++        run.action(&action).unwrap();
++    }
++    for id in [2, 3] {
++        assert_eq!(run.native.phase(id), Some(Phase::Accepted));
++        assert_eq!(run.reference.phase(id), Some(Phase::Accepted));
++        run.action(&stage(id, Persistence::Write)).unwrap();
++        run.action(&stage(id, Persistence::Sync)).unwrap();
++        run.action(&Action::Pump).unwrap();
++    }
++    assert!(run.observation().commands.values().all(Vec::is_empty));
++    run.action(&stage(2, Persistence::Complete)).unwrap();
++    run.action(&Action::Pump).unwrap();
++    assert_eq!(run.commands(1), vec![(501, 7)]);
++    assert_eq!(run.reference.commands(1), vec![(501, 7)]);
++    run.action(&stage(3, Persistence::Complete)).unwrap();
++    for action in [
++        Action::Pump,
++        Action::Heartbeat(1),
++        Action::Pump,
++        Action::Check,
++        Action::Read(1, 1),
++    ] {
++        run.action(&action).unwrap();
++    }
++    assert!(run.observation().values.values().all(|value| *value == 7));
++    assert_eq!(run.evidence.barriers, 2);
++    assert_eq!(run.evidence.completions, 2);
++}
++#[test]
++fn acknowledged_completed_original_ids_survive_restart_and_stale_callbacks() {
++    for power in [false, true] {
++        for id in 1..=3 {
++            let mut actions = base(id, 600);
++            actions.extend([
++                stage(id, Persistence::Hold),
++                Action::Write(id, 601, 3),
++                stage(id, Persistence::Write),
++                stage(id, Persistence::Sync),
++                stage(id, Persistence::Complete),
++            ]);
++            settle(&mut actions, id);
++            actions.push(stage(
++                id,
++                if power {
++                    Persistence::PowerLoss
++                } else {
++                    Persistence::ProcessCrash
++                },
++            ));
++            actions.extend([stage(id, Persistence::Stale), Action::Campaign(id)]);
++            settle(&mut actions, id);
++            actions.push(Action::Write(id, 601, 3));
++            settle(&mut actions, id);
++            actions.push(Action::Read(id, 72));
++            let trace = Trace {
++                seed: 60 + id,
++                actions,
++            };
++            let result = replay(&trace).unwrap();
++            assert_eq!(
++                replay(&Trace::decode(&trace.encode()).unwrap()),
++                Ok(result.clone())
++            );
++            assert!(result.values.values().all(|value| *value == 10));
++            assert_eq!(result.evidence.completions, 1);
++            assert_eq!(result.evidence.stale_checks, 1);
++        }
++    }
++}
++#[test]
++fn falsely_reported_reference_sync_loses_original_ack_and_reduces_with_actual_power_cut() {
++    let mut actions = base(1, 701);
++    actions.extend([
++        stage(1, Persistence::LieReferenceSync),
++        stage(1, Persistence::Hold),
++        Action::Write(1, 702, 3),
++        stage(1, Persistence::Write),
++        stage(1, Persistence::Sync),
++        stage(1, Persistence::Complete),
++    ]);
++    settle(&mut actions, 1);
++    actions.push(stage(1, Persistence::PowerLoss));
++    let trace = Trace { seed: 70, actions };
++    let target = Mismatch::ReferenceRecovery(1, 702);
++    assert_eq!(replay(&trace), Err(target.clone()));
++    let reduced = histories::reduce(trace.clone(), &target);
++    assert!(reduced.actions.len() < trace.actions.len());
++    assert!(reduced
++        .actions
++        .contains(&stage(1, Persistence::LieReferenceSync)));
++    assert!(reduced.actions.contains(&stage(1, Persistence::PowerLoss)));
++    assert!(reduced
++        .actions
++        .iter()
++        .any(|action| matches!(action, Action::Write(1, 702, 3))));
++    assert_eq!(
++        replay(&Trace::decode(&reduced.encode()).unwrap()),
++        Err(target)
++    );
++    let mut corrected = reduced.clone();
++    corrected
++        .actions
++        .retain(|action| *action != stage(1, Persistence::LieReferenceSync));
++    assert!(replay(&corrected).is_ok());
++    println!(
++        "reduced false reference sync:\n{}",
++        String::from_utf8(reduced.encode()).unwrap()
++    );
++}
++#[test]
++fn persistence_opcodes_are_versioned_and_invalid_phase_order_is_refused() {
++    assert!(Trace::decode(b"VBDIF1 1\nhold 1\n").is_err());
++    assert!(Trace::decode(b"VBDIF2 1\nsync 4\n").is_err());
++    let trace = Trace {
++        seed: 1,
++        actions: vec![stage(1, Persistence::Sync)],
++    };
++    assert_eq!(
++        replay(&Trace::decode(&trace.encode()).unwrap()),
++        Err(Mismatch::Action(1))
++    );
++}
+diff --git a/tests/runtime/timer_contract/isolation.rs b/tests/runtime/timer_contract/isolation.rs
+new file mode 100644
+index 0000000..2434b06
+--- /dev/null
++++ b/tests/runtime/timer_contract/isolation.rs
+@@ -0,0 +1,68 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++fn distinct_owners(original: RuntimeOwner) -> [RuntimeOwner; 5] {
++    let mut variants = [original; 5];
++    variants[0].store.identity.id = StoreId::new(2).unwrap();
++    variants[1].store.identity.incarnation = StoreIncarnation::new(2).unwrap();
++    variants[2].store.session = StoreSession::new(2).unwrap();
++    variants[3].lane = ExecutionLaneId::new(2).unwrap();
++    variants[4].generation = RuntimeGeneration::new(2).unwrap();
++    variants
++}
++
++pub(super) fn exact_owner_isolation<T: TimerService>(factory: impl Fn(RuntimeOwner) -> T) {
++    let original = owner(HostLogStore::new(1).binding());
++    for foreign in distinct_owners(original) {
++        assert_ne!(foreign, original);
++        let mut first = factory(original);
++        let mut second = factory(foreign);
++        let first_token = first
++            .register(group(1), TimerKind::Election, MonoTime(10))
++            .unwrap();
++        let second_token = second
++            .register(group(1), TimerKind::Election, MonoTime(10))
++            .unwrap();
++        assert_eq!(first_token.sequence, second_token.sequence);
++        assert_eq!(first_token.owner, original);
++        assert_eq!(second_token.owner, foreign);
++        assert_eq!(first.cancel(second_token), Err(RuntimeError::StaleTicket));
++        assert_eq!(second.cancel(first_token), Err(RuntimeError::StaleTicket));
++        assert_eq!((first.len(), second.len()), (1, 1));
++        assert_eq!(first.owner(), original);
++        assert_eq!(second.owner(), foreign);
++        assert_eq!(
++            first.poll(MonoTime(11), 1).unwrap(),
++            vec![Expiration {
++                token: first_token,
++                late_ms: 1
++            }]
++        );
++        assert_eq!(second.len(), 1, "another owner retains its deadline");
++        assert_eq!(
++            second.poll(MonoTime(12), 1).unwrap(),
++            vec![Expiration {
++                token: second_token,
++                late_ms: 2
++            }]
++        );
++        assert!(first.is_empty());
++        assert!(second.is_empty());
++        assert_eq!(first.cancel(first_token), Err(RuntimeError::StaleTicket));
++        assert_eq!(second.cancel(second_token), Err(RuntimeError::StaleTicket));
++    }
++}
++
++#[test]
++fn host_timer_distinct_store_session_lane_and_generation_isolation() {
++    exact_owner_isolation(|binding| HostTimers::new(binding, 3));
++}
++
++#[cfg(feature = "native")]
++#[test]
++fn native_timer_distinct_store_session_lane_and_generation_isolation() {
++    exact_owner_isolation(|binding| {
++        voteboat::native::runtime::DeadlineQueue::new(binding, 3).unwrap()
++    });
++}
+diff --git a/tests/runtime/timer_contract/mutants.rs b/tests/runtime/timer_contract/mutants.rs
+new file mode 100644
+index 0000000..6c4da86
+--- /dev/null
++++ b/tests/runtime/timer_contract/mutants.rs
+@@ -0,0 +1,143 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++#[derive(Clone, Copy)]
++enum Fault {
++    StoreBlind,
++    IgnoreBudget,
++    DestructiveRefusal,
++    FalseLateness,
++    ReversedOrder,
++}
++
++struct DefectiveTimers {
++    inner: HostTimers,
++    fault: Fault,
++}
++
++impl DefectiveTimers {
++    fn new(binding: RuntimeOwner, fault: Fault) -> Self {
++        Self {
++            inner: HostTimers::new(binding, 3),
++            fault,
++        }
++    }
++}
++
++impl TimerService for DefectiveTimers {
++    fn owner(&self) -> RuntimeOwner {
++        self.inner.owner()
++    }
++    fn capacity(&self) -> usize {
++        self.inner.capacity()
++    }
++    fn len(&self) -> usize {
++        self.inner.len()
++    }
++    fn register(
++        &mut self,
++        group: GroupIdentity,
++        kind: TimerKind,
++        deadline: MonoTime,
++    ) -> Result<TimerToken, RuntimeError> {
++        self.inner.register(group, kind, deadline)
++    }
++    fn cancel(&mut self, mut token: TimerToken) -> Result<(), RuntimeError> {
++        if matches!(self.fault, Fault::StoreBlind) {
++            token.owner.store = self.inner.owner().store;
++        }
++        self.inner.cancel(token)
++    }
++    fn poll(&mut self, now: MonoTime, limit: usize) -> Result<Vec<Expiration>, RuntimeError> {
++        if matches!(self.fault, Fault::DestructiveRefusal) && now < self.inner.now {
++            self.inner.entries.clear();
++        }
++        if matches!(self.fault, Fault::ReversedOrder) {
++            return self.reverse_poll(now, limit);
++        }
++        let budget = if matches!(self.fault, Fault::IgnoreBudget) {
++            usize::MAX
++        } else {
++            limit
++        };
++        let mut expired = self.inner.poll(now, budget)?;
++        if matches!(self.fault, Fault::FalseLateness) {
++            for expiration in &mut expired {
++                expiration.late_ms = 0;
++            }
++        }
++        Ok(expired)
++    }
++}
++
++impl DefectiveTimers {
++    fn reverse_poll(
++        &mut self,
++        now: MonoTime,
++        limit: usize,
++    ) -> Result<Vec<Expiration>, RuntimeError> {
++        if now < self.inner.now {
++            return Err(RuntimeError::ClockRegressed);
++        }
++        self.inner.now = now;
++        self.inner
++            .entries
++            .sort_by_key(|token| std::cmp::Reverse(token.deadline));
++        let mut expired = Vec::new();
++        while expired.len() < limit {
++            let Some(position) = self
++                .inner
++                .entries
++                .iter()
++                .position(|token| token.deadline <= now)
++            else {
++                break;
++            };
++            let token = self.inner.entries.remove(position);
++            expired.push(Expiration {
++                token,
++                late_ms: now.0 - token.deadline.0,
++            });
++        }
++        Ok(expired)
++    }
++}
++
++fn rejects(fault: Fault, check: impl FnOnce(DefectiveTimers)) {
++    let provider = DefectiveTimers::new(owner(HostLogStore::new(1).binding()), fault);
++    assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| check(provider))).is_err());
++}
++
++#[test]
++fn shared_owner_assertions_detect_store_blind_cancellation() {
++    assert!(std::panic::catch_unwind(|| {
++        isolation::exact_owner_isolation(|binding| {
++            DefectiveTimers::new(binding, Fault::StoreBlind)
++        });
++    })
++    .is_err());
++}
++
++#[test]
++fn shared_poll_assertions_detect_budget_bypass() {
++    rejects(Fault::IgnoreBudget, polling::refusal_preserves_deadlines);
++}
++
++#[test]
++fn shared_poll_assertions_detect_destructive_regression_refusal() {
++    rejects(
++        Fault::DestructiveRefusal,
++        polling::refusal_preserves_deadlines,
++    );
++}
++
++#[test]
++fn shared_poll_assertions_detect_false_lateness() {
++    rejects(Fault::FalseLateness, polling::ordered_budget_and_lateness);
++}
++
++#[test]
++fn shared_poll_assertions_detect_reversed_deadline_order() {
++    rejects(Fault::ReversedOrder, polling::ordered_budget_and_lateness);
++}
+diff --git a/tests/runtime/timer_contract/polling.rs b/tests/runtime/timer_contract/polling.rs
+new file mode 100644
+index 0000000..6c92e03
+--- /dev/null
++++ b/tests/runtime/timer_contract/polling.rs
+@@ -0,0 +1,98 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++pub(super) fn refusal_preserves_deadlines<T: TimerService>(mut timers: T) {
++    let original = timers
++        .register(group(1), TimerKind::Election, MonoTime(10))
++        .unwrap();
++    assert!(timers.poll(MonoTime(12), 0).unwrap().is_empty());
++    assert_eq!(timers.len(), 1, "zero budget retains an already due token");
++    assert_eq!(
++        timers.poll(MonoTime(11), 1),
++        Err(RuntimeError::ClockRegressed)
++    );
++    assert_eq!(timers.len(), 1, "refusal retains the original deadline");
++    assert_eq!(
++        timers.poll(MonoTime(12), 1).unwrap(),
++        vec![Expiration {
++            token: original,
++            late_ms: 2
++        }]
++    );
++    assert!(timers.is_empty());
++    assert!(timers.poll(MonoTime(12), usize::MAX).unwrap().is_empty());
++    assert_eq!(timers.cancel(original), Err(RuntimeError::StaleTicket));
++}
++
++pub(super) fn ordered_budget_and_lateness<T: TimerService>(mut timers: T) {
++    let later = timers
++        .register(group(1), TimerKind::Election, MonoTime(20))
++        .unwrap();
++    let earliest = timers
++        .register(group(2), TimerKind::Election, MonoTime(3))
++        .unwrap();
++    let middle = timers
++        .register(group(3), TimerKind::Heartbeat, MonoTime(10))
++        .unwrap();
++    for (token, late_ms, retained) in [(earliest, 27, 2), (middle, 20, 1), (later, 10, 0)] {
++        assert_eq!(
++            timers.poll(MonoTime(30), 1).unwrap(),
++            vec![Expiration { token, late_ms }]
++        );
++        assert_eq!(timers.len(), retained);
++        assert_eq!(timers.cancel(token), Err(RuntimeError::StaleTicket));
++    }
++    assert!(timers.is_empty());
++}
++
++fn boundary_lateness<T: TimerService>(mut timers: T) {
++    let original = timers
++        .register(group(1), TimerKind::Election, MonoTime(0))
++        .unwrap();
++    assert_eq!(
++        timers.poll(MonoTime(u64::MAX), 1).unwrap(),
++        vec![Expiration {
++            token: original,
++            late_ms: u64::MAX
++        }]
++    );
++    let boundary = timers
++        .register(group(1), TimerKind::Election, MonoTime(u64::MAX))
++        .unwrap();
++    assert!(timers.poll(MonoTime(u64::MAX), 0).unwrap().is_empty());
++    assert_eq!(timers.len(), 1);
++    assert_eq!(
++        timers.poll(MonoTime(u64::MAX), 1).unwrap(),
++        vec![Expiration {
++            token: boundary,
++            late_ms: 0
++        }]
++    );
++    assert!(timers.is_empty());
++}
++
++fn poll_obligations<T: TimerService>(factory: impl Fn(usize) -> T) {
++    for capacity in [1, 3, 17] {
++        refusal_preserves_deadlines(factory(capacity));
++        boundary_lateness(factory(capacity));
++    }
++    ordered_budget_and_lateness(factory(3));
++}
++
++#[test]
++fn host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations() {
++    poll_obligations(|capacity| HostTimers::new(owner(HostLogStore::new(1).binding()), capacity));
++}
++
++#[cfg(feature = "native")]
++#[test]
++fn native_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations() {
++    poll_obligations(|capacity| {
++        voteboat::native::runtime::DeadlineQueue::new(
++            owner(HostLogStore::new(1).binding()),
++            capacity,
++        )
++        .unwrap()
++    });
++}

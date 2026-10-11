@@ -79,6 +79,102 @@ fn simultaneous_frame_close_retains_original_sends_and_unread_input_coarse() {
     simultaneous(6);
 }
 
+fn received_close_progress(link: &mut Link, original: &Message) -> (bool, bool) {
+    let status = link.receiver.drain_status();
+    let closing = status
+        .session
+        .is_some_and(|s| s.state == SessionState::Closing);
+    if closing && status.received.is_some() {
+        let received = link.receiver.take_received().unwrap();
+        assert_eq!(received.connection, link.receiver.binding());
+        assert_eq!(received.messages.as_slice(), std::slice::from_ref(original));
+        assert!(link.receiver.take_received().is_none());
+    }
+    let retained = status.state == TransportState::Draining;
+    if retained {
+        let session = status.session.expect("EOF must retain its protocol owner");
+        assert_eq!(session.state, SessionState::Closing);
+        assert_eq!(session.protocol_drained, Some(false));
+        assert!(session.next_deadline.is_some());
+    }
+    (closing, retained)
+}
+
+#[test]
+fn clean_peer_eof_retains_framed_session_until_real_protocol_drain() {
+    let mut link = Link::new();
+    let original = message(1);
+    let ticket = link.queue.submit(vec![original.clone()]).unwrap();
+    link.sender
+        .submit(link.queue.poll(1).pop().unwrap())
+        .unwrap();
+    let mut elapsed = 0;
+    for time in 0..500 {
+        elapsed = time;
+        link.poll(time);
+        if link.sender.usage().completion && link.receiver.received_info().is_some() {
+            break;
+        }
+    }
+    let done = link.sender.take_send().unwrap();
+    assert_eq!(done.batch.ticket, ticket);
+    assert_eq!(
+        done.batch.messages.as_slice(),
+        std::slice::from_ref(&original)
+    );
+    assert_eq!(done.result, LocalSendResult::Sent);
+    link.queue.complete(done.batch, done.result).unwrap();
+    assert!(link.queue.is_drained());
+    // Keep decoded input unread until after the actual authenticated peer close.
+    link.sender.close();
+    let budget = TransportPollBudget {
+        session: SessionPollBudget {
+            io_calls: 1,
+            read_bytes: 1200,
+            write_bytes: 1200,
+        },
+        ..TransportPollBudget::default()
+    };
+    let mut retained = false;
+    let mut peer_closed = false;
+    let mut response = false;
+    for time in elapsed + 1..elapsed + 5000 {
+        for (index, transport) in [&mut link.sender, &mut link.receiver]
+            .into_iter()
+            .enumerate()
+        {
+            let progress = transport.poll(MonoTime(link.start + time), budget).unwrap();
+            assert!(progress.session.io_calls <= 1);
+            link.arrivals.emitted(index, progress.session.written_bytes);
+            if index == 1 && peer_closed {
+                response |= progress.session.written_bytes > 0;
+            }
+        }
+        let (closing, draining) = received_close_progress(&mut link, &original);
+        peer_closed |= closing;
+        retained |= draining;
+        if link.receiver.state() == TransportState::Closed
+            && link.sender.state() == TransportState::Closed
+        {
+            break;
+        }
+    }
+    assert!(
+        retained,
+        "the original framed EOF must expose retained close work"
+    );
+    assert!(
+        response,
+        "the retained framed provider must send the actual close response"
+    );
+    for transport in [&mut link.sender, &mut link.receiver] {
+        assert_eq!(transport.state(), TransportState::Closed);
+        assert_eq!(transport.usage(), TransportUsage::default());
+        assert!(transport.take_send().is_none());
+        assert!(transport.drain_status().session.is_none());
+    }
+}
+
 #[test]
 fn closing_partially_sent_frame_on_peer_loss_returns_original_failed_ownership() {
     let mut link = Link::new();

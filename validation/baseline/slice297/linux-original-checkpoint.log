@@ -1,0 +1,47 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/routed.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/routed-94a0d082f8668bf1)
+
+running 1 test
+delegated Quic checkpoint=true phase=Reserve
+delegated Quic checkpoint=true phase=Intent
+delegated Quic checkpoint=true phase=Stage(21)
+delegated Quic checkpoint=true phase=Stage(22)
+delegated Quic checkpoint=true phase=Fence
+delegated Quic checkpoint=true phase=Import(21)
+delegated Quic checkpoint=true phase=Import(22)
+delegated Quic checkpoint=true phase=ChildPublication
+delegated Quic checkpoint=true phase=ParentPublication
+delegated Quic checkpoint=true phase=Activate(21)
+delegated Quic checkpoint=true phase=Activate(22)
+routed timeout shutdown state=Drained clients_drained=true reads_drained=true read_usage=ReadInvocationUsage { requests: 0, bytes: 0 } results_drained=true result_usage=ApplicationResultUsage { batches: 0, receipts: 0, bytes: 0 } owner_drained=true outbound_drained=true peers_drained=true
+routed timeout node=NodeId(1) group=GroupIdentity { id: GroupId(100), incarnation: GroupIncarnation(1) } role=Follower hard=HardState { term: 128, voted_for: Some(NodeId(2)) } revision=LogRevision(402) base=130 commit=130 last=130 applied=130 pending=false clients=ClientUsage { requests: 0, bytes: 0 } replica=ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 } outbound=OutboundUsage { batches: 0, messages: 0, bytes: 0 } peers=Some((PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }, PeerRosterUsage { connections: 0, connecting: 0, reserved_bytes: 0 }))
+routed timeout peer bindings=[(NodeId(1), None), (NodeId(2), None), (NodeId(3), None)]
+routed timeout now=MonoTime(57874) peer=NodeId(1) drain=None
+routed timeout now=MonoTime(57874) peer=NodeId(2) drain=Some(PeerDrainStatus { peer: PeerIdentity { node: NodeId(2), store: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) } }, closed: true, fenced: false, authorized: true, retiring: false, attempt: None, binding: None, accepted: None, transport: None })
+routed timeout now=MonoTime(57874) peer=NodeId(3) drain=Some(PeerDrainStatus { peer: PeerIdentity { node: NodeId(3), store: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) } }, closed: true, fenced: false, authorized: true, retiring: false, attempt: None, binding: None, accepted: None, transport: None })
+routed timeout shutdown state=Drained clients_drained=true reads_drained=true read_usage=ReadInvocationUsage { requests: 0, bytes: 0 } results_drained=true result_usage=ApplicationResultUsage { batches: 0, receipts: 0, bytes: 0 } owner_drained=true outbound_drained=true peers_drained=true
+routed timeout node=NodeId(2) group=GroupIdentity { id: GroupId(100), incarnation: GroupIncarnation(1) } role=Candidate hard=HardState { term: 128, voted_for: Some(NodeId(2)) } revision=LogRevision(402) base=130 commit=130 last=130 applied=130 pending=false clients=ClientUsage { requests: 0, bytes: 0 } replica=ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 } outbound=OutboundUsage { batches: 0, messages: 0, bytes: 0 } peers=Some((PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }, PeerRosterUsage { connections: 0, connecting: 0, reserved_bytes: 0 }))
+routed timeout peer bindings=[(NodeId(1), None), (NodeId(2), None), (NodeId(3), None)]
+routed timeout now=MonoTime(57874) peer=NodeId(1) drain=Some(PeerDrainStatus { peer: PeerIdentity { node: NodeId(1), store: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) } }, closed: true, fenced: false, authorized: true, retiring: false, attempt: None, binding: None, accepted: None, transport: None })
+routed timeout now=MonoTime(57874) peer=NodeId(2) drain=None
+routed timeout now=MonoTime(57874) peer=NodeId(3) drain=Some(PeerDrainStatus { peer: PeerIdentity { node: NodeId(3), store: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) } }, closed: true, fenced: false, authorized: true, retiring: false, attempt: None, binding: None, accepted: None, transport: None })
+routed timeout shutdown state=Draining clients_drained=true reads_drained=true read_usage=ReadInvocationUsage { requests: 0, bytes: 0 } results_drained=true result_usage=ApplicationResultUsage { batches: 0, receipts: 0, bytes: 0 } owner_drained=true outbound_drained=true peers_drained=false
+routed timeout node=NodeId(3) group=GroupIdentity { id: GroupId(100), incarnation: GroupIncarnation(1) } role=Candidate hard=HardState { term: 128, voted_for: Some(NodeId(3)) } revision=LogRevision(402) base=130 commit=130 last=130 applied=130 pending=false clients=ClientUsage { requests: 0, bytes: 0 } replica=ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 } outbound=OutboundUsage { batches: 0, messages: 0, bytes: 0 } peers=Some((PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }, PeerRosterUsage { connections: 1, connecting: 0, reserved_bytes: 6291456 }))
+routed timeout peer bindings=[(NodeId(1), Some(SessionBinding { local: LocalIdentity { node: NodeId(3), store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(15) } }, peer: LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(15) } }, generation: SecureSessionGeneration(150000), wire_version: 1 })), (NodeId(2), None), (NodeId(3), None)]
+routed timeout now=MonoTime(57874) peer=NodeId(1) drain=Some(PeerDrainStatus { peer: PeerIdentity { node: NodeId(1), store: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) } }, closed: true, fenced: false, authorized: true, retiring: false, attempt: None, binding: Some(SessionBinding { local: LocalIdentity { node: NodeId(3), store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(15) } }, peer: LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(15) } }, generation: SecureSessionGeneration(150000), wire_version: 1 }), accepted: None, transport: Some(TransportDrainStatus { binding: SessionBinding { local: LocalIdentity { node: NodeId(3), store: StoreBinding { identity: StoreIdentity { id: StoreId(3), incarnation: StoreIncarnation(1) }, session: StoreSession(15) } }, peer: LocalIdentity { node: NodeId(1), store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(15) } }, generation: SecureSessionGeneration(150000), wire_version: 1 }, state: Draining, usage: TransportUsage { send_frame_bytes: 0, receive_frame_bytes: 0, decoded_bytes: 0, sending: false, completion: false }, received: None, session: Some(SessionDrainStatus { state: Closing, flushed: true, next_deadline: Some(MonoTime(60926)), close_started: Some(true), protocol_drained: Some(false) }), close_started: Some(true) }) })
+routed timeout now=MonoTime(57875) peer=NodeId(2) drain=Some(PeerDrainStatus { peer: PeerIdentity { node: NodeId(2), store: StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) } }, closed: true, fenced: false, authorized: true, retiring: false, attempt: None, binding: None, accepted: None, transport: None })
+routed timeout now=MonoTime(57875) peer=NodeId(3) drain=None
+
+thread 'native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints' (77069) panicked at tests/routed/delegation.rs:723:9:
+native routed progress timed out
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints ... FAILED
+
+failures:
+
+failures:
+    native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 184 filtered out; finished in 57.88s
+
+error: test failed, to rerun pass `--test routed`

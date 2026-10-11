@@ -379,3 +379,7 @@ fn mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_applicati
 #[cfg(feature = "native")]
 #[path = "older_checkpoint/native.rs"]
 mod native;
+
+#[cfg(feature = "native")]
+#[path = "older_checkpoint/election_rollback.rs"]
+mod election_rollback;

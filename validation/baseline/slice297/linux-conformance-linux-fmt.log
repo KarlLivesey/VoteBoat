@@ -1,0 +1,25 @@
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/quic/peer_close.rs:34:
+     // EOF denies fresh writes; it does not remove the original protocol owner
+     // before that owner can send its queued close response with a fresh budget.
+     assert_eq!(b.read_plaintext(&mut [0; 1]), Ok(0));
+-    assert_eq!(b.write_plaintext(b"after peer close"), Err(SessionError::Closed));
++    assert_eq!(
++        b.write_plaintext(b"after peer close"),
++        Err(SessionError::Closed)
++    );
+     let mut response = false;
+     for time in received_at + 1..received_at + 100 {
+         let progress = b.poll(MonoTime(time), budget).unwrap();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/quic.rs:17:
+ mod chunk_progress;
+ #[path = "quic/closing_timer.rs"]
+ mod closing_timer;
+-#[path = "quic/peer_close.rs"]
+-mod peer_close;
+ #[path = "quic/frame_progress.rs"]
+ mod frame_progress;
++#[path = "quic/peer_close.rs"]
++mod peer_close;
+ mod support;
+ use std::net::UdpSocket;
+ use support::*;

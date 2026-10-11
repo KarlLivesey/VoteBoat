@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests/member_recovery.rs (target/divide-membership/build/debug/deps/member_recovery-297577b90cd72be5)
+
+running 2 tests
+
+thread 'older_checkpoint::election_rollback::old_checkpoint_public_rollback_survives_file_reclaim_and_election_reopen' (194) panicked at tests/member_recovery/older_checkpoint/election_rollback.rs:253:45:
+called `Result::unwrap()` on an `Err` value: Custom { kind: AlreadyExists, error: "store already exists" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test older_checkpoint::election_rollback::old_checkpoint_public_rollback_survives_file_reclaim_and_election_reopen ... FAILED
+old-checkpoint rollback: frame_bytes=135, fault_schedules=139
+test older_checkpoint::election_rollback::old_checkpoint_final_rollback_native_faults_restore_the_actual_election_policy ... ok
+
+failures:
+
+failures:
+    older_checkpoint::election_rollback::old_checkpoint_public_rollback_survives_file_reclaim_and_election_reopen
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 42 filtered out; finished in 0.12s
+
+error: test failed, to rerun pass `--test member_recovery`

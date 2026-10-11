@@ -19,6 +19,8 @@ mod chunk_progress;
 mod closing_timer;
 #[path = "quic/frame_progress.rs"]
 mod frame_progress;
+#[path = "quic/peer_close.rs"]
+mod peer_close;
 mod support;
 use std::net::UdpSocket;
 use support::*;

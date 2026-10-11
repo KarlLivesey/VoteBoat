@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/before/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.71s
+     Running tests/quic.rs (target/divide-shutdown/before/build/debug/deps/quic-07e7ea05c47388f3)
+
+running 1 test
+
+thread 'frame_progress::shutdown::clean_peer_eof_retains_framed_session_until_real_protocol_drain' (56615) panicked at tests/quic/frame_progress/shutdown.rs:162:5:
+the original framed EOF must expose retained close work
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test frame_progress::shutdown::clean_peer_eof_retains_framed_session_until_real_protocol_drain ... FAILED
+
+failures:
+
+failures:
+    frame_progress::shutdown::clean_peer_eof_retains_framed_session_until_real_protocol_drain
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.01s
+
+error: test failed, to rerun pass `--test quic`

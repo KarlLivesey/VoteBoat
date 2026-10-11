@@ -365,9 +365,12 @@ impl<S: SecureSession, C: WireCodec, P: BufferPool> NativePeerTransport<S, C, P>
             if self.sending.is_some() {
                 return Err(TransportError::Session(SessionError::Closed));
             }
-            self.session.take();
             self.clear_partial();
-            self.state = TransportState::Closed;
+            // Clean EOF can precede the secure provider's protocol drain.
+            // Retain its response/timer owner until its real Closed state;
+            // the end of this poll still releases an already-closed provider.
+            self.state = TransportState::Draining;
+            self.start_close();
             return Ok(0);
         }
         self.read += n;

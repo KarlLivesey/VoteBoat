@@ -3,7 +3,16 @@
 use super::*;
 impl Trace {
     pub(super) fn encode(&self) -> Vec<u8> {
-        let mut text = format!("VBDIF1 {}\n", self.seed);
+        let version = if self
+            .actions
+            .iter()
+            .any(|a| matches!(a, Action::Persistence(..)))
+        {
+            2
+        } else {
+            1
+        };
+        let mut text = format!("VBDIF{version} {}\n", self.seed);
         for action in &self.actions {
             let line = match action {
                 Action::Campaign(id) => format!("campaign {id}"),
@@ -15,6 +24,9 @@ impl Trace {
                 Action::Read(id, request) => format!("read {id} {request}"),
                 Action::Check => "check".into(),
                 Action::CorruptReference(id) => format!("corrupt {id}"),
+                Action::Persistence(id, operation) => {
+                    format!("{} {id}", persistence_tag(*operation))
+                }
             };
             text.push_str(&line);
             text.push('\n');
@@ -32,7 +44,7 @@ impl Trace {
             .ok_or("trace header")?
             .split_whitespace()
             .collect();
-        let ["VBDIF1", seed] = header.as_slice() else {
+        let [version @ ("VBDIF1" | "VBDIF2"), seed] = header.as_slice() else {
             return Err("trace version");
         };
         let seed = seed.parse::<u64>().map_err(|_| "trace seed")?;
@@ -44,12 +56,12 @@ impl Trace {
             if actions.len() == MAX_ACTIONS {
                 return Err("action bound");
             }
-            actions.push(decode_action(line)?);
+            actions.push(decode_action(line, *version == "VBDIF2")?);
         }
         Ok(Self { seed, actions })
     }
 }
-fn decode_action(line: &str) -> Result<Action, &'static str> {
+fn decode_action(line: &str, persistence: bool) -> Result<Action, &'static str> {
     let fields: Vec<_> = line.split_whitespace().collect();
     Ok(match fields.as_slice() {
         ["campaign", id] => Action::Campaign(node_id(id)?),
@@ -73,8 +85,34 @@ fn decode_action(line: &str) -> Result<Action, &'static str> {
         }
         ["check"] => Action::Check,
         ["corrupt", id] => Action::CorruptReference(node_id(id)?),
+        [tag, id] if persistence => Action::Persistence(node_id(id)?, parse_persistence(tag)?),
         _ => return Err("action"),
     })
+}
+fn persistence_tag(operation: Persistence) -> &'static str {
+    match operation {
+        Persistence::Hold => "hold",
+        Persistence::Write => "persist_write",
+        Persistence::Sync => "sync",
+        Persistence::Complete => "complete",
+        Persistence::ProcessCrash => "process_crash",
+        Persistence::PowerLoss => "power_loss",
+        Persistence::Stale => "stale",
+        Persistence::LieReferenceSync => "lie_sync",
+    }
+}
+fn parse_persistence(tag: &str) -> Result<Persistence, &'static str> {
+    match tag {
+        "hold" => Ok(Persistence::Hold),
+        "persist_write" => Ok(Persistence::Write),
+        "sync" => Ok(Persistence::Sync),
+        "complete" => Ok(Persistence::Complete),
+        "process_crash" => Ok(Persistence::ProcessCrash),
+        "power_loss" => Ok(Persistence::PowerLoss),
+        "stale" => Ok(Persistence::Stale),
+        "lie_sync" => Ok(Persistence::LieReferenceSync),
+        _ => Err("persistence action"),
+    }
 }
 fn node_id(text: &str) -> Result<u64, &'static str> {
     let id = text.parse().map_err(|_| "node")?;

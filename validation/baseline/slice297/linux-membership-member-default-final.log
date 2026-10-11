@@ -1,0 +1,50 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.23s
+     Running tests/member_recovery.rs (target/divide-membership/build/debug/deps/member_recovery-d34ba035a7072eea)
+
+running 43 tests
+test committed_replacement_assignment_authorizes_only_the_new_exact_store ... ok
+test host_member_records_an_exact_retired_voters_final_commit_after_its_barrier ... ok
+test host_checkpoint_restores_dynamic_membership_and_application_before_exposure ... ok
+test dynamic_recovery_requires_exact_assignment_in_both_views_and_valid_history ... ok
+test host_joint_and_uncommitted_final_restart_reconstruct_distinct_election_predicates ... ok
+test host_witness_authorizes_only_volatile_replication_through_public_contracts ... ok
+test failed_joint_barriers_recover_only_a_complete_old_or_new_membership ... ok
+test joint_repair::configuration_replication_is_opt_in_and_retains_sender_and_journal_checks ... ok
+test joint_repair::accepted_final_repairs_from_only_its_committed_joint_checkpoint ... ok
+test joint_repair::actual_files_keep_joint_repair_after_lost_ack_and_reopen ... ok
+test failed_retirement_commit_barriers_release_no_reply_and_recover_whole_boundaries ... ok
+test joint_repair::committed_repair_image_supersedes_only_uncommitted_learner_tail ... ok
+test joint_repair::final_checkpoint_repair_restores_before_ballot_and_survives_lost_completion ... ok
+test joint_repair::configuration_replication_snapshot_waits_for_application_before_normal_ack ... ok
+test joint_repair::committed_checkpoint_repair_refuses_untrusted_sources_and_regressions ... ok
+test joint_repair::wire_seven_checkpoint_repair_is_bounded_and_refuses_older_protocols ... ok
+test joint_repair::promoted_voter_discards_only_authenticated_obsolete_repair_requests ... ok
+test joint_repair::snapshot_repair_holds_ack_until_restore_and_recovers_lost_completion ... ok
+test native_witness_authorizes_only_volatile_replication_through_public_contracts ... ok
+test native_member_records_an_exact_retired_voters_final_commit_after_its_barrier ... ok
+test native::native_store_uses_the_same_dynamic_election_contract ... ok
+test joint_repair::snapshot_repair_refuses_wrong_store_scope_history_and_application ... ok
+test joint_repair::public_repair_roundtrips_membership_wire_and_native_wal ... ok
+test native::native_files_reclaim_and_restart_dynamic_member_with_verified_application ... ok
+test joint_repair::failed_native_repair_barriers_release_no_ack_and_recover_whole_assignment ... ok
+test joint_repair::wire_six_snapshot_repair_is_explicit_bounded_and_truncation_safe ... ok
+test recovered_dynamic_learner_cannot_vote_campaign_or_serve_reads ... ok
+test joint_repair::wire_five_repair_is_explicit_bounded_and_rejects_every_truncation ... ok
+test recovered_final_weighted_policy_is_used_instead_of_bootstrap_majority ... ok
+test rollback_restores_joint_rules_and_historical_ballot_survives_final_restart ... ok
+test term_zero_replica_can_query_without_advancing_hard_state ... ok
+test older_checkpoint::mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application ... ok
+test older_checkpoint::election_rollback::old_checkpoint_public_rollback_survives_file_reclaim_and_election_reopen ... ok
+test authenticated_witness::native_durable_witness_exchange_uses_real_tcp_tls_wire_three ... ok
+test older_checkpoint::host_old_learner_checkpoint_recovers_each_membership_transition ... ok
+test joint_repair::native_batched_repair_recovers_failed_barriers_and_advances_only_durable_cursors ... ok
+test older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim ... ok
+test native::written_joint_and_each_torn_frame_never_create_partial_voting_membership ... ok
+test joint_repair::divergent_learner_suffix_replacement_recovers_old_or_complete_batch_after_power_loss ... ok
+test joint_repair::configuration_replication_wal_faults_recover_old_or_complete_joint ... ok
+test older_checkpoint::election_rollback::old_checkpoint_final_rollback_native_faults_restore_the_actual_election_policy ... ok
+test joint_repair::snapshot_repair_wal_crashes_never_release_ack_or_partly_promote ... ok
+test older_checkpoint::native::every_torn_transition_with_old_checkpoint_recovers_whole_membership_and_retries ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s

@@ -42,9 +42,31 @@ settled checks. Isolated accepted97-delta writes are absent from the healed
 committed prefix. A deliberately corrupted reference application must mismatch
 after a real committed command; deletion reduction preserves that failure and
 the corrected host passes the reduced schedule. Decoder bounds/refusals are
-checked separately. This scope does not certify hierarchy, joint membership,
-message-by-message equivalence, arbitrary fault schedules or differential crash/
-checkpoint recovery. The latter is the next deliverable.
+checked separately.
+
+VBDIF2 adds explicit hold, storage write, sync, completion, process/power restart
+and stale callback actions. VoteBoat uses actual native WAL bytes and original
+admission tickets/barrier completions. The reference pins its actual Ready and
+owns separate written and synchronized Entry/HardState images. Only explicit
+completion releases persistence-dependent effects. A fresh core and application
+replay each engine's own surviving prefix; acknowledged commands are comparison
+evidence, never recovery input. Native old-session completions must fail without
+progress; the reference host rejects old Ready epochs before touching RawNode.
+
+Eighteen histories cut leader commands at accepted/written/synchronized phases
+under process and power loss. Six more restart acknowledged completed commands,
+then exercise stale callbacks, original retries and real quorum reads. A held
+two-follower history proves synchronization without completion cannot release
+their acknowledgements. Exact codec replay retains these cuts. A deliberately
+false reference sync loses an acknowledged original operation under power loss;
+failure-preserving reduction retains that write and cut, and the corrected host
+passes the same schedule.
+
+The reference image models loss of unsynchronized state, not serialized/torn
+physical disk behavior. Selected native physical fault tests remain separate.
+This scope does not certify hierarchy, joint membership, message-by-message
+equivalence, arbitrary vote/read/follower crash schedules or differential
+checkpoint recovery. Differential checkpoint recovery is the next deliverable.
 
 Reviewed primary sources: [raft-rs tagged manifest](https://github.com/tikv/raft-rs/blob/v0.7.0/Cargo.toml),
 [RawNode/Ready contract](https://github.com/tikv/raft-rs/blob/v0.7.0/src/raw_node.rs),

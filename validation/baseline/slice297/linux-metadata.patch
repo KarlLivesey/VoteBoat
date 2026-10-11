@@ -1,0 +1,65 @@
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index b7fb9e4..a0f6555 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -719,0 +720,3 @@
++        "tests/runtime/timer_contract/isolation.rs",
++        "tests/runtime/timer_contract/polling.rs",
++        "tests/runtime/timer_contract/mutants.rs",
+@@ -723 +726 @@
+-      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
++      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Independent host/native primitive shared assertions additionally cover simultaneous store ID/incarnation/session, lane ID and runtime-generation isolation; zero-budget/regressed-time preservation, bounded earliest expiration, and exact u64::MAX lateness. Five defective host providers demonstrate detection of store-blind cancellation, budget bypass, destructive refusal, false lateness and reversed ordering. Sequence exhaustion and arbitrary host execution remain unqualified. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 5aa94dd..d71b619 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -520 +520,10 @@
+-        {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"}
++        {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"},
++        {"file": "tests/runtime/timer_contract/isolation.rs", "symbol": "host_timer_distinct_store_session_lane_and_generation_isolation"},
++        {"file": "tests/runtime/timer_contract/isolation.rs", "symbol": "native_timer_distinct_store_session_lane_and_generation_isolation"},
++        {"file": "tests/runtime/timer_contract/polling.rs", "symbol": "host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations"},
++        {"file": "tests/runtime/timer_contract/polling.rs", "symbol": "native_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations"},
++        {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_owner_assertions_detect_store_blind_cancellation"},
++        {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_budget_bypass"},
++        {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_destructive_regression_refusal"},
++        {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_false_lateness"},
++        {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_reversed_deadline_order"}
+@@ -528 +537,3 @@
+-            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"}
++            {"file": "tests/runtime/timer_contract.rs", "symbol": "modeled_traces"},
++            {"file": "tests/runtime/timer_contract/isolation.rs", "symbol": "exact_owner_isolation"},
++            {"file": "tests/runtime/timer_contract/polling.rs", "symbol": "refusal_preserves_deadlines"}
+@@ -530 +541 @@
+-          "remaining": ["Finite capacity-three histories do not establish allocation behavior at all supported capacities or bounded execution of arbitrary host callbacks."]
++          "remaining": ["Selected capacity-one/three/seventeen primitive polling checks and finite capacity-three histories do not establish allocation behavior at all supported capacities or bounded execution of arbitrary host callbacks."]
+@@ -540 +551,3 @@
+-            {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"}
++            {"file": "tests/runtime/timer_contract.rs", "symbol": "shared_timer_assertions_detect_cancellation_ignoring_owner"},
++            {"file": "tests/runtime/timer_contract/isolation.rs", "symbol": "exact_owner_isolation"},
++            {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_owner_assertions_detect_store_blind_cancellation"}
+@@ -542 +555 @@
+-          "remaining": ["Sequence exhaustion and every store/session/lane identity mutation are not covered by these selected generation/group/kind/sequence/deadline checks; timer tokens are volatile, not durable evidence."]
++          "remaining": ["Simultaneous providers independently vary store ID, store incarnation, store session, execution lane ID and runtime generation while retaining otherwise identical tokens. Selected exact-owner checks do not establish sequence exhaustion or every combined Shard/worker reincarnation and recovery history; timer tokens are volatile, not durable evidence."]
+@@ -553,3 +566,10 @@
+-            {"file": "tests/runtime/timer_replay/schedule.rs", "symbol": "recorded_timed_owner_schedules_replay_exact_native_states_and_counter_retries"}
+-          ],
+-          "remaining": ["Eight seeds of 128 sequential actions per provider and selected TimedShard integration do not prove all schedules, real-host responsiveness or the cause of platform liveness failures."]
++            {"file": "tests/runtime/timer_replay/schedule.rs", "symbol": "recorded_timed_owner_schedules_replay_exact_native_states_and_counter_retries"},
++            {"file": "tests/runtime/timer_contract/polling.rs", "symbol": "refusal_preserves_deadlines"},
++            {"file": "tests/runtime/timer_contract/polling.rs", "symbol": "ordered_budget_and_lateness"},
++            {"file": "tests/runtime/timer_contract/polling.rs", "symbol": "boundary_lateness"},
++            {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_budget_bypass"},
++            {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_destructive_regression_refusal"},
++            {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_false_lateness"},
++            {"file": "tests/runtime/timer_contract/mutants.rs", "symbol": "shared_poll_assertions_detect_reversed_deadline_order"}
++          ],
++          "remaining": ["Shared primitive checks include regression refusal preserving the original deadline, earliest transfer within caller budget and u64::MAX lateness boundaries. Defective host providers fail those same assertions. These checks, eight seeds of 128 sequential actions per provider and selected TimedShard integration do not prove all schedules, real-host responsiveness or the cause of platform liveness failures."]
+diff --git a/validation/check-provider-conformance.test.mjs b/validation/check-provider-conformance.test.mjs
+index acf1d1f..c9ac66d 100644
+--- a/validation/check-provider-conformance.test.mjs
++++ b/validation/check-provider-conformance.test.mjs
+@@ -42,0 +43,3 @@ for (const [name, mutate] of [
++    ['missing exact owner isolation assertion', d => { review(d, 'TimerService').operations[1].assertions.find(a => a.symbol === 'exact_owner_isolation').symbol = 'invented'; }],
++    ['missing poll preservation assertion', d => { review(d, 'TimerService').operations[2].assertions.find(a => a.symbol === 'refusal_preserves_deadlines').symbol = 'invented'; }],
++    ['missing timer defective-provider runner', d => { review(d, 'TimerService').runners.find(a => a.symbol === 'shared_poll_assertions_detect_budget_bypass').symbol = 'invented'; }],

@@ -1,13 +1,26 @@
 # Baseline acceptance map
 
+Parallel integration: [slice297](../validation/baseline/slice297/README.md).
+Linux/macOS each pass810 affected executions over four profiles: Raft,
+membership recovery, runtime timers, QUIC, transport and peers. Formatting and
+four strict all-target Clippy profiles are zero;694 frozen input guards match.
+Selected interrupted persistence matches an independent known-Raft host across
+original command cuts/restarts/retries, with false-sync detection and reduction.
+Old checkpoint plus real Final-to-Joint rollback survives139 native fault
+schedules and uses recovered-policy ballots. Shared timer assertions detect five
+defective hosts. Two controlled clean-close owner-release failures are fixed;
+the older Linux285/288 cause remains unproven. Reference checkpoint recovery,
+required combined feature acceptance and remaining provider obligations stay
+open; this is not complete P0–P7 acceptance.
+
 Compatible reference comparison: [slice296](../validation/baseline/slice296/README.md).
 Linux/macOS each pass251 complete Raft executions across four profiles, with
 formatting/four strict Clippy profiles zero and686 matching input guards.
 Controlled majority elections, commands/retries, partition repair and quorum
 reads match independent raft-rs0.7.0; exact replay and corruption reduction run.
 Production dependency graphs are unchanged; reference dependencies are test-only.
-Interrupted durability/checkpoint differential and broader fault/provider checks
-remain. Original Mac285 finishes73/0 all and40/0 default; the retained Linux
+Selected interrupted durability is qualified297; checkpoint differential and
+broader fault/provider checks remain. Original Mac285 finishes73/0 all and40/0 default; the retained Linux
 shutdown failure remains unresolved. Feature-complete acceptance is not claimed.
 
 Shared wire provisioning: [slice293](../validation/baseline/slice293/README.md).

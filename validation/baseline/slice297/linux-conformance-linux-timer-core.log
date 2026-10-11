@@ -1,0 +1,17 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.21s
+     Running tests/runtime.rs (target/divide-conformance/build/debug/deps/runtime-e76452b27ab5028e)
+
+running 9 tests
+test timer_contract::isolation::host_timer_distinct_store_session_lane_and_generation_isolation ... ok
+test timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_budget_bypass ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal ... ok
+test timer_contract::polling::host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_false_lateness ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 27 filtered out; finished in 0.00s

@@ -324,7 +324,10 @@ impl NativeQuicSession {
                         && self.sending.is_none()
                     {
                         self.peer_closed = true;
-                        self.state = SessionState::Closed;
+                        // Quinn still owns the close response and drain timer.
+                        // A final-budget read must not make the next poll skip
+                        // that work. EOF remains readable through peer_closed.
+                        self.state = SessionState::Closing;
                     } else if !(self.close_started
                         && matches!(reason, ConnectionError::LocallyClosed))
                     {

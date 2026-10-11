@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.80s
+     Running tests/member_recovery.rs (target/divide-membership/build/debug/deps/member_recovery-9b73c65126f8cc2b)
+
+running 12 tests
+test term_zero_replica_can_query_without_advancing_hard_state ... ok
+test committed_replacement_assignment_authorizes_only_the_new_exact_store ... ok
+test host_member_records_an_exact_retired_voters_final_commit_after_its_barrier ... ok
+test host_witness_authorizes_only_volatile_replication_through_public_contracts ... ok
+test recovered_dynamic_learner_cannot_vote_campaign_or_serve_reads ... ok
+test host_checkpoint_restores_dynamic_membership_and_application_before_exposure ... ok
+test rollback_restores_joint_rules_and_historical_ballot_survives_final_restart ... ok
+test recovered_final_weighted_policy_is_used_instead_of_bootstrap_majority ... ok
+test dynamic_recovery_requires_exact_assignment_in_both_views_and_valid_history ... ok
+test host_joint_and_uncommitted_final_restart_reconstruct_distinct_election_predicates ... ok
+test older_checkpoint::mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application ... ok
+test older_checkpoint::host_old_learner_checkpoint_recovers_each_membership_transition ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

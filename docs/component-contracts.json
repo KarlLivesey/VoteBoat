@@ -717,10 +717,13 @@
       "conformance": [
         "tests/runtime.rs",
         "tests/runtime/timer_contract.rs",
+        "tests/runtime/timer_contract/isolation.rs",
+        "tests/runtime/timer_contract/polling.rs",
+        "tests/runtime/timer_contract/mutants.rs",
         "tests/runtime/timer_replay.rs",
         "tests/runtime/timer_replay/schedule.rs"
       ],
-      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
+      "scope": "Bounded ordered deadlines with exact scoped tokens, replacement/cancellation and lateness. TimedShard supplies automatic consensus timer management through this public seam. Non-voting followers have no election timer; retiring leaders retain heartbeat scheduling until final commitment and step-down. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Independent host/native primitive shared assertions additionally cover simultaneous store ID/incarnation/session, lane ID and runtime-generation isolation; zero-budget/regressed-time preservation, bounded earliest expiration, and exact u64::MAX lateness. Five defective host providers demonstrate detection of store-blind cancellation, budget bypass, destructive refusal, false lateness and reversed ordering. Sequence exhaustion and arbitrary host execution remain unqualified. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
     },
     {
       "design_id": "C10/C11",

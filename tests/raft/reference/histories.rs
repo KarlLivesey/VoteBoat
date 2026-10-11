@@ -70,7 +70,7 @@ fn known_majority_reference_matches_original_commands_retries_partition_repair_a
         }
     }
 }
-fn reduce(mut trace: Trace, target: &Mismatch) -> Trace {
+pub(super) fn reduce(mut trace: Trace, target: &Mismatch) -> Trace {
     let mut cursor = 0;
     while cursor < trace.actions.len() {
         let mut candidate = trace.clone();
@@ -115,7 +115,7 @@ fn reference_host_application_corruption_is_detected_and_reduced_after_real_comm
 #[test]
 fn differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions() {
     for bytes in [
-        b"VBDIF2 1\n".as_slice(),
+        b"VBDIF3 1\n".as_slice(),
         b"VBDIF1 0\n",
         b"VBDIF1 1\nwrite 1 0 2\n",
         b"VBDIF1 1\ncampaign 4\n",

@@ -4,14 +4,23 @@ use super::*;
 use raft_reference::{
     eraftpb::{Entry, EntryType, Message as ReferenceMessage},
     storage::MemStorage,
-    Config, RawNode, StateRole,
+    Config, RawNode, Ready, StateRole,
 };
+#[path = "host/persistence.rs"]
+mod persistence;
+use persistence::{finish, Disk, Held};
 
 struct Replica {
     core: RawNode<MemStorage>,
     applied: Vec<Entry>,
     reads: BTreeMap<u64, u64>,
     corrupted_value: bool,
+    disk: Disk,
+    held: Option<Held>,
+    paused: bool,
+    epoch: u64,
+    previous: Option<(u64, u64)>,
+    bad_sync: bool,
 }
 pub(super) struct Reference {
     replicas: BTreeMap<u64, Replica>,
@@ -38,6 +47,12 @@ impl Reference {
                         applied: Vec::new(),
                         reads: BTreeMap::new(),
                         corrupted_value: false,
+                        disk: Disk::default(),
+                        held: None,
+                        paused: false,
+                        epoch: 1,
+                        previous: None,
+                        bad_sync: false,
                     },
                 )
             })
@@ -52,10 +67,16 @@ impl Reference {
         self.replicas[&id].core.raft.state == StateRole::Leader
     }
     pub(super) fn campaign(&mut self, id: u64) {
+        if self.replicas[&id].held.is_some() {
+            return;
+        }
         self.replicas.get_mut(&id).unwrap().core.campaign().unwrap();
         self.ready(id);
     }
     pub(super) fn write(&mut self, id: u64, operation: u128, delta: i64) {
+        if self.replicas[&id].held.is_some() {
+            return;
+        }
         let mut bytes = operation.to_le_bytes().to_vec();
         bytes.extend(delta.to_le_bytes());
         self.replicas
@@ -67,10 +88,16 @@ impl Reference {
         self.ready(id);
     }
     pub(super) fn heartbeat(&mut self, id: u64) {
+        if self.replicas[&id].held.is_some() {
+            return;
+        }
         self.replicas.get_mut(&id).unwrap().core.ping();
         self.ready(id);
     }
     pub(super) fn read(&mut self, id: u64, request: u64) {
+        if self.replicas[&id].held.is_some() {
+            return;
+        }
         self.replicas
             .get_mut(&id)
             .unwrap()
@@ -82,39 +109,27 @@ impl Reference {
         let replica = self.replicas.get_mut(&id).unwrap();
         let mut count = 0;
         while replica.core.has_ready() {
+            if replica.held.is_some() {
+                break;
+            }
             count += 1;
             assert!(count < 1000, "non-quiescent reference Ready");
-            let mut ready = replica.core.ready();
+            let ready = replica.core.ready();
             assert_eq!(
                 ready.snapshot().get_metadata().index,
                 0,
                 "snapshot is outside this trace contract"
             );
-            // This host models successful atomic durable persistence per Ready.
-            // Even optional commit-only hard-state writes are persisted here.
-            // No persisted message or advancement escapes before these writes.
-            let store = replica.core.raft.raft_log.store.clone();
-            {
-                let mut disk = store.wl();
-                disk.append(ready.entries()).unwrap();
-                if let Some(hard) = ready.hs() {
-                    disk.set_hardstate(hard.clone());
-                }
+            if replica.paused {
+                replica.held = Some(Held {
+                    ready,
+                    phase: Phase::Accepted,
+                });
+                break;
             }
-            self.messages.extend(ready.take_messages());
-            self.messages.extend(ready.take_persisted_messages());
-            for read in ready.take_read_states() {
-                let request = u64::from_le_bytes(read.request_ctx.as_slice().try_into().unwrap());
-                assert!(replica.reads.insert(request, read.index).is_none());
-            }
-            apply(&mut replica.applied, ready.take_committed_entries());
-            let mut light = replica.core.advance(ready);
-            if let Some(commit) = light.commit_index() {
-                store.wl().mut_hard_state().commit = commit;
-            }
-            self.messages.extend(light.take_messages());
-            apply(&mut replica.applied, light.take_committed_entries());
-            replica.core.advance_apply();
+            replica.write_ready(&ready);
+            replica.sync_image();
+            finish(replica, ready, &mut self.messages);
             assert!(self.messages.len() < 10000);
         }
     }
@@ -123,7 +138,9 @@ impl Reference {
         while let Some(message) = self.messages.pop_front() {
             count += 1;
             assert!(count < 100000, "non-quiescent reference messages");
-            if !self.blocked.contains(&(message.from, message.to)) {
+            if !self.blocked.contains(&(message.from, message.to))
+                && self.replicas[&message.to].held.is_none()
+            {
                 let id = message.to;
                 self.replicas
                     .get_mut(&id)

@@ -122,9 +122,10 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294; define matching accepted/written/synced/completion cuts before extending either driver. | Honor original VoteBoat tickets and ordered reference Ready persistence; process/power restart discards only the declared volatile state. Compare original committed operations and retries, retain counterexamples/reduction and qualify both hosts. |
-| Next: differential checkpoint recovery | Advance P1/R01 snapshot and replay acceptance. | Interrupted log differential and existing actual native snapshot294; reference snapshot/publication and application data must come from its own durable image. | Exercise staged/publication/compaction restart cuts and original retries; compare restored application/dedup state without restoring either engine from the comparison oracle. Keep strict builds and bounded artifacts. |
-| Following: retained lifecycle failure correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285/288 failure; typed inspection295 is qualified, but matching original histories pass on both hosts without a failed-state capture. Original Mac285 is terminal73/0 all and40/0 default on its original image. | Inspect retained failures and capture the actual retained provider predicate before a causal fix/regression. No ownership/timer weakening, blanket deadline extension or unchanged healthy probes. |
+| Completed297: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294. | Actual original native tickets and reference Ready cuts, own-image process/power recovery, retries/reads, stale refusal and false-sync reduction pass both hosts. Selected schedules only; snapshots remain separate. |
+| Current: differential checkpoint recovery | Advance P1/R01 snapshot and replay acceptance. | Interrupted log differential297 and existing actual native snapshot294; reference snapshot/publication and application data must come from its own durable image. | Exercise staged/publication/compaction restart cuts and original retries; compare restored application/dedup state without restoring either engine from the comparison oracle. Keep strict builds and bounded artifacts. |
+| Next: retained lifecycle failure correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285/288 failure and qualified typed inspection295. Slice297 proves two clean-close owner-release defects independently; their relationship to the old failure remains unproven. Original Mac285 is terminal73/0 all and40/0 default. | Capture the original failed provider predicate if the changed close path still fails. Preserve ownership/timer contracts and exact old evidence; do not infer causation from passing controlled tests or repeat unchanged healthy probes. |
+| Following: feature acceptance audit | Establish a concrete feature-complete exit for the Linux/macOS service and embedding. | Implemented roadmap evidence, completed mini deliverables and remaining baseline obligations. | Map every required baseline feature to source and meaningful checks; identify a finite list of missing feature/functional acceptance items. Keep arbitrary exhaustive testing, performance/security follow-up, P8 and Windows outside this feature exit. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -27556,3 +27557,139 @@ the retained Linux285/288 shutdown failure, broader conformance/fuzz/combined
 faults and full P0–P7 remain open. Performance/security stay the user's later
 phase; P8/Windows are deferred. See `docs/REFERENCE_TESTING.md` and
 `validation/baseline/slice296/README.md`.
+
+Parallel delivery review — user requested divide-and-conquer. The current
+interrupted-durability comparison advances P1 while independently owned work
+checks a demonstrated shutdown contract (P5/P6), an incomplete TimerService
+provider obligation (P0/VB-011), and old-checkpoint/joint rollback recovery (P4).
+These are existing roadmap exits, not prerequisites for one another. Reference
+work owns tests/raft/reference; shutdown owns native/runtime close paths and
+QUIC tests; conformance owns selected timer tests/metadata; membership owns the
+older-checkpoint election/rollback family. Each uses its own local build cache.
+Integrate independently qualified changes, then freeze one matching Linux/Mac
+image and run complete affected targets plus strict four-profile checks. Keep
+planned schemas separate from evidence and do not claim any original failure
+resolved solely because a controlled composition passes.
+
+Schema297 — interrupted differential persistence (P1/chapter11): retain the
+VBDIF1 baseline and add versioned external hold/write-persistence/sync/completion,
+process/power restart and stale-completion actions. NativeHost pins the actual
+Persist update before admission; append_batch writes and returns its original
+LogTicket, barrier synchronizes the real native WAL/manifest and returns the
+original DurableLog, and only explicit completion releases dependent effects.
+The independent reference host pins original RawNode Ready before storage,
+maintains separate written and durable log/hard-state images, and emits no
+persisted messages or advancement until that Ready's successful barrier.
+Process restart retains written bytes; power loss retains only synchronized
+images. Each engine reopens its own state and reconstructs a fresh application
+from its own committed prefix; comparison history supplies no recovered state.
+Reference Ready ownership includes a host epoch and ordered number; restart
+invalidates that owner. Native completion must refuse the original old-session
+token. Preserve each engine's internal no-op differences and documented commit
+recovery differences; compare original commands/application/reads at settled
+post-recovery barriers, and acknowledged prefixes independently at restart.
+The native delayed driver is needed because296's Cluster synchronously completes
+all Persist effects and cannot cut admission/sync/completion. The reference image
+is needed because MemStorage clones share live state and cannot represent loss
+of unsynchronized writes. Acceptance: both process/power cuts across accepted,
+written and synchronized original work, successful exact release and stale
+refusal, originally committed retry/read after leader restart, replayable traces
+and a meaningful defective-sync negative/reduction. Keep existing majority
+traces, bounded queues, strict lint and both-host qualification. Snapshots remain
+next; no production API/protocol/provider changes are planned.
+
+Schema parallel TimerService — exact RuntimeOwner cancellation and transfer:
+use identical public timers across five independent store/lane/session/generation
+owner changes. Cross-instance cancellation must refuse and retain the exact
+expiration. Shared host/native poll assertions cover zero-budget clock observation,
+regression refusal without consumption, bounded earliest transfer and exact
+lateness including u64::MAX. Only exact cancel/expiration releases ownership;
+mutants bypass identity/budget/regression/lateness/order and must fail the same
+assertions. This closes selected P0 obligations, not sequence exhaustion,
+arbitrary host responsiveness or broader integration. No production timer changes.
+
+Schema parallel membership — checkpoint/suffix/election composition (P4): an
+old learner checkpoint2 retains op900; committed op901 at3 and Joint4 coexist
+with accepted uncommitted Final5. An exact authorized higher-term voter Append
+replaces only5 with Noop. Durable state remains Final until the native barrier;
+accepted-log membership exposes Joint immediately, but Busy refuses new events
+until completion. A failed core is fenced/discarded. Reopen bytes, verified old checkpoint plus suffix
+and fresh application restore whole Final or Joint with original retry IDs.
+Execute campaigns/ballots through independent public cores/native stores and
+exact tickets; Final elects with self4+1 while Joint requires self4+1+2. Failed
+rollback emits no acknowledgement; recovered original operations total10.
+Check real file checkpoint/reclaim/reopen, torn replacement frames and sync/
+manifest faults separately. No fixture-only mutation substitutes for rollback.
+
+Schema parallel shutdown — original protocol owner retention (P5/P6): an
+authenticated clean peer close may arrive on the last bounded I/O call while
+Quinn still owns its close response and drain timer. Mark peer EOF independently
+from session Closing; retain the original connection until its actual drained
+predicate and empty output. Framed EOF clears partial input and starts Draining,
+retaining that session until Closed. Preserve unread plaintext, original send
+completion/credits, poll budgets, authenticated binding and the original timer.
+Prove both early-release defects with isolated before-fix controls and actual
+encrypted UDP; qualify QUIC/transport/peer composition. This adds no new
+consensus effect or timer extension. The older Linux285/288 timeout lacked the
+provider predicate and remains causally unproven.
+
+Implemented297 — parallel integration: Linux and macOS each pass810 complete
+Raft/member_recovery/runtime/QUIC/transport/peers executions, all253/default231/
+core97/native229. Formatting and four strict all-target Clippy profiles have
+zero diagnostics;694 frozen inputs match before/terminal and publication.
+Selected native original command cuts/restarts match independent raft-rs own
+written/durable images:18 accepted/written/synced process/power histories, six
+completed-command restarts, exact stale rejection/retries/reads and held actual
+follower acknowledgements. Deliberately false reference sync loses original
+op702 under an actual power cut and reduces to a replayable causal schedule;
+the corrected host passes it. The reference uses owned Entry/HardState images,
+not torn physical bytes. Checkpoint and arbitrary follower/vote/read cuts remain
+separate; no engine recovers from the comparison oracle.
+
+Membership tests combine verified old learner checkpoint2 with committed op901,
+Joint4 and real Final5-to-Joint rollback. Actual native barriers/fencing/reopen,
+139 replacement-frame/sync/manifest fault schedules, recovered-policy durable
+ballots, original retries/value10 and real file checkpoint/reclaim/reopen pass.
+Accepted membership and volatile Candidate/Leader roles are not durability
+receipts: public membership can expose accepted Joint before the barrier while
+new events remain Busy; durable policy/vote/index changes require completion.
+Shared TimerService assertions now check five owner dimensions, refusal
+preservation, caller budget/order and exact boundary lateness on independent
+host/native providers. Five defective hosts fail those identical assertions.
+Metadata checker passes33 cases;15 partial provider reviews/98 operations remain
+partial, with sequence exhaustion and arbitrary host responsiveness unqualified.
+
+Production changes retain authenticated clean QUIC close as Closing until the
+original Quinn response/timer drain, and retain the framed session after EOF.
+Two isolated before-fix controls fail on actual encrypted UDP response progress
+and premature transport owner release. New tests preserve original send results,
+credits and unread input through EOF/drain. Packet presence is not decoded proof
+of a specific close frame. No deadline, RTT, poll budget, accepted-send ownership,
+consensus, durability or dependency change. These proved defects do not by
+themselves diagnose the retained Linux285/288 timeout. Original evidence remains.
+
+Parallel workers own separate timer, membership and close-path files/caches;
+root owns the differential harness and integrated qualification. Independent
+read-only reviews found no blocker and retained the model limitations above.
+Preflight incorrect payload/volatile-state assumptions, temporary missing modules
+from concurrent registration, one new test complexity28/25 and private method
+visibility failures are retained. Focused type/contract/helper fixes precede the
+clean integrated image; no lint threshold or assertion was waived. A first
+original-regression filter selected zero tests and was corrected to the exact
+qualified name. Sandbox Node child-process spawning was replaced by shell file
+listing plus filesystem-only preparation. Macro review297 closes these selected
+P0/P1/P4/P5/P6 deliverables; the linked plan advances to checkpoint differential,
+retained lifecycle acceptance and a finite feature-exit audit. Performance and
+security remain later work, P8/Windows deferred, full P0–P7 active. See
+`validation/baseline/slice297/README.md` and `docs/REFERENCE_TESTING.md`.
+
+Original lifecycle recheck297: the exact all-feature checkpoint QUIC history
+fails0/1 in57.88s after Activate22. The new public inspection captures the
+remaining node3-to-node1 provider: transport Draining, empty usage/input,
+session Closing/flushed, close_started=true, protocol_drained=false. At
+MonoTime57874 its actual retained next_deadline is60926,3052ms after the fixture
+cutoff. This is current-source evidence of a still-future protocol deadline;
+it does not establish the missing provider state of original285/288. No fixed
+budget or production timer was changed to make this pass. Separate next work
+checks the fixture cleanup expectation against that exact original deadline.
+The810/0 affected-target acceptance is not a claim that the whole suite is clean.

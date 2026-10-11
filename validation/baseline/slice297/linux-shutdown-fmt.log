@@ -1,0 +1,7 @@
+error: couldn't read `/home/karllivesey/Documents/ChatGPT/VoteBoat/tests/raft/reference/native_host.rs`: No such file or directory (os error 2)
+  --> /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/raft/reference.rs:11:1
+   |
+11 | mod native_host;
+   | ^^^^^^^^^^^^^^^^
+
+Error writing files: failed to resolve mod `native_host`: /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/raft/reference/native_host.rs does not exist

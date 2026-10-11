@@ -1,0 +1,7 @@
+error: couldn't read `/home/karllivesey/Documents/ChatGPT/VoteBoat/tests/raft/reference/host/persistence.rs`: No such file or directory (os error 2)
+  --> /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/raft/reference/host.rs:10:1
+   |
+10 | mod persistence;
+   | ^^^^^^^^^^^^^^^^
+
+Error writing files: failed to resolve mod `persistence`: /home/karllivesey/Documents/ChatGPT/VoteBoat/tests/raft/reference/host/persistence.rs does not exist

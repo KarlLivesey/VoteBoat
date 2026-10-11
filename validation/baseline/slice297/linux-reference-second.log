@@ -1,0 +1,37 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.52s
+     Running tests/raft.rs (target/divide-reference/build/debug/deps/raft-5f03544838f50ce5)
+
+running 8 tests
+test reference::histories::differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions ... ok
+test reference::persistence::persistence_opcodes_are_versioned_and_invalid_phase_order_is_refused ... ok
+test reference::persistence::original_follower_acknowledgements_wait_for_explicit_durability_completion ... ok
+test reference::persistence::acknowledged_completed_original_ids_survive_restart_and_stale_callbacks ... ok
+reduced false reference sync:
+VBDIF2 70
+campaign 1
+pump
+lie_sync 1
+hold 1
+write 1 702 3
+persist_write 1
+sync 1
+complete 1
+pump
+power_loss 1
+
+test reference::persistence::falsely_reported_reference_sync_loses_original_ack_and_reduces_with_actual_power_cut ... ok
+test reference::persistence::accepted_written_and_synced_original_commands_match_after_process_and_power_cuts ... ok
+test reference::histories::known_majority_reference_matches_original_commands_retries_partition_repair_and_reads ... ok
+reduced reference-host mismatch:
+VBDIF1 41
+campaign 1
+pump
+write 1 41053 -3
+pump
+corrupt 1
+check
+
+test reference::histories::reference_host_application_corruption_is_detected_and_reduced_after_real_commit ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 71 filtered out; finished in 0.76s

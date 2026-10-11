@@ -1,0 +1,621 @@
+   Compiling once_cell v1.21.4
+   Compiling rustls v0.23.45
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice297/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.05s
+     Running tests/member_recovery.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/member_recovery-d34ba035a7072eea)
+
+running 43 tests
+test committed_replacement_assignment_authorizes_only_the_new_exact_store ... ok
+test host_witness_authorizes_only_volatile_replication_through_public_contracts ... ok
+test host_checkpoint_restores_dynamic_membership_and_application_before_exposure ... ok
+test host_member_records_an_exact_retired_voters_final_commit_after_its_barrier ... ok
+test dynamic_recovery_requires_exact_assignment_in_both_views_and_valid_history ... ok
+test host_joint_and_uncommitted_final_restart_reconstruct_distinct_election_predicates ... ok
+test failed_joint_barriers_recover_only_a_complete_old_or_new_membership ... ok
+test joint_repair::configuration_replication_is_opt_in_and_retains_sender_and_journal_checks ... ok
+test joint_repair::actual_files_keep_joint_repair_after_lost_ack_and_reopen ... ok
+test joint_repair::committed_checkpoint_repair_refuses_untrusted_sources_and_regressions ... ok
+test joint_repair::configuration_replication_snapshot_waits_for_application_before_normal_ack ... ok
+test joint_repair::committed_repair_image_supersedes_only_uncommitted_learner_tail ... ok
+test joint_repair::accepted_final_repairs_from_only_its_committed_joint_checkpoint ... ok
+test joint_repair::snapshot_repair_refuses_wrong_store_scope_history_and_application ... ok
+test failed_retirement_commit_barriers_release_no_reply_and_recover_whole_boundaries ... ok
+test joint_repair::promoted_voter_discards_only_authenticated_obsolete_repair_requests ... ok
+test joint_repair::public_repair_roundtrips_membership_wire_and_native_wal ... ok
+test joint_repair::wire_seven_checkpoint_repair_is_bounded_and_refuses_older_protocols ... ok
+test native::native_store_uses_the_same_dynamic_election_contract ... ok
+test native_member_records_an_exact_retired_voters_final_commit_after_its_barrier ... ok
+test joint_repair::final_checkpoint_repair_restores_before_ballot_and_survives_lost_completion ... ok
+test native_witness_authorizes_only_volatile_replication_through_public_contracts ... ok
+test native::native_files_reclaim_and_restart_dynamic_member_with_verified_application ... ok
+test joint_repair::wire_six_snapshot_repair_is_explicit_bounded_and_truncation_safe ... ok
+old-checkpoint rollback: frame_bytes=135, fault_schedules=139
+old-checkpoint FinalAccepted: frame_bytes=106, fault_schedules=110
+test joint_repair::wire_five_repair_is_explicit_bounded_and_rejects_every_truncation ... ok
+test recovered_dynamic_learner_cannot_vote_campaign_or_serve_reads ... ok
+test recovered_final_weighted_policy_is_used_instead_of_bootstrap_majority ... ok
+test term_zero_replica_can_query_without_advancing_hard_state ... ok
+test rollback_restores_joint_rules_and_historical_ballot_survives_final_restart ... ok
+test joint_repair::snapshot_repair_holds_ack_until_restore_and_recovers_lost_completion ... ok
+test older_checkpoint::mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application ... ok
+test joint_repair::failed_native_repair_barriers_release_no_ack_and_recover_whole_assignment ... ok
+test older_checkpoint::election_rollback::old_checkpoint_public_rollback_survives_file_reclaim_and_election_reopen ... ok
+test older_checkpoint::host_old_learner_checkpoint_recovers_each_membership_transition ... ok
+test authenticated_witness::native_durable_witness_exchange_uses_real_tcp_tls_wire_three ... ok
+test joint_repair::native_batched_repair_recovers_failed_barriers_and_advances_only_durable_cursors ... ok
+test older_checkpoint::native::file_old_learner_checkpoint_recovers_voting_and_removal_after_reclaim ... ok
+test native::written_joint_and_each_torn_frame_never_create_partial_voting_membership ... ok
+test joint_repair::divergent_learner_suffix_replacement_recovers_old_or_complete_batch_after_power_loss ... ok
+old-checkpoint FinalCommitted: frame_bytes=377, fault_schedules=381
+test joint_repair::configuration_replication_wal_faults_recover_old_or_complete_joint ... ok
+test older_checkpoint::election_rollback::old_checkpoint_final_rollback_native_faults_restore_the_actual_election_policy ... ok
+old-checkpoint Demoted: frame_bytes=337, fault_schedules=341
+test joint_repair::snapshot_repair_wal_crashes_never_release_ack_or_partly_promote ... ok
+test older_checkpoint::native::every_torn_transition_with_old_checkpoint_recovers_whole_membership_and_retries ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+     Running tests/peers.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/peers-09499df589499395)
+
+running 19 tests
+test construction_exhaustion_and_rejection_preserve_resources ... ok
+test changed_provider_limits_are_retired_before_further_external_polling ... ok
+test bounded_attempts_timeout_backoff_and_stale_ready_connections ... ok
+test drained_roster_hands_off_fresh_generations_and_rejects_old_ready_work ... ok
+test authentication_scope_limits_session_rollback_and_duplicate_attach_are_rejected ... ok
+test generation_range_exhaustion_never_hides_partially_issued_tickets ... ok
+test failed_connection_holds_original_send_and_capacity_until_exact_completion ... ok
+test invalid_send_completion_fences_without_releasing_queue_credits ... ok
+test drain_inspection_retains_original_roster_ticket_through_close_and_retirement ... ok
+test fair_visits_and_aggregate_capacity_bound_connection_resources ... ok
+test assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_without_mutation ... ok
+test outbound_priority_reordering_does_not_make_an_older_dispatch_stale ... ok
+test malformed_peer_messages_and_capacity_cannot_enter_ingress ... ok
+test receives_are_scoped_and_obsolete_input_is_discarded_before_reconnect ... ok
+test shutdown_drains_accepted_send_and_invalidates_pending_connection_ticket ... ok
+test prospective_assignments_keep_other_groups_without_admitting_input ... ok
+test revoked_sends_keep_exact_credits_and_same_store_reenrollment_keeps_session_floor ... ok
+test membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready ... ok
+test store_replacement_requires_handoff_and_rejection_preserves_live_binding ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/quic.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/quic-898b7d4f7ca27644)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/raft-6a188bac9c86eba9)
+
+running 79 tests
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test fault_schedule::codec::all_actions_round_trip_with_original_ids_and_bytes ... ok
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test fault_schedule::codec::malformed_and_oversized_traces_are_rejected_before_execution ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test fault_schedule::crash::failed_sync_fences_actual_store_and_core_without_escaping_vote_effects ... ok
+test fault_schedule::delayed::admitted_and_synced_votes_wait_for_actual_completion_delivery ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test fault_schedule::crash::process_crash_and_power_loss_distinguish_complete_unsynced_vote_frames ... ok
+test fault_schedule::delayed::power_loss_distinguishes_written_and_synced_unobserved_votes ... ok
+test fault_schedule::publication::manifest_failure_before_or_after_replacement_never_releases_votes ... ok
+test fault_schedule::reads::cancelled_pending_and_ready_reads_reject_old_replies_and_request_reuse ... ok
+test fault_schedule::delayed::independently_completed_follower_is_required_for_a_real_durable_quorum ... ok
+test fault_schedule::reads::lagging_application_restart_and_fencing_cannot_reuse_read_authority ... ok
+test fault_schedule::reads::cached_leadership_cannot_replace_fresh_read_quorum_or_one_use ... ok
+composed append/publication trace:
+VBSIM 1 266
+short_write 1 31
+campaign 1
+process_crash 1
+delay 1
+campaign 1
+publish_before 1
+power_loss 1
+campaign 1
+publish_after 1
+power_loss 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+power_loss 1
+stale 1
+
+test fault_schedule::publication::short_write_and_manifest_failures_share_exact_composed_replay ... ok
+composed crash/failure trace:
+VBSIM 1 265
+delay 1
+campaign 1
+fail_sync 1
+heartbeat 1
+process_crash 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+fail_sync 1
+process_crash 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+power_loss 1
+stale 1
+
+test fault_schedule::crash::composed_process_crashes_and_failed_syncs_replay_exactly ... ok
+test fault_schedule::crash::uncertain_counter_write_recovers_and_original_id_applies_once ... ok
+composed read/cancel trace:
+VBSIM 1 267
+campaign 1
+pump
+counter 1 9911 9
+pump
+read 1 1
+newest
+cancel_read 1 1
+read 1 2
+pump
+serve_counter 1 2
+serve_counter 1 2
+read 1 3
+pump
+process_crash 1
+serve_counter 1 3
+campaign 1
+pump
+serve_counter 1 3
+read 1 4
+isolate 1
+pump
+serve_counter 1 4
+cancel_read 1 4
+heal
+read 1 5
+pump
+serve_counter 1 5
+
+test fault_schedule::reduce::exhausted_reduction_budget_preserves_the_same_failure_without_claiming_minimality ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test fault_schedule::reads::read_cancel_crash_and_partition_schedule_replays_exact_authority ... ok
+test fault_schedule::publication::short_vote_tails_and_complete_error_frames_have_distinct_recovery ... ok
+test fault_schedule::publication::ambiguous_commit_publication_recovers_counter_and_original_retry_once ... ok
+test fault_schedule::snapshots::histories::snapshot_trace_version_and_malformed_phases_are_rejected_before_execution ... ok
+test fault_schedule::snapshots::histories::aborted_replacement_stage_preserves_actual_published_log_anchor ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test fault_schedule::snapshots::histories::lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operations ... ok
+test reference::histories::differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test reference::persistence::persistence_opcodes_are_versioned_and_invalid_phase_order_is_refused ... ok
+test reference::persistence::original_follower_acknowledgements_wait_for_explicit_durability_completion ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test three_node_history_with_only_host_components ... ok
+test fault_schedule::snapshots::histories::failed_seal_and_lost_root_completions_recover_actual_published_state ... ok
+minimized actual prefix-loss trace:
+VBSIM 1 42
+campaign 1
+pump
+bad_sync 2
+write 1 7001 7
+pump
+power_loss 2
+
+test fault_schedule::reduce::actual_false_sync_prefix_loss_is_replayed_and_minimized ... ok
+test fault_schedule::snapshots::histories::compacted_snapshot_composes_with_delayed_wal_completion_and_uncertain_original_retry ... ok
+minimized false snapshot-seal-sync trace:
+VBSIM 2 298
+campaign 1
+pump
+counter 1 9911 9
+pump
+snapshot_begin 1
+snapshot_write 1
+snapshot_bad_sync 1
+snapshot_publish 1
+snapshot_compact 1
+power_loss 1
+
+test fault_schedule::snapshots::histories::false_snapshot_seal_sync_is_replayed_reduced_and_rejected_before_voting ... ok
+reduced false reference sync:
+VBDIF2 70
+campaign 1
+pump
+lie_sync 1
+hold 1
+write 1 702 3
+persist_write 1
+sync 1
+complete 1
+pump
+power_loss 1
+
+test reference::persistence::falsely_reported_reference_sync_loses_original_ack_and_reduces_with_actual_power_cut ... ok
+test fault_schedule::snapshots::histories::every_snapshot_phase_survives_process_and_power_loss_with_original_retry ... ok
+test fault_schedule::snapshots::histories::a_replaced_snapshot_retains_the_old_log_anchor_through_every_new_phase_cut ... ok
+test reference::persistence::acknowledged_completed_original_ids_survive_restart_and_stale_callbacks ... ok
+test reference::persistence::accepted_written_and_synced_original_commands_match_after_process_and_power_cuts ... ok
+test fault_schedule::delayed::delayed_completion_schedules_replay_with_bounded_pending_ownership ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+test fault_schedule::snapshots::histories::seeded_snapshot_network_and_restart_histories_replay_exactly_without_vacuous_phases ... ok
+test fault_schedule::recorded_seeded_schedules_replay_the_same_actual_core_states ... ok
+test reference::histories::known_majority_reference_matches_original_commands_retries_partition_repair_and_reads ... ok
+reduced reference-host mismatch:
+VBDIF1 41
+campaign 1
+pump
+write 1 41053 -3
+pump
+corrupt 1
+check
+
+test reference::histories::reference_host_application_corruption_is_detected_and_reduced_after_real_commit ... ok
+
+test result: ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.78s
+
+     Running tests/runtime.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/runtime-ed87cac3fe791a49)
+
+running 53 tests
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test campaign_delay::missing_ballots_still_retry_after_the_fresh_durable_self_vote_window ... ok
+test campaign_delay::durable_self_vote_fences_expired_campaign_and_preserves_matching_ballot ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+
+thread 'scheduler_contract::shared_assertions_detect_destructive_refusal' (73473) panicked at tests/runtime/scheduler_contract.rs:33:9:
+assertion `left == right` failed
+  left: None
+ right: Some(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ...
+thread 'scheduler_contract::shared_assertions_detect_unfair_front_insertion' (73475) panicked at tests/runtime/scheduler_contract.rs:47:13:
+assertion `left == right` failed
+  left: GroupIdentity { id: GroupId(3), incarnation: GroupIncarnation(1) }
+ right: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }
+ok
+test scheduler_contract::shared_assertions_detect_destructive_refusal ... ok
+test scheduler_contract::shared_assertions_detect_unfair_front_insertion ... ok
+test timer_contract::isolation::host_timer_distinct_store_session_lane_and_generation_isolation ... ok
+
+thread 'timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation' (73481) panicked at tests/runtime/timer_contract/isolation.rs:30:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(StaleTicket)
+test timer_contract::isolation::native_timer_distinct_store_session_lane_and_generation_isolation ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation ... ok
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_budget_bypass' (73482) panicked at tests/runtime/timer_contract/polling.rs:9:5:
+assertion failed: timers.poll(MonoTime(12), 0).unwrap().is_empty()
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal' (73483) panicked at tests/runtime/timer_contract/polling.rs:15:5:
+assertion `left == right` failed: refusal retains the original deadline
+  left: 0
+ right: 1
+test timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal ... ok
+
+thread 'test timer_contract::mutants::shared_poll_assertions_detect_budget_bypass ... timer_contract::mutants::shared_poll_assertions_detect_false_latenessok' (
+73484) panicked at tests/runtime/timer_contract/polling.rs:39:9:
+assertion `left == right` failed
+  left: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 2, deadline: MonoTime(3) }, late_ms: 0 }]
+ right: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 2, deadline: MonoTime(3) }, late_ms: 27 }]
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order' (73485) panicked at tests/runtime/timer_contract/polling.rs:39:9:
+assertion `left == right` failed
+  left: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 1, deadline: MonoTime(20) }, late_ms: 10 }]
+ right: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 2, deadline: MonoTime(3) }, late_ms: 27 }]
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+
+thread 'scheduler_contract::shared_assertions_detect_incarnation_blind_cancel' (73474) panicked at tests/runtime/scheduler_contract.rs:15:5:
+assertion `left == right` failed
+  left: 1
+ right: 2
+test timer_contract::mutants::shared_poll_assertions_detect_false_lateness ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order ... ok
+test scheduler_contract::shared_assertions_detect_incarnation_blind_cancel ... ok
+test timer_contract::polling::host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test failed_shared_barrier_fences_submitted_groups_without_votes_escaping ... ok
+test timer_contract::polling::native_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test scheduler_contract::host_scheduler_obligations ... ok
+test scheduler_contract::native_scheduler_obligations ... ok
+test native_scheduler_deadline_clock_and_entropy_conformance ... ok
+test timer_replay::schedule::timed_schedule_codec_rejects_unknown_domains_and_unbounded_inputs ... ok
+test timer_contract::native_timer_exact_tokens_and_bounded_histories ... ok
+test timer_replay::timer_campaign_waits_for_real_wal_sync_and_original_completion ... ok
+
+thread 'timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner' (73489) panicked at tests/runtime/timer_contract.rs:23:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(StaleTicket)
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test timer_replay::timed_owner_recovery_distinguishes_written_synced_and_both_crash_modes ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test automatic_timer_history_reopens_three_actual_native_files ... ok
+test native_timer_replication_progress_survives_multiple_heartbeat_retries ... ok
+test virtual_time_leader_loss_and_recovery_use_native_timers_and_wals ... ok
+test timer_replay::held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries ... ok
+replayed seed=1 actions=150 states=151
+test timer_replay::schedule::bounded_recorded_timer_file_replays_through_the_actual_owner ... ok
+VBTIMER 1 1
+hold 1
+partition 1
+at 40
+at 42
+at 44
+at 46
+at 48
+at 50
+at 52
+at 54
+at 56
+at 58
+at 60
+at 62
+at 64
+at 66
+at 68
+at 70
+at 72
+at 74
+at 76
+at 78
+at 80
+at 82
+at 84
+at 86
+at 88
+at 90
+at 92
+at 94
+at 96
+at 98
+at 100
+at 102
+at 104
+at 106
+at 108
+at 110
+at 112
+at 114
+at 116
+at 118
+at 120
+at 120
+write 2 9911 7
+at 121
+read 2 1
+at 122
+sync
+complete
+heal
+old
+at 123
+at 125
+at 127
+at 129
+at 131
+at 133
+at 135
+at 137
+at 139
+at 141
+at 143
+at 145
+at 147
+at 149
+at 151
+at 153
+at 155
+at 157
+at 159
+at 161
+at 163
+at 165
+at 167
+at 169
+at 171
+at 173
+at 175
+at 177
+at 179
+at 181
+at 183
+at 185
+at 187
+at 189
+at 191
+at 193
+at 195
+at 197
+at 199
+at 200
+write 1 9911 7
+at 201
+crash 0
+at 202
+at 204
+at 206
+at 208
+at 210
+at 212
+at 214
+at 216
+at 218
+at 220
+at 222
+at 224
+at 226
+at 228
+at 230
+at 232
+at 234
+at 236
+at 238
+at 240
+at 242
+at 244
+at 246
+at 248
+at 250
+at 252
+at 254
+at 256
+at 258
+at 260
+at 262
+at 264
+at 266
+at 268
+at 270
+at 272
+at 274
+at 276
+at 278
+at 280
+at 282
+at 284
+at 286
+at 288
+at 290
+at 292
+at 294
+at 296
+at 298
+at 300
+at 300
+write 1 9911 7
+at 301
+read 1 1001
+at 302
+
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+test hundred_groups_share_native_wals_and_recover_acknowledged_state ... ok
+test hundred_group_history_uses_actual_shared_files_on_three_nodes ... ok
+test timer_replay::schedule::recorded_timed_owner_schedules_replay_exact_native_states_and_counter_retries ... ok
+
+test result: ok. 53 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/transport.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/transport-8f8bc80211c90f5c)
+
+running 37 tests
+test native::construction_and_submission_reject_insecure_incompatible_and_stale_bindings ... ok
+test native::drain_status::guarded_inspection_forwards_timer_but_does_not_drive_or_revoke_the_channel ... ok
+test native::close_drains_send_abort_fails_it_and_completed_input_survives_failure ... ok
+test native::downstream_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::downstream_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::malformed_encoding_returns_original_batch_and_pool_credits ... ok
+test native::drain_status::drain_inspection_preserves_exact_frame_slots_and_boxed_session_override ... ok
+test native::owner_factory_refuses_insufficient_full_duplex_quota_without_leasing ... ok
+test native::malformed_or_partial_frame_never_leaks_a_message ... ok
+test native::malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session ... ok
+test native::exhausted_pool_returns_original_send_and_retries_receive_without_reading ... ok
+test native::native_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::excessive_original_vector_capacity_is_returned_before_encoding ... ok
+test native::poll_progress::exhausted_and_zero_session_budgets_do_not_add_follow_through_polls ... ok
+test native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch ... ok
+test native::invalid_header_is_rejected_before_large_frame_allocation ... ok
+test native::policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release ... ok
+test native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget ... ok
+test native::native_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+thread 'native::shared_contract::shared_checker_detects_completion_before_local_flush' (73530) panicked at tests/native/shared_contract.rs:152:5:
+local flush was bypassed
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::public_host_queue_and_single_fixture_codec_compose_with_native_driver ... ok
+test native::receive_growth_failure_releases_partial_frame_and_closes_channel ... ok
+test native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget ... ok
+test native::send_failure_and_transport_drop_release_pool_without_destroying_other_view ... ok
+test native::shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing ... ok
+test native::send_completion_waits_for_channel_flush_and_failure_releases_buffers ... ok
+test native::shared_contract::shared_checker_detects_completion_before_local_flush ... ok
+test transport_limits_are_available_without_native_dependencies ... ok
+test native::shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits ... ok
+test native::shared_contract::independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership ... ok
+test native::unread_batch_stops_next_frame_and_does_not_starve_opposite_direction ... ok
+test native::short_io_preserves_batch_and_queue_credits_until_terminal_consumption ... ok
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing ... ok
+test native::zero_and_single_call_budgets_preserve_bidirectional_progress ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::shared_contract::native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership ... ok
+test native::actual_tcp_tls_driver_transfers_both_directions_under_backpressure ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s

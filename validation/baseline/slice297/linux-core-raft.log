@@ -1,0 +1,179 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice297/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.70s
+     Running tests/member_recovery.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/member_recovery-9b73c65126f8cc2b)
+
+running 12 tests
+test committed_replacement_assignment_authorizes_only_the_new_exact_store ... ok
+test term_zero_replica_can_query_without_advancing_hard_state ... ok
+test host_witness_authorizes_only_volatile_replication_through_public_contracts ... ok
+test host_member_records_an_exact_retired_voters_final_commit_after_its_barrier ... ok
+test recovered_dynamic_learner_cannot_vote_campaign_or_serve_reads ... ok
+test dynamic_recovery_requires_exact_assignment_in_both_views_and_valid_history ... ok
+test recovered_final_weighted_policy_is_used_instead_of_bootstrap_majority ... ok
+test host_checkpoint_restores_dynamic_membership_and_application_before_exposure ... ok
+test rollback_restores_joint_rules_and_historical_ballot_survives_final_restart ... ok
+test host_joint_and_uncommitted_final_restart_reconstruct_distinct_election_predicates ... ok
+test older_checkpoint::mismatched_old_pin_never_falls_back_to_newer_publication_or_changes_application ... ok
+test older_checkpoint::host_old_learner_checkpoint_recovers_each_membership_transition ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/peers.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/peers-052c553201d03817)
+
+running 19 tests
+test authentication_scope_limits_session_rollback_and_duplicate_attach_are_rejected ... ok
+test bounded_attempts_timeout_backoff_and_stale_ready_connections ... ok
+test construction_exhaustion_and_rejection_preserve_resources ... ok
+test changed_provider_limits_are_retired_before_further_external_polling ... ok
+test drain_inspection_retains_original_roster_ticket_through_close_and_retirement ... ok
+test failed_connection_holds_original_send_and_capacity_until_exact_completion ... ok
+test generation_range_exhaustion_never_hides_partially_issued_tickets ... ok
+test drained_roster_hands_off_fresh_generations_and_rejects_old_ready_work ... ok
+test fair_visits_and_aggregate_capacity_bound_connection_resources ... ok
+test assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_without_mutation ... ok
+test invalid_send_completion_fences_without_releasing_queue_credits ... ok
+test malformed_peer_messages_and_capacity_cannot_enter_ingress ... ok
+test outbound_priority_reordering_does_not_make_an_older_dispatch_stale ... ok
+test receives_are_scoped_and_obsolete_input_is_discarded_before_reconnect ... ok
+test shutdown_drains_accepted_send_and_invalidates_pending_connection_ticket ... ok
+test prospective_assignments_keep_other_groups_without_admitting_input ... ok
+test membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready ... ok
+test revoked_sends_keep_exact_credits_and_same_store_reenrollment_keeps_session_floor ... ok
+test store_replacement_requires_handoff_and_rejection_preserves_live_binding ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/quic.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/quic-f0b268fb12ebabbc)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/raft-ec95b63b8af6b74c)
+
+running 29 tests
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test three_node_history_with_only_host_components ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/runtime.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/runtime-e76452b27ab5028e)
+
+running 36 tests
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test campaign_delay::missing_ballots_still_retry_after_the_fresh_durable_self_vote_window ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test campaign_delay::durable_self_vote_fences_expired_campaign_and_preserves_matching_ballot ... ok
+
+thread 'scheduler_contract::shared_assertions_detect_destructive_refusal' (74641) panicked at tests/runtime/scheduler_contract.rs:33:9:
+assertion `left == right` failed
+  left: None
+ right: Some(GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) })
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'scheduler_contract::shared_assertions_detect_incarnation_blind_cancel' (74642) panicked at tests/runtime/scheduler_contract.rs:15:5:
+assertion `left == right` failed
+  left: 1
+ right: 2
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+
+thread 'scheduler_contract::shared_assertions_detect_unfair_front_insertion' (74643) panicked at tests/runtime/scheduler_contract.rs:47:13:
+assertion `left == right` failed
+  left: GroupIdentity { id: GroupId(3), incarnation: GroupIncarnation(1) }
+ right: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test scheduler_contract::shared_assertions_detect_destructive_refusal ... ok
+test scheduler_contract::shared_assertions_detect_incarnation_blind_cancel ... ok
+
+thread 'timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation' (74648) panicked at tests/runtime/timer_contract/isolation.rs:30:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(StaleTicket)
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_budget_bypass' (74649) panicked at tests/runtime/timer_contract/polling.rs:9:5:
+assertion failed: timers.poll(MonoTime(12), 0).unwrap().is_empty()
+test scheduler_contract::shared_assertions_detect_unfair_front_insertion ... ok
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal' (74650) panicked at tests/runtime/timer_contract/polling.rs:15:5:
+assertion `left == right` failed: refusal retains the original deadline
+  left: 0
+ right: 1
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_false_lateness' (74651) panicked at test node_item_and_group_byte_limits_each_preserve_control_reserves ... tests/runtime/timer_contract/polling.rsok:
+39:9:
+assertion `left == right` failed
+  left: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 2, deadline: MonoTime(3) }, late_ms: 0 }]
+ right: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 2, deadline: MonoTime(3) }, late_ms: 27 }]
+test timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation ... ok
+
+thread 'timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner' (74654) panicked at tests/runtime/timer_contract.rs:23:9:
+assertion `left == right` failed
+  left: Ok(())
+ right: Err(StaleTicket)
+test timer_contract::mutants::shared_poll_assertions_detect_budget_bypass ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_false_lateness ... ok
+
+thread 'timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order' (74652) panicked at tests/runtime/timer_contract/polling.rs:39:9:
+assertion `left == right` failed
+  left: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 1, deadline: MonoTime(20) }, late_ms: 10 }]
+ right: [Expiration { token: TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 2, deadline: MonoTime(3) }, late_ms: 27 }]
+test timer_contract::polling::host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test scheduler_contract::host_scheduler_obligations ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order ... ok
+test timer_contract::isolation::host_timer_distinct_store_session_lane_and_generation_isolation ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+
+test result: ok. 36 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/transport.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-reference/build/debug/deps/transport-3a90c8425de2c8fa)
+
+running 1 test
+test transport_limits_are_available_without_native_dependencies ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

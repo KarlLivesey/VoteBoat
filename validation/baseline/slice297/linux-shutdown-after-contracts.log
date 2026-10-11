@@ -1,0 +1,96 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.24s
+     Running tests/peers.rs (target/divide-shutdown/build/debug/deps/peers-f2d5fcc0f2e97075)
+
+running 19 tests
+test changed_provider_limits_are_retired_before_further_external_polling ... ok
+test construction_exhaustion_and_rejection_preserve_resources ... ok
+test assignment_preflight_rejects_conflicts_wrong_binding_capacity_and_time_without_mutation ... ok
+test malformed_peer_messages_and_capacity_cannot_enter_ingress ... ok
+test invalid_send_completion_fences_without_releasing_queue_credits ... ok
+test failed_connection_holds_original_send_and_capacity_until_exact_completion ... ok
+test drain_inspection_retains_original_roster_ticket_through_close_and_retirement ... ok
+test fair_visits_and_aggregate_capacity_bound_connection_resources ... ok
+test authentication_scope_limits_session_rollback_and_duplicate_attach_are_rejected ... ok
+test bounded_attempts_timeout_backoff_and_stale_ready_connections ... ok
+test drained_roster_hands_off_fresh_generations_and_rejects_old_ready_work ... ok
+test membership_reconciliation_retains_shared_peers_cancels_attempts_and_invalidates_old_ready ... ok
+test prospective_assignments_keep_other_groups_without_admitting_input ... ok
+test outbound_priority_reordering_does_not_make_an_older_dispatch_stale ... ok
+test revoked_sends_keep_exact_credits_and_same_store_reenrollment_keeps_session_floor ... ok
+test store_replacement_requires_handoff_and_rejection_preserves_live_binding ... ok
+test generation_range_exhaustion_never_hides_partially_issued_tickets ... ok
+test receives_are_scoped_and_obsolete_input_is_discarded_before_reconnect ... ok
+test shutdown_drains_accepted_send_and_invalidates_pending_connection_ticket ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/quic.rs (target/divide-shutdown/build/debug/deps/quic-07e7ea05c47388f3)
+
+running 21 tests
+test handshake_timeout_byte_ceiling_and_foreign_sources_preserve_identity_gate ... ok
+test closing_an_unacknowledged_send_fails_on_peer_loss_instead_of_hanging ... ok
+test close_drains_sent_bytes_and_clean_eof_does_not_discard_unread_data ... ok
+test frame_progress::multiplexed_group_frame_completes_with_coarse_owner_cadence ... ok
+test frame_progress::shutdown::simultaneous_frame_close_retains_original_sends_and_unread_input_fine ... ok
+test chunk_progress::three_group_chunk_burst_progresses_with_coarse_owner_polls ... ok
+test frame_progress::separate_group_frames_complete_with_fine_owner_cadence ... ok
+test chunk_progress::serialized_small_chunks_preserve_acknowledged_flush_within_election_interval ... ok
+test frame_progress::shutdown::closing_partially_sent_frame_on_peer_loss_returns_original_failed_ownership ... ok
+test closing_timer::resolved_send_close_retains_actual_long_rtt_protocol_deadline ... ok
+test authenticated_udp_sessions_preserve_identity_and_partial_ordered_bytes ... ok
+test frame_progress::shutdown::simultaneous_frame_close_retains_original_sends_and_unread_input_coarse ... ok
+test frame_progress::shutdown::clean_peer_eof_retains_framed_session_until_real_protocol_drain ... ok
+test frame_progress::separate_group_frames_complete_with_coarse_owner_cadence ... ok
+test peer_close::clean_peer_close_at_last_io_call_retains_response_and_protocol_timer ... ok
+test single_call_budgets_are_fair_and_clock_reversal_fences ... ok
+test invalid_certificate_name_or_exact_store_never_exposes_a_binding ... ok
+test lost_initial_and_application_datagrams_retransmit_without_changing_bytes ... ok
+test native_framed_transport_retains_original_credits_until_exact_send_completion ... ok
+test three_raft_replicas_commit_through_quic_framing_and_exact_log_completions ... ok
+test quic_authenticates_exact_selected_wire_version_without_downgrade ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/transport.rs (target/divide-shutdown/build/debug/deps/transport-fbc576360c104d8a)
+
+running 37 tests
+test native::construction_and_submission_reject_insecure_incompatible_and_stale_bindings ... ok
+test native::malformed_encoding_returns_original_batch_and_pool_credits ... ok
+test native::close_drains_send_abort_fails_it_and_completed_input_survives_failure ... ok
+test native::downstream_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::drain_status::guarded_inspection_forwards_timer_but_does_not_drive_or_revoke_the_channel ... ok
+test native::malformed_host_reserve_refuses_before_frame_use_and_drops_owned_session ... ok
+test native::drain_status::drain_inspection_preserves_exact_frame_slots_and_boxed_session_override ... ok
+test native::excessive_original_vector_capacity_is_returned_before_encoding ... ok
+test native::native_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::exhausted_pool_returns_original_send_and_retries_receive_without_reading ... ok
+test native::native_owner_quota_preserves_other_peer_and_reconnect_credits ... ok
+test native::malformed_or_partial_frame_never_leaks_a_message ... ok
+test native::invalid_header_is_rejected_before_large_frame_allocation ... ok
+test native::owner_factory_refuses_insufficient_full_duplex_quota_without_leasing ... ok
+test native::poll_progress::plaintext_follow_through_uses_only_remaining_independent_session_budget ... ok
+test native::poll_progress::follow_through_failure_preserves_validated_receive_and_original_failed_batch ... ok
+test native::public_host_queue_and_single_fixture_codec_compose_with_native_driver ... ok
+test native::poll_progress::overreported_session_progress_on_either_poll_fails_before_reusing_budget ... ok
+test native::send_failure_and_transport_drop_release_pool_without_destroying_other_view ... ok
+test native::shared_factory_refuses_undersized_control_or_bulk_capacity_before_leasing ... ok
+test native::send_completion_waits_for_channel_flush_and_failure_releases_buffers ... ok
+test native::shared_contract::shared_checker_detects_completion_before_local_flush ... ok
+test native::receive_growth_failure_releases_partial_frame_and_closes_channel ... ok
+test native::poll_progress::exhausted_and_zero_session_budgets_do_not_add_follow_through_polls ... ok
+test native::shared_contract::independent_host_transport_preserves_shared_groups_budgets_and_terminal_ownership ... ok
+test native::policy_lease_survives_transport_flush_abort_and_queue_drop_until_batch_release ... ok
+test native::shared_host_buffers_preserve_partial_io_flush_and_independent_queue_credits ... ok
+test transport_limits_are_available_without_native_dependencies ... ok
+test native::short_io_preserves_batch_and_queue_credits_until_terminal_consumption ... ok
+test native::shared_lifetimes::host_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::shared_lifetimes::native_providers_keep_shared_credits_through_partial_io_abort_and_replacement ... ok
+test native::unread_batch_stops_next_frame_and_does_not_starve_opposite_direction ... ok
+test native::shared_contract::native_transport_preserves_same_shared_groups_budgets_and_terminal_ownership ... ok
+test native::zero_and_single_call_budgets_preserve_bidirectional_progress ... ok
+test native::downstream_shared_pool_protects_validated_control_and_holds_flush_ownership ... ok
+test native::explicit_membership_wire_selection_preserves_short_io_credits_and_session_fencing ... ok
+test native::actual_tcp_tls_driver_transfers_both_directions_under_backpressure ... ok
+
+test result: ok. 37 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s

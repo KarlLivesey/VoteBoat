@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+#[path = "timer_contract/isolation.rs"]
+mod isolation;
+#[path = "timer_contract/mutants.rs"]
+mod mutants;
+#[path = "timer_contract/polling.rs"]
+mod polling;
 
 fn scoped_cancellation<T: TimerService>(timers: &mut T) {
     let token = timers
