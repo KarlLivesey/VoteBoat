@@ -350,6 +350,7 @@
         "frame_length",
         "decode_batch",
         "supports_checkpoint",
+        "is_checkpoint",
         "encode_checkpoint",
         "decode_checkpoint"
       ],
@@ -357,9 +358,10 @@
       "conformance": [
         "tests/log_store.rs",
         "tests/log_reclaim.rs",
-        "tests/membership.rs"
+        "tests/membership.rs",
+        "tests/log_reclaim/codec.rs"
       ],
-      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. VBLCPT01 preserves bootstrap-representable ballots; VBLCPT02 adds historical configuration/store ballot origin. Both full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records."
+      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. VBLCPT01 preserves bootstrap-representable ballots; VBLCPT02 adds historical configuration/store ballot origin. Both full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records. A supplied codec owns bounded checkpoint recognition through is_checkpoint (at most 32 bytes); recovery retains mandatory state validation and reclamation refuses unrecognized images before replacement. The default preserves native markers. Downstream model and real-file tests cover exact state, sessions, tickets, trailing batches, repeated reclamation and wrong-codec refusal. Recognition is not validation or migration."
     },
     {
       "design_id": "C05",

@@ -559,7 +559,10 @@
           "obligation": "Declare optional physical reclamation. Unsupported calls fail without mutation. Reject outstanding transitions and insufficient budgets. Successful cleanup preserves every group's current durable state and snapshot references, does not move the logical retention floor and issues no new durability ticket.",
           "assertions": [
             {"file": "tests/provider_conformance/log_store.rs", "symbol": "refusal_and_reclamation"},
-            {"file": "tests/log_reclaim.rs", "symbol": "rewrite_preserves_exact_live_state_and_never_reuses_tickets"}
+            {"file": "tests/log_reclaim.rs", "symbol": "rewrite_preserves_exact_live_state_and_never_reuses_tickets"},
+            {"file": "tests/log_reclaim/codec.rs", "symbol": "supplied_marker_recovers_exact_state_sessions_and_tickets_after_power_loss"},
+            {"file": "tests/log_reclaim/codec.rs", "symbol": "inconsistent_recognition_rejects_before_replacement_or_state_change"},
+            {"file": "tests/log_reclaim/codec.rs", "symbol": "supplied_marker_reopens_real_files_with_trailing_batches_and_reclamation"}
           ],
           "remaining": ["General retention/segment policy and wider disk-full/device failure combinations."]
         }

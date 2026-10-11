@@ -17,8 +17,14 @@ mod support;
 use support::*;
 use voteboat::{contracts::*, identity::*, log::*, native::log_store::*};
 
+#[path = "log_reclaim/codec.rs"]
+mod codec;
 fn populated<I: JournalIo>(io: I) -> NativeLogStore<I> {
-    let mut store = NativeLogStore::create(io, identity(1), LogLimits::default()).unwrap();
+    populated_with(io, NativeLogCodec)
+}
+fn populated_with<I: JournalIo, C: LogCodec>(io: I, codec: C) -> NativeLogStore<I, C> {
+    let mut store =
+        NativeLogStore::create_with_codec(io, identity(1), LogLimits::default(), codec).unwrap();
     append(
         &mut store,
         vec![

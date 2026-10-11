@@ -1,0 +1,82 @@
+   Compiling voteboat v0.1.0 (<linux-repo>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+     Running tests/ballots.rs (target/debug/deps/ballots-9305e1f42caed508)
+
+running 3 tests
+test host_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+test ballot_origin_is_checked_on_recovery_without_granting_current_authority ... ok
+test host_removal_and_compaction_keep_the_historical_promise ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-ddf0f9c184dc3443)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/log_store.rs (target/debug/deps/log_store-bc2967d06dc4fd97)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/membership.rs (target/debug/deps/membership-1d148cc12a00e6bc)
+
+running 18 tests
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test host_store_configuration_journal_conformance ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/raft.rs (target/debug/deps/raft-ef870167f3a6c747)
+
+running 29 tests
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test three_node_history_with_only_host_components ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

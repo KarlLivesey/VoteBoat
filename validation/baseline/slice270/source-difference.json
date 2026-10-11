@@ -1,0 +1,11 @@
+{
+  "previous": "slice268",
+  "inputs": 663,
+  "added": [
+    "tests/log_reclaim/codec.rs"
+  ],
+  "changed": [
+    "src/native/log_store.rs",
+    "tests/log_reclaim.rs"
+  ]
+}

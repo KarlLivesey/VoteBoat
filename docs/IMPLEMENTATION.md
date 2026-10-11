@@ -26451,3 +26451,67 @@ manifest verifies all662 inputs before the all-feature family, which announces
 the separate application-conformance worktree. Both code images match published
 178844a; leave them immutable until terminal. Original Mac262/251 processes
 remain separate. Launch and partial progress are not platform acceptance.
+
+270 schema: close the C08 LogCodec checkpoint dispatch gap. NativeLogStore
+currently lets a supplied codec encode/decode and successfully reclaim a live
+checkpoint, but recovery selects that decoder only through native magic bytes.
+A downstream codec with its own marker can therefore accept reclamation then
+lose reopen compatibility despite using the same supplied decoder. Keep format2,
+manifest/session rules and one authoritative binding. Add a source-compatible
+LogCodec::is_checkpoint bounded prefix probe (at most32 bytes), defaulting to
+current native markers; supplied codecs own recognition and decoding. Recovery
+uses that probe, then retains all existing sequence/state/identity/boundary
+validation. Reclamation must check the same recognition before replacement,
+so inconsistent codecs cannot publish an unrecoverable image. Recognition is
+neither validation nor durability. No bytes, tickets or effects escape earlier.
+Acceptance: first retain the actual prior reclaim-success/reopen-failure using a
+host codec marker; then exact two-group state/ticket/session recovery through
+model and real files, checkpoint plus trailing batches and another reclamation,
+wrong selected codec rejection, inconsistent-probe rejection before any journal
+change, existing native legacy/historical-ballot cases, full store/reclaim/ballot/
+Raft targets on both hosts and four strict profiles zero. Advances P0/R19/P1
+replacement/recovery. The host codec is a test companion, not an advertised new
+backend, migrated format or P7 optimization. Existing269/262/251 runs stay frozen.
+
+270 observation: OS sampling confirms old Mac251 is still executing an actual
+QUIC merge-collision history through Node/peer polling, with recent routed-log
+updates. A live old process and finite one-second sample do not prove a cleanup
+hang; preserve it and do not restart based on age. Current269 jobs remain live.
+
+270 linked mini plan (P0/R19/P1 within the macro feature milestone):
+- Current: make selected codec reclamation reopen-compatible. Depends on existing
+  manifest/session and live-image contracts. Shape: one bounded prefix classifier
+  on LogCodec; recovery selects its decoder, then invariant validation; reclaim
+  rejects inconsistent classification before journal replacement. Ownership stays
+  with the single store; uncertain replacement still fences it. Completion checks:
+  prior failure retained, exact two-group model/file restarts, ticket/session
+  semantics, refusal without mutation, full storage/ballot/membership/Raft targets
+  and four strict feature profiles on Linux and macOS. Linux is terminal clean;
+  Mac validation is pending. No whole-platform completion claim.
+- Next: collect corrected269 full delegated-family results. Depends on live
+  immutable Linux/Mac source and original terminal logs. Purpose: qualify P5/P6
+  integrated ownership histories; completion requires all69 actual results and
+  failure bodies retained, then focused cause fixes if needed. Preserve older
+  262/251 terminal evidence separately; do not relabel old sources as270.
+- Following: close the next evidenced functional contract/recovery gap. Depends
+  on those terminal results and the P0–P7 requirement ledger. Purpose: advance
+  feature completeness through the smallest usable missing path; select the
+  concrete API/state/cleanup checks from evidence before editing. Performance
+  tuning and security audit remain subsequent work; Windows/P8 remain deferred.
+Macro review: a real P0/P1 codec joint is repaired, rather than adding a backend
+prerequisite. The full P0–P7 goal and broader platform qualification remain open.
+The before-fix663-input manifest was observed after its negative test, without
+a before-run source assertion; it must not be presented as one.
+
+270 acceptance: model/file supplied-marker regressions are terminal clean.
+Linux and Mac each pass ballots10, log_reclaim11, log_store9, membership32 and
+Raft62 in all/default/native profiles; core passes3/0/0/18/29 respectively.
+Thus422 selected tests pass per host, with zero failures. Formatting and all
+four strict Clippy profiles are zero on both. All663 frozen inputs verify before
+and after both matrices; only log_store.rs, log_reclaim.rs and the new codec
+companion differ from268. The metadata checker and its test pass, retaining14
+partial reviews/88 named operation obligations rather than claiming complete
+codec/backend certification. Evidence: [270](../validation/baseline/slice270/README.md).
+The current mini deliverable is accepted; next remains terminal269 collection
+and focused fixes, then the next evidenced P0–P7 functional gap. Broader platform
+acceptance stays open and the original262/251 evidence is still separate.

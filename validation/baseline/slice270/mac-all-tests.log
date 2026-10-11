@@ -1,0 +1,156 @@
+   Compiling voteboat v0.1.0 (<mac-repo270>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 31.39s
+     Running tests/ballots.rs (target/debug/deps/ballots-de33de0cb06b1f81)
+
+running 10 tests
+test host_removal_and_compaction_keep_the_historical_promise ... ok
+test ballot_origin_is_checked_on_recovery_without_granting_current_authority ... ok
+test native::host_decoder_cannot_publish_structurally_invalid_ballot_recovery ... ok
+test host_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+test native::native_new_ballot_eligibility_and_rollback_promise_conformance ... ok
+test native::failed_ballot_barriers_and_image_replacement_never_erase_a_durable_promise ... ok
+test native::native_image_and_restart_preserve_removed_candidate_after_compaction ... ok
+test native::written_ballot_is_not_durable_and_every_torn_vote_frame_recovers_one_promise ... ok
+test native::historical_ballot_image_rejects_torn_corrupt_and_invalid_origins ... ok
+test native::actual_native_file_restart_keeps_ballot_origin_after_full_image_reclaim ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-2fbe34d34d6a928a)
+
+running 11 tests
+test codec::inconsistent_recognition_rejects_before_replacement_or_state_change ... ok
+test unsupported_codec_and_host_store_decline_maintenance_before_mutation ... ok
+test pending_transitions_and_encoding_budget_reject_before_replacement ... ok
+test live_image_can_exceed_one_batch_without_losing_cold_group_or_suffix ... ok
+test rewrite_preserves_exact_live_state_and_never_reuses_tickets ... ok
+test host_checkpoint_decoder_cannot_bypass_mandatory_log_invariants ... ok
+test codec::supplied_marker_recovers_exact_state_sessions_and_tickets_after_power_loss ... ok
+test replacement_failure_fences_and_power_loss_recovers_whole_old_or_new_state ... ok
+test image_codec_rejects_every_truncation_bit_corruption_and_invalid_state ... ok
+test codec::supplied_marker_reopens_real_files_with_trailing_batches_and_reclamation ... ok
+test native_files_keep_exclusive_selection_and_reclaim_repeatedly ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.84s
+
+     Running tests/log_store.rs (target/debug/deps/log_store-fce558edf58969c7)
+
+running 9 tests
+test valid_checksums_cannot_hide_unbounded_policy_or_command_lengths ... ok
+test user_commands_leave_control_reserve_and_admission_is_bounded ... ok
+test restart_recovers_policy_identity_hard_state_suffix_and_commit ... ok
+test compacted_log_ranges_and_committed_prefix_protection_with_native_and_host ... ok
+test failed_sync_or_publication_fences_without_acknowledging_the_transition ... ok
+test suffix_fence_invalidates_uncompleted_old_generation ... ok
+test public_store_conformance_runs_against_native_and_host ... ok
+test every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix ... ok
+test codec_roundtrips_rejects_every_single_bit_mutation_and_unbounded_lengths ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/membership.rs (target/debug/deps/membership-736b001fa67e59a3)
+
+running 32 tests
+test configuration_ingress_charges_owned_metadata_to_data_budget ... ok
+test arbitrary_weighted_policy_changes_require_joint_rules_even_with_same_voters ... ok
+test configuration_snapshots::matching_snapshot_cannot_forge_configuration_or_drop_operation_history ... ok
+test configuration_snapshots::compacted_joint_status_does_not_invent_the_discarded_entry_term ... ok
+test configuration_snapshots::native::legacy_codec_capability_cannot_drop_membership_metadata ... ok
+test accepted_log_activation_uses_both_policies_before_joint_commit ... ok
+test configuration_snapshots::host_snapshot_base_preserves_joint_rollback_final_and_application_dedup ... ok
+test configuration_snapshots::snapshot_membership_cost_is_retained_by_worker_and_ingress_reservations ... ok
+test crash::configuration_range_and_admission_charge_owned_metadata ... ok
+test configuration_snapshots::native::native_configuration_snapshot_recovery_and_physical_reclaim_conformance ... ok
+test configuration_snapshots::checkpoint_validation_rejects_bad_boundaries_operations_and_joint_identity ... ok
+test host_store_configuration_journal_conformance ... ok
+test host_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test native_configuration_status_distinguishes_durable_and_committed_phases ... ok
+test crash::final_commit_status_requires_recovered_barrier_not_written_or_uncertain_reply ... ok
+test replacement_removes_uncommitted_joint_and_reconstructs_previous_learners ... ok
+test replay_rejects_index_overflow_without_panicking ... ok
+test promotion_requires_committed_matching_learner_identity_and_no_hot_voter_edit ... ok
+test crash::failed_configuration_barriers_fence_and_recover_without_fabricated_receipts ... ok
+test native_store_configuration_journal_conformance ... ok
+test crash::physical_reclamation_preserves_joint_final_and_operation_reuse_guards ... ok
+test replica_and_voter_identity_views_follow_activation_rollback_and_compaction ... ok
+test snapshots_cannot_erase_the_only_recoverable_configuration ... ok
+test static_core_refuses_journal_recovery_and_host_injected_configuration_rpc ... ok
+test wire_capability_does_not_bypass_live_core_configuration_refusal ... ok
+test transition_grammar_rejects_overlap_early_final_and_operation_reuse ... ok
+test joint_frontier_matches_exhaustive_prefix_evaluation ... ok
+test crash::every_torn_configuration_and_replacement_frame_recovers_one_complete_state ... ok
+test crash::actual_files_reopen_resumable_joint_then_committed_final_status ... ok
+test configuration_snapshots::native::interrupted_snapshot_publication_never_exposes_a_partial_membership_base ... ok
+test configuration_snapshots::native::every_torn_wal_snapshot_switch_retains_the_selected_pinned_membership ... ok
+test configuration_snapshots::native::actual_files_preserve_joint_and_final_configuration_bases ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.46s
+
+     Running tests/raft.rs (target/debug/deps/raft-6b922bf42bed553f)
+
+running 62 tests
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test fault_schedule::codec::all_actions_round_trip_with_original_ids_and_bytes ... ok
+test fault_schedule::codec::malformed_and_oversized_traces_are_rejected_before_execution ... ok
+test fault_schedule::crash::failed_sync_fences_actual_store_and_core_without_escaping_vote_effects ... ok
+test fault_schedule::delayed::admitted_and_synced_votes_wait_for_actual_completion_delivery ... ok
+test fault_schedule::crash::process_crash_and_power_loss_distinguish_complete_unsynced_vote_frames ... ok
+test fault_schedule::delayed::power_loss_distinguishes_written_and_synced_unobserved_votes ... ok
+test fault_schedule::delayed::independently_completed_follower_is_required_for_a_real_durable_quorum ... ok
+test fault_schedule::reads::cached_leadership_cannot_replace_fresh_read_quorum_or_one_use ... ok
+test fault_schedule::crash::uncertain_counter_write_recovers_and_original_id_applies_once ... ok
+test fault_schedule::publication::manifest_failure_before_or_after_replacement_never_releases_votes ... ok
+test fault_schedule::reads::cancelled_pending_and_ready_reads_reject_old_replies_and_request_reuse ... ok
+test fault_schedule::crash::composed_process_crashes_and_failed_syncs_replay_exactly ... ok
+test fault_schedule::publication::short_write_and_manifest_failures_share_exact_composed_replay ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test fault_schedule::reads::read_cancel_crash_and_partition_schedule_replays_exact_authority ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test fault_schedule::reads::lagging_application_restart_and_fencing_cannot_reuse_read_authority ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test fault_schedule::publication::ambiguous_commit_publication_recovers_counter_and_original_retry_once ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test fault_schedule::reduce::exhausted_reduction_budget_preserves_the_same_failure_without_claiming_minimality ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test fault_schedule::publication::short_vote_tails_and_complete_error_frames_have_distinct_recovery ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test three_node_history_with_only_host_components ... ok
+test fault_schedule::reduce::actual_false_sync_prefix_loss_is_replayed_and_minimized ... ok
+test fault_schedule::delayed::delayed_completion_schedules_replay_with_bounded_pending_ownership ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test fault_schedule::recorded_seeded_schedules_replay_the_same_actual_core_states ... ok
+
+test result: ok. 62 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+

@@ -74,6 +74,14 @@ pub trait LogCodec {
     fn supports_checkpoint(&self) -> bool {
         false
     }
+    /// Recognize a checkpoint from a prefix of at most 32 bytes.
+    ///
+    /// Recognition selects `decode_checkpoint`; it does not validate the image.
+    /// Override this when supplying a different checkpoint marker. The default
+    /// recognizes both native checkpoint formats for existing implementations.
+    fn is_checkpoint(&self, header: &[u8]) -> bool {
+        checkpoint::is_checkpoint(header)
+    }
     fn encode_checkpoint(
         &self,
         _sequence: u64,
@@ -210,7 +218,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
         let mut offset = 0usize;
         let mut sequence = 0u64;
         let mut state = BTreeMap::new();
-        if checkpoint::is_checkpoint(&bytes) {
+        if codec.is_checkpoint(&bytes[..bytes.len().min(HEADER)]) {
             (sequence, state, offset) = codec.decode_checkpoint(&bytes, limits)?;
             if offset < HEADER + TRAILER || offset > bytes.len() || offset > boundary as usize {
                 return Err(StorageError::Corrupt("checkpoint outside durable prefix"));
@@ -431,6 +439,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                 .encode_checkpoint(self.sequence, &self.durable, self.limits, max_bytes)?;
         if bytes.len() > max_bytes || bytes.len() < HEADER + TRAILER {
             return Err(StorageError::Rejected("checkpoint codec byte budget"));
+        }
+        if !self.codec.is_checkpoint(&bytes[..HEADER]) {
+            return Err(StorageError::Rejected("checkpoint codec prefix mismatch"));
         }
         let (sequence, recovered, length) = self.codec.decode_checkpoint(&bytes, self.limits)?;
         if sequence != self.sequence || recovered != self.durable || length != bytes.len() {

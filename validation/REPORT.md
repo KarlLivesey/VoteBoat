@@ -6511,3 +6511,11 @@ path mistake in the first inspection is retained alongside corrected output.
 Formatting and all four strict Clippy profiles pass with zero diagnostics.
 The prior36526bc macOS job has7 counter failures; Ubuntu passes. Full-goal and
 platform acceptance remain open. See [slice210b](baseline/slice210b/README.md).
+
+Slice270 repairs supplied `LogCodec` checkpoint recognition for reclamation and
+recovery. Linux and macOS each pass422 targeted storage/ballot/membership/Raft
+tests across all/default/core/native configurations, with formatting and four
+strict Clippy profiles clean. Before-fix successful reclamation followed by
+failed reopen is retained. This is scoped contract/recovery acceptance; broader
+frozen269 and older262/251 lifecycle runs remain separate and do not certify
+full-platform completion. See [slice270](baseline/slice270/README.md).
