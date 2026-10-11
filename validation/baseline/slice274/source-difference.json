@@ -1,0 +1,11 @@
+{
+  "previous": "cca50c3",
+  "inputs": 668,
+  "added": [
+    "tests/routed/metadata_endpoint_discovery/recovery.rs"
+  ],
+  "changed": [
+    "tests/routed/metadata_endpoint_discovery.rs"
+  ],
+  "production_changed": []
+}

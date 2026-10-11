@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (<linux-repo>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.33s
+     Running tests/routed.rs (target/debug/deps/routed-653534aeca8f938d)
+
+running 1 test
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (3390336) panicked at tests/routed/metadata_endpoint_discovery.rs:84:5:
+assertion `left == right` failed
+  left: true
+ right: false
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry ... FAILED
+
+failures:
+
+failures:
+    native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 184 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `--test routed`

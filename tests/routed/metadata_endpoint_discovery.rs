@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+#[path = "metadata_endpoint_discovery/recovery.rs"]
+mod recovery;
 #[path = "metadata_endpoint_source.rs"]
 mod source;
 use source::{now, View};
@@ -61,16 +63,32 @@ fn write_checked(
         4096,
     )
     .unwrap();
-    let receipt = propose_recovering(nodes, env.clock, 20, operation, bytes);
-    let RoutedOutcome::Applied(receipt) = receipt.outcome else {
-        panic!("{receipt:?}")
+    let (receipt, uncertain) = propose_recovering_observed(nodes, env.clock, 20, operation, bytes);
+    assert_write(&receipt, operation, expected, duplicate, uncertain);
+}
+fn assert_write(
+    routed: &RoutedReceipt<voteboat::bucket_counter::BucketReceipt>,
+    operation: u128,
+    expected: i64,
+    duplicate: bool,
+    uncertain: bool,
+) {
+    let RoutedOutcome::Applied(receipt) = &routed.outcome else {
+        panic!("{routed:?}")
     };
     assert_eq!(receipt.operation, OperationId::new(operation).unwrap());
     assert_eq!(
         receipt.outcome,
         voteboat::bucket_counter::BucketOutcome::Value(expected)
     );
-    assert_eq!(receipt.duplicate, duplicate);
+    if duplicate {
+        assert!(receipt.duplicate, "required original retry");
+    } else {
+        assert!(
+            !receipt.duplicate || uncertain,
+            "unexplained fresh duplicate"
+        );
+    }
 }
 fn refresh(
     env: &Environment<'_>,

@@ -104,20 +104,16 @@ this completes the selected mini-plan history, not either whole milestone.
 
 ### Mini plan: current deliverable and next two
 
-Current checkpoint273: timer/WAL replay272 is accepted on both hosts and
-pushed6946a39. Linux corrected lifecycle269 is terminal69/0; Mac269 remains
-live with three reported failures. Its imported-partial checkpoint comparison
-has identical7400-byte content except applied index46 versus44. Match exact
-replica identities and the final actual committed WAL prefix before comparing
-recovered applications; do not normalize or discard checkpoint fields. The
-corrected six-case family now passes on both hosts, with four additional
-regression executions each and formatting/four strict profiles zero.
+Checkpoint274 is accepted on Linux and Mac: the endpoint caller preserves actual
+accepted leadership uncertainty, while original retries remain strict. Both
+hosts pass 12 selected executions and formatting/four strict Clippy profiles.
+The current deliverable is the separate imported-retirement timeout diagnosis.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Accepted273: exact restart expectation from retained application and final durable tail | Advance P5/P6 recovery qualification without rejecting legitimate committed progress. | Existing application clone/apply contracts and actual stores returned by owner abort; original identities/cuts. | Key retained apps and final logs by NodeId; contiguous replay from captured applied boundary through actual commit; exact reopened log and checkpoint equality; actual-core no-op/command-tail regressions and affected native histories on Linux/Mac; formatting/four strict profiles zero. |
-| Next: endpoint original-write duplicate qualification | Advance P5 functional endpoint migration. | Mac269 reports operation3 duplicate=true where fixture demanded false; inspect exact unknown outcome and original content, preserving the two existing duplicate checks. | Controlled actual authority-loss/committed retry evidence; require original IDs/content/outcomes and unchanged outbox count; repeat only known uncertainty. |
-| Following: imported-retirement timeout cause | Advance P5/P6 composed retirement. | Live immutable Mac269 terminal/failure context and exact original phase; no deadline increase or protocol relaxation. | Reproduce/isolate cause, fix narrowly, retain original cuts and cold retry/fence/cleanup assertions, then qualify affected scope on both platforms. |
+| Current: imported-retirement timeout cause | Advance P5/P6 composed retirement on Mac/Linux. | Immutable Mac269 failure context and original phase; actual owner/core/peer state is needed to explain the deadline. | Isolate cause, fix narrowly, preserve original cuts and cold retry/fence/cleanup checks, qualify affected scope on both hosts without relaxing protocol checks. |
+| Next: full corrected lifecycle qualification | Advance P5/P6 platform acceptance while preserving service/embedding. | Terminal269/262 and accepted273/274 plus the retirement correction; freeze the final source before execution. | Classify exact terminal failures and run the corrected complete lifecycle family on both hosts, retaining source guards and strict checks. |
+| Following: configuration admission recovery diagnosis | Advance P4 usable membership administration on Mac/Linux. | Original Mac251 native_benchmark failure reports configuration admission journal capacity; qualify its relevance against current codec/admission contracts and source first. | Identify an actual failing trigger or record that the old failure no longer reproduces; any fix must retain bounded admission, durable configuration recovery, original requests and affected two-platform checks. |
 
 The full P0–P7 goal remains active. Performance tuning and security review follow
 feature/functional Linux/macOS work; Windows/P8 remain deferred. Historical
@@ -26656,3 +26652,60 @@ duplicate/uncertainty assertion; following is the imported-retirement timeout.
 Mac269/262 remain live independently, and original Mac251 is terminal1779/46
 with full source-bound failures retained. This selected acceptance does not
 close all Mac failures, provider obligations, combined fault gates or P0–P7.
+
+274 schema before edits: Mac269 endpoint QUIC/WAL operation3 returns duplicate
+true where write_checked demands false. Existing proposal recovery repeats only
+NotLeader or actual Unknown(LeadershipChanged), preserves operation/content and
+returns an uncertain flag only for accepted Unknown. The endpoint discards that
+flag. Use it for the fresh result: duplicate requires known accepted uncertainty;
+original duplicate=true requests still require true regardless of uncertainty.
+Keep operation/value validation unchanged. A shared private receipt assertion is
+needed to exercise the same rule with actual controlled native outcomes. First
+retain its original-rule failure in a controlled history: an accepted original
+command reaches native WAL while peers are not polled, a Campaign causes a real
+Unknown result, exact original completion is released, fresh authority commits
+the original content and retry returns duplicate. Require actual committed value
+and one outbox item, cold WAL/checkpoint reopen and another exact duplicate.
+Known-uncertainty positive plus unexplained-duplicate and missing-required-
+duplicate negatives must use actual receipts; no fabricated ClientUnknown or
+DurableLog. Ownership/worker/client cleanup remains the existing native contract.
+No production, provider, wire or persistence format change. Run original four
+endpoint histories and controlled TCP/QUIC regressions on Linux/Mac; strict four
+profiles/source guards zero. Next investigates the retirement timeout; following
+collects full corrected qualification and the next evidenced P0–P7 gap.
+
+274 pre-edit refinement: the new negative receipt check also submits a fresh
+operation4, so its final client result must retain the same observed uncertainty
+instead of assuming a first-attempt success. For the missing-required-duplicate
+negative, capture the original application's clone and NodeId before submission,
+then replay that same replica's actual contiguous committed tail through its
+current applied boundary. The first operation4 apply receipt must be nonduplicate;
+the replayed whole checkpoint must equal the live application's checkpoint.
+This private helper supplies an actual first-apply receipt without changing client
+semantics or fabricating one. Replica identity is necessary because recovery can
+reorder nodes. Preserve the initial frozen matrices as preliminary evidence and
+qualify the final refined source separately; no live Mac snapshot is edited.
+
+274 acceptance: Linux and Mac each pass the original endpoint migrations and
+controlled actual-unknown histories: family all6/default3, plus regressions
+all2/default1, for 12 executions per host. Family times are Linux35.16s/11.06s
+and Mac274.08s/120.56s; these are validation runtimes, not performance results.
+Formatting and four strict all-target Clippy profiles have zero diagnostics.
+All668 final inputs verify before checks, after regressions and at family
+terminal on both hosts. The earlier controlled original-rule failure0/1 and its
+before/after668 guards are retained separately. Final controls preserve actual
+client uncertainty, original IDs/content/values, outbox counts and cold duplicates.
+The missing-required-duplicate negative uses the actual first apply receipt from
+that NodeId's committed tail and verifies the exact complete live checkpoint.
+Initial matrices were preliminary; only the final refined manifest is accepted.
+Production/public contracts/wire/persistence formats are unchanged. Evidence:
+[274](../validation/baseline/slice274/README.md).
+Macro review: selected P5 endpoint qualification is repaired without changing
+protocol semantics. The current mini item advances to the P5/P6 imported-
+retirement timeout; next is the corrected whole lifecycle qualification. The
+following recorded configuration-admission failure concerns usable P4 behavior,
+not benchmark optimization; establish its current relevance before adding any
+helper. Older Mac269/262 remain live on their own frozen sources, and original
+Mac251 remains terminal with 46 failures. Full platform, provider and combined-
+fault obligations and P0–P7 remain open; tuning/security follow feature work,
+and Windows/P8 remain deferred.

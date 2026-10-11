@@ -1,0 +1,21 @@
+   Compiling voteboat v0.1.0 (<mac-repo274>)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.34s
+     Running tests/routed.rs (target/debug/deps/routed-42b79c1d511c4246)
+
+running 1 test
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (18439488) panicked at tests/routed/metadata_endpoint_discovery.rs:87:9:
+unexplained fresh duplicate
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (18439488) panicked at tests/routed/metadata_endpoint_discovery.rs:85:9:
+required original retry
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (18439488) panicked at tests/routed/metadata_endpoint_discovery.rs:87:9:
+unexplained fresh duplicate
+
+thread 'native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry' (18439488) panicked at tests/routed/metadata_endpoint_discovery.rs:85:9:
+required original retry
+test native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 103 filtered out; finished in 6.65s
