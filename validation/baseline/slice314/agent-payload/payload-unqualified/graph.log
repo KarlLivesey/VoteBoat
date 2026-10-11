@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running tests/logical_voter_payload.rs (target/divide-shutdown/build/debug/deps/logical_voter_payload-dc267372c76f6f46)
+
+running 1 test
+test search::finite_payload_checkpoint_graph has been running for over 60 seconds
+profileB ordinary-child assumed; fixed18caller commands+2typed early submissions, other2cells fixed synced X/Y prelude; selected representative one power-or-process cut; child checkpoint/suffix on selected physical1 (all3 physical checkpoint paths in controls); stats=Stats { states: 500000, edges: 2773215, attempts: 11371744, depth: 89, depth_cap: false, state_cap: true, edge_cap: false, terminals: 0, recovered_terminals: 0, checkpoint_terminals: 0 }; remaining_frontier=26177
+
+thread 'search::finite_payload_checkpoint_graph' (14) panicked at tests/logical_voter_payload/search.rs:98:5:
+selected graph reached declared resource cap; frontier unqualified
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test search::finite_payload_checkpoint_graph ... FAILED
+
+failures:
+
+failures:
+    search::finite_payload_checkpoint_graph
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 3 filtered out; finished in 96.65s
+
+error: test failed, to rerun pass `--test logical_voter_payload`

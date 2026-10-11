@@ -1,0 +1,59 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error: the function has a cognitive complexity of (26/25)
+  --> tests/logical_voter_promises/controls.rs:16:4
+   |
+16 | fn control(graph: Graph, weak: Weak, expected: &str) {
+   |    ^^^^^^^
+   |
+   = help: you could split it up into multiple smaller functions
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#cognitive_complexity
+   = note: requested on the command line with `-D clippy::cognitive-complexity`
+
+error: this function has too many lines (153/100)
+  --> tests/logical_voter_promises/engine/admission.rs:17:5
+   |
+17 |     pub(super) fn admit(&mut self, _weak: Weak) {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+   = note: requested on the command line with `-D clippy::too-many-lines`
+
+error: this function has too many arguments (9/7)
+   --> tests/logical_voter_promises/engine/admission.rs:172:5
+    |
+172 | /     pub(super) fn capsule(
+173 | |         &self,
+174 | |         cell: usize,
+175 | |         epoch: u8,
+...   |
+181 | |         entry: Option<Entry>,
+182 | |     ) -> Capsule {
+    | |________________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_arguments
+    = note: `-D clippy::too-many-arguments` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::too_many_arguments)]`
+
+error: this function has too many lines (122/100)
+  --> tests/logical_voter_promises/engine/parent.rs:17:5
+   |
+17 |     pub(super) fn parent(&mut self, weak: Weak) {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+
+error: called `unwrap` on `self.pending` after checking its variant with `is_some`
+   --> tests/logical_voter_promises/engine/storage.rs:141:27
+    |
+140 |         let expected = if weak == Weak::StaleCompletion && self.pending.is_some() {
+    |                                                            ---------------------- the check is happening here
+141 |             let pending = self.pending.as_mut().unwrap();
+    |                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: try using `match`
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#unnecessary_unwrap
+    = note: `-D clippy::unnecessary-unwrap` implied by `-D warnings`
+    = help: to override `-D warnings` add `#[allow(clippy::unnecessary_unwrap)]`
+
+error: could not compile `voteboat` (test "logical_voter_promises") due to 5 previous errors
+warning: build failed, waiting for other jobs to finish...

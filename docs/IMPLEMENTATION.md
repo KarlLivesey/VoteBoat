@@ -17,7 +17,7 @@ record claims that unimplemented phases already work.
 | P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
 | P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
 | P7 | Functional multi-lane assembly, batching/pipelining, reclamation and recovery throttling | Existing mechanisms and finite TCP/QUIC histories remain supported. The original chapter12 P7 throughput/p99 acceptance condition moves to P9; this reordering does not claim that condition passed. |
-| P8 | Subgroup-backed logical voters and broader transactions | Functional scope remains incomplete. Independent transaction model311, replicated applications312 and actual Node driver313 are qualified on Linux/macOS. Logical voters and remaining broader transaction scope remain. Establish explicit protocol, evidence/capability and recovery contracts, model-check required transitions, then qualify usable native/public-interface paths. Performance-dependent research promotion remains P9. |
+| P8 | Subgroup-backed logical voters and broader transactions | Functional scope remains incomplete. Transaction model311, applications312, actual Node driver313 and logical-voter protocol gate314 are qualified on Linux/macOS. Native logical voters and remaining broader transaction scope remain. Qualify actual child-backed parent responses, supported nesting/lifecycle and broader transaction programs through public interfaces. Performance-dependent research promotion remains P9. |
 | P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, striped single-group WAL, representative relays and other throughput projects. No automatic start after P8. |
 | P10 | Security review and hardening | Later separate phase, with the user's Daybreak review. Existing authentication, identity, bounded-resource and protocol-safety contracts remain required during feature work. |
 
@@ -152,9 +152,10 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Completed311: transaction protocol and independent model | Establish P8's durable atomicity/isolation contract before implementing phase commands. | Reviewed310 scope, chapters08/11 and actual Node client/read/application contracts. | Eight model tests pass in all four profiles on Linux/Mac;126,818 states/827,613 transitions exhaust the declared graph and three weakened rules produce actual counterexamples. Volatile observations and committed phase proofs are separate. Formatting/four strict profiles and714 source guards are clean. Model evidence alone implements no transaction engine. |
 | Completed312: replicated transaction applications | Implement coordinator/participant state, account locks, immutable phase IDs, bounded admission/receipts and checkpoint recovery. Advances P8 transactions. | Qualified311 protocol/model and existing public application/client/read/checkpoint composition. | Eleven unit and six public downstream tests pass in each of four profiles on Linux/Mac; formatting/four strict Clippy profiles zero and730 frozen inputs match. Atomic application/refusal, original-content retry, lock/retention and restore checks pass. Actual Node provenance and network coordination remain313. |
 | Completed313: native transaction driver and usable embedding | Deliver the complete bounded transfer through actual networked groups. Advances P8 transactions. | Qualified312 applications and original Node proposal/quorum-read tickets. | Linux/macOS each pass124 affected executions (44 distinct), including actual TCP/QUIC histories, unpolled-peer quorum loss with locked state, graceful leader replacement, checkpoint/suffix recovery, host composition and joined recovery cleanup. Formatting/four strict profiles zero;755 frozen inputs match. Physical partition and abrupt process-crash claims are not established by these selected histories. This first feature does not complete all P8. |
-| Current314: logical-voter refinement mapping and protocol gate | Define the remaining P8 parent-voter feature before native assembly. | Reviewed310 fixed composition, proposed313 mapping/model schemas and existing ordered log/quorum/configuration/recovery contracts. | Explicit child-committed-state to parent-voter mapping, scoped response capsules/payload availability, representative replacement and persisted/volatile recovery model. Required weakened guards produce actual counterexamples. Resolve durable transition-intent authority and child eligibility timing; declare supported nesting/activation limits. This protocol gate alone implements no logical-voter service. |
-| Next315: usable logical-voter native assembly | Advance P8 by composing actual replicated child groups into one ordered parent-voter path. | Qualified314 mapping/model, scoped payload/evidence and recovery contracts, existing Node/provider seams. | Actual durable child-backed parent responses, representative replacement, payload availability, old checkpoint/suffix recovery, unavailable inner quorum and stale-context refusal on Linux/Mac. Public host substitution and actual drain/worker joins must pass with zero lint. Fixed one-level assembly alone does not finish P8. |
-| Following316: nested logical-voter lifecycle qualification | Advance P8 beyond the first fixed cohort with supported nesting and safe parent/child configuration activation. | Qualified315 native path,314 activation models and existing P4 membership/checkpoint contracts. | Enforced acyclic/depth-bounded construction, exact representative/configuration fences, declared serialized transition intents, actual nested checkpoint/suffix and joint/final fault histories on both hosts. Record remaining broader transaction scope separately before claiming all P8 complete. |
+| Completed314: logical-voter refinement mapping and protocol gate | Establish the P8 parent-voter protocol before native assembly. | Reviewed310 scope, proposed313 schemas and existing ordered log/quorum/configuration/recovery contracts. | Linux/macOS each pass68 executions across four profiles; nine positive graphs exhaust, ten actual weakening traces cover the required guard families and an additional overlap control. Formatting/four strict profiles zero;782 inputs match. Mapping, control-only parent lifecycle intent, child eligibility and finite storage/recovery bounds are explicit. No native service is implemented by this gate. |
+| Current315: usable logical-voter native assembly | Advance P8 by composing actual replicated child groups into one ordered parent-voter path. | Qualified314 mapping/model, scoped payload/evidence and recovery contracts, existing Node/provider seams. | Three parent logical leaves backed by nine actual child owners; child-backed storage/snapshots, gated sends/client/read results, distinct authenticated identities, representative replacement, whole-child restart, checkpoint/suffix, unavailable inner quorum and stale-context refusal on Linux/Mac TCP/QUIC. Direct public bypass controls, host substitution and owned drain/joins must pass with zero lint. Fixed one-level assembly alone does not finish P8. |
+| Next316: nested logical-voter lifecycle qualification | Advance P8 beyond the first fixed cohort with supported nesting and safe parent/child configuration activation. | Qualified315 native path,314 activation models and existing P4 membership/checkpoint contracts. | Enforced acyclic/depth-bounded construction, exact representative/configuration fences, declared serialized transition intents, actual nested checkpoint/suffix and joint/final fault histories on both hosts. Record omitted/model-bound histories separately; native qualification cannot assume314's surviving-child authority. |
+| Following317: broader transaction programs and recovery | Advance P8 beyond the fixed two-account transfer with explicit multi-key/multi-participant semantics. | Qualified311–313 durable coordination/provenance, chapter08 locking/read-validation/deadlock/recovery duties and existing public application/Node seams. | Specify and implement bounded immutable participant programs, read-version validation and atomic local prepare/apply; distributed coordinator selection, deadlock handling and retained decisions/locks. Independent model and actual Node/native histories must cover concurrent conflicts, explicit refusal/abort, unknown outcomes, checkpoint/suffix and coordinator/participant failure on both hosts. Unsupported capabilities refuse before admission; no fictional atomic scan or moving-owner guarantee. This remains planned work. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28399,3 +28400,139 @@ capsules for persistence-free acknowledgments, historical request semantics,
 durable overlap-intent authority and precise child eligibility timing. They are
 unimplemented plans, not proof or native evidence. This goal stays active until
 qualified functional P0–P8, then completes and stops before P9/P10.
+
+Schema314 — independent logical-voter protocol gate (P8): retain the proposed313
+refinement but implement actual finite models before any native parent assembly.
+Each stable logical leaf projects committed/applied backing-child state with
+recoverable bytes to one ordinary parent voter. Track physical written/synchronized
+child prefixes separately from child commit/application and caller observations.
+Parent term/vote, ordered payload, effective configuration, suffix/checkpoint and
+representative fence survive replacement; child indices never become parent
+indices. Every response, including persistence-free ReadAck, requires an exact
+child-committed capsule bound to its original request/identity/epoch/content.
+An already committed historical capsule may arrive late for that same request;
+it cannot authorize a read invoked after a newer completed write.
+
+Resolve314 activation choices explicitly: new representative claims/actions must
+pass the backing child's latest accepted voter-policy eligibility, with rollback
+recomputing that policy. Child commitment still follows the full effective
+old/joint/new predicate, and application checks the ordered committed transition
+before publishing a capsule. Preserve historical exact packets rather than assume
+instantaneous knowledge of a remote fence. Native315 must enforce this through
+actual child/core and application contracts, not a provider Ready assertion.
+
+Select one authoritative control-only parent lifecycle intent for serialized
+parent/child membership changes. It records immutable operation, destination,
+expected configurations and phase in the parent log before child transition
+admission. Competing intents serialize at that log; loss/restart resolves the
+original intent and original child outcome through quorum reads. Release only
+after the selected transition's final outcome is durable. Ordinary child business
+writes require no parent intent or ancestor commit. The model must explore two
+competing admissions and lost receipt/restart, not hide them behind a local mutex.
+
+Model314 ownership is explicit original action/output/packet plus finite budgets.
+Crash drops volatile waits/writes but restores from actual selected synchronized
+child checkpoint/suffix, never oracle history. Five separated profiles cover
+promises/capsules, payload/checkpoints, child activation, parent activation and
+serialized overlap. They assume the qualified ordinary child-consensus contract
+while modeling actual matching synchronized physical witnesses; they are not a
+new proof of every child Raft RPC. Independent witness/history oracles import no
+production transition helpers. Every weakening must produce a real replayable
+counterexample and a corresponding safe refusal/progress schedule.
+
+Acceptance314: report exact states/transitions/depth and cap/frontier flags, reach
+positive commit/read/replacement/recovery/activation terminals, and execute all
+eight planned weakened controls without constructing fake committed images or
+oracle-failure flags. Models and refinement documentation pass on Linux/macOS in
+four sequential profiles, with formatting/four strict Clippy configurations zero.
+This adds no runtime provider or performance mechanism;315 actual native assembly
+and316 nested lifecycle qualification remain the next two mini deliverables.
+
+Review refinement314 (work in progress): a synchronized physical prefix is not a
+persisted commit marker. Selected-representative recovery profiles use a fresh
+quorum observation of the surviving ordinary child authority, then decode the
+selected store's own synchronized checkpoint/suffix. They must actually discard
+and reconstruct the parent cache; clearing volatile disk writes while comparing
+an unchanged application image is insufficient. These bounded profiles do not
+qualify simultaneous loss of every child runtime. Native315/316 still require
+whole-child restart and supported nested recovery. Explicit catch-up and serial
+schedule bounds will accompany each search report. No completed model or runtime
+claim follows from this schema refinement.
+
+Search-bound refinement314 (still unqualified): the first payload graph reached
+its declared500,000-state cap at depth89 before a positive terminal, with26,177
+states still queued; that original exploration is not exhausted. The selected
+caller workload now waits for all three prior physical deliveries before the
+next original action admission, while actual majority commitment, application,
+observation, checkpointing and a physical cut still interleave before the third
+sync inside each round. This is a declared graph boundary, not a child protocol
+guard. Preserve the original capped source/log and unchanged negative controls;
+accumulated lag across several commands remains omitted from this model and
+required in native qualification. Separately, the actual competing-intent
+Outcome/Release workload exceeds the original384-depth sketch; its declared
+depth cap becomes1024 while retaining500,000 states/5,000,000 edges and bounded
+record capacities. Neither resource change establishes completion by itself.
+
+Implemented314 — logical-voter protocol gate: three independent Rust targets
+cover promises/capsules, payload/checkpoints and child/parent activation with
+replicated competing intents. The [refinement mapping](LOGICAL_VOTERS.md) relates
+applied committed child state and recoverable bytes to one crash-recoverable
+parent voter. Ten generated/replayed weakening traces cover eight required guard
+families, separate child/parent joint checks and an additional omitted-intent
+control; each safe counterpart refuses the missing dependency and progresses.
+No production logical voter, public provider seam or native assembly is added.
+
+Validation314: Linux and macOS each pass68 model executions across sequential
+all/default/core/native profiles (17 distinct tests). Nine positive graphs per
+profile exhaust:926,769 total states and2,965,418 edges, zero frontier/cap flags.
+Formatting and all four strict all-target Clippy configurations are zero;782
+frozen inputs match before/terminal on each host and at root. The110-contract
+inventory checker passes metadata/path validation. Original capped searches,
+compilation/oracle/scheduler/lint preflights, concrete negative traces and exact
+commands are retained in [314 evidence](../validation/baseline/slice314/README.md).
+These finite graphs assume ordinary consensus, selected surviving child authority
+and stated catch-up/serial workload bounds. Simultaneous whole-child loss, actual
+RPC/transport and omitted accumulated-lag histories remain native obligations.
+The original Mac302 sweep is separate and still live at the latest process check;
+the new affected matrix does not establish full baseline acceptance.
+
+Macro review314: the protocol gate is qualified, while native logical voters,
+supported nesting/lifecycle and remaining broader transactions keep P8 incomplete.
+The mini plan advances to315 native assembly,316 nesting/layer activation and317
+broader programs. The first transfer remains usable and ordinary physical mode
+remains supported. P9 performance/default-promotion comparisons and P10 security
+remain outside this goal; qualified functional P0–P8 remains its stopping boundary.
+
+Schema315 — actual child-backed parent assembly (planned): use the existing
+GroupLog/apply_batch validator and selected pure codec contracts for one logical
+parent image per child application. Claim advances representative epoch/session,
+preserving promises, payload, configuration, pins and original outcomes. Mutation,
+snapshot publication/reconciliation and exact response capsules are replicated
+child actions with bounded lifetime count/bytes and recovery reserves. Child
+indices identify provenance; parent indices/revisions/generations remain distinct.
+Latest accepted child membership gates new representative work; immutable origin
+configuration is provenance, not equality with today's configuration. Historical
+committed retries resolve original outcomes; unknown absence never proves abort.
+
+One explicit host pump owns actual child Node tickets/results; synchronous parent
+workers only transfer reserved work into queues. Original child Applied or fresh
+quorum resolution alone permits parent completion. A verified child-quorum image
+feeds read-only parent recovery; no parent fallback WAL or empty bootstrap exists.
+Logical authority is sealed at construction below convenience drivers. Capture
+original sends, application receipts and read results once, retain their charges,
+and publish only after their exact child capsule. Physical public effect/result
+entry points refuse logical bypass before exposing payloads or invoking callbacks.
+A bounded logical-only response codec binds original application values without
+recreating receipts, cloning results or imposing codecs on physical applications.
+
+The transport envelope keeps actual authenticated physical scope distinct from
+logical voter/store/session/capsule scope. Checked deployment limits must fit full
+parent mutations, snapshots, capsule values and child checkpoints before opening
+workers. Failure fences phase production, retains original ownership and enters
+explicit recovery/drain; cancellation never undoes a promise. Parent dependencies
+drain before joining child workers. The [application](../validation/baseline/slice314/LOGICAL_APPLICATION315_SCHEMA.md),
+[release](../validation/baseline/slice314/LOGICAL_RELEASE315_SCHEMA.md) and
+[native harness](../validation/baseline/slice314/LOGICAL_NATIVE315_SCHEMA.md)
+sketches identify exact API/codec/identity changes. They are plans, not native
+evidence. Acceptance is the315 mini-plan row; actual whole-child restart and direct
+public bypass controls are necessary because314 does not qualify either.

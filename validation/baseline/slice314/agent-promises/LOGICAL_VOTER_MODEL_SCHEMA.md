@@ -1,0 +1,142 @@
+# Proposed314 independent logical-voter model schema
+
+**Plan only; no model executed, no source/build/git changes, no proof claim.** Functional logical-voter composition is P8. Striping, relay tuning, benchmarks/default research promotion are outside this deliverable. The model must be paired with the actual child-backed workers, authenticated logical envelope, recovery and native histories before this path is qualified.
+
+## Source and refinement target
+
+- `VoteBoat-Design-Pack/docs/16-research-track.md`, **R-A · Replicated logical voters**: a child group durably stores parent term/vote/prefix/configuration/response context; replacement preserves the same promises; old representatives cannot conflict with successors. Required abstract mapping, state preservation and model-checked reconfiguration remain obligations.
+- `docs/03-consensus-and-quorum-trees.md`, **Elections and commitment**, **All quorum uses**, **Actual Raft groups acting as voters**, **Policy changes**: logical identities count once, durable contiguous matching prefixes, current-term commitment, candidate last-term/index freshness, full response context and effective joint predicates.
+- `docs/04-wal-and-durability.md`, **Recovery** (physical ordered records and coherent suffix generations, especially paragraph at line87), plus `docs/17-native-first-composition.md`, **Storage is a consensus-storage contract** (lines83–101): owned admission differs from scoped durability; atomic suffix/hard-state transitions; verified log/checkpoint recovery; cancellation cannot undo accepted work; one authoritative backing path.
+- `docs/07-membership-and-lifecycle.md`, **Replica membership and policy changes** (lines9–19): latest accepted configuration activates locally; joint entry commits under both predicates; final follows joint commitment; rollback/recovery recomputes effective configuration; removed members stop after safe final commitment.
+- `docs/11-testing-and-safety-case.md`, I01–I05/I07–I12, **Model checking** (line51): persisted versus volatile state and receipt provenance must be explicit; actual weakened counterexamples, finite limits and independent safety/liveness claims.
+- `target/divide-provider/LOGICAL_VOTER_MAPPING.md`, **Formal refinement and independent finite model**, **Ordered transitions**, **Checkpoint, payload and restart mapping**, **Parent and child membership**: selected proposed protocol and eight required weakened controls.
+
+Every projection is one ordinary crash-recoverable parent voter per stable logical leaf. Only committed child application transitions with required available bytes change that projection. Child admission/write/sync without child commit+apply, refused stale actions and lost output observations are stuttering steps. Claiming a representative changes volatile ownership, not durable promises. The oracle must never reuse production Raft/storage/policy/driver helpers or another model's apply function.
+
+The model treats ordinary child consensus's leader election/commit preservation as the already-qualified baseline contract, while explicitly representing its three physical durable stores, matching synchronized prefix witnesses, inner quorum loss and restart. It is **not** a new exhaustive proof of all child Raft RPCs. That assumption must be printed with results; replacing the inner quorum checker with “child Ready=true” is forbidden.
+
+## Independent typed state
+
+Use local enum/index types, not production IDs. Exact immutable tuples include parent incarnation, logical voter/store incarnation, backing-child incarnation, physical representative identity/session and representative epoch. Fixed identity domains are enumerable and deliberately non-interchangeable.
+
+- Parent: three logical leaves L0/L1/L2; two parent terms1/2, candidates A/B, two business-entry positions1/2 and command identities X/Y with distinct content. Profiles D/E allow **four** ordered parent positions so the two explicit Joint/Final configuration entries fit without replacing business positions; A/B/C use the two-position parent bound. A parent leader's volatile role/request context is separate from each leaf's durable image. Each parent image has term, optional vote, accepted ordered entries with entry terms, commit prefix, suffix generation, effective accepted configuration and checkpoint anchor. No per-index “largest term wins” reconstruction.
+- Each logical cell: three physical child replicas P0/P1/P2. Per physical replica distinguish volatile admitted/written child records from synchronized ordered child records and synchronized checkpoint bytes/metadata. The canonical committed child command prefix and applied boundary are separate from observations. Only a matching synchronized child majority can commit its next ordered action. A current child leader must recover the committed prefix before accepting a representative claim. Application projection may lag commit until the explicit Apply action.
+- Representative: epoch0 (no active claim), then1/2; exact physical identity/session. Volatile cached parent image is copied by explicit verified recovery. Old cached images are retained only when needed to generate delayed old-owner actions; they never overwrite the child authority. A new claim requires a child committed action with expected prior epoch and eligibility/configuration scope.
+- Original action: cell, immutable action ordinal/content, original owner session/epoch, expected parent revision/suffix generation, effect sequence and exact dependency set. Repeating an ID with different bytes refuses. A historical completion can complete only its original owner action, never a fresh slot whose scalar sequence happens to match.
+- Capsule: exact parent/logical-store/child tuple, owner epoch, parent term/effective configuration, requester logical+physical origin/session, request sequence, request kind and response kind, matching index/term/content identity. Its committed child action position is provenance, not a parent log index. Positive responses bind actual available payload/checkpoint bytes. Sending stores the entire capsule as an owned packet.
+- Payload: separate `ContentTag` and actual bytes token X/Y. Each durable image records which physical stores retain bytes. A digest/ref alone has no recoverability. Snapshot has data+metadata+dedup/term/vote/configuration/fence, separately published and anchored states, two retained snapshot slots (old pinned/new staged), and suffix records after the anchor.
+- Oracle-only witness history: append-only bounded durable grant/release events, original client invocation/acknowledgement/read events and exact committed parent entries. This history survives modeled crash and is never used to restore protocol state. The oracle derives logical quorum sets from full witnesses and independently enumerates old/new majority predicates.
+
+## Profiles: finite coverage rather than one exploding Cartesian product
+
+All profiles keep three distinct physical replicas in every modeled logical cell and two current/delayed response slots. At most **two owned child actions globally** may be in volatile flight; one ordered mutation at a time per cell. Fixed command/request pools are immutable: at most **48 original child action identities per cell**, **12 parent request contexts** across votes/appends/reads/configuration, and **32 exact capsule identities per cell**. These include two claims, retained promise/append actions, two checkpoint generations and selected configuration actions; reusing an exhausted pool refuses rather than generating new identities. Reuse/duplicate/loss/reorder affect bounded slots without generating fresh unbounded sequence numbers. Completed historical observations can be dropped after their oracle event is recorded; protocol floors remain in durable state. Disconnected links are booleans over the selected bounded edges. No wall-clock state or timeouts establish facts.
+
+| Profile | Selected interleavings and finite additional state | Required positive terminal reachability |
+|---|---|---|
+| A · promises and response release | Three parent leaves, all three physical stores/cell, two terms/candidates, two epochs, two entries, two original read contexts and two owned packets. Admission/write/sync/commit/apply, promise replacement, old cached parent, lost receipt, duplicate/reordered packet, inner quorum loss, process/power cut. | A current-term parent commit and read; representative replacement that preserves its prior vote/prefix; refusal under inner quorum loss; recovered exact retry can later complete. |
+| B · payload/checkpoint recovery | Same parent leaves; one selected cell explores detailed nested snapshot publication/anchor/pins and child checkpoint+suffix interleavings; other cells still require explicit synchronized quorum witnesses. Two snapshot slots and one overwritten uncommitted suffix. | Acknowledged X recovered through old checkpoint+surviving suffix; newer checkpoint replacement with old pin retained until anchor; epoch2 serves using its own recovered image. |
+| C · child activation + failover | Add P3 as a non-voting learner in L0's child. Child old={P0,P1,P2}, new={P1,P2,P3}; accepted Old/Joint/New plus committed transition phase. Parent policy stays fixed. A parent term/vote promise predates the child transition. | Joint and final child commitment, representative loss at joint/final boundary, exact promise/payload recovered by eligible successor; removed physical representative's new actions refused. |
+| D · parent activation + rollback | Add distinct logical L3 with its own three physical child replicas and stable store identity; parent old={L0,L1,L2}, new={L1,L2,L3}. New cell has explicit staged import/readiness payload and original identity. Parent accepted Old/Joint/New and committed transition phase, snapshot membership and one uncommitted configuration-suffix replacement. Child memberships fixed. | New logical leaf ready before necessary quorum use; joint and final parent commitment; rollback restores Old/Joint at exact accepted boundary; checkpoint+suffix recovery yields the same effective policy and promises. |
+| E · declared overlap admission | Small integration profile sharing a stable parent intent identity and one child intent identity. Select **serialized** layer transitions: parent admission during a child transition and child admission during a parent transition refuse before new work; restart retains the intent phase. | Both orders (child then parent / parent then child) complete; overlapping request returns original rejected ownership, no untracked transition begins. This does not qualify arbitrary simultaneous overlapping activation. |
+
+First exploration limits: breadth-first graph search, **depth384, 500,000 retained unique states/profile, 5,000,000 generated transitions/profile**. The depth permits the explicit nested Write/Sync/Commit/Apply/capsule steps through both terms and configuration phases; reaching a terminal schedule must be checked before graph coverage is claimed. These are resource caps, not predictions or success claims. Every result reports visited/enqueued states, transitions, deepest frontier, all reached cap flags, concrete terminal witnesses, and whether the exact selected graph exhausted. If a cap is reached, stop and report the unqualified frontier; do not silently describe a truncated graph as exhaustive. A focused executable schedule can demonstrate each terminal/control even when a broader search is bounded. No extra dimensions are added to compensate for a reached cap.
+
+A/B are needed for the first usable static-cohort path. C/D/E are the finite reconfiguration acceptance obligations; they cannot be called satisfied by A/B or baseline ordinary-membership tests. This matrix does not demonstrate multiple nested levels, arbitrary policies, unbounded queues or simultaneous parent+child reconfiguration. The formal recursive mapping still needs a depth-bounded acyclic construction argument and its selected native qualification.
+
+## Actions and dependency checks
+
+1. `EstablishCell`, `Admit(action)` and `Write(physical,action)` record intent/local bytes only. `Synchronize(physical,action)` records exact durable ordered child bytes. `CommitChild(action,matching witnesses)` requires the child effective policy and a contiguous matching synchronized prefix; `ApplyChild(action)` changes only the corresponding canonical application projection. Out-of-order completion never advances a prefix over a hole.
+2. `ClaimRepresentative(expected_epoch,next_epoch,physical,child_cfg)` goes through1. `ObserveClaim/ObserveAction` consumes the original completion; `LoseObservation` removes only the wait/output. `RecoverRepresentative` reconstructs its parent from its child checkpoint+surviving committed suffix after a fresh child quorum observation. Missing bootstrap/image refuses; no empty-voter/fallback-WAL action exists.
+3. `RequestVote(candidate,parent_term,last_term,last_index,context)` validates freshness; `PersistPromise` goes through1; `AdmitCapsule(VoteGrant/AppendAck/ReadAck/exact outbound request)` goes through1 and validates canonical state/fence/request/content. `ReleaseCapsule` transfers an original consumed positive result to a packet slot; `Deliver/Drop/DuplicatePacket` preserve all packet fields and bound ownership. `CountParentEvidence` independently retains unique logical identities in the current original parent context.
+4. `ParentAppend`, `ReplaceUncommittedSuffix`, `AdvanceParentCommit`, `InvokeRead`, `FinishRead`, `ApplyParent`, `AcknowledgeClient` retain ordinary parent log matching, current-term commitment, durable local apply and live exact read context. An acknowledged original operation is recorded by the oracle; no observed high watermark or cached role supplies client success.
+5. `StageParentCheckpointBytes`, `PublishParentCheckpoint`, `AnchorParentCheckpoint`, `ReclaimOldPin`, `ChildCheckpoint`, `ProcessRestart`, `PowerRestart` distinguish published bytes, anchored dependency and actual synchronized storage. Power restart drops admitted/written but unsynchronized state; process restart has a separately named conservative outcome and never promotes local write to child quorum evidence. Recover from actual selected child data, not oracle state.
+6. `Disconnect/RestoreInnerLink`, `CloseIntake`, `CancelWait`, `ConsumeOutput` retain bounded credits. Cancel cannot revoke a committed promise/acknowledged payload. Under unavailable inner quorum the parent may pause/refuse, never count a physical heartbeat or timeout as a logical vote.
+7. C/D/E alone enable learner catch-up, `AdmitJoint`, `ReceiveJoint`, `CommitJoint`, `AdmitFinal`, `ReceiveFinal`, `CommitFinal`, suffix rollback and recovery. Latest accepted configuration controls all local predicates; final admission requires original joint commitment. New identity readiness carries complete required parent data. Overlap blocks before admission under a durable declared intent, without a local-map edit.
+
+## Independent oracles
+
+- **Vote uniqueness (I01):** oracle durable grant event set has at most one candidate per exact parent/logical incarnation/term, regardless of physical representative count/epoch. Child claims do not clear this history or projected hard state.
+- **Parent history (I02/I03):** independent committed-entry witness sets contain no differing value at one parent index; each counted durable match is a contiguous exact prefix; only leader-current-term evidence advances commitment; successful read has a permitted point between its original invocation/completion in the independent acknowledged-history order.
+- **Release/provenance (I04/I11):** every released packet/client response cites a consumed original child-committed/applied action and exact dependency bytes, owner ticket/session/epoch/revision/content. Pure ReadAck is included. An obsolete action cannot consume a new runtime's credit. Authenticated physical transport identity remains distinct from separately mapped logical sender.
+- **Activation (I05):** independently evaluate accepted Old/Joint/New predicates at **each** election/write/read evidence use; joint requires both old/new; final depends on actual joint committed prefix. Rollback and checkpoint recovery derive effective policy from surviving configuration records. Learner and retired physical IDs do not become extra logical votes.
+- **Recovery and snapshots (I07/I08/I09):** every acknowledged operation has the required actual bytes on a recoverable durable quorum under the selected ordinary-Raft failure assumption; decode the selected checkpoint plus suffix independently and compare term/vote/log/configuration/dedup/fence and application content. A parent checkpoint anchor requires its entire child-backed image/pin, and reclaim requires the new anchor. Physical child indices never stand in for parent boundaries.
+- **Ownership/availability (I10/I12):** all owned request/packet/output/payload pin counts stay within declared capacities; accepted work survives cancellation until terminal consumption. Inner quorum loss cannot create evidence, swap in another child/store incarnation or weaken parent policy. Under explicitly restored links and finite work, positive schedules reach drain/commit; arbitrary permanent partitions are allowed to block.
+
+## Required weakened controls and concrete trace recipes
+
+These are **candidate schedules to encode and execute**; this document does not report a found counterexample. Each weakening changes a single transition/release guard; the unchanged independent oracle must fail on a generated actual trace. Retain the full typed action trace and failure reason; replay it from the same initial state, including all Write/Sync/Commit/Apply actions below, rather than invoking an oracle-failure flag.
+
+| Weakening | Minimal causally complete trace recipe | Independent failure |
+|---|---|---|
+| Worker-only response gate | Commit X/term1; retain old cached representatives for L0/L1. Commit epoch2 claims and term2/Y write through fresh logical majority; acknowledge Y. **Then** invoke a new old-leader read. Cached old representatives emit ReadAck without new child capsules despite the child term/fence. Old leader completes X read. | New read after completed Y returns X; capsules absent / old owner cannot authorize new request (I04 and linearizable history). An earlier overlapping read is not this control. |
+| Local-written child ack | Admit parent X mutation, Write to one physical store, skip Synchronize/child Commit+Apply; unsafe release parent acknowledgement, count a parent quorum constructed the same way and acknowledge X; power-cut unsynchronized stores and recover. | Released dependency has no child quorum provenance; acknowledged X not recoverable (I04/I07). |
+| Representatives as extra votes | L0 durably grants A in term1 under epoch1 and emits exact grant. Replace its representative, preserve that same grant, emit a retry from epoch2 for the original context. Unsafe parent counts both physical representatives as two votes in a three-logical-leaf election/commit. | Evidence's unique logical set is only {L0}, below parent majority; no extra logical leaf exists (I04/I05). |
+| Digest without payload | Correctly record a payload tag but omit actual X bytes from backing child synchronization; unsafe capsule acknowledges X and parent/client succeeds. Replace representative/recover exact image, which has tag but no bytes. | Recoverability/response dependency requires X bytes, not its tag (I07/I09). |
+| Old completion releases new effect | Admit an epoch1/action/session/suffix-generation0 mutation and delay its child result; commit epoch2 claim and a valid suffix-generation1 replacement; allocate a distinct epoch2 owned effect with reused scalar ordinal. Deliver old original result. Unsafe scalar-only match releases the new effect. | Full immutable original owner/action/revision/content dependency does not match (I04/I11); no forged completion is injected. |
+| Vote erased on replacement | Child quorum commit+apply grants A in term1. Commit representative epoch2, but unsafe recovery clears parent's vote while retaining term1. Real B request in term1 is accepted and child-committed grant B is released. | Oracle historical durable grants for the same logical term contain A and B (I01). |
+| New-only before joint commitment | Stage/catch-up distinct L3. Accept joint parent entry where new-side quorum can durably acknowledge but old-side quorum is absent; joint remains uncommitted. Unsafe append/accept FinalNew and use new-only predicate for an actual election/read/commit witness. | Actual FinalNew action has no preceding joint commit, and current predicate omits old quorum (I05). Do not claim a conflicting-entry trace unless the actual bounded schedule also produces one. |
+| Anchor before recoverable checkpoint | Stage new parent image/checkpoint metadata; omit full synchronized bytes/pin on backing child quorum. Unsafe anchor parent prefix and reclaim old payload/checkpoint. Power-cut/recover from actual child checkpoint+suffix. | Boundary exists without recoverable image/preserved prior pin; acknowledged state cannot be reconstructed (I07/I09). |
+
+Each control needs a corresponding safe schedule showing the same attempted action refuses/blocks until its missing dependency is supplied, then progresses where appropriate. Mutation schedules must not fabricate imported state, quorum-ready booleans, parent indexes from child indexes, completed writes or full committed images.
+
+## Protocol clarifications / objections before implementation
+
+1. **Capsule time semantics:** a capsule child-committed before a subsequent representative claim authorizes only its exact already-existing request. Its already-emitted packet may arrive later and is checked under the parent's live term/config/request context. This differs from admitting a new old-epoch capsule after the claim, which refuses. No model should assume instantaneous knowledge of a remote fence at physical send time. The critical stale-read control starts the read *after* the newer write completes, so no earlier capsule can bind its fresh request sequence. Parent local service success also needs this fresh request authority, including the parent leader's logical self evidence.
+2. **Child activation eligibility cutoff:** specify whether a removed representative may finish a capsule committed before accepted FinalNew versus only before committed FinalNew. Baseline accepted-policy timing and post-final-commit retirement must be preserved. The first model can conservatively refuse new claims/actions from a representative absent from the latest accepted child voter set, while retaining old exact historical packets; production and schema must select the same rule.
+3. **Layer overlap:** simple runtime mutex/map refusal is insufficient across restart. If the selected implementation serializes child/parent transitions, the intent and phase dependency must be replicated/recovered, and rejection must happen before an incompatible transition owns work. **Choose its authoritative log explicitly.** A concrete candidate is a control-only parent intent (one child or parent membership transition at a time) acquired through the actual current parent log before the child configuration proposal; ordinary child writes still require no ancestor decision. Independently reading one parent flag and one child flag is not atomic serialization and must be explored as a competing-admission race, not omitted with a magical model mutex. Profile E is not implemented/qualified until this choice and its lost-receipt/restart release rules are fixed; it checks the selected supported behavior instead of arbitrary overlap.
+4. **Startup authority:** ordinary asynchronous worker completions cannot justify a synchronous “durable mirror” adapter at open. Need a named fresh child-verified recovered-image seam, followed by the existing log+snapshot+application compacted validation. No private oracle image or bare highest index can initialize the parent's promises.
+
+These are finite protocol choices needed for a usable real child-backed voter, not additional performance/security workstreams. No generic placeholder adapter, second authoritative WAL or relaxed durability mode is proposed.
+
+## Implementation314A mini schema (before source edits)
+
+Selected profileA is split into five finite workload graphs sharing one independent
+engine: two-candidate promise/replacement; repeated representatives counted once;
+post-newer-write cached read; pre-durable output probe; held original completion
+versus fresh epoch ticket. Each graph starts with three empty logical cells and
+establishes epoch1 through actual child admit/write/sync/commit/apply/observe
+transitions. Original parent request pools and the semantic workload order are
+fixed; physical write/sync order, majority selection, unsynchronized power cuts,
+receipt loss/fresh exact status resolution and boundary observation are explored
+by BFS. This is not the full Cartesian parent/child Raft RPC graph.
+
+At most one child mutation is actively driven globally, plus one deliberately
+held original output. Each cell retains its three physical written/synchronized
+contiguous child-prefix counters, original ordered command records and canonical
+committed/applied image separately. Before moving to another workload request,
+all physical replicas catch up through the original accepted child records; this
+bounded selected delivery policy permits exhaustion without accumulating arbitrary
+historical physical quorum-mask combinations. Commit may occur at any actual
+synchronized majority before this catch-up, and output may be lost before catch-up.
+This omission (no indefinitely lagging replica across multiple completed requests)
+must be reported, not promoted to arbitrary-fault qualification.
+
+The independent oracle checks transition-time child quorum/prefix provenance and
+retained original parent grant/client/read/credit history. It never supplies state
+to recovery and uses no production code. Counterexamples are searched/replayed
+from the same empty initial graph using concrete actions; the stale-read control
+continues to an actual post-write stale read result before final oracle evaluation.
+Other controls use the first independent invariant failure. No unsafe oracle flags
+or canned committed images are allowed. First caps remain384 depth/500,000 states/
+5,000,000 edges per workload; a reached cap is failure of the required exhausted
+selected-graph gate. New top-level test target is published only after children.
+
+314A reviewed recovery refinement: selected representative Apply requires its own
+synchronized prefix through the original child command; Recover requires that
+same selected physical store's synchronized applied prefix plus a fresh live
+matching majority. The immutable child command arena denotes exact bytes in each
+written/synchronized contiguous physical prefix, rather than data supplied by an
+oracle. Canonical commit/applied flags are surviving ordinary child-consensus
+authority under the qualified baseline preservation assumption, not silently
+persisted physical metadata. Unsynchronized power cuts discard only the affected
+store's written suffix; complete synchronized-store loss is not this profile.
+Repair preserves the original outage's affected cell and available-store mask.
+Independent transition assertions also check exact receipt-loss status quorum
+and original consumed write/read packet authority before packet cleanup.
+
+The cached-reader control invokes a NEW context5 read after Y's acknowledged
+term2 write through the partitioned former parent's term1 view. It cannot reuse
+an earlier read capsule. The safe counterpart refuses the old-epoch capsule and
+then supplies current term2/context6 child-committed capsules for a fresh read.
+No native result, production helper, authority injection or state fabricated by
+the oracle participates in these finite graphs.

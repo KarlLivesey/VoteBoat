@@ -1,0 +1,10 @@
+tests/logical_voter_promises.rs: OK
+tests/logical_voter_promises/controls.rs: OK
+tests/logical_voter_promises/engine.rs: OK
+tests/logical_voter_promises/oracle.rs: OK
+tests/logical_voter_promises/program.rs: OK
+tests/logical_voter_promises/search.rs: OK
+tests/logical_voter_promises/types.rs: OK
+tests/logical_voter_promises/engine/admission.rs: OK
+tests/logical_voter_promises/engine/parent.rs: OK
+tests/logical_voter_promises/engine/storage.rs: OK

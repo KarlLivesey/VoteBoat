@@ -1,0 +1,9 @@
+tests/logical_voter_activation.rs: OK
+tests/logical_voter_activation/actions.rs: OK
+tests/logical_voter_activation/controls.rs: OK
+tests/logical_voter_activation/journal.rs: OK
+tests/logical_voter_activation/oracle.rs: OK
+tests/logical_voter_activation/protocol.rs: OK
+tests/logical_voter_activation/scenarios.rs: OK
+tests/logical_voter_activation/search.rs: OK
+tests/logical_voter_activation/types.rs: OK

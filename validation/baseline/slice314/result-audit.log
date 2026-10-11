@@ -1,0 +1,10 @@
+linux all:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+linux default:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+linux core:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+linux native:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+linux: terminal0;68 executions;782 before/terminal inputs match
+mac all:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+mac default:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+mac core:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+mac native:17/0; nine graph counts match; frontier/caps zero; strict Clippy zero
+mac: terminal0;68 executions;782 before/terminal inputs match

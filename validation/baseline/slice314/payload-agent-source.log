@@ -1,0 +1,8 @@
+tests/logical_voter_payload.rs: OK
+tests/logical_voter_payload/control.rs: OK
+tests/logical_voter_payload/image.rs: OK
+tests/logical_voter_payload/model.rs: OK
+tests/logical_voter_payload/oracle.rs: OK
+tests/logical_voter_payload/search.rs: OK
+tests/logical_voter_payload/storage.rs: OK
+tests/logical_voter_payload/types.rs: OK

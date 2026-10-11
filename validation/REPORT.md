@@ -15,8 +15,9 @@ with its original counter195/1 failure retained. No complete platform or P0–P7
 acceptance is claimed. Seeded parser, scoped client-history and shared connector
 evidence is archived in [301](baseline/slice301/README.md). Sustainable throughput
 at the original correctness/p99 gate moves to the user's later P9 phase. Newly
-included P8 logical-voter/transaction functionality has no usable native engine
-yet. The [transaction protocol model311](baseline/slice311/README.md) passes8 tests
+included P8 functionality remains incomplete. The fixed transfer driver313 is
+usable; native logical voters remain unimplemented. The
+[transaction protocol model311](baseline/slice311/README.md) passes8 tests
 in four profiles on each host, with126,818 states/827,613 transitions exhausted,
 actual weakening counterexamples and zero formatting/four strict profiles.
 This finite model assumes actual committed commands and trusted receipt origins;
@@ -24,8 +25,14 @@ it is not native transaction or logical-voter acceptance.
 [Replicated transaction applications312](baseline/slice312/README.md) pass11 unit
 and6 public downstream tests per profile on each host; formatting/four strict
 profiles are zero and730 frozen inputs match before/terminal. This implements
-application primitives, with actual Node provenance/networked driver and logical
-voters still outstanding. This goal stops only
+application primitives; the [actual Node driver313](baseline/slice313/README.md)
+qualifies124 affected executions per host, including TCP/QUIC and joined cleanup.
+The [logical-voter model gate314](baseline/slice314/README.md) qualifies17 tests
+per profile on both platforms, zero formatting/four strict Clippy diagnostics and
+782 source guards. Nine declared positive graphs exhaust; real negative traces
+replay and safe counterparts progress. Ordinary-child assumptions and graph
+bounds remain explicit; native logical voters and broader transactions are still
+outstanding. This goal stops only
 after functional P8 qualification, before P9 performance/P10 security.
 The records below describe their own historical sources and outcomes.
 

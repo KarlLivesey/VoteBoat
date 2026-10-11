@@ -1,0 +1,24 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/logical_voter_payload.rs (target/divide-shutdown/build/debug/deps/logical_voter_payload-dc267372c76f6f46)
+
+running 3 tests
+
+thread 'control::holes_stale_suffix_original_binding_and_unavailable_recovery_refuse' (15) panicked at tests/logical_voter_payload/control.rs:10:9:
+refused Submit(Meta0) at child4
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+B missing-payload counterexample actions43: [Submit(Claim1), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Promise), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(AppendX), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Commit1), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Ack(0), Power, Quorum]; oracle=acknowledged parent1 has only0 recoverable exact-byte child witnesses
+B early-anchor counterexample actions153: [Submit(Claim1), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Promise), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(AppendX), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Commit1), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Ack(0), Submit(Meta0), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Bytes0), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Publish0), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Anchor0), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Tentative), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Replace), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Commit2), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Ack(1), Submit(Meta1), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Anchor1), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, Submit(Reclaim0), Write(0), Sync(0), Write(1), Sync(1), Write(2), Sync(2), Commit, Apply, Observe, CheckpointStage(0), CheckpointSync(0), CheckpointAnchor(0), CheckpointStage(1), CheckpointSync(1), CheckpointAnchor(1), CheckpointStage(2), CheckpointSync(2), CheckpointAnchor(2), Power, Quorum]; oracle=acknowledged parent1 has only0 recoverable exact-byte child witnesses
+B safe missing dependency refusal then actual FillX progress actions51
+test control::holes_stale_suffix_original_binding_and_unavailable_recovery_refuse ... FAILED
+test control::missing_body_counterexample_and_safe_dependency_progress ... ok
+B safe checkpoint refusal then full bytes/publish/anchor/pin progress actions198
+test control::early_anchor_counterexample_and_safe_pin_progress ... ok
+
+failures:
+
+failures:
+    control::holes_stale_suffix_original_binding_and_unavailable_recovery_refuse
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test logical_voter_payload`
