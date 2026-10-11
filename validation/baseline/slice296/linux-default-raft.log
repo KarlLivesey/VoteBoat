@@ -1,0 +1,215 @@
+   Compiling rustls v0.23.45
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice296/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.18s
+     Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/slice287/build/debug/deps/raft-6a188bac9c86eba9)
+
+running 74 tests
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test fault_schedule::codec::all_actions_round_trip_with_original_ids_and_bytes ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test fault_schedule::codec::malformed_and_oversized_traces_are_rejected_before_execution ... ok
+test fault_schedule::crash::failed_sync_fences_actual_store_and_core_without_escaping_vote_effects ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test fault_schedule::delayed::admitted_and_synced_votes_wait_for_actual_completion_delivery ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test fault_schedule::delayed::power_loss_distinguishes_written_and_synced_unobserved_votes ... ok
+test fault_schedule::publication::manifest_failure_before_or_after_replacement_never_releases_votes ... ok
+test fault_schedule::crash::process_crash_and_power_loss_distinguish_complete_unsynced_vote_frames ... ok
+test fault_schedule::delayed::independently_completed_follower_is_required_for_a_real_durable_quorum ... ok
+test fault_schedule::reads::cancelled_pending_and_ready_reads_reject_old_replies_and_request_reuse ... ok
+test fault_schedule::reads::cached_leadership_cannot_replace_fresh_read_quorum_or_one_use ... ok
+test fault_schedule::reads::lagging_application_restart_and_fencing_cannot_reuse_read_authority ... ok
+composed append/publication trace:
+VBSIM 1 266
+short_write 1 31
+campaign 1
+process_crash 1
+delay 1
+campaign 1
+publish_before 1
+power_loss 1
+campaign 1
+publish_after 1
+power_loss 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+power_loss 1
+stale 1
+
+test fault_schedule::publication::short_write_and_manifest_failures_share_exact_composed_replay ... ok
+composed crash/failure trace:
+VBSIM 1 265
+delay 1
+campaign 1
+fail_sync 1
+heartbeat 1
+process_crash 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+fail_sync 1
+process_crash 1
+campaign 1
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+counter 1 9911 9
+sync 1
+complete 1
+pump
+sync 1
+complete 1
+pump
+power_loss 1
+stale 1
+
+test fault_schedule::crash::composed_process_crashes_and_failed_syncs_replay_exactly ... ok
+composed read/cancel trace:
+VBSIM 1 267
+campaign 1
+pump
+counter 1 9911 9
+pump
+read 1 1
+newest
+cancel_read 1 1
+read 1 2
+pump
+serve_counter 1 2
+serve_counter 1 2
+read 1 3
+pump
+process_crash 1
+serve_counter 1 3
+campaign 1
+pump
+serve_counter 1 3
+read 1 4
+isolate 1
+pump
+serve_counter 1 4
+cancel_read 1 4
+heal
+read 1 5
+pump
+serve_counter 1 5
+
+test fault_schedule::reads::read_cancel_crash_and_partition_schedule_replays_exact_authority ... ok
+test fault_schedule::crash::uncertain_counter_write_recovers_and_original_id_applies_once ... ok
+test fault_schedule::snapshots::histories::snapshot_trace_version_and_malformed_phases_are_rejected_before_execution ... ok
+test fault_schedule::reduce::exhausted_reduction_budget_preserves_the_same_failure_without_claiming_minimality ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test fault_schedule::snapshots::histories::aborted_replacement_stage_preserves_actual_published_log_anchor ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test fault_schedule::publication::ambiguous_commit_publication_recovers_counter_and_original_retry_once ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test reference::histories::differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test fault_schedule::publication::short_vote_tails_and_complete_error_frames_have_distinct_recovery ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test fault_schedule::snapshots::histories::lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operations ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test three_node_history_with_only_host_components ... ok
+test fault_schedule::snapshots::histories::failed_seal_and_lost_root_completions_recover_actual_published_state ... ok
+minimized actual prefix-loss trace:
+VBSIM 1 42
+campaign 1
+pump
+bad_sync 2
+write 1 7001 7
+pump
+power_loss 2
+
+test fault_schedule::reduce::actual_false_sync_prefix_loss_is_replayed_and_minimized ... ok
+minimized false snapshot-seal-sync trace:
+VBSIM 2 298
+campaign 1
+pump
+counter 1 9911 9
+pump
+snapshot_begin 1
+snapshot_write 1
+snapshot_bad_sync 1
+snapshot_publish 1
+snapshot_compact 1
+power_loss 1
+
+test fault_schedule::snapshots::histories::false_snapshot_seal_sync_is_replayed_reduced_and_rejected_before_voting ... ok
+test fault_schedule::snapshots::histories::compacted_snapshot_composes_with_delayed_wal_completion_and_uncertain_original_retry ... ok
+test fault_schedule::snapshots::histories::a_replaced_snapshot_retains_the_old_log_anchor_through_every_new_phase_cut ... ok
+test fault_schedule::snapshots::histories::every_snapshot_phase_survives_process_and_power_loss_with_original_retry ... ok
+test fault_schedule::delayed::delayed_completion_schedules_replay_with_bounded_pending_ownership ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+test fault_schedule::snapshots::histories::seeded_snapshot_network_and_restart_histories_replay_exactly_without_vacuous_phases ... ok
+test reference::histories::known_majority_reference_matches_original_commands_retries_partition_repair_and_reads ... ok
+test fault_schedule::recorded_seeded_schedules_replay_the_same_actual_core_states ... ok
+reduced reference-host mismatch:
+VBDIF1 41
+campaign 1
+pump
+write 1 41053 -3
+pump
+corrupt 1
+check
+
+test reference::histories::reference_host_application_corruption_is_detected_and_reduced_after_real_commit ... ok
+
+test result: ok. 74 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s

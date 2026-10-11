@@ -44,6 +44,8 @@ jobs:
         shell: bash
         run: |
           set -e
+          compiler="$(bash validation/reference-tools.sh)"
+          if [[ -n "$compiler" ]]; then export PROTOC="$compiler"; fi
           # Native three-node/100-group fixtures retain 300 snapshot-store locks.
           # macOS shells can inherit a 256-file limit; adjust this step only.
           if [[ "$RUNNER_OS" == macOS ]]; then ulimit -n 4096; fi

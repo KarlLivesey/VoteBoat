@@ -122,8 +122,8 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 
 | Deliverable | Purpose and macro milestone | Dependencies | Completion checks |
 | --- | --- | --- | --- |
-| Current: compatible majority reference differential | Advance chapter11/R11 functional safety evidence for the service and embedding. | Audit295 and reviewed raft-rs0.7.0 RawNode/Ready semantics; keep reference integration test-only and define compatible external actions before adding dependencies. | Compare actual cores at settled command/read boundaries while honoring both persistence contracts. Retain seeds, original IDs, mismatches and reduction; qualify both platforms. Flat-majority comparison does not certify hierarchy. |
-| Next: differential interrupted durability and checkpoint recovery | Advance P1/R01 acknowledged-operation recovery acceptance. | The independent baseline comparison and actual native replay294; each reference's storage/snapshot advancement must represent the same declared fault model. | Exercise accepted/written/synced/completion and checkpoint restart cuts with original retries; compare durable/application outcomes without recovering either engine from the oracle. Preserve counterexamples and strict builds. |
+| Current: differential interrupted durability | Advance P1/R01 acknowledged-operation recovery for the service and embedding. | Qualified compatible reference296 and actual native replay294; define matching accepted/written/synced/completion cuts before extending either driver. | Honor original VoteBoat tickets and ordered reference Ready persistence; process/power restart discards only the declared volatile state. Compare original committed operations and retries, retain counterexamples/reduction and qualify both hosts. |
+| Next: differential checkpoint recovery | Advance P1/R01 snapshot and replay acceptance. | Interrupted log differential and existing actual native snapshot294; reference snapshot/publication and application data must come from its own durable image. | Exercise staged/publication/compaction restart cuts and original retries; compare restored application/dedup state without restoring either engine from the comparison oracle. Keep strict builds and bounded artifacts. |
 | Following: retained lifecycle failure correction | Advance P5/P6 owned shutdown/restart acceptance. | Linux285/288 failure; typed inspection295 is qualified, but matching original histories pass on both hosts without a failed-state capture. Original Mac285 is terminal73/0 all and40/0 default on its original image. | Inspect retained failures and capture the actual retained provider predicate before a causal fix/regression. No ownership/timer weakening, blanket deadline extension or unchanged healthy probes. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
@@ -27504,3 +27504,55 @@ failure or certify all lifecycle acceptance. Full P0–P7 remains active; broade
 fault/conformance and later performance/security gates remain. See
 `validation/baseline/slice295/README.md` and
 `validation/baseline/slice285/mac-final/README.md`.
+
+Schema296 — compatible majority differential (P1/chapter11): use the actual
+VoteBoat public core with NativeLogStore/ModelIo and an independent three-voter
+raft-rs0.7.0 RawNode/MemStorage harness. Keep raft-rs and a discarded slog logger
+as pinned dev dependencies only, with its protobuf-codec and default logger
+otherwise disabled; this is a reference test target, not a production adapter.
+Each engine owns its own bounded queue, durable state and committed entries.
+External trace actions carry original node/operation IDs and Counter deltas,
+explicit campaigns, partitions/heal and settled pumps/reads. Compare committed
+command prefixes, deduplicated Counter values and quorum-backed read results;
+ignore internal no-op indices and message shapes. Forwarding/proposal refusal
+semantics are declared separately. Settled valid majority elections must produce
+the same external leader and later command outcomes. Reference Ready handling
+stores entries/hard state before persisted messages or advancement, then handles
+LightReady commit/application. The baseline reference store models atomic
+successful persistence; interrupted/device/snapshot durability is the next slice,
+not inferred from memory storage. No engine restores from the comparison oracle.
+Retain serialized external schedules, deterministic replay and mismatch-target
+reduction with a deliberate reference-host corruption negative. Tests must
+assert nonzero successful elections/writes/reads/partition repair. Dependency
+pins and lockfile changes are confined to development; verify normal dependency
+edges remain unchanged. Run complete Raft tests plus strict four-profile checks
+on Linux/macOS, retain frozen inputs and failed preflight checks. No production
+consensus, membership, transport or storage design is changed.
+
+Implemented296 evidence — compatible known-Raft comparison: Linux/macOS each
+pass251 complete Raft executions, all74/default74/core29/native74. Three new
+reference tests execute in each native-enabled profile. Thirty-two six-round
+VBDIF1 traces preserve original IDs/deltas and replay exactly; each asserts seven
+campaigns,24 proposals,12 ready and six unavailable reads,six partitions and19
+settled checks. Both actual engines match committed commands, retry-deduplicated
+Counter values and quorum-authorized reads. Accepted isolated97-delta commands
+never enter the healed committed prefix. Independent reference Ready entries/
+hard state precede persisted messages/advancement, then ordered application and
+LightReady; no custom persistence/hierarchy is certified by the memory reference.
+A deliberate reference-host application corruption reduces to six actions with
+an actual campaign/write/commit; the corrected host passes the same trace.
+Formatting/four strict all-target profiles are zero on both hosts;686 frozen
+runtime/CI/tooling inputs match before/terminal and current publication. Each
+host's all-feature normal dependency graph exactly matches295 apart from root
+path. Pinned raft-rs0.7.0/slog2.7.0 and their locked dependencies are development
+only. ARM Mac test builds use an official hashed temporary protoc3.21.12 bundle;
+CI prepares it through the same helper. Production and the design pack are
+unchanged. Initial codec sibling visibility errors and Mac Bash3.2 empty-array
+script failure are retained; focused visibility/script fixes precede acceptance,
+with no lint waiver or consensus rewrite. Macro review296: the declared flat
+majority comparison mini-deliverable advances P1/chapter11 acceptance. The linked
+plan now separates interrupted durability and checkpoint differential checks;
+the retained Linux285/288 shutdown failure, broader conformance/fuzz/combined
+faults and full P0–P7 remain open. Performance/security stay the user's later
+phase; P8/Windows are deferred. See `docs/REFERENCE_TESTING.md` and
+`validation/baseline/slice296/README.md`.

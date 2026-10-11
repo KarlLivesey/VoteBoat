@@ -1,0 +1,102 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0624]: associated function `decode` is private
+  --> tests/raft/reference/histories.rs:48:30
+   |
+48 |         let decoded = Trace::decode(&trace.encode()).unwrap();
+   |                              ^^^^^^ private associated function
+   |
+  ::: tests/raft/reference/codec.rs:24:5
+   |
+24 |     fn decode(bytes: &[u8]) -> Result<Self, &'static str> {
+   |     ----------------------------------------------------- private associated function defined here
+
+error[E0624]: method `encode` is private
+  --> tests/raft/reference/histories.rs:48:44
+   |
+48 |         let decoded = Trace::decode(&trace.encode()).unwrap();
+   |                                            ^^^^^^ private method
+   |
+  ::: tests/raft/reference/codec.rs:5:5
+   |
+ 5 |     fn encode(&self) -> Vec<u8> {
+   |     --------------------------- private method defined here
+
+error[E0624]: method `encode` is private
+  --> tests/raft/reference/histories.rs:53:41
+   |
+53 |                 String::from_utf8(trace.encode()).unwrap()
+   |                                         ^^^^^^ private method
+   |
+  ::: tests/raft/reference/codec.rs:5:5
+   |
+ 5 |     fn encode(&self) -> Vec<u8> {
+   |     --------------------------- private method defined here
+
+error[E0624]: associated function `decode` is private
+   --> tests/raft/reference/histories.rs:102:24
+    |
+102 |         replay(&Trace::decode(&reduced.encode()).unwrap()),
+    |                        ^^^^^^ private associated function
+    |
+   ::: tests/raft/reference/codec.rs:24:5
+    |
+ 24 |     fn decode(bytes: &[u8]) -> Result<Self, &'static str> {
+    |     ----------------------------------------------------- private associated function defined here
+
+error[E0624]: method `encode` is private
+   --> tests/raft/reference/histories.rs:102:40
+    |
+102 |         replay(&Trace::decode(&reduced.encode()).unwrap()),
+    |                                        ^^^^^^ private method
+    |
+   ::: tests/raft/reference/codec.rs:5:5
+    |
+  5 |     fn encode(&self) -> Vec<u8> {
+    |     --------------------------- private method defined here
+
+error[E0624]: method `encode` is private
+   --> tests/raft/reference/histories.rs:112:35
+    |
+112 |         String::from_utf8(reduced.encode()).unwrap()
+    |                                   ^^^^^^ private method
+    |
+   ::: tests/raft/reference/codec.rs:5:5
+    |
+  5 |     fn encode(&self) -> Vec<u8> {
+    |     --------------------------- private method defined here
+
+error[E0624]: associated function `decode` is private
+   --> tests/raft/reference/histories.rs:126:24
+    |
+126 |         assert!(Trace::decode(bytes).is_err());
+    |                        ^^^^^^ private associated function
+    |
+   ::: tests/raft/reference/codec.rs:24:5
+    |
+ 24 |     fn decode(bytes: &[u8]) -> Result<Self, &'static str> {
+    |     ----------------------------------------------------- private associated function defined here
+
+error[E0624]: associated function `decode` is private
+   --> tests/raft/reference/histories.rs:128:20
+    |
+128 |     assert!(Trace::decode(&vec![b'x'; 65537]).is_err());
+    |                    ^^^^^^ private associated function
+    |
+   ::: tests/raft/reference/codec.rs:24:5
+    |
+ 24 |     fn decode(bytes: &[u8]) -> Result<Self, &'static str> {
+    |     ----------------------------------------------------- private associated function defined here
+
+error[E0624]: associated function `decode` is private
+   --> tests/raft/reference/histories.rs:130:16
+    |
+130 |         Trace::decode(format!("VBDIF1 1\n{}", "check\n".repeat(MAX_ACTIONS + 1)).as_bytes())
+    |                ^^^^^^ private associated function
+    |
+   ::: tests/raft/reference/codec.rs:24:5
+    |
+ 24 |     fn decode(bytes: &[u8]) -> Result<Self, &'static str> {
+    |     ----------------------------------------------------- private associated function defined here
+
+For more information about this error, try `rustc --explain E0624`.
+error: could not compile `voteboat` (test "raft") due to 9 previous errors

@@ -21,6 +21,9 @@ mod drain_coordinator;
 mod fault_schedule;
 #[path = "raft/leadership.rs"]
 mod leadership;
+#[cfg(feature = "native")]
+#[path = "raft/reference.rs"]
+mod reference;
 mod support;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 use support::*;

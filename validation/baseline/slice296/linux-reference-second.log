@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.39s
+     Running tests/raft.rs (target/debug/deps/raft-5f03544838f50ce5)
+
+running 3 tests
+test reference::histories::differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions ... ok
+test reference::histories::known_majority_reference_matches_original_commands_retries_partition_repair_and_reads ... ok
+reduced reference-host mismatch:
+VBDIF1 41
+campaign 1
+pump
+write 1 41053 -3
+pump
+corrupt 1
+check
+
+test reference::histories::reference_host_application_corruption_is_detected_and_reduced_after_real_commit ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 71 filtered out; finished in 0.66s

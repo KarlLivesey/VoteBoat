@@ -1,0 +1,954 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index 6c498a4..4a4bb72 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -4,0 +5,15 @@ version = 4
++[[package]]
++name = "aho-corasick"
++version = "1.1.5"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "c982642fa9e8606056828ee9a8505737230110bb1099153c79efe865c59d12ba"
++dependencies = [
++ "memchr",
++]
++
++[[package]]
++name = "bitflags"
++version = "1.3.2"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
++
+@@ -10,0 +26,6 @@ checksum = "72f5acc6cb2ba439de613abc23857ec3d78374d8ed5ac84e9d11336e87da8649"
++[[package]]
++name = "byteorder"
++version = "1.5.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
++
+@@ -41 +62 @@ dependencies = [
+- "rand_core",
++ "rand_core 0.10.1",
+@@ -82,0 +104,9 @@ dependencies = [
++[[package]]
++name = "fxhash"
++version = "0.2.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "c31b6d751ae2c7f11320402d34e41349dd1016f8d5d45e48c4312bc8625af50c"
++dependencies = [
++ "byteorder",
++]
++
+@@ -106 +136 @@ dependencies = [
+- "rand_core",
++ "rand_core 0.10.1",
+@@ -109,0 +140,11 @@ dependencies = [
++[[package]]
++name = "getset"
++version = "0.1.7"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "6cf442baaabe4213ce7d1239afc26c039180b6456da2cededa316ae2c8a77a77"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 2.0.119",
++]
++
+@@ -132,0 +174,6 @@ checksum = "4050469837a6ff301cd14c1f8f24f88549e6d548f24f64e2148eb0f72cebc51f"
++[[package]]
++name = "memchr"
++version = "2.8.3"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
++
+@@ -144,0 +192,9 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
++[[package]]
++name = "ppv-lite86"
++version = "0.2.21"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "85eae3c4ed2f50dcfe72643da4befc30deadb458a9b590d720cde2f2b1e97da9"
++dependencies = [
++ "zerocopy",
++]
++
+@@ -153,0 +210,30 @@ dependencies = [
++[[package]]
++name = "protobuf"
++version = "2.28.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "106dd99e98437432fed6519dedecfade6a06a73bb7b2a1e019fdd2bee5778d94"
++dependencies = [
++ "bytes",
++]
++
++[[package]]
++name = "protobuf-build"
++version = "0.14.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "2df9942df2981178a930a72d442de47e2f0df18ad68e50a30f816f1848215ad0"
++dependencies = [
++ "bitflags",
++ "protobuf",
++ "protobuf-codegen",
++ "regex",
++]
++
++[[package]]
++name = "protobuf-codegen"
++version = "2.28.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "033460afb75cf755fcfc16dfaed20b86468082a2ea24e05ac35ab4a099a017d6"
++dependencies = [
++ "protobuf",
++]
++
+@@ -163 +249 @@ dependencies = [
+- "rand",
++ "rand 0.10.3",
+@@ -170 +256 @@ dependencies = [
+- "thiserror",
++ "thiserror 2.0.21",
+@@ -190,0 +277,38 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
++[[package]]
++name = "raft"
++version = "0.7.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f12688b23a649902762d4c11d854d73c49c9b93138f2de16403ef9f571ad5bae"
++dependencies = [
++ "bytes",
++ "fxhash",
++ "getset",
++ "protobuf",
++ "raft-proto",
++ "rand 0.8.8",
++ "slog",
++ "thiserror 1.0.69",
++]
++
++[[package]]
++name = "raft-proto"
++version = "0.7.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "fb6884896294f553e8d5cfbdb55080b9f5f2f43394afff59c9f077e0f4b46d6b"
++dependencies = [
++ "bytes",
++ "protobuf",
++ "protobuf-build",
++]
++
++[[package]]
++name = "rand"
++version = "0.8.8"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e058c7de0b26af77780c769414d6257830bb240f3c38477dbc2c16e5f54d6d4c"
++dependencies = [
++ "libc",
++ "rand_chacha",
++ "rand_core 0.6.4",
++]
++
+@@ -199 +323,20 @@ dependencies = [
+- "rand_core",
++ "rand_core 0.10.1",
++]
++
++[[package]]
++name = "rand_chacha"
++version = "0.3.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "e6c10a63a0fa32252be49d21e7709d4d4baf8d231c2dbce1eaa8141b9b127d88"
++dependencies = [
++ "ppv-lite86",
++ "rand_core 0.6.4",
++]
++
++[[package]]
++name = "rand_core"
++version = "0.6.4"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
++dependencies = [
++ "getrandom 0.2.17",
+@@ -214 +357 @@ dependencies = [
+- "rand_core",
++ "rand_core 0.10.1",
+@@ -216,0 +360,29 @@ dependencies = [
++[[package]]
++name = "regex"
++version = "1.13.1"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "f020237b6c8eed93db2e2cb53c00c60a8e1bc73da7d073199a1180401450218d"
++dependencies = [
++ "aho-corasick",
++ "memchr",
++ "regex-automata",
++ "regex-syntax",
++]
++
++[[package]]
++name = "regex-automata"
++version = "0.4.18"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "ad8553b9b26413251cbf30e620595c7a41b3887f03da04579c0e6b0d6a06b4b2"
++dependencies = [
++ "aho-corasick",
++ "memchr",
++ "regex-syntax",
++]
++
++[[package]]
++name = "regex-syntax"
++version = "0.8.11"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "d6f6ff9a378485b298a5286656da665ba74413d36db0979633275d2e708145d4"
++
+@@ -289,0 +462,6 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
++[[package]]
++name = "slog"
++version = "2.7.0"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "8347046d4ebd943127157b94d63abb990fcf729dc4e9978927fdf4ac3c998d06"
++
+@@ -295,0 +474,11 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
++[[package]]
++name = "syn"
++version = "2.0.119"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "unicode-ident",
++]
++
+@@ -306,0 +496,9 @@ dependencies = [
++[[package]]
++name = "thiserror"
++version = "1.0.69"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
++dependencies = [
++ "thiserror-impl 1.0.69",
++]
++
+@@ -313 +511,12 @@ dependencies = [
+- "thiserror-impl",
++ "thiserror-impl 2.0.21",
++]
++
++[[package]]
++name = "thiserror-impl"
++version = "1.0.69"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 2.0.119",
+@@ -324 +533 @@ dependencies = [
+- "syn",
++ "syn 3.0.6",
+@@ -369,0 +579 @@ dependencies = [
++ "raft",
+@@ -371,0 +582 @@ dependencies = [
++ "slog",
+@@ -412 +623 @@ dependencies = [
+- "syn",
++ "syn 3.0.6",
+@@ -507,0 +719,20 @@ checksum = "589f6da84c646204747d1270a2a5661ea66ed1cced2631d546fdfb155959f9ec"
++[[package]]
++name = "zerocopy"
++version = "0.8.62"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "86502bf56ac7c77571a32e2647bb2a15894565e981fb2a48d7bde2d91c965a9d"
++dependencies = [
++ "zerocopy-derive",
++]
++
++[[package]]
++name = "zerocopy-derive"
++version = "0.8.62"
++source = "registry+https://github.com/rust-lang/crates.io-index"
++checksum = "5457206954b06561e2608c7e19cf58b1926586d999c246eebe4502f7e2039d1a"
++dependencies = [
++ "proc-macro2",
++ "quote",
++ "syn 2.0.119",
++]
++
+diff --git a/Cargo.toml b/Cargo.toml
+index 21c184e..103ecb4 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -22,0 +23,4 @@ bytes = { version = "=1.12.1", optional = true }
++[dev-dependencies]
++raft_reference = { package = "raft", version = "=0.7.0", default-features = false, features = ["protobuf-codec"] }
++slog = { version = "=2.7.0", default-features = false }
++
+diff --git a/tests/raft.rs b/tests/raft.rs
+index 414bb14..50019dd 100644
+--- a/tests/raft.rs
++++ b/tests/raft.rs
+@@ -23,0 +24,3 @@ mod leadership;
++#[cfg(feature = "native")]
++#[path = "raft/reference.rs"]
++mod reference;
+diff --git a/tests/raft/reference.rs b/tests/raft/reference.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/reference.rs
+@@ -0,0 +1,209 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++#[path = "reference/codec.rs"]
++mod codec;
++#[path = "reference/histories.rs"]
++mod histories;
++#[path = "reference/host.rs"]
++mod host;
++use host::Reference;
++use voteboat::application::{read_at_barrier, Counter, StateMachine};
++
++const MAX_ACTIONS: usize = 512;
++#[derive(Clone, Debug, Eq, PartialEq)]
++enum Action {
++    Campaign(u64),
++    Write(u64, u128, i64),
++    Isolate(u64),
++    Heal,
++    Pump,
++    Heartbeat(u64),
++    Read(u64, u64),
++    Check,
++    CorruptReference(u64),
++}
++#[derive(Clone, Debug, Eq, PartialEq)]
++struct Trace {
++    seed: u64,
++    actions: Vec<Action>,
++}
++#[derive(Clone, Debug, Default, Eq, PartialEq)]
++struct Evidence {
++    campaigns: usize,
++    writes: usize,
++    reads: usize,
++    unavailable_reads: usize,
++    checks: usize,
++    partitions: usize,
++}
++#[derive(Clone, Debug, Eq, PartialEq)]
++enum Mismatch {
++    Leader(u64),
++    Commands(u64),
++    Application(u64),
++    Read(u64, u64),
++}
++#[derive(Clone, Debug, Eq, PartialEq)]
++struct Observation {
++    commands: BTreeMap<u64, Vec<(u128, i64)>>,
++    values: BTreeMap<u64, i64>,
++    evidence: Evidence,
++}
++struct Comparison {
++    native: Cluster<NativeLogStore<ModelIo>>,
++    reference: Reference,
++    evidence: Evidence,
++}
++impl Comparison {
++    fn new() -> Self {
++        Self {
++            native: Cluster::new(bootstrap(1, 3), native),
++            reference: Reference::new(),
++            evidence: Evidence::default(),
++        }
++    }
++    fn pump(&mut self) {
++        self.native.pump();
++        self.reference.pump();
++    }
++    fn action(&mut self, action: &Action) -> Result<(), Mismatch> {
++        match *action {
++            Action::Campaign(id) => {
++                self.native.act(id, Event::Campaign);
++                self.reference.campaign(id);
++                self.evidence.campaigns += 1;
++            }
++            Action::Write(id, operation, delta) => {
++                // The controlled trace addresses an actual leader, including an
++                // isolated old leader. Follower forwarding is not equivalent.
++                if self.native.replicas[&id].core.role() != Role::Leader
++                    || !self.reference.is_leader(id)
++                {
++                    return Err(Mismatch::Leader(id));
++                }
++                self.native.act(
++                    id,
++                    Event::Propose {
++                        operation: OperationId::new(operation).unwrap(),
++                        bytes: delta.to_le_bytes().to_vec(),
++                    },
++                );
++                self.reference.write(id, operation, delta);
++                self.evidence.writes += 1;
++            }
++            Action::Isolate(id) => {
++                self.native.partition(&[id]);
++                self.reference.isolate(id);
++                self.evidence.partitions += 1;
++            }
++            Action::Heal => {
++                self.native.heal();
++                self.reference.heal();
++            }
++            Action::Pump => self.pump(),
++            Action::Heartbeat(id) => {
++                self.native.act(id, Event::Heartbeat);
++                self.reference.heartbeat(id);
++            }
++            Action::Read(id, request) => self.read(id, request)?,
++            Action::Check => {
++                self.check()?;
++                self.evidence.checks += 1;
++            }
++            Action::CorruptReference(id) => self.reference.corrupt(id),
++        }
++        self.native.assert_safety();
++        self.reference.assert_safety();
++        Ok(())
++    }
++    fn check(&self) -> Result<(), Mismatch> {
++        for id in 1..=3 {
++            if self.commands(id) != self.reference.commands(id) {
++                return Err(Mismatch::Commands(id));
++            }
++            if self.counter(id).read_applied(0).unwrap() != self.reference.value(id, u64::MAX) {
++                return Err(Mismatch::Application(id));
++            }
++        }
++        Ok(())
++    }
++    fn commands(&self, id: u64) -> Vec<(u128, i64)> {
++        self.native.applied[&id]
++            .iter()
++            .filter_map(|entry| match &entry.payload {
++                EntryPayload::Command { operation, bytes } => Some((
++                    operation.get(),
++                    i64::from_le_bytes(bytes.as_slice().try_into().unwrap()),
++                )),
++                _ => None,
++            })
++            .collect()
++    }
++    fn counter(&self, id: u64) -> Counter {
++        let mut app = Counter::new(MAX_ACTIONS).unwrap();
++        app.apply_batch(&self.native.applied[&id]).unwrap();
++        app
++    }
++    fn read(&mut self, id: u64, request: u64) -> Result<(), Mismatch> {
++        if self.native.replicas[&id].core.role() != Role::Leader || !self.reference.is_leader(id) {
++            return Err(Mismatch::Leader(id));
++        }
++        self.native.act(id, read_request(request));
++        self.reference.read(id, request);
++        self.pump();
++        let barrier = self
++            .native
++            .reads
++            .get(&id)
++            .and_then(|ready| {
++                ready
++                    .iter()
++                    .find(|barrier| barrier.request().get() == request)
++            })
++            .copied();
++        let app = self.counter(id);
++        let value = barrier.map(|barrier| {
++            read_at_barrier(
++                &mut self.native.replicas.get_mut(&id).unwrap().core,
++                &barrier,
++                &app,
++                (),
++            )
++            .unwrap()
++        });
++        let other = self.reference.read_value(id, request);
++        if value != other {
++            return Err(Mismatch::Read(id, request));
++        }
++        if value.is_some() {
++            self.evidence.reads += 1;
++        } else {
++            self.evidence.unavailable_reads += 1;
++            self.native.act(
++                id,
++                Event::CancelRead {
++                    request: ReadRequestId::new(request).unwrap(),
++                },
++            );
++        }
++        Ok(())
++    }
++    fn observation(&self) -> Observation {
++        Observation {
++            commands: (1..=3).map(|id| (id, self.commands(id))).collect(),
++            values: (1..=3)
++                .map(|id| (id, self.counter(id).read_applied(0).unwrap()))
++                .collect(),
++            evidence: self.evidence.clone(),
++        }
++    }
++}
++fn replay(trace: &Trace) -> Result<Observation, Mismatch> {
++    assert!(trace.actions.len() <= MAX_ACTIONS);
++    let mut comparison = Comparison::new();
++    for action in &trace.actions {
++        comparison.action(action)?;
++    }
++    Ok(comparison.observation())
++}
+diff --git a/tests/raft/reference/codec.rs b/tests/raft/reference/codec.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/reference/codec.rs
+@@ -0,0 +1,85 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++impl Trace {
++    pub(super) fn encode(&self) -> Vec<u8> {
++        let mut text = format!("VBDIF1 {}\n", self.seed);
++        for action in &self.actions {
++            let line = match action {
++                Action::Campaign(id) => format!("campaign {id}"),
++                Action::Write(id, operation, delta) => format!("write {id} {operation} {delta}"),
++                Action::Isolate(id) => format!("isolate {id}"),
++                Action::Heal => "heal".into(),
++                Action::Pump => "pump".into(),
++                Action::Heartbeat(id) => format!("heartbeat {id}"),
++                Action::Read(id, request) => format!("read {id} {request}"),
++                Action::Check => "check".into(),
++                Action::CorruptReference(id) => format!("corrupt {id}"),
++            };
++            text.push_str(&line);
++            text.push('\n');
++        }
++        text.into_bytes()
++    }
++    pub(super) fn decode(bytes: &[u8]) -> Result<Self, &'static str> {
++        if bytes.len() > 65536 || !bytes.ends_with(b"\n") {
++            return Err("trace bounds");
++        }
++        let text = std::str::from_utf8(bytes).map_err(|_| "trace text")?;
++        let mut lines = text.lines();
++        let header: Vec<_> = lines
++            .next()
++            .ok_or("trace header")?
++            .split_whitespace()
++            .collect();
++        let ["VBDIF1", seed] = header.as_slice() else {
++            return Err("trace version");
++        };
++        let seed = seed.parse::<u64>().map_err(|_| "trace seed")?;
++        if seed == 0 {
++            return Err("trace seed");
++        }
++        let mut actions = Vec::new();
++        for line in lines {
++            if actions.len() == MAX_ACTIONS {
++                return Err("action bound");
++            }
++            actions.push(decode_action(line)?);
++        }
++        Ok(Self { seed, actions })
++    }
++}
++fn decode_action(line: &str) -> Result<Action, &'static str> {
++    let fields: Vec<_> = line.split_whitespace().collect();
++    Ok(match fields.as_slice() {
++        ["campaign", id] => Action::Campaign(node_id(id)?),
++        ["write", id, operation, delta] => {
++            let operation = operation.parse::<u128>().map_err(|_| "operation")?;
++            if operation == 0 {
++                return Err("operation");
++            }
++            Action::Write(node_id(id)?, operation, delta.parse().map_err(|_| "delta")?)
++        }
++        ["isolate", id] => Action::Isolate(node_id(id)?),
++        ["heal"] => Action::Heal,
++        ["pump"] => Action::Pump,
++        ["heartbeat", id] => Action::Heartbeat(node_id(id)?),
++        ["read", id, request] => {
++            let request = request.parse::<u64>().map_err(|_| "request")?;
++            if request == 0 {
++                return Err("request");
++            }
++            Action::Read(node_id(id)?, request)
++        }
++        ["check"] => Action::Check,
++        ["corrupt", id] => Action::CorruptReference(node_id(id)?),
++        _ => return Err("action"),
++    })
++}
++fn node_id(text: &str) -> Result<u64, &'static str> {
++    let id = text.parse().map_err(|_| "node")?;
++    if !(1..=3).contains(&id) {
++        return Err("node");
++    }
++    Ok(id)
++}
+diff --git a/tests/raft/reference/host.rs b/tests/raft/reference/host.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/reference/host.rs
+@@ -0,0 +1,213 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use raft_reference::{
++    eraftpb::{Entry, EntryType, Message as ReferenceMessage},
++    storage::MemStorage,
++    Config, RawNode, StateRole,
++};
++
++struct Replica {
++    core: RawNode<MemStorage>,
++    applied: Vec<Entry>,
++    reads: BTreeMap<u64, u64>,
++    corrupted_value: bool,
++}
++pub(super) struct Reference {
++    replicas: BTreeMap<u64, Replica>,
++    messages: VecDeque<ReferenceMessage>,
++    blocked: BTreeSet<(u64, u64)>,
++}
++impl Reference {
++    pub(super) fn new() -> Self {
++        let logger = slog::Logger::root(slog::Discard, slog::o!());
++        let replicas = (1..=3)
++            .map(|id| {
++                let config = Config {
++                    id,
++                    pre_vote: false,
++                    check_quorum: false,
++                    max_uncommitted_size: 65536,
++                    ..Config::default()
++                };
++                let store = MemStorage::new_with_conf_state((vec![1, 2, 3], vec![]));
++                (
++                    id,
++                    Replica {
++                        core: RawNode::new(&config, store, &logger).unwrap(),
++                        applied: Vec::new(),
++                        reads: BTreeMap::new(),
++                        corrupted_value: false,
++                    },
++                )
++            })
++            .collect();
++        Self {
++            replicas,
++            messages: VecDeque::new(),
++            blocked: BTreeSet::new(),
++        }
++    }
++    pub(super) fn is_leader(&self, id: u64) -> bool {
++        self.replicas[&id].core.raft.state == StateRole::Leader
++    }
++    pub(super) fn campaign(&mut self, id: u64) {
++        self.replicas.get_mut(&id).unwrap().core.campaign().unwrap();
++        self.ready(id);
++    }
++    pub(super) fn write(&mut self, id: u64, operation: u128, delta: i64) {
++        let mut bytes = operation.to_le_bytes().to_vec();
++        bytes.extend(delta.to_le_bytes());
++        self.replicas
++            .get_mut(&id)
++            .unwrap()
++            .core
++            .propose(vec![], bytes)
++            .unwrap();
++        self.ready(id);
++    }
++    pub(super) fn heartbeat(&mut self, id: u64) {
++        self.replicas.get_mut(&id).unwrap().core.ping();
++        self.ready(id);
++    }
++    pub(super) fn read(&mut self, id: u64, request: u64) {
++        self.replicas
++            .get_mut(&id)
++            .unwrap()
++            .core
++            .read_index(request.to_le_bytes().to_vec());
++        self.ready(id);
++    }
++    fn ready(&mut self, id: u64) {
++        let replica = self.replicas.get_mut(&id).unwrap();
++        let mut count = 0;
++        while replica.core.has_ready() {
++            count += 1;
++            assert!(count < 1000, "non-quiescent reference Ready");
++            let mut ready = replica.core.ready();
++            assert_eq!(
++                ready.snapshot().get_metadata().index,
++                0,
++                "snapshot is outside this trace contract"
++            );
++            // This host models successful atomic durable persistence per Ready.
++            // Even optional commit-only hard-state writes are persisted here.
++            // No persisted message or advancement escapes before these writes.
++            let store = replica.core.raft.raft_log.store.clone();
++            {
++                let mut disk = store.wl();
++                disk.append(ready.entries()).unwrap();
++                if let Some(hard) = ready.hs() {
++                    disk.set_hardstate(hard.clone());
++                }
++            }
++            self.messages.extend(ready.take_messages());
++            self.messages.extend(ready.take_persisted_messages());
++            for read in ready.take_read_states() {
++                let request = u64::from_le_bytes(read.request_ctx.as_slice().try_into().unwrap());
++                assert!(replica.reads.insert(request, read.index).is_none());
++            }
++            apply(&mut replica.applied, ready.take_committed_entries());
++            let mut light = replica.core.advance(ready);
++            if let Some(commit) = light.commit_index() {
++                store.wl().mut_hard_state().commit = commit;
++            }
++            self.messages.extend(light.take_messages());
++            apply(&mut replica.applied, light.take_committed_entries());
++            replica.core.advance_apply();
++            assert!(self.messages.len() < 10000);
++        }
++    }
++    pub(super) fn pump(&mut self) {
++        let mut count = 0;
++        while let Some(message) = self.messages.pop_front() {
++            count += 1;
++            assert!(count < 100000, "non-quiescent reference messages");
++            if !self.blocked.contains(&(message.from, message.to)) {
++                let id = message.to;
++                self.replicas
++                    .get_mut(&id)
++                    .unwrap()
++                    .core
++                    .step(message)
++                    .unwrap();
++                self.ready(id);
++            }
++        }
++    }
++    pub(super) fn isolate(&mut self, id: u64) {
++        self.blocked = (1..=3)
++            .flat_map(|a| (1..=3).filter_map(move |b| ((a == id) != (b == id)).then_some((a, b))))
++            .collect();
++    }
++    pub(super) fn heal(&mut self) {
++        self.blocked.clear();
++    }
++    pub(super) fn commands(&self, id: u64) -> Vec<(u128, i64)> {
++        self.replicas[&id]
++            .applied
++            .iter()
++            .filter_map(command)
++            .collect()
++    }
++    pub(super) fn value(&self, id: u64, index: u64) -> i64 {
++        let mut operations = BTreeMap::new();
++        let mut value = 0i64;
++        for (operation, delta) in self.replicas[&id]
++            .applied
++            .iter()
++            .take_while(|e| e.index <= index)
++            .filter_map(command)
++        {
++            match operations.entry(operation) {
++                std::collections::btree_map::Entry::Vacant(entry) => {
++                    entry.insert(delta);
++                    value = value.checked_add(delta).unwrap();
++                }
++                std::collections::btree_map::Entry::Occupied(entry) => {
++                    assert_eq!(*entry.get(), delta)
++                }
++            }
++        }
++        value + i64::from(self.replicas[&id].corrupted_value && !operations.is_empty())
++    }
++    pub(super) fn read_value(&self, id: u64, request: u64) -> Option<i64> {
++        self.replicas[&id].reads.get(&request).map(|index| {
++            assert!(*index <= self.replicas[&id].applied.last().map_or(0, |e| e.index));
++            self.value(id, *index)
++        })
++    }
++    pub(super) fn corrupt(&mut self, id: u64) {
++        self.replicas.get_mut(&id).unwrap().corrupted_value = true;
++    }
++    pub(super) fn assert_safety(&self) {
++        let mut leaders = BTreeSet::new();
++        for replica in self.replicas.values() {
++            if replica.core.raft.state == StateRole::Leader {
++                assert!(leaders.insert(replica.core.raft.term));
++            }
++            for other in self.replicas.values() {
++                for (left, right) in replica.applied.iter().zip(&other.applied) {
++                    assert_eq!(left, right, "reference committed-prefix divergence");
++                }
++            }
++        }
++    }
++}
++fn apply(applied: &mut Vec<Entry>, entries: Vec<Entry>) {
++    for entry in entries {
++        assert_eq!(entry.index, applied.last().map_or(1, |last| last.index + 1));
++        assert_eq!(entry.get_entry_type(), EntryType::EntryNormal);
++        applied.push(entry);
++    }
++}
++fn command(entry: &Entry) -> Option<(u128, i64)> {
++    if entry.data.is_empty() {
++        return None;
++    }
++    assert_eq!(entry.data.len(), 24);
++    Some((
++        u128::from_le_bytes(entry.data[..16].try_into().unwrap()),
++        i64::from_le_bytes(entry.data[16..].try_into().unwrap()),
++    ))
++}
+diff --git a/tests/raft/reference/histories.rs b/tests/raft/reference/histories.rs
+new file mode 100644
+--- /dev/null
++++ b/tests/raft/reference/histories.rs
+@@ -0,0 +1,133 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++fn settled(actions: &mut Vec<Action>, leader: u64) {
++    actions.extend([
++        Action::Pump,
++        Action::Heartbeat(leader),
++        Action::Pump,
++        Action::Check,
++    ]);
++}
++fn generated(seed: u64) -> Trace {
++    let mut actions = vec![Action::Campaign(1)];
++    settled(&mut actions, 1);
++    let mut leader = 1;
++    let mut random = seed;
++    for round in 0..6u64 {
++        random ^= random << 13;
++        random ^= random >> 7;
++        random ^= random << 17;
++        let operation = u128::from(seed) * 1000 + u128::from(round) * 10 + 1;
++        let delta = i64::try_from(random % 19).unwrap() - 9;
++        actions.push(Action::Write(leader, operation, delta));
++        settled(&mut actions, leader);
++        actions.push(Action::Write(leader, operation, delta));
++        settled(&mut actions, leader);
++        actions.push(Action::Read(leader, round * 10 + 1));
++        actions.push(Action::Isolate(leader));
++        // A locally accepted old-leader command must not escape its partition.
++        actions.push(Action::Write(leader, operation + 1, 97));
++        actions.push(Action::Pump);
++        actions.push(Action::Read(leader, round * 10 + 2));
++        leader = leader % 3 + 1;
++        actions.push(Action::Campaign(leader));
++        actions.push(Action::Pump);
++        actions.push(Action::Write(leader, operation + 2, -3));
++        actions.push(Action::Pump);
++        actions.push(Action::Read(leader, round * 10 + 3));
++        actions.push(Action::Heal);
++        settled(&mut actions, leader);
++    }
++    Trace { seed, actions }
++}
++#[test]
++fn known_majority_reference_matches_original_commands_retries_partition_repair_and_reads() {
++    for seed in 1..=32 {
++        let trace = generated(seed);
++        let decoded = Trace::decode(&trace.encode()).unwrap();
++        assert_eq!(decoded, trace);
++        let result = replay(&trace).unwrap_or_else(|error| {
++            panic!(
++                "seed {seed}: {error:?}\n{}",
++                String::from_utf8(trace.encode()).unwrap()
++            )
++        });
++        assert_eq!(
++            replay(&decoded),
++            Ok(result.clone()),
++            "seed {seed} exact replay"
++        );
++        assert_eq!(result.evidence.campaigns, 7);
++        assert_eq!(result.evidence.writes, 24);
++        assert_eq!(result.evidence.reads, 12);
++        assert_eq!(result.evidence.unavailable_reads, 6);
++        assert_eq!(result.evidence.partitions, 6);
++        assert_eq!(result.evidence.checks, 19);
++        for commands in result.commands.values() {
++            assert_eq!(commands.len(), 18);
++            assert!(commands.iter().all(|(_, delta)| *delta != 97));
++        }
++    }
++}
++fn reduce(mut trace: Trace, target: &Mismatch) -> Trace {
++    let mut cursor = 0;
++    while cursor < trace.actions.len() {
++        let mut candidate = trace.clone();
++        candidate.actions.remove(cursor);
++        if replay(&candidate).as_ref().err() == Some(target) {
++            trace = candidate;
++            cursor = 0;
++        } else {
++            cursor += 1;
++        }
++    }
++    trace
++}
++#[test]
++fn reference_host_application_corruption_is_detected_and_reduced_after_real_commit() {
++    let mut trace = generated(41);
++    trace
++        .actions
++        .extend([Action::CorruptReference(1), Action::Check]);
++    let target = Mismatch::Application(1);
++    assert_eq!(replay(&trace), Err(target.clone()));
++    let reduced = reduce(trace.clone(), &target);
++    assert!(reduced.actions.len() < trace.actions.len());
++    assert!(reduced
++        .actions
++        .iter()
++        .any(|action| matches!(action, Action::Write(..))));
++    assert_eq!(
++        replay(&Trace::decode(&reduced.encode()).unwrap()),
++        Err(target)
++    );
++    let mut corrected = reduced.clone();
++    corrected
++        .actions
++        .retain(|action| !matches!(action, Action::CorruptReference(_)));
++    assert!(replay(&corrected).is_ok());
++    println!(
++        "reduced reference-host mismatch:\n{}",
++        String::from_utf8(reduced.encode()).unwrap()
++    );
++}
++#[test]
++fn differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions() {
++    for bytes in [
++        b"VBDIF2 1\n".as_slice(),
++        b"VBDIF1 0\n",
++        b"VBDIF1 1\nwrite 1 0 2\n",
++        b"VBDIF1 1\ncampaign 4\n",
++        b"VBDIF1 1\nread 1 0\n",
++        b"VBDIF1 1\nwrite 1 9",
++        b"VBDIF1 1\ncheck extra\n",
++    ] {
++        assert!(Trace::decode(bytes).is_err());
++    }
++    assert!(Trace::decode(&vec![b'x'; 65537]).is_err());
++    assert!(
++        Trace::decode(format!("VBDIF1 1\n{}", "check\n".repeat(MAX_ACTIONS + 1)).as_bytes())
++            .is_err()
++    );
++}

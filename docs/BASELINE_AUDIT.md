@@ -676,3 +676,21 @@ semantic mismatch rather than modifying VoteBoat to resemble the reference.
 Hierarchical voting and arbitrary membership/snapshot combinations need their
 own evidence after the compatible baseline. No reference code is copied into
 the production core and no external adapter is introduced by this review.
+
+## Slice296 — controlled majority comparison qualified
+
+The previously unexecuted known-Raft comparison now runs against pinned
+raft-rs0.7.0 through independent public-core hosts. Both platforms pass251
+complete Raft executions with strict four-profile/formatting zero and686
+matching inputs.32 six-round traces compare real committed commands, retries,
+partition repair and quorum reads; exact replay and an actually committed
+reference-host corruption negative/reduction are executed. This closes the
+declared controlled majority baseline deliverable, not arbitrary protocol or
+crash equivalence. Reference MemStorage represents successful atomic persistence.
+The next mini items are matching interrupted durability, then checkpoint recovery
+from each engine's own durable state. Broader worker/device/membership/lifecycle
+combinations, provider obligations and fuzz coverage remain. Original Mac285 is
+terminal73/0 all and40/0 default; Linux285/288 remains a required unresolved
+shutdown fault. No new major feature was needed for this comparison; production
+consensus/API/format/dependency graph is unchanged. The usable service/embedding
+remains available and full P0–P7 stays active, with performance/security later.

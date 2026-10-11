@@ -1,5 +1,15 @@
 # Baseline acceptance map
 
+Compatible reference comparison: [slice296](../validation/baseline/slice296/README.md).
+Linux/macOS each pass251 complete Raft executions across four profiles, with
+formatting/four strict Clippy profiles zero and686 matching input guards.
+Controlled majority elections, commands/retries, partition repair and quorum
+reads match independent raft-rs0.7.0; exact replay and corruption reduction run.
+Production dependency graphs are unchanged; reference dependencies are test-only.
+Interrupted durability/checkpoint differential and broader fault/provider checks
+remain. Original Mac285 finishes73/0 all and40/0 default; the retained Linux
+shutdown failure remains unresolved. Feature-complete acceptance is not claimed.
+
 Shared wire provisioning: [slice293](../validation/baseline/slice293/README.md).
 Linux/macOS each pass72 wire/configuration-capacity executions across four feature
 profiles, strict Clippy/formatting zero and673 matching input guards. The same

@@ -35,6 +35,8 @@ jobs:
           TMPDIR: ${{ runner.temp }}
         run: |
           set -o pipefail
+          compiler="$(bash validation/reference-tools.sh)"
+          if [[ -n "$compiler" ]]; then export PROTOC="$compiler"; fi
           cargo test --locked --offline --all-features \
             --test counter_service --test directory_service --test transfer_service \
             2>&1 | tee operator-recovery.log
