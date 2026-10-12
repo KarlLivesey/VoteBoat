@@ -70,6 +70,16 @@ pub struct MonoTime(pub u64);
 pub trait Clock {
     fn now(&self) -> MonoTime;
 }
+/// Signed nanoseconds since the Unix epoch, for local diagnostics only.
+/// Wall time may move backwards and never establishes a deadline or authority.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct DiagnosticWallTime(pub i128);
+
+/// Independent diagnostic time source; consensus accepts only monotonic time.
+/// Hosts choose and sample this provider explicitly, outside deterministic work.
+pub trait DiagnosticClock {
+    fn diagnostic_wall_time(&self) -> DiagnosticWallTime;
+}
 /// Election jitter only; not a source of identities or cryptographic material.
 pub trait ElectionEntropy {
     fn sample(&mut self) -> u64;

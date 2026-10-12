@@ -872,7 +872,20 @@
       "conformance": [
         "tests/runtime.rs"
       ],
-      "scope": "Local monotonic milliseconds with clone-shared epoch; virtual host clock injection. No core clock reads or diagnostic wall-clock API."
+      "scope": "Local monotonic milliseconds with clone-shared epoch and virtual host injection. Consensus timing never samples diagnostic wall time; the separate DiagnosticClock contract provides explicit caller-sampled diagnostics."
+    },
+    {
+      "design_id": "C12",
+      "public_contract": "DiagnosticClock / DiagnosticWallTime",
+      "operations": [
+        "diagnostic_wall_time"
+      ],
+      "native": "MonotonicClock implements the independent diagnostic contract with explicit SystemTime sampling.",
+      "conformance": [
+        "tests/runtime.rs",
+        "src/native/runtime.rs"
+      ],
+      "scope": "Caller-sampled signed nanoseconds since Unix epoch, including pre-epoch/subsecond values. Hosts inject this provider independently of Clock. Diagnostic wall time may regress and grants no deadline, election, lease, quorum or durability authority. No conversion to MonoTime, hidden polling or retained resource. Native conversion and clone/monotonic controls are private unit tests; downstream injection varies wall time while election inputs remain unchanged. Matching macOS qualification is pending slice401."
     },
     {
       "design_id": "C04/C10",

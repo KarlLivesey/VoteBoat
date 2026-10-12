@@ -1,0 +1,25 @@
+{
+  "meaning": "Post-test fingerprints of the five implementation/inventory inputs; not a before/after artifact guard or full-source certificate.",
+  "inputs": [
+    {
+      "file": "src/runtime.rs",
+      "sha256": "0a6e42ed17ecca72340f7df24fa6d27b5e1c32e425ac7fa4b2916a087192c055"
+    },
+    {
+      "file": "src/native/runtime.rs",
+      "sha256": "91282b74deb11e814210383d5baec89785f2b9e6dd26d22964acf5d6788241d4"
+    },
+    {
+      "file": "tests/runtime.rs",
+      "sha256": "6a4e5241e916a83725d3907d8db755c9009e4d806d75c66cac45f976612750f3"
+    },
+    {
+      "file": "docs/component-contracts.json",
+      "sha256": "83e4017bc578a703c0d81b46ca847847c844d00c79c251364b82c578a2de08d4"
+    },
+    {
+      "file": "docs/provider-conformance.json",
+      "sha256": "596cb45b2f0dcea743175a7daf0550db9ce0ed84006f63b86d3f180b716e1e83"
+    }
+  ]
+}

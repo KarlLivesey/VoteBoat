@@ -1,0 +1,62 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.73s
+     Running tests/runtime.rs (target/debug/deps/runtime-aaa33fbb51565572)
+
+running 54 tests
+test campaign_delay::missing_ballots_still_retry_after_the_fresh_durable_self_vote_window ... ok
+test campaigning::paused_follower_keeps_replication_contact_without_rearming_an_election ... ok
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test delayed_durable_vote_completion_resets_and_fences_a_queued_expiration ... ok
+test campaign_delay::durable_self_vote_fences_expired_campaign_and_preserves_matching_ballot ... ok
+test expiration_backpressure_retains_one_token_and_close_cancels_queued_campaigns ... ok
+test diagnostic_wall_clock_jumps_never_enter_monotonic_election_timing ... ok
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+test campaigning::pause_invalidates_queued_election_and_resume_arms_a_fresh_timer ... ok
+test deadlines_visit_tokens_and_shutdown_do_not_alias_or_roll_back_work ... ok
+test dropping_one_shard_leaves_the_host_store_and_other_owner_live ... ok
+test campaigning::paused_leader_retains_automatic_heartbeat_deadlines ... ok
+test host_shard_reserves_control_bounds_retention_and_fairly_drains ... ok
+test enrolled_learner_has_no_election_timer_and_still_processes_durable_replication ... ok
+test retained_voter_replication_contact_bridges_scope_without_activating_it ... ok
+test prospective_reservation_peeks_the_exact_queue_choice_without_consumption ... ok
+test retained_capacity_group_identity_and_background_are_charged_before_admission ... ok
+test scheduler_contract::shared_assertions_detect_incarnation_blind_cancel ... ok
+test scheduler_contract::shared_assertions_detect_unfair_front_insertion ... ok
+test scheduler_contract::shared_assertions_detect_destructive_refusal ... ok
+test node_item_and_group_byte_limits_each_preserve_control_reserves ... ok
+test scheduler_contract::host_scheduler_obligations ... ok
+test failed_shared_barrier_fences_submitted_groups_without_votes_escaping ... ok
+test native_scheduler_deadline_clock_and_entropy_conformance ... ok
+test scheduler_contract::native_scheduler_obligations ... ok
+test timer_contract::isolation::host_timer_distinct_store_session_lane_and_generation_isolation ... ok
+test timer_contract::isolation::native_timer_distinct_store_session_lane_and_generation_isolation ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_budget_bypass ... ok
+test stale_malformed_denied_and_unrelated_messages_do_not_extend_election_deadlines ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_destructive_regression_refusal ... ok
+test timer_contract::mutants::shared_owner_assertions_detect_store_blind_cancellation ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_false_lateness ... ok
+test suspended_dependency_scopes_completion_and_allows_another_group_to_run ... ok
+test timer_contract::polling::host_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test timer_contract::mutants::shared_poll_assertions_detect_reversed_deadline_order ... ok
+test timer_contract::shared_timer_assertions_detect_cancellation_ignoring_owner ... ok
+test timer_contract::polling::native_timer_poll_retains_refused_work_and_transfers_exact_bounded_expirations ... ok
+test timer_provider_failure_latches_and_still_allows_explicit_stop ... ok
+test timer_contract::host_timer_exact_tokens_and_bounded_histories ... ok
+test timer_replay::schedule::timed_schedule_codec_rejects_unknown_domains_and_unbounded_inputs ... ok
+test timer_contract::native_timer_exact_tokens_and_bounded_histories ... ok
+test timer_replay::timer_campaign_waits_for_real_wal_sync_and_original_completion ... ok
+test timer_replay::timed_owner_recovery_distinguishes_written_synced_and_both_crash_modes ... ok
+test automatic_timer_history_reopens_three_actual_native_files ... ok
+test network_round_trip_longer_than_heartbeat_interval_still_commits_and_reads ... ok
+test virtual_time_elects_replaces_and_recovers_leaders_with_host_providers ... ok
+test native_timer_replication_progress_survives_multiple_heartbeat_retries ... ok
+test timer_replay::held_timer_campaign_does_not_stall_other_group_or_lose_cold_retries ... ok
+test virtual_time_leader_loss_and_recovery_use_native_timers_and_wals ... ok
+test timer_replay::schedule::bounded_recorded_timer_file_replays_through_the_actual_owner ... ok
+test hundred_groups_share_host_log_and_scheduler_with_delayed_completion_isolation ... ok
+test hundred_groups_share_native_wals_and_recover_acknowledged_state ... ok
+test hundred_group_history_uses_actual_shared_files_on_three_nodes ... ok
+test timer_replay::schedule::recorded_timed_owner_schedules_replay_exact_native_states_and_counter_retries ... ok
+
+test result: ok. 54 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+

@@ -166,6 +166,38 @@ impl Clock for VirtualClock {
         MonoTime(self.0.get())
     }
 }
+struct HostDiagnosticClock {
+    wall: Cell<DiagnosticWallTime>,
+    reads: Cell<usize>,
+}
+impl DiagnosticClock for HostDiagnosticClock {
+    fn diagnostic_wall_time(&self) -> DiagnosticWallTime {
+        self.reads.set(self.reads.get() + 1);
+        self.wall.get()
+    }
+}
+
+#[test]
+fn diagnostic_wall_clock_jumps_never_enter_monotonic_election_timing() {
+    let clock = VirtualClock(Rc::new(Cell::new(100)));
+    let diagnostics = HostDiagnosticClock {
+        wall: Cell::new(DiagnosticWallTime(0)),
+        reads: Cell::new(0),
+    };
+    let expected = election_deadline(&clock, &mut FixedEntropy(7), 100, 20).unwrap();
+    assert_eq!(diagnostics.reads.get(), 0);
+    for (read, wall) in [i128::MAX, -1, i128::MIN, 0, 1].into_iter().enumerate() {
+        diagnostics.wall.set(DiagnosticWallTime(wall));
+        assert_eq!(diagnostics.diagnostic_wall_time(), DiagnosticWallTime(wall));
+        assert_eq!(diagnostics.reads.get(), read + 1);
+        assert_eq!(
+            election_deadline(&clock, &mut FixedEntropy(7), 100, 20),
+            Ok(expected)
+        );
+        assert_eq!(clock.now(), MonoTime(100));
+        assert_eq!(diagnostics.reads.get(), read + 1);
+    }
+}
 struct FixedEntropy(u64);
 impl ElectionEntropy for FixedEntropy {
     fn sample(&mut self) -> u64 {

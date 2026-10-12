@@ -15,26 +15,26 @@ deferred. Stop after P8.
 
 Remaining:
 
-1. **Mac deep composition and cleanup.** Linux397 passes both complete cold
-   histories and all nine nested-owner tests. Linux398 passes both complete
-   repeated-replacement histories. Matching Mac checks are prepared; Mac394's
-   three final-cleanup failures remain preserved.
-2. **Startup and Joint recovery are qualified.** Linux396 passes all-feature57/0
-   and default42/0; Mac396 passes the same complete targets. Mac393 also passes
-   original Joint cold recovery over TCP and QUIC, including all old and restored
-   owners' cleanup. Remaining advanced membership work is the Mac repeated path.
-3. **Final configuration and requirement audit.** Broad Linux384 is terminal:
-   default2124/0, core1028/0, native1511/0, all features2436/2. Its old startup
-   failures remain failed records. All sixteen later changed inputs are fixtures
-   in three targets; production is unchanged. Their replacement all-feature
-   checks pass; current default logical targets pass7/0 and8/0. Complete the Mac
-   gates and source-specific P0–P8 evidence review before declaring completion.
+1. **Mac deep recovery and repeated replacement.** Joint recovery and complete
+   startup targets pass on both hosts. Linux397/398 and default400 cover the
+   complete logical targets. Combined Mac398 is running; its cold TCP case failed
+   waiting for the new checkpoint to publish, with original snapshot work still
+   owned. The old and new failures remain recorded.
+2. **Separate diagnostic wall clock (C12).** The final audit found this required
+   public operation missing. Slice401 adds an independent injectable contract
+   and native implementation; local four-profile runtime tests and native controls pass, with matching Mac
+   checks pending after398 hands back the machine.
+3. **Final requirement and source audit.** Broad Linux384 remains historical:
+   default2124/0, core1028/0, native1511/0, all2436/2. Corrected startup and all
+   affected logical fixture targets pass. Their399 reconciliation predates401's
+   additive production clock change. Finish the source-specific Linux/macOS
+   evidence map before declaring P8 complete.
 
 Formatting and strict all-target Clippy remain zero for all four supported
 configurations, enforced by the enabled pre-push hook. CI runs in the background.
 Historical failures and exact source/runtime evidence remain recorded.
 
-See the [current mini plan](IMPLEMENTATION.md#current-mini-plan372),
+See the [current mini plan](IMPLEMENTATION.md#current-mini-plan401),
 [requirement map](BASELINE_ACCEPTANCE.md), and
 [checkpoint recovery evidence](../validation/baseline/slice397/README.md), and
 [repeated-replacement evidence](../validation/baseline/slice398/README.md).

@@ -1,0 +1,87 @@
+{
+  "meaning": "Actual sequential local Cargo test invocations in the normal test profile. No release-profile, whole-repository test, matching Mac, or artifact-custody claim.",
+  "cases": [
+    {
+      "name": "all",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "runtime"
+      ],
+      "log": "runtime_all.log",
+      "passed": 54,
+      "failed": 0
+    },
+    {
+      "name": "default",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--test",
+        "runtime"
+      ],
+      "log": "runtime_default.log",
+      "passed": 54,
+      "failed": 0
+    },
+    {
+      "name": "core",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--test",
+        "runtime"
+      ],
+      "log": "runtime_core.log",
+      "passed": 37,
+      "failed": 0
+    },
+    {
+      "name": "native",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--no-default-features",
+        "--features",
+        "native",
+        "--test",
+        "runtime"
+      ],
+      "log": "runtime_native.log",
+      "passed": 54,
+      "failed": 0
+    },
+    {
+      "name": "native diagnostic unit controls",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--lib",
+        "diagnostic_clock_tests"
+      ],
+      "log": "native_diagnostic.log",
+      "passed": 2,
+      "failed": 0,
+      "filtered": 272
+    }
+  ]
+}

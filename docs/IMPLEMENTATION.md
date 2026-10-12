@@ -31396,21 +31396,22 @@ NetworkNode physical-backing adapter, retaining direct aliases and actual curren
 source-view bindings. Following is complete relay Linux/Mac closure and final
 normative/current-source P0–P8 qualification. P8 remains active; P9/P10 not begun.
 
-### Current mini plan372
+### Current mini plan401
 
-Macro review: ordinary static physical-voter relay trees now qualify on BOTH
-Linux/macOS (corrected37122 native and17 core controls per host, format/all4strict0,
-1297 source/executable guards). Original helpers remain nonvoting/noWAL. Broader
-programs/striped storage and bounded root366 constructor scope retain both-host
-qualification. Logical imported/Joint/Unknown cold functions now qualify both hosts;
-Mac complete nested/repeated cleanup and final source reconciliation remain.
-No unfinished functionality moves to P9/P10; final current-source audit remains.
+Macro review: the final requirement audit found C12's explicit diagnostic wall
+clock operation absent from the public interface. Earlier scope limits and
+"no missing named feature" conclusions do not satisfy this requirement. Slice401
+closes that additive P0 seam; it does not introduce performance/security work.
+Previously qualified logical/startup features remain historical evidence. Mac398
+is executing the final deep/repeated histories. Its cold TCP case failed while
+waiting for the actual new checkpoint frontier; no complete Mac cold pass is
+claimed. New401 production inputs require their own qualification.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Mac394 cold TCP/QUIC fail final physical close. Corrected397 passes Linux all nine cases, including both complete cold histories and meaningful old-predicate negative; default400 passes the complete seven-case target. Combined398 Mac source preserves exact397 selected code and is ready after terminal startup396. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Preserve original failures and authority checks; await actual new checkpoint coverage. | Usable recursive composition, P8 |
-| Next: repeated membership closure | Finish both genuine replacements with original send/receipt and full ownership handback. | Mac393 Joint TCP/QUIC and startup396 all57/default42 pass. Linux398 repeated TCP/QUIC pass, and default400 completes all eight activation cases. Combined398 Mac source includes the exact two-line receive-drain correction. | Complete original repeated TCP/QUIC with both Joint/Final/Outcome/Release/business/read results; exact accepted send completions, all15 provider joins/rebind and zero lint diagnostics. | Online membership and advanced composition, P4/P8 |
-| Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, normative384 map, source399 reconciliation and terminal Linux384 broad four-profile run. All16 changed fixtures map to three targets; production is unchanged. | Map every explicit functional requirement to appropriate Linux/macOS evidence; reconcile source differences and preserved failures, required checks and cleanup. Stop when P8 actually complete. | Goal completion, P0–P8 |
+| Current: C12 diagnostic clock401 | Supply the required independently injected wall clock while keeping consensus monotonic. | Existing Clock/MonoTime and original chapter17 C12; pre-edit schema at target/root315/clock401/SCHEMA.md. | Downstream backward/extreme wall-time injection, native signed epoch conversion, full runtime four configurations, formatter/four strict Clippy zero, selected matching Mac clock tests after398 handback. | Replaceable Rust interfaces, P0/P8 closure |
+| Next: Mac deep/repeated recovery closure | Finish genuine cold recovery and both replacements with original ownership cleanup. | Existing397 checkpoint frontier and398 receive-drain fixes; live sole Mac398 owner. Cold TCP failed CheckpointPublished and requires focused diagnosis from actual pending dependencies. | Actual checkpoint covers original applied frontier, original quorum-authorized read/retry, same-store recovery, both Joint/Final/Outcome/Release histories, all original joins/rebind on TCP/QUIC. Preserve original timers and failed evidence. | Recursive composition and online membership, P4/P8 |
+| Following: final explicit requirement audit | Establish P0–P8 completion against actual finished source. | Above closures, normative requirements, historical384 matrix,399/400 source reconciliation and additive401 checks. | Map every explicit R/VB/I and named P8 function to appropriate Linux/macOS evidence; reconcile source changes and preserved failures. Mark complete and stop only after required checks pass. | Goal completion, P0–P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
 native22/0 (28.19s),core17/0 (0.02s),targeted original failed TCP1/0 (0.80s),TLS
@@ -32134,3 +32135,38 @@ no binary/cache or Mac acceptance claim was added. Final remaining gates are
 current Mac398 deep/repeated completion and normative/platform assertion review.
 The Mac90457 job is live: controls2/0 and original warm Read5 have completed in
 coldTCP; no full cold/repeated pass is yet claimed.
+
+### Slice401: explicit C12 diagnostic wall-clock seam
+
+The original chapter17 catalogue and specs/component-contracts.json require
+monotonic and diagnostic wall time separately. Existing Clock exposes only now;
+the inventory's explicit omission was a real missing operation, not an optional
+adapter. Pre-edit schema records shape, ownership, failure and acceptance checks.
+
+DiagnosticClock and DiagnosticWallTime(i128 signed Unix nanoseconds) are additive
+public interfaces. Native MonotonicClock samples SystemTime only on an explicit
+diagnostic request. Clock/MonoTime/election_deadline remain unchanged, with no
+conversion, extra thread, queue, resource or consensus wall-clock read. A private
+conversion handles pre-epoch/subsecond values and permits deterministic testing
+without changing the machine clock. Downstream tests inject backwards/extreme
+values and verify unchanged monotonic deadlines and diagnostic sample counts.
+
+Initial formatter and strict all-feature Clippy completed with zero diagnostics.
+Full runtime/profile checks and matching Mac clock execution are in progress;
+Mac398's frozen pre401 histories cannot qualify the new production API. Prior399
+"production unchanged" reconciliation applies to source398, not current401.
+
+Slice401 local qualification is complete: full runtime all54/0, default54/0,
+core37/0 and native54/0, sequential normal Cargo test-profile runs; native signed
+epoch/subsecond and shared-monotonic controls2/0. Formatting and strict all-target
+Clippy default/all/core/native each exit0 with zero diagnostics. Metadata integrity
+passes145 contracts/41 partial reviews/389 operations; checker controls pass.
+Portable actual logs/commands: validation/baseline/slice401. Fingerprints are
+post-test inputs only, not a before/after artifact certificate. Matching Mac clock
+checks remain pending after398 terminal handback. No full fresh matrix claim.
+
+The initial provider checker controls failed the stale hard-coded40 review count
+after adding C12 (actual41). Updated expected41/389 counts and selected buffer
+negative controls by their named contract rather than the final ledger row.
+The direct Node checker rerun passes39/0; original failed wrapper log remains
+in slice401. This focused metadata correction changes no Rust input.

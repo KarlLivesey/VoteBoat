@@ -4147,6 +4147,37 @@
           ]
         }
       ]
+    },
+    {
+      "public_contract": "DiagnosticClock / DiagnosticWallTime",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/runtime.rs",
+          "symbol": "diagnostic_wall_clock_jumps_never_enter_monotonic_election_timing"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "diagnostic_wall_time"
+          ],
+          "obligation": "Sample diagnostic wall time explicitly through an independent host-supplied provider. Backwards and extreme signed values must not enter monotonic election deadlines or cause consensus to sample diagnostics.",
+          "assertions": [
+            {
+              "file": "tests/runtime.rs",
+              "symbol": "diagnostic_wall_clock_jumps_never_enter_monotonic_election_timing"
+            },
+            {
+              "file": "tests/runtime.rs",
+              "symbol": "diagnostic_wall_time"
+            }
+          ],
+          "remaining": [
+            "Selected deterministic host injection and separate native unit conversion/epoch controls do not certify every future provider or wall-clock synchronization behavior. Matching macOS execution of the new diagnostic API remains pending slice401."
+          ]
+        }
+      ]
     }
   ]
 }

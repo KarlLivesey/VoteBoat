@@ -14,10 +14,10 @@ const review = (value, name = 'LogStore') => value.reviews.find(row => row.publi
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 40);
-    assert.equal(report.reviewed_operations, 388);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 40);
-    for (const name of ['WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
+    assert.equal(report.reviewed_contracts, 41);
+    assert.equal(report.reviewed_operations, 389);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 41);
+    for (const name of ['DiagnosticClock / DiagnosticWallTime', 'WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }
 });
@@ -76,9 +76,9 @@ for (const [name, mutate] of [
     ['missing wire operation', d => { review(d, 'WireCodec').operations.pop(); }],
     ['missing wire assertion', d => { review(d, 'WireCodec').operations[0].assertions = []; }],
     ['missing wire limitation', d => { review(d, 'WireCodec').operations[0].remaining = []; }],
-    ['missing buffer operation', d => { d.reviews.at(-1).operations.pop(); }],
-    ['missing buffer assertion', d => { d.reviews.at(-1).operations[0].assertions = []; }],
-    ['missing buffer limitation', d => { d.reviews.at(-1).operations[0].remaining = []; }]
+    ['missing buffer operation', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations.pop(); }],
+    ['missing buffer assertion', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations[0].assertions = []; }],
+    ['missing buffer limitation', d => { review(d, 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits').operations[0].remaining = []; }]
 ]) {
     test(`rejects ${name}`, () => {
         const changed = structuredClone(ledger);

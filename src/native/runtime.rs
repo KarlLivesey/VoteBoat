@@ -17,7 +17,7 @@
 use crate::{identity::GroupIdentity, runtime::*};
 use std::{
     collections::{BTreeMap, BTreeSet, VecDeque},
-    time::Instant,
+    time::{Instant, SystemTime, UNIX_EPOCH},
 };
 
 pub struct FairScheduler {
@@ -187,6 +187,22 @@ impl Clock for MonotonicClock {
         MonoTime(self.epoch.elapsed().as_millis().min(u64::MAX as u128) as u64)
     }
 }
+impl DiagnosticClock for MonotonicClock {
+    fn diagnostic_wall_time(&self) -> DiagnosticWallTime {
+        unix_wall_time(SystemTime::now())
+    }
+}
+
+fn unix_wall_time(time: SystemTime) -> DiagnosticWallTime {
+    let (duration, sign) = match time.duration_since(UNIX_EPOCH) {
+        Ok(duration) => (duration, 1),
+        Err(before) => (before.duration(), -1),
+    };
+    DiagnosticWallTime(
+        sign * (i128::from(duration.as_secs()) * 1_000_000_000
+            + i128::from(duration.subsec_nanos())),
+    )
+}
 
 /// Explicitly seeded, reproducible SplitMix64 election jitter. Hosts should
 /// choose independent per-node seeds. No cryptographic/security use is supported.
@@ -205,5 +221,34 @@ impl ElectionEntropy for JitterEntropy {
         x = (x ^ (x >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
         x = (x ^ (x >> 27)).wrapping_mul(0x94d049bb133111eb);
         x ^ (x >> 31)
+    }
+}
+
+#[cfg(test)]
+mod diagnostic_clock_tests {
+    use super::*;
+    use std::time::Duration;
+
+    #[test]
+    fn native_diagnostic_clock_preserves_signed_epoch_and_subseconds() {
+        for (time, nanos) in [
+            (UNIX_EPOCH, 0),
+            (UNIX_EPOCH + Duration::new(1, 17), 1_000_000_017),
+            (UNIX_EPOCH - Duration::new(1, 17), -1_000_000_017),
+            (UNIX_EPOCH - Duration::from_nanos(1), -1),
+        ] {
+            assert_eq!(unix_wall_time(time), DiagnosticWallTime(nanos));
+        }
+    }
+
+    #[test]
+    fn native_diagnostic_sampling_keeps_the_shared_monotonic_epoch() {
+        let clock = MonotonicClock::new();
+        let shared = clock.clone();
+        let before = clock.now();
+        let _: DiagnosticWallTime = clock.diagnostic_wall_time();
+        let after = shared.now();
+        assert!(after >= before);
+        assert_eq!(clock.epoch, shared.epoch);
     }
 }

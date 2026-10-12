@@ -1,5 +1,16 @@
 # Validation report
 
+Current401 correction: C12 explicitly requires diagnostic wall time as well as
+monotonic time. The final audit found the public diagnostic operation absent;
+401 adds it with separate host injection and native signed Unix-time conversion.
+Local runtime all54/default54/core37/native54 and native controls2 pass;
+formatting/four strict Clippy are zero. Matching Mac clock checks remain pending.
+Prior399 production-unchanged statements apply to source398, not current401.
+Mac396 startup is complete (all57/0, default42/0); default400 logical targets pass
+7/0 and8/0. Mac398 is running; cold TCP failed actual CheckpointPublished while
+the old snapshot and owned work remained. P8 is incomplete. Older summaries below
+retain their source-specific results and are not current completion certificates.
+
 Current399: P8 remains incomplete. Broad frozen Linux384 is terminal:
 all2436/2, default2124/0, core1028/0 and native1511/0; formatting/four strict
 Clippy/documentation/source/artifact guards are zero. The two original startup

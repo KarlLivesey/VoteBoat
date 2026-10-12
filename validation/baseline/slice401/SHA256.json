@@ -1,0 +1,92 @@
+[
+  {
+    "file": "README.md",
+    "bytes": 1470,
+    "sha256": "300fc13c1756b77d3f6d449117bc2f64c75768b06e5b232409bfd71615b14386"
+  },
+  {
+    "file": "SCHEMA.md",
+    "bytes": 1991,
+    "sha256": "db5bd04107212efc03b5b12b70bbe1bb86c722c3a7ebd605abe29d244666d456"
+  },
+  {
+    "file": "checks.json",
+    "bytes": 1363,
+    "sha256": "3480227120d8a8a648175bafc23580f059261370c01040abce7b3bf63d792a63"
+  },
+  {
+    "file": "clippy_all.log",
+    "bytes": 72,
+    "sha256": "a13905646e2aed93ec6ea9ed6ac91490a4e01f91af0215c3965279a910612149"
+  },
+  {
+    "file": "clippy_core.log",
+    "bytes": 148,
+    "sha256": "e647db8253b7a521ce58433db5e2799211738a3466b10af85b697e991880c032"
+  },
+  {
+    "file": "clippy_default.log",
+    "bytes": 148,
+    "sha256": "3f8d15cc34b5d129e74753ddd2a106298d65b546d8ca0c2d2c741fbe03cbecc7"
+  },
+  {
+    "file": "clippy_native.log",
+    "bytes": 148,
+    "sha256": "06e045e9799fa0f291b7bf60dc0a05edd30d28a2615594733fa2988c95c5a94e"
+  },
+  {
+    "file": "fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "native_diagnostic.log",
+    "bytes": 572,
+    "sha256": "c764dc0a89b00dbe1f295ae99f7fc43c91812bde4f3249c63aab1b2b0fb2c49f"
+  },
+  {
+    "file": "provider_checker_controls.log",
+    "bytes": 2182,
+    "sha256": "dbf5bd616c549015b4092129e6f5820e9c752086933df38e8654294333526ae1"
+  },
+  {
+    "file": "provider_checker_controls_initial.log",
+    "bytes": 343,
+    "sha256": "ccaf264053e89a1bff21af66cde5e1ffe781a9126d6adb57f6961a93cb44ecbd"
+  },
+  {
+    "file": "provider_inventory.json",
+    "bytes": 8542,
+    "sha256": "f97c9049cb2dd72969689437ab04191858599fb2c1ed227f3e3a6c3849344a7d"
+  },
+  {
+    "file": "runtime_all.log",
+    "bytes": 4943,
+    "sha256": "e0bc51d0b4fb679941bfafbbd42f2b40d2385dbdea1371fdbb9024fb0aeb184c"
+  },
+  {
+    "file": "runtime_core.log",
+    "bytes": 3464,
+    "sha256": "8e519d12ca6221f8da2dfc654ef39a4d1901e6844bb2694d2951dd6937ef812b"
+  },
+  {
+    "file": "runtime_default.log",
+    "bytes": 4944,
+    "sha256": "8370678738d56c56a19e90868818e7201d1ea190a132990e36145bb613ee9def"
+  },
+  {
+    "file": "runtime_native.log",
+    "bytes": 4943,
+    "sha256": "b9430d778a59d3459fcacd290a57c4f674b4bbc71ca604aa62b308fdaaf3832f"
+  },
+  {
+    "file": "source_after_tests.json",
+    "bytes": 847,
+    "sha256": "46197e978a0466c04e88518f7a3824ed054c08dbb120de9c5eda7c41105c336f"
+  },
+  {
+    "file": "tests.json",
+    "bytes": 1744,
+    "sha256": "1ab48f31ad83ae63e25509db35b58e259d6534f9604dfbc5859c5e13121a4e93"
+  }
+]
