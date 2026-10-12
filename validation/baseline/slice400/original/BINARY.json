@@ -1,0 +1,140 @@
+{
+  "records": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rmeta"
+      ],
+      "executable": null,
+      "fresh": true
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "logical_nested_native",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/tests/logical_nested_native.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_nested_native-65b9de5f12b79ad9"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_nested_native-65b9de5f12b79ad9",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "logical_activation_nested",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/tests/logical_activation_nested.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_activation_nested-b6978c1f9a8622dc"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_activation_nested-b6978c1f9a8622dc",
+      "fresh": false
+    }
+  ],
+  "artifacts": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib": "04326e2e131295792a1dff83b625576f4519bc629b6e1ef54e4a45b0cc2c960c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rmeta": "cc42e5cad2685ebe8d3279c6dbf46b677008223fde4a466f4856cb3cceb0a7b4",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_nested_native-65b9de5f12b79ad9": "9d62a53f7bbd82aead81a9b03345e2b786485845ef66efd7f52f12588d27563d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_activation_nested-b6978c1f9a8622dc": "9eeeead0b4be974d70417e21e10066112a7a6258712a3beef68ad0556da928c5"
+  },
+  "enumeratedTests": {
+    "logical_nested_native": [
+      "cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+      "handoff_control::tcp_observation_handoff_retains_original_child_checkpoint_until_actual_drain",
+      "history::tcp_two_logical_levels_use_twenty_seven_native_owners",
+      "maintenance_controls::original_backing_checkpoint_admission_preserves_scope_and_waits_for_durability",
+      "maintenance_controls::recovered_backing_checkpoint_covers_new_original_claim_before_join",
+      "setup::profile::complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds",
+      "setup::profile::whole_static_history_and_cross_layer_capabilities_are_declared_before_activation"
+    ],
+    "logical_activation_nested": [
+      "cold_joint::tcp_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final",
+      "history::tcp_fifteen_native_owners_two_original_logical_replacements",
+      "history::tcp_original_import_lost_image_target_stores_cold_claim_then_activation",
+      "history::tcp_original_uncommitted_unknown_import_wal_cold_then_real_activation",
+      "history::tcp_original_unknown_import_target_cold_resolves_then_activation",
+      "history::tcp_twelve_native_owners_original_logical_learner_activation",
+      "profile::declared_full_middle_and_top_batches_fit_separate_release_windows",
+      "profile::selected_complete_upper_canonical_history_fits_lower_snapshot_and_import"
+    ]
+  }
+}

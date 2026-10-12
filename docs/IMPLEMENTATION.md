@@ -32105,3 +32105,32 @@ format/four strict profiles/source/protoc/old-cache guards are zero. Maintenance
 controls pass2/0 in1.66s; full coldTCP is active, followed by coldQUIC and both
 repeated histories. The original15/90s guards and complete handbacks remain.
 No Mac fullcold/repeated pass or goal completion is claimed yet.
+
+### Independent affected-source review and portable default400
+
+Independent read-only review confirms exact current3981306 hashes and all16
+fixture differences against384. Actual Cargo depinfo across all four profiles,
+including12 CLI depinfos, finds no changed production/dependency or affected
+execution target beyond startup, nested-native and nested-activation. Changed
+startup.rs is TLS-gated off in core/native profiles; their original startup
+executables actually ran zero tests. Both logical targets are likewise TLS-gated.
+No hidden current supported-config execution gap was found.
+
+Startup396 differs from current only in the separate nested/activation fixtures,
+so its57ALL/42DEFAULT results cover current startup dependencies. Nested397 differs
+from current only in activationLower, so its complete9ALL and4007DEFAULT cover
+current nested dependencies. Activation393's sole current dependency change is
+Lower; retain_retired's only caller is repeated::retire, confined to the two
+repeated histories. Changed398 executes both ALL repeated branches;400 executes
+all8DEFAULT activation cases. This is an inspected source/branch reconciliation,
+not a freshly executed whole-current matrix or arbitrary provider certificate.
+No additional unchanged Linux suite was launched.
+
+Portable validation/baseline/slice400 is sealed:38files/569933bytes, original
+commands/logs/lists/default profile/library-cache/source guards, and explicit
+reuse of exact398 format/four strict evidence. Root checksum verification0.
+Both fresh fixture executables and cached library provenance remain honest;
+no binary/cache or Mac acceptance claim was added. Final remaining gates are
+current Mac398 deep/repeated completion and normative/platform assertion review.
+The Mac90457 job is live: controls2/0 and original warm Read5 have completed in
+coldTCP; no full cold/repeated pass is yet claimed.

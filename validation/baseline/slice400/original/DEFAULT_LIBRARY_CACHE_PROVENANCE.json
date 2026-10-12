@@ -1,0 +1,54 @@
+{
+  "actualCargoRecord": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "voteboat",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rmeta"
+    ],
+    "executable": null,
+    "fresh": true
+  },
+  "original398DefaultArtifactsUnchanged": [
+    {
+      "original398DefaultLibraryArtifact": "target/divide-shutdown/retired398/build/release/deps/libvoteboat-436591ee7768556c.rlib",
+      "copiedDefaultArtifact": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib",
+      "sha256": "04326e2e131295792a1dff83b625576f4519bc629b6e1ef54e4a45b0cc2c960c",
+      "hashEqual": true
+    },
+    {
+      "original398DefaultLibraryArtifact": "target/divide-shutdown/retired398/build/release/deps/libvoteboat-436591ee7768556c.rmeta",
+      "copiedDefaultArtifact": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rmeta",
+      "sha256": "cc42e5cad2685ebe8d3279c6dbf46b677008223fde4a466f4856cb3cceb0a7b4",
+      "hashEqual": true
+    }
+  ],
+  "claim": "Cargo reports actual default-feature library fresh=true from terminal398 cache; fresh default fixture executables compiled. Exact source/full manifest equality supports cache reuse; no fresh library compiler invocation claimed."
+}

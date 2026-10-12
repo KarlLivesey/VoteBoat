@@ -1,0 +1,52 @@
+warning: failed to save last-use data
+This may prevent cargo from accurately tracking what is being used in its global cache. This information is used for automatically removing unused data in the cache.
+
+attempt to write a readonly database
+
+Caused by:
+  Error code 8: attempt to write a readonly database
+       Fresh cfg-if v1.0.5
+       Fresh libc v0.2.190
+       Fresh find-msvc-tools v0.1.14
+       Fresh getrandom v0.2.17
+       Fresh shlex v2.0.1
+       Fresh cc v1.6.0
+       Fresh memchr v2.8.3
+       Fresh aho-corasick v1.1.5
+       Fresh unicode-ident v1.0.26
+       Fresh regex-syntax v0.8.11
+       Fresh zeroize v1.9.1
+       Fresh untrusted v0.9.0
+       Fresh ring v0.17.14
+       Fresh rustls-pki-types v1.15.1
+       Fresh proc-macro2 v1.0.107
+       Fresh regex-automata v0.4.18
+       Fresh protobuf-codegen v2.28.0
+       Fresh regex v1.13.1
+       Fresh quote v1.0.47
+       Fresh rustls-webpki v0.103.15
+       Fresh once_cell v1.21.4
+       Fresh bitflags v1.3.2
+       Fresh subtle v2.6.1
+       Fresh rustls v0.23.45
+       Fresh protobuf-build v0.14.1
+       Fresh syn v2.0.119
+       Fresh zerocopy v0.8.62
+       Fresh ppv-lite86 v0.2.21
+       Fresh rand_core v0.6.4
+       Fresh bytes v1.12.1
+       Fresh protobuf v2.28.0
+       Fresh rand_chacha v0.3.1
+       Fresh thiserror-impl v1.0.69
+       Fresh byteorder v1.5.0
+       Fresh fxhash v0.2.1
+       Fresh thiserror v1.0.69
+       Fresh raft-proto v0.7.0
+       Fresh rand v0.8.8
+       Fresh slog v2.7.0
+       Fresh getset v0.1.7
+       Fresh raft v0.7.0
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo)
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name logical_activation_nested --edition=2021 tests/logical_activation_nested.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --test --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=b869b83b40338fa6 -C extra-filename=-b6978c1f9a8622dc --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps --extern raft_reference=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libraft-622438d62e64bd01.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libring-a30cbf4057fa3105.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/librustls-ea74678cd8c130c0.rlib --extern slog=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libslog-1548afd236727c98.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/build/ring-ecbdc9ab25929811/out`
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name logical_nested_native --edition=2021 tests/logical_nested_native.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --test --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=cff24d75f2adcbdc -C extra-filename=-65b9de5f12b79ad9 --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps --extern raft_reference=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libraft-622438d62e64bd01.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libring-a30cbf4057fa3105.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/librustls-ea74678cd8c130c0.rlib --extern slog=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libslog-1548afd236727c98.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/build/ring-ecbdc9ab25929811/out`
+    Finished `release` profile [optimized] target(s) in 27.46s

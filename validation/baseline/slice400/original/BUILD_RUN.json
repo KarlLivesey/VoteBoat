@@ -1,0 +1,24 @@
+{
+  "command": [
+    "cargo",
+    "+stable",
+    "test",
+    "--locked",
+    "--offline",
+    "--release",
+    "--test",
+    "logical_nested_native",
+    "--test",
+    "logical_activation_nested",
+    "--no-run",
+    "--message-format=json",
+    "--verbose"
+  ],
+  "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo",
+  "exit": 0,
+  "seconds": 27.47,
+  "featureSelection": "DEFAULT (no feature flags)",
+  "targetDir": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default",
+  "debugAssertions": true,
+  "overflowChecks": true
+}

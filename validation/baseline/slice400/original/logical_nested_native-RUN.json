@@ -1,0 +1,37 @@
+{
+  "command": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_nested_native-65b9de5f12b79ad9",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo",
+  "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/test-tmp",
+  "target": "logical_nested_native",
+  "features": [
+    "default",
+    "native",
+    "tls"
+  ],
+  "profile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  },
+  "enumeratedTests": [
+    "cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+    "handoff_control::tcp_observation_handoff_retains_original_child_checkpoint_until_actual_drain",
+    "history::tcp_two_logical_levels_use_twenty_seven_native_owners",
+    "maintenance_controls::original_backing_checkpoint_admission_preserves_scope_and_waits_for_durability",
+    "maintenance_controls::recovered_backing_checkpoint_covers_new_original_claim_before_join",
+    "setup::profile::complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds",
+    "setup::profile::whole_static_history_and_cross_layer_capabilities_are_declared_before_activation"
+  ],
+  "launch": true,
+  "exit": 0,
+  "seconds": 90.4,
+  "summary": [
+    "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 90.39s"
+  ]
+}

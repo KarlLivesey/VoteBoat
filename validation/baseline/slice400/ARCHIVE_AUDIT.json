@@ -1,0 +1,21 @@
+{
+  "compilationInputs": 1306,
+  "byteIdenticalCopies": 33,
+  "sourceCopyArtifactMismatches": [],
+  "originalDefaultArtifacts": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rlib": "04326e2e131295792a1dff83b625576f4519bc629b6e1ef54e4a45b0cc2c960c",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/libvoteboat-436591ee7768556c.rmeta": "cc42e5cad2685ebe8d3279c6dbf46b677008223fde4a466f4856cb3cceb0a7b4",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_nested_native-65b9de5f12b79ad9": "9d62a53f7bbd82aead81a9b03345e2b786485845ef66efd7f52f12588d27563d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_activation_nested-b6978c1f9a8622dc": "9eeeead0b4be974d70417e21e10066112a7a6258712a3beef68ad0556da928c5"
+  },
+  "original398Artifacts": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/logical_activation_nested-8e09feec40a6f4eb": "ebb7f2038ca06ff887616a35eedabe4d78351b34a868cadade9fccf27a1ee24d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/libvoteboat-be40bd833a88996f.rlib": "1099cd8757c841a97b2675c560c1a7a14d186e5eb892353bf6451a771531c1bc",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/libvoteboat-be40bd833a88996f.rmeta": "d349ffbf7cfa1b06ce6579253e5c5d7de2cc32205cfe5d484e98818b8d81f4dc"
+  },
+  "newLintExecuted": false,
+  "newLibraryCompiled": false,
+  "newTargetExecutablesCompiled": true,
+  "newTestsExecutedDuringPublication": false,
+  "noMacSuccessClaim": true
+}

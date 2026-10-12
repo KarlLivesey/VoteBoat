@@ -1,0 +1,130 @@
+{
+  "sourceInputs": 1306,
+  "source": "exact frozen398, compilation hash delta0",
+  "featureConfiguration": [
+    "default",
+    "native",
+    "tls"
+  ],
+  "quicFeatureEnabled": false,
+  "profile": {
+    "optimization": "3",
+    "debugAssertions": true,
+    "overflowChecks": true
+  },
+  "actualTargets": {
+    "logical_nested_native": {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_nested_native-65b9de5f12b79ad9",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo",
+      "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/test-tmp",
+      "target": "logical_nested_native",
+      "features": [
+        "default",
+        "native",
+        "tls"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "enumeratedTests": [
+        "cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+        "handoff_control::tcp_observation_handoff_retains_original_child_checkpoint_until_actual_drain",
+        "history::tcp_two_logical_levels_use_twenty_seven_native_owners",
+        "maintenance_controls::original_backing_checkpoint_admission_preserves_scope_and_waits_for_durability",
+        "maintenance_controls::recovered_backing_checkpoint_covers_new_original_claim_before_join",
+        "setup::profile::complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds",
+        "setup::profile::whole_static_history_and_cross_layer_capabilities_are_declared_before_activation"
+      ],
+      "launch": true,
+      "exit": 0,
+      "seconds": 90.4,
+      "summary": [
+        "test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 90.39s"
+      ]
+    },
+    "logical_activation_nested": {
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/build-default/release/deps/logical_activation_nested-b6978c1f9a8622dc",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/repo",
+      "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/default400/test-tmp",
+      "target": "logical_activation_nested",
+      "features": [
+        "default",
+        "native",
+        "tls"
+      ],
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "enumeratedTests": [
+        "cold_joint::tcp_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final",
+        "history::tcp_fifteen_native_owners_two_original_logical_replacements",
+        "history::tcp_original_import_lost_image_target_stores_cold_claim_then_activation",
+        "history::tcp_original_uncommitted_unknown_import_wal_cold_then_real_activation",
+        "history::tcp_original_unknown_import_target_cold_resolves_then_activation",
+        "history::tcp_twelve_native_owners_original_logical_learner_activation",
+        "profile::declared_full_middle_and_top_batches_fit_separate_release_windows",
+        "profile::selected_complete_upper_canonical_history_fits_lower_snapshot_and_import"
+      ],
+      "launch": true,
+      "exit": 0,
+      "seconds": 91.66,
+      "summary": [
+        "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 91.66s"
+      ]
+    }
+  },
+  "checksReuse": {
+    "sourceInputs": 1306,
+    "sourceDelta": [],
+    "checks": [
+      {
+        "stage": "fmt",
+        "exit": 0,
+        "seconds": 2.25
+      },
+      {
+        "stage": "strict-all",
+        "exit": 0,
+        "seconds": 0.55
+      },
+      {
+        "stage": "strict-default",
+        "exit": 0,
+        "seconds": 0.48
+      },
+      {
+        "stage": "strict-none",
+        "exit": 0,
+        "seconds": 0.07
+      },
+      {
+        "stage": "strict-native",
+        "exit": 0,
+        "seconds": 0.08
+      }
+    ],
+    "originalCheckArtifactSha256": "366680106ea354d4f527cd61c9336639f01ddb043bcc2e45988d2e349b2379fe",
+    "originalSourceManifestSha256": "d30b045a1dbff1baa304ef5461900b93594252375a87e59f911493d1d986213c",
+    "purpose": "Exact frozen398 source reuses actual fmt+ALL4 strict0; no new lint execution claimed"
+  },
+  "sourceAndArtifactGuards": "before/after source1306+original398 executable/library+both DEFAULT executable/library/rmeta delta0",
+  "testTempEntriesAtTerminal": 0,
+  "scope": "Both affected complete DEFAULT-feature targets; no broader/all-feature/Mac execution or timing claim",
+  "mainGitMacRootDocsChanged": false
+}

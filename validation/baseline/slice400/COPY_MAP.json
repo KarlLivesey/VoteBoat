@@ -1,0 +1,211 @@
+{
+  "byteIdenticalCopies": [
+    {
+      "original": "target/divide-shutdown/default400/BASE.json",
+      "retained": "original/BASE.json",
+      "sha256": "dd4e4ae8092d5259adfa1c6f2ab4b2448416a684fc361e50cf5b630c87e6c465",
+      "bytes": 749
+    },
+    {
+      "original": "target/divide-shutdown/default400/BINARY.json",
+      "retained": "original/BINARY.json",
+      "sha256": "6237b8ebf4de16d6523ecdc00bb7f8e87c815278825cfb8a007dc079e85f2356",
+      "bytes": 6357
+    },
+    {
+      "original": "target/divide-shutdown/default400/BUILD.jsonl",
+      "retained": "original/BUILD.jsonl",
+      "sha256": "5c1bff13432b81cde77cda5466ad71778fd896e217ccb5f9a89dadd3f46119d9",
+      "bytes": 58937
+    },
+    {
+      "original": "target/divide-shutdown/default400/BUILD.log",
+      "retained": "original/BUILD.log",
+      "sha256": "af35562cc3718c8bea06bd77f7496317aa9d4ccaa90755d2d8f34d9db25117c5",
+      "bytes": 5453
+    },
+    {
+      "original": "target/divide-shutdown/default400/BUILD_RUN.json",
+      "retained": "original/BUILD_RUN.json",
+      "sha256": "17d01d3e81fd9bca9d92698eea50f4bcd2b7dc9667d9cfcc22b2ed6e8e4ad605",
+      "bytes": 609
+    },
+    {
+      "original": "target/divide-shutdown/default400/CHECKS_ORIGINAL398.json",
+      "retained": "original/CHECKS_ORIGINAL398.json",
+      "sha256": "366680106ea354d4f527cd61c9336639f01ddb043bcc2e45988d2e349b2379fe",
+      "bytes": 600
+    },
+    {
+      "original": "target/divide-shutdown/default400/CHECKS_REUSE.json",
+      "retained": "original/CHECKS_REUSE.json",
+      "sha256": "a512b0de731938b0d25b3b3416a19de28a49c0f2b8a7d956bf5bda75bc05ea8d",
+      "bytes": 776
+    },
+    {
+      "original": "target/divide-shutdown/default400/DEFAULT_LIBRARY_CACHE_PROVENANCE.json",
+      "retained": "original/DEFAULT_LIBRARY_CACHE_PROVENANCE.json",
+      "sha256": "9c1b4a6690ea26888e4bad0ecfae09815716493f0d08a8e29b5dfab312f78850",
+      "bytes": 2392
+    },
+    {
+      "original": "target/divide-shutdown/default400/EVIDENCE_SHA256.json",
+      "retained": "original/EVIDENCE_SHA256.json",
+      "sha256": "558b8ccc1c3d19c01c56d72dd4b493e657e4ca02f8661b8ce85bb5bcc8d656da",
+      "bytes": 2771
+    },
+    {
+      "original": "target/divide-shutdown/default400/RESULT.json",
+      "retained": "original/RESULT.json",
+      "sha256": "72d9c36494933f12eb3d9366d48f0132b555cd69cb172062e270ba451cc82b38",
+      "bytes": 4898
+    },
+    {
+      "original": "target/divide-shutdown/default400/RESULT.md",
+      "retained": "original/RESULT.md",
+      "sha256": "eef9c2312aabe6be11a32c2882b581452a27f446dc55be6753c3a66efdd83c59",
+      "bytes": 2002
+    },
+    {
+      "original": "target/divide-shutdown/default400/SCHEMA.md",
+      "retained": "original/SCHEMA.md",
+      "sha256": "b0bec7e2a068faa5b26178b2fece9e08695315306ee51ce67ac3aa147cad044d",
+      "bytes": 1209
+    },
+    {
+      "original": "target/divide-shutdown/default400/SOURCE.json",
+      "retained": "original/SOURCE.json",
+      "sha256": "d30b045a1dbff1baa304ef5461900b93594252375a87e59f911493d1d986213c",
+      "bytes": 144645
+    },
+    {
+      "original": "target/divide-shutdown/default400/after-build-guard.json",
+      "retained": "original/after-build-guard.json",
+      "sha256": "2d7897150ef291ce0f143cca2550f43375a2b537d7a56ef254c4c6ec7c4da6eb",
+      "bytes": 130
+    },
+    {
+      "original": "target/divide-shutdown/default400/after-logical_activation_nested-guard.json",
+      "retained": "original/after-logical_activation_nested-guard.json",
+      "sha256": "2d7897150ef291ce0f143cca2550f43375a2b537d7a56ef254c4c6ec7c4da6eb",
+      "bytes": 130
+    },
+    {
+      "original": "target/divide-shutdown/default400/after-logical_nested_native-guard.json",
+      "retained": "original/after-logical_nested_native-guard.json",
+      "sha256": "2d7897150ef291ce0f143cca2550f43375a2b537d7a56ef254c4c6ec7c4da6eb",
+      "bytes": 130
+    },
+    {
+      "original": "target/divide-shutdown/default400/before-build-guard.json",
+      "retained": "original/before-build-guard.json",
+      "sha256": "0a580c27a6c2df7babb05e80e15d85bdf47b378c251e2670b33c5db8b76f952d",
+      "bytes": 100
+    },
+    {
+      "original": "target/divide-shutdown/default400/before-logical_activation_nested-guard.json",
+      "retained": "original/before-logical_activation_nested-guard.json",
+      "sha256": "2d7897150ef291ce0f143cca2550f43375a2b537d7a56ef254c4c6ec7c4da6eb",
+      "bytes": 130
+    },
+    {
+      "original": "target/divide-shutdown/default400/before-logical_nested_native-guard.json",
+      "retained": "original/before-logical_nested_native-guard.json",
+      "sha256": "2d7897150ef291ce0f143cca2550f43375a2b537d7a56ef254c4c6ec7c4da6eb",
+      "bytes": 130
+    },
+    {
+      "original": "target/divide-shutdown/default400/build.py",
+      "retained": "original/build.py",
+      "sha256": "7729d307453486873dcb9474d455dd6dae679a6d5c0a817d717066203999a35b",
+      "bytes": 2321
+    },
+    {
+      "original": "target/divide-shutdown/default400/checks_original398.py",
+      "retained": "original/checks_original398.py",
+      "sha256": "3058b08ff211b9492ac576253192ebcc3b7167c3f224c5e7bf328bab63189c06",
+      "bytes": 1127
+    },
+    {
+      "original": "target/divide-shutdown/default400/guard.py",
+      "retained": "original/guard.py",
+      "sha256": "a1cd7c99dc8feda3e6c268f87f17574a69fe93fd782628b52d04516713f2f7f4",
+      "bytes": 780
+    },
+    {
+      "original": "target/divide-shutdown/default400/logical_activation_nested-LIST.txt",
+      "retained": "original/logical_activation_nested-LIST.txt",
+      "sha256": "57ba5214c4483664d2d3ca5780361deefcfccde90a5176a6056ab66aa8615604",
+      "bytes": 687
+    },
+    {
+      "original": "target/divide-shutdown/default400/logical_activation_nested-RUN.json",
+      "retained": "original/logical_activation_nested-RUN.json",
+      "sha256": "32b0c8b01032da4f6539bfee8066aa635cf429ad12778b8218f79f31f82ad46f",
+      "bytes": 1530
+    },
+    {
+      "original": "target/divide-shutdown/default400/logical_activation_nested.log",
+      "retained": "original/logical_activation_nested.log",
+      "sha256": "c8d558517d9069077498500ae7e0c6c6bd0548dc994bd0a62aa85b44cee4d586",
+      "bytes": 2462
+    },
+    {
+      "original": "target/divide-shutdown/default400/logical_nested_native-LIST.txt",
+      "retained": "original/logical_nested_native-LIST.txt",
+      "sha256": "1b594cfc656ebda95993c8793036b7e3763325874209e22b1ac34eb094d50c35",
+      "bytes": 688
+    },
+    {
+      "original": "target/divide-shutdown/default400/logical_nested_native-RUN.json",
+      "retained": "original/logical_nested_native-RUN.json",
+      "sha256": "9ea711cb0d5ba8019414400aa66fe3ebeed4abaec5d9c9c9aa90cad37eb87c15",
+      "bytes": 1521
+    },
+    {
+      "original": "target/divide-shutdown/default400/logical_nested_native.log",
+      "retained": "original/logical_nested_native.log",
+      "sha256": "955f0f4663280a3a0ef85b80977bcb3c47b9330f915719e2c20b7269f58c9f82",
+      "bytes": 302601
+    },
+    {
+      "original": "target/divide-shutdown/default400/run.py",
+      "retained": "original/run.py",
+      "sha256": "7f551b466b33173c6a093c19913843e27d350f487e952add9f7f58ca2bce9953",
+      "bytes": 1459
+    },
+    {
+      "original": "target/divide-shutdown/default400/terminal-guard.json",
+      "retained": "original/terminal-guard.json",
+      "sha256": "2d7897150ef291ce0f143cca2550f43375a2b537d7a56ef254c4c6ec7c4da6eb",
+      "bytes": 130
+    },
+    {
+      "original": "target/divide-shutdown/default400/repo/Cargo.toml",
+      "retained": "source-fixtures/Cargo.toml",
+      "sha256": "5155ea53a21565bd3006d8b56af3393573d3f16b0fe0ef0e69547500ab14ceaa",
+      "bytes": 1949
+    },
+    {
+      "original": "target/divide-shutdown/default400/repo/tests/logical_nested_native.rs",
+      "retained": "source-fixtures/tests/logical_nested_native.rs",
+      "sha256": "9b1f673c191eb09c6c9e524f10c19b96430efadef96f64e8e1c3f80f5d65ffcf",
+      "bytes": 1749
+    },
+    {
+      "original": "target/divide-shutdown/default400/repo/tests/logical_activation_nested.rs",
+      "retained": "source-fixtures/tests/logical_activation_nested.rs",
+      "sha256": "d5e0834f05b90a6f973d00a3adbaee9b72b3525cc08784a49672f70e13462b61",
+      "bytes": 2120
+    }
+  ],
+  "excluded": [
+    "binaries",
+    "libraries",
+    "cache",
+    "design pack",
+    "Git",
+    "Mac evidence"
+  ],
+  "originalCopiesUnchanged": true
+}

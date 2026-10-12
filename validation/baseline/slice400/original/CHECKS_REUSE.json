@@ -1,0 +1,34 @@
+{
+  "sourceInputs": 1306,
+  "sourceDelta": [],
+  "checks": [
+    {
+      "stage": "fmt",
+      "exit": 0,
+      "seconds": 2.25
+    },
+    {
+      "stage": "strict-all",
+      "exit": 0,
+      "seconds": 0.55
+    },
+    {
+      "stage": "strict-default",
+      "exit": 0,
+      "seconds": 0.48
+    },
+    {
+      "stage": "strict-none",
+      "exit": 0,
+      "seconds": 0.07
+    },
+    {
+      "stage": "strict-native",
+      "exit": 0,
+      "seconds": 0.08
+    }
+  ],
+  "originalCheckArtifactSha256": "366680106ea354d4f527cd61c9336639f01ddb043bcc2e45988d2e349b2379fe",
+  "originalSourceManifestSha256": "d30b045a1dbff1baa304ef5461900b93594252375a87e59f911493d1d986213c",
+  "purpose": "Exact frozen398 source reuses actual fmt+ALL4 strict0; no new lint execution claimed"
+}
