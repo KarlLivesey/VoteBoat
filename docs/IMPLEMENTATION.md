@@ -31929,3 +31929,46 @@ compilation because its output path used the wrong working directory; corrected
 invocation uses the isolated mutant directory. No native test was restarted.
 Mac394 continues on unchanged392 source; this publication does not claim its
 qualification or final goal completion.
+
+### Checkpoint397 actual qualification and remaining receive obligation
+
+Fresh frozen397 Linux controls pass2/0 in0.09s. Full original coldTCP passes1/0
+in48.23s; only after its terminal source/artifact guards, coldQUIC passes1/0
+in76.90s on the same executable. Both original histories complete same-store
+checkpoint/suffix recovery, duplicate retries, exact reads and all27 physical
+owner joins/rebinds/directory cleanup. Source1306 and actual executable/library
+hashes remain unchanged; compiler records verify optimization3, debug assertions
+and overflow checks. No deadline was changed.
+
+The isolated negative restores exactly the old396 Cluster source while retaining
+the new recovered-store regression and identical production. It fails0/1 in0.06s
+at the new `state.base_index() >= frontier` assertion, while the corrected control
+passes. Both negative and positive inputs/artifacts are guarded. This proves the
+regression detects the demonstrated old-snapshot false completion; it does not
+prove the older Mac timing failure's cause. Packet: target/root315/checkpoint397.
+
+Mac394 is terminal: original coldTCP763.49s and coldQUIC752.82s each fail final
+physical CloseDrained; repeatedQUIC166.21s fails Middle close. Its failure-only
+observer identifies exactly Node203 still Draining with three outbound messages
+(3452bytes each) to201/202/204. The other four Middle owners and all five lower
+bridges are drained. Exact source1306/binaries/library, all four strict profiles,
+compiler assertions/overflow/protoc and provider-cache guards are zero. These are
+three failed cases, preserved in target/divide-admin342/read394/RESULT.md.
+
+Independent source review finds a separate retired-session host obligation:
+Lower.advance polls three obsolete sessions but leaves their never-admitted
+received frames held until after Middle shutdown. LogicalPeerSession stops
+reading plaintext while a received frame is held, and bounded QUIC stream credit
+can then block subsequent traffic. Closed-network polling already cancels queued
+sends and consumes actual completions; no missing-session production bug is
+established. The old failure lacks retired-receiver state, so its exact cause is
+not proved. The next bounded schema will drain only those unadmitted frames with
+the retained original authorization after each existing poll, keeping every
+session owned/open until original final closure and full cleanup.
+
+Mac resource was handed to prepared Joint393 TCP/QUIC, then startup396. Matching
+checkpoint397 qualification is locally prepared for the subsequent handback.
+No P9/P10 work or completion claim; all functional ownership gates stay required.
+The broad Linux384 core profile also completed111target results/1028passed/0failed,
+including documentation and source1306/executable111 guards0. Native-only runs
+next on its original sequential runner6548; this remains a historical cut.
