@@ -1,0 +1,224 @@
+{
+  "copies": [
+    {
+      "source": "target/root315/checkpoint397/SOURCE.json",
+      "retained": "original/SOURCE.json",
+      "bytes": 144645,
+      "sha256": "4cff4dcd412407cb94c67ebcf0a3c9360dd4e0eabebb0e2a648aa8b0e4f2bfb0"
+    },
+    {
+      "source": "target/root315/checkpoint397/CAPTURE.json",
+      "retained": "original/CAPTURE.json",
+      "bytes": 196,
+      "sha256": "98381ec421bc811bfd97a33029ee2825da12e599b463c6e77ca99266453993e9"
+    },
+    {
+      "source": "target/root315/checkpoint397/SCHEMA.md",
+      "retained": "original/SCHEMA.md",
+      "bytes": 1943,
+      "sha256": "fe758313eb368aafb7481e3789f04e5dcd74a252abda3d9e7405ece614898674"
+    },
+    {
+      "source": "target/root315/checkpoint397/BUILD.jsonl",
+      "retained": "original/BUILD.jsonl",
+      "bytes": 73817,
+      "sha256": "6adb31d4efa214bc6c50c1462f08fecde05a955c7ac3ef1921cbe2b62f763581"
+    },
+    {
+      "source": "target/root315/checkpoint397/BUILD.log",
+      "retained": "original/BUILD.log",
+      "bytes": 173,
+      "sha256": "d31894e83a18d6a60361292b99158f2988e403dbda545a7115029d05bc8c1c5c"
+    },
+    {
+      "source": "target/root315/checkpoint397/run.mjs",
+      "retained": "original/run.mjs",
+      "bytes": 2471,
+      "sha256": "2fbbfe7c4218b6d4e18b2513389615da8e5df42075220f0964740d6c7182e1f6"
+    },
+    {
+      "source": "target/root315/checkpoint397/controls.json",
+      "retained": "original/controls.json",
+      "bytes": 3460,
+      "sha256": "3d6364c3353a34a834650edea6b5eceb4517f26aab71010aa9d45ed6e30c50c8"
+    },
+    {
+      "source": "target/root315/checkpoint397/controls.log",
+      "retained": "original/controls.log",
+      "bytes": 327,
+      "sha256": "318ff27849b07f9216e865bf7a2c770df6a1133911eaa8f1a80cd8199cbba77f"
+    },
+    {
+      "source": "target/root315/checkpoint397/cold_tcp.json",
+      "retained": "original/cold_tcp.json",
+      "bytes": 3532,
+      "sha256": "256c56693a26ca55c2ee1f8a829949f00756c0af18460c61644ced087bfce0cb"
+    },
+    {
+      "source": "target/root315/checkpoint397/cold_tcp.log",
+      "retained": "original/cold_tcp.log",
+      "bytes": 201765,
+      "sha256": "be6c9e6e9b0a0d18b5952ecf6a624166359a1be68f8f47bf05ff58b29017e53d"
+    },
+    {
+      "source": "target/root315/checkpoint397/cold_quic.json",
+      "retained": "original/cold_quic.json",
+      "bytes": 3533,
+      "sha256": "4f2e16cbd9f1b15e4c84dddf354171272e49add11c7fa6156439b1a68bec57de"
+    },
+    {
+      "source": "target/root315/checkpoint397/cold_quic.log",
+      "retained": "original/cold_quic.log",
+      "bytes": 203614,
+      "sha256": "1c6d06d70c56e272bef993be29d583864408b2b646a744a7e22300a390ae26dd"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/SCOPE.json",
+      "retained": "negative/SCOPE.json",
+      "bytes": 289,
+      "sha256": "e628786ad31d7072b9a1330db8f74ca4d6a0f586dfc8e775bd022a0dc53d11cb"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/SOURCE.json",
+      "retained": "negative/SOURCE.json",
+      "bytes": 144645,
+      "sha256": "a31e038c87bc8f275dd1082961e06cc514d277a4761ae91cf4029b52e30af2f9"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/BUILD.jsonl",
+      "retained": "negative/BUILD.jsonl",
+      "bytes": 75000,
+      "sha256": "3dc48086b1b6302c31e4af8211cac9419bd644dcc76b9c72e532938d313cc6a1"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/BUILD.log",
+      "retained": "negative/BUILD.log",
+      "bytes": 180,
+      "sha256": "c24ac61f5c4948d6880b2669ba4c2f130a7bd586370a031c3a10f9fdde354dfd"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/regression.json",
+      "retained": "negative/regression.json",
+      "bytes": 3600,
+      "sha256": "038c3a3cfb345db662f9867a5e54392840fa46faf31c51fc9b4448a627b7c6a8"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/regression.log",
+      "retained": "negative/regression.log",
+      "bytes": 642,
+      "sha256": "90cc2e239f7c26ea94eee0a9859b72ead6dedf12f3af0d8bfc9683942a8395d5"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/run.mjs",
+      "retained": "negative/run.mjs",
+      "bytes": 2471,
+      "sha256": "2fbbfe7c4218b6d4e18b2513389615da8e5df42075220f0964740d6c7182e1f6"
+    },
+    {
+      "source": "target/root315/checkpoint397/mutant/repo/tests/logical_nested_native/cluster.rs",
+      "retained": "negative/source-fixtures/tests/logical_nested_native/cluster.rs",
+      "bytes": 12805,
+      "sha256": "4c7c664c0946f690a20079b943e6976b00e470feabfacb03814b162e1f47ebab"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/cluster.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/cluster.rs",
+      "bytes": 13294,
+      "sha256": "1c929ee1f3d7f20a0b095fd5af5d1ca17b0b22aa28cadc1965ab617c95b725c5"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/maintenance_controls.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/maintenance_controls.rs",
+      "bytes": 6867,
+      "sha256": "2105cd1477abcbe83abc34fced4e59c8624509c5b30ee6fab99f444817849e0c"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/cold_recovery.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/cold_recovery.rs",
+      "bytes": 6652,
+      "sha256": "f5a833f48afc5bc23db0d6afb6421c9a66ac19dc3867de94f723bb99cae745bd"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/cleanup.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/cleanup.rs",
+      "bytes": 1156,
+      "sha256": "0b2da76906197ebef03754ff799b038ca750f1a09d37c12fdbef9aff897813d4"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/read.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/read.rs",
+      "bytes": 2472,
+      "sha256": "2f3b04cbbc7473b528c979eec7da1dfaf8c7c9f0dc9d19579efe0613936e740b"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/requests.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/requests.rs",
+      "bytes": 4085,
+      "sha256": "594c7f155ca9ae28f60963ba7696918d423238133bd94a04bab09b3a4bba0818"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/middle.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/middle.rs",
+      "bytes": 5225,
+      "sha256": "04065c0588c11755c012dd8265c42a6708601180bedda69f9295f2b46eb77ad9"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/shutdown.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/shutdown.rs",
+      "bytes": 1992,
+      "sha256": "e7b13538896cc6e95b3a444be987e4d4d072d618a05c2ad0394812e95254372a"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/host.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/host.rs",
+      "bytes": 11652,
+      "sha256": "2acc3ad558bbcdb7b6e64981b709a20cf4f6fc365f8c73489b9bd40eebc968c9"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/convergence.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/convergence.rs",
+      "bytes": 5616,
+      "sha256": "65fb8d0f37403a7793a015eb4c5d62715630ed57e573c7c1549483266a9e3511"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/watchdog.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/watchdog.rs",
+      "bytes": 8807,
+      "sha256": "22b01daee1f814ea4a64cd5937e1fa11479db55a6c0de7dc7a7ae1b63315405b"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native/write.rs",
+      "retained": "source-fixtures/tests/logical_nested_native/write.rs",
+      "bytes": 3120,
+      "sha256": "2b667c5830055dd4cdc0579cf8fbd8c892fc09946a1d945fbc41ecfbb94ccb68"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/tests/logical_nested_native.rs",
+      "retained": "source-fixtures/tests/logical_nested_native.rs",
+      "bytes": 1749,
+      "sha256": "9b1f673c191eb09c6c9e524f10c19b96430efadef96f64e8e1c3f80f5d65ffcf"
+    },
+    {
+      "source": "target/root315/checkpoint397/repo/Cargo.toml",
+      "retained": "source-fixtures/Cargo.toml",
+      "bytes": 1949,
+      "sha256": "5155ea53a21565bd3006d8b56af3393573d3f16b0fe0ef0e69547500ab14ceaa"
+    },
+    {
+      "source": ".githooks/pre-push",
+      "retained": "source-fixtures/.githooks/pre-push",
+      "bytes": 601,
+      "sha256": "4adca8d65c571a717098ad784e08ac561d60e8b92196283fde50ab0e8a70769f"
+    }
+  ],
+  "sourceBytesUnchanged": true,
+  "copiesByteIdentical": true,
+  "excluded": [
+    "binaries",
+    "libraries",
+    "cache",
+    "design pack",
+    "Git metadata",
+    "pending Mac qualification"
+  ]
+}

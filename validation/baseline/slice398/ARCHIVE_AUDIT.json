@@ -1,0 +1,9 @@
+{
+  "exactCopies": 53,
+  "originalCopyMismatches": [],
+  "copiedCompileManifestInputs": 1306,
+  "noAdditionalTestsRun": true,
+  "noMacQualificationImported": true,
+  "excludedBinaryCacheDesignPackGit": true,
+  "schemaBeforeCopies": true
+}

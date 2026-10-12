@@ -1,0 +1,14 @@
+{
+  "inputs": 1306,
+  "original_source_mismatches": [],
+  "copied_original_mismatches": [],
+  "original_artifact_mismatches": [],
+  "checked_original_artifacts": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/logical_activation_nested-8e09feec40a6f4eb": "ebb7f2038ca06ff887616a35eedabe4d78351b34a868cadade9fccf27a1ee24d",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/libvoteboat-be40bd833a88996f.rlib": "1099cd8757c841a97b2675c560c1a7a14d186e5eb892353bf6451a771531c1bc",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/libvoteboat-be40bd833a88996f.rmeta": "d349ffbf7cfa1b06ce6579253e5c5d7de2cc32205cfe5d484e98818b8d81f4dc",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/logical_nested_native-50c00f3e35e6a2bb": "4f564df43270e918b2b3f2b5da94528666d92d1f07438a868bd4ac520092228e",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/libvoteboat-be40bd833a88996f.rlib": "1099cd8757c841a97b2675c560c1a7a14d186e5eb892353bf6451a771531c1bc"
+  },
+  "audit_kind": "read-only original content guard before and after publication; not a runtime rerun"
+}

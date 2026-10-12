@@ -1,0 +1,119 @@
+{
+  "currentFixture": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo/Cargo.toml",
+    "target": {
+      "kind": [
+        "test"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "logical_activation_nested",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo/tests/logical_activation_nested.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/logical_activation_nested-8e09feec40a6f4eb"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/logical_activation_nested-8e09feec40a6f4eb",
+    "fresh": false
+  },
+  "currentLibrary": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "voteboat",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+    ],
+    "executable": null,
+    "fresh": true
+  },
+  "cached397LibraryRecord": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/repo#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/repo/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "voteboat",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/repo/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "libraryHashMatches": true,
+  "original397BuildLogSha256": "d31894e83a18d6a60361292b99158f2988e403dbda545a7115029d05bc8c1c5c",
+  "original397JsonSha256": "6adb31d4efa214bc6c50c1462f08fecde05a955c7ac3ef1921cbe2b62f763581",
+  "testListOriginalSelections": 2
+}

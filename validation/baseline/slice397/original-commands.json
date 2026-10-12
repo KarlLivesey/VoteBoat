@@ -1,0 +1,42 @@
+{
+  "controls": {
+    "command": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+      "maintenance_controls::",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "command_provenance": "exact original run record",
+    "status": 0
+  },
+  "cold_tcp": {
+    "command": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+      "cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "command_provenance": "exact original run record",
+    "status": 0
+  },
+  "cold_quic": {
+    "command": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+      "cold_recovery::quic_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "command_provenance": "exact original run record",
+    "status": 0
+  },
+  "old_predicate_negative": {
+    "command": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/mutant/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+      "recovered_backing_checkpoint_covers_new_original_claim_before_join",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "status": 101,
+    "command_provenance": "exact original run record"
+  }
+}

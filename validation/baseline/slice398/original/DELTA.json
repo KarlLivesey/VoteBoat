@@ -1,0 +1,8 @@
+{
+  "inputs": 1306,
+  "deltaFrom397": [
+    "tests/logical_activation_nested/lower.rs"
+  ],
+  "productionChanges": 0,
+  "beforeAfterCopiedMismatches": []
+}

@@ -1,0 +1,11 @@
+--- /home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint397/repo/tests/logical_activation_nested/lower.rs	2026-10-12 18:02:20.566118036 +0100
++++ /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo/tests/logical_activation_nested/lower.rs	2026-10-12 18:11:44.700031700 +0100
+@@ -52,6 +52,8 @@
+                 .session
+                 .poll(now, TransportPollBudget::default())
+                 .unwrap();
++            // This obsolete route never admits frames to the current owner.
++            let _ = owned.session.take_received(owned.authorization).unwrap();
+         }
+         for bridge in &mut self.bridges {
+             bridge.advance(now, Self::budget()).unwrap();

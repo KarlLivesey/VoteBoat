@@ -15,21 +15,19 @@ deferred. Stop after P8.
 
 Remaining:
 
-1. **Mac deep composition and cleanup.** Complete twenty-seven-owner cold histories
-   pass Linux TCP/QUIC on frozen392. Mac394 TCP reaches same-store recovery and
-   retry, then fails final physical shutdown with retained work. QUIC and repeated
-   replacement qualification are running; remaining failed ownership must be
-   resolved and all original joins/rebinds completed.
-2. **Membership and startup closure.** Linux393 passes all fourteen logical
-   activation tests. Mac Joint qualification is prepared. Startup395 passes
-   default42/0 and all-feature56/1 on395. Published396 keeps surviving voters
-   polled during source cleanup and passes the complete startup target:
-   all-feature57/0 and default42/0. Mac startup qualification remains pending.
-3. **Final requirement and platform qualification.** Frozen Linux384 passes all
-   default tests2124/0; all features2436/2 fail in startup fixtures subsequently
-   corrected. Core/native profiles are pending. Reconcile these historical cuts
-   with current-source checks and finish the P0–P8 requirement audit; this is not
-   a whole-current-source acceptance claim.
+1. **Mac deep composition and cleanup.** Linux397 passes both complete cold
+   histories and all nine nested-owner tests. Linux398 passes both complete
+   repeated-replacement histories. Matching Mac checks are prepared; Mac394's
+   three final-cleanup failures remain preserved.
+2. **Startup platform closure.** Linux396 passes all-feature57/0 and default42/0;
+   matching Mac qualification is running. Mac393 now passes original Joint cold
+   recovery over TCP and QUIC, including all old and restored owners' cleanup.
+3. **Final configuration and requirement audit.** Broad Linux384 is terminal:
+   default2124/0, core1028/0, native1511/0, all features2436/2. Its old startup
+   failures remain failed records. All sixteen later changed inputs are fixtures
+   in three targets; production is unchanged. Their replacement all-feature
+   checks pass; current default logical targets are running. Complete the Mac
+   gates and source-specific P0–P8 evidence review before declaring completion.
 
 Formatting and strict all-target Clippy remain zero for all four supported
 configurations, enforced by the enabled pre-push hook. CI runs in the background.
@@ -37,4 +35,5 @@ Historical failures and exact source/runtime evidence remain recorded.
 
 See the [current mini plan](IMPLEMENTATION.md#current-mini-plan372),
 [requirement map](BASELINE_ACCEPTANCE.md), and
-[frozen392 recovery evidence](../validation/baseline/slice392/README.md).
+[checkpoint recovery evidence](../validation/baseline/slice397/README.md), and
+[repeated-replacement evidence](../validation/baseline/slice398/README.md).

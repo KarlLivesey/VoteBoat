@@ -1,0 +1,32 @@
+{
+  "tcp": {
+    "argv": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/logical_activation_nested-8e09feec40a6f4eb",
+      "--exact",
+      "history::tcp_fifteen_native_owners_two_original_logical_replacements",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo",
+    "environment": {
+      "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/test-tmp"
+    },
+    "provenance": "derived from exact original RUN record and byte-identical run_history.py; not a new execution",
+    "exit": 0
+  },
+  "quic": {
+    "argv": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/build/release/deps/logical_activation_nested-8e09feec40a6f4eb",
+      "--exact",
+      "history::quic_fifteen_native_owners_two_original_logical_replacements",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/repo",
+    "environment": {
+      "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/retired398/test-tmp"
+    },
+    "provenance": "derived from exact original RUN record and byte-identical run_history.py; not a new execution",
+    "exit": 0
+  }
+}

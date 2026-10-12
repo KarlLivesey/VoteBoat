@@ -31997,3 +31997,61 @@ source; it is pending, not a pass. Macro/mini plan above now reflects completed
 Linux397/396 and the exclusive Mac393→396→397 sequence. Publish this checked
 fixture correction with all hook profiles enforced, retaining actual future
 results separately. No performance/security phase starts.
+
+### Acceptance reconciliation399 — completed broad matrix, scoped replacements
+
+The prior goal turn made concrete progress: published397 checkpoint frontier
++regression and398 retained receive-drain corrections. This turn inspected their
+actual results and finished missing affected-case qualification, with no runtime
+or production edits. Schema399 is in target/root315/audit399/SCHEMA.md.
+
+Broad Linux384 runner6548 is terminal exit1: all2436passed/2failed, default2124/0,
+core1028/0 and native1511/0. Documentation, formatting/four strict Clippy, all four
+source1306 and actual executable guards are zero. Preserve both original startup
+failures as failures. No unchanged broad run was restarted.
+
+Comparing current398 to that1306-input cut finds exactly16 changed fixture files,
+zero production/dependency/feature changes. Actual Cargo target records and
+original Rust depinfo map all16 to startup4/nested7/activation5, with no unassigned
+input. Target-specific evidence must replace those changed scopes, rather than
+pretending the old full run executed current code. Source-specific replacement
+checks: startup396 all57/0 and default42/0; activation393 all14/0 plus398's exact
+Lower-only changed repeated paths TCP1/0 and QUIC1/0.
+
+The remaining five nested397 cases were executed once on the same original
+asserted/overflow-checked optimized binary: warm TCP/QUIC, original retained-child
+checkpoint handoff, and both profile controls,5/0 in16.45s. Exact actual list,
+command, source1306 and executable/library hashes match. Along with its previously
+passed two maintenance controls and two full cold histories, every one of that
+nine-test target's cases now passed on the same source/artifact. No already-passed
+cold/control case was repeated. A sandbox --list attempt returned EPERM despite
+emitted names; the escalated runner independently re-enumerated successfully
+before native execution. This failed observation was not counted as a passing
+check or a restarted native history.
+
+Current default-feature nested and activation targets are now being qualified
+separately in default400, with actual default compiler records and test counts;
+all-feature TCP execution is not substituted for this feature configuration.
+This is the remaining affected supported-config check, not another whole-matrix
+loop. Core/native profile feature gates and zero whole-repository Clippy remain
+required.
+
+Mac393 is terminal0: original JointTCP1/0 in121.88s and JointQUIC1/0 in127.36s.
+Each completes all12 old joins/rebinds at Joint, four fresh saved-history Claims
+with same identities and increased sessions, continued activation/business and
+all12 restored owner joins/rebinds. All22 runner stages and old394 source/artifact
+read-only guards are zero; actual fresh compiler records retain optimization3,
+assertions and overflow. The oldMac388 election conjunct remains unknown. Packet:
+target/divide-provider/election393-mac. Mac startup396 now holds exclusive16152;
+combined matching398 source is locally prepared for checkpoint controls/cold and
+repeated histories, preserving exact397 code and original bounds.
+
+Root inspected portable39744files/976478bytes and39860files/523897bytes; checksum
+checks returned0. Archived397 tool-only checks/refusal are explicitly retrospective
+transcriptions, not fabricated raw logs or timestamps. P8 models, public contract
+and normative384 map remain scoped evidence. All631 referenced paths still exist;
+changed fingerprints are documents/rules and affected fixtures, production0.
+The primary pack's original62 files verify byte-for-byte. GitHub visibility is
+PUBLIC, default branch main; Cargo/LICENSE remain RPL-1.5 (GitHub's license label
+is Other). Final requirement/platform closure remains unproven until the listed
+Mac/default gates and source-specific assertion review complete. No P9/P10 work.

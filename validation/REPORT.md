@@ -1,5 +1,28 @@
 # Validation report
 
+Current399: P8 remains incomplete. Broad frozen Linux384 is terminal:
+all2436/2, default2124/0, core1028/0 and native1511/0; formatting/four strict
+Clippy/documentation/source/artifact guards are zero. The two original startup
+failures remain failed historical outcomes. Changed396 startup passes all57/0
+and default42/0. Changed397 completes all nine nested-owner tests, including
+full cold TCP/QUIC and original cleanup; its exact old-checkpoint negative fails
+the new frontier assertion as intended. Changed398 repeated TCP/QUIC histories
+pass with all fifteen owners' handbacks. Actual depinfo maps the sixteen later
+fixture changes to those three targets; production/dependencies/features are
+unchanged. Current default logical targets are separately under qualification.
+
+Mac393 original Joint cold TCP/QUIC pass with all old/restored owner cleanup,
+actual asserted/overflow-checked compiler records and all source/artifact guards.
+Mac396 startup is running; matching397/398 deep/repeated cases are prepared.
+Mac394's three final-cleanup failures remain preserved, without a cause claim.
+The original design pack verifies all62 files against its untouched manifest.
+No whole-current-source completion, P9 performance or P10 security claim follows.
+
+Portable evidence: [397](baseline/slice397/README.md),
+[398](baseline/slice398/README.md), and [396](baseline/slice396/README.md).
+Earlier source-scoped records below retain their original failures and limits;
+their historical "current/latest" labels do not supersede this summary.
+
 Latest347B/348/351 selected cuts: target347B passes74 logical library controls
 (including2 actual TCP/QUIC candidate histories),8 public application controls
 and2 original facade histories, formatting/four strict zero with1222 guarded

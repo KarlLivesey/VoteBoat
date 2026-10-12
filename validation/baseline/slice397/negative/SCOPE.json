@@ -1,0 +1,8 @@
+{
+  "purpose": "Restore exactly pre-fix cluster predicate; keep new recovered-store regression unchanged",
+  "delta": [
+    "tests/logical_nested_native/cluster.rs"
+  ],
+  "expectedFailure": "new durable snapshot/base must cover newer recovered Claim frontier",
+  "productionChanges": 0
+}

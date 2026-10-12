@@ -31,16 +31,23 @@ Completed selected preparation is archived in
 acceptance remains pending; its original705-source failure stays separate from
 the corrected709-source results.
 
-Current387 scoped closure: selected static relays and relay-backed logical
-storage qualify on both hosts371; first genuine twelve-owner replacement also
-passes both Mac protocols379. Linux repeated fifteen-owner closure383 and full
-twenty-seven-owner cold recovery385 pass TCP/QUIC. Mac imported-target and
-committed-Unknown cold recovery pass both protocols383; remaining Mac cases,
-the demonstrated parent shutdown assertion and final coherent matrices remain
-open. These cuts do not replace original failed302 evidence or qualify the
-whole moving source. See [current mini plan372](IMPLEMENTATION.md#current-mini-plan372).
+Current399 scoped closure: selected static relays, relay-backed logical storage,
+first replacement and imported/Unknown recovery qualify on both hosts. Mac393
+also passes Joint cold recovery TCP/QUIC with all old/restored owner handbacks.
+Linux397 completes all nine nested-owner tests; Linux398 completes both repeated
+replacement histories. Broad Linux384 is terminal: default2124/0, core1028/0,
+native1511/0, all2436/2. Its old startup failures remain preserved; changed startup
+396 passes all57/0 and default42/0. Actual Rust depinfo maps all sixteen later
+changed inputs to only startup/nested/activation fixtures, with production0.
+Current default logical target execution, Mac startup/nested/repeated gates and
+final source-specific evidence consolidation remain. These cuts do not rewrite
+old failed records or certify the whole moving source. See the
+[current mini plan372](IMPLEMENTATION.md#current-mini-plan372).
 The [portable383 packet](../validation/baseline/slice383/README.md) preserves
 the original Linux repeated passes and all ten Mac results, including failures.
+Portable [397](../validation/baseline/slice397/README.md) and
+[398](../validation/baseline/slice398/README.md) preserve the latest changed Linux
+histories, the meaningful old-checkpoint negative and actual scope/profile guards.
 
 Parallel integration: [slice297](../validation/baseline/slice297/README.md).
 Linux/macOS each pass810 affected executions over four profiles: Raft,
@@ -1334,7 +1341,7 @@ general end-to-end linearizability checking across all applications. Slice164 no
 chapter11 validation obligations remain explicit rather than being replaced by
 a passing test count.
 
-## Next implementation decisions
+## Historical implementation decisions before297
 
 1. Slices193–194 implement read-only split preview, public restartable decisions
    and authenticated native split start/status/resumption. Slice195 checks native

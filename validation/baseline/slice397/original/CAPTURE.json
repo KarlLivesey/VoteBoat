@@ -1,0 +1,9 @@
+{
+  "inputs": 1306,
+  "deltaFrom396": [
+    "tests/logical_nested_native/cluster.rs",
+    "tests/logical_nested_native/maintenance_controls.rs"
+  ],
+  "productionChanges": 0,
+  "mismatches": []
+}

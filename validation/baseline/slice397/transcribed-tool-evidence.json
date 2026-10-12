@@ -1,0 +1,36 @@
+{
+  "provenance": "Parent root supplied transcription of original tool outputs; contemporaneous raw logs unavailable. No timestamps invented.",
+  "stable_source_commit": "885d572",
+  "earlier_fmt_all_feature": {
+    "handle": 84053,
+    "exit": 0,
+    "terminal_excerpt": "Finished dev profile in0.16s"
+  },
+  "push_hook": {
+    "handle": 35957,
+    "exit": 0,
+    "stages": [
+      "Checking formatting and strict Clippy before push...",
+      "default Finished dev0.19s",
+      "all Finished dev0.03s",
+      "core Finished dev0.02s",
+      "native Finished dev0.02s",
+      "pushed e1e9ed5..885d572 main"
+    ]
+  },
+  "initial_negative_precompile_refusal": {
+    "exit": 1,
+    "original_message": "zsh:5: read-only file system: ../BUILD.jsonl",
+    "cwd": "main workspace (default exec cwd)",
+    "cargo_launched": false,
+    "native_launched": false,
+    "scope": "after copied source/cache setup, before cargo redirection succeeded"
+  },
+  "corrected_negative_build": {
+    "handle": 98432,
+    "exit": 0,
+    "cwd": "mutant/repo",
+    "native_negative_invocations": 1,
+    "native_negative_status": 101
+  }
+}
