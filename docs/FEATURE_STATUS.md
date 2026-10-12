@@ -19,12 +19,11 @@ Remaining:
 1. **Mac deep cold recovery.** Linux402 passes all9/default7 nested tests. Its
    checkpoint-only90s watchdog retains actual durable-frontier and cleanup
    assertions. Both old Mac398 cold failures under15s remain preserved.
-2. **One native-only100-group Mac check.** The audit located an older unclosed
-   failure. The exact unchanged test is included in the current Mac402 sequence.
-3. **Final source and requirements reconciliation.** The71-row audit records
+2. **Final source and requirements reconciliation.** The71-row audit records
    implemented evidence and these remaining checks; it is not a completion claim.
 
-Both Mac398 repeated-replacement histories now pass with original owner cleanup.
+Both Mac398 repeated-replacement histories and the exact Mac native-only100-group
+recovery test now pass with original owner cleanup.
 Formatting and strict all-target Clippy remain zero for all four configurations,
 enforced by the enabled pre-push hook. CI provides background feedback.
 

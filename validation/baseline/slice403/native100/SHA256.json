@@ -1,0 +1,62 @@
+[
+  {
+    "file": "ORIGINAL_BROKEN_RUNNER.sh",
+    "bytes": 8546,
+    "sha256": "841f90cef9765fa02f4067518f3d795bf6f5f85703c000cb51ce941bf7363fd5"
+  },
+  {
+    "file": "README.md",
+    "bytes": 1039,
+    "sha256": "6e5fd30e16e38adcb1817e7ed7dea581720cc2eff61fa1a8d331ee517dca005d"
+  },
+  {
+    "file": "RUNNER_CORRECTION.md",
+    "bytes": 710,
+    "sha256": "1d70cba587d602cd460da1a33f76b9a4b491640cd6ff863be3fa943bdcb27a71"
+  },
+  {
+    "file": "TEST_IDENTITY.json",
+    "bytes": 715,
+    "sha256": "37e67794b86ea067bfa40a705d95e87d0290a687034eab614a775c7a788cb6ed"
+  },
+  {
+    "file": "continuation_source_start.log",
+    "bytes": 51880,
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4"
+  },
+  {
+    "file": "continuation_syntax.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "continue_cold.sh",
+    "bytes": 3266,
+    "sha256": "3b283b879a015eead348d802319ce72f3f9ca590391a8107b8974a567f812206"
+  },
+  {
+    "file": "native_hundred.command",
+    "bytes": 222,
+    "sha256": "4954d091eb8d7d30d711bec2dcd84fc615836ea2c1b22df90ffc6c121236de6e"
+  },
+  {
+    "file": "native_hundred.log",
+    "bytes": 529,
+    "sha256": "a30097238d6c1c3406e092934b4aab98c089c2bf6dba2dc9661a808eaa20b8d9"
+  },
+  {
+    "file": "original_syntax.log",
+    "bytes": 105,
+    "sha256": "6cf120200e9b146eb0b7a6291dfcfe9b09b5e076252048ea0dd4e7d517d09c03"
+  },
+  {
+    "file": "runner.log",
+    "bytes": 137,
+    "sha256": "6a2110787c7fe12b9be8bb2d26aaefe354ad0061d7aef1ebec79385e77661210"
+  },
+  {
+    "file": "source_after_build.log",
+    "bytes": 51880,
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4"
+  }
+]

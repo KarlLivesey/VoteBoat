@@ -11,12 +11,17 @@
   },
   {
     "file": "README.md",
-    "bytes": 1053,
-    "sha256": "ffc841d8d2b84be33c85e462784965b0666cd730a3203aec9d9fc110fa6da162"
+    "bytes": 1344,
+    "sha256": "830704ff3e14a079e00e6af252a44734711e545af3e43c7f33a49abc8d154e49"
   },
   {
     "file": "mac315b-native-original.log",
     "bytes": 21476,
     "sha256": "54c9e2351ba0211b519cc0f23d732cd7eeba300b0074a9c6e34f78c6f7eeee7e"
+  },
+  {
+    "file": "native100/SHA256.json",
+    "bytes": 1727,
+    "sha256": "6a257a8402fecc9a17c447bd2af9767c9be392d1dc5b59d5da6a11a40deee84c"
   }
 ]

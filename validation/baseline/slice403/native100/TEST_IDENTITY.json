@@ -1,0 +1,20 @@
+{
+  "test": "tests/effect_owner.rs",
+  "sha256": "fa5c54ca954f893c72df658a2f7a1cf43e0457fc9e6be87f43903a7481e0004b",
+  "entire_file_matches_original315b": true,
+  "source_commit": "9d3e863",
+  "source_input_count": 1306,
+  "production_unchanged_since401": true,
+  "profile": "normal Cargo test profile, unoptimized + debuginfo, native-only; actual command/log retained",
+  "result": {
+    "passed": 1,
+    "failed": 0,
+    "filtered": 181,
+    "seconds": 90.03
+  },
+  "source_checks": {
+    "before": 1306,
+    "after": 1306
+  },
+  "limits": "Native test executable has no before/after hash capture. Original release-artifact continuation guard applies to pending cold histories, not the native-only executable."
+}

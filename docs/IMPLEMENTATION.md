@@ -31407,8 +31407,8 @@ current Mac sequence. No new functional scope, performance tuning or security wo
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac native-only and deep recovery qualification | Finish the remaining platform-specific recovery evidence. | Exact402 source and original100-group test; terminal398 and401 handback. Linux complete nested all9/default7 pass; current Mac sequence is being launched with persisted PID. | Original native-only100-group snapshot/reopen/read/cleanup case; full TCP/QUIC cold histories with real frontier/ref/base/router/worker conditions and all27 joins/rebind. Preserve previous failures. | Shared runtime and recursive composition, P2/P8 |
-| Next: final source and requirement reconciliation | Establish full requested functional coverage against the final source. | Current checks and71-row audit, raw Mac398/401 results, historical384 plus399/400/401/402 source map. | Close Q-100-MAC/Q-DEEP-MAC with actual outcomes; inspect every R/VB/I/C and named P8 row, source differences, required local checks and historical failures. | Goal completion, P0–P8 |
+| Current: Mac deep recovery qualification | Finish the remaining platform-specific recovery evidence. | Exact402 source; terminal398/401 handback and native-only100-group pass. Linux complete nested all9/default7 pass; corrected Mac continuation is active with persisted PID. | Full TCP/QUIC cold histories with real frontier/ref/base/router/worker conditions and all27 joins/rebind. Preserve previous failures. | Shared runtime and recursive composition, P2/P8 |
+| Next: final source and requirement reconciliation | Establish full requested functional coverage against the final source. | Current checks and71-row audit, raw Mac398/401 results, historical384 plus399/400/401/402 source map. | Close Q-DEEP-MAC with actual outcomes and incorporate closed Q-100-MAC/Q-CLOCK-MAC; inspect every R/VB/I/C and named P8 row, source differences, required local checks and historical failures. | Goal completion, P0–P8 |
 | Following: publish final milestone and stop | Hand over the completed functional release boundary. | Fully satisfied prior row and clean enabled pre-push checks. | Commit/push final concise status and evidence, mark goal complete, leave P9 performance planning/P10 security/Windows untouched. | Requested stopping boundary after P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
@@ -32239,3 +32239,14 @@ identical, but production changed, so no old failure cause or current pass is
 inferred. The exact original normal-profile native-only test is included before
 Mac402 cold checks with its10s watchdog unchanged. Portable audit and original
 failure: validation/baseline/slice403.
+
+Mac402 exact native-only100-group test passes1/0 in90.03s, original normal test
+profile and unchanged10s per-drain guard. Whole effect_owner test file matches
+315b;1306 source checks pass before/after. This closes Q-100-MAC with actual
+snapshot/read/reopen/retry/cleanup, not a full native matrix assertion. After
+this pass, the wrapper failed on a quoting error before cold cases. The cause
+was JS replacement-string dollar-apostrophe expansion; original script/error
+are retained. A literal, locally and remotely syntax-checked continuation
+validated the recorded pass plus source/release fingerprints and started only
+cold TCP/QUIC. Active remote continuation PID58093; no successful work repeated.
+Portable evidence: validation/baseline/slice403/native100.

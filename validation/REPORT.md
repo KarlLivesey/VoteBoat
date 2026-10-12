@@ -1,5 +1,12 @@
 # Validation report
 
+Native100 closure403: the exact current Mac native-only test passes1/0 in90.03s
+with original10s per-drain watchdog and whole test file unchanged from315b.
+Q-100-MAC is closed; both deep Mac cold histories and final reconciliation remain.
+The initial wrapper stopped on a quoted-pattern error after the pass; a syntax-
+checked continuation started only the pending cold cases. Historical failures
+and wrapper error are preserved in slice403/native100.
+
 Current403: Mac398 is terminal; both repeated-replacement histories pass with
 all original ownership cleanup, while both cold cases fail final publication
 under the original15s watchdog. Mac401 clock injection1/native controls2 pass.

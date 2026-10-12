@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --no-default-features --features native --test effect_owner native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport -- --exact --nocapture --test-threads=1 

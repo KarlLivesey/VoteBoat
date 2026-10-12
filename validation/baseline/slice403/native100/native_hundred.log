@@ -1,0 +1,10 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-checkpoint402-19408bff49/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.26s
+     Running tests/effect_owner.rs (/tmp/voteboat-macos-checkpoint402-19408bff49/build/debug/deps/effect_owner-5360874e97cc807f)
+
+running 1 test
+test native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 181 filtered out; finished in 90.03s
+

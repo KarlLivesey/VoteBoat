@@ -16,3 +16,8 @@ Subsequent root-inspected evidence:
   The entire effect_owner test file is unchanged. A current exact native-only
   check is prepared as part of the Mac402 sequence; no old cause is inferred.
 - Q-DEEP-MAC and final source reconciliation remain pending. No P9/P10 work.
+
+Later update: Q-100-MAC is closed by the exact unchanged native-only case,1/0
+in90.03s with the original per-drain watchdog. See [native100](native100/README.md),
+including the preserved runner error and bounded continuation details. Only
+Q-DEEP-MAC and final source reconciliation remain.

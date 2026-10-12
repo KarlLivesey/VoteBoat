@@ -1,0 +1,2 @@
+./mac_checks.sh: line 115: unexpected EOF while looking for matching `''
+./mac_checks.sh: line 117: syntax error: unexpected end of file
