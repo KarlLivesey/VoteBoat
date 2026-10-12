@@ -1,0 +1,4 @@
+/tmp/voteboat-macos-close405/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib
+/tmp/voteboat-macos-close405/build/release/deps/logical_nested_native-4dbba713a780d579
+/tmp/voteboat-macos-close405/build/release/deps/quic-3f83771a3828b67d
+/tmp/voteboat-macos-close405/build/release/deps/routed-15fdb9a3f20d0893

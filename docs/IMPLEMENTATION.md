@@ -1,5 +1,30 @@
 # Implementation record
 
+## Current completion boundary — user clarification, 12 October 2026
+
+P0–P8 capabilities are implemented. The user clarified that the final15-second
+Mac QUIC shutdown limit measures performance, not capability, and must not hold
+P8 open. Fixed shutdown-speed acceptance moves to P9; P10 security and Windows
+remain deferred. No optimization was performed. The402 QUIC test remains a
+recorded failure, not a claimed pass; its recovery assertions had completed before
+the final-close timeout.405 shares the actual-protocol-deadline close predicate,
+with real release/join checks retained. Full Linux nested all15/default13 and Mac
+shared controls6 plus actual timer controls2 pass. The already-started Mac full
+QUIC rerun and extra routed regression may finish; their results are not assumed.
+
+Final macro review: all named functional milestones through P8 have implementation
+and bounded evidence, with source reconciliation recorded in slice405. This goal
+stops here; performance targets, tuning and dedicated security work require the
+next user-directed phase. Earlier pending-status entries below are historical.
+
+Final mini plan:
+
+| Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- | --- |
+| Close capability audit | Record implemented scope without promoting a speed watchdog to a feature requirement. | User's clarification;71-row source/evidence reconciliation. | Preserve failed results and state timing/terminal-result limits explicitly. | P0–P8 capability completion |
+| Publish completion record | Make the reviewed boundary available. | Existing zero format/four-Clippy results and enabled hook. | Commit/push documentation and source evidence. | P8 handover |
+| Stop | Leave optimization decisions to the user. | Published boundary. | No automatic P9/P10 work. | Requested goal boundary |
+
 ## Scope and roadmap
 
 This repository implements the proposed VoteBoat baseline in bounded vertical
@@ -10,14 +35,14 @@ record claims that unimplemented phases already work.
 | Phase | Intended behavior | Current status |
 | --- | --- | --- |
 | P0 | Typed identities, validated policies, public contracts and virtual-time/storage harness | Implemented public NodeParts/provider injection, owned construction failures, ordering/cancellation/lifetime contracts and native/downstream assertions. The finite selected-provider review and connector checks are recorded in [301](../validation/baseline/slice301/README.md); hypothetical adapters require their own qualification. |
-| P1 | Native durable three-node Raft, recovery, elections, repair, snapshots, reads and retries | Implemented native WAL/checkpoints, ordered application, operation IDs and quorum reads. Mixed Linux/Mac service256, actual snapshot recovery294 and interrupted durability297 provide selected evidence. Complete current platform qualification remains302. |
-| P2 | Many groups per process, shared lanes, coalesced transport, bounded fair scheduling and overload isolation | Implemented shared scheduling/workers, batched multiplexed transport, admission/control reserves and hundred-group histories. Owned executable shutdown305 is qualified on Linux/Mac; complete platform acceptance remains302. |
+| P1 | Native durable three-node Raft, recovery, elections, repair, snapshots, reads and retries | Implemented native WAL/checkpoints, ordered application, operation IDs and quorum reads. Mixed Linux/Mac service256, actual snapshot recovery294 and interrupted durability297 provide selected evidence. |
+| P2 | Many groups per process, shared lanes, coalesced transport, bounded fair scheduling and overload isolation | Implemented shared scheduling/workers, batched multiplexed transport, admission/control reserves and hundred-group histories. Owned executable shutdown305 is qualified on Linux/Mac; |
 | P3 | Weighted/recursive fixed policies at all quorum sites | Implemented validated policies at elections, durable commitment and reads, including joint transitions. Nine-voter intersection/frontier and actual recursive membership histories exist; policy hot-reload remains forbidden. Platform qualification is separate from finite model evidence. |
-| P4 | Learner catch-up, joint membership/policy changes and snapshot membership recovery | Implemented readiness, joint/final activation, rollback/restart/resumption and authenticated Node/sample-service administration. Native startup284 and old-checkpoint/recovered-policy fault histories297 pass both hosts. Complete current service/lifecycle qualification remains302. |
-| P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
-| P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
+| P4 | Learner catch-up, joint membership/policy changes and snapshot membership recovery | Implemented readiness, joint/final activation, rollback/restart/resumption and authenticated Node/sample-service administration. Native startup284 and old-checkpoint/recovered-policy fault histories297 pass both hosts. |
+| P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. |
+| P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Finite histories are not an exhaustive proof. |
 | P7 | Functional multi-lane assembly, batching/pipelining, reclamation and recovery throttling | Existing mechanisms and finite TCP/QUIC histories remain supported. The original chapter12 P7 throughput/p99 acceptance condition moves to P9; this reordering does not claim that condition passed. |
-| P8 | Subgroup-backed logical voters, ordinary representative relays, striped single-group WAL and broader transactions | Incomplete. Striped storage, broader programs, static relay trees and selected-network logical backing have selected Linux/macOS qualification. Current nested27-owner cold and repeated15-owner histories pass Linux TCP/QUIC. Genuine first learner replacement now passes both Mac protocols; imported-target/Joint/committed-Unknown/uncommitted-Unknown cold histories pass Linux. Remaining: Mac nested/repeated/recovery qualification and final coherent P0–P8 sweep/audit. P9 holds performance measurements only. |
+| P8 | Subgroup-backed logical voters, ordinary representative relays, striped single-group WAL and broader transactions | Implemented with Linux/macOS bounded functional evidence. The user-confirmed capability boundary above defers fixed shutdown-speed acceptance to P9 and preserves failed/timed test records. |
 | P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, tuning and cost comparisons for striped single-group WAL, representative relays and other throughput projects; relay functionality is a named P8 requirement. No automatic start after P8. |
 | P10 | Security review and hardening | Later separate phase, with the user's Daybreak review. Existing authentication, identity, bounded-resource and protocol-safety contracts remain required during feature work. |
 
@@ -111,7 +136,7 @@ solely for compatibility. Preserve explicit migration for already-written data.
 | --- | --- | --- |
 | Usable static service and Rust embedding | Run a durable three-node service, write/read/retry, recover after leader loss/restart and shut down cleanly; document the same Rust composition. Slice256 passes TCP/TLS and QUIC with two Linux replicas and one Mac, a required Linux/Mac quorum, original cold retries and owned process/store cleanup. Public NodeParts embedding remains available. Broader operator/recovery acceptance stays separate; online membership is not a prerequisite. | First usable delivery on P0–P3; preserve it while later milestones develop. |
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; recover elections, rollback and partial delivery with exact activation timing. | P4 mechanisms are implemented through public Node and authenticated sample administration. Native startup284 and interrupted older-checkpoint policy recovery297 provide selected Linux/Mac evidence; current full platform qualification remains302. |
-| Recursive responsibilities and routing | Resolve manifests, selectively place groups and route requests; cached child operation survives parent unavailability without an ancestor commit in the normal write path. | P5 mechanisms are implemented, including native creation/delegation/metadata movement and bounded directory/lookup service profiles. Complete current platform qualification remains302. Automatic global orchestration is deferred by chapter12. |
+| Recursive responsibilities and routing | Resolve manifests, selectively place groups and route requests; cached child operation survives parent unavailability without an ancestor commit in the normal write path. | P5 mechanisms are implemented, including native creation/delegation/metadata movement and bounded directory/lookup service profiles. Automatic global orchestration is deferred by chapter12. |
 | Split and merge | Move actual data with source fencing, import readiness and durable activation; preserve retry/outbox lineage and recover without two active owners. | P6 public mechanisms and bounded split/compatible-merge services are implemented. Selected phase/reopen, retirement and independent per-bucket client histories are recorded; complete current platform qualification remains302. |
 | Advanced functional composition | Run actual replicated subgroups as crash-recoverable parent voters, ordinary physical-voter representative relays, striped local storage preserving one ordered Raft log, and explicitly defined broader transaction semantics. | P8 is now in this goal. Public contracts and formal mapping/models precede native implementation; original promises, payload availability, transitions and transaction recovery must be qualified. Existing recursive policies or outbox support do not substitute for these features. |
 | Later measured tuning | Demonstrate sustainable throughput improvement at the original correctness/p99 budget, with attributable costs; evaluate striped WAL, representative relays and research trade-offs. | P9 remains unmet and outside this goal. After P8, stop so the user can consider optimization choices; no automatic tuning begins. |

@@ -1,5 +1,19 @@
 # Validation report
 
+## Current scope clarification — 12 October 2026
+
+P0–P8 capability work is complete under the user's explicit clarification:
+shutdown speed belongs to P9 and is not a missing capability. Mac402's QUIC
+15-second final-close test **failed** after its recovery assertions; that result
+is preserved, not turned into a pass.405 retains actual-close and owner-release
+checks while honoring original protocol deadlines. Linux nested all15/default13
+and Mac close controls6+2 pass. The full Mac405 rerun and extra routed regression
+were already running at this handover; no terminal outcome is claimed here.
+No performance or security qualification is implied. See
+[feature status](../docs/FEATURE_STATUS.md) and [405 evidence](baseline/slice405/README.md).
+The entries below preserve earlier source-specific statuses.
+
+
 Mac402 full cold TCP passes1/0 in850.99s with original durability/recovery/
 all27 cleanup and matching source/artifact guards. QUIC is running and remains
 the only native test case required before final audit completion. See

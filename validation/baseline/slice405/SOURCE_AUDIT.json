@@ -1,0 +1,1493 @@
+{
+  "kind": "Draft final P0-P8 requirement/source reconciliation; not yet completion",
+  "as_of_utc": "2026-10-12T19:01:54.798966+00:00",
+  "source_head": "9842aae717b3909fe0f1ff0e3a106203f85abf88",
+  "current_source_manifest": "target/root315/close405/SOURCE.json",
+  "current_input_count": 1307,
+  "current_hash_guard": {
+    "missing": [],
+    "changed": []
+  },
+  "manifest_deltas": {
+    "384": {
+      "source": "target/root315/final384/SOURCE.json",
+      "changed": [
+        "src/native/runtime.rs",
+        "src/runtime.rs",
+        "tests/logical_activation_nested/diagnostic.rs",
+        "tests/logical_activation_nested/history.rs",
+        "tests/logical_activation_nested/lower.rs",
+        "tests/logical_activation_nested/progress.rs",
+        "tests/logical_activation_nested/shutdown.rs",
+        "tests/logical_nested_native.rs",
+        "tests/logical_nested_native/cluster.rs",
+        "tests/logical_nested_native/cold_recovery.rs",
+        "tests/logical_nested_native/convergence.rs",
+        "tests/logical_nested_native/host.rs",
+        "tests/logical_nested_native/maintenance_controls.rs",
+        "tests/logical_nested_native/read.rs",
+        "tests/logical_nested_native/requests.rs",
+        "tests/routed.rs",
+        "tests/routed/shutdown.rs",
+        "tests/routed/shutdown/long_rtt.rs",
+        "tests/runtime.rs",
+        "tests/startup.rs",
+        "tests/startup/discovery.rs",
+        "tests/startup/maintenance/drain.rs",
+        "tests/startup/maintenance/membership_drain.rs"
+      ],
+      "added": [
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs"
+      ],
+      "removed": [
+        "tests/routed/shutdown/contract.rs"
+      ]
+    },
+    "399": {
+      "source": "target/root315/audit399/COHERENCE.json",
+      "changed": [
+        "src/native/runtime.rs",
+        "src/runtime.rs",
+        "tests/logical_nested_native.rs",
+        "tests/logical_nested_native/cluster.rs",
+        "tests/routed.rs",
+        "tests/routed/shutdown.rs",
+        "tests/routed/shutdown/long_rtt.rs",
+        "tests/runtime.rs"
+      ],
+      "added": [
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs"
+      ],
+      "removed": [
+        "tests/routed/shutdown/contract.rs"
+      ]
+    },
+    "404": {
+      "source": "target/root315/source404/RECONCILIATION.json",
+      "changed": [
+        "tests/logical_nested_native.rs",
+        "tests/logical_nested_native/cluster.rs",
+        "tests/routed.rs",
+        "tests/routed/shutdown.rs",
+        "tests/routed/shutdown/long_rtt.rs"
+      ],
+      "added": [
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs"
+      ],
+      "removed": [
+        "tests/routed/shutdown/contract.rs"
+      ]
+    }
+  },
+  "production_changes": [
+    "src/native/runtime.rs",
+    "src/runtime.rs"
+  ],
+  "production_semantics_check": "Removed exactly new diagnostic API, native implementation/conversion/private tests and SystemTime import; remaining two runtime source files equal frozen384 byte-for-byte. No other src changed and no other production diagnostic caller.",
+  "fixture_translation_units": [
+    {
+      "file": "tests/logical_activation_nested/diagnostic.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_activation_nested"
+      ]
+    },
+    {
+      "file": "tests/logical_activation_nested/history.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_activation_nested"
+      ]
+    },
+    {
+      "file": "tests/logical_activation_nested/lower.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_activation_nested"
+      ]
+    },
+    {
+      "file": "tests/logical_activation_nested/progress.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_activation_nested"
+      ]
+    },
+    {
+      "file": "tests/logical_activation_nested/shutdown.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_activation_nested"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/cluster.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/cold_recovery.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/convergence.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/host.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/maintenance_controls.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/read.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/logical_nested_native/requests.rs",
+      "change": "changed",
+      "translation_units": [
+        "logical_nested_native"
+      ]
+    },
+    {
+      "file": "tests/routed.rs",
+      "change": "changed",
+      "translation_units": [
+        "routed"
+      ]
+    },
+    {
+      "file": "tests/routed/shutdown.rs",
+      "change": "changed",
+      "translation_units": [
+        "routed"
+      ]
+    },
+    {
+      "file": "tests/routed/shutdown/long_rtt.rs",
+      "change": "changed",
+      "translation_units": [
+        "routed"
+      ]
+    },
+    {
+      "file": "tests/runtime.rs",
+      "change": "changed",
+      "translation_units": [
+        "runtime"
+      ]
+    },
+    {
+      "file": "tests/startup.rs",
+      "change": "changed",
+      "translation_units": [
+        "startup"
+      ]
+    },
+    {
+      "file": "tests/startup/discovery.rs",
+      "change": "changed",
+      "translation_units": [
+        "startup"
+      ]
+    },
+    {
+      "file": "tests/startup/maintenance/drain.rs",
+      "change": "changed",
+      "translation_units": [
+        "startup"
+      ]
+    },
+    {
+      "file": "tests/startup/maintenance/membership_drain.rs",
+      "change": "changed",
+      "translation_units": [
+        "startup"
+      ]
+    },
+    {
+      "file": "tests/support/protocol_close.rs",
+      "change": "added",
+      "translation_units": [
+        "logical_nested_native",
+        "routed"
+      ]
+    },
+    {
+      "file": "tests/support/protocol_close/contract.rs",
+      "change": "added",
+      "translation_units": [
+        "logical_nested_native",
+        "routed"
+      ]
+    },
+    {
+      "file": "tests/routed/shutdown/contract.rs",
+      "change": "removed",
+      "translation_units": [
+        "routed"
+      ]
+    }
+  ],
+  "emitted_current_depinfo": {
+    "routed": {
+      "depinfo": "target/root315/checkpoint402/build/release/deps/routed-c46258bcc6d8f083.d",
+      "sha256": "2ac95171f1cba32b4a7f332894718b56383e2333abd7f0f93b691083c0b381d0",
+      "included_changed_or_added": [
+        "tests/routed.rs",
+        "tests/routed/shutdown.rs",
+        "tests/routed/shutdown/long_rtt.rs",
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs"
+      ]
+    },
+    "logical_nested_native": {
+      "depinfo": "target/root315/checkpoint402/build/release/deps/logical_nested_native-65b9de5f12b79ad9.d",
+      "sha256": "ddffcbbc8983a8623e69981b30a41f28e0943fbdc190267c0fdb91c183655149",
+      "included_changed_or_added": [
+        "tests/logical_nested_native.rs",
+        "tests/logical_nested_native/cluster.rs",
+        "tests/logical_nested_native/cold_recovery.rs",
+        "tests/logical_nested_native/convergence.rs",
+        "tests/logical_nested_native/host.rs",
+        "tests/logical_nested_native/maintenance_controls.rs",
+        "tests/logical_nested_native/read.rs",
+        "tests/logical_nested_native/requests.rs",
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs"
+      ]
+    }
+  },
+  "source_replacements": {
+    "clock": {
+      "files": [
+        "src/runtime.rs",
+        "src/native/runtime.rs",
+        "tests/runtime.rs"
+      ],
+      "covered_by": [
+        "validation/baseline/slice401/README.md",
+        "validation/baseline/slice401/tests.json",
+        "validation/baseline/slice401/mac/README.md"
+      ],
+      "result": "Linux runtime54/54/37/54 +native2; Mac selected1+2. Old monotonic/scheduler code is byte-identical after removing new diagnostic declarations/impl/private tests. No consensus caller."
+    },
+    "startup": {
+      "files": [
+        "tests/startup.rs",
+        "tests/startup/discovery.rs",
+        "tests/startup/maintenance/drain.rs",
+        "tests/startup/maintenance/membership_drain.rs"
+      ],
+      "covered_by": [
+        "validation/baseline/slice396/README.md",
+        "validation/baseline/slice396/mac/README.md"
+      ],
+      "result": "Linux and Mac full startup all57/default42; current fixture source unchanged after396. Cooperative drain callback keeps surviving replicas polling during source cleanup; the earlier bare failure cause is not inferred. No new production behavior."
+    },
+    "logical_activation_nested": {
+      "files": [
+        "tests/logical_activation_nested/diagnostic.rs",
+        "tests/logical_activation_nested/history.rs",
+        "tests/logical_activation_nested/lower.rs",
+        "tests/logical_activation_nested/progress.rs",
+        "tests/logical_activation_nested/shutdown.rs"
+      ],
+      "covered_by": [
+        "validation/baseline/slice393/README.md",
+        "validation/baseline/slice398/README.md",
+        "validation/baseline/slice398/mac/README.md",
+        "validation/baseline/slice400/README.md",
+        "validation/baseline/slice383/README.md"
+      ],
+      "result": "Linux393 all14 plus exact lower-fixture replacement398 repeated2, default400 full8. Mac393 Joint2, Mac398 repeated2, prior383 imported/Unknown6 and earlier first replacement. No changed405 activation fixture."
+    },
+    "logical_nested_native": {
+      "files": [
+        "tests/logical_nested_native.rs",
+        "tests/logical_nested_native/cluster.rs",
+        "tests/logical_nested_native/cold_recovery.rs",
+        "tests/logical_nested_native/convergence.rs",
+        "tests/logical_nested_native/host.rs",
+        "tests/logical_nested_native/maintenance_controls.rs",
+        "tests/logical_nested_native/read.rs",
+        "tests/logical_nested_native/requests.rs",
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs"
+      ],
+      "covered_by": [
+        "validation/baseline/slice397/README.md",
+        "validation/baseline/slice402/README.md",
+        "target/root315/mac402/tcp-pass/cold_tcp.log",
+        "target/root315/close405/SHARED_RESULTS.json",
+        "validation/baseline/slice405/nested-all.log",
+        "validation/baseline/slice405/nested-default.log"
+      ],
+      "result": "Current405 full Linux nested all15/0 in124.51s and default13/0 in46.77s, each with0filtered. Mac TCP4021/0 with full27-store recovery/cleanup in850.99s. Current405 only shares stronger original-close predicate, no production change. Mac failed-QUIC405 needs actual terminal result; do not promote partial log to pass.",
+      "pending": [
+        "Mac405 full original coldQUIC terminal result and source/artifact guards"
+      ]
+    },
+    "routed": {
+      "files": [
+        "tests/routed.rs",
+        "tests/routed/shutdown.rs",
+        "tests/routed/shutdown/long_rtt.rs",
+        "tests/support/protocol_close.rs",
+        "tests/support/protocol_close/contract.rs",
+        "tests/routed/shutdown/contract.rs"
+      ],
+      "covered_by": [
+        "target/root315/close405/SHARED_RESULTS.json",
+        "target/root315/close405/shared-controls-release.log",
+        "target/root315/close405/routed-long-rtt-exact.log",
+        "target/root315/close405/quic-long-rtt.log"
+      ],
+      "result": "Existing pure close predicate moved to shared test module, same caller poll/background/diagnostic functions. Strengthened live-set/time and local/connector counts. Six controls+actual routed longRTT1+nativeQUIC1 pass; original broad384 routed history evidence retained. Additional current full192 routed regression is running; not counted successful.",
+      "additional_pending": [
+        "Current full routed192 regression (additional confidence check)"
+      ]
+    }
+  },
+  "closed_obligations": {
+    "Q-CLOCK-MAC": {
+      "status": "closed_selected_scope",
+      "evidence": [
+        "validation/baseline/slice401/mac/runtime_clock.log",
+        "validation/baseline/slice401/mac/native_clocks.log",
+        "validation/baseline/slice401/mac/exits.txt"
+      ],
+      "result": "Actual public injection1/0 and native signed/shared-epoch2/0; exact clock production sources match405. Source/binary guards0."
+    },
+    "Q-100-MAC": {
+      "status": "closed_selected_scope",
+      "evidence": [
+        "validation/baseline/slice403/native100/native_hundred.log",
+        "validation/baseline/slice403/native100/TEST_IDENTITY.json"
+      ],
+      "result": "Exact unchanged effect_owner native-only100-compacted-groups case1/0 in90.03s; original10s per-drain retained. Source guards0; no original executable hash custody is claimed."
+    }
+  },
+  "requirements": [
+    {
+      "id": "R01",
+      "requirement": "Ordinary crash-fault consensus",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R02",
+      "requirement": "Recursive responsibility decomposition",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R03",
+      "requirement": "Horizontal growth of one logical responsibility",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R04",
+      "requirement": "Hierarchical quorums",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "quorum"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R05",
+      "requirement": "Selective participation",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R06",
+      "requirement": "Shared, high-throughput WAL",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R07",
+      "requirement": "Cheap mostly-idle groups",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R08",
+      "requirement": "No ancestor in the normal commit path",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R09",
+      "requirement": "Safe transitions",
+      "status": "pending_final_mac_deep_quic",
+      "assertion_bundles": [
+        "membership",
+        "routing",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R10",
+      "requirement": "Honest ordering and durability API",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "application"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R11",
+      "requirement": "Deterministic testing",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "timer",
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R12",
+      "requirement": "Bounded overload",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "runtime",
+        "buffers"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R13",
+      "requirement": "Build native implementations first",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R14",
+      "requirement": "Public integration seams throughout",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "timer",
+        "clock",
+        "buffers",
+        "application",
+        "policy",
+        "observability",
+        "credentials"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-CLOCK-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R15",
+      "requirement": "Embeddable composition",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "transport",
+        "application",
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R16",
+      "requirement": "Optional compile-time adapters",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "runtime",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R17",
+      "requirement": "Purpose-built persistence contract",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R18",
+      "requirement": "Single authoritative persistence path",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "R19",
+      "requirement": "Contract-wide safety and bounds",
+      "status": "pending_final_mac_deep_quic",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "buffers",
+        "credentials",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-000",
+      "requirement": "Define the inventory in chapter 17, dependency direction, typed admission/completions and host-owned lifetime rules. Establish a core/interfaces-only build and downstream injection tests. Avoid a generic read/write store or a monolithic universal backend trait.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "runtime",
+        "clock"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-CLOCK-MAC",
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-001",
+      "requirement": "Define separate group, node/store, configuration, ownership and lane generations. Reject reused/unknown incarnations in a bounded decoder.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-002",
+      "requirement": "Append framed batches; support scoped barriers, hard state, range fetch, suffix/prefix operations, snapshot binding, interrupted-tail recovery and corruption detection. Expose durability tokens rather than booleans. Keep platform I/O replaceable below the logical store; never automatically stack alternative log stores.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-003",
+      "requirement": "Implement explicit event/effect types and persistence dependency ordering. A mock storage completion must not release unrelated or future acknowledgements.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-004",
+      "requirement": "Implement durable voting, log replication, ordered application, request IDs and unknown outcomes. Prove basic histories with the simulator before real transport.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "application"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-005",
+      "requirement": "Host 100 groups, then scale the count and active fraction. Add bounded admission and fair scheduling before increasing maximum buffers.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-006",
+      "requirement": "Enumerate every majority use and replace only through the validated policy abstraction. Add joint-configuration test cases, not just election examples.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "quorum",
+        "membership"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-007",
+      "requirement": "Build `/services/x/orders` and `/services/y/jobs` with distinct assignment sets. Demonstrate cached child progress without the root.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-008",
+      "requirement": "Implement the conservative freeze-based range split, including actual target data durability and duplicated client retries. Optimize pause only after recovery is correct.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-009",
+      "requirement": "Exercise the same public seams with native components and local downstream test doubles. No actual third-party adapter is required. Verify host-owned resources, construction failure cleanup and shutdown with in-flight work.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "transport",
+        "runtime",
+        "clock"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-CLOCK-MAC",
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-010",
+      "requirement": "Keep core/contracts free of concrete providers. Distinguish compiled availability from selected implementation. Reject unknown providers, incompatible formats and unsupported durability before service starts. Record enabled dependency features and component identities.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "transport",
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "VB-011",
+      "requirement": "Turn the specification's storage, transport, scheduler, codec and supporting-provider obligations into reusable tests. A future external adapter may not advertise support until these tests and relevant durable histories pass.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "snapshots",
+        "timer",
+        "clock",
+        "buffers",
+        "application",
+        "observability",
+        "credentials"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-CLOCK-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I01",
+      "requirement": "A voter never durably grants two different candidates a vote in the same term/group incarnation.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I02",
+      "requirement": "No two different entries become committed at one index in the same group history.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "quorum"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I03",
+      "requirement": "Durable progress is a contiguous matching prefix, not a maximum completed index.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "striped"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I04",
+      "requirement": "A persistence-dependent effect never escapes before all its dependencies succeed.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "raft",
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I05",
+      "requirement": "Every activated policy is validated and all relevant quorum checks use its correct effective configuration.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "quorum",
+        "membership"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I06",
+      "requirement": "At most one group can successfully serve a transferred scope at a time under the lifecycle contract.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I07",
+      "requirement": "An acknowledged operation remains recoverable under the documented failure/durability assumptions.",
+      "status": "pending_final_mac_deep_quic",
+      "assertion_bundles": [
+        "raft",
+        "storage",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I08",
+      "requirement": "Replay does not duplicate an in-contract operation ID's application effect.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "application",
+        "routing",
+        "transactions"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I09",
+      "requirement": "Snapshot/checkpoint publication never exposes a boundary without its required state.",
+      "status": "pending_final_mac_deep_quic",
+      "assertion_bundles": [
+        "snapshots",
+        "logical",
+        "striped"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I10",
+      "requirement": "Queues and retained resources remain bounded under overload and quorum loss.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "runtime",
+        "buffers"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I11",
+      "requirement": "An old store/group/lane incarnation cannot supply valid evidence for a replacement incarnation.",
+      "status": "pending_final_mac_deep_quic",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "I12",
+      "requirement": "Unrelated parent/control failure does not create a new authority or silently weaken a child's quorum.",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing",
+        "quorum"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C01",
+      "requirement": "Public append_batch, persist_hard_state, fetch_range, replace_suffix, truncate_prefix, recover",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C02",
+      "requirement": "Public barrier, poll_durable, fence_failure",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C03",
+      "requirement": "Public begin_stage, write_chunk, seal, publish, install, recover, reclaim",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C04",
+      "requirement": "Public submit_vectored, poll_completion, sync_data, publish_manifest, sync_directory",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C05",
+      "requirement": "Public apply_batch, read_at_barrier, checkpoint, restore, deduplicate",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "application"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C06",
+      "requirement": "Public try_send_batch, poll_events, reserve_peer_budget, drain",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C07",
+      "requirement": "Public encoded_len, encode_into, decode_bounded, negotiate",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "formats",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C08",
+      "requirement": "Public encode_batch, verify_frame, decode_recovery, check_version",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "formats",
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C09",
+      "requirement": "Public establish, bind_identity, renew, revoke, close",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "credentials",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C10",
+      "requirement": "Public enqueue_ready, poll_budgeted, reschedule, drain",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C11",
+      "requirement": "Public register, cancel, poll_expired",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "timer"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C12",
+      "requirement": "Public monotonic_now, diagnostic_wall_time",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "clock"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-CLOCK-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C13",
+      "requirement": "Public sample_jitter, seed_test_source",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "timer"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C14",
+      "requirement": "Public reserve, acquire, transfer, release",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "buffers"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C15",
+      "requirement": "Public reserve_credits, account_inflight, release, reject",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "buffers",
+        "runtime"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [
+        "Q-100-MAC"
+      ],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C16",
+      "requirement": "Public route_key, validate_scope, propose_split",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C17",
+      "requirement": "Public resolve_hint, cache, invalidate, bound_retry",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C18",
+      "requirement": "Public eligible_hosts, score, propose_move",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "policy"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C19",
+      "requirement": "Public record_bounded, snapshot_counters, export",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "observability"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C20",
+      "requirement": "Public parse_typed, validate, submit_intent, report_receipt",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "policy",
+        "membership"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C21",
+      "requirement": "Public bind_principal, check_scope, refresh, audit",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "credentials"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C22",
+      "requirement": "Public checksum, verify, encode_bounded, decode_bounded",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C23",
+      "requirement": "Public export_scope, import_scope, finish_checkpoint, recover_import",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "routing",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "C24",
+      "requirement": "Public capabilities, prepare, decide, recover",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "transactions"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement.",
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "P8-striped",
+      "requirement": "P8-striped",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "striped"
+      ],
+      "open_obligations": [],
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "P8-relays",
+      "requirement": "P8-relays",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "relays"
+      ],
+      "open_obligations": [],
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "P8-logical",
+      "requirement": "P8-logical",
+      "status": "pending_final_mac_deep_quic",
+      "assertion_bundles": [
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "prior_audit_status": "implemented_pending_selected_qualification",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    },
+    {
+      "id": "P8-transactions",
+      "requirement": "P8-transactions",
+      "status": "bounded_requirement_evidence_reconciled",
+      "assertion_bundles": [
+        "transactions"
+      ],
+      "open_obligations": [],
+      "prior_audit_status": "implemented_with_scoped_recorded_evidence",
+      "closed_obligations": [],
+      "qualification_limits": "No current whole-suite or universal provider proof. See original403 assertion bundles and exact source replacement map."
+    }
+  ],
+  "remaining_gate": "Mac405 full original deep QUIC and source/artifact guards; root final current-source audit. Additional full routed192 regression is pending and not counted passed. No extra missing named functionality identified.",
+  "historical_failures_preserved": [
+    "Broad Linux384 all2436/2 (startup); default2124/0,core1028/0,native1511/0 are historical only.",
+    "Mac315b native179/1 remains original failed matrix; selected native100403 now passes original case.",
+    "Mac383 repeated2 and Joint2 remain failed in that source; later393/398 targeted passes replace those paths.",
+    "Mac398 coldTCP/QUIC fail old15s CheckpointPublished;402 extends only test checkpoint watchdog while requiring actual frontier/ref/router/worker.",
+    "Mac402 QUIC0/1 843.17s fails old15s CloseDrained after local work settles. No provider state/deadline was captured;405 shared predicate must prove eligibility dynamically."
+  ],
+  "explicit_scope": {
+    "P9": "Performance optimization, sustainable throughput/p99, allocation/RSS/CPU and comparative benchmark gates, including research tradeoff measurement.",
+    "P10": "Dedicated security audit/hardening; current authentication/ownership/bounds remain required.",
+    "Windows": "Deferred target.",
+    "future_unselected": "Explicit chapter16 R-B global ordered distributed lanes and R-D dormancy/parallel application are distinct optional research directions, not one of four promoted P8 features. Third-party adapters, SQL and moving-key/global-scan transactions not promised."
+  },
+  "prior_assertion_review": "validation/baseline/slice403/FINAL_REQUIREMENTS.json",
+  "stable_evidence_sha256": {
+    "target/root315/close405/SHARED_RESULTS.json": "01e42f1f70ba8f65bb2a798a58620284de25921668efbefebc0dcb0642fe6fc4",
+    "target/root315/close405/SOURCE.json": "02919ecc93d8ddbbf93969212cfb5c926ead6cdaa06c0983937dca01d935e335",
+    "target/root315/close405/exits.txt": "c979d21ce0756dc71b316180fffd435bb98c8e9b0a26e1c0e5daf17adc589886",
+    "target/root315/close405/quic-long-rtt.log": "f07ef7ab00b0ed300adc016b9606e9c96c918c14d61f5c37ff4485246380c7a7",
+    "target/root315/close405/routed-long-rtt-exact.log": "e6d9cf75012a21920b382ba731800da282dbff3b55d2069c455b093fafcf8cc7",
+    "target/root315/close405/shared-controls-release.log": "5287760242b9ebc8e19315b222751c15c33da147cb755c55fc3fe95250615223",
+    "target/root315/mac402/tcp-pass/cold_tcp.log": "73c71e52a8b3b19053dd3b7b1717b24c403c81bdd94e2d55dec23f2e8e374211",
+    "validation/baseline/slice383/README.md": "6385f717eee53b87285e761becc3da3b9d91efac2d188c7b7c3d3a9f2f8ae937",
+    "validation/baseline/slice393/README.md": "d199dd53744987f966501675cd58dac3be591622fdc35821271957fc1b0efa05",
+    "validation/baseline/slice396/README.md": "4ec9049f6922d01b54596fdcbb2bfb910d00e72874a5e57b9f00e07874b94cb2",
+    "validation/baseline/slice396/mac/README.md": "3823da481c8fa5a28ae6f079ed7a7f41bb525470fc91925f7a41dd99f8e088c3",
+    "validation/baseline/slice397/README.md": "125d983c073709385a692898937280579eed68a6e7b1477c6dc8647ea6de497b",
+    "validation/baseline/slice398/README.md": "ff72ebd83887fc50b284c3cab74ac3b738fbed284794271491aaf58f1bc878e2",
+    "validation/baseline/slice398/mac/README.md": "84a6fd988a6bd76bb2e4e76fd51a0a466da9991ddc5011220ab105c97f85a0b7",
+    "validation/baseline/slice400/README.md": "fa879b5bf08e6c71ec8ce2ed8d1f6bca0cdf7e30d6a25ab768d3ba56084fb80c",
+    "validation/baseline/slice401/README.md": "300fc13c1756b77d3f6d449117bc2f64c75768b06e5b232409bfd71615b14386",
+    "validation/baseline/slice401/mac/README.md": "842b77940edc3b8a2aee0629ed5ed05cdf48aedbf409e78af1f1f88c97ef01f3",
+    "validation/baseline/slice401/mac/exits.txt": "83c4d70f7efcbcc307435321c3c668721a6b413d4048066439e1d10d18729076",
+    "validation/baseline/slice401/mac/native_clocks.log": "8491df1fa25fa28bd89ab23bec498076fb44938cfd9014b1687aeff5cb1b8570",
+    "validation/baseline/slice401/mac/runtime_clock.log": "f8eb4cec58957d282c1efd27c5abcb575087ae6ec54ca37e34e6716efbe65b4a",
+    "validation/baseline/slice401/tests.json": "1ab48f31ad83ae63e25509db35b58e259d6534f9604dfbc5859c5e13121a4e93",
+    "validation/baseline/slice402/README.md": "50ae25ca80e5a1e9c1f1217ce14b44d86539cb0d1dba5d63082c1094e0b24889",
+    "validation/baseline/slice403/FINAL_REQUIREMENTS.json": "3b8a7aae848821610635ef6a5cc32d687892369f433f281ea141f1b2864f0813",
+    "validation/baseline/slice403/native100/TEST_IDENTITY.json": "37e67794b86ea067bfa40a705d95e87d0290a687034eab614a775c7a788cb6ed",
+    "validation/baseline/slice403/native100/native_hundred.log": "a30097238d6c1c3406e092934b4aab98c089c2bf6dba2dc9661a808eaa20b8d9",
+    "validation/baseline/slice405/nested-all.log": "2cdb790746e7384aec9c0e628472f0e2d789a4d6546d184a009a3d38bfd1b9ad",
+    "validation/baseline/slice405/nested-default.log": "d03140b39a65256879a3ded1fbc57f8bb0aaf20d123dc1653eb37e8554eb3902"
+  },
+  "limits": [
+    "Source hashes and metadata are not substitutes for test assertions. The403 71-row source/assertion review and finite model scopes remain binding.",
+    "No mandatory full moving-source matrix is claimed; exact unchanged implementation plus targeted replacement tests form the evidence map.",
+    "Ongoing Mac405 and full routed logs are deliberately not fingerprinted or counted as successful; completed Linux nested15/13 are read and fingerprinted from the committed archive.",
+    "No unsupported third-party-provider, arbitrary configuration Cartesian-product, Windows, P9 or P10 certification."
+  ],
+  "capability_boundary": {
+    "user_clarification": "The 15-second shutdown cutoff is performance, not capability; it does not gate P8.",
+    "performance_phase": "P9",
+    "test_results": "Pending and failed outcomes remain unchanged; no pass inferred.",
+    "stop_after": "P8 capability completion"
+  }
+}

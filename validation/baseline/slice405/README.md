@@ -29,3 +29,12 @@ checks compiler-reported assertion/overflow/optimization/features, records the
 original three test executables plus library, and guards source and artifacts
 before/after every selected case. Successful402 TCP/403 native100/401 clock
 qualification is retained separately;405 does not claim to rerun those checks.
+
+## User-confirmed capability boundary
+
+The user explicitly classified the15-second shutdown limit as performance,
+not capability. It no longer gates P8 feature completion. This is not a claim
+that402's failed Mac test passed, or that405's still-running full Mac/routed
+checks have terminal results. Fixed shutdown speed belongs to P9. All original
+functional release checks remain in the implementation. P0–P8 capability closure
+uses the reconciled bounded evidence; no tuning or security phase starts here.
