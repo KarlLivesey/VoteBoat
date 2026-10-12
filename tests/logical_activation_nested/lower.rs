@@ -52,6 +52,8 @@ impl<'a> Lower<'a> {
                 .session
                 .poll(now, TransportPollBudget::default())
                 .unwrap();
+            // This obsolete route never admits frames to the current owner.
+            let _ = owned.session.take_received(owned.authorization).unwrap();
         }
         for bridge in &mut self.bridges {
             bridge.advance(now, Self::budget()).unwrap();

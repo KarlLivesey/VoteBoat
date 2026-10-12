@@ -31408,8 +31408,8 @@ No unfinished functionality moves to P9/P10; final current-source audit remains.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Frozen392 complete Linux cold TCP/QUIC pass, archived in validation/baseline/slice392. Exclusive Mac394 runs that source. TCP reaches cold recovery but fails final physical close; QUIC and repeated replacement are pending. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Diagnose actual failed ownership/state; preserve original failures and authority checks. | Usable recursive composition, P8 |
-| Next: membership and startup closure | Finish repeated replacement, cold membership and serving-voter drain qualification. | Linux393 all14 logical activation tests pass; Mac Joint393 waits for exclusive394 handback. Startup395 all-feature56/1 and default42/0; cooperative396 extends normal survivor polling to the remaining membership-drain fixture. | Actual repeated replacement and Joint recovery on Mac; complete startup all/default target after396; actual business and duplicate receipts, provider closure and zero lint diagnostics. | Online membership and advanced composition, P4/P8 |
+| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Mac394 cold TCP/QUIC fail final physical close. Corrected397 checkpoint frontier contract passes Linux controls2/0 and complete cold TCP/QUIC1/0 each; its exact old-predicate negative fails as expected. Matching Mac397 is locally prepared behind393/396. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Preserve original failures and authority checks; await actual new checkpoint coverage. | Usable recursive composition, P8 |
+| Next: membership and startup closure | Finish repeated replacement, cold membership and serving-voter drain qualification. | Linux393 all14 activation tests pass; Mac Joint393 is running, then startup396. Linux startup396 all-feature57/0 and default42/0. Mac394 repeatedQUIC retains three obsolete outbound messages; independent receive-drain correction398 is under Linux qualification. | Actual repeated replacement and Joint recovery on Mac; complete startup all/default target; original business and duplicate receipts, accepted send completions, provider closure and zero lint diagnostics. | Online membership and advanced composition, P4/P8 |
 | Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, read-only full requirement audit, coherent current snapshot and existing source/model/durability records. Linux384 broad matrix remains running on its frozen source. | Map every explicit functional requirement to appropriate Linux/macOS evidence; reconcile source differences and failures, required checks and cleanup. Stop when P8 actually complete. | Goal completion, P0–P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
@@ -31972,3 +31972,28 @@ No P9/P10 work or completion claim; all functional ownership gates stay required
 The broad Linux384 core profile also completed111target results/1028passed/0failed,
 including documentation and source1306/executable111 guards0. Native-only runs
 next on its original sequential runner6548; this remains a historical cut.
+
+### Retired receive obligation398 — schema and bounded fixture correction
+
+Before editing, schema target/root315/retired398/SCHEMA.md recorded the exact
+Retired session/authorization ownership, peer retirement, unadmitted receive
+cancellation, later original full closure and failure checks. Source review of
+LogicalPeerSession plaintext reads and bounded native QUIC stream credit confirms
+the host obligation described above. The old394 log still does not establish
+that held receive frames caused those exact pending sends.
+
+Lower.advance now uses the same `take_received(original_authorization)` operation
+already present in final cleanup after each existing retired-session poll.
+These obsolete frames are discarded before admission to any current owner; no
+ACK, successful send result, client output or quorum evidence is fabricated.
+Exactly the same three provider sessions remain owned/open until the original
+final close. Existing accepted-send completion/no-retired-output assertions,
+full lower and Middle drain, worker joins/rebinds and original15s bounds remain.
+This is one fixture change and no production change, API or new helper.
+
+Root formatting and strict all-feature/all-target Clippy are zero. Guarded
+complete original repeated TCP/QUIC qualification is delegated on a frozen398
+source; it is pending, not a pass. Macro/mini plan above now reflects completed
+Linux397/396 and the exclusive Mac393→396→397 sequence. Publish this checked
+fixture correction with all hook profiles enforced, retaining actual future
+results separately. No performance/security phase starts.
