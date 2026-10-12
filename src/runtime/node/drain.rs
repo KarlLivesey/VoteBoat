@@ -63,12 +63,11 @@ impl<
         W: PersistenceWorker,
         O: OutboundQueue,
         H: SnapshotWorker,
-        C: PeerConnector,
-        F: PeerTransportFactory<C::Session>,
-    > Node<S, T, E, A, W, O, H, C, F>
+        N: PeerNetworkConfiguration,
+    > NetworkNode<S, T, E, A, W, O, H, N>
 where
     A::Receipt: ApplicationReceipt,
-    C::Endpoint: Clone,
+    N::Endpoint: Clone,
 {
     /// Close ordinary client admission immediately, then disable campaigns in
     /// bounded owner polls. Existing leaders keep heartbeats for handoff.

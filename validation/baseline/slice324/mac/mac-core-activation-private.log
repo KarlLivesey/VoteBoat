@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice324-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.33s
+     Running unittests src/lib.rs (/tmp/voteboat-macos-CzK1if/slice324-membership/build/debug/deps/voteboat-b4df062d1c8e545b)
+
+running 7 tests
+test logical_voter::activation::tests::semantics::malformed_late_and_unprepared_phases_do_not_partially_apply ... ok
+test logical_voter::activation::tests::semantics::one_replicated_slot_retains_busy_terminal_and_first_positions ... ok
+test logical_voter::activation::tests::semantics::malformed_configuration_or_cross_incarnation_cannot_begin ... ok
+test logical_voter::activation::tests::semantics::reserved_terminal_capacity_survives_full_business_and_intent_lifetimes ... ok
+test logical_voter::activation::tests::semantics::all_pending_and_retained_phase_aliases_refuse ... ok
+test logical_voter::activation::tests::recovery::own_checkpoint_and_original_suffix_restore_busy_and_active_state ... ok
+test logical_voter::activation::tests::recovery::invalid_restore_is_atomic_and_rejects_history_materialization_and_profile ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 126 filtered out; finished in 0.04s
+

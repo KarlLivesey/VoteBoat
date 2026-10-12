@@ -261,6 +261,16 @@ impl<P: PeerTransport> PeerRoster<P> {
             p.binding
         }
     }
+    /// Observe an actual current authenticated transport, not catalog identity.
+    pub fn source_view(&self, peer: NodeId) -> Option<AuthenticatedSourceView> {
+        if self.fenced {
+            return None;
+        }
+        let binding = self.binding(peer)?;
+        let transport = self.peers.get(&peer)?.transport.as_ref()?;
+        let view = AuthenticatedSourceView::from_direct_transport(transport).ok()?;
+        (view.direct_access() == Some(binding)).then_some(view)
+    }
     pub(crate) fn disconnected_send_deadline(
         &self,
         peer: NodeId,

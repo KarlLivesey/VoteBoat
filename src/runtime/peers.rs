@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Bounded peer reactor over explicitly owned connector, roster and ingress.
 use super::*;
+mod network;
 use crate::{connect::*, outbound::*, secure::*, transport::*};
 use std::collections::BTreeSet;
 
@@ -98,6 +99,8 @@ impl PeerDriverBudget {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum PeerDriverError {
+    #[cfg(feature = "native")]
+    Relay(crate::native::relay::RelayNetworkError),
     Owner(EffectOwnerError),
     InvalidLimits,
     WrongBinding,

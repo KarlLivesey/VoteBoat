@@ -31,6 +31,15 @@ use std::{
     time::{Duration, Instant},
 };
 const ALPN: &[u8] = b"voteboat-quic/1";
+fn alpn(version: u16) -> &'static [u8] {
+    if version == crate::logical_voter::LOGICAL_NETWORK_VERSION {
+        b"voteboat-logical-quic/1"
+    } else if version == crate::native::relay::RELAY_NETWORK_VERSION {
+        b"voteboat-relay-quic/2"
+    } else {
+        ALPN
+    }
+}
 
 /// One exact, construction-authorized peer and one fresh local generation.
 /// The host supplies a dedicated bound socket; discovery/shared listeners are
@@ -81,6 +90,9 @@ fn bounded_transport(limits: SessionLimits) -> Result<Arc<TransportConfig>, Sess
                 .try_into()
                 .map_err(|_| SessionError::InvalidLimits)?,
         ))
+        // Transport-only liveness preserves silent channels; a nonresponsive
+        // peer still expires under the original idle policy.
+        .keep_alive_interval(Some(Duration::from_secs(2)))
         .max_concurrent_uni_streams(1u32.into())
         .stream_receive_window((limits.write_buffer_bytes as u32).into())
         .receive_window((limits.write_buffer_bytes as u32).into())
@@ -148,9 +160,9 @@ impl NativeQuicSession {
         );
         let transport = bounded_transport(limits)?;
         let mut tls_client = (*config.client).clone();
-        tls_client.alpn_protocols = vec![ALPN.to_vec()];
+        tls_client.alpn_protocols = vec![alpn(config.wire_version()).to_vec()];
         let mut tls_server = (*config.server).clone();
-        tls_server.alpn_protocols = vec![ALPN.to_vec()];
+        tls_server.alpn_protocols = vec![alpn(config.wire_version()).to_vec()];
         let mut server_config = ServerConfig::with_crypto(Arc::new(
             QuicServerConfig::try_from(tls_server).map_err(|_| SessionError::InvalidCredentials)?,
         ));
@@ -312,7 +324,9 @@ impl NativeQuicSession {
                         .handshake_data()
                         .and_then(|v| v.downcast::<HandshakeData>().ok())
                         .ok_or(SessionError::Authentication)?;
-                    if data.protocol.as_deref() != Some(ALPN) || connection.accepted_0rtt() {
+                    if data.protocol.as_deref() != Some(alpn(self.wire_version))
+                        || connection.accepted_0rtt()
+                    {
                         return Err(SessionError::IncompatibleProtocol);
                     }
                     self.authenticated = true;

@@ -18,6 +18,8 @@ mod peers;
 pub use peers::*;
 mod membership;
 pub use membership::*;
+mod source;
+pub use source::*;
 
 /// Construction-selected conversion of one ready authenticated session into
 /// one multiplexed transport. The factory owns the session after this call;

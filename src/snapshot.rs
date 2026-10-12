@@ -328,18 +328,42 @@ pub fn restore_application<A: CheckpointStateMachine, S: SnapshotRetention>(
     store: &mut S,
 ) -> Result<Restored<A::Receipt>, CheckpointError> {
     check_binding(raft, store)?;
+    let limits = store.limits();
+    restore_application_from(raft, application, limits, || {
+        if let Some(reference) = raft.state().snapshot {
+            store.load_pinned(reference).map(Some)
+        } else {
+            store.load()
+        }
+    })
+}
+
+/// Restore an already verified image without publishing or reconciling storage.
+/// Logical recovery owns complete child-quorum pin bytes and must leave every
+/// retention mutation to its asynchronous child-backed snapshot worker.
+pub(crate) fn restore_application_image<A: CheckpointStateMachine>(
+    raft: &Raft,
+    application: &mut A,
+    snapshot: Option<Snapshot>,
+    limits: SnapshotLimits,
+) -> Result<Restored<A::Receipt>, CheckpointError> {
+    restore_application_from(raft, application, limits, || Ok(snapshot))
+}
+
+fn restore_application_from<A: CheckpointStateMachine>(
+    raft: &Raft,
+    application: &mut A,
+    limits: SnapshotLimits,
+    load: impl FnOnce() -> Result<Option<Snapshot>, StorageError>,
+) -> Result<Restored<A::Receipt>, CheckpointError> {
     application.validate_group(raft.state().bootstrap.group)?;
     if application.applied_index() != 0 {
         return Err(CheckpointError::InvalidBoundary);
     }
-    let limits = store.limits().validate()?;
+    let limits = limits.validate()?;
     let mut next = application.clone();
     let mut floor = 0;
-    let snapshot = if let Some(reference) = raft.state().snapshot {
-        Some(store.load_pinned(reference)?)
-    } else {
-        store.load()?
-    };
+    let snapshot = load()?;
     if let Some(snapshot) = snapshot {
         let m = &snapshot.metadata;
         if m.bootstrap != raft.state().bootstrap

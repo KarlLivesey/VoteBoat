@@ -1,0 +1,30 @@
+{
+  "linux": {
+    "actual_Cargo_artifact_profile": {
+      "opt_level": "0",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/checkpoint383-build/debug/deps/logical_activation_nested-f271d6116c20e281",
+    "artifact_fresh": false,
+    "proof": "linux/BUILD.jsonl"
+  },
+  "mac": {
+    "recorded_profile": "test [unoptimized + debuginfo]",
+    "binary_paths": [
+      {
+        "path": "/tmp/voteboat-macos-retired383-jHNT8fJC/build/debug/deps/logical_activation_nested-d47bb5f466ca5ee0",
+        "sha256": "8ce5a8840268903a1120b7776dcbc97eca0b9705f8ced054d7a67d8a50fc67e2"
+      }
+    ],
+    "proof": [
+      "mac/original/build.log",
+      "mac/original/joint_tcp.log",
+      "mac/original/build.command"
+    ],
+    "release_flag_present": false,
+    "overflow_checks": "not observed in recorded compiler flags"
+  }
+}

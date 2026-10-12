@@ -65,10 +65,31 @@ fn drain(protocol: NativePeerProtocol) {
     // Shutdown still owns all accepted effects; readiness itself never stops workers.
     let source = h.nodes.remove(0);
     drain_wire_nodes(vec![source], h.clock);
-    assert!(matches!(
-        h.submit(0, rejected.request.operation, rejected.request.bytes),
-        ClientOutcome::Applied { .. }
-    ));
+    let operation = rejected.request.operation;
+    let outcome = h.submit(0, operation, rejected.request.bytes);
+    if !matches!(&outcome, ClientOutcome::Applied { .. }) {
+        eprintln!("post-drain protocol={protocol:?} operation={operation:?} outcome={outcome:?}");
+        for (slot, node) in h.nodes.iter().enumerate() {
+            let owner = &node.local().owner;
+            let core = h.core(slot);
+            eprintln!(
+                "survivor slot={slot} node={:?} owner={:?} worker={:?} usage={:?} state={:?} role={:?} term={} commit={} last={} applied={} deadline={:?} transfer={:?}",
+                core.local_node(),
+                owner.identity(),
+                owner.worker_binding(),
+                owner.usage(),
+                node.state(),
+                core.role(),
+                core.state().hard_state.term,
+                core.state().commit_index,
+                core.state().last_index(),
+                h.app(slot).applied_index(),
+                owner.deadline(group()),
+                core.leadership_transfer(),
+            );
+        }
+    }
+    assert!(matches!(&outcome, ClientOutcome::Applied { .. }));
     assert_eq!(
         h.app(0).inner().0.read_applied(h.app(0).applied_index()),
         Ok(7)

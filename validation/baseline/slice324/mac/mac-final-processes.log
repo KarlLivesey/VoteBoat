@@ -1,0 +1,4 @@
+  PID  PPID  ELAPSED STAT COMMAND
+20050 19019 06:37:00 SN   bash /tmp/voteboat-macos-CzK1if/slice302/checks.sh /tmp/voteboat-macos-CzK1if/repo302 /tmp/voteboat-macos-CzK1if/slice302/results mac
+21495 20050 06:36:27 SN   /Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo test --locked --offline --no-fail-fast --all-features -- --nocapture
+83714 21495 06:23:34 RN   /private/tmp/voteboat-macos-CzK1if/repo302/target/debug/deps/routed-af8b8ce041d791b8 --nocapture

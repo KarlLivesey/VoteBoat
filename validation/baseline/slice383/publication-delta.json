@@ -1,0 +1,10 @@
+{
+  "base": "frozen382",
+  "inputs": 1306,
+  "fixture_modified": [
+    "tests/logical_activation_nested/cluster.rs"
+  ],
+  "production_modified": [],
+  "publication_absolute_seconds": 90,
+  "all_other_original_stage_seconds": 15
+}

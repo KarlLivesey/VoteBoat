@@ -293,30 +293,30 @@ fn application_routers(owner_id: RuntimeOwner, local: LocalIdentity) -> Result<R
         IngressLimits::default(),
     ))?;
     let results = checked(ApplicationRouter::new(
-        ApplicationRouterBinding {
-            owner: owner_id,
-            generation: ApplicationRouterGeneration::new(1).unwrap(),
-        },
+        ApplicationRouterBinding::new(
+            RuntimeAuthorization::physical(owner_id),
+            ApplicationRouterGeneration::new(1).unwrap(),
+        ),
         ApplicationRouterLimits::default(),
     ))?;
     let clients = checked(ClientRouter::new(
-        ClientRouterBinding {
-            owner: owner_id,
-            generation: ClientRouterGeneration::new(1).unwrap(),
-        },
+        ClientRouterBinding::new(
+            RuntimeAuthorization::physical(owner_id),
+            ClientRouterGeneration::new(1).unwrap(),
+        ),
         ClientRouterLimits::default(),
     ))?;
     let reads = checked(ReadRequests::new(
-        ReadInvocationBinding {
-            owner: owner_id,
-            generation: ReadInvocationGeneration::new(1).unwrap(),
-        },
+        ReadInvocationBinding::new(
+            RuntimeAuthorization::physical(owner_id),
+            ReadInvocationGeneration::new(1).unwrap(),
+        ),
         ReadInvocationLimits::default(),
         checked(ReadRouter::new(
-            ReadRouterBinding {
-                owner: owner_id,
-                generation: ReadRouterGeneration::new(1).unwrap(),
-            },
+            ReadRouterBinding::new(
+                RuntimeAuthorization::physical(owner_id),
+                ReadRouterGeneration::new(1).unwrap(),
+            ),
             ReadRouterLimits::default(),
         ))?,
     ))?;

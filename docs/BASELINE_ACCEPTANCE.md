@@ -12,7 +12,7 @@ complete P8 qualification.
 Current feature exit: [concise status](FEATURE_STATUS.md). The preserved705-input
 matrix302 is [terminal on Linux](../validation/baseline/slice302/linux/README.md):
 all1952/0,default1708/0,core775/0,native1226/0, with705 before/terminal and Git-tree
-input matches. Mac all-feature remains live. Its original Mac counter195/1 timeout
+input matches. The original Mac302 matrix is terminal: all/default failed, core/native passed. Its original Mac counter195/1 timeout
 has no ownership observations; silent diagnostic303 passes do not explain it.
 Controlled304 independently proves that the executable's ten-second cap refuses
 a settled original future QUIC close. Correction305 retains only original
@@ -30,6 +30,17 @@ Completed selected preparation is archived in
 [slice305](../validation/baseline/slice305/README.md). Current302 terminal platform
 acceptance remains pending; its original705-source failure stays separate from
 the corrected709-source results.
+
+Current387 scoped closure: selected static relays and relay-backed logical
+storage qualify on both hosts371; first genuine twelve-owner replacement also
+passes both Mac protocols379. Linux repeated fifteen-owner closure383 and full
+twenty-seven-owner cold recovery385 pass TCP/QUIC. Mac imported-target and
+committed-Unknown cold recovery pass both protocols383; remaining Mac cases,
+the demonstrated parent shutdown assertion and final coherent matrices remain
+open. These cuts do not replace original failed302 evidence or qualify the
+whole moving source. See [current mini plan372](IMPLEMENTATION.md#current-mini-plan372).
+The [portable383 packet](../validation/baseline/slice383/README.md) preserves
+the original Linux repeated passes and all ten Mac results, including failures.
 
 Parallel integration: [slice297](../validation/baseline/slice297/README.md).
 Linux/macOS each pass810 affected executions over four profiles: Raft,
@@ -1232,6 +1243,7 @@ later revision inherits a platform pass from that result.
 | P5: versioned manifests, selective placement, cached routing/delegation; established children survive parent outage | Directory/LifecycleDirectory, created groups, retained insertion, deletion, local/foreign reparenting, metadata relocation and locator/grant adoption. tests/{directory,group_creation,namespace_creation,retained_insertion,deletion,reparenting,metadata_transfer}.rs; tests/routed native histories. | Slice160 composes automatic manifest lookup with lifecycle and moved metadata serving envelopes, with selected native move/reopen histories. Slice172 adds bounded authenticated remote endpoint refresh, cancellation, source replacement and retained cached-peer operation. Slice184 adds provisioned authenticated remote manifest fetching through the public Rust seam with TCP/QUIC original-read, disconnect and offline-child checks. Slice189 adds executable initial publication;190 adds cold recursive multi-authority lookup;191 connects explicit placement plans to the authorized membership executor. Broader fault gates and the operator lifecycle surface remain. Automatic global orchestration is not a baseline prerequisite. Native selected deletion/reparenting/migration paths now exist; they must not be listed as absent. |
 | P6: staged split/import/fence/publish/activate/merge, retry lineage, exclusive owners and bounded recoverable pauses | ScopeStateMachine and native BucketCounter; transfer source/target/publication/retirement, retained and imported partial owners. tests/transfer_*.rs, tests/{scoped_source,imported_parent,retained_insertion}.rs, tests/routed phase/restart/retirement histories. Metadata migration preserves original authority domains. | Slice185 adds selected same-source joint-membership plus split-fence abort/recovery, exact import configuration lineage and independent target retry/outbox reopen. These are bounded profiles and selected cuts, not every lifecycle composition. Unresolved-creation cancellation is implemented169, with selected native competing-publication owner-loss schedules171. General retention/reclamation policy, broader compatible mapping/provider coverage and other combined failure schedules remain; no automatic timeout unfreeze. |
 | P7: multiple local lanes, batching/pipelining, reclamation and recovery throttling; sustainable improvement at fixed correctness/p99 with attributable costs | Explicit lane/store identities, shared barriers, exact-ticket reclamation and offered-load/maintenance/journal harnesses. tests/{shared_barrier,log_reclaim,maintenance}.rs and validation/performance. Slice158 adds forced eight-group native snapshot recovery and one successful original long QUIC pause run. | Slice162 adds explicit concurrent recovery request/image-capacity admission. Slice165 adds opt-in bounded periodic physical reclamation in Node and the service, with native hundred-group and TCP/QUIC restart/retry evidence. Slice166 adds bounded automatic checkpoint progression in the same Node/service composition; native hundred-group and TCP/QUIC reopen/retry histories pass. Bandwidth shaping and latency guarantees are not implemented. Slice178 adds static multi-lane native composition with disjoint stores/groups, bounded host threads and TCP/QUIC recovery/retry evidence. Sustainable load, fuller allocation/RSS/copy/queue attribution and platform/device coverage remain. Automatic live lane placement/migration is an optional enhancement, not substituted for these acceptance gates. Original250ms serial TCP p99 gate remains unmet; latest retained control gate is slice183 (873.492994ms; same host with the older baseline active). Slice183 rejected a Written-stage replication candidate: its first run failed and its repeat had1107.213750ms p99. The source was restored; this is experimental evidence, not an installed feature. Slice158's2918.173043ms offered-load p99 is a different workload, not that gate. |
+| P8: ALL advanced functional requirements, including striped ordinary-group WAL, physical-voter representative trees, subgroup-backed logical voters and the declared broader transaction layer | Frozen318/321 record selected Linux/macOS Program and striped-storage evidence. Logical applications/runtime/activation and actual native histories provide selected implemented evidence. tests/representative_relay_model.rs is protocol research only; positive exhaustion and working native relay transport remain unqualified. | Complete original logical parent/child/recursive administration, learner enrollment, representative fencing, nested checkpoint/suffix/recovery and cleanup; real relay transport with original physical-voter provenance; all required model/durability/fault/platform acceptance. No functional requirement moves toP9. Final complete P0–P8 requirement audit is mandatory before declaring P8 complete. |
 
 Historical QUIC pause failures105/106 remain valid failed observations; the
 single success158 does not reconstruct their packet histories or guarantee
@@ -1288,7 +1300,7 @@ operations/scope and test locations; its checker validates metadata only.
 | C21 authorization | PrincipalCredentials/ServiceAuthorizer/authorize_session, NativeServiceAccess, CredentialJournal | Executable live command-policy reload records local preparation before publication, revokes existing channels and validates restart files. External issuer, full durable audit history, automatic cross-node credential coordination and broader revocation schedules remain; explicit executable peer rotation is supplied by207b1–b3. Unflagged loopback mode is explicitly trusted. |
 | C22 integrity/compression | Named native checksum/digest framing internally | A separate selectable integrity provider is not exposed; optional bounded compression is unimplemented. Chapter17 permits related providers to share an implementation: neither a new trait per checksum helper nor optional compression is automatically a baseline blocker. |
 | C23 scope transfer | ScopeStateMachine/ScopeImage, native BucketCounter, source/target/lifecycle guards | Wider application/provider and recursive fault/retention coverage; core retains fence/publication/activation authority. |
-| C24 transactions | One-group ordered commands; qualified311 model,312 applications and313 actual Node driver/embedding on Linux/macOS | The first fixed two-participant transfer uses original Node provenance, actual TCP/QUIC quorums and retained recovery/cleanup. Remaining broader transaction scope and subgroup-backed logical voters keep P8 incomplete; no arbitrary transaction program or remote transaction command-service claim. |
+| C24 transactions | One-group ordered commands; fixed transfer311–313; bounded multi-key ProgramApplication/ProgramDriver and models qualified in frozen318 on Linux/macOS | Actual five-group TCP/QUIC programs preserve read/write locks, original phase observations, distributed coordinator selection, contention abort, leader replacement and checkpoint/suffix recovery. Fixed key ownership and numeric/versioned programs are the declared contract; arbitrary SQL, moving-key transactions and an atomic responsibility-wide scan are not implemented. Remaining explicit functional failure gates and logical-voter activation/recovery keep P8 incomplete. |
 
 ## Invariants and scenario limits
 
@@ -1332,7 +1344,7 @@ a passing test count.
    Broader lifecycle profiles remain open; do not create another ownership engine.
    Bounded coordinated node drain197 and assignment listing198 are implemented;
    broader lifecycle/operator profiles and failure coverage remain.
-2. Retain P7's original fixed250ms gate. The saved183 control is873.492994ms
+2. Retain the original fixed250ms performance gate in P9. The saved183 control is873.492994ms
    and the rejected candidate repeat1107.213750ms. Both fail. Do not relabel a
    different workload, a finite successful recovery, or added static lanes as
    a sustainable throughput improvement.
@@ -1347,7 +1359,7 @@ a passing test count.
    is pending with no jobs yet. Neither is a passing current-source baseline.
    Continue local feature work while these run.
 
-P8 and Windows are deferred. Automatic global split/merge orchestration,
+Functional P8 research is included in the active goal; stop at qualified P8 completion. Performance measurements/promotion comparisons are P9, dedicated security is P10, and Windows remains deferred. Automatic global split/merge orchestration,
 busy-polling, custom allocators and particular external adapters are explicitly
 not prerequisites in the design. That does not defer the baseline behavior or
 validation obligations identified above.
@@ -1374,3 +1386,68 @@ three focused regressions also pass. Compatible reference comparison remains
 next; no full lifecycle or P0–P7 completion claim.
 See [295](../validation/baseline/slice295/README.md) and
 [Mac285 terminal](../validation/baseline/slice285/mac-final/README.md).
+
+### Current functional research scope clarification337
+
+The accepted goal implements the chapter12 P8 deliverables through the current
+macro plan: subgroup-backed logical voters with representative transitions,
+striped local storage preserving one ordered Raft log, and bounded broader
+transactions. Chapter16 R-B distributed ordered lanes is a distinct optional
+research design requiring its own chosen order semantics, sequencer/hole recovery,
+visibility and failover protocol. No such engine is implemented or qualified, and
+striped local WAL is not presented as it. It has not been selected as a new
+prerequisite for this functional goal. Chapter12 names ordinary representative relays inP8; the confirmed functional
+research scope includes implementing and testing that transport feature. Its
+cost/throughput comparison belongs toP9.
+Logical-voter representative fencing/failover and recursive recovery remain P8.
+
+Frozen318/321 evidence for programs and striped storage remains selected evidence,
+not proof of all devices, arbitrary applications, all-depth logical composition or
+all research designs. The read-only337 audit maps remaining explicit functional
+requirements before the final completion decision; current goal is active.
+
+### Scope confirmation341 — 12 October 2026
+
+The user explicitly requires ALL functionality at P8 completion. The phase map
+therefore includes working representative relay trees inP8. P9 covers their
+performance comparisons/tuning, not their implementation. Unimplemented or
+unqualified functional requirements remain open, regardless of interface/model
+coverage or clean lint. Review all normative P0–P8 requirements against actual
+Linux/macOS evidence before completion; do not omit features behind a generic
+research/optional label. Original explicit future adapters/alternative designs
+remain accurately identified rather than advertised as supported.
+
+### Selected evidence342–344
+
+Full nested TCP now passes actual write/duplicate/read, maintenance and all27
+physical-owner cleanup. The corresponding original QUIC election failed from
+observed idle expiry; transport keepalive now passes25 focused tests and full
+nested QUIC qualification is separate. Cold nested recovery remains open.
+LogicalNode configuration observation passes TCP/QUIC on Linux and Mac. Mac343
+passes24 selected observer/export/result/snapshot tests plus formatting and four
+strict Clippy profiles, with1288 unchanged captured inputs. Human authorization
+resolved the earlier Mac source-transfer blocker. Relay344 subsequently exhausts
+all seven declared positive finite graphs with frontier0; eight focused/negative
+controls pass. This qualifies the finite Linux model scope, not native relay
+support or Mac model acceptance. Full logical enrollment and all normative
+P0–P8 duties remain required.
+
+### Selected evidence345–350
+
+Candidate34572+8+2 tests/four strict profiles and common network34665+32+1+2
+tests/full strict qualify components, not full new logical membership/relay IO.
+Relay344 now passes9/0 on Mac as well as Linux with identical seven exhausted
+positive graphs and original guards. Frozen347 assertion-enabled release349
+staticQUIC passes genuine business/read/all27-owner cleanup1/0 under original
+deadlines/quotas/assertions. Its same-binary coldTCP fails0/1 after actual same-store
+reopen, both-tier restoration and one consumed duplicate5. Full convergence,
+next retry/read/finalcleanup remain open. Mac static nesting is dispatched.
+See current IMPLEMENTATION mini plan350 and per-cut artifacts; previous failures
+and complete normative P0–P8 qualification remain required.
+
+Subsequent retained Learners350 passes2 original native TCP/QUIC refusal/cleanup
+controls and formatting/four strict zero on its frozen1193-input driver overlay.
+Network346 inventory/review controls pass137/37/371 with33 checker tests. Mac
+static349 has now failed0/1 before first write completes; original watchdog and
+lease evidence stay failed, without a timeout increase. Complete platform
+qualification remains required.

@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice324-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 19.90s
+     Running tests/logical_activation_application.rs (/tmp/voteboat-macos-CzK1if/slice324-membership/build/debug/deps/logical_activation_application-5a145e35ed8dbee0)
+
+running 4 tests
+test contracts::explicit_schema_mapping_and_lifetime_envelopes ... ok
+test contracts::selected_inner_context_is_forwarded_without_freezing_parent_configuration ... ok
+test contracts::bounded_receipts_reads_and_faithful_response_tags ... ok
+test contracts::original_business_content_retry_and_contiguous_control_positions ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

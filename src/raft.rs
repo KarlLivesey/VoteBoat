@@ -28,6 +28,8 @@ use std::collections::{BTreeMap, BTreeSet};
 mod leadership;
 mod readiness;
 mod receive;
+mod send_window;
+mod source;
 pub use leadership::{LeadershipTransfer, LeadershipTransferRequest};
 pub use readiness::*;
 mod configuration;
@@ -313,6 +315,7 @@ pub struct Raft {
     campaigning_enabled: bool,
     votes: BTreeSet<NodeId>,
     vote_context: Option<RequestContext>,
+    granted_vote_reply: Option<send_window::GrantedVoteReply>,
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
     requests: BTreeMap<NodeId, Replication>,
@@ -431,6 +434,7 @@ impl Raft {
             campaigning_enabled: true,
             votes: BTreeSet::new(),
             vote_context: None,
+            granted_vote_reply: None,
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
             requests: BTreeMap::new(),
@@ -581,7 +585,8 @@ impl Raft {
         self.node
     }
     /// Volatile local timer-reset sequence, not a term or quorum watermark.
-    /// Changes on a campaign, valid leader contact, or a durable granted vote.
+    /// Changes on a campaign, valid leader contact, a durable granted vote,
+    /// or transfer of an original logical Vote/granted Voted into its authorized queue.
     pub fn election_reset_sequence(&self) -> u64 {
         self.election_reset
     }
@@ -1155,15 +1160,7 @@ impl Raft {
         }
         effects.extend(retirement);
         self.after_durable(p.after, p.reply, &mut effects)?;
-        if effects.iter().any(|e| {
-            matches!(
-                e,
-                Effect::Send(Message {
-                    rpc: Rpc::Voted { granted: true },
-                    ..
-                })
-            )
-        }) {
+        if self.remember_granted_vote(&effects) {
             self.reset_election()?;
         }
         Ok(effects)
@@ -1619,11 +1616,8 @@ impl Raft {
         let (index, term, previous) = self.retirement_predecessor()?;
         (m.term == term && previous.voter_store(m.from) == Some(m.sender.identity)).then_some(index)
     }
-    fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
-        // Repair can remain queued while its learner completes promotion.
-        // Authenticate before discarding obsolete terms or refusing a repair
-        // whose historical view no longer owns this replica's voting state.
-        if matches!(
+    fn authenticated_repair_source(&self, m: &Message) -> bool {
+        matches!(
             m.rpc,
             Rpc::LearnerRepair { .. }
                 | Rpc::LearnerRepairSnapshot { .. }
@@ -1635,7 +1629,12 @@ impl Raft {
             && m.context.sequence > 0
             && m.term > 0
             && self.membership().voter_store(m.from) == Some(m.sender.identity)
-        {
+    }
+    fn receive(&mut self, mut m: Message) -> Result<Vec<Effect>, RaftError> {
+        // Repair can remain queued while its learner completes promotion.
+        // Authenticate before discarding obsolete terms or refusing a repair
+        // whose historical view no longer owns this replica's voting state.
+        if self.authenticated_repair_source(&m) {
             if m.term < self.durable.hard_state.term {
                 return Ok(Vec::new());
             }
@@ -1678,17 +1677,8 @@ impl Raft {
         if contact {
             self.leader_contact = Some(leader);
         }
-        if contact
-            || effects.iter().any(|e| {
-                matches!(
-                    e,
-                    Effect::Send(Message {
-                        rpc: Rpc::Voted { granted: true },
-                        ..
-                    })
-                )
-            })
-        {
+        let granted = self.remember_granted_vote(&effects);
+        if contact || granted {
             self.reset_election()?;
         }
         Ok(effects)
@@ -1913,4 +1903,6 @@ mod batched_repair;
 #[path = "raft/connections.rs"]
 mod connections;
 mod joint_repair;
+#[cfg(feature = "native")]
+pub(crate) mod request_window;
 mod snapshot_repair;

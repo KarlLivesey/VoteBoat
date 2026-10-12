@@ -1,0 +1,470 @@
+{
+  "platform": "linux",
+  "initialStageInvocations": 24,
+  "supplementalUnrunTlsInvocations": 2,
+  "declaredStages": 26,
+  "expected": [
+    "fmt",
+    "inventory",
+    "conformance",
+    "conformance_controls",
+    "all-clippy",
+    "all-response-private",
+    "all-configuration-public",
+    "all-child-profile-private",
+    "all-wrapper-profile-private",
+    "all-child-profile-public",
+    "all-wrapper-profile-public",
+    "all-snapshot-ack",
+    "all-parent-driver",
+    "default-clippy",
+    "core-clippy",
+    "core-response-private",
+    "core-configuration-public",
+    "core-child-profile-private",
+    "core-wrapper-profile-private",
+    "core-child-profile-public",
+    "core-wrapper-profile-public",
+    "native-clippy",
+    "native-snapshot-ack",
+    "native-parent-driver",
+    "tls-snapshot-ack",
+    "tls-parent-driver"
+  ],
+  "exits": [
+    "fmt=0",
+    "inventory=0",
+    "conformance=0",
+    "conformance_controls=0",
+    "all-clippy=0",
+    "all-response-private=0",
+    "all-configuration-public=0",
+    "all-child-profile-private=0",
+    "all-wrapper-profile-private=0",
+    "all-child-profile-public=0",
+    "all-wrapper-profile-public=0",
+    "all-snapshot-ack=0",
+    "all-parent-driver=0",
+    "default-clippy=0",
+    "core-clippy=0",
+    "core-response-private=0",
+    "core-configuration-public=0",
+    "core-child-profile-private=0",
+    "core-wrapper-profile-private=0",
+    "core-child-profile-public=0",
+    "core-wrapper-profile-public=0",
+    "native-clippy=0",
+    "native-snapshot-ack=0",
+    "native-parent-driver=0",
+    "tls-snapshot-ack=0",
+    "tls-parent-driver=0"
+  ],
+  "cfgDisabledNotBehavioralAcceptance": [
+    "native-snapshot-ack",
+    "native-parent-driver"
+  ],
+  "missing": [],
+  "unexpected": [],
+  "duplicates": [],
+  "stages": {
+    "fmt": {
+      "present": true,
+      "warning": false
+    },
+    "inventory": {
+      "present": true,
+      "warning": false
+    },
+    "conformance": {
+      "present": true,
+      "warning": false
+    },
+    "conformance_controls": {
+      "present": true,
+      "warning": false
+    },
+    "all-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "all-response-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 159
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 15,
+      "missingTests": []
+    },
+    "all-configuration-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 7,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 7,
+      "missingTests": []
+    },
+    "all-child-profile-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 170
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 4,
+      "missingTests": []
+    },
+    "all-wrapper-profile-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 172
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "all-child-profile-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "all-wrapper-profile-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "all-snapshot-ack": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 30
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "all-parent-driver": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "default-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "core-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "core-response-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 127
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 15,
+      "missingTests": []
+    },
+    "core-configuration-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 7,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 7,
+      "missingTests": []
+    },
+    "core-child-profile-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 138
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 4,
+      "missingTests": []
+    },
+    "core-wrapper-profile-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 140
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "core-child-profile-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "core-wrapper-profile-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "native-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "native-snapshot-ack": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 0,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 0,
+      "compileOnly": true,
+      "missingTests": []
+    },
+    "native-parent-driver": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 0,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 0,
+      "compileOnly": true,
+      "missingTests": []
+    },
+    "tls-snapshot-ack": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 19
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "tls-parent-driver": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    }
+  },
+  "terminal": [
+    "run=0",
+    "source_guard=0"
+  ],
+  "supplementalTerminal": [
+    "run=0",
+    "source_guard=0"
+  ],
+  "excluded": [
+    "logical_nested_native",
+    "effect_owner native-only Mac315b",
+    "Mac324 failed election aggregate",
+    "actual membership activation after parent Begin",
+    "full nested logical composition",
+    "full P8 acceptance"
+  ],
+  "metadata": {
+    "inventory126": true,
+    "partialReviews27": true,
+    "operationNames310": true,
+    "negative33": true
+  },
+  "failed": false
+}

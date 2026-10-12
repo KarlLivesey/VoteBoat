@@ -1,0 +1,20 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification324/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.93s
+     Running tests/logical_network.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification324/build/debug/deps/logical_network-fc0d02f2d07819cb)
+
+running 4 tests
+test controls::real_dispatched_rejected_batch_cancels_exact_original_after_close ... ok
+test refusals::constructor_and_accepted_abort_preserve_original_channel_and_queue_ownership ... ok
+test refusals::real_frame_refuses_truncation_oversize_and_original_receipt_mismatches ... ok
+test controls::real_original_proof_short_io_flush_stale_owner_and_completion_preserve_credits ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.67s
+
+     Running tests/logical_voter_network.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification324/build/debug/deps/logical_voter_network-34d444cf1156bbc9)
+
+running 2 tests
+test history::quic_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results ... ok
+test history::tcp_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 24.88s
+

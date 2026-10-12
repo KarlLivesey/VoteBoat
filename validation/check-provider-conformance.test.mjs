@@ -14,9 +14,9 @@ const review = (value, name = 'LogStore') => value.reviews.find(row => row.publi
 
 test('review counts only audited operations and retains unreviewed contracts', () => {
     const report = checkObligations(inventory, ledger, read);
-    assert.equal(report.reviewed_contracts, 15);
-    assert.equal(report.reviewed_operations, 98);
-    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 15);
+    assert.equal(report.reviewed_contracts, 40);
+    assert.equal(report.reviewed_operations, 388);
+    assert.equal(report.unreviewed_contracts.length, inventory.contracts.length - 40);
     for (const name of ['WireCodec', 'StateMachine', 'ReadableStateMachine', 'CheckpointStateMachine', 'BoundedStateMachine + ApplicationReceipt', 'PeerTransport', 'TimerService', 'ReadyScheduler', 'LogStore', 'SnapshotStore', 'SnapshotRetention', 'SnapshotWorker', 'CredentialJournal / CredentialRecordIo', 'AdmissionPolicy / AdmissionRequest / AdmissionLease', 'BufferPool / FrameBuffer / BufferClass / BufferLimits / BufferUsage / BufferOwner / BufferOwnerLimits']) {
         assert.ok(!report.unreviewed_contracts.includes(name));
     }
@@ -34,6 +34,30 @@ for (const [name, mutate] of [
     ['false completion claim', d => { review(d).status = 'complete'; }],
     ['missing limitation', d => { review(d).operations[0].remaining = []; }],
     ['missing snapshot operation', d => { review(d, 'SnapshotStore').operations.pop(); }],
+    ['missing logical tracked cancellation', d => {
+        const logical = d.reviews.find(r => r.public_contract.startsWith('LogicalNode /'));
+        logical.operations.find(o => o.names.includes('cancel_learner_readiness_tracked')).names = ['request_learner_readiness_tracked'];
+    }],
+    ['missing logical session retirement assertion', d => {
+        const logical = d.reviews.find(r => r.public_contract.startsWith('LogicalNode /'));
+        logical.operations.find(o => o.names.includes('retire_peer_session')).assertions = [];
+    }],
+    ['missing logical attachment limitation', d => {
+        const logical = d.reviews.find(r => r.public_contract.startsWith('LogicalNode /'));
+        logical.operations.find(o => o.names.includes('attach_peer_session')).remaining = [];
+    }],
+    ['missing original channel retirement', d => {
+        const channel = d.reviews.find(r => r.public_contract.startsWith('PeerNetworkChannelReplacement /'));
+        channel.operations[0].names = channel.operations[0].names.filter(n => n !== 'retire_channel');
+    }],
+    ['missing delegated receiving access assertion', d => {
+        const source = d.reviews.find(r => r.public_contract.startsWith('AuthenticatedSourceView /'));
+        source.operations.find(o => o.names.includes('receiving_access')).assertions = [];
+    }],
+    ['missing delegated path limitation', d => {
+        const source = d.reviews.find(r => r.public_contract.startsWith('AuthenticatedSourceView /'));
+        source.operations.find(o => o.names.includes('path')).remaining = [];
+    }],
     ['missing retention assertion', d => { review(d, 'SnapshotRetention').operations[0].assertions[0].symbol = 'invented'; }],
     ['missing admission operation', d => { admissionReview(d).operations.pop(); }],
     ['missing admission assertion', d => { admissionReview(d).operations[0].assertions = []; }],

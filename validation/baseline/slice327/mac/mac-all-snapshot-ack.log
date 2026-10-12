@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice327-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.81s
+     Running tests/logical_voter_native.rs (/tmp/voteboat-macos-CzK1if/slice327-membership/build/debug/deps/logical_voter_native-b210220dd28f1804)
+
+running 2 tests
+test authority::snapshot_ack::original_duplicate_snapshot_ack_above_and_below_base_quic ... ok
+test authority::snapshot_ack::original_duplicate_snapshot_ack_above_and_below_base_tcp ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 30 filtered out; finished in 4.45s
+

@@ -1,0 +1,34 @@
+{
+  "source": "target/divide-provider/checkpoint383/SOURCE.json",
+  "inputs": 1306,
+  "source_mismatches": 0,
+  "remote": "/tmp/voteboat-macos-retired383-jHNT8fJC",
+  "build_clone_pending": true,
+  "mac_resource": "admin342 exact383 only",
+  "packet_hashes": {
+    "mac-retired383-checks.sh": "65497140ceccdf182704c19010968487ee1a184063805cf2d83a9240b7b7492b",
+    "MAC_RETIRED383_SOURCE_SHA256.txt": "1f41ef732a30ee6cf8be828a92aba8902bf7a0c3f2df56a3b69c5ab36a571332",
+    "MAC_RETIRED383_SCHEMA.md": "5224c0ba96a4ef85bf14d5e1bf34f7ae760a5874aace4681389fb4bdd72db802",
+    "MAC_RETIRED383_CUMULATIVE_DELTA.json": "dcf1c87561b2b717adb466d000f45610217c22868c167e5b0e83e1c3481c2bfc"
+  },
+  "selected_cases": 10,
+  "transfer_hashes": {
+    "mac-retired383-checks.sh": "65497140ceccdf182704c19010968487ee1a184063805cf2d83a9240b7b7492b",
+    "MAC_RETIRED383_SOURCE_SHA256.txt": "1f41ef732a30ee6cf8be828a92aba8902bf7a0c3f2df56a3b69c5ab36a571332",
+    "MAC_RETIRED383_SCHEMA.md": "5224c0ba96a4ef85bf14d5e1bf34f7ae760a5874aace4681389fb4bdd72db802",
+    "MAC_RETIRED383_CUMULATIVE_DELTA.json": "dcf1c87561b2b717adb466d000f45610217c22868c167e5b0e83e1c3481c2bfc",
+    "SOURCE.json": "4128207a553e53d7826618324ca65aeb498ea5658a7535202eda4c245419374c",
+    "SCHEMA.md": "dfdeb9ca7b32e0d627ad1d522e5d943e9d9cb6fbd213f3856058c2ef069de499",
+    "DELTA.json": "60a5b86f454b0e64fddff42847ccd9f8adafc24e2c1c4dece8c0593f6a39435c",
+    "CAPTURE_GUARD.json": "331f5938395ed9fb4e09a79f078b93b39f415adc59c442349f2b835d5a3b6d7e",
+    "QUALIFICATION.json": "7c01fac1ede55b4195b939c68c08b8fcabe3fa4f65f234603c2c4b4ee2817854",
+    "EVIDENCE_SHA256.json": "12c96019cadcf7fd53fe27ffb2bc08bde350a393586abd801c08b21644275e90",
+    "LICENSE": "9cda24c4404610861fee407c95b9ef498b48153dc54c83ea8aded0844114f3fb",
+    "PRIOR_BINARY_SHA256.txt": "ad585bb88904b06eddf401a74301b5a5db08b62b4743f50482dd287afaa4af26"
+  },
+  "transfer_mismatches": 0,
+  "runner_guards": "nonempty executable; pipefail; mismatch stops before next case",
+  "ssh_handle": 70033,
+  "resource_handoff": "Nested381 SSH62959 terminal1; explicit release",
+  "runner_launched": true
+}

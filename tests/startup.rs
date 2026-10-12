@@ -29,6 +29,8 @@ use voteboat::{
 };
 #[path = "startup/discovery.rs"]
 mod discovery;
+#[path = "startup/log_limits.rs"]
+mod log_limits;
 #[path = "startup/maintenance.rs"]
 mod maintenance;
 #[path = "startup/multi.rs"]

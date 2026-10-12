@@ -23,7 +23,8 @@
         "open_with_peer_rotation",
         "prepare_discovery_with_peer_rotation",
         "open_with_peer_rotation_and_timers",
-        "NativeTimingProfile::timers"
+        "NativeTimingProfile::timers",
+        "prepare_for_discovery_with_log_limits"
       ],
       "native": "Explicit single-group native filesystem/listener/worker assembly over public NodeParts providers; TCP/TLS default, optional QUIC with shared UDP socket and two storage workers.",
       "conformance": [
@@ -38,9 +39,11 @@
         "tests/counter_service/peer_discovery.rs",
         "tests/startup/timing_profile.rs",
         "tests/service_profiles.rs",
-        "tests/startup/shutdown_clock.rs"
+        "tests/startup/shutdown_clock.rs",
+        "tests/startup/log_limits.rs",
+        "tests/startup/log_limits/application.rs"
       ],
-      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Single-group recovery requires the complete one-group durable WAL inventory, refusing an omitted multi-group profile. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; open_with_protocol_and_timers exposes validated caller-selected TimerConfig for static/member hosts, rejecting invalid timing and initial election deadline overflow before binding/files. Original wrappers retain defaults. A TCP/QUIC downstream test checks invalid inputs are side-effect free and host-relative custom election deadlines. Timing grants no quorum or membership authority; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1–6, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3/4. Format 6 selects historical committed learner snapshot repair and matching core/codec/roster on member recovery; native member tests cover TCP/QUIC stable and compacted-joint images. Explicit NativeMemberStartup selects receive-side configuration replication; static NativeStartup retains its default ingress gate. Slice189 composes a native metadata authority executable with explicit initial-plan publication, quorum-backed remote manifest reads, accepted-read draining and checkpoint retry recovery; broader recursive orchestration remains open. Slice190 adds a cold executable recursive route client: bounded explicit authority endpoints, independently pinned TLS sessions, original quorum-backed manifest protocol and the existing checked resolver. Three independent three-voter authorities cover TCP/QUIC traversal, required-path-only lookup, unavailable endpoint rotation, stale floors, parent/epoch/scope/schema refusals and interrupted leaf reads. A known child remains discoverable with ancestors stopped. Output remains a per-invocation hint; it cannot activate ownership or execute a write. Slice207b1 adds opt-in guarded credentials and pre-side-effect durable record validation to static/member/multi-group startup, using the existing credential journal and host-owned preparation. Slice209g exposes static prepare_for_discovery through the same native recovery and worker setup, returning owned NativeNodeParts before Node construction. Hosts wrap the native connector with public discovery and retain final Node validation; QUIC discovered Dial is opt-in, with unchanged provisioned pins and Accept addresses. Existing open methods keep configured routing. Downstream TCP/QUIC histories preserve original receipts through restart with stale configured dial addresses, and rejected/abandoned assembly returns or explicitly closes and joins original resources. Slice209h adds member and shared multi-group preparation through their existing recovery paths, preserving Recover-only member validation and the exact shared group/application inventory. Downstream TCP/QUIC histories recover member receipts and three independent checkpointed applications with one store binding. Executable source bootstrap remains separate. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries. Slice245 exposes construction-time throughput/edge/legacy TimerConfig profiles and explicit timers for credential-rotating static/member open. Typed CLI selection is forwarded through all service static/member/multi/discovery/rotation branches; durable service CLI defaults explicitly to throughput while low-level Rust defaults remain unchanged. Invalid/duplicate profile selection precedes resource ownership. Timing is liveness configuration, never consensus/durability authority or a performance guarantee. Slice246 native shutdown conformance retains the original caller-owned monotonic epoch, independently bounds cleanup, verifies an owner beyond10000ms drains/joins and releases the exact directory/listener for recovery. Real native wire/maintenance/shared-group test assemblies explicitly select the declared throughput profile without changing low-level defaults, core/provider semantics or acceptance assertions."
+      "scope": "Typed exact bootstrap/node/store identities, create/recover mode, caller-supplied TLS configuration/pins/names/addresses, host application, WorkerWake and initial monotonic time. Configured routing cannot activate membership. Fresh application is restored/replayed through verified snapshot/log recovery before exposure. Single-group recovery requires the complete one-group durable WAL inventory, refusing an omitted multi-group profile. Pure peer/identity validation precedes binding/files; later failed construction returns application plus a nonblocking cleanup handle that closes and joins started idle workers and releases listener/store locks. Initialization/recovery may have changed files; no rollback or implicit create fallback. One group with selected native defaults; open_with_protocol_and_timers exposes validated caller-selected TimerConfig for static/member hosts, rejecting invalid timing and initial election deadline overflow before binding/files. Original wrappers retain defaults. A TCP/QUIC downstream test checks invalid inputs are side-effect free and host-relative custom election deadlines. Timing grants no quorum or membership authority; Node::from_parts remains the public path for alternate providers and multi-group assembly. Five downstream startup tests include a host application, late failure after worker spawn and two independent instances sharing a host wake and explicit host clock propagation. open_with_protocol selects TCP/TLS or optional QUIC through the same recovery path and NativeServiceConnector; original open retains TCP/TLS. A sixth QUIC startup test verifies late failure socket release and worker cleanup. Seven service tests include actual QUIC processes, leader loss, recovered-peer catch-up, native checkpoint/restart and dedup. No separate-host/macOS deployment evidence. NativeTlsConfig selects one exact supported wire version (1–6, default 1); startup derives matching codec, roster and sessions on create/recover. Three-node TCP/QUIC histories commit, drain/join and recover under versions 2/3/4. Format 6 selects historical committed learner snapshot repair and matching core/codec/roster on member recovery; native member tests cover TCP/QUIC stable and compacted-joint images. Explicit NativeMemberStartup selects receive-side configuration replication; static NativeStartup retains its default ingress gate. Slice189 composes a native metadata authority executable with explicit initial-plan publication, quorum-backed remote manifest reads, accepted-read draining and checkpoint retry recovery; broader recursive orchestration remains open. Slice190 adds a cold executable recursive route client: bounded explicit authority endpoints, independently pinned TLS sessions, original quorum-backed manifest protocol and the existing checked resolver. Three independent three-voter authorities cover TCP/QUIC traversal, required-path-only lookup, unavailable endpoint rotation, stale floors, parent/epoch/scope/schema refusals and interrupted leaf reads. A known child remains discoverable with ancestors stopped. Output remains a per-invocation hint; it cannot activate ownership or execute a write. Slice207b1 adds opt-in guarded credentials and pre-side-effect durable record validation to static/member/multi-group startup, using the existing credential journal and host-owned preparation. Slice209g exposes static prepare_for_discovery through the same native recovery and worker setup, returning owned NativeNodeParts before Node construction. Hosts wrap the native connector with public discovery and retain final Node validation; QUIC discovered Dial is opt-in, with unchanged provisioned pins and Accept addresses. Existing open methods keep configured routing. Downstream TCP/QUIC histories preserve original receipts through restart with stale configured dial addresses, and rejected/abandoned assembly returns or explicitly closes and joins original resources. Slice209h adds member and shared multi-group preparation through their existing recovery paths, preserving Recover-only member validation and the exact shared group/application inventory. Downstream TCP/QUIC histories recover member receipts and three independent checkpointed applications with one store binding. Executable source bootstrap remains separate. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries. Slice245 exposes construction-time throughput/edge/legacy TimerConfig profiles and explicit timers for credential-rotating static/member open. Typed CLI selection is forwarded through all service static/member/multi/discovery/rotation branches; durable service CLI defaults explicitly to throughput while low-level Rust defaults remain unchanged. Invalid/duplicate profile selection precedes resource ownership. Timing is liveness configuration, never consensus/durability authority or a performance guarantee. Slice246 native shutdown conformance retains the original caller-owned monotonic epoch, independently bounds cleanup, verifies an owner beyond10000ms drains/joins and releases the exact directory/listener for recovery. Real native wire/maintenance/shared-group test assemblies explicitly select the declared throughput profile without changing low-level defaults, core/provider semantics or acceptance assertions. Slice332 storage selection adds prepare_for_discovery_with_log_limits. Pure selected LogLimits/bootstrap/native worker compatibility validation precedes IO; the same capability drives actual one authoritative native WAL create/recover and recovered Raft core. Existing default/timing/rotation preparation retains default limits. The original application/cleanup handle remains owned on rejection. Hosts select matching original wire/client providers in still-empty prepared parts before unchanged Node assembly. Dedicated all/TLS tests exercise actual70704-byte committed/applied native worker history, original member recovery/duplicate/file reopen, unchanged default refusal, smaller recovery refusal and invalid-before-IO cleanup. Full activation cleanup, fault scope and same-source macOS remain required. Selected envelopes358/359/360: client admission can select the supported larger command cap; private native assembly derives worker batch and shard event/visit/group/global byte budgets from the actual authoritative LogStore limits. Expanded effect-owner budgets use actual recovered current/rollback core reservations plus checked selected native storage growth headroom, preserving ordinary and protected control windows within the existing4GiB ceiling. Fresh small-core defaults remain exact. Invalid storage profiles refuse before files/listeners; recovered owner-budget refusal happens after storage recovery and before worker spawn, with existing owned cleanup. Linux frozen1224-input controls pass actual larger original synchronized write, same-store recovery/dedup, independent file reopen, default-WAL refusal and invalid profiles (4/0), scalar owner controls3/0, formatting and all four strict profiles0. Every actual prospective event still checks its reservation; this is not arbitrary membership, nested cold, Mac or universal lifetime certification. Snapshot/transport envelopes remain explicit host selections."
     },
     {
       "design_id": "C10/C15",
@@ -104,7 +107,15 @@
         "configure_wal_maintenance",
         "wal_maintenance",
         "configure_checkpoints",
-        "checkpoints"
+        "checkpoints",
+        "configuration_requests_are_drained",
+        "request_learner_readiness_tracked",
+        "cancel_learner_readiness_tracked",
+        "export_checkpoint",
+        "poll_checkpoint_export",
+        "complete_checkpoint_export",
+        "cancel_checkpoint_export",
+        "drain_failed_checkpoint_exports"
       ],
       "native": "NativeNode<A, C=NativePeerConnector, F=NativeTransportFactory<NativeWireCodec>> / NativeNodeParts<A, C=NativePeerConnector, F=NativeTransportFactory<NativeWireCodec>> / NativeLocalParts aliases (tls feature), selecting the same public provider contracts",
       "conformance": [
@@ -128,7 +139,7 @@
         "tests/startup/maintenance.rs",
         "tests/counter_service/leadership.rs"
       ],
-      "scope": "Owning composition of local and peer drivers with explicit selected providers, quiescent construction and original component return on rejection. Configured remote voter stores require authorized peer coverage and snapshots; recovered compacted groups require snapshots. Both budgets/time prevalidate before work. Exact original client/read outputs survive consumer holding; shutdown quiesces service intake before draining owner, timers, network and selected workers. Provider faults/abort fence the owner and preserve earlier results and outstanding worker/driver ownership for explicit recovery. Thirteen host tests and an actual three-node/100-group native WAL/TLS checkpoint/restart/dedup history with explicit worker joins. Slice 101 adds benchmark-owned shared NodeParts assembly, real TCP/QUIC 1/8-group counter measurements and full all-replica recovery/retry/join gates; independent raw checks validate group-scoped receipt histories, positions and windows. This is finite local performance evidence with explicit longer benchmark elections, not a scaling improvement or a production timer change. Explicit live worker maintenance retains exact results through shutdown; fatal cleanup fences while preserving earlier replies. No hidden I/O/runtime, new durability evidence, filesystem configuration loader or daemon. Learner repair assembly requires an exact selected peer-roster version (5 retained, 6 snapshot); missing or incompatible networking returns owned parts before service or persistence. Explicit witness query/cancellation controls share bounded owner admission and exact core authority checks. Query selection requires roster format >=3 before admission; status is local volatile core state, not an operation receipt. Slice 81 downstream owning-Node schedules hold delayed replies across cancellation and reconnect, reject queued old-store-session promotion proofs before persistence and commit with fresh readiness. Native TCP/QUIC administrative tests hold a real snapshot-verified reply in bounded ingress across cancellation while transport remains polled; fresh exchange and existing promotion/recovery then pass. Native session-restart plus this exact delayed-reply schedule is not claimed as one combined history. Slice 104 adds benchmark-only bounded scheduled offered load, explicit refusals and intended-start timing through the same public Node contracts. Six deterministic ledger/cleanup tests, independent negative arithmetic checks and four finite TCP/QUIC runs retain exact known values, joins/reopen and historical retries. Unknown outcomes invalidate successful performance publication; no sustainable/fixed-p99 or maintenance claim follows. Slice 105 adds benchmark-only bounded checkpoint/reclaim waves and a full-duration follower host-poll pause. Exact reclaim tickets and same-leader/term/store durable checkpoint boundaries gate completion; selected snapshot catch-up and nonregressing recovered bases are checked separately from client values. Deterministic state/timing tests and independent negative arithmetic checks cover these finite cases, not arbitrary failures or sustainable capacity. Slice145 defaulted native alias transport-factory parameter permits explicit shared owner-quota selection without expanding all Node type arguments. Selected actual TCP/TLS100-group assembly holds one full peer quota through disconnect/reconnect; eight groups commit/apply/read using the other peer while the pressured follower remains at its old applied value. Release permits actual catch-up; explicit worker joins return all frame credits, surviving host views remain usable and durable reopen retries original operations without repeating effects before a new write. No protocol/format/default-startup change, new durability fact, selected QUIC pressure, arbitrary fairness/fault or performance claim. Slice165 adds opt-in interval/retry/byte-bounded physical WAL scheduling through the selected worker, host monotonic time, a single accepted job and latest-only diagnostics. Manual receipts are not consumed; policy changes reject in-flight jobs, shutdown stops scheduling and drains automatic completions, and failed recovery retains the original ticket/results. Deadline exhaustion and permanent admission errors stop scheduling; overload and safe storage refusal back off. Native hundred-group reclaim/reopen and selected TCP/QUIC executable restart/retry histories pass. This does not schedule checkpoints, perform incremental cleaning or guarantee latency. Slice166 adds opt-in automatic checkpoints using bounded interval scans, an ordered group cursor, applied-entry thresholds and capped tracked admissions. Queued/executing requests remain pending until a matching execution and a durable local base at/above their target; no admission is reported as completed. The original snapshot worker, core and retention checks remain authoritative. Disabled policy creates no work. Node shutdown stops scans and drains requests; abort/recovery retains exact admissions. Selected native hundred-group and TCP/QUIC executable recovery histories exercise checkpoint plus physical reclaim and original retries. Slice196a explicitly permits version7 repair cores with native wire8, whose repair semantics match version7; version5/6 checks remain exact. This compatibility is tested by TCP/QUIC startup, write, drain/join and reopening. It does not expose the new handoff through Node administration yet. Slice196b1 adds volatile leadership-transfer/cancel controls; transfer rejects a missing or pre8 peer assembly before queue admission. Durable intent and outcomes live in the opt-in Maintenance application wrapper through ordinary client ownership. Native TCP/WAL and QUIC/checkpoint tests recover original pending/completed intents, reject stale completion, preserve retries and new writes, and query status with the normal quorum read path. Executable command orchestration remains196b2. Slice196b2 exposes the workflow through an explicit authenticated counter schema2/wire8 profile: start, quorum status, resume and cancellation. One original intent/term attempt and one internal completion ticket per local driver, five-second expiry, exact wait cancellation, and terminal cancellation retries via quorum reads. Selected executable TCP/QUIC pending/terminal restarts, lost replies, authorization, status disconnect/deadline and plain-data profile refusal are tested. Slice197b2b2 permits explicitly requested provisioned membership administration with the actual Maintenance application readiness envelope and existing live-session authorization. Automatic administration remains refused; general multi-group drain, wider application profiles and macOS remain unvalidated."
+      "scope": "Owning composition of local and peer drivers with explicit selected providers, quiescent construction and original component return on rejection. Configured remote voter stores require authorized peer coverage and snapshots; recovered compacted groups require snapshots. Both budgets/time prevalidate before work. Exact original client/read outputs survive consumer holding; shutdown quiesces service intake before draining owner, timers, network and selected workers. Provider faults/abort fence the owner and preserve earlier results and outstanding worker/driver ownership for explicit recovery. Thirteen host tests and an actual three-node/100-group native WAL/TLS checkpoint/restart/dedup history with explicit worker joins. Slice 101 adds benchmark-owned shared NodeParts assembly, real TCP/QUIC 1/8-group counter measurements and full all-replica recovery/retry/join gates; independent raw checks validate group-scoped receipt histories, positions and windows. This is finite local performance evidence with explicit longer benchmark elections, not a scaling improvement or a production timer change. Explicit live worker maintenance retains exact results through shutdown; fatal cleanup fences while preserving earlier replies. No hidden I/O/runtime, new durability evidence, filesystem configuration loader or daemon. Learner repair assembly requires an exact selected peer-roster version (5 retained, 6 snapshot); missing or incompatible networking returns owned parts before service or persistence. Explicit witness query/cancellation controls share bounded owner admission and exact core authority checks. Query selection requires roster format >=3 before admission; status is local volatile core state, not an operation receipt. Slice 81 downstream owning-Node schedules hold delayed replies across cancellation and reconnect, reject queued old-store-session promotion proofs before persistence and commit with fresh readiness. Native TCP/QUIC administrative tests hold a real snapshot-verified reply in bounded ingress across cancellation while transport remains polled; fresh exchange and existing promotion/recovery then pass. Native session-restart plus this exact delayed-reply schedule is not claimed as one combined history. Slice 104 adds benchmark-only bounded scheduled offered load, explicit refusals and intended-start timing through the same public Node contracts. Six deterministic ledger/cleanup tests, independent negative arithmetic checks and four finite TCP/QUIC runs retain exact known values, joins/reopen and historical retries. Unknown outcomes invalidate successful performance publication; no sustainable/fixed-p99 or maintenance claim follows. Slice 105 adds benchmark-only bounded checkpoint/reclaim waves and a full-duration follower host-poll pause. Exact reclaim tickets and same-leader/term/store durable checkpoint boundaries gate completion; selected snapshot catch-up and nonregressing recovered bases are checked separately from client values. Deterministic state/timing tests and independent negative arithmetic checks cover these finite cases, not arbitrary failures or sustainable capacity. Slice145 defaulted native alias transport-factory parameter permits explicit shared owner-quota selection without expanding all Node type arguments. Selected actual TCP/TLS100-group assembly holds one full peer quota through disconnect/reconnect; eight groups commit/apply/read using the other peer while the pressured follower remains at its old applied value. Release permits actual catch-up; explicit worker joins return all frame credits, surviving host views remain usable and durable reopen retries original operations without repeating effects before a new write. No protocol/format/default-startup change, new durability fact, selected QUIC pressure, arbitrary fairness/fault or performance claim. Slice165 adds opt-in interval/retry/byte-bounded physical WAL scheduling through the selected worker, host monotonic time, a single accepted job and latest-only diagnostics. Manual receipts are not consumed; policy changes reject in-flight jobs, shutdown stops scheduling and drains automatic completions, and failed recovery retains the original ticket/results. Deadline exhaustion and permanent admission errors stop scheduling; overload and safe storage refusal back off. Native hundred-group reclaim/reopen and selected TCP/QUIC executable restart/retry histories pass. This does not schedule checkpoints, perform incremental cleaning or guarantee latency. Slice166 adds opt-in automatic checkpoints using bounded interval scans, an ordered group cursor, applied-entry thresholds and capped tracked admissions. Queued/executing requests remain pending until a matching execution and a durable local base at/above their target; no admission is reported as completed. The original snapshot worker, core and retention checks remain authoritative. Disabled policy creates no work. Node shutdown stops scans and drains requests; abort/recovery retains exact admissions. Selected native hundred-group and TCP/QUIC executable recovery histories exercise checkpoint plus physical reclaim and original retries. Slice196a explicitly permits version7 repair cores with native wire8, whose repair semantics match version7; version5/6 checks remain exact. This compatibility is tested by TCP/QUIC startup, write, drain/join and reopening. It does not expose the new handoff through Node administration yet. Slice196b1 adds volatile leadership-transfer/cancel controls; transfer rejects a missing or pre8 peer assembly before queue admission. Durable intent and outcomes live in the opt-in Maintenance application wrapper through ordinary client ownership. Native TCP/WAL and QUIC/checkpoint tests recover original pending/completed intents, reject stale completion, preserve retries and new writes, and query status with the normal quorum read path. Executable command orchestration remains196b2. Slice196b2 exposes the workflow through an explicit authenticated counter schema2/wire8 profile: start, quorum status, resume and cancellation. One original intent/term attempt and one internal completion ticket per local driver, five-second expiry, exact wait cancellation, and terminal cancellation retries via quorum reads. Selected executable TCP/QUIC pending/terminal restarts, lost replies, authorization, status disconnect/deadline and plain-data profile refusal are tested. Slice197b2b2 permits explicitly requested provisioned membership administration with the actual Maintenance application readiness envelope and existing live-session authorization. Automatic administration remains refused; general multi-group drain, wider application profiles and macOS remain unvalidated. Additive tracked readiness/cancellation returns the original AdmissionTicket; configuration-only drain inspection does not certify readiness or global cleanup. Their admin328 actual OwnerStep/fault controls are in progress, not qualified. Slice331 delegates durable checkpoint export through the existing sole snapshot worker/router without changing the original store session. Separate host-router/worker tests do not imply enrollment. A later actual Linux TCP/QUIC one-parent/four-child pilot consumes original Node export/import and readiness through Joint/Final/Outcome/Release; larger topology and restart/loss remain pending."
     },
     {
       "design_id": "C06/C07/C15",
@@ -425,16 +436,25 @@
         "complete",
         "close",
         "abort",
-        "is_drained"
+        "is_drained",
+        "retains_only_exported_ordinary_outputs"
       ],
       "native": "Fixed ownership guard over ProposalAdmission, EffectOwner and ApplicationRouter; native Counter histories select it directly",
       "conformance": [
         "tests/effect_owner.rs",
         "tests/history.rs",
         "tests/support/history.rs",
-        "tests/counter_service/history.rs"
+        "tests/counter_service/history.rs",
+        "src/runtime/clients/tests.rs",
+        "tests/logical_activation_driver/bindings.rs",
+        "tests/logical_activation_driver/intake.rs",
+        "tests/logical_activation_driver/cohort/pressure/history.rs",
+        "tests/logical_activation_driver/cohort/pressure/holding.rs",
+        "tests/logical_activation_driver/cohort/pressure/ownership.rs",
+        "tests/logical_activation_driver/cohort/pressure/guards.rs",
+        "tests/logical_activation_driver/cohort/pressure/controls.rs"
       ],
-      "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes."
+      "scope": "Bounded node/per-group command and reply reservation, exact tracked input/position/result identity, repeated execution-time application validation, Applied vs NotProposed vs Unknown outcomes, conservative cancellation retention and durable-log capacity takeover, consumer-held credits and failed-owner abort. Nine client tests including compaction-delayed reply, plus exact tracked-stop conformance and real three-node/100-group native WAL/TLS/quorum-loss/reconnect/snapshot/recovery histories. One selected service router per live group; low-level host Propose APIs do not provide this policy. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice164 adds an independent bounded Counter history checker and selected actual TCP/QUIC service histories with concurrent invocations, unread committed reply, quorum loss, crash, retries and WAL/checkpoint reopen. It checks one Counter order scope including omitted or late unknown effects; it is not a generic proof for all host applications or lifecycle scopes. Slice330C1 privately selects the verified immutable activation profile for client global/group count and whole-byte windows. Public ClientRouterLimits adds control_requests/group_control_requests/control_bytes with compatible physical/unselected behavior. At least two whole selected windows and one ordinary window must fit; original selected command allocation over the configured command cap rejects unchanged. Pending retains original class/credits through cancellation and externally held completion until terminal AND released cleanup. Eight private accounting controls pass all/core, eleven original host admission histories pass, actual verified-image construction refuses five short client configurations without changing the core, and native TCP/QUIC histories hold two genuine ordinary Applied outputs at their quota while Begin, fresh Status and duplicate Begin complete through original child capsule authorization. Exact ordinary rejection preserves allocation/content; close/drain/join passes. This is client-count pressure only: read/result/owner full quotas, complete terminal activation, arbitrary providers and newer macOS qualification remain pending. Selected command capacity358 permits a host-declared ceiling up to16MiB with unchanged64KiB default. Constructor still accounts original input allocation, copies, receipt and control windows against its bounded total; selection grants no WAL, snapshot or transport capability. Nine focused Linux constructor/accounting controls pass, including the complete larger-command windows and above-ceiling refusal; broader provider/platform scope remains separate."
     },
     {
       "design_id": "C05",
@@ -487,9 +507,14 @@
       ],
       "native": "Fixed ownership guard over BoundedReadableStateMachine and EffectOwner; native Counter histories select it directly",
       "conformance": [
-        "tests/effect_owner.rs"
+        "tests/effect_owner.rs",
+        "src/runtime/read_requests/tests.rs",
+        "src/runtime/read_requests/tests/construction.rs",
+        "src/runtime/read_requests/tests/classification.rs",
+        "src/runtime/reads/tests.rs",
+        "tests/logical_activation_driver/read_intake.rs"
       ],
-      "scope": "Exact live ReadReady lease and one-use authority, query/result reservation before immutable application callback, node/per-group limits, original rejected query/lease ownership, catch-up retry, actual result capacity validation with provider failure fencing, opaque result identity and credits through consumer completion. Six downstream host tests plus native WAL/TLS/100-group read histories. ReadRequests now owns and budgets original pending read invocations before ReadReady; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "scope": "Exact live ReadReady lease and one-use authority, query/result reservation before immutable application callback, node/per-group limits, original rejected query/lease ownership, catch-up retry, actual result capacity validation with provider failure fencing, opaque result identity and credits through consumer completion. Six downstream host tests plus native WAL/TLS/100-group read histories. ReadRequests now owns and budgets original pending read invocations before ReadReady; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice330C2 adds verified-profile whole invocation/execution control windows and additive typed submit_logical. Exact complete Status/Active classification reserves global/group counts and bytes; physical generic submit stays ordinary. Held output retains original credits until terminal and release. Private all/core accounting controls and existing downstream read regressions pass; original native TCP/QUIC sequential fresh reads hold two ordinary terminal outputs while Active and Status consume selected remaining capacity, reject full total quota and drain/join. Owner intake linkage330C3B, full terminal activation, fault/recovery and same-source macOS remain separate requirements."
     },
     {
       "design_id": "C05/C10/C15",
@@ -508,13 +533,26 @@
         "complete",
         "close",
         "abort",
-        "is_drained"
+        "is_drained",
+        "submit_logical",
+        "retains_only_exported_ordinary_outputs"
       ],
       "native": "Fixed invocation owner over explicitly selected ReadRouter, public BoundedReadableStateMachine and shared EffectOwner; native Counter histories select it directly",
       "conformance": [
-        "tests/effect_owner.rs"
+        "tests/effect_owner.rs",
+        "src/runtime/read_requests/tests.rs",
+        "src/runtime/read_requests/tests/construction.rs",
+        "src/runtime/read_requests/tests/classification.rs",
+        "src/runtime/reads/tests.rs",
+        "tests/logical_activation_driver/read_intake.rs",
+        "src/runtime/read_requests/tests/lifecycle.rs",
+        "tests/logical_activation_driver/cohort/pressure/history.rs",
+        "tests/logical_activation_driver/cohort/pressure/holding.rs",
+        "tests/logical_activation_driver/cohort/pressure/ownership.rs",
+        "tests/logical_activation_driver/cohort/pressure/guards.rs",
+        "tests/logical_activation_driver/cohort/pressure/controls.rs"
       ],
-      "scope": "Bounded original query/reply ownership before tracked Read admission; exact scoped step/request/ready/result correlation; checked IDs above live core allocation floor; original reservation revalidation; one unresolved protocol read per group and separate consumer-held reply limits; control cancellation only after original data Read step, exact ready-lease cancellation without catch-up, failure/leadership unavailable outcomes, original rejected query ownership, foreign consumer-envelope rejection, close/drain and failed-owner abort. Ten downstream host tests and actual three-node/100-group native WAL/TLS quorum-loss, replacement, healing, subsequent-read, snapshot/checkpoint/reconnect/recovery histories. PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "scope": "Bounded original query/reply ownership before tracked Read admission; exact scoped step/request/ready/result correlation; checked IDs above live core allocation floor; original reservation revalidation; one unresolved protocol read per group and separate consumer-held reply limits; control cancellation only after original data Read step, exact ready-lease cancellation without catch-up, failure/leadership unavailable outcomes, original rejected query ownership, foreign consumer-envelope rejection, close/drain and failed-owner abort. Ten downstream host tests and actual three-node/100-group native WAL/TLS quorum-loss, replacement, healing, subsequent-read, snapshot/checkpoint/reconnect/recovery histories. PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice330C2 adds verified-profile whole invocation/execution control windows and additive typed submit_logical. Exact complete Status/Active classification reserves global/group counts and bytes; physical generic submit stays ordinary. Held output retains original credits until terminal and release. Private all/core accounting controls and existing downstream read regressions pass; original native TCP/QUIC sequential fresh reads hold two ordinary terminal outputs while Active and Status consume selected remaining capacity, reject full total quota and drain/join. Owner intake linkage330C3B, full terminal activation, fault/recovery and same-source macOS remain separate requirements. Slice330C3B implements private correlated typed-read owner admission. The exact installed profile, actual logical authorization, original checked request and one complete initialized query encoding drive identical owner output preflight and original input enqueue. Raw generic reads stay ordinary. Borrowed classification data is dropped after admission; original queue class governs visits and cleanup. Private root owner controls pass eight all/seven core, including physical-authority refusal; typed read controls pass eleven all/eleven core and twenty-two original physical regressions. Native read linkage regression and current full strict checks are tracked separately; complete terminal ordinary-byte/effect pressure, topology/recovery and macOS remain pending."
     },
     {
       "design_id": "C03",
@@ -680,9 +718,11 @@
       ],
       "native": "Fixed bounded coordination over selected BoundedStateMachine and EffectOwner; native Counter histories use it directly",
       "conformance": [
-        "tests/effect_owner.rs"
+        "tests/effect_owner.rs",
+        "src/runtime/applications/tests.rs",
+        "tests/logical_activation_driver/bindings.rs"
       ],
-      "scope": "Exact live Committed lease/durable entry/applied boundary validation, output reservation before application, control reserves, receipt identity/count/capacity validation, full conservative credits and original verified applied positions through consumer completion, scoped checked tickets and original rejected lease/output ownership. Six core/host-only tests and real three-node/100-group WAL/TLS/snapshot/reconnect/recovery histories. No proposal acceptance or client delivery guarantee. ClientRouter now supplies proposal/dedup/outcome admission; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit."
+      "scope": "Exact live Committed lease/durable entry/applied boundary validation, output reservation before application, control reserves, receipt identity/count/capacity validation, full conservative credits and original verified applied positions through consumer completion, scoped checked tickets and original rejected lease/output ownership. Six core/host-only tests and real three-node/100-group WAL/TLS/snapshot/reconnect/recovery histories. No proposal acceptance or client delivery guarantee. ClientRouter now supplies proposal/dedup/outcome admission; ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Slice330A binds exact selected activation profiles from original VerifiedLogicalImage in private logical construction. Whole batches share complete-envelope classification with child mutation retention. Every configured control window reserves its whole declared receipt vector, positions and Held bytes; ordinary receipt ceilings are separate. Original parent maximum whole batch must fit; undersized selected limits refuse without transfer. Seven private accounting/classification controls pass all/core, and actual three-child image constructor refusal/restore/cleanup passes. Private synthetic Held controls test accounting only, not protocol authority. Frozen Mac331 passes the same selected application controls and actual constructor; full upstream/downstream quota remains pending."
     },
     {
       "design_id": "C10",
@@ -747,9 +787,13 @@
       "conformance": [
         "tests/runtime.rs",
         "tests/runtime/timer_replay.rs",
-        "tests/runtime/timer_replay/schedule.rs"
+        "tests/runtime/timer_replay/schedule.rs",
+        "src/runtime/logical_intake/tests.rs",
+        "src/runtime/logical_intake/tests/capacity.rs",
+        "src/runtime/logical_intake/tests/reads.rs",
+        "tests/logical_activation_driver/owner_intake.rs"
       ],
-      "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification."
+      "scope": "Single-owner automatic election/heartbeat deadlines, exact queued expiration fencing, bounded overload retry and explicit provider failure. Caller supplies monotonic time and bounded effect workers. No deadline-derived read authority. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice272 adds actual timed-owner/native WAL/model-journal composition: timer-origin accepted visits, original persistence tickets, separate sync/completion, restart owner rejection, independent second-group progress and bounded encoded/decoded schedules with exact state replay and Counter retries. Native-majority virtual-time evidence is finite; it is not physical worker/device or all-policy certification. Slice330C3A installs an immutable selected input profile only during original verified logical-owner construction. Declared whole tracked input windows validate before installation. Exact canonical Propose uses the original control queue and stored class; malformed, business, foreign and raw Read stay ordinary. Oversized original allocation refuses unchanged. Four private input controls pass all/core, real selected constructor refuses four short input profiles without modifying the original core, and five original native constructor/parent/client regressions pass. Typed owner-read linkage330C3B is a subsequent private correlated seam; whole effect reservation and full upstream terminal quota qualification remain pending. Slice330C3B implements private correlated typed-read owner admission. The exact installed profile, actual logical authorization, original checked request and one complete initialized query encoding drive identical owner output preflight and original input enqueue. Raw generic reads stay ordinary. Borrowed classification data is dropped after admission; original queue class governs visits and cleanup. Private root owner controls pass eight all/seven core, including physical-authority refusal; typed read controls pass eleven all/eleven core and twenty-two original physical regressions. Native read linkage regression and current full strict checks are tracked separately; complete terminal ordinary-byte/effect pressure, topology/recovery and macOS remain pending."
     },
     {
       "design_id": "C10/C15",
@@ -775,9 +819,13 @@
         "tests/effect_owner.rs",
         "tests/support/connection_budget.rs",
         "tests/support/node.rs",
-        "tests/counter_service/assignments.rs"
+        "tests/counter_service/assignments.rs",
+        "src/runtime/logical_intake/tests.rs",
+        "src/runtime/logical_intake/tests/capacity.rs",
+        "src/runtime/logical_intake/tests/reads.rs",
+        "tests/logical_activation_driver/owner_intake.rs"
       ],
-      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Tracked input identity and proposed position support ClientRouter's repeated application validation and exact outcomes. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers, asynchronous checkpoints, decoded ingress and application/client results. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice198 exposes the existing ordered local assignments through an authenticated bounded command: at most256 source rows and eight output rows, exact group/incarnation and locally accepted/stable/joint target configurations, and SHA-256 cursor binding to node/store/incarnation/session and the complete view. Every local scope requires Inspect before output; data writes preserve cursors, configuration changes and store reopen invalidate them. This local view grants no durability, quorum, global placement or ownership evidence. TCP/QUIC executable histories and bounded parser/maximum-identity tests cover the command."
+      "scope": "Pre-execution effect reservations, control reserves, one owned lease per group, exact worker binding/visit/stage checks, application catch-up and one-use reads, fenced failure and explicit drain. Tracked input identity and proposed position support ClientRouter's repeated application validation and exact outcomes. Three-node/100-group native-WAL/TCP/TLS history with native scheduler/timer providers, asynchronous checkpoints, decoded ingress and application/client results. ReadRequests supplies bounded original read invocation/result ownership; PeerDriver now supplies reactor coordination; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Ordered groups_after uses the existing group map range for bounded maintenance cursor scans, with no ownership or scheduling state change. Slice198 exposes the existing ordered local assignments through an authenticated bounded command: at most256 source rows and eight output rows, exact group/incarnation and locally accepted/stable/joint target configurations, and SHA-256 cursor binding to node/store/incarnation/session and the complete view. Every local scope requires Inspect before output; data writes preserve cursors, configuration changes and store reopen invalidate them. This local view grants no durability, quorum, global placement or ownership evidence. TCP/QUIC executable histories and bounded parser/maximum-identity tests cover the command. Slice330C3A installs an immutable selected input profile only during original verified logical-owner construction. Declared whole tracked input windows validate before installation. Exact canonical Propose uses the original control queue and stored class; malformed, business, foreign and raw Read stay ordinary. Oversized original allocation refuses unchanged. Four private input controls pass all/core, real selected constructor refuses four short input profiles without modifying the original core, and five original native constructor/parent/client regressions pass. Typed owner-read linkage330C3B is a subsequent private correlated seam; whole effect reservation and full upstream terminal quota qualification remain pending. Slice330C3B implements private correlated typed-read owner admission. The exact installed profile, actual logical authorization, original checked request and one complete initialized query encoding drive identical owner output preflight and original input enqueue. Raw generic reads stay ordinary. Borrowed classification data is dropped after admission; original queue class governs visits and cleanup. Private root owner controls pass eight all/seven core, including physical-authority refusal; typed read controls pass eleven all/eleven core and twenty-two original physical regressions. Native read linkage regression and current full strict checks are tracked separately; complete terminal ordinary-byte/effect pressure, topology/recovery and macOS remain pending. Peer-ingress363 records the actual consumed Receive.from on Stepped and retains it with the SAME live Active until original Visit retirement. Private queued/active per-group source inspection plus original has_pending_send supports obsolete-session handback without draining unrelated work. This metadata grants no authentication, quorum or durability authority. Focused actual-core queued/leased/active source controls pass2/0; original runtime/effect controls and all four strict profiles are being closed on a guarded frozen cut. Guarded root363 final Linux qualification passes focused2 controls, original effect-owner187 (including8 real network cases) and runtime53 with zero failures; formatting and all four strict profiles0,1277 frozen inputs unchanged. Initial loopback sandbox refusals are separately recorded and authorised same-binary tests pass. Current C361/full platform qualification remains separate."
     },
     {
       "design_id": "C10/C15",
@@ -791,7 +839,14 @@
         "deliver",
         "usage",
         "is_drained",
-        "discard_failed"
+        "discard_failed",
+        "export_checkpoint",
+        "poll_export",
+        "complete_export",
+        "cancel_export",
+        "close_exports",
+        "drain_failed_exports",
+        "checkpoint_exports_are_drained"
       ],
       "native": "Fixed routing over the selected SnapshotWorker and EffectOwner",
       "conformance": [
@@ -800,9 +855,12 @@
         "tests/learners.rs",
         "examples/benchmark/shared_recovery.rs",
         "tests/snapshot_routes/reservation.rs",
-        "examples/benchmark/shared_recovery/maintenance.rs"
+        "examples/benchmark/shared_recovery/maintenance.rs",
+        "tests/snapshot_exports.rs",
+        "tests/snapshot_exports/native.rs",
+        "tests/snapshot_exports/contention.rs"
       ],
-      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. ReplicaDriver and PeerDriver now supply local service and peer driving; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Explicit volatile recovery request and capacity quotas gate preparation before extra owner reservation; readiness charges two image allowances. Original receipts retain credit through worker completion until router delivery or fenced discard. Local checkpoint publication/reconciliation remain under global owner/router/worker limits. Selected host pressure/stale/failure/checkpoint tests and native TCP/QUIC eight-group forced repair with foreground writes and reopen validate this admission seam; no bandwidth, latency or preemption guarantee. Slice167 releases unused speculative reservation on retryable snapshot refusal while retaining actual effect payloads and exact leases. Preparation reacquires the original continuation floor and full image allowance before allocation or provider submission. Accepted work keeps its credit. Deterministic competing-lease tests and native automatic-maintenance/recovery schedules cover this pressure path."
+      "scope": "Bounded one-use admission-to-effect-lease map, exact runtime/worker/visit checks, pre-admission output reservation, original rejection ownership, duplicate/stale rejection, fenced provider failures and drain continuations. Native three-node/100-group TCP/TLS snapshot catch-up and actual-file recovery with native runtime providers; explicit elections and automatic heartbeats, plus a separate timer-driven election/partition/healing history. ReplicaDriver and PeerDriver now supply local service and peer driving; Node now composes these selected components with coordinated lifecycle; native filesystem/provider assembly remains explicit. Explicit volatile recovery request and capacity quotas gate preparation before extra owner reservation; readiness charges two image allowances. Original receipts retain credit through worker completion until router delivery or fenced discard. Local checkpoint publication/reconciliation remain under global owner/router/worker limits. Selected host pressure/stale/failure/checkpoint tests and native TCP/QUIC eight-group forced repair with foreground writes and reopen validate this admission seam; no bandwidth, latency or preemption guarantee. Slice167 releases unused speculative reservation on retryable snapshot refusal while retaining actual effect payloads and exact leases. Preparation reacquires the original continuation floor and full image allowance before allocation or provider submission. Accepted work keeps its credit. Deterministic competing-lease tests and native automatic-maintenance/recovery schedules cover this pressure path. Slice331 adds exact durable-anchor live export with shared request/image limits, two image allowances and fixed held metadata reserved before worker admission. Original worker Load does not install or reopen storage. Opaque external output remains charged; exact consume/cancel/failed-only sole-consumer cleanup preserves original ownership. Thirteen Linux all-feature and twelve core controls pass, including an actual native snapshot-store/worker load with a host WAL. Frozen Mac331 qualifies the selected original export controls; Linux one-parent/four-child TCP/QUIC pilot subsequently exercises original Node export/import and membership. Full three-parent/ten-owner, restart/loss and broader faults remain separate. Additive331B pure export-only drain inspection preserves ordinary healthy snapshot ownership; actual separate-group normal work and externally held export controls pass on Linux. This additive getter is excluded from frozen Mac331. Same-group retained export/ordinary snapshot ownership now refuses a validated original snapshot lease as retryable Overloaded. Stale/foreign original leases still fail preceding validation. Original retained lease/payload and export credits survive; exact export consumption permits same-lease retry. Deterministic regression covers pending and externally held export; native Mac334 failure association remains unproven."
     },
     {
       "design_id": "C12",
@@ -966,9 +1024,10 @@
         "tests/quic.rs",
         "tests/quic/chunk_progress.rs",
         "tests/quic/closing_timer.rs",
-        "tests/native/drain_status.rs"
+        "tests/native/drain_status.rs",
+        "tests/quic/keep_alive.rs"
       ],
-      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1–4 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport. Slice295 adds non-owning drain_status with unsupported protocol fields absent by default, exact Box/GuardedSession forwarding, and native QUIC original timer/close/drained state. Inspection never supplies send completion or permission to drop work."
+      "scope": "TLS 1.3 mutual authentication, trusted peer certificate pins and authenticated recovered store-session hello. Bounded nonblocking I/O progress and handshake byte/time ceilings; host-supplied resources and generations. PeerTransport uses this same public seam. Real loopback TLS/wire/worker histories plus partial-I/O, backpressure and failure tests. Optional caller-polled QUIC owns one dedicated UDP socket per peer endpoint, fixed remote address and 1200-byte packets, with one reliable outgoing chunk awaiting ACK and one incoming stream. No migration, early data or application datagrams. Nine QUIC tests include retransmission, budget fairness, exact identity failures, close/data retention and a three-replica election/commit/apply history using host log tickets. NativeQuicConnector now owns bounded shared UDP establishment; NativeStartup::open_with_protocol and the service CLI select TCP/TLS or QUIC explicitly. Box<S> forwards the same SecureSession contract. Simulator-only providers rejected; neither local flush nor QUIC ACK is Raft durability evidence. NativeTlsConfig::with_wire_version selects an exact format 1–4 for TCP and QUIC; encrypted hello mismatch fails before Ready with no downgrade. Cloned credentials and existing sessions retain their selection. TCP/shared-QUIC connectors verify that version at handoff. NativeStartup selects matching codec and roster. Real format-3 witness exchanges use native storage and framed transport. Slice295 adds non-owning drain_status with unsupported protocol fields absent by default, exact Box/GuardedSession forwarding, and native QUIC original timer/close/drained state. Inspection never supplies send completion or permission to drop work. Native QUIC344 adds encrypted2s keepalive with the existing5s idle timeout unchanged. Quiet ordinary/logical authenticated links retain later exact payloads and actual protocol close; stopped peers still fail within the bounded original control. All25 native QUIC tests pass on Linux. Keepalive grants no plaintext, quorum, durability or read evidence; The same25 focused controls pass on frozen344 macOS, with formatting/full all-feature strict Clippy and1185 unchanged captured inputs. Full nested qualification remains separate."
     },
     {
       "design_id": "C06",
@@ -1216,13 +1275,14 @@
         "verify_learner_readiness",
         "Raft::accept_learner_readiness",
         "Raft::check_learner_readiness",
-        "Raft::ready_learner"
+        "Raft::ready_learner",
+        "Raft::pending_learner_readiness"
       ],
       "native": "Selected native log and snapshot files use the same host-driven application/checkpoint verification contract; native file reopen requires a fresh learner session round.",
       "conformance": [
         "tests/learners.rs"
       ],
-      "scope": "One bounded pending request per core, binding leader context/session, committed stable configuration, learner exact store/session, term and contiguous committed prefix. Verification rejects pending/Written work, applied lag, unsupported schema/capacity, provider disagreement and missing pinned compacted data; bounded checkpoint restore checks application compatibility. Replies match the entire request and current authenticated peer binding; accepted tokens become stale after commit/term/configuration/session changes. Provider/peer assertions use the existing authenticated non-Byzantine trust model. No new durable record, watermark or generation. Native exchange now feeds retained checked readiness and local proposal admission; no online membership or placement policy claim."
+      "scope": "One bounded pending request per core, binding leader context/session, committed stable configuration, learner exact store/session, term and contiguous committed prefix. Verification rejects pending/Written work, applied lag, unsupported schema/capacity, provider disagreement and missing pinned compacted data; bounded checkpoint restore checks application compatibility. Replies match the entire request and current authenticated peer binding; accepted tokens become stale after commit/term/configuration/session changes. Provider/peer assertions use the existing authenticated non-Byzantine trust model. No new durable record, watermark or generation. Native exchange now feeds retained checked readiness and local proposal admission; no online membership or placement policy claim. The pending request getter inspects the existing volatile exchange only and grants no ReadyLearner or durability authority; actual admin retry controls remain pending."
     },
     {
       "design_id": "C01/C04/C10/C15",
@@ -1355,16 +1415,19 @@
         "open_with_protocol",
         "open_with_protocol_and_timers",
         "prepare_for_discovery",
-        "prepare_discovery_with_peer_rotation"
+        "prepare_discovery_with_peer_rotation",
+        "prepare_for_discovery_with_log_limits"
       ],
       "native": "Explicit native member recovery over the existing NativeStartup assembly, verified recover_member_replica, native WAL/snapshot workers and selected TCP/TLS or QUIC connector.",
       "conformance": [
         "tests/native_member_startup.rs",
         "tests/startup.rs",
         "tests/startup/discovery.rs",
-        "tests/counter_service/peer_discovery.rs"
+        "tests/counter_service/peer_discovery.rs",
+        "tests/startup/log_limits.rs",
+        "tests/startup/log_limits/application.rs"
       ],
-      "scope": "Caller-owned bounded provisioned exact stores/credentials and immutable original bootstrap; Recover with membership wire only. Exact local store must exist in committed and accepted recovered membership. Active roster derives from committed/accepted/rollback-reachable cores; every required peer needs exact provisioned identity, including old peers behind an uncommitted final. Extra provisioned hints do not grant active roster membership or votes; committed retirement permits obsolete provisioning to disappear. Native TCP dial/TCP-QUIC pins use the same explicit map. Verified checkpoint/application replay precedes exposure; failed recovery can advance sessions/restore returned application and returns existing cleanup ownership without rollback. Late failure joins workers/releases sockets. Native fixture learner/joint/final/checkpoint histories test both protocols, non-voting learner campaign, durable status/resumption hints and restored retry state; fixtures do not prove online distributed creation/commit. Static NativeStartup still rejects dynamic journals. No new durability effect/token/generation/watermark/format, no implicit enrollment or serving authority. Counter CLI, enforced application envelope and faulted remote lifecycle integration remain pending. Slice209h exposes prepared native parts for host discovery composition while preserving Recover-only validation, exact provisioned stores and verified member recovery. TCP/QUIC tests preserve original receipt values through restart with stale configured Dial addresses; Create refuses before files. Final Node assembly remains caller-owned. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries."
+      "scope": "Caller-owned bounded provisioned exact stores/credentials and immutable original bootstrap; Recover with membership wire only. Exact local store must exist in committed and accepted recovered membership. Active roster derives from committed/accepted/rollback-reachable cores; every required peer needs exact provisioned identity, including old peers behind an uncommitted final. Extra provisioned hints do not grant active roster membership or votes; committed retirement permits obsolete provisioning to disappear. Native TCP dial/TCP-QUIC pins use the same explicit map. Verified checkpoint/application replay precedes exposure; failed recovery can advance sessions/restore returned application and returns existing cleanup ownership without rollback. Late failure joins workers/releases sockets. Native fixture learner/joint/final/checkpoint histories test both protocols, non-voting learner campaign, durable status/resumption hints and restored retry state; fixtures do not prove online distributed creation/commit. Static NativeStartup still rejects dynamic journals. No new durability effect/token/generation/watermark/format, no implicit enrollment or serving authority. Counter CLI, enforced application envelope and faulted remote lifecycle integration remain pending. Slice209h exposes prepared native parts for host discovery composition while preserving Recover-only validation, exact provisioned stores and verified member recovery. TCP/QUIC tests preserve original receipt values through restart with stale configured Dial addresses; Create refuses before files. Final Node assembly remains caller-owned. Slice209j adds credential-checked discovery preparation using the same startup path and owned cleanup. Counter startup composes a driven exact-peer source for static, member and shared-group profiles; selected executable TCP/QUIC histories cover peer-key rotation, WAL/checkpoint reopen and original data retries. Slice332 storage selection adds prepare_for_discovery_with_log_limits. Pure selected LogLimits/bootstrap/native worker compatibility validation precedes IO; the same capability drives actual one authoritative native WAL create/recover and recovered Raft core. Existing default/timing/rotation preparation retains default limits. The original application/cleanup handle remains owned on rejection. Hosts select matching original wire/client providers in still-empty prepared parts before unchanged Node assembly. Dedicated all/TLS tests exercise actual70704-byte committed/applied native worker history, original member recovery/duplicate/file reopen, unchanged default refusal, smaller recovery refusal and invalid-before-IO cleanup. Full activation cleanup, fault scope and same-source macOS remain required."
     },
     {
       "design_id": "C01/C04/C10/C15/C20",
@@ -1374,15 +1437,18 @@
         "publish and pin checkpoint",
         "persist imported contiguous prefix",
         "retry exact import",
-        "recover member"
+        "recover member",
+        "NativeMemberStartup::enroll_snapshot_with_log_limits"
       ],
       "native": "Shared public LogStore/SnapshotRetention composition and explicit native file provisioning through NativeMemberStartup; no sockets or workers during import.",
       "conformance": [
         "tests/learner_enrollment.rs",
         "tests/native_member_startup.rs",
-        "tests/counter_service/drain_replacement.rs"
+        "tests/counter_service/drain_replacement.rs",
+        "tests/startup/log_limits.rs",
+        "tests/logical_activation_driver/cohort/members.rs"
       ],
-      "scope": "Host authenticates source commitment; stable exact learner/store only, no voter or joint import. Original bootstrap, application schema/data, retained allocation and provider budgets checked. Clone validation precedes mutation; durable snapshot publication and pin precede log barrier and verified combined recovery. Exact completed import or exact published image can resume after lost receipts; progressed or different images refuse. Host and native WAL fault injection covers publication/pin/log failures and same-image retry; native files reopen over TCP/QUIC. Initialization across fresh WAL/bootstrap/snapshot stores is not atomic and incomplete creation requires explicit inspection; Recover never creates missing stores. Application may be restored after durable import; errors never imply rollback. No new token, generation, watermark or format. No network commitment certificate or released remote membership; service endpoints/enforced envelopes and faulted lifecycle remain pending. Slice197b2d adds explicit counter-maintenance schema2/wire8 selection to offline enrollment, using the same application wrapper as serving. Wrong-profile imports/retries refuse; original image retries preserve state. Native TCP/QUIC replacement-drain histories import Counter retry state and an existing completed maintenance record. The source local drain journal is not part of that replicated image; a newly enrolled target starts without its own drain profile."
+      "scope": "Host authenticates source commitment; stable exact learner/store only, no voter or joint import. Original bootstrap, application schema/data, retained allocation and provider budgets checked. Clone validation precedes mutation; durable snapshot publication and pin precede log barrier and verified combined recovery. Exact completed import or exact published image can resume after lost receipts; progressed or different images refuse. Host and native WAL fault injection covers publication/pin/log failures and same-image retry; native files reopen over TCP/QUIC. Initialization across fresh WAL/bootstrap/snapshot stores is not atomic and incomplete creation requires explicit inspection; Recover never creates missing stores. Application may be restored after durable import; errors never imply rollback. No new token, generation, watermark or format. No network commitment certificate or released remote membership; service endpoints/enforced envelopes and faulted lifecycle remain pending. Slice197b2d adds explicit counter-maintenance schema2/wire8 selection to offline enrollment, using the same application wrapper as serving. Wrong-profile imports/retries refuse; original image retries preserve state. Native TCP/QUIC replacement-drain histories import Counter retry state and an existing completed maintenance record. The source local drain journal is not part of that replicated image; a newly enrolled target starts without its own drain profile. Slice332 storage selection adds explicit checked offline enrollment LogLimits and default delegation. Actual create/recover/import uses the selected WAL limits, rejects invalid limits before files and preserves original application. The same selected limits must be supplied for member reopen; provisioning still grants no readiness. Full332 changed TCP reaches authenticated readiness, Joint/Final, original Outcome/Release and post-replacement business/duplicate/fresh read, then fails original network cleanup with Closed; no full history/QUIC/platform qualification follows."
     },
     {
       "design_id": "C05/C10/C20",
@@ -2782,18 +2848,1074 @@
     {
       "design_id": "C05/C24",
       "public_contract": "TransferApplication over StateMachine, ProposalAdmission, BoundedStateMachine, BoundedReadableStateMachine and CheckpointStateMachine",
-      "operations": ["coordinator", "participant", "start", "status", "account", "validate_group", "validate_proposal", "apply_batch", "read_at", "checkpoint", "restore_checkpoint"],
+      "operations": [
+        "coordinator",
+        "participant",
+        "start",
+        "status",
+        "account",
+        "validate_group",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint"
+      ],
       "native": "Concrete deterministic coordinator/participant application selected through the existing public Node application map; existing log, snapshot and runtime providers remain authoritative.",
-      "conformance": ["tests/transaction_application.rs", "src/transaction/tests.rs", "src/transaction/tests/admission.rs", "src/transaction/tests/refusal.rs", "src/transaction/tests/recovery.rs"],
+      "conformance": [
+        "tests/transaction_application.rs",
+        "src/transaction/tests.rs",
+        "src/transaction/tests/admission.rs",
+        "src/transaction/tests/refusal.rs",
+        "src/transaction/tests/recovery.rs"
+      ],
       "scope": "Application primitives for one fixed coordinator and two canonical participant group incarnations, immutable transfer content and ten per-destination phase operation IDs. Whole-lifetime records reserve terminal progress and are never evicted. Coordinator Start scans retained/pending destination aliases; participant prepare retains a lock without balance mutation, Commit applies once, Abort from unprepared state retains a tombstone, and release removes only the original lock. Public business intake exposes only Start and queries; internal phase bytes are trusted assertions, not independently verified foreign certificates. Receipt current and first retained indices are separate. Queries and one fixed status allocation are accounted through existing bounded read contracts. Checkpoint restore reconstructs local retained first-phase history against exact opening accounts/profile/capacity and publishes only after complete semantic equality. This is a partial C24 implementation: actual Node provenance, networked coordination/recovery and usable cross-group transfer remain slice313. Safe P4 voter membership is not frozen; account ownership is fixed. No new storage owner, hidden runtime, schema migration, arbitrary transaction program, global scan or hypothetical-backend certification."
     },
     {
       "design_id": "C24",
       "public_contract": "TransferDriver / DriverTicket / DriverCompletion / DriverBudget",
-      "operations": ["new", "submit", "resume", "advance", "progress", "poll_completion", "complete", "usage", "failure", "close", "stop_waiting", "is_drained"],
+      "operations": [
+        "new",
+        "submit",
+        "resume",
+        "advance",
+        "progress",
+        "poll_completion",
+        "complete",
+        "usage",
+        "failure",
+        "close",
+        "stop_waiting",
+        "is_drained"
+      ],
       "native": "Generic exclusive borrower of host-selected Nodes; NativeNode specialization uses the existing native WAL, snapshot, TCP/TLS and QUIC providers. Standalone embedded_transfer hosts three single-voter groups; native conformance separately uses three physical replicas.",
-      "conformance": ["tests/transaction_driver.rs", "tests/transaction_driver/history.rs", "tests/transaction_driver/recovery.rs", "tests/transaction_driver/ownership.rs", "tests/transaction_driver/unavailable.rs", "tests/support/transaction_driver.rs", "src/transaction/driver/tests.rs", "src/transaction/driver/tests/native.rs", "examples/embedded_transfer.rs"],
+      "conformance": [
+        "tests/transaction_driver.rs",
+        "tests/transaction_driver/history.rs",
+        "tests/transaction_driver/recovery.rs",
+        "tests/transaction_driver/ownership.rs",
+        "tests/transaction_driver/unavailable.rs",
+        "tests/support/transaction_driver.rs",
+        "src/transaction/driver/tests.rs",
+        "src/transaction/driver/tests/native.rs",
+        "examples/embedded_transfer.rs"
+      ],
       "scope": "Fixed two-participant account transfer with immutable phase IDs and original first indices. Actual consumed Node Applied outputs or fresh coordinator quorum status supply phase authority; local role/status remains diagnostic. Construction accepts 1..64 selectively hosted compatible Nodes and checks original account openings and lifetime capacities. Fresh host-allocated driver generation scopes tickets/completions. Bounded round-robin progress, exact opaque result correlation, returned stale outputs and original Node reservation drain preserve ownership. Unknown/cancel/timeout never decides Abort. Provider errors stop phase production and retain cleanup outputs. Driver Drop performs no I/O or compensation; the host owns Node recovery, shutdown and worker joins. Seven private mismatch controls consume actual opaque Node results; downstream tests use host providers in core-only builds. Platform qualification is recorded in docs/IMPLEMENTATION.md. Remote command-service orchestration, wider transaction profiles and logical voters remain P8 work. No second storage owner, hidden runtime or hypothetical-backend certification."
+    },
+    {
+      "design_id": "C05/C24",
+      "public_contract": "LogicalApplication over StateMachine, ProposalAdmission, BoundedStateMachine, BoundedReadableStateMachine and CheckpointStateMachine",
+      "operations": [
+        "new",
+        "validate_group",
+        "validate_proposal",
+        "apply_batch",
+        "read_at",
+        "checkpoint",
+        "restore_checkpoint",
+        "decode_configuration_operation",
+        "with_activation_control_profile",
+        "activation_control_profile",
+        "new_enrollment_candidate",
+        "initialization"
+      ],
+      "native": "Deterministic child application over host-selected LogCodec, SnapshotCodec and WireCodec. It retains one ordered parent GroupLog; no separate parent WAL. Initialization-specific schema2 candidate application reuses the same selected codecs and existing ordered log/member recovery; public LogicalInitialization, LogicalEnrollmentPlan, LogicalEnrollmentOrigin, LogicalEnrollmentRecord and LogicalEnrollmentView are provisioning/inspection data, not consumed runtime authority.",
+      "conformance": [
+        "tests/logical_voter_application.rs",
+        "src/logical_voter/application/tests.rs",
+        "src/logical_voter/application/tests/eligibility.rs",
+        "src/logical_voter/application/tests/snapshots.rs",
+        "src/logical_voter/application/tests/reads.rs",
+        "tests/logical_configuration_history.rs",
+        "tests/logical_configuration_history/retention.rs",
+        "tests/logical_configuration_history/encoding.rs",
+        "tests/logical_voter_native/authority/snapshot_ack.rs",
+        "src/logical_voter/application/tests/authority/snapshot_ack.rs",
+        "src/logical_voter/application/tests/control_profile.rs",
+        "src/logical_voter/application/tests/control_profile/reads.rs",
+        "tests/logical_voter_application/candidate.rs",
+        "src/logical_voter/application/tests/enrollment.rs",
+        "src/logical_voter/application/tests/enrollment/formats.rs",
+        "src/logical_voter/application/tests/enrollment/recovery.rs",
+        "src/logical_voter/application/tests/enrollment/refusals.rs",
+        "src/logical_voter/application/tests/enrollment/empty.rs"
+      ],
+      "scope": "Bounded original Claim, mutation, snapshot, reconciliation and response-capsule actions. Replicated representative epoch/session fences future work; retained historical outcomes preserve exact original bytes and first positions. Latest child membership gates new intake. Whole-lifetime reservations retain cleanup capacity; restore is atomic and reconstructs original history. Scalar durable ticket records contain correlation data, not runtime authority. Slice315 is in progress: component tests do not establish a complete native logical parent, nested activation or arbitrary provider conformance. Additive ConfigurationOperation query returns the exact original max-two applied Learners or Joint/Final entries with child incarnation and applied boundary; unknown is scoped inspection. Bounded selected-codec decoding returns no quorum/readiness/commit permission. Selected Linux public controls cover original checkpoint at Joint plus Final suffix and cold replay, unchanged old query bytes, malformed grammar/scope/truncation and retained allocation refusal; consumed native-driver provenance remains pending. Original SnapshotAck authorization mirrors the durable committed-prefix rule: zero remains negative; positive indices require committed coverage and either checkpoint coverage or an existing retained term. Actual original three-child TCP/QUIC controls fail before the correction and pass after it above/below own base, withholding child completion retains original credits and forbids early sends. Private shape guards are distinct from original permit provenance; nested and Mac qualification remain pending. Selected immutable activation control profile is opt-in before all child history and pins original catalog/schemas/limits into configuration. Whole unchanged mixed actions with at least one valid selected control can use finite child reserve; standalone Business and malformed or foreign controls remain ordinary. Exact ClientApplied classification requires original group/operation and response schema. Budget classification grants no authority. Parent/router/capture reservations and original full-quota activation driver are still required. Slice329 reserves complete selected Status/Active ReadResult commands only for exact response schema, ticket and barrier groups and canonical complete query; malformed, zero-ID, trailing and wrapped Business queries remain ordinary. Original barrier/owner/configuration checks remain authoritative. Selected checkpoint replay preserves original command and classification; full parent/router/read-intake/release reservation remains unqualified. Slice345 preserves BootstrapVoter A01/C01/R01/schema1 configuration, response shapes and lifetime behavior, with an exact pre-change 750-byte checkpoint regression. An immutable checked EnrollmentCandidate plan binds target/group, Learners operation/expected/result configuration and nonzero source application schema. Private A02 EnrollmentClaim atomically materializes the full selected-codec imported snapshot as a target-owned generation1 pin and ordinary member parent with voted_for=None, retaining original entry/export correlation/command/operation/first position. Parsed correlation is not authority. The permanent target import generation floor survives later publication, old pin retirement and canonical C02 checkpoint replay; source generation remains lineage only. Candidate stays schema2 through actual deterministic Joint/commit/Final/commit updates and normal Claim suffix replay. V2-only Enrollment read carries full bounded plan/optional record separately from unchanged V1 Image/Metadata. Native codec empty payload refusal is preserved; a downstream host codec and legitimate zero-byte application qualify generic empty-data import/restore. Linux final guarded compilation cut passes72 logical library controls (12 candidate,60 existing),8 public controls (3 candidate,5 existing), and the two unchanged actual native TCP/QUIC singleton facade histories with original joins. Formatting and required full all-target/all-feature strict Clippy pass;1193 compilation inputs remain unchanged through these runs. This application component is not native learner enrollment, consumed fresh Enrollment/Claim/Image/Snapshot provenance, dynamic authenticated target attachment/readiness, full nine-plus-three membership or current macOS candidate qualification."
+    },
+    {
+      "design_id": "C03/C04/C10/C15",
+      "public_contract": "LogicalChildBridge / VerifiedLogicalImage / LogicalLogView / LogicalSnapshotView",
+      "operations": [
+        "new",
+        "begin_claim",
+        "advance",
+        "take_image",
+        "pump_persistence",
+        "pump_release",
+        "close",
+        "is_drained",
+        "recovery_views",
+        "into_owner",
+        "recover_parent",
+        "pump_snapshots",
+        "activation_control_profile"
+      ],
+      "native": "Exclusive bounded borrower of actual child Nodes, selecting existing native TCP/TLS or QUIC providers in downstream tests; verified read-only parent recovery views use existing LogStore and SnapshotStore contracts.",
+      "conformance": [
+        "tests/logical_voter_native/history.rs",
+        "tests/logical_voter_native/persistence.rs",
+        "tests/logical_voter_native/authority.rs",
+        "tests/logical_activation_driver/bindings.rs"
+      ],
+      "scope": "Only consumed original child Applied outputs or fresh quorum resolution may mint sealed runtime authority. Unknown absence retries the same original action and never proves Abort. Verified startup includes exact parent state and full pinned snapshots; anchored application recovery is atomic and recovery-view mutations refuse. A checked nonempty local Node subset includes the exact representative; independently driven outside child peers do not count as synthetic quorum evidence. Original tickets, bounded charges, rejected outputs and accepted failed cleanup remain owned until consumed. Selected actual three-parent/nine-child TCP/QUIC quorum-outage/repair and orderly representative replacement histories pass on Linux; macOS and recursive composition remain qualification obligations. Exact selected profile is configuration inspection only; verified image selection is minted from the actual backing assembly when original Claim/read provenance is consumed. Parent construction compares the complete actual wrapper profile before moving owned parts. A storage application profile classifies stored parent commands and remains distinct from the profile of its own consumed command envelope. Full parent/router control reservation is still pending."
+    },
+    {
+      "design_id": "C03/C13",
+      "public_contract": "LogicalPersistenceWorker / LogicalPersistencePort",
+      "operations": [
+        "logical_persistence",
+        "binding",
+        "limits",
+        "usage",
+        "submit",
+        "poll",
+        "close",
+        "is_drained"
+      ],
+      "native": "Existing public PersistenceWorker implementation with bounded channels and explicit LogicalChildBridge host pumping; no hidden executor or synchronous child I/O.",
+      "conformance": [
+        "tests/logical_voter_native/persistence.rs"
+      ],
+      "scope": "Exactly one parent unit per accepted request. Original worker/visit tickets and charges survive until terminal output consumption. Written and Durable conservatively wait for actual consumed committed child mutation; Durable matches the full original Written LogTicket. Accepted parent hard state and payload are validated against original GroupLog. A mismatch or lost bridge returns original Uncertain and fences. Current selected TCP/QUIC histories use actual parent-generated leases and child checkpoint/suffix cold reopen; complete failure-injection and host replacement qualification remain open."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "LogicalReplicaDriver / LogicalRouterParts / LogicalReleaseCoordinator",
+      "operations": [
+        "routers",
+        "new",
+        "poll",
+        "releases",
+        "usage",
+        "release_usage",
+        "close_intake",
+        "discard_failed",
+        "is_drained"
+      ],
+      "native": "Public logical-mode facade over the existing ReplicaDriver and owner-bound application/client/read routers; release coordinator retains originals until child authority is consumed.",
+      "conformance": [
+        "tests/logical_voter_native/parent.rs",
+        "tests/logical_voter_native/persistence.rs",
+        "tests/logical_voter_native/authority.rs",
+        "tests/logical_activation_driver/bindings.rs",
+        "src/runtime/logical_release/tests.rs",
+        "src/runtime/logical_release/tests/capacity.rs",
+        "src/runtime/logical_release/tests/classification.rs",
+        "tests/logical_activation_driver/history.rs",
+        "src/runtime/clients/tests.rs",
+        "tests/logical_activation_driver/intake.rs",
+        "src/runtime/logical_intake/tests.rs",
+        "src/runtime/logical_intake/tests/capacity.rs",
+        "src/runtime/logical_intake/tests/reads.rs",
+        "tests/logical_activation_driver/owner_intake.rs",
+        "src/runtime/read_requests/tests.rs",
+        "src/runtime/read_requests/tests/construction.rs",
+        "src/runtime/read_requests/tests/classification.rs",
+        "src/runtime/reads/tests.rs",
+        "tests/logical_activation_driver/read_intake.rs",
+        "tests/logical_voter_native/facade/construction_capacity.rs"
+      ],
+      "scope": "Constructor-bound authorization comes only from VerifiedLogicalImage and the exact recovered parent owner. Physical constructors, generic effect transfer and callback paths refuse logical bypass. Captured sends and values remain owned and charged while waiting for exact immutable child capsules. Failed cleanup retains submitted capsules until actual authorized/refused outcomes settle; refusal never grants publication. Trusted local parent controls exercise persistence and authority, not negotiated parent networking. Slice315 full network, snapshot-worker, failure and platform qualification remain open. Slice330A selected router construction validates original maximum complete commit batch and reserves all declared application control windows, including receipt/position/Held memory. Slice330B privately binds release construction to the exact original result-router profile and declared whole batch. Every control capture window plus one ordinary whole batch must fit before transfer. Complete original mixed commits and canonical faithful Status/Active queries select release capacity; original authorization and all capsule permits remain mandatory. Five private credit/codec controls pass all/core, genuine selected constructor refusal/restore/drain passes1 and original TCP/QUIC parent histories pass2 on Linux. Synthetic retained records test accounting only. Client/read invocation and owner intake, end-to-end full-quota histories and Mac330B remain outstanding. Slice330C1 privately selects the verified immutable activation profile for client global/group count and whole-byte windows. Public ClientRouterLimits adds control_requests/group_control_requests/control_bytes with compatible physical/unselected behavior. At least two whole selected windows and one ordinary window must fit; original selected command allocation over the configured command cap rejects unchanged. Pending retains original class/credits through cancellation and externally held completion until terminal AND released cleanup. Eight private accounting controls pass all/core, eleven original host admission histories pass, actual verified-image construction refuses five short client configurations without changing the core, and native TCP/QUIC histories hold two genuine ordinary Applied outputs at their quota while Begin, fresh Status and duplicate Begin complete through original child capsule authorization. Exact ordinary rejection preserves allocation/content; close/drain/join passes. This is client-count pressure only: read/result/owner full quotas, complete terminal activation, arbitrary providers and newer macOS qualification remain pending. Slice330C3A installs an immutable selected input profile only during original verified logical-owner construction. Declared whole tracked input windows validate before installation. Exact canonical Propose uses the original control queue and stored class; malformed, business, foreign and raw Read stay ordinary. Oversized original allocation refuses unchanged. Four private input controls pass all/core, real selected constructor refuses four short input profiles without modifying the original core, and five original native constructor/parent/client regressions pass. Typed owner-read linkage330C3B is a subsequent private correlated seam; whole effect reservation and full upstream terminal quota qualification remain pending. Slice330C3B implements private correlated typed-read owner admission. The exact installed profile, actual logical authorization, original checked request and one complete initialized query encoding drive identical owner output preflight and original input enqueue. Raw generic reads stay ordinary. Borrowed classification data is dropped after admission; original queue class governs visits and cleanup. Private root owner controls pass eight all/seven core, including physical-authority refusal; typed read controls pass eleven all/eleven core and twenty-two original physical regressions. Native read linkage regression and current full strict checks are tracked separately; complete terminal ordinary-byte/effect pressure, topology/recovery and macOS remain pending. Root366 preserves the selected verified parent-log batch ceiling privately on the logical router and refuses static release profiles unable to retain that complete ordinary batch plus one original control capture. Physical defaults and selected activation every-window reserves remain unchanged. Linux frozen366 passes8 application/11 release controls and original native facade TCP/QUIC2 with original-parts rejection and corrected assembly. Mac366 and general concurrency/lifetime guarantees are not qualified by this check. Root366 matching macOS21 actual controls/facade tests, format/all4strict0,1279 source and actual executable/runner guards now qualify the same bounded static constructor scope on both hosts. This does not resolve nested Mac first-write or membership."
+    },
+    {
+      "design_id": "C05/C06/C09",
+      "public_contract": "LogicalResponseCodec / LogicalOutboundQueue / AuthorizedLogicalSend",
+      "operations": [
+        "logical_response_schema",
+        "receipt_encoding_bound",
+        "query_encoding_bound",
+        "read_encoding_bound",
+        "encode_receipt",
+        "encode_query",
+        "encode_read",
+        "submit_authorized",
+        "logical_activation_control_profile"
+      ],
+      "native": "Existing host LogicalResponseCodec extension now includes a faithful bounded native LogicalApplication implementation with named LOGICAL_RESPONSE_SCHEMA; LogicalOutboundQueue admits only original AuthorizedLogicalSend.",
+      "conformance": [
+        "tests/logical_voter_native/application.rs",
+        "tests/logical_voter_native/outbound.rs",
+        "tests/logical_voter_native/persistence.rs",
+        "src/logical_voter/response/tests.rs",
+        "tests/logical_configuration_history/encoding.rs",
+        "tests/logical_activation_driver/bindings.rs"
+      ],
+      "scope": "Encode every original receipt field and exact Image/Outcome/Snapshot/Metadata/Uninitialized read variant within static checked envelopes. Selected log/snapshot codecs and membership bytes roundtrip exactly; constructor/atomic cloned apply checks complete materialized response framing. Short/provider-error encodings preserve caller output and application state. This enables the codec joint for316; it does not implement logical backing endpoints, nested network plans or native two-level authority. Authorized sends retain actual original effect, sealed child provenance and exact command bytes; queue acceptance is not delivery. Actual nine-owner/controlled Linux network histories are recorded separately; integrated macOS and wider provider qualification remain explicit. Exact selected profile is configuration inspection only; verified image selection is minted from the actual backing assembly when original Claim/read provenance is consumed. Parent construction compares the complete actual wrapper profile before moving owned parts. A storage application profile classifies stored parent commands and remains distinct from the profile of its own consumed command envelope. Full parent/router control reservation is still pending."
+    },
+    {
+      "design_id": "C03/C04/C13",
+      "public_contract": "LogicalSnapshotWorker / LogicalSnapshotPort",
+      "operations": [
+        "logical_snapshots",
+        "binding",
+        "limits",
+        "usage",
+        "load_reservation",
+        "checkpoint_bytes",
+        "submit",
+        "poll",
+        "close",
+        "is_drained",
+        "pending_request",
+        "operation",
+        "retained_references",
+        "cache_bytes"
+      ],
+      "native": "Existing public SnapshotWorker contract with explicit matching child bridge and persistence port; no hidden I/O, executor, parent WAL or alternate snapshot owner.",
+      "conformance": [
+        "tests/logical_voter_native/checkpoint.rs",
+        "tests/logical_voter_native/parent_snapshots.rs",
+        "src/logical_voter/snapshots/tests.rs"
+      ],
+      "scope": "One original accepted work/visit and bounded completion, input plus maximum output credits until terminal consumption, and at most two complete verified cache pins. Actual child Publish/Reconcile outcomes precede publication/install/reclamation completion. Readiness and send loads use only verified immutable bytes and grant no parent response authority. Construction checks exact recovered image/persistence domain and image reservations. Selected TCP/QUIC parent checkpoint histories preserve old anchor through withheld publication and compaction, then reconcile before whole-child cold recovery. Private completion tests establish correlation only. Full outer parent network, interrupted snapshot schedules, replacement providers and macOS qualification remain open315 duties."
+    },
+    {
+      "design_id": "C06/C09/C15",
+      "public_contract": "LogicalPeerDescriptor / LogicalPeerPlan / LogicalFrameCodec / LogicalNetworkQueue / LogicalPeerSession / LogicalReceived",
+      "operations": [
+        "from_verified",
+        "new",
+        "mapping",
+        "representative",
+        "physical",
+        "local",
+        "peers",
+        "frame_length",
+        "authorization",
+        "binding",
+        "limits",
+        "usage",
+        "peer_usage",
+        "submit_authorized",
+        "submit",
+        "poll",
+        "complete",
+        "close",
+        "poll_logical",
+        "complete_logical",
+        "cancel_dispatched",
+        "state",
+        "take_send",
+        "has_received",
+        "take_received",
+        "is_drained",
+        "abort",
+        "message",
+        "receipt",
+        "into_message",
+        "ticket",
+        "send",
+        "result"
+      ],
+      "native": "Separate logical-envelope codec and explicit caller-polled queue/session over the existing SecureSession contract; native TCP/TLS and QUIC configurations opt into a dedicated negotiated logical profile.",
+      "conformance": [
+        "src/logical_voter/network/frame.rs",
+        "tests/logical_voter_network.rs",
+        "tests/logical_voter_network/history.rs",
+        "tests/logical_voter_network/channels.rs"
+      ],
+      "scope": "Actual static three-parent/nine-child Linux TCP/QUIC histories cover parent election, original write/retry, fresh quorum read, bounded backing-quorum outage with held original mutation/client ownership, same-operation repair, all nine checkpoints plus later suffix, orderly cold replacement of physical representative1 with2, and explicit native cleanup. Controlled original proof histories cover short I/O, flush ownership, stale owner, malformed frames and original-batch cancellation. Serialized remote provenance is an authenticated representative assertion, not a portable child quorum certificate or minted local permit. This finite selected scope does not establish arbitrary nesting, crash replacement, every fault schedule or provider certification. Integrated macOS qualification remains open315; recursive backing and activation remain316."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "ProgramApplication / ProgramProfile / Program / ParticipantProgram / ProgramLimits",
+      "operations": [
+        "new",
+        "coordinator",
+        "participant",
+        "start",
+        "operation",
+        "profile",
+        "group",
+        "role",
+        "limits",
+        "transaction_capacity",
+        "remaining_transactions",
+        "contains_key",
+        "key_ids",
+        "key",
+        "status",
+        "validate_group",
+        "deployment_requirements",
+        "applied_index",
+        "apply_batch",
+        "receipt_bytes_bound",
+        "validate_proposal",
+        "validate_proposal_context",
+        "query_bytes",
+        "read_at",
+        "read_result_bound",
+        "read_result_bytes",
+        "schema_version",
+        "checkpoint",
+        "restore_checkpoint"
+      ],
+      "native": "Deterministic bounded numeric-key program application over the existing application, admission, read and checkpoint contracts; no executor, I/O or consumed-Node driver is included in this first317 slice.",
+      "conformance": [
+        "tests/program_transaction_application.rs",
+        "src/program_transaction/tests.rs",
+        "tests/program_transaction_model.rs"
+      ],
+      "scope": "Immutable fixed ownership/catalog/incarnations, checked injective local phase IDs and explicit version-checked read/write footprints. Atomic whole-local prepare and durable no-wait refusal, retained original decisions/AppliedAll/release/tombstones, exact retries, write versions and read locks preserve the declared numeric-key profile. Serialized private phase assertions are trusted host-driver inputs, not authenticated certificates. Application semantic and finite isolation-model checks are separate from actual Node driver, native recovery and both-platform acceptance. Broader cross-group transaction layer remains unfinished317; no arbitrary SQL, range query or ownership-change semantics are implied."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "ProgramDriver / ProgramDriverTicket / ProgramDriverCompletion / ProgramDriverBudget",
+      "operations": [
+        "new",
+        "submit",
+        "resume",
+        "advance",
+        "poll_completion",
+        "complete",
+        "close",
+        "stop_waiting",
+        "failure",
+        "usage",
+        "progress",
+        "is_drained"
+      ],
+      "native": "Exclusive bounded borrower of actual public Node<ProgramApplication> client/read streams, using existing host-selected native and replacement provider contracts; no new executor or Raft engine.",
+      "conformance": [
+        "src/program_transaction/driver/tests/native.rs",
+        "src/program_transaction/driver/tests/history.rs",
+        "tests/program_transaction_driver.rs",
+        "tests/program_transaction_driver/history.rs"
+      ],
+      "scope": "Original opaque Applied and fresh quorum Status outputs alone supply immutable Prepare/decision/AppliedAll/release/Finish facts. Exact node/ticket/operation/command/first-position binding and explicit host-fresh generation reject stale outputs; Unknown/admission refusal never means semantic Abort. Constructor preflights fixed opening catalogs, sum of coordinator quotas and read envelopes. Accepted work/output credits survive close, lost observations and failed opaque completion cleanup. Actual single-voter five-group Node controls and selected protocol histories are checked; complete three-replica TCP/QUIC multi-group fault recovery and Linux/macOS qualification remain317 obligations. Application format is unchanged. Actual three-replica five-group native TCP/QUIC histories now pass14/0 and TLS-only7/0, including own checkpoint-plus-suffix recovery verified before Node polling/catch-up, graceful leader replacement, retained unobserved phases, original opaque-output ownership and unknown quorum observation. Frozen Linux/macOS integrated qualification remains open; these are not abrupt-crash or physical-partition histories."
+    },
+    {
+      "design_id": "C03/C04",
+      "public_contract": "StripedIo / StripedJournal / FileStripedIo / StripedLimits / StripedLogStore",
+      "operations": [
+        "lane_count",
+        "read_catalog",
+        "read_payload",
+        "append_payload",
+        "sync_payload",
+        "truncate_payload",
+        "publish_catalog",
+        "create",
+        "open",
+        "open_surviving",
+        "recover",
+        "inspect_control",
+        "create_striped",
+        "recover_striped"
+      ],
+      "native": "Explicit fixed-lane native JournalIo adapter over exactly one NativeLogStore; selected native frame bytes are chunked once across payload lanes and complete command-stripped control catalogs are mirrored.",
+      "conformance": [
+        "tests/striped_log_store.rs",
+        "tests/striped_log_store/histories.rs",
+        "tests/striped_log_store/faults.rs",
+        "tests/striped_log_store/files.rs",
+        "tests/striped_wal_model.rs",
+        "tests/striped_node.rs",
+        "src/native/log_store/striped/file/tests.rs"
+      ],
+      "scope": "Linux selected downstream tests cover native append/barrier/range/suffix/snapshot metadata/reclamation/reopen, stale original tickets, primitive-boundary injected before/after failures, control survival plus payload quarantine after either device loss, checksums, catalog limits and shared exclusive native locks. Exact immutable lane IDs, bounded two-slot payload generations and greatest exact catalog epochs preserve one ordered log. Full selected original frames must match catalog checksums/control images; diagnostic surviving control provides no voting/append authority. Catalog exhaustion conservatively fences through the existing JournalIo uncertainty contract even when preflight prevented writes. Snapshot durable pins remain a separate original LogUpdate precondition. No second LogStore, alternate codec compatibility, implicit migration, default-provider promotion or performance claim. Actual Node integration, native file primitive interruption controls and both-platform frozen qualification remain required. Actual three-voter native TCP/QUIC Node histories now pass, including own checkpoint plus suffix before peer polling. Native file tests execute 60 before/after primitive error locations per all-feature and native-only profile, including acknowledged generation2-to3 parity reuse and exact own-file reopening. These are process/file-error controls, not sudden-power-loss evidence. Frozen318 Linux is fully qualified; integrated macOS and later319 cut qualification remain separate."
+    },
+    {
+      "design_id": "C06/C13",
+      "public_contract": "LogicalBackingChild / LogicalBackingBridge / LogicalBackingPump / LogicalBackingPollError",
+      "operations": [
+        "local",
+        "state",
+        "failure",
+        "propose",
+        "read",
+        "poll",
+        "poll_client",
+        "poll_read",
+        "complete_client",
+        "complete_read",
+        "backing_is_drained",
+        "pump_backing",
+        "endpoint_chain",
+        "inspect_backing",
+        "checkpoint",
+        "checkpoint_backing",
+        "cancel_client",
+        "cancel_read"
+      ],
+      "native": "Crate-sealed trusted backing joint with original selected-network NetworkNode and owning LogicalNode adapters; direct Node and LogicalChildBridge aliases remain compatible.",
+      "conformance": [
+        "tests/logical_voter_native/backing.rs",
+        "tests/logical_voter_native.rs",
+        "tests/logical_voter_network.rs",
+        "tests/logical_nested_native/maintenance_controls.rs",
+        "tests/logical_nested_native.rs",
+        "tests/logical_relay_native/history.rs",
+        "tests/logical_relay_native/history/controls.rs",
+        "tests/logical_relay_native/cluster.rs"
+      ],
+      "scope": "Exact original provider tuple, opaque client/read outputs and associated bounded poll budget. Scoped HRTB lower-port pumping never exposes mutable owner or routers; original accepted work survives close/failure. Typed Node/Replica/Network/LogicalNode failures remain non-lossy. Physical adapter has no lower obligations; logical adapter derives work quiescence from its actual original driver, ports, routers, queues and sessions. Selected physical native TCP/QUIC regressions pass. The owning logical adapter is implemented; actual full two-level native qualification remains open. Immediate electorate/store/session and sealed physical endpoint identities remain distinct. Scoped read-only inspection of original local providers permits diagnosis while an upper bridge owns the exclusive completion streams; no mutable owner, original output or retained borrow escapes. Checkpoint forwarding admits the existing exact selected-group control under the exclusive bridge borrow, even during active bridge work. Success is admission only: original Published, compacting Persist and Reconcile must complete before reclaim/drain. A focused real three-child Linux TCP control passes invalid-slot/closed refusal, unchanged owner credits and base at admission, original checkpoint completion, fresh Claim and owned join/rebind. The multi-level maintenance history remains failing at an original release permit; this control does not qualify it or macOS maintenance. TargetB347 sealed cancellation delegates to the existing original Node/LogicalNode client and read cancellation methods, stopping observation without canceling durable operation ownership. C371 qualifies Linux TCP/QUIC genuine three-node relay-network LogicalApplication backing through the same bridge/facade: current authenticated source-view readiness, tracked cancellation and preserved default configuration refusal, real Claim, original writes/reads, checkpoint, same-store WAL reopen, fresh higher-session Claim, dedupe/new command and complete physical/helper joins. The adapter is generic over existing PeerNetworkConfiguration; no new public operation or fabricated authority. Direct TCP/QUIC facade regressions pass. All four strict configurations and formatting pass on1305 guarded inputs. Matching Mac TCP1/0 (5.11s), QUIC1/0 (9.12s) and direct regressions2/0 (3.73s) now pass with all four strict configurations/formatting zero,1305 source and actual executable guards unchanged. Root inspected all15 recorded runner stages0; relay-backed dynamic learner promotion, helper restart during logical recovery and deep multi-owner logical replacement are not inferred from this static history."
+    },
+    {
+      "design_id": "C06/C13",
+      "public_contract": "LogicalEndpointChain / LogicalEndpointHop / LogicalEndpointError",
+      "operations": [
+        "hops",
+        "leaf",
+        "leaf_group",
+        "depth"
+      ],
+      "native": "Opaque immutable bounded route from consumed Claim plus subsequent original quorum Image and selected representative ownership.",
+      "conformance": [
+        "src/logical_voter/endpoint/shape/tests.rs",
+        "tests/logical_voter_native/endpoint.rs"
+      ],
+      "scope": "No public scalar constructor or authority factory. At most eight logical hops; current original owner/core/store/membership and hop adjacency are checked; repeated groups, voters, stores and excessive depth refuse. Actual native selected representative3 differs from responding leader1 and supplies the physical leaf. Synthetic shape controls mint no Claim, barrier or verified chain. Logical membership identities are not relabelled as physical socket identities. Actual recursive replacement and both-platform qualification remain required."
+    },
+    {
+      "design_id": "C06/C13",
+      "public_contract": "LogicalNode / LogicalNodeParts / LogicalNodePump / LogicalNodeRecovery / LogicalNodeLimits / LogicalNodePollBudget / LogicalNodeShutdownProgress / LogicalNodeShutdownRejected / LogicalPeerClosure / LogicalPeerAttachRejected",
+      "operations": [
+        "from_parts",
+        "local",
+        "state",
+        "failure",
+        "endpoint_chain",
+        "propose",
+        "read",
+        "poll_client",
+        "complete_client",
+        "poll_read",
+        "complete_read",
+        "cancel_client",
+        "cancel_read",
+        "campaign",
+        "heartbeat",
+        "checkpoint",
+        "pump_backing",
+        "poll",
+        "work_is_drained",
+        "close_intake",
+        "is_drained",
+        "abort",
+        "into_parts",
+        "into_recovery",
+        "poll_shutdown",
+        "inspect_read",
+        "export_checkpoint",
+        "poll_checkpoint_export",
+        "complete_checkpoint_export",
+        "cancel_checkpoint_export",
+        "drain_failed_checkpoint_exports",
+        "configure",
+        "poll_configuration",
+        "cancel_configuration",
+        "configuration_requests_are_drained",
+        "configuration_status",
+        "request_learner_readiness_tracked",
+        "cancel_learner_readiness_tracked",
+        "attach_peer_session",
+        "inspect_deferred",
+        "retire_peer_session"
+      ],
+      "native": "Owning caller-polled logical facade over original NodeLocalParts, child-backed workers/ports, LogicalReplicaDriver and explicitly supplied authenticated sessions; no parent WAL or hidden executor.",
+      "conformance": [
+        "tests/logical_voter_native/facade.rs",
+        "tests/logical_voter_native/facade/fixture.rs",
+        "tests/logical_voter_native/facade/histories.rs",
+        "tests/logical_voter_native/facade/restart.rs",
+        "tests/logical_voter_native/facade/abort.rs",
+        "tests/logical_voter_native/facade/cancel.rs",
+        "tests/logical_voter_native/facade/shutdown.rs",
+        "tests/logical_activation_driver/cohort/close.rs",
+        "tests/logical_activation_driver/cohort/close/shutdown.rs",
+        "tests/logical_activation_driver/cohort/history.rs",
+        "tests/logical_activation_driver/cohort/cleanup.rs",
+        "tests/logical_activation_driver/cohort/progress.rs",
+        "tests/logical_voter_native/facade/shutdown_service.rs",
+        "tests/logical_activation_driver/cohort/close/rejection.rs",
+        "tests/logical_voter_native/facade/exports.rs",
+        "tests/logical_voter_native/facade/administration.rs",
+        "tests/logical_activation_nested/history.rs",
+        "tests/logical_activation_nested/controls.rs",
+        "tests/logical_activation_nested/enrollment.rs",
+        "tests/logical_activation_nested/readiness.rs",
+        "tests/logical_activation_nested/repeated.rs"
+      ],
+      "scope": "One selected group with generic host application, scheduler/timers/entropy and SecureSession/codecs. Pure construction validates consumed-image state, current original authorization/route, provider/port/router bindings, quiescence and complete fixed peer routes; rejection returns original parts. Bounded network polling retains original overloaded sends, backpressured ingress and rejected completions. Mandatory original child-release gates remain in ReplicaDriver; scoped lower pumping permits progress under upper bridge exclusive borrowing. Explicit quiesce/drain and recovery retain every accepted lower dependency and original opaque output. Linux singleton logical-voter facade backed by an actual three-physical-voter quorum passes TCP/QUIC and TLS-only controls, with original checkpoint publication held by child observations, later suffix, actual backing-store cold reopen, exact parent/application restore before polling, missing-snapshot refusal with original-part reuse, duplicate result/current retry position and fresh quorum read. No fabricated peer responses. This is not qualification of the separately planned two-level multi-voter topology, nested membership activation or all-depth recovery; The frozen323 Linux/macOS cut qualifies the selected facade/recovery/cancellation histories. Later held-checkpoint close correction is separately tested on Linux and needs fresh macOS qualification. Quiescing closes owner timer admission after original service results settle; Draining continues the original driver until accepted lower work and sends settle, then closes sessions and cancels unadmitted receive bytes. Controlled original native TCP running-peer-close passes after a clean crate rebuild: three logical parents backed by nine actual physical owners, 7 original plaintext bytes of a 605-byte authorized frame, real peer close and Network(Session(Closed)) recovery, retained original Failed completion with queue credit until exact consumption, unaccepted original batch cancellation and actual joins/rebind. Exact lower WAL/snapshot/release/child ownership is settled before inducing failure. This covers running refusal and original recovery consumption only; requested graceful shutdown with outstanding sends, full activation cleanup, accepted-WAL failure cleanup and newer macOS control remain unqualified. First cached diagnostic-linked run is excluded from production acceptance. Explicit poll_shutdown now advances original service-empty Quiescing to Draining before network polling, cancels exact never-session-accepted originals, correlates accepted terminal send outputs, reports bounded local delivery/peer closure observations and preserves collected observations in a boxed rejection. Running plain poll remains strict; only explicit Draining Closed/Session(Closed) with actual terminal transport and exact original completion consumption can retire a peer as a scoped closure. Clean frozen native TCP pair2/0 and original held-checkpoint TCP/QUIC plus TLS-only controls qualify selected paths. No global shutdown, held service-output, other provider-error, full activation, all-depth or newer macOS certification follows. Full Linux three-parent/ten-native-owner child replacement334 now passes TCP/QUIC with original business/protocol assertions and all real cleanup/joins. Service-output holds, other provider-fault rejection, lost/restart, recursive activation and current macOS remain distinct unqualified scope. LogicalNode original live checkpoint export now delegates to the same selected SnapshotRouter/LogicalSnapshotWorker sole consumer without closing/reopening source or changing representative session. Original immutable Load data supplies no readiness/voting authority; cancellation retains accepted work, opaque output holds credits through close/recovery, exact completion releases them. Linux TCP/QUIC singleton controls pass4/0, with explicit export-capable recovery metadata allowance and actual worker joins; Mac343 qualifies the same four selected live-export and abort/recovery histories on the frozen current source. Learner import/full logical membership remain unqualified. Slice342 retains the original ConfigurationRequests observer on the SAME EffectOwner, with checked request/byte limits, exact OwnerStep and durable journal correlation, cancellation without queued-event removal, held Shutdown metadata before owner drain, and OwnerFailed observer transfer with original recovery parts. Public historical status grants no fresh quorum authority. The existing default configuration policy is preserved: it rejects nonempty promotion readiness rather than all Configure events; a valid empty-readiness same-electorate Learners operation genuinely commits. Linux TCP/QUIC original observer controls pass 2/0; frozen Mac343 qualifies the same two controls plus four live-export histories, three result-gate/defective-codec controls and fifteen snapshot-export regressions (24 actual tests), with formatting and four strict Clippy profiles at zero. This does not implement stronger sealed logical promotion authorization, dynamic learner transport, durable logical learner import/Claim, nine-plus-three replacement or complete recursive membership. C355 exposes original tracked learner-readiness request/cancellation, immutable deferred-batch inspection and checked whole authenticated session attachment with LogicalPeerAttachRejected preserving caller ownership. Sealed activation authorizes actual execution on the SAME original core; default nonempty promotion remains refused. Frozen first12-owner Linux TCP/QUIC qualifies actual source export/import, original request scopes and attachment through Joint/Final and cleanup. Cancellation assertions are added in C361 but the full new slice is not yet qualified. C361 adds bounded verified candidate catalogs and retire_peer_session: only Running, exact current/rollback peer exclusion, drained original queue/pending/input/completion/session work, checked catalog contraction before mutation, then whole original session handback for host close. Its repeated15-owner and cold histories remain unqualified; Mac first-C fails before Enrolling and has separate immutable diagnostics. C365 qualifies Linux TCP/QUIC imported target-only same-store cold reconstruction with source9 owners live, fresh genuine Claim/Enrollment/Image/Snapshot provenance and complete12-owner terminal cleanup. Actual follower tracked readiness cancellation, wrong-group and closed refusal execute in those histories. Full12-owner cold Joint/Unknown, repeated-history final cleanup and current Mac membership remain open. C367 qualifies Linux all12-store WAL restore with committed/applied Joint and no committed/applied Final, fresh claims and new same-intent driver through terminal lifecycle. Its original pre-stop committed/zero-Final-admission claim is not established by the existing check. C368 qualifies committed-Unknown target3 cold with source9 live. Repeated receipt closure, uncommitted Unknown, stronger boundary and Mac remain open."
+    },
+    {
+      "design_id": "C05/C25",
+      "public_contract": "LogicalActivationApplication over StateMachine, ProposalAdmission, BoundedStateMachine, BoundedReadableStateMachine, CheckpointStateMachine and LogicalResponseCodec",
+      "operations": [
+        "new",
+        "parent",
+        "inner",
+        "mappings",
+        "limits",
+        "business",
+        "begin",
+        "status",
+        "active",
+        "validate_group",
+        "deployment_requirements",
+        "validate_deployment_requirements",
+        "validate_proposal_context",
+        "validate_proposal",
+        "applied_index",
+        "apply_batch",
+        "receipt_bytes_bound",
+        "schema_version",
+        "checkpoint",
+        "restore_checkpoint",
+        "query_bytes",
+        "read_result_bound",
+        "read_result_bytes",
+        "read_at",
+        "logical_response_schema",
+        "receipt_encoding_bound",
+        "encode_receipt",
+        "query_encoding_bound",
+        "encode_query",
+        "read_encoding_bound",
+        "encode_read",
+        "control_profile",
+        "logical_activation_control_profile"
+      ],
+      "native": "Opt-in bounded parent-replicated child activation application around the selected host application; original business commands and control Noops share one original Raft log.",
+      "conformance": [
+        "tests/logical_activation_application.rs",
+        "tests/logical_activation_application/contracts.rs",
+        "src/logical_voter/activation/tests/semantics.rs",
+        "src/logical_voter/activation/tests/recovery.rs",
+        "src/logical_voter/activation/tests/control_profile.rs",
+        "tests/logical_activation_driver/bindings.rs"
+      ],
+      "scope": "Canonical three-voter majority child replacement preserves two original node/store identities and changes one physical voter. One active durable Begin→Outcome→Release slot; Busy and completed intents are permanently retained within explicit lifetime capacity. Original phase IDs, first positions, exact retries and reserved terminal capacity survive the own checkpoint plus suffix. Private terminal encoders are trusted protocol assertions, not consumed-Node observations or public authority constructors. Actual learner/Joint/Final driver, parent-cell and recursive activation and Linux/macOS native qualification remain pending. The immutable profile comes from the actual configured wrapper; it selects budget parsing only and does not create consumed observations or permits. Exact selected profile is configuration inspection only; verified image selection is minted from the actual backing assembly when original Claim/read provenance is consumed. Parent construction compares the complete actual wrapper profile before moving owned parts. A storage application profile classifies stored parent commands and remains distinct from the profile of its own consumed command envelope. Full parent/router control reservation is still pending."
+    },
+    {
+      "design_id": "C05/C25",
+      "public_contract": "LogicalActivationControlProfile",
+      "operations": [
+        "parent",
+        "mappings",
+        "limits",
+        "inner_schema",
+        "application_schema",
+        "response_schema",
+        "format_version"
+      ],
+      "native": "Immutable exact profile returned by the actual configured LogicalActivationApplication, with private construction and bounded original envelope classification.",
+      "conformance": [
+        "src/logical_voter/activation/tests/control_profile.rs",
+        "src/logical_voter/application/tests/control_profile.rs",
+        "tests/logical_activation_application/contracts.rs"
+      ],
+      "scope": "Construction-time budget classification only. Complete original envelopes distinguish control from wrapped business, retain whole mixed content and refuse malformed/foreign Begin shapes. Exact profile bytes bind child checkpoint replay. Accessors expose immutable selected configuration and never mint runtime or quorum authority; original parent/router reservation and full native activation qualification remain pending."
+    },
+    {
+      "design_id": "C05/C25",
+      "public_contract": "ChildActivationDriver / sealed LogicalActivationParent",
+      "operations": [
+        "new",
+        "intent",
+        "phase",
+        "failure",
+        "original_begin_position",
+        "is_drained",
+        "pump",
+        "advance",
+        "stop_waiting",
+        "try_reclaim",
+        "LogicalActivationParent::profile",
+        "LogicalActivationParent::bindings",
+        "LogicalActivationParent::observer_bounds",
+        "LogicalActivationParent::is_running",
+        "LogicalActivationParent::observers_are_drained",
+        "LogicalActivationParent::begin_bytes",
+        "LogicalActivationParent::propose",
+        "LogicalActivationParent::status",
+        "LogicalActivationParent::poll_client",
+        "LogicalActivationParent::complete_client",
+        "LogicalActivationParent::poll_read",
+        "LogicalActivationParent::complete_read",
+        "LogicalActivationParent::cancel_client",
+        "LogicalActivationParent::cancel_read",
+        "LogicalActivationParent::poll",
+        "LogicalActivationParent::pump",
+        "LogicalActivationParent::observer_stream_is_clear"
+      ],
+      "native": "Owned original parent driver over a sealed genuine LogicalNode adapter around the selected LogicalActivationApplication; HRTB pump preserves original backing resources.",
+      "conformance": [
+        "tests/logical_activation_driver.rs",
+        "tests/logical_activation_driver/history.rs",
+        "tests/logical_activation_driver/fixture.rs",
+        "tests/logical_activation_driver/progress.rs",
+        "tests/logical_activation_driver/cohort/pressure/history.rs",
+        "tests/logical_activation_driver/cohort/pressure/holding.rs",
+        "tests/logical_activation_driver/cohort/pressure/ownership.rs",
+        "tests/logical_activation_driver/cohort/pressure/guards.rs",
+        "tests/logical_activation_driver/cohort/pressure/controls.rs",
+        "tests/logical_activation_driver/cohort/byte_pressure/history.rs",
+        "tests/logical_activation_driver/cohort/byte_pressure/clients.rs",
+        "tests/logical_activation_driver/cohort/byte_pressure/holding.rs"
+      ],
+      "scope": "Bounded original Begin and fresh Status observation with exact owner/router/ticket/group/operation/first positions, one pending attempt and one retained rejected output. Cancellation releases observer interest only; completion retains original lower dependencies. No public scalar positive observation factory. Actual TCP/QUIC single logical parent over three physical backing voters qualifies parent observation ownership; Begun is intermediate. Actual learner enrollment, Joint/Final, terminal Outcome/Release, original mixed parent/router reserve, full9+1 and recursive qualification remain incomplete. Scoped observer-stream clearing now permits attachment/reclaim with exact externally held terminal ordinary observations while global Node/router drain remains false. No unrelated queued/inflight/control output is stolen. Native full TCP/QUIC replacement under ordinary count pressure passes with original four opaque outputs and exact credit retention, then host consumption and actual joins. Byte/lower capture pressure, recursive logical membership and macOS remain distinct. Client ordinary-byte saturation also passes native TCP/QUIC: one genuine host-held duplicate output retains64687bytes of65536 ordinary window, leaving849 versus next normal850 with one count slot free. Same original allocation/content refuses unchanged; full replacement, later original business and joins complete without a quota/lifetime change. Read bytes and application/release capture remain separate scope."
+    },
+    {
+      "design_id": "C01/C10/C15/C24",
+      "public_contract": "ChildActivationDriver native child administration / LogicalActivationBackingChild / LogicalActivationAuthorization / LogicalActivationContinuation",
+      "operations": [
+        "advance_with_child",
+        "advance_child",
+        "detach_child",
+        "attach_enrolled_child",
+        "stop_waiting_with_child",
+        "LogicalActivationBackingChild::configuration_requests_are_drained",
+        "LogicalActivationBackingChild::configure_activation",
+        "LogicalActivationBackingChild::cancel_activation_read",
+        "LogicalActivationBackingChild::poll_activation_configuration",
+        "LogicalActivationBackingChild::cancel_activation_configuration",
+        "LogicalActivationBackingChild::request_activation_readiness",
+        "LogicalActivationBackingChild::cancel_activation_readiness",
+        "LogicalActivationBackingChild::activation_readiness",
+        "LogicalActivationBackingChild::pending_activation_readiness",
+        "LogicalActivationBackingChild::activation_peer_binding",
+        "LogicalActivationBackingChild::poll_activation",
+        "LogicalActivationAuthorization::intent",
+        "LogicalActivationAuthorization::parent_owner",
+        "LogicalActivationAuthorization::profile",
+        "export_checkpoint_backing",
+        "poll_checkpoint_export_backing",
+        "complete_checkpoint_export_backing",
+        "cancel_checkpoint_export_backing",
+        "LogicalActivationBackingChild::export_checkpoint",
+        "LogicalActivationBackingChild::poll_checkpoint_export",
+        "LogicalActivationBackingChild::complete_checkpoint_export",
+        "LogicalActivationBackingChild::cancel_checkpoint_export"
+      ],
+      "native": "Sealed physical Node administrative extension and original ChildActivationDriver/LogicalBackingBridge composition; actual native child history pending.",
+      "conformance": [
+        "src/logical_voter/activation/driver/child.rs",
+        "src/logical_voter/activation/driver/authorization.rs",
+        "src/logical_voter/bridge/backing/activation.rs",
+        "src/logical_voter/bridge/backing/physical/activation.rs",
+        "src/logical_voter/bridge/activation/continuation.rs",
+        "src/logical_voter/bridge/activation/readiness.rs",
+        "src/logical_voter/bridge/activation/export.rs",
+        "tests/logical_activation_driver/readiness.rs",
+        "tests/logical_activation_driver/learners.rs",
+        "tests/logical_activation_nested/history.rs",
+        "tests/logical_activation_nested/controls.rs",
+        "tests/logical_activation_nested/enrollment.rs",
+        "tests/logical_activation_nested/assembly.rs"
+      ],
+      "scope": "Registered admin328 source compiles with strict lint; no native child or recursive activation qualification is claimed. Nonclone private authorization retains original consumed parent Status provenance and immutable canonical phase plan; default physical poll still refuses administrative configuration. Original configuration completion and fresh applied history feed Learners/Joint/Final progression. Tracked readiness/cancellation pins the original AdmissionTicket/OwnerStep and authenticated live learner session; pending request inspection supplies no positive readiness. Drained consuming detach retains original representative/logical session in opaque continuation; real enrolled cohort must reattach in that same scope and reobserve Learners before Joint. Native fourth-child enrollment requires live original snapshot export, currently planned331. Full-quota Outcome/Release, partial-loss recovery, parent-cell/recursive activation, all actual administrative fault controls and platform qualification remain unproven. The separate advance_child path lets the actual parent endpoint pump its own backing bridge while the target child remains exclusively owned; convenience combined advancement rejects an unrelated backing store. Continuation retains the original Claim barrier floor and requires fresh actual child Metadata revalidation; carrier fields create no fresh authority. New readiness/cancel histories are running and do not yet qualify full child activation. Nine current Linux original parent/readiness/absent-learner/cancel-before-dispatch/selected-router controls pass TCP/QUIC. Actual one-parent/four-child pilot passes TCP/QUIC live Node export/import, same-session continuation, authenticated readiness, Joint/Final and parent Outcome/Release; accepted readiness cancellation controls also pass. Selected target passes13 all and7 TLS-only. Two earlier12/1 immediate bridge-close observations remain unresolved, despite the later exact-predicate13/0 run. Full three-parent/ten-owner, restart/loss, full quota and newer macOS activation remain pending. Cancel-before-dispatch retains the original Unknown observer until the exact original OwnerStep executes. Compact declared child checkpoint bounds obey unchanged native transport guards; no whole-state checkpoint capacity claim. Slice350 retains full original consumed Learners history/ticket/barrier/owner instead of a boolean and reserves its coexistence with later reads before authorization; original native TCP/QUIC Learners refusal/cleanup controls pass. This retention alone is not an enrollment export factory. Composed C355/native356 Linux TCP/QUIC qualification uses three original logical members backed by nine actual NativeNodes plus one enrolled logical learner backed by three fresh NativeNodes. Genuine source export/opaque enrollment, actual target import and fresh Claim observations, authenticated attachment/readiness, Joint/Final, Outcome/Release, post-change write/read and all12 native worker/session cleanup pass. Foreign source refuses with same original export/heap/credits; deferred ticket/effect/operation/heap/credits survive import and attachment. This is the first replacement only: repeated candidate/catalog retirement, Unknown/imported/Joint cold reconstruction, actual logical readiness cancellation and current Mac remain separate functional duties."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "SnapshotRouter live exports / SnapshotExportTicket / SnapshotExportCompletion / SnapshotExportOutcome / SnapshotExportRejected",
+      "operations": [
+        "export_checkpoint",
+        "poll_export",
+        "complete_export",
+        "cancel_export",
+        "close_exports",
+        "drain_failed_exports",
+        "ticket",
+        "outcome",
+        "checkpoint_exports_are_drained"
+      ],
+      "native": "Original selected SnapshotWorker Load over the existing SnapshotRouter sole consumer; NativeSnapshotWorker/FileSnapshotIo and host replacement controls",
+      "conformance": [
+        "tests/snapshot_exports.rs",
+        "tests/snapshot_exports/intake.rs",
+        "tests/snapshot_exports/lifecycle.rs",
+        "tests/snapshot_exports/errors.rs",
+        "tests/snapshot_exports/failed_jobs.rs",
+        "tests/snapshot_exports/native.rs"
+      ],
+      "scope": "Opaque nonclone output and exact owner/worker/request/visit/reference correlation; scalar tickets grant no activation or durability authority. Existing durable anchor/configuration/schema is pinned before bounded original worker admission. Poll transfers output while credits remain held. Pending cancellation retains actual worker dependency, externally held cancellation waits for exact consume, failed-only drain replaces the sole consumer after fencing and reconciles normal jobs without fabrication. Linux controls13 all/12core plus14 original snapshot-router regressions pass; real native snapshot-worker load uses a host WAL, not an actual native Node/enrollment history. Frozen Mac331 passes the original export controls; the later Linux one-parent/four-child pilot consumes actual Node export/import through readiness/Joint/Final/Outcome/Release. Full three-parent/ten-owner and P8 qualification remain outstanding. Additive331B pure export-only drain inspection preserves ordinary healthy snapshot ownership; actual separate-group normal work and externally held export controls pass on Linux. This additive getter is excluded from frozen Mac331. Frozen Mac343 also passes all fifteen current snapshot_exports regressions, including validated same-group held-export/ordinary-snapshot retry contention, with original snapshot-worker controls and source guards; this is selected platform regression evidence, not attribution or successful rerun of the earlier full Mac334 activation failures."
+    },
+    {
+      "design_id": "C06/C10/C13/C15",
+      "public_contract": "ReadRequests::inspect / EffectOwner::inspect_visit / LogicalBackingBridge::inspect_work / ReadInvocationInspection / EffectVisitInspection / LogicalBridgeWorkInspection",
+      "operations": [
+        "inspect",
+        "inspect_visit",
+        "inspect_work"
+      ],
+      "native": "Allocation-free immutable sampled views of original retained read, Visit/lease and bridge work; no new provider or runtime.",
+      "conformance": [
+        "tests/logical_voter_network/held_read.rs",
+        "tests/logical_voter_network/held_read/inspection.rs",
+        "tests/logical_voter_network/held_read/phases.rs"
+      ],
+      "scope": "Private-field views preserve original ticket/admission/lifecycle state, exact leased EffectTicket/kind and borrowed bridge command/capsule/child attempt. Foreign/reclaimed read tickets and unknown groups refuse. Getters expose diagnostic data only; no mutable owner, opaque output, quorum/read barrier or release authority escapes. Absent samples can miss completed transitions and never prove success. Actual Linux TCP/QUIC nine-child/three-parent control matches original ReadProbe lease to child command/ticket, retains64 completion-withheld polls, resumes through actual peer quorum, consumes exact value5 output and joins. Full affected network target4/0 and final focused2/0 pass; nested316 identity/cause and current macOS remain unqualified."
+    },
+    {
+      "design_id": "C05/C10/C15",
+      "public_contract": "ClientRouter / ReadRequests exported ordinary observer inspection",
+      "operations": [
+        "ClientRouter::retains_only_exported_ordinary_outputs",
+        "ReadRequests::retains_only_exported_ordinary_outputs"
+      ],
+      "native": "Pure scoped inspection of original terminal exported ordinary client/read ownership; no provider, I/O, new runtime or positive consensus proof.",
+      "conformance": [
+        "tests/logical_activation_driver/cohort/pressure/history.rs",
+        "tests/logical_activation_driver/cohort/pressure/holding.rs",
+        "tests/logical_activation_driver/cohort/pressure/ownership.rs",
+        "tests/logical_activation_driver/cohort/pressure/guards.rs",
+        "tests/logical_activation_driver/cohort/pressure/controls.rs",
+        "tests/logical_activation_driver/cohort/byte_pressure/history.rs",
+        "tests/logical_activation_driver/cohort/byte_pressure/clients.rs",
+        "tests/logical_activation_driver/cohort/byte_pressure/holding.rs"
+      ],
+      "scope": "Only the exact selected group/current logical binding is eligible. No ready/unstepped/control/foreign/inflight observation or unresolved admission/position/cancellation/execution remains. Original externally held outputs and all count/byte reservations survive. Settled terminal Cancelled ordinary read outputs are eligible only after the actual matching cancel step clears remaining ownership. Existing global is_drained remains false until host exact consumption. Full Linux TCP/QUIC three-parent/ten-native-owner replacement passes with actual ordinary count/group saturation and original outcomes retained through Begin/Status/Outcome/Release/reclaim; independent native refusal/cancellation/foreign/stale controls pass. Actual count-profile charges are two clients1700bytes and two read invocations1776bytes. Byte/application/release saturation, macOS, parent-cell/recursive membership and lost/restart are separate open scope. Client ordinary-byte saturation also passes native TCP/QUIC: one genuine host-held duplicate output retains64687bytes of65536 ordinary window, leaving849 versus next normal850 with one count slot free. Same original allocation/content refuses unchanged; full replacement, later original business and joins complete without a quota/lifetime change. Read bytes and application/release capture remain separate scope."
+    },
+    {
+      "design_id": "C06/C13",
+      "public_contract": "LogicalBackingBridge observation handoff",
+      "operations": [
+        "observations_are_drained"
+      ],
+      "native": "Existing sealed physical/logical backing bridge; sampled complete original bridge-owned fields and exclusively consumed child client/read streams.",
+      "conformance": [
+        "tests/logical_nested_native/handoff_control.rs",
+        "tests/logical_nested_native/handoff_control/held.rs",
+        "tests/logical_nested_native/host.rs"
+      ],
+      "scope": "Pure observation settlement allows an owning host to return a borrow while independently accepted child lower work remains owned. Existing full is_drained still includes all child backing_is_drained predicates. No quorum/delivery/whole-child drain proof or accepted-work cancellation. Actual27-physical/9-middle/3-top TCP control holds the same checkpoint owner/request/bytes/command/child ticket, drains original top owners, hands back middle owners, resumes same original request to checkpoint and joins all actual workers. Full nested TCP/QUIC, cold recovery and macOS remain separate qualification."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "PeerNetworkParts / PeerNetworkRejected",
+      "operations": [
+        "local",
+        "original_wire_version",
+        "source_identity",
+        "initial_routes",
+        "route_budget"
+      ],
+      "native": "PeerDriver direct adapter selected at construction; NetworkNode retains one owning runtime. Contract version1. Actual delegated native relay provider remains unimplemented.",
+      "conformance": [
+        "src/runtime/peer_network.rs",
+        "src/runtime/peers/network.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node_network/provider.rs",
+        "tests/support/node_network.rs"
+      ],
+      "scope": "Pure selected construction identity, routes and budgets must validate before ownership moves; refusal returns concrete original provider/local inputs. Network346 validates direct compatibility and public selected-provider injection on Linux; arbitrary replacement providers, delegated paths and Mac same-cut composition require separate qualification."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "PeerNetwork / NetworkNode / NetworkNodeParts / NativeNetworkNode",
+      "operations": [
+        "build",
+        "source_view",
+        "poll",
+        "drain",
+        "close",
+        "is_drained",
+        "next_deadline",
+        "into_parts",
+        "into_recovery"
+      ],
+      "native": "PeerDriver direct adapter selected at construction; NetworkNode retains one owning runtime. Contract version1. Actual delegated native relay provider remains unimplemented.",
+      "conformance": [
+        "src/runtime/peer_network.rs",
+        "src/runtime/peers/network.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node_network/provider.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node.rs"
+      ],
+      "scope": "Use one supplied provider and one owning runtime. Preserve original ingress/outbound ownership, local-only send semantics, bounded polling and full concrete parts/recovery without implicit fallback. Network346 validates direct compatibility and public selected-provider injection on Linux; arbitrary replacement providers, delegated paths and Mac same-cut composition require separate qualification."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "PeerNetworkConfiguration",
+      "operations": [
+        "original_wire_version",
+        "install_admission_routes",
+        "configuration_capacity",
+        "reconcile_planned_membership",
+        "preflight_event",
+        "reconcile_membership",
+        "set_admission_routes",
+        "disconnect"
+      ],
+      "native": "PeerDriver direct adapter selected at construction; NetworkNode retains one owning runtime. Contract version1. Actual delegated native relay provider remains unimplemented.",
+      "conformance": [
+        "src/runtime/peer_network/configuration.rs",
+        "src/runtime/peers/network.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node_network/provider.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node.rs"
+      ],
+      "scope": "Keep original accepted/committed membership, rollback-reachable routes, actual resource preflight and owned event/route refusal. Transport selection cannot activate membership. Network346 validates direct compatibility and public selected-provider injection on Linux; arbitrary replacement providers, delegated paths and Mac same-cut composition require separate qualification."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "PeerNetworkCredentials",
+      "operations": [
+        "replace_peer_credentials"
+      ],
+      "native": "PeerDriver direct adapter selected at construction; NetworkNode retains one owning runtime. Contract version1. Actual delegated native relay provider remains unimplemented.",
+      "conformance": [
+        "src/runtime/peer_network/optional.rs",
+        "src/runtime/peers/network.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node_network/provider.rs",
+        "tests/support/node_peer_credentials.rs"
+      ],
+      "scope": "Optional concrete credential replacement preserves exact expected/replacement generations and returns original material on refusal; unavailable capability is no fallback. Network346 validates direct compatibility and public selected-provider injection on Linux; arbitrary replacement providers, delegated paths and Mac same-cut composition require separate qualification."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "PeerNetworkInspection",
+      "operations": [
+        "peer_drain_status"
+      ],
+      "native": "PeerDriver direct adapter selected at construction; NetworkNode retains one owning runtime. Contract version1. Actual delegated native relay provider remains unimplemented.",
+      "conformance": [
+        "src/runtime/peer_network/optional.rs",
+        "src/runtime/peers/network.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node_network/provider.rs",
+        "tests/support/node.rs"
+      ],
+      "scope": "Optional drain inspection borrows the selected provider without transferring owners or manufacturing drained state. Network346 validates direct compatibility and public selected-provider injection on Linux; arbitrary replacement providers, delegated paths and Mac same-cut composition require separate qualification."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "AuthenticatedSourceView / AuthenticatedSourcePath",
+      "operations": [
+        "from_direct_transport",
+        "source",
+        "original_wire_version",
+        "direct_access",
+        "receiving_access",
+        "path",
+        "delegation_path"
+      ],
+      "native": "Direct native PeerDriver and selected NativeRelayNetwork capture actual authenticated origins/receiving paths. Identity observations never establish readiness, quorum or durability. Delegated provider implemented; platform qualification is scoped below.",
+      "conformance": [
+        "src/transport/source.rs",
+        "src/runtime/peers/network.rs",
+        "tests/support/node_network.rs",
+        "tests/support/node_network/provider.rs",
+        "tests/support/node_network.rs",
+        "tests/native_relay/history.rs",
+        "tests/native_relay/late_reply.rs",
+        "tests/native_relay/helper_restart.rs",
+        "tests/native_relay/recovery.rs",
+        "tests/native_relay/minority.rs",
+        "tests/native_relay/provider_refusal.rs",
+        "tests/native_relay/tree_history.rs",
+        "tests/native_relay/tree_restart.rs"
+      ],
+      "scope": "Capture identity only from an actual authenticated open direct transport. Catalogs cannot construct it and consumers independently reject a source NodeId mismatch. Never treat it as readiness, availability, quorum or durability evidence. Network346 validates direct compatibility and public selected-provider injection on Linux; arbitrary replacement providers, delegated paths and Mac same-cut composition require separate qualification. Source352 distinguishes original physical voter source from actual adjacent helper receiving access. Delegated direct_access returnsNone; readonly receiving_access/path preserve actual authenticated permitted path kind. Private delegated construction requires genuine validated input, never route catalog alone. Linux star TCP/QUIC12 histories pass, including late replies and decoder allocation conservation. This is explicit authenticated non-Byzantine delegation, not end-to-end origin crypto. Full helper-chain path, general trees and Mac remain next. Relay364 preserves a bounded copyable sequence of real helper captures exposed by delegation_path; final receiving physical binding remains separate. Actual Linux two-helper native histories assert origin3/helper10/helper9 and reverse route1/helper9/helper10. Static topology does not mint source observations. Initial Mac tree histories pass, but complete helper-restart and captured-binding lifetime follow-up remain open. Relay371 corrected Mac full native22/core17 and original helper restart now pass with guarded source/binaries. Buffered retained IO uses exact originally authenticated capture through clean closure; new admission/readiness remain Ready-only."
+    },
+    {
+      "design_id": "C01/C15/C24/C25",
+      "public_contract": "ChildActivationDriver source enrollment / LogicalLearnerEnrollment / LogicalEnrollmentExport / LogicalEnrollmentExportRejected",
+      "operations": [
+        "enroll_logical_learner"
+      ],
+      "native": "Owning driver consumes an original live LogicalNode export under retained original Learners authority; target-selected immutable codecs and initializer. No public capability constructor.",
+      "conformance": [
+        "src/logical_voter/activation/driver/enrollment.rs",
+        "src/logical_voter/activation/driver/enrollment/validation.rs",
+        "src/logical_voter/enrollment/capability.rs",
+        "tests/logical_activation_driver/source_export.rs",
+        "tests/logical_activation_nested/history.rs",
+        "tests/logical_activation_nested/controls.rs",
+        "tests/logical_activation_nested/enrollment.rs",
+        "tests/logical_activation_nested/assembly.rs"
+      ],
+      "scope": "Source351 checks original driver parent binding/authorization and full consumed Learners entry/barrier; actual logical source endpoint/representative/core/store, accepted AND committed stable assignment, current durable anchor/schema, full target-codec snapshot and retained memory before consumption. Wrong input retains the same opaque completion and credits. Postconsumption failure returns its owned original loaded/failed outcome. Actual TCP/QUIC missing-authority controls preserve the original backing export allocation/credits and all six original worker joins. Successful genuine 12-owner source mint, dynamic membership and Mac remain unqualified. Composed C355/native356 Linux TCP/QUIC qualification uses three original logical members backed by nine actual NativeNodes plus one enrolled logical learner backed by three fresh NativeNodes. Genuine source export/opaque enrollment, actual target import and fresh Claim observations, authenticated attachment/readiness, Joint/Final, Outcome/Release, post-change write/read and all12 native worker/session cleanup pass. Foreign source refuses with same original export/heap/credits; deferred ticket/effect/operation/heap/credits survive import and attachment. This is the first replacement only: repeated candidate/catalog retirement, Unknown/imported/Joint cold reconstruction, actual logical readiness cancellation and current Mac remain separate functional duties."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "NativeRelayBatch / RelayRequestScopes / RelayOutputLimits / RelayCaptureRejected / RelayLocalSend / RelayCompletionRejected",
+      "operations": [
+        "capture",
+        "ticket",
+        "original",
+        "encode",
+        "complete",
+        "RelayRequestScopes::ticket",
+        "RelayRequestScopes::current_requests",
+        "RelayRequestScopes::matches_reply"
+      ],
+      "native": "Original native outbound Send ownership plus existing NativeWireCodec, contract version1. Internal actual-Raft per-recipient classifier; no public caller Ready or Raft inspection authority.",
+      "conformance": [
+        "src/native/relay.rs",
+        "src/native/relay/completion.rs",
+        "src/raft/request_window.rs",
+        "src/raft/request_window_tests.rs",
+        "src/raft/request_window_tests/native_output.rs",
+        "src/raft/request_window_tests/snapshot.rs"
+      ],
+      "scope": "Relay348 captures the original OutboundQueue batch against the actual EffectOwner, retaining Vec allocation/SendTicket/admission through encode or completion refusal. Sealed per-recipient scopes derive from current core requests/readiness/authority/repair and genuine one-way outputs. Local Sent/Failed/Cancelled release queue ownership only; returned scopes remain separate. Actual17 core/native-output unit controls pass; these private finite controls do not qualify native files, authenticated delegated ingress, helper sockets, usable relay networks or Mac same-cut behavior. Downstream provider conformance review and actual native delegated source paths remain open."
+    },
+    {
+      "design_id": "C01/C10/C15/C24/C25",
+      "public_contract": "LogicalBackingBridge candidate enrollment / LogicalEnrollmentRejected / LogicalEnrollmentRecovery / LogicalEnrollmentRecoveryRejected",
+      "operations": [
+        "begin_enrollment",
+        "stop_enrollment_waiting",
+        "into_enrollment_recovery",
+        "resume_enrollment"
+      ],
+      "native": "Owned candidate target bridge over sealed genuine physical/logical backing Nodes; consumes opaque source capability and uses original client/read streams. No public source mint constructor.",
+      "conformance": [
+        "src/logical_voter/bridge/enrollment.rs",
+        "src/logical_voter/bridge/enrollment/recovery.rs",
+        "src/logical_voter/bridge/enrollment/tests.rs",
+        "src/logical_voter/bridge/enrollment/tests/controls.rs",
+        "src/logical_voter/bridge/enrollment/tests/fixture.rs",
+        "tests/logical_activation_nested/unknown_target.rs"
+      ],
+      "scope": "TargetB347 retains immutable import/encoded command through original Applied, Unknown, cancel and fresh exact Outcome resolution; canceled observation does not abort accepted work. Opaque recovery hands back original grant or bytes and original Nodes after its streams drain, refusing different live owner/target. Fresh original Enrollment→Image→current Snapshot barriers seal startup; later normal Claim advances current epoch/session while retaining original import. Candidate endpoint/current accepted AND committed membership and descriptor reconstruction are checked; bootstrap V1 path unchanged. Actual private native target TCP/QUIC histories with genuine three-node Applied/read/cleanup pass. Their deterministic private source grant is not source-authority qualification. Full downstream enrollment through genuine owning driver/source export, dynamic peers/readiness/JointFinal,12-owner recovery and Mac remain open. C368 qualifies genuine-source Linux TCP/QUIC import observation cancellation, exact original Applying→Resolving before recovery/resume, whole sealed recovery handback and fresh-owner refusal. Actual import subsequently commits; target3 same-store cold plus fresh Claim/Enrollment/Image/Snapshot resolves original full lineage while source9 stays live, then activation/business/all12 original joins pass. This is committed Unknown resolution, not uncommitted import absence or new-owner replay of old authority. Mac remains unqualified. C370 additionally qualifies Linux TCP/QUIC original uncommitted Unknown WAL cold: actual partition budget, exact persisted uncommitted import before and after same-store reopen, whole inert aborted domains with original network/worker terminal observations, genuine fresh election and correlated enrollment proof before retirement, then original activation and all12 closure. Repeated replacement and Mac qualification remain open."
+    },
+    {
+      "design_id": "C10/C15",
+      "public_contract": "LogicalReleaseLimits::capture_reservation_bytes<R,V>",
+      "operations": [
+        "capture_reservation_bytes"
+      ],
+      "native": "Pure checked footprint helper; original LogicalReleaseCoordinator capture_charge delegates the same exact arithmetic.",
+      "conformance": [
+        "src/runtime/logical_release/tests/capacity.rs",
+        "tests/logical_nested_native/parts.rs",
+        "tests/logical_nested_native/cold_recovery.rs"
+      ],
+      "scope": "Calculates complete declared capture storage for actual selected response types and effect/batch count: four original capsule copies plus ExpectedCapsule/request/Pending metadata, with checked overflow. It grants no source, readiness, release, durability or admission authority; caller must select valid limits and complete ordinary/control windows. Constructor behavior and existing1GiB ceiling remain unchanged. Eight focused Linux accounting/classification controls pass, including the old capsule-only profile refusal and protected complete static-batch capacity. The frozen363 native27-owner cold TCP/QUIC histories pass on the SAME assertion/overflow-enabled binary with actual same-store reopen, both-tier restore, original duplicate writes, fresh Read5 and all original worker/session cleanup. Static profile reserves one complete ordinary and one protected control batch, preserving counts; it is not activation all-reserved-window capacity certification. Mac and full metadata/lifetime/general-provider scope remain separately required."
+    },
+    {
+      "design_id": "C06/C13",
+      "public_contract": "NativeRelayPlan / RelayHelperPlan / RelayNetworkLimits / RelaySourceCapture / RelayFrame / NativeRelayBatch / RelayReceived / RelayHop / RelayForwarder / NativeRelayParts / NativeRelayNetwork / NativeTlsConfig relay profile / RelayTreePlan",
+      "operations": [
+        "RelayNetworkLimits::validate",
+        "NativeRelayPlan::new",
+        "NativeRelayPlan::local",
+        "NativeRelayPlan::helper",
+        "NativeRelayPlan::source",
+        "NativeRelayPlan::sources",
+        "NativeRelayPlan::original_wire_version",
+        "RelayHelperPlan::new",
+        "RelayHelperPlan::local",
+        "RelayHelperPlan::source",
+        "RelayHelperPlan::sources",
+        "RelayHelperPlan::original_wire_version",
+        "RelaySourceCapture::binding",
+        "RelaySourceCapture::source",
+        "RelaySourceCapture::original_wire_version",
+        "RelayFrame::kind",
+        "RelayFrame::original_ticket",
+        "RelayFrame::wire_bytes",
+        "RelayFrame::source_capture",
+        "RelayFrame::record_kinds",
+        "RelayFrame::returned_requests",
+        "NativeRelayBatch::frame",
+        "RelayReceived::frame",
+        "RelayReceived::source_view",
+        "RelayReceived::connection",
+        "RelayReceived::ticket",
+        "RelayHop::for_voter",
+        "RelayHop::for_helper",
+        "RelayHop::binding",
+        "RelayHop::authenticated_binding",
+        "RelayHop::session_deadline",
+        "RelayHop::state",
+        "RelayHop::captured_source",
+        "RelayHop::source_opened",
+        "RelayHop::submit",
+        "RelayHop::take_send",
+        "RelayHop::take_received",
+        "RelayHop::received",
+        "RelayHop::can_submit",
+        "RelayHop::work_is_drained",
+        "RelayHop::is_drained",
+        "RelayHop::next_deadline",
+        "RelayHop::close",
+        "RelayHop::abort",
+        "RelayHop::into_session",
+        "RelayHop::poll",
+        "RelayForwarder::build",
+        "RelayForwarder::source_capture",
+        "RelayForwarder::pending_requests",
+        "RelayForwarder::retained_bytes",
+        "RelayForwarder::close",
+        "RelayForwarder::is_drained",
+        "RelayForwarder::next_deadline",
+        "RelayForwarder::into_parts",
+        "RelayForwarder::attach_source_hop",
+        "RelayForwarder::abort",
+        "RelayForwarder::poll",
+        "RelayForwarder::poll_with_admission",
+        "NativeTlsConfig::with_relay_profile",
+        "RelayTreePlan::new",
+        "RelayTreePlan::max_hops",
+        "NativeRelayPlan::for_tree",
+        "RelayHelperPlan::for_tree",
+        "RelaySourceCapture::path"
+      ],
+      "native": "Attached authenticated-session nonvoting helper assembly implements the same PeerNetworkParts, PeerNetwork, PeerNetworkConfiguration and optional channel-replacement contracts.",
+      "conformance": [
+        "tests/native_relay/history.rs",
+        "tests/native_relay/late_reply.rs",
+        "tests/native_relay/helper_restart.rs",
+        "tests/native_relay/recovery.rs",
+        "tests/native_relay/minority.rs",
+        "tests/native_relay/provider_refusal.rs",
+        "src/native/relay/network/plan/tree.rs",
+        "tests/native_relay/tree_history.rs",
+        "tests/native_relay/tree_restart.rs",
+        "tests/native_relay/tree_plan.rs",
+        "tests/native_relay/envelopes.rs"
+      ],
+      "scope": "Frozen352 bounded three-physical-voter star with one noWAL/nonvoting helper. Original parent SendTicket/context, physical source and receiving helper stay distinct; source capture is minted only from actual authenticated input. Original encoded scopes and hop IO credits have separate lifetimes, blocked branches do not suppress healthy-majority progress, exact late ReadAck is discarded before a later read completes, old IO retirement/replacement retains original read/correlation, real checkpoint/WAL reopen preserves original dedup. A selected bad decoder returns both actual packet and violating allocation into owned recovery before core admission. Twelve TCP/QUIC histories and17 original-core scope controls pass; fmt/all4strict0,1280 guarded inputs and binaries unchanged. Unchanged-production direct regressions separately pass Node65, PeerDriver32, native100group1 and direct facade20. Scalar getters have selected indirect coverage; source-hop attachment has no dedicated history yet. No helper-to-helper tree, automatic dialing or end-to-end cryptographic origin claim. Explicit authenticated non-Byzantine delegation. Tree364 implementation and Mac remain P8, performance/dedicated security deferred. Relay364 checked finite attached-session trees retain original physical voters and exact authenticated helper captures, separate from final physical receiving access; helpers never vote or own WAL. Linux1296-input cut passes18 native TCP/QUIC histories plus2 topology/envelope controls,17 core request-window controls and same-cut direct regressions; format/all4strict0. Full path/control/codec envelope construction refuses whole original sessions/parts. Mac initial20 has19pass/1 TCP helper-restart WrongBinding; newer tree paths pass but complete Mac qualification remains open. Relay371 captured-binding lifetime correction is separately pending. No exhaustive arbitrary-tree proof, autodial or end-to-end origin cryptography claim. Corrected relay371 now qualifies the same1297-input static-tree cut on BOTH Linux/macOS: native22/core17 per host, targeted original Mac TCP restart and genuine TLS closure controls, format/all4strict0 and source/executable/protoc/transfer guards. This finishes ordinary static relay functionality within declared contracts; logical physical backing generic composition/current full P8 qualification remain separate."
+    },
+    {
+      "design_id": "C06/C13",
+      "public_contract": "PeerNetworkChannelReplacement / NetworkNode optional channel lifecycle",
+      "operations": [
+        "retire_channel",
+        "replace_channel",
+        "NetworkNode::retire_peer_channel",
+        "NetworkNode::replace_peer_channel"
+      ],
+      "native": "NativeRelayNetwork and generic owning NetworkNode forwarding for Running/Quiescing lifecycle.",
+      "conformance": [
+        "tests/native_relay/helper_restart.rs"
+      ],
+      "scope": "Explicit idempotent local-hop retirement drives original IO and real close deadlines while preserving semantic collectors and owned credits. Fresh replacement requires old local IO settled; caller mismatch returns boxed whole original ready channel without changing current network. Same original SendTicket and read ticket survive actual helper restart/replay; all Nodes remain Running. TCP/QUIC actual histories pass on frozen352. General trees, late old-generation variants, arbitrary replacement providers and current Mac remain unqualified; local Sent is not remote durability."
+    },
+    {
+      "design_id": "C10/C15/C24",
+      "public_contract": "AuthenticatedDelegationPath",
+      "operations": [
+        "hops",
+        "len",
+        "is_empty"
+      ],
+      "native": "Bounded copyable read-only transport metadata; only actual verified in-crate captures create/extend it. Maximum16 helper capture bindings; final physical receiving access is separate.",
+      "conformance": [
+        "src/transport/source/path.rs",
+        "tests/native_relay/tree_history.rs",
+        "tests/native_relay/tree_plan.rs",
+        "tests/native_relay/envelopes.rs"
+      ],
+      "scope": "Fixed owned helper-capture chain, not a quorum/readiness token or a route catalog. Linux actual native histories exercise hops/len; the empty predicate is a simple unqualified observation, not new authority. Source view and native relay qualification remain scoped separately; no arbitrary-provider or global path certification."
     }
   ],
   "not_yet_implemented": [
@@ -2802,7 +3924,6 @@
     "per-group-critical-path-tracing-and-external-exporters",
     "general-durable-authorization-audit",
     "optional-bounded-compression",
-    "broader-cross-group-transaction-layer-P8",
     "automatic-global-placement-orchestration"
   ],
   "remaining_validation": [
@@ -2810,6 +3931,8 @@
     "combined-interrupted-recursive-scope-transfer-lifecycle",
     "configuration-ingress-revocation-new-voter-and-ticket-release-fault-combinations",
     "combined-recursive-directory-ownership-movement-faults",
-    "complete-reusable-provider-operation-and-lifetime-conformance"
+    "complete-reusable-provider-operation-and-lifetime-conformance",
+    "complete-P0-P8-functional-requirement-and-Linux-macOS-evidence-audit",
+    "native-logical-nesting-repeated-membership-and-cold-recovery-current-macOS-qualification"
   ]
 }

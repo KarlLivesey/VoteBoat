@@ -169,6 +169,11 @@ impl Raft {
         self.learner_readiness = None;
         self.ready_learner = None;
     }
+    /// Inspect the original volatile exchange still owned by this core.
+    /// This is pending-work inspection, never promotion readiness or authority.
+    pub fn pending_learner_readiness(&self) -> Option<LearnerReadinessRequest> {
+        self.learner_readiness
+    }
     /// Volatile native-exchange result. Promotion must still recheck its scope
     /// and current authenticated peer binding at execution.
     pub fn ready_learner(&self) -> Option<&ReadyLearner> {
@@ -184,20 +189,9 @@ impl Raft {
             }
             _ => return Err(RaftError::InvalidMessage),
         };
-        if message.group != request.group
-            || message.configuration != request.configuration
-            || message.term != request.term
-            || message.context != request.context
-            || message.to != self.node
-            || message.from == self.node
-        {
-            return Err(RaftError::WrongIdentity);
-        }
+        self.readiness_message_source(&message)?;
         match message.rpc {
             Rpc::LearnerReadinessRequest(_) => {
-                if message.from != request.leader || message.sender != request.context.origin {
-                    return Err(RaftError::WrongIdentity);
-                }
                 // Readiness cannot advance a term, reset election timers or
                 // authorize a peer from a different configuration.
                 if self
@@ -221,13 +215,6 @@ impl Raft {
                 Ok(vec![Effect::VerifyLearnerReadiness(message)])
             }
             Rpc::LearnerReadinessReply { ready, .. } => {
-                if message.from != request.learner.node
-                    || message.to != request.leader
-                    || message.sender.identity != request.learner.store
-                    || message.sender.session != request.session
-                {
-                    return Err(RaftError::WrongIdentity);
-                }
                 let receipt = LearnerReadinessReceipt {
                     request,
                     binding: message.sender,
@@ -249,6 +236,41 @@ impl Raft {
             }
             _ => unreachable!(),
         }
+    }
+    pub(super) fn readiness_message_source(&self, message: &Message) -> Result<(), RaftError> {
+        let request = match &message.rpc {
+            Rpc::LearnerReadinessRequest(request) | Rpc::LearnerReadinessReply { request, .. } => {
+                **request
+            }
+            _ => return Err(RaftError::InvalidMessage),
+        };
+        if message.group != request.group
+            || message.configuration != request.configuration
+            || message.term != request.term
+            || message.context != request.context
+            || message.to != self.node
+            || message.from == self.node
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        match message.rpc {
+            Rpc::LearnerReadinessRequest(_) => {
+                if message.from != request.leader || message.sender != request.context.origin {
+                    return Err(RaftError::WrongIdentity);
+                }
+            }
+            Rpc::LearnerReadinessReply { .. } => {
+                if message.from != request.learner.node
+                    || message.to != request.leader
+                    || message.sender.identity != request.learner.store
+                    || message.sender.session != request.session
+                {
+                    return Err(RaftError::WrongIdentity);
+                }
+            }
+            _ => unreachable!(),
+        }
+        Ok(())
     }
     fn check_readiness_request(
         &self,

@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification323/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 16.38s
+     Running tests/logical_voter_native.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/build/debug/deps/logical_voter_native-be79e03fd4439104)
+
+running 18 tests
+test authority::accepted_capsule_retains_original_parent_credits_until_actual_failed_cleanup_observation ... ok
+test authority::actual_verified_child_authority_blocks_raw_transfer_and_physical_router_construction ... ok
+test authority::already_admitted_append_cannot_overtake_retained_original_vote_capsule ... ok
+test authority::vote_window::original_accepted_votes_refresh_and_invalidate_queued_election_after_refusal ... ok
+test authority::vote_window::postaccept_timer_exhaustion_fences_but_keeps_original_queue_proof ... ok
+test authority::vote_window::original_granted_reply_acceptance_preserves_full_follower_window ... ok
+test backing::generic_backing_consumes_original_tcp_outputs_and_preserves_errors ... ok
+test endpoint::tcp_endpoint_uses_selected_original_representative_and_refuses_aliases ... ok
+test checkpoint::tcp_original_parent_checkpoint_publication_compaction_and_reconcile_recover_full_bytes ... ok
+test facade::cancel::logical_facade_cancelled_waits_retain_actual_child_work_tcp ... ok
+test facade::abort::logical_facade_abort_retains_original_child_attempt_and_resolves_unknown_tcp ... ok
+test facade::restart::logical_facade_checkpoint_suffix_cold_backing_recovery_tcp ... ok
+test history::tcp_child_claim_checkpoint_suffix_and_cold_reopen ... ok
+test facade::logical_facade_original_provider_ownership_and_result_gates_tcp ... ok
+test persistence::tcp_original_parent_promise_and_payload_survive_child_checkpoint_suffix_restart ... ok
+test history::incompatible_mapping_refuses_without_consuming_child_ownership ... ok
+test results::defective_bounded_read_codec_fences_once_and_preserves_original_nonpositive_completion ... ok
+test results::tcp_original_client_and_read_results_wait_for_consumed_child_capsules ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.78s
+

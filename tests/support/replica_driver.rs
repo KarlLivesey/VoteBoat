@@ -64,32 +64,32 @@ impl Fixture {
         let id = owner.identity();
         let mut f = Self {
             results: ApplicationRouter::new(
-                ApplicationRouterBinding {
-                    owner: id,
-                    generation: ApplicationRouterGeneration::new(1).unwrap(),
-                },
+                ApplicationRouterBinding::new(
+                    RuntimeAuthorization::physical(id),
+                    ApplicationRouterGeneration::new(1).unwrap(),
+                ),
                 ApplicationRouterLimits::default(),
             )
             .unwrap(),
             clients: ClientRouter::new(
-                ClientRouterBinding {
-                    owner: id,
-                    generation: ClientRouterGeneration::new(1).unwrap(),
-                },
+                ClientRouterBinding::new(
+                    RuntimeAuthorization::physical(id),
+                    ClientRouterGeneration::new(1).unwrap(),
+                ),
                 ClientRouterLimits::default(),
             )
             .unwrap(),
             reads: ReadRequests::new(
-                ReadInvocationBinding {
-                    owner: id,
-                    generation: ReadInvocationGeneration::new(1).unwrap(),
-                },
+                ReadInvocationBinding::new(
+                    RuntimeAuthorization::physical(id),
+                    ReadInvocationGeneration::new(1).unwrap(),
+                ),
                 ReadInvocationLimits::default(),
                 ReadRouter::new(
-                    ReadRouterBinding {
-                        owner: id,
-                        generation: ReadRouterGeneration::new(1).unwrap(),
-                    },
+                    ReadRouterBinding::new(
+                        RuntimeAuthorization::physical(id),
+                        ReadRouterGeneration::new(1).unwrap(),
+                    ),
                     ReadRouterLimits::default(),
                 )
                 .unwrap(),

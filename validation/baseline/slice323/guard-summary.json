@@ -1,0 +1,45 @@
+{
+  "input_paths": 1031,
+  "frozen_source_rehash": "passed",
+  "root_after_paths": "identical",
+  "local_copied_paths": "identical",
+  "mac_copied_paths": "identical",
+  "mac_before_paths": "identical",
+  "mac_terminal_paths": "identical",
+  "hash_guards": {
+    "root-after-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    },
+    "copied-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    },
+    "mac-copied-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    },
+    "mac-before-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    },
+    "mac-terminal-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    },
+    "linux-before-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    },
+    "linux-terminal-source.log": {
+      "successful_paths": 1031,
+      "sha256": "7f2a1cdf3f236b945b3c8d855c6aee82aadf0a3980291780e40f66db1002ae65"
+    }
+  },
+  "runner_matches_pinned_remote": true,
+  "linux_same_cut": true,
+  "linux_manifest_and_runner_match": true,
+  "linux_before_paths": "identical",
+  "linux_terminal_paths": "identical",
+  "selected_test_counts_match": true
+}

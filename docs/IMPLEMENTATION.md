@@ -17,8 +17,8 @@ record claims that unimplemented phases already work.
 | P5 | Versioned manifests, selective assignments, cached routing and durable delegation | Implemented recursive directory/responsibility mechanisms, independent child progress, creation/deletion/movement and routing through public contracts. Sample services expose bounded profiles; established children survive parent outage in recorded native histories. Complete current qualification remains302. |
 | P6 | Staged split/import/fence/publish/activate, compatible merge and application adapters | Implemented durable ownership transitions, actual data import, retry/outbox lineage, resumption and retirement. Recorded no-dual-owner phase/reopen tests and per-bucket client histories301 provide selected evidence. Complete platform qualification remains302; finite histories are not an exhaustive proof. |
 | P7 | Functional multi-lane assembly, batching/pipelining, reclamation and recovery throttling | Existing mechanisms and finite TCP/QUIC histories remain supported. The original chapter12 P7 throughput/p99 acceptance condition moves to P9; this reordering does not claim that condition passed. |
-| P8 | Subgroup-backed logical voters and broader transactions | Functional scope remains incomplete. Transaction model311, applications312, actual Node driver313 and logical-voter protocol gate314 are qualified on Linux/macOS. Native logical voters and remaining broader transaction scope remain. Qualify actual child-backed parent responses, supported nesting/lifecycle and broader transaction programs through public interfaces. Performance-dependent research promotion remains P9. |
-| P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, striped single-group WAL, representative relays and other throughput projects. No automatic start after P8. |
+| P8 | Subgroup-backed logical voters, ordinary representative relays, striped single-group WAL and broader transactions | Incomplete. Striped storage, broader programs, static relay trees and selected-network logical backing have selected Linux/macOS qualification. Current nested27-owner cold and repeated15-owner histories pass Linux TCP/QUIC. Genuine first learner replacement now passes both Mac protocols; imported-target/Joint/committed-Unknown/uncommitted-Unknown cold histories pass Linux. Remaining: Mac nested/repeated/recovery qualification and final coherent P0–P8 sweep/audit. P9 holds performance measurements only. |
+| P9 | Performance optimization and research cost comparisons | Later separate phase: original P7 sustainable improvement/cost gates, tuning and cost comparisons for striped single-group WAL, representative relays and other throughput projects; relay functionality is a named P8 requirement. No automatic start after P8. |
 | P10 | Security review and hardening | Later separate phase, with the user's Daybreak review. Existing authentication, identity, bounded-resource and protocol-safety contracts remain required during feature work. |
 
 Goal boundary310: the user requests this goal to finish and stop when P8's
@@ -26,14 +26,17 @@ functional work is implemented and qualified. P9/P10 are retained in the roadmap
 but excluded from this goal's completion boundary. Preserve sensible efficiency
 during implementation without starting a tuning project. The original design
 pack is unchanged: its P7 performance exit maps to P9 here, and its P8 optimization
-tracks also move to P9. Its logical-voter formal mapping, transition model and
-failure/recovery duties remain P8 requirements. Measured trade-offs required for
+measurements also move to P9. Functional striped-WAL, logical-voter formal mapping,
+transition model and failure/recovery duties remain P8 requirements. Measured trade-offs required for
 normal/default research promotion remain explicit later gates; P8 functional
 completion alone does not claim those gates passed or enable a new default.
 
 [Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
 component catalogue entries to source/evidence and explicit unresolved work.
 It is a working ledger, not a completion certificate.
+The [current mini plan372](#current-mini-plan372)
+covers recursive owning handoff, logical-cell membership, relays and platform closure.
+Historical mini plans below preserve the evidence and decisions at their source cuts.
 
 Initial targets are Linux and macOS. Windows is deferred. CI is intended to run
 in the background without gating changes or implementation progress. Local tests
@@ -66,7 +69,7 @@ first three-process executable now exposes that assembly. Generic startup
 the shared typed startup and configured endpoint path are described in Slices
 38–39 below. Separate-host deployment and operational packaging remain work.
 
-## Linked macro and mini plan — updated 11 October 2026
+## Linked macro and mini plan — updated 12 October 2026
 
 The macro plan tracks usable capabilities, not the number of internal slices.
 The mini plan covers the current deliverable and the next two, including their
@@ -84,6 +87,18 @@ cause and revise this sketch before another material change.
 
 ### Macro plan
 
+Scope confirmation341 — 12 October 2026: the user requires ALL functional
+requirements through P0–P8 to be present at P8 completion. Ordinary physical-voter
+representative relays are mandatory P8 functionality, alongside logical voters,
+striped single-group WAL and the declared broader transaction layer. P9 receives
+performance work and measurements only; it cannot absorb an unfinished functional
+path. P10 receives dedicated security review/hardening. Existing authentication,
+correctness, recovery and ownership contracts remain functional acceptance.
+A prototype, model, interface-only joint, selected passing history or clean lint
+run cannot stand in for a working feature and its required Linux/macOS evidence.
+Every unresolved functional item stays visible until implemented and qualified;
+complete the requirement-by-requirement audit before completing this goal.
+
 Priority update310: finish functional features through P8 on Linux and macOS,
 then complete this goal and stop. P9 performance and P10 security are separate
 later phases; Daybreak owns the security pass. Original performance measurements
@@ -98,14 +113,15 @@ solely for compatibility. Preserve explicit migration for already-written data.
 | Online membership | Add/catch up a learner, establish readiness, change voters through joint consensus and retire peers; recover elections, rollback and partial delivery with exact activation timing. | P4 mechanisms are implemented through public Node and authenticated sample administration. Native startup284 and interrupted older-checkpoint policy recovery297 provide selected Linux/Mac evidence; current full platform qualification remains302. |
 | Recursive responsibilities and routing | Resolve manifests, selectively place groups and route requests; cached child operation survives parent unavailability without an ancestor commit in the normal write path. | P5 mechanisms are implemented, including native creation/delegation/metadata movement and bounded directory/lookup service profiles. Complete current platform qualification remains302. Automatic global orchestration is deferred by chapter12. |
 | Split and merge | Move actual data with source fencing, import readiness and durable activation; preserve retry/outbox lineage and recover without two active owners. | P6 public mechanisms and bounded split/compatible-merge services are implemented. Selected phase/reopen, retirement and independent per-bucket client histories are recorded; complete current platform qualification remains302. |
-| Advanced functional composition | Run actual replicated subgroups as crash-recoverable parent voters and provide explicitly defined broader transaction semantics. | P8 is now in this goal. Public contracts and formal mapping/models precede native implementation; original promises, payload availability, transitions and transaction recovery must be qualified. Existing recursive policies or outbox support do not substitute for these features. |
+| Advanced functional composition | Run actual replicated subgroups as crash-recoverable parent voters, ordinary physical-voter representative relays, striped local storage preserving one ordered Raft log, and explicitly defined broader transaction semantics. | P8 is now in this goal. Public contracts and formal mapping/models precede native implementation; original promises, payload availability, transitions and transaction recovery must be qualified. Existing recursive policies or outbox support do not substitute for these features. |
 | Later measured tuning | Demonstrate sustainable throughput improvement at the original correctness/p99 budget, with attributable costs; evaluate striped WAL, representative relays and research trade-offs. | P9 remains unmet and outside this goal. After P8, stop so the user can consider optimization choices; no automatic tuning begins. |
 | Later security review | Review and harden the qualified feature set, preserving its functional and performance contracts. | P10 is separate later work with Daybreak; it does not postpone baseline identity/authentication or consensus safety. |
 
 These are capability milestones, not a claim that every earlier phase is
 finished. The detailed phase table above remains the scope ledger. P8's functional
-scope remains incomplete: the first actual transfer is qualified; logical voters
-and remaining broader transaction scope remain. Online membership and split/merge do not block use of the
+scope remains incomplete: bounded broader transactions and striped local WAL have
+qualified frozen evidence; recursive logical lifecycle, ordinary relays and current
+platform qualification remain. Online membership and split/merge do not block use of the
 static service; no calendar estimate or completion percentage is inferred from
 the count of remaining milestones.
 
@@ -155,7 +171,10 @@ retirement275 passes4 on each host but does not explain the old timeout cause.
 | Completed314: logical-voter refinement mapping and protocol gate | Establish the P8 parent-voter protocol before native assembly. | Reviewed310 scope, proposed313 schemas and existing ordered log/quorum/configuration/recovery contracts. | Linux/macOS each pass68 executions across four profiles; nine positive graphs exhaust, ten actual weakening traces cover the required guard families and an additional overlap control. Formatting/four strict profiles zero;782 inputs match. Mapping, control-only parent lifecycle intent, child eligibility and finite storage/recovery bounds are explicit. No native service is implemented by this gate. |
 | Current315: usable logical-voter native assembly | Advance P8 by composing actual replicated child groups into one ordered parent-voter path. | Qualified314 mapping/model, scoped payload/evidence and recovery contracts, existing Node/provider seams. | Three parent logical leaves backed by nine actual child owners; child-backed storage/snapshots, gated sends/client/read results, distinct authenticated identities, representative replacement, whole-child restart, checkpoint/suffix, unavailable inner quorum and stale-context refusal on Linux/Mac TCP/QUIC. Direct public bypass controls, host substitution and owned drain/joins must pass with zero lint. Fixed one-level assembly alone does not finish P8. |
 | Next316: nested logical-voter lifecycle qualification | Advance P8 beyond the first fixed cohort with supported nesting and safe parent/child configuration activation. | Qualified315 native path,314 activation models and existing P4 membership/checkpoint contracts. | Enforced acyclic/depth-bounded construction, exact representative/configuration fences, declared serialized transition intents, actual nested checkpoint/suffix and joint/final fault histories on both hosts. Record omitted/model-bound histories separately; native qualification cannot assume314's surviving-child authority. |
-| Following317: broader transaction programs and recovery | Advance P8 beyond the fixed two-account transfer with explicit multi-key/multi-participant semantics. | Qualified311–313 durable coordination/provenance, chapter08 locking/read-validation/deadlock/recovery duties and existing public application/Node seams. | Specify and implement bounded immutable participant programs, read-version validation and atomic local prepare/apply; distributed coordinator selection, deadlock handling and retained decisions/locks. Independent model and actual Node/native histories must cover concurrent conflicts, explicit refusal/abort, unknown outcomes, checkpoint/suffix and coordinator/participant failure on both hosts. Unsupported capabilities refuse before admission; no fictional atomic scan or moving-owner guarantee. This remains planned work. |
+| Following317: broader transaction programs and recovery | Advance P8 beyond the fixed two-account transfer with explicit multi-key/multi-participant semantics. | Qualified311–313 durable coordination/provenance, chapter08 locking/read-validation/deadlock/recovery duties and existing public application/Node seams. | Bounded numeric-key programs, read-version validation, atomic local prepare/apply, coordinator selection, no-wait refusal and retained decisions/locks are implemented. Independent finite model, actual Node driver and three-replica/five-group TCP/QUIC histories pass selected Linux checks. Frozen integrated Linux/macOS qualification and scope review remain; no arbitrary-code, moving-owner, abrupt-crash or physical-partition claim. |
+| Parallel318 current: native striped storage provider | Advance P8 functional single-group local striping without changing ordinary Raft order. | Chapter04/16 R-C contracts, existing LogStore/native codecs and independent318 storage dependency model. | Bounded explicit lanes, one authoritative store, synchronized payload/control dependencies, prefix/suffix generations, snapshots and atomic replacement/recovery. Downstream Linux provider/fault tests and actual three-voter TCP/QUIC embedding pass; final source/profile/platform qualification remains. |
+| Parallel318 next: native interruption and platform qualification | Establish actual file publication/reclaim failure behavior on both targets. | Settled318 provider and explicit snapshot-pin/lane I/O contracts. | Original acknowledged state survives declared primitive cuts, lost payload refuses recovery while mirrored control survives, wrong generations/identities cannot acknowledge; Linux/macOS frozen guard/lint/test matrix. No benchmark or performance gate. |
+| Parallel318 following: integrate functional feature exit | Make striped storage a documented selectable embedding path and close P8 storage requirements. | Qualified318 tests/models and actual provider operation review. | Public construction example, reviewed limitations and explicit backend migration rule; preserve simple ordinary provider. Whole P8 completion still requires316 nested activation and317 program qualification. |
 
 Schema287 — public runner qualification (P4): retain the existing bound drain
 sequence, operation, configuration record and plan digest. An interrupted
@@ -28536,3 +28555,3199 @@ drain before joining child workers. The [application](../validation/baseline/sli
 sketches identify exact API/codec/identity changes. They are plans, not native
 evidence. Acceptance is the315 mini-plan row; actual whole-child restart and direct
 public bypass controls are necessary because314 does not qualify either.
+
+Scope clarification315: P8 includes research needed to specify and implement its
+functional extensions. Performance research and optimization are P9; dedicated
+security research and hardening are P10. The active goal stops after qualified
+functional P0–P8 on Linux and macOS. The original P8 research heading does not
+make those later phases prerequisites for this goal.
+
+Schema refinement315 — preserve exact completion ownership: the logical worker
+admits exactly one parent persistence unit and retains its original visit/request
+until terminal output is consumed. Retain the actual Written LogTicket inline,
+within the original metadata reservation; Durable must match that full ticket,
+not merely its count. A mismatch fences and returns Uncertain for the original
+request. Failed release cleanup must retain submitted capsules until an actual
+consumed child outcome settles them; a refused outcome never becomes publication
+authority. Bridge cleanup retries the original sealed observation even when phase
+production has already been fenced. Completion checks are strict repository lint,
+actual parent-generated persistence and accepted-capsule failure controls.
+
+Development evidence315 (in progress, Linux only): the deterministic application
+passes12 semantic controls and4 public-contract tests. Pure codec relocation
+preserves the original bytes and native exports: the focused format matrix passes
+9/9/9/6 tests across all/default/native/core configurations, plus3 moved library
+and52 existing native format regressions. The first actual three-store child
+cohort passes6 tests with all features and4 with TLS only. Real parent-generated
+leases retain term7/vote12/BallotOrigin and exact committed X/Y payload through
+child checkpoint, suffix and joined whole-cohort cold reopen. Parent inputs are
+trusted local Raft controls; these tests establish no authenticated outer logical
+network or complete parent quorum. Two additional worker fault controls pass:
+all8 changed Durable ticket fields return original Uncertain, and exact Written
+credits survive until Durable output consumption. These use injected completion
+streams and establish correlation, not child authority.
+
+New public seams and partial operation reviews are recorded in
+`docs/component-contracts.json` and `docs/provider-conformance.json`; metadata/path
+checks pass for115 inventory entries. Root all-target/all-feature strict Clippy
+and formatting pass after the bridge and completion-correlation fixes. The other
+profiles and final integrated source freeze remain under review. The tracked
+pre-push hook remains enabled. Local development logs are retained under
+`target/root315`, `target/divide-membership`, `target/divide-provider` and
+`target/divide-shutdown`; final retained/platform evidence is not yet published.
+
+Remaining315 includes the actual three-parent/nine-child network envelope,
+logical snapshot worker, original client/read result publication and combined
+failure/drain/recovery controls plus macOS qualification. Actual failed-capsule
+cleanup also exposed a legitimate negative authority-reply validation mismatch;
+a focused correction is in progress, with original refusal cleanup kept separate
+from positive authority. This component progress does not complete315 or P8.
+
+Schema315 snapshot worker — supply the existing SnapshotWorker contract through
+one bounded accepted request and an explicit host-driven port. Construction uses
+the sealed VerifiedLogicalImage and matching LogicalPersistencePort binding;
+it performs no I/O and starts no executor. The port owns at most two full verified
+pins. A current parent image is borrowed only after the persistence port's
+original terminal output was consumed, never from unconsumed Written events.
+Publish carries the original snapshot work/visit, full bytes, exact revision and
+durable anchor into one child action. Only its consumed sealed outcome permits
+Published. Install/Reconcile similarly require a child action against the exact
+current parent anchor before releasing older pins. Readiness/send loads use only
+complete verified retained bytes; they never grant parent response authority.
+Original worker credits cover input plus maximum output and survive until terminal
+poll. Provider mismatches and child refusal fence, returning uncertainty/failure
+for the original request; rejected input returns original ownership. Close stops
+new intake and drains accepted work without undoing publication.
+
+Restart refinement: native publication first reconciles to the actual durable
+anchor. The deterministic child action must likewise discard an unanchored orphan
+only atomically with valid new publication, keep the old anchor until parent WAL
+mutation is actually child-committed, and allow exact full-image reuse. Retained
+original publication outcomes supply monotonic generation history even when an
+orphan pin is dropped. Validation refusal must leave retained pins intact. This
+correction prevents a completed pre-restart publication from permanently refusing
+a later checkpoint retry. No new storage fallback or mandatory ancestor write is
+introduced. Acceptance: actual parent-generated checkpoint/snapshot effects,
+old anchor plus new orphan/checkpoint/suffix cold restart, preserved full bytes,
+stale/foreign scope refusal and explicit worker/parent/child drain on both hosts.
+This supplies315's missing snapshots;316 nesting and317 broader transactions stay
+the next two deliverables. P9/P10 do not start.
+
+Ordering review315: existing EffectOwner keeps an active leased visit while
+captured Send/application/read outputs remain. Shard cannot execute another visit
+for that group until finish. Thus a later same-group persistence request cannot
+overtake an earlier retained capsule, even when the host pumps persistence first.
+The acceptance control admits two parent inputs together and withholds the first
+capsule; no additional ordering helper is needed.
+
+Recovery refinement315: the actual checkpoint fixture reaches child Publish,
+parent compacting Mutate and child Reconcile, then compacted restart exposes a
+contract mismatch: generic snapshot recovery unconditionally mutates retention,
+while verified logical views correctly reject mutation. The smallest recovery
+path is `VerifiedLogicalImage::recover_parent`: recover the assigned member using
+existing core validation, select only its authoritative durable anchor from the
+complete consumed child-quorum pin bytes, and reuse the existing atomic checkpoint
+restore/membership/suffix replay checks. A newer unanchored publication never
+restores application state. Retention changes remain child-backed worker actions;
+no read-only provider pretends that reconciliation succeeded. Failed validation
+returns no core and leaves the original application intact. Acceptance is actual
+compacted whole-child cold reopen with a new representative, exact restored
+application plus suffix, and unchanged physical snapshot recovery controls.
+
+Development evidence315: three logical snapshot worker correlation controls pass
+on Linux (original rejected buffer, queued-output credits through close, foreign
+completion returning original uncertainty). These are private completion-stream
+fault controls; actual child-authorized publication still requires the native
+checkpoint fixture. The complete parent network and macOS qualification remain
+open.
+
+Development qualification315 update (Linux): the complete current one-cohort
+native component suite passes13 tests. This includes actual TCP/QUIC publication,
+compaction and Reconcile through two checkpoint generations; full child checkpoint,
+later suffix and whole-cohort cold reopen; original client/read result capsules;
+accepted-capsule failed-owner cleanup; and same-group vote-before-append ordering.
+Atomic recovery controls refuse an already-applied application, incompatible
+schema and a restore callback that changes its clone before returning failure,
+without modifying the caller's original application. Original client/read values
+remain charged while child completion is withheld; foreign router rejection
+retains the same opaque output, and a defective bounded codec yields only the
+original nonpositive result. These parent peer inputs remain trusted local
+controls, not the full outer parent network.
+
+The root affected component run passes114 library tests,9 logical format tests
+and4 public application tests; physical snapshot/member recovery passes69 tests.
+Sandbox-only attempts retained their loopback EPERM failures separately; the same
+socket-enabled commands pass. Root all-feature and core-only strict Clippy pass
+at their observed source cuts. Snapshot inventory/partial operation metadata now
+covers116 entries; references do not certify replacement providers. Development
+logs remain under `target/root315` and the three agent directories. The current
+Mac302 sweep was verified live in its actual routed executable; it remains older
+source qualification and supplies no macOS evidence for315.
+
+Next315 work is the parameterized three-logical-parent/nine-physical-owner native
+network fixture. Each child cohort is configured before claims with distinct
+physical node/store/group identities; no post-claim identity rewrite is permitted.
+The new queue/session contract keeps original opaque proof ownership, local flush
+completion, bounded frames and cleanup separate from parent Raft acknowledgement.
+Full static parent quorum, whole-cohort failure/restart and both-platform
+qualification remain required.316 supported nesting/lifecycle and317 broader
+transactions remain the next two deliverables; no performance work is started.
+
+The logical network public seam is now inventoried as the117th contract, with
+its native acceptance explicitly unfinished. Separate negotiated TLS/QUIC
+profiles preserve ordinary wire compatibility. Unaccepted dispatched work has an
+exact original-batch cancellation path; it cannot manufacture successful delivery.
+Four strict root Clippy profiles and formatting pass at their respective observed
+source cuts; the tracked pre-push checks remain enabled without bypass.
+
+First full native network evidence315: the actual three-parent/nine-child static
+fixture passes TCP and QUIC histories on Linux (2/0). Dedicated negotiated logical
+envelopes carry unchanged original logical identities over distinct authenticated
+physical representatives. The full parent quorum elects, commits an original
+write/retry, returns a fresh quorum read with original opaque result charges held,
+then all nine children checkpoint, join/reopen, claim fresh representatives and
+recover the same original data. Outer sessions/connectors and all original child
+workers explicitly drain/join; native endpoints rebind after cleanup. This
+supersedes the earlier component-only network boundary. Inner-quorum outage,
+checkpoint-plus-later-suffix, representative endpoint replacement, controlled
+transport fault histories and macOS qualification remain under development.
+The network inventory and selected partial operation references now describe
+this actual scope; no arbitrary nesting or full315 completion is claimed.
+
+Additional root regression cuts pass95 core library,6 core format and4 core
+application tests, plus73 existing secure/transport/QUIC tests after dedicated
+profile introduction. The next316 schema review identifies a necessary ownership
+interface for real logical backing children and separate immediate-member versus
+resolved physical endpoint identities; it is still a proposal, not implementation.
+
+Schema315 local child ownership: the actual inner-outage fixture exposes an
+unnecessary constructor restriction requiring every child voter Node to be
+borrowed by one bridge. A host may instead own the other real child replicas and
+poll them independently (or deploy them elsewhere). Permit a nonempty checked
+local subset containing the exact representative, preserving all original
+bootstrap/member/store/configuration/budget/stream checks. The complete child
+electorate and policy remain in each original Node; only its consumed actual
+quorum-backed outcomes permit authority. The bridge exclusively owns completion
+streams of supplied Nodes, while the host owns outside peers and their progress.
+No subset cardinality counts as quorum evidence. If the outside quorum stops,
+accepted original work remains pending/charged and never becomes success or Abort;
+resuming those same original peers must resolve it. Acceptance is actual native
+inner-quorum outage/repair, full-cohort regressions, and unchanged empty/missing-
+representative/mismatched assembly refusal. This improves usable P8 embedding;
+it introduces no alternate certificate, new poll-selection API or hidden owner.
+
+Linked-plan parallelism315: keep the current315 network/fault/platform exit intact.
+The next316 schema review establishes the required real logical-child facade,
+opaque output ownership and independent resolved endpoint chain; it remains
+unimplemented. Following317 now develops its independent deterministic program
+application/model while315 native qualification proceeds. This does not depend
+on316 because it uses the existing ordinary Node/Raft provider path. The approved
+profile is immutable version-checked numeric-key programs over multiple keys and
+participant groups, atomic whole-local-footprint prepare, durable no-wait lock
+refusal/deadlock avoidance, deterministic coordinator catalog selection and
+retained exact decision/AppliedAll/release/tombstone history. New schema preserves
+the existing Transfer format; no arbitrary SQL/closure semantics are implied.
+Application/model checks are the first bounded deliverable, then actual consumed-
+Node program driver and native recovery/contended histories, then Linux/macOS
+qualification. Local application tests never stand in for this complete317 exit.
+This advances P8 broader transactions without making unrelated performance or
+security work a prerequisite. The shared macro stopping boundary remains P8.
+
+Actual315 extended network evidence: the three-parent/nine-native-child history
+now passes TCP and QUIC on Linux (2/0). With two independently owned backing
+peers withheld, the original accepted persistence mutation and client remain
+pending and charged; resuming those same peers resolves the same operation.
+All nine children checkpoint and retain a later suffix, then cold reopen with
+physical representative1 replaced by2. Fresh Claims and endpoint plans recover
+the original logical parent data and duplicate history. Empty or missing-
+representative assembly refusals preserve original resources. This is bounded
+quorum loss and orderly replacement, not a crash or indefinite-liveness claim.
+The fixture uses actual leadership transfer plus cohort term/prefix convergence
+before Claims; no timers, quorum or authority checks were weakened. The full
+one-cohort native suite passes13/0 on the same development cut. Shared registered
+ProgramApplication is being checked before the guarded315 Linux/macOS snapshot.
+
+Schema316 first codec slice: recursive backing requires LogicalApplication to
+implement the existing faithful LogicalResponseCodec contract. A named response
+schema will encode every original receipt field, exact query variant and complete
+Image/Outcome/Snapshot/Metadata/Uninitialized read value. Parent log and snapshot
+bytes use the selected existing codecs with full roundtrip checks; membership
+and pinned references remain explicit. Bounds are checked before output writes
+and constructor/application acceptance rejects materialized responses that cannot
+fit their declared envelope. Encoding changes no state, ownership or authority;
+on failure it yields no successful capsule and never reconstructs a completion.
+Acceptance checks compare all variants and changed fields, short output buffers,
+custom codec refusal, stable bounds across restore and existing315 regressions.
+This necessary P8 nesting joint precedes the sealed backing-child interface and
+actual two-level native assembly; codec tests alone cannot complete316.
+
+Actual317 first application slice is now publicly registered. Core and all-feature
+checks pass10 private semantic histories,3 downstream public contracts and2
+finite-model tests. Original immutable phase history reconstructs checkpoints;
+all-key prepare, version checks, read locks, no-wait refusal, uncontacted Abort
+tombstones, AppliedAll before release and retained capacity are covered. The
+strict independent graph explores2,405 states/6,268 edges/depth72 with2 fully
+consumed terminal outcomes and frontier0; four weakened rules generate and
+replay concrete oracle violations. Safe underlying ordinary group commit is an
+explicit assumption, and receipt loss does not discard the committed outcome.
+Formatting/full strict Clippy pass on the checked source cut. Inventory118 and
+partial operation-reference metadata pass, including33 negative controls. Actual
+consumed-Node program driver, native five-group histories and both-platform
+qualification remain317 work; this evidence does not complete P8.
+
+Scope correction318: the user's P8 research confirmation includes functional
+striped single-group WAL. Historical310/primary status had moved the whole
+feature into P9; that was broader than deferring performance work. Preserve that
+history, but the current macro now includes R-C's functionality and failure gates
+in P8. Benchmarking/tuning/cost comparisons and default promotion remain P9.
+Do not change the original pack or claim existing WAL lane IDs implement stripes.
+The linked mini sequence remains315 qualification,316 nesting/activation and317
+broader transaction driver/native histories. Independent318 first specifies and
+checks the storage dependency model, then implements one explicit selectable
+provider, then actual storage/Node recovery on Linux/macOS. This is a required
+functional feature, not another helper for the logical-voter path.
+
+Schema318 first independent storage model: preserve one ordered Raft log. Two
+explicit local payload lanes own records identified by exact group/incarnation,
+suffix generation, index and content identity. The replicated control catalog
+holds hard state/configuration, selected suffix generation, lane assignments and
+snapshot binding. Written payload/control is separate from synchronized bytes.
+A positive durable-prefix token depends on the contiguous prefix of selected-
+generation records plus both synchronized control copies; maximum completed
+index cannot certify holes. Mirrored control survives one device loss; missing
+selected payload quarantines recovery rather than silently truncating acknowledged
+data or issuing a positive response. A new suffix generation must not reuse old
+record completions. Snapshot selection/reclamation requires original durable
+snapshot bytes before catalog publication. No term/vote/configuration survives
+only in a lost device, and no recovery path fabricates payload or group authority.
+Acceptance first explores finite reordered lane/control writes, synchronization,
+crash/reopen/device loss, stale generation and snapshot dependencies, with
+generated/replayed weakened-rule violations. That independent finite model is
+not the real provider or an exhaustive crash proof; native provider and actual
+Node histories are subsequent318 obligations. Existing ordinary WAL remains
+the simple selectable supported path.
+
+Actual316 codec evidence: the faithful native LogicalResponseCodec is implemented;
+14 focused core tests,38 logical library tests and the existing13 native plus2
+nine-owner network regressions pass on Linux. Formatting and required full strict
+Clippy pass on that observed cut. Complete original fields, bounded staging,
+selected codec roundtrips and atomic materialization refusal are checked. It does
+not add speculative pre-Raft application simulation, a logical-child facade or
+nested endpoint authority; actual nested composition remains316 work.
+
+Actual317 driver evidence: exclusive original Node client/read completion routing
+now drives all phases through actual consumed outcomes. Linux single-voter checks
+pass12 driver tests plus10 application tests; core11,public3 and model2 pass on
+their recorded cuts. Required formatting/full strict Clippy pass. Initial actual
+three-replica/five-group TCP/QUIC histories pass14 tests; own-byte checkpoint/suffix
+recovery is being strengthened before that native test slice is frozen. These
+histories and the older frozen315 qualification are distinct source cuts.
+
+Actual318 independent storage model: strict finite prefix/suffix graphs each visit
+476 states/1,452 edges/depth15 and the snapshot graph54/68/depth11; each has3
+terminals and frontier0 within explicit100,000-state/500,000-edge/depth64 caps.
+Four weakened rules generate and independently replay prefix-hole, lost-promise,
+old-generation and premature-snapshot violations. Both core and all-feature model
+tests pass2/0. This assumes safe ordinary Raft and a surviving independent snapshot
+provider; it does not model byte corruption, reconfiguration, repeated faults or
+native storage. The functional provider is the current independent deliverable.
+
+Schema318 native striped journal: reuse exactly one authoritative NativeLogStore
+and its existing native codecs/transition validation over an explicit StripedJournal
+JournalIo adapter, not another log backend underneath it. A replaceable StripedIo
+owns2..8 fixed, distinct lanes. Original encoded atomic frames are divided into
+bounded chunks placed round-robin with persisted exact lane/offset/length/checksum
+references. Commands exist once in payload lanes. Every lane mirrors a versioned,
+bounded catalog containing the references and complete command-stripped native
+control frames (term/vote/ballot origin/configuration/suffix/snapshot metadata).
+Data synchronization on all lanes precedes catalog publication on all lanes;
+only the original NativeLogStore barrier can then release original LogTickets.
+Partial write/sync/publication errors fence that store with no successful token.
+Recovery selects the greatest exact catalog epoch, rejects divergent equal epochs
+and corruption, reconstructs complete original frames and checks their original
+checksum plus exact control image. Missing selected payload quarantines recovery;
+an independently inspectable control image is diagnostic and grants no authority.
+Successful reopen republishes a fresh original store session before effects.
+Physical reclamation uses two bounded payload generations per lane: stage/sync
+the next full checkpoint on inactive slots, publish all new catalogs, then permit
+old-slot reuse. Partial publication can recover the complete old or new selection;
+neither deletes payload needed by a published catalog. File I/O uses exclusive
+locks shared with the ordinary provider, fixed lane IDs, complete writes and file/
+directory synchronization. There is no implicit backend migration or new worker.
+Snapshot installation still requires the original external durable pin contract;
+this adapter cannot certify another provider's files. Checks require downstream
+append/barrier/fetch/suffix/snapshot/reclaim/reopen, original stale tickets, exact
+payload placement, bounded admission, control survival with lost-payload refusal,
+injected primitive failures and actual Node worker integration before318 completion.
+Linux/macOS frozen native qualification follows implementation; no performance
+claim or default-provider promotion is part of this P8 slice.
+
+Actual318 first native provider evidence: explicit StripedJournal/FileStripedIo now
+implement the existing JournalIo path behind one authoritative NativeLogStore.
+Complete original frames are chunked once across fixed lanes; all synchronized
+payload dependencies precede mirrored bounded catalog publication. Commands are
+excluded from mirrored native control frames. Quiescent reclamation stages the
+other bounded payload slot before selecting a new catalog epoch. Recovery checks
+exact original payload/control/CRC and native transitions, restores fresh sessions,
+and fences missing selected payload rather than issuing matching-prefix evidence.
+Diagnostic open_surviving retains fixed missing-lane positions and control only.
+Both native backends share exclusive locks and refuse implicit format migration.
+Eight Linux downstream histories pass, including all before/after modeled I/O cuts
+for append/sync/publication/reclaim, original-ticket/suffix fences, actual native
+file reopen/layout/locks, missing devices, corruption and bounded catalog refusal.
+An additional learner/Joint/Final + historical ballot/snapshot control test passes;
+its first failure correctly rejected a test-generated Final with a new operation,
+fixed to retain the original Joint operation without changing production rules.
+Actual public Node embedding passes TCP/QUIC2/0 and TLS-only1/0 with three real
+voters, three fixed lanes per replica, owned checkpoint+later suffix reconstruction
+before any peer polling, exact original dedup/read results and joined cleanup.
+These are selected Linux results: modeled I/O power-loss is not a native device
+power-failure claim, native reopen is orderly, and macOS/current integrated source
+qualification remains. Catalog budget exhaustion conservatively fences through
+existing JournalIo uncertainty even when preflight prevented payload writes.
+Required full strict Clippy and formatting pass observed development cuts; final
+four-profile checks are running with the tracked hook, without pushing or bypass.
+The tracked hook subsequently completes0 with formatting and default/all/core/
+native strict Clippy at zero. Final318 provider9/0 and model2/0 pass all-feature
+and native-only configurations. Guarded318 qualification captures992 exact inputs
+with root/path/copy hashes matching; newer endpoint/file-interruption work is a
+separate cut. Linux incremental qualification is live; Mac preparation retains
+the older315b matrix and original302 processes. No complete318 or P8 claim follows
+from this initial frozen capture.
+
+### Macro review320 and linked current mini plan
+
+P8 remains the macro milestone: implement and qualify functional research before
+stopping for P9 performance planning. The missing owning logical facade was a
+necessary dependency of true nesting: an upper bridge exclusively borrows its
+middle endpoints, so middle network progress and lower ports must remain usable
+through that borrow. It introduces no new consensus engine or parent WAL.
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current320: owning logical embedding | Let an actual logical group serve as another group's child through original opaque output streams; advances P8 logical voters. | Qualified consumed-image/response/backing contracts and sealed endpoint316; original ReplicaDriver and provider ownership. | Pure rejection returns original parts; real lower holds block results; original write/read and accepted-work drain; zero formatting/four strict profiles. Selected Linux singleton facade controls are implemented; full nested topology is the next deliverable, not claimed here. |
+| Next316: actual two-level native quorums | Demonstrate recursive service behavior through genuine middle and upper quorums; advances P8 nesting. |320 facade, distinct group/voter/store namespaces, bounded nested codec envelopes and supplied authenticated sessions. |27 physical owners back9 middle voters in3 independent groups and3 upper voters; actual TCP/QUIC elect/write/retry/read, deepest output hold, own checkpoint plus suffix, cold bottom-up recovery and joined cleanup on Linux/macOS. |
+| Following: nested activation and remaining feature audit | Close remaining P8 lifecycle duties and qualify supported feature profiles. | Actual nested network/recovery acceptance, existing314 protocol graphs and original membership/representative contracts. | Serialized Joint/Final/representative intent, old-owner fence, original unknown operation resolution, native supported cuts, current-source platform guards and requirement-by-requirement audit. Existing macOS stress failure remains a demonstrated gap until resolved; P9/P10 do not start automatically. |
+
+Schema320 was recorded before production edits in target/root315/LOGICAL_NODE320_SCHEMA.md.
+Data/API: owning generic LogicalNode plus original specialized NodeLocalParts,
+LogicalPersistencePort/optional LogicalSnapshotPort, original LogicalReplicaDriver
+and supplied SecureSession/codecs. Sessions are keyed by immediate logical peer;
+actual transport leaf remains in the sealed plan. Constructor checks the consumed
+image's exact original state, current authorization/route, provider/port/router
+bindings, quiescence and complete configured peer routes before ownership transfer.
+It returns every supplied part on rejection. Network polling retains original
+batches on overload, original ingress on backpressure and rejected completions;
+no scalar application state supplies success. Scoped lower pumping remains usable
+while an upper bridge consumes the exclusive client/read streams.
+
+States: Running -> Quiescing closes service intake and keeps accepted work driven;
+Draining starts only after original owner/driver/releases, routers, workers/ports,
+queue and session work settle, then closes original providers/sessions; Drained
+requires actual closed-session drain. Idle healthy sessions do not constitute
+accepted work. Fatal failures retain all original parts, driver, pending batches,
+ingress/completions and route in typed recovery ownership. No timeout means rollback.
+A terminal drained node is not reopened by abort. This initial facade supports one
+selected static group; nested membership qualification remains separately required.
+
+Actual320 first Linux evidence: all-feature library compiles, required full strict
+Clippy passes0 after factoring three complex return signatures into named aliases
+without allowances. Public TCP/QUIC facade controls pass2/0 over one singleton
+logical voter backed by a genuine three-physical-voter child quorum. They check
+original-part construction refusal, original route ownership, idle recovery transfer,
+held child outputs, original client receipt/fresh read, read executes once and
+resource-return drain. Full affected native target19/0 and nine-owner network2/0
+pass. The singleton is an explicit selected profile, not fabricated middle/upper
+majority evidence. Strengthened accepted-work close controls and final checks follow.
+Initial compile diagnostics were private budget-check visibility and a Debug-bound
+expect; fixed with shared crate-visible validation and unchanged exact-authorization
+panic handling. Test preflights corrected explicit child module paths and Counter's
+existing8-byte command API. Sandboxed listener refusal occurred before runtime;
+authorized localhost execution then passed, with that failed log retained.
+
+Actual319 native file qualification:60 declared before/after primitive error locations
+(30 ordinary publication,30 acknowledged2-to3 reused-slot reclamation) pass in both
+all-feature and native-only configurations. Existing striped provider9/0 and real
+TCP/QUIC Node2/0 pass; formatting and full strict0 on that settled cut. Errors surround
+actual staging open/write_all/file sync/rename/directory sync and own-file reopening,
+with exact original old/full-next state, locks, sessions and next parity reuse checked.
+This is process/file-error evidence, not a sudden-power-loss or hardware claim.
+
+Frozen318 Linux is terminal0 with all24 declared stages audited and992 source/fixture
+inputs guarded (manifest SHA327309f79c2b1b1e740b3f1d9f933a05eaf37fc33f4cd3fd249d9ced797d223d).
+Full library counts all/default/core/native150/149/120/131; selected functional29/29/17/29;
+actual program plus striped Node16/8/TLS-inapplicable/TLS-inapplicable; physical backing2/1/
+TLS-inapplicable/TLS-inapplicable; affected channels91/70/8/57, all failures0. Four strict
+profiles, formatting and metadata pass. Mac318 independently completes all24 stages
+with matching counts, run/source_guard0 and zero warnings on the same guarded cut.
+Saved manifests and terminal audits: validation/baseline/slice318/README.md.
+Later endpoint319/facade320/nested work is outside that frozen source evidence.
+Mac315b's complete selected all/default/core matrices and four strict profiles pass;
+native has reproducible initial catch-up failure in hundred_compacted_groups (179/1
+in effect_owner, other components120/0). Original10s cap and assertions remain.
+It is snapshot/persistence work still pending during catch-up, not evidence of a
+shutdown leak. Focused unchanged control also fails; retained files are inspected
+without inferring a slow-disk/stuck-worker cause. No P8 completion follows.
+
+Final320 selected facade controls pass TCP/QUIC2/0 and TLS-only1/0, including
+finishing an original accepted write after closing intake and returning the original
+closed request on further admission. The tracked pre-push script completes0 with
+formatting and default/all/core/native strict full-target Clippy, zero diagnostics
+(target/root315/root320-facade-four-strict-settled.log). This includes compilation
+of the new nested fixture; its real-time upper election currently fails and is not
+qualified by clean lint or the singleton controls. P8 remains incomplete.
+
+### Mini plan321: owning recovery, real nesting and qualification
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current321: owning logical checkpoint/recovery | Qualify the facade's original snapshot and cold recovery path needed by nested owners; advances P8 logical voters. | Original consumed image, snapshot/persistence workers and opaque lower observations; schema321 recorded before editing. | Actual parent checkpoint with withheld original child completion, later suffix, physical-store cold reopen, exact parent/application restore before parent polling, missing-snapshot refusal returning reusable original parts, dedup/fresh read/new write and owned joins. Linux controls pass; current-source macOS qualification is next. |
+| Next316: real nested election, network and recovery | Close actual multi-voter recursive usability, rather than infer it from singleton controls; advances P8 nesting. | Current owning facade and sealed endpoint chain, original middle/bottom dependencies and authenticated sessions. | Original Vote capture/authorize/wire/ingress trace identifies the current real-time election failure; focused cause fix preserves clocks/profile/15s acceptance and authority. Then full27-owner TCP/QUIC write/read/hold/checkpoint/suffix/cold-recovery histories and joins on both hosts. |
+| Following: activation and supported-profile exit audit | Qualify P8 lifecycle and remaining platform/failure duties before stopping. | Actual nested acceptance, serialized membership/representative contracts and existing314 models. | Native Joint/Final/fence/replacement faults, exact original Unknown resolution, guarded current platform matrix and requirement-by-requirement evidence audit. Older Mac315b native snapshot catch-up remains failed; no completion inferred from incremental318/321 gates. |
+
+Actual321 Linux controls pass4/0 with all features and2/0 with TLS only. The two
+new histories use the public owning facade over an actual three-voter child quorum:
+parent snapshot publication cannot bind/reclaim while original child output is
+held; the selected snapshot plus later suffix restores after all lower providers
+join and actual stores reopen. Exact parent state, pins and application value are
+checked before the parent polls. A compacted facade without snapshots refuses
+pure construction, returns original parts and accepts those same parts with actual
+matching snapshot handles. Original-operation retry retains its result, carries
+the current retry log index per Counter's existing contract and leaves value7;
+an original quorum read confirms7 and a new write reaches10. All handles drain,
+physical threads join and listeners rebind. Parent time is the existing explicit
+MonoTime(0) functional-control profile; this proves no real-time nested liveness.
+
+Initial compile needed the existing SnapshotWorker trait import. The first runtime
+probe correctly refused a fresh uninitialized bridge: the fixture now consumes
+Claim/Image through the same original bridge that pumps the providers. A later
+assertion incorrectly required Counter's duplicate receipt to keep its first log
+index; source review confirms it reports the retry entry position while preserving
+the original result. The corrected assertion checks exact current commit/receipt
+position and unchanged value, rather than changing the production contract.
+Final all-feature/TLS logs are target/root315/root321-facade-restart-final-all.log
+and root321-facade-final-tls.log. The tracked hook completes0 with formatting and
+all four strict full-target Clippy profiles (root321-four-strict.log), no allowances.
+Current-source Linux/macOS incremental qualification is prepared separately.
+
+### Mini plan322: accepted failure, real nesting and activation
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current322: original accepted-work abort | Qualify the owning facade's failure transfer and resolve an unknown operation through the actual child; advances P8 logical voters. | Original recovery parts, accepted child capsule, sealed fresh Claim/Image; schema322 recorded before editing. | Withheld child completion prevents failed cleanup, all original credits remain owned, actual completion permits cleanup, fresh representative recovers the write and original retry/read proves no double application. Linux TCP/QUIC and TLS-only controls pass; current-source macOS is still required. |
+| Next316: real nested service and recovery | Establish recursive multi-voter usability through actual physical and logical quorums; advances P8 nesting. | Owning facade, original authorized outputs and checked election-token refresh after accepted original Vote transfer. | Original clocks/profile and acceptance bound; actual upper election/write/retry/read, deepest output hold, checkpoint plus suffix, cold recovery and original owned joins on Linux/macOS. Passing singleton controls does not discharge this item. |
+| Following: actual nested activation | Implement the remaining research lifecycle protocol; advances P8 membership and representative transitions. | Existing314 reconfiguration models, recovered intent/outcome, original child eligibility and exact live peer plans. | Serialized durable Begin/Outcome/Release, child and parent Joint/Final at the intended layer, lost-result/restart recovery, old representative fence and actual native histories; then supported-profile exit audit. |
+
+Actual322 Linux accepted-abort controls pass TCP/QUIC2/0 and TLS-only1/0. An
+original write reaches application value9 but its original client capsule remains
+submitted to the child with the completion withheld. Abort transfers the actual
+parts and reports the original ticket as Unknown(Aborted); it does not undo the
+applied write. Failed cleanup refuses while that child obligation is unsettled.
+Sixteen withheld steps preserve exactly the original release credits. Consuming
+the actual child terminal permits failed-domain cleanup, closes original providers
+and ports, and settles bridge ownership. The failed owner remains failed.
+
+A fresh representative consumes a genuine Claim/Image from those same child
+owners. Its application reconstructs9 before parent polling. Retrying the original
+operation returns its duplicate result9 and an original quorum read confirms9.
+The replacement facade drains, original physical threads join and listeners
+rebind. This selected singleton control uses the existing explicit parent MonoTime(0)
+profile; it does not qualify real-time nesting, abrupt process loss or macOS.
+Actual logs: target/root315/root322-abort-first.log and root322-abort-tls.log.
+Frozen321 predates this test and the separate logical Vote-window correction.
+
+The nested causal trace identifies an election response window consumed by
+mandatory child authorization before the original Vote enters the outbound queue.
+The focused correction refreshes the existing checked election sequence only
+after that exact original authorized Vote is accepted. Candidate role, current
+term/self ballot, membership, group, sender, request context and accepted-prefix
+guards remain required. Withheld child authorization and queue refusal do not
+refresh the timer; old queued timer tokens become stale, and the new deadline can
+still trigger a campaign. Core correlation controls2/0 and actual child/queue
+controls2/0 pass; formatting and strict all-target/all-feature Clippy pass0.
+Post-accept reset exhaustion fences the owner while retaining the queue's actual
+authorized proof. No granted-response timer extension or fabricated peer receipt
+is introduced. The real nested TCP history remains a separate required gate.
+
+### Macro review323 and current mini plan
+
+The supported-platform319–321 matrix is now terminal on both hosts. This closes
+the declared native file-error and owning checkpoint/recovery qualification cut;
+the full P8 milestone remains incomplete because actual two-level liveness,
+nested activation and remaining failure histories are not qualified. Newer
+accepted-abort/cancellation and timer corrections are separate source cuts.
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current323: cancellation and platform lifetime qualification | Close the public facade cancellation/accepted-failure joints needed by nested owners; advances P8 logical voters. | Original client/read capsules, tested322 recovery ownership, original native providers and exact consumed output streams. | Cancel a wait after accepted child submission; retain original credits during holds; exact Unknown/Unavailable, duplicate write resolution, read executes once, healthy close/drain and joined cleanup. Linux passes; current-source macOS qualification follows the settled timer correction. |
+| Next316: nested request/response liveness and recovery | Complete usable real-time recursive service behavior; advances P8 nesting. | Original authorized Vote and granted response transfer timing, checked timer-token invalidation, owning scoped lower pumping. | Preserve clocks/profile and15s assertion; actual multi-voter election/current-term commit, write/retry/read, deepest hold, own checkpoint plus suffix, cold bottom-up recovery and actual joins on both hosts. |
+| Following: serialized native activation and exit audit | Implement outstanding P8 child/parent transition and representative contracts. | Qualified nested service,314 refinement/reconfiguration models and actual fresh peer-plan authority. | Durable Begin/Outcome/Release with original observations; Joint/Final, stale representative fence, lost-result/restart faults; complete functional requirement and Linux/macOS profile audit before stopping. |
+
+Schema323 records the API, state, ownership and cancellation/recovery checks before
+editing. Actual new cancellation controls pass TCP/QUIC2/0. A committed/applied
+write's actual result capsule is submitted to the child, then cancelling the wait
+reports the original ticket as Unknown(CancelledWait). Sixteen withheld steps keep
+the original release credits and healthy Running owner. Consuming actual child
+output settles them; an original-operation retry returns duplicate result9 and a
+fresh read confirms9. A genuine quorum read executes once before its result capsule
+is submitted, then cancelling its wait reports Unavailable(Cancelled). The held
+capture remains owned; original terminal consumption causes no second output or
+execution. A fresh read increments the execution count exactly once. Stale
+cancellation refuses, explicit heartbeat drains, and original provider closure,
+physical joins and listener rebind complete. No production cancellation semantics
+were changed. This is the selected MonoTime(0) parent control, not real-time nesting.
+
+Current Linux affected all-feature targets pass33/0: original logical owner/facade27,
+logical-network controls4 and genuine nine-owner parent quorum2. TLS-only facade
+passes4/0. The tracked pre-push hook323 completes0 with formatting and default/all/
+core/native full-target strict Clippy, zero diagnostics. Those checks predate the
+next granted-response correction. Partial facade operation review adds24 named
+operations with actual assertions and explicit limitations; metadata checker and
+negative controls pass. Totals are24 partial reviews/242 names, not full provider
+certification. Logs: target/root315/root323-{affected-logical-all,facade-tls,four-strict}.log.
+
+Frozen321 saved evidence is validation/baseline/slice321/README.md:1026 exact inputs,
+123 inventory entries and29 declared stages per platform, terminal run/source_guard0,
+no missing/duplicate stages, warnings or failures. Root independently inspects both
+terminal audits and verifies all eight saved-content hashes. Exact manifest digest
+628f99722ca290366e5c5c50fbf7fe87bf90d334935642ce6e0315033da757b4; file-list digest
+ba3304e4b197e7dabb7f6e1a3bbd8ae6488da89295230b9b18b9cc015ae7f366. Original Mac302
+processes stay separate and untouched; failed315b and nested histories are excluded.
+
+The first post-Vote correction nested TCP history still fails upper election at
+the unchanged bound. One guarded copy-only causal trace proves actual101 becomes
+Leader1 after receiving a granted original vote. Follower102's granted reply transfers
+at3401ms but retains deadline3970ms; it campaigns at3974ms before the first original
+leader Append arrives4818ms. Follower103 likewise transfers its grant4163ms, campaigns
+5250ms before Append5668ms. Thus the candidate-only correction is insufficient.
+The next narrowly guarded follower grant-transfer correction is planned from this
+exact evidence; no configuration interval, clock or timeout has been changed.
+
+### Macro review324: functional P8 and parallel activation work
+
+P8 includes the design research and implementation for striped one-group storage,
+representative trees and recursive logical voters, and broader transactions.
+Research/model checks alone do not complete it: supported implementations need
+their actual durability, recovery, ownership and Linux/macOS histories. The user's
+current scope moves optimization and original performance acceptance gates to P9;
+dedicated security review is P10. Existing authentication and correctness remain
+mandatory. Stop at qualified functional P8; do not start either later phase.
+
+The granted-response transfer correction is now implemented. It refreshes the
+existing checked election token only after the exact current durable ballot's
+original positive reply is accepted by the original authorized outbound queue.
+The volatile emitted-reply correlation cannot be reconstructed from an old reply
+after restart. Withheld authorization, queue refusal, denial, stale context and
+wrong durable ballot do not reset it. Core controls pass3/0; affected Linux
+all-feature logical targets pass34/0 and TLS-only23/0. Formatting and all four
+strict Clippy profiles pass0. The separate frozen323 macOS cut passes all16
+declared stages, including69 Rust tests and33 metadata controls, with unchanged
+1031-input manifest and zero terminal source guards. The matching frozen Linux
+qualification is running; no same-source two-platform claim is made yet.
+
+The actual27-physical-owner, nine-middle-voter, three-upper-voter TCP fixture now
+elects an upper leader and commits/applies its current-term entry. Its declared
+upper timing profile is500ms heartbeat and6000–10000ms election; middle/physical
+timers retain the original throughput profile. The first original client write
+still has no receipt at the15s watchdog. The retained cutoff shows ongoing lower
+durable progress and stable term1 roles; it does not prove eventual completion.
+Global work-idle predicates were removed only from business readiness, retaining
+actual commits, application positions and original outputs. Shutdown still must
+retire all original accepted work. Preserve the failed15s history as P9 speed
+evidence. Define bounded functional progress/deadlock checks before changing its
+watchdog; do not optimize or fabricate completion to satisfy that speed target.
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current324: replicated logical activation application, alongside real nested service | Supply the actual parent control slot needed for P8 child/representative activation; continue P8 nesting without making model state into a receipt. | Existing application/response/checkpoint seams,314 activation models, canonical original/target membership and explicit immutable phase IDs. Schema recorded in target/divide-provider/ACTIVATION_APPLICATION_SCHEMA.md before production edits. | Opt-in versioned business/control envelope, exact operation/content forwarding and contiguous inner Noop positions; durable Begin→Outcome→Release with exact retries, Busy/conflicts, reserved terminal capacity; own checkpoint plus suffix and atomic invalid-restore refusal. Focused semantic tests, metadata coverage, fmt/full strict0. Actual activation is still pending. |
+| Next: consumed-observation native child transition driver | Turn the replicated slot into real P8 learner/Joint/Final and representative replacement. | Application state, genuine consumed parent Applied/quorum-read observations, exclusive backing bridge configuration authority and authenticated learner readiness. | Original phase tickets/first positions, actual committed Joint then Final, fresh claimed image/peer plans, lost-result restart recovery and old representative fencing; Linux/macOS histories. Private serialized assertions alone do not qualify this item. |
+| Following: parent and recursive activation plus functional exit audit | Complete P8 lifecycle at its intended layers and stop at the requested boundary. | Qualified child driver, real nested write/retry/read/checkpoint/suffix recovery and owned shutdown, existing model obligations. | Serialized parent-cell changes and recursive activation, partial delivery/election/snapshot recovery and no concurrent representative; requirement-by-requirement Linux/macOS audit. Original throughput/latency gates are recorded for P9 rather than silently claimed passed. |
+
+The activation application introduces one necessary replicated state owner rather
+than a new Raft payload or ordering boundary. It is deliberately opt-in with a
+distinct schema; old inner snapshots are rejected rather than silently migrated.
+Control Outcome/Release assertions remain private trusted-driver inputs until
+the following slice consumes genuine Node observations. No caller-created scalar
+authority or replacement membership completion is introduced in this slice.
+
+Actual324 activation application passes Linux all-feature and core-only profiles,
+each7 private semantic/recovery controls plus4 downstream public-interface tests.
+Exact source and logs are recorded in
+target/divide-provider/ACTIVATION_APPLICATION_EVIDENCE.md. The wrapper is opt-in;
+there is no new Raft payload/order or implicit snapshot migration. Native
+activation driver, actual membership/representative transitions and macOS are
+still pending. Inventory now has124 entries and25 partial reviews/273 operation
+names; metadata and its negative controls pass. The review checker initially
+rejected source-unit-test anchors, so those were removed from the public-interface
+review rather than relaxing the checker. Private unit evidence remains separate.
+
+The held-checkpoint close regression first executes one original TCP history and
+fails0/1: Quiescing never advances while the actual checkpoint request is held.
+The focused owning-lifecycle correction then passes TCP/QUIC2/0. Quiescing waits
+for original service output streams, closes owner admission/timers and enters
+Draining. The original ReplicaDriver continues consuming accepted lower work;
+held child completion prevents early checkpoint binding or prefix reclamation.
+After the actual completion, the original checkpoint binds/compacts, all workers
+and ports drain, physical threads join and listeners rebind. Providers and secure
+sessions close only after accepted original sends/work settle; unadmitted receive
+input is explicitly canceled. This control uses the established injected parent
+MonoTime(0), not nested real-time or abrupt-loss qualification. The initial exact
+filter omitted its module path and ran zero tests; that output is preserved and
+not counted. Actual logs are root324-shutdown-before-actual.log and
+root324-shutdown-after.log under target/root315.
+
+The nested functional watchdog binds only once-only progress of the original
+ticket: Proposed at16954ms, exact durable entry at18716ms and actual commit at42302ms.
+It uses30s without matched progress and a fixed90s absolute cap; unrelated traffic,
+timer resets and prefix growth cannot extend it. The actual TCP history then
+fails at51.55s with Storage(Rejected("group entry limit")) from the configured
+32-entry middle log, before original Applied delivery. This is retained evidence
+of bounded admission failure, not a passing functional history or lost receipt.
+Review a coherent finite-history construction profile or original maintenance
+path before the next run; do not silently raise limits or replace receipt checks.
+
+Frozen323 is now saved at validation/baseline/slice323/README.md with identical
+1031-input source on Linux/macOS, all16 stages terminal0/source_guard0 and69
+selected Rust tests per host. Both audits match declared mandatory controls and
+root verifies all58 saved-artifact hashes. The later activation and shutdown
+changes and failing nested histories are excluded. No full P8 completion is claimed.
+
+### Mini plan325: bounded nested maintenance and native activation
+
+The actual suffix-cap failure changes the next dependency. Increasing the middle
+entry cap alone would leave original full-checkpoint and physical command bounds
+unresolved. Read-only serialization review instead finds the existing accepted
+middle snapshot envelope53,296 bytes plus logical Publish overhead418 bytes fits
+the original65,536-byte lower/physical command limit. Every accepted upper
+application state already passes its own48KiB replay/materialized checkpoint cap.
+The retained history is finite; maintenance never erases its deduplication ledger
+or promises that independent maximum capacities can all be saturated together.
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current325: original nested backing checkpoints | Finish real recursive service within its existing bounded storage profile; advances P8 nesting and recovery. | Sealed endpoint's existing checkpoint operation, exact selected child group, original snapshot/persistence ports. Schema/comparison in target/divide-shutdown/NESTED316_LIFETIME_PROPOSAL.md before editing. | Typed admission-only checkpoint forwarding through exclusive bridge ownership; invalid/closed controls refuse; one outstanding request per middle owner at16 retained entries. Actual original base/frontier advance and worker/router credits settle, write/retry/fresh read and original owned close/joins complete. Preserve32-entry unmaintained failure; unchanged budgets and no fake completion. |
+| Next: actual native child activation driver | Execute the replicated application protocol against original parent/child observations; advances P8 logical membership/representative lifecycle. | Tested activation application324, exact retained child configuration history, selected reserved terminal classification, authenticated readiness and scoped bridge capabilities. | Learner→committed Joint→Final, original phase tickets/first positions and fresh status reads; loss/restart resumes the same intent; new representative claims with original payload and old representative fences. Application assertions alone do not close this item. |
+| Following: nested recovery and parent/recursive activation | Complete the remaining research feature obligations before the functional exit audit. | Working nested service/maintenance, actual child driver and existing model/refinement contracts. | Deep held original output, checkpoint plus suffix and bottom-up cold recovery; serialized parent/recursive changes, partial delivery/election faults and actual Linux/macOS owned cleanup. Keep performance gates in P9 and stop only after full functional P0–P8 qualification. |
+
+The checkpoint joint is necessary because the upper bridge exclusively owns the
+middle Nodes and their opaque streams. It forwards the existing operation only;
+no mutable Node/owner, new storage format, hidden executor or positive observation
+escapes. The actual checkpoint publication, compaction Persist and Reconcile
+remain driven by the original lower providers. The independent frozen324 platform
+matrix is running on1047 guarded inputs; later maintenance changes are excluded.
+
+Settled324 Linux affected targets pass36/0 all-feature and24/0 TLS-only, including
+the held-checkpoint controls and authenticated network regression. The tracked
+hook runs fmt and all four strict full-target Clippy configurations with terminal0
+and zero diagnostics. Fresh platform evidence remains separate until terminal
+guards/audits; no full P8 claim is inferred from these selected passes.
+
+### Actual325 maintenance and remaining platform evidence
+
+The sealed checkpoint joint now forwards only the existing exact-group operation
+through the exclusive backing borrow. It introduces no new durability token or
+mutable owner access. A focused real three-physical-child TCP control passes1/0:
+invalid slot and closed bridge refuse without changing original ownership; active
+Claim work does not manufacture Busy; admission leaves the original base and
+bridge credits unchanged; actual snapshot completion advances the base, the fresh
+Claim completes, and original physical joins/listener rebind succeed. Required
+full-target/all-feature strict Clippy and formatting pass with zero diagnostics.
+The failed sandbox listener attempt is retained separately from this actual test.
+Logs are target/divide-shutdown/nested316-maintenance-{control-native,fmt,strict}.log.
+The inventory records checkpoint/checkpoint_backing with this selected scope;
+no full backing-provider conformance review is inferred.
+
+The first actual maintained nested TCP history fails0/1 at39.84s. Seven middle
+owners complete original checkpoint compaction at base15; owner8 then admits its
+checkpoint. The original upper write reaches proposal18178ms and exact durability
+19736ms, but bridge.pump_release subsequently returns Release(StalePermit), before
+original commit/Applied delivery. This is a new checkpoint/release interaction,
+not the earlier32-entry suffix refusal or a functional watchdog expiry. Preserve
+the exact log and source hashes; inspect original expected/consumed capsule and
+receipt provenance before changing ordering. No changed timeout, budget or
+replacement success observation is authorized by this failure.
+
+Frozen324 Linux is terminal run0/source_guard0: all16 declared stages and82
+selected Rust tests pass, including all/core activation11 each, all-feature
+native30 plus network6 and TLS native19 plus network5. Formatting, all four
+strict profiles, inventory124, partial reviews25/273 and33 metadata controls
+pass. The initial detached compile lost process ownership before any Rust tests;
+it is preserved and only missing stages were resumed under a verified foreground
+handle. This frozen1047-input cut excludes the later maintenance changes.
+
+The same frozen324 macOS aggregate is terminal run101/source_guard0. Its preceding
+eight stages pass, including all-feature activation7 private/4 public and native30.
+The next logical-network target passes2/fails2: the actual initial child election
+in Cluster::open exceeds the original15s wait before the cancellation test body;
+the subsequent fixture mutex-poison failure follows that panic. Raw evidence does
+not explain the election stall or prove a cancellation defect. The remaining
+seven unrun stages run separately without replaying the failed stage. Retain the
+failed aggregate regardless of their outcomes; no two-platform324 qualification
+is claimed. Exact logs/audit are under target/divide-membership/qualification324.
+
+The next activation dependency is a bounded ConfigurationOperation quorum-read
+query over the application's already-retained original configuration entries.
+Local CompactedCompleted status omits Final's original index/term, so it cannot
+resolve a lost original phase receipt. The new query must return only original
+learner or Joint/Final history with its group/applied boundary, preserve it across
+checkpoint and suffix, and retain bounded codec/admission refusal. Inspection
+values do not authorize configuration: the following driver must consume the
+original fresh ReadCompletion/barrier. This implements the concrete recovery
+joint needed by Mini325's next item; actual driver, parent-cell and recursive
+activation remain functional P8 work.
+
+Frozen324 partial evidence is saved in
+[validation/baseline/slice324/README.md](../validation/baseline/slice324/README.md).
+Root inspects both independent audits and verifies all86 saved-content hashes.
+Linux passes82 selected tests; Mac passes78/fails2, with two all-feature nine-owner
+tests unrun after Cargo stops the failed stage. Mac's separate seven-stage
+continuation passes run0/source_guard0, including default/TLS native19/network5,
+core activation11 and remaining strict profiles. The original aggregate101 and
+failed audit remain; no supported-platform324 completion claim is made.
+
+### Mini plan326: original response authorization and activation recovery
+
+The failure-only capture preserves the exact original expected capsule and
+consumed child observation: submitted=true, settled=false, byte/content equality
+holds, and the result is Refused(InvalidResponse). Capsule revision32/generation1/
+configuration1 equal the child's authoritative parent image32/1/1, with base0 and
+commit15. This disproves the proposed StaleImage/revision-race cause for that
+capture. The RPC kind was not recorded, so the capture alone does not establish
+which protocol predicate refused it. Read-only core review independently finds
+an actual contract mismatch: receive_snapshot emits SnapshotAck(received.index)
+for a snapshot already covered by the committed prefix, without requiring that
+index equal the local compacted base; the logical validator accepts only0/base.
+The next focused original-Raft/child-lease regression must demonstrate that
+mismatch before correction. Snapshot completion deferral is not justified by
+this evidence. Keep diagnostic source/log hashes and remove temporary stderr
+instrumentation before production qualification.
+
+| Deliverable | Purpose / macro milestone | Dependencies | Completion checks |
+| --- | --- | --- | --- |
+| Current326: original snapshot-response authorization | Finish the usable nested write/maintenance path in P8 without refusing valid original committed-prefix responses. | Actual326 invalid-response capture, original Raft receive_snapshot branch and existing mapping/representative/effect-lease guards. Schema precedes authority edits. | Actual uncheckpointed follower acknowledges an already committed snapshot through its original Send lease; held child output prevents release and preserves credits; after real child authorization the exact original Ack escapes. Wrong scope/term, above-commit and stale cases refuse. Then actual maintained nested write/retry/read/close, fmt/full strict0. |
+| Next: retained configuration query and consumed native child activation | Resolve lost Learners/Joint/Final receipts and execute the parent-replicated activation slot; advances P8 logical membership. | Existing original configuration history, bounded selected codecs, opt-in activation application, real child readiness/enrollment and reserved terminal work. Query schema is target/divide-provider/LOGICAL_CONFIGURATION_QUERY_SCHEMA.md. | Exact max-two original phase entries through checkpoint+suffix, bounded malformed/refusal controls; actual fresh Node barrier consumption, committed Learners/Joint/Final, original Outcome/Release and representative replacement. Local query values alone grant no authority. |
+| Following: deep recovery, parent-cell and recursive activation | Complete P8 at its intended layers and qualify both supported hosts. | Successful maintained recursive service and actual child driver, existing transition/refinement models and ownership seams. | Own checkpoint+suffix/bottom-up cold reopen, partial original phase/output loss, competing parent/child changes, stale representative refusal and genuine Linux/macOS cleanup. Audit full functional requirements before marking complete; stop before P9/P10. |
+
+Actual326 implements the bounded ConfigurationOperation query without changing
+existing checkpoint history/schema. Additive query4/read5 preserve old response
+bytes. Exact original Learners2/term2, Joint4/term3 and Final7/term5 survive own
+checkpoint at Joint plus the original Final suffix and full cold restore. Empty
+unknown history is scoped to the applied boundary. Read-at may expose later
+applied history, so the driver must acquire an original fresh barrier covering
+the phase it uses. Decode limits count to two before allocation, checks exact
+selected codec and child scope/grammar, and charges retained capacities. Actual
+Linux all-feature affected downstream tests pass15/0 (new history7, activation4,
+logical application4), core history7/0 and private response controls15/0 in both
+profiles. The final valid8192-byte opening profile refuses an oversized original
+63-member learner configuration with exact ReceiptBudget and unchanged state.
+Initial compile/fixture/filter mistakes remain recorded in
+target/divide-provider/CONFIGURATION_QUERY_EVIDENCE.md; zero-filtered tests are
+not counted. Native consumed-Node provenance and macOS query qualification remain.
+Inventory stays124; partial review adds the decoder, now25/274; all33 metadata
+controls pass. No full provider certificate is inferred.
+
+The separate actual original SnapshotAck regression fails0/1 before correction
+with Release(StalePermit), then passes TCP/QUIC2/0 after it. An original follower
+with base0/commit2 acknowledges received Snapshot1 through its original Send
+lease; withholding actual child completion keeps original credits and emits no
+send. Actual child authorization then releases the same Ack1/context. Its own
+checkpoint2 completes through original publication/compaction/reconciliation;
+receiving the same Snapshot1 below base2 still releases the exact original Ack1
+without changing application/log state. Original providers join and listeners
+rebind. These are trusted local snapshot-input controls, not outer authenticated
+snapshot-network provenance. Private actual-Raft and malformed shape guards pass
+2/0, keeping term/configuration/origin and uncommitted-positive refusals. The
+production predicate now mirrors durable committed coverage plus checkpoint or
+known-term coverage. Temporary failure diagnostics are removed. Logs and hashes:
+target/divide-shutdown/NESTED316_ACK_SOURCE_SHA256.txt;
+nested316-snapshot-ack-before.log, nested316-snapshot-ack-native-fixed.log,
+nested316-snapshot-ack-guards-extracted.log and the final fmt/strict logs.
+
+The next actual maintained nested TCP run fails0/1 at17.70s in upper election
+readiness, before any maintenance request or business write. Original101 is
+Leader1 with current-term Noop1 durable/commit1/app1;102/103 are Follower1 with
+durable Noop1 but commit0/app0. An original leader Send lease and child attempt
+remain. No semantic refusal is observed, so this run does not establish that
+the Ack correction fixes the earlier unlogged RPC. The original15s phase is
+retained as speed evidence. The approved fixture-only replacement binds each
+actual original owner and pre-Campaign candidate/store/configuration, with term
+and Noop index derived from its original durable boundary. At most12 once-only
+matching durable ballot/Noop/commit/applied milestones extend the same30s
+inactivity bound, within a fixed90s total. Other terms, roles, heartbeats or lower
+traffic cannot extend it. Actual current-term leader/commit and all-app readiness
+stay mandatory; generic Host.until and shutdown caps remain unchanged. Schema:
+target/divide-shutdown/NESTED316_ELECTION_WATCHDOG_PROPOSAL.md before fixture edits.
+
+The final settled query+Ack cut runs the actual tracked pre-push hook with fmt
+and default/all/core/native full-target strict Clippy terminal0, zero diagnostics
+(target/root315/root326-four-strict-final.log). This follows the final exact
+budget-refusal assertion; the earlier clean hook predates that test edit. These
+checks do not execute the full feature suite or qualify later source changes.
+
+Actual native activation now proceeds through owned original parent endpoints,
+immutable attempts and consumed Begin/Status observations. The necessary parallel
+reserve joint is explicitly selected from the actual wrapper configuration,
+persisted in the backing profile and defaults to Ordinary. Whole original mixed
+Business/control mutations and applied captures must remain indivisible and
+fully charged to a finite selected reserve; standalone Business remains ordinary.
+Short budgets must refuse before ownership transfer/application. The proposal at
+target/divide-provider/ACTIVATION_CONTROL326_SCHEMA.md is reviewed. Slice327
+implements its child-storage portion below; parent/router/capture remains pending.
+Classification supplies capacity only; the driver still requires genuine consumed
+child/parent observations for every transition. This is a dependency of actual
+activation, not a replacement completion target.
+
+The exact initial-election watchdog is now implemented; formatting and required
+full-target/all-feature strict Clippy pass0. The next actual maintained TCP
+history completes all12 original election milestones, then obtains original
+proposal19429ms/durability21711ms for operation300000. Eight middle checkpoint
+completions are observed. It fails0/1 at41.28s because the original consumed
+ClientOutcome does not match Applied; the fixture panic omitted its variant.
+There is no StalePermit or watchdog expiry in this capture. The outcome's actual
+reason is unproven: preserve the log, add only exact consumed-outcome/failure
+context, and trace it before changing routing, timers or ownership. The Node API
+already permits Unknown, so an actual leadership-loss result must be resumed
+using the same operation/content and original current-leader path if confirmed;
+it cannot be turned into fabricated Applied or silently ignored. Log:
+target/divide-shutdown/nested316-tcp-election-functional.log. Original client
+receipt, retry, fresh read and recursive recovery/cleanup remain open.
+
+### Mini plan327: selected activation reservation and original client resumption
+
+The current deliverable advances P8 logical-voter activation. Its child-storage
+schema is recorded before edits in target/root315/ACTIVATION327_STORAGE_SCHEMA.md:
+select an immutable profile obtained from the actual activation wrapper only
+on an unused LogicalApplication; bind its complete catalog, schemas and limits
+into checkpoint configuration. Default assemblies keep their original encoding.
+Classify the whole original mixed mutation as control only when every command
+parses under that selected profile and at least one is genuine control. Exact
+control ClientApplied requires the original operation/group and response schema.
+No classification creates a protocol permit or rewrites original content.
+Preflight finite storage for two maximum original actions. Pending admission,
+retained accounting and checkpoint replay use the same selected classifier.
+The parent application/router/release reservation is still a separate required
+joint before qualifying full activation terminal progress.
+
+| Mini item | Purpose and macro milestone | Dependencies | Completion checks |
+|---|---|---|---|
+| Current327: child reservation and original nested resumption | Preserve terminal child capacity and usable recursive write/read in P8. | Actual wrapper-derived profile, exact initial-state selection, original retained commands; actual Unknown outcome and immutable client content. | Whole mixed action admitted at ordinary quota; standalone Business/malformed controls refuse; exact-profile checkpoint/suffix replay and mismatched restore atomic refusal; bounded same-ID retry after actual Unknown; actual TCP write once/read/close; fmt and strict zero. |
+| Next: original activation parent driver and mixed result reserve | Make P8 activation an actual runtime feature. | Original opaque parent client/read completions, fresh retained Status, selected profile and finite parent/router/capture budgets. | Held outputs retain ownership; once-only completion; whole original mixed capture fits reserve; wrong binding refuses; actual learner enrollment and Joint/Final followed by Outcome/Release. |
+| Following: recursive activation recovery and platform qualification | Complete P8 lifecycle evidence. | Actual full driver and stable nested service path. | Exact checkpoint/suffix recovery, receipt-loss resume, cold rebuild and cleanup with no dual owner; required models; Linux/macOS selected matrix and remaining full roadmap audit. |
+
+The outcome-capture TCP history fails0/1 in41.60s with actual
+Unknown(LeadershipChanged), rather than a missing fabricated Applied reply.
+Its original operation300000 had proposal19371/durable21206 and no observed
+original commit/Applied; another upper voter is the actual term2 leader.
+The fixture now resumes the same group/operation/content only after consuming
+that original terminal uncertainty, using at most four accepted attempts and
+one unchanged90s total/30s matched-progress watchdog across attempts. The
+leader hint routes intake only; the actual opaque outcome and fresh read barrier
+remain the authority. No production election timers or budgets change.
+Nested qualification remains incomplete until the actual resumed history passes.
+
+Slice327 child-storage profile is implemented. Explicit selection refuses used
+or already selected state, wrong parent/catalog, oversized selected commands,
+and less than two maximum-action storage reservations. Default configuration
+bytes remain unchanged; selected checkpoints append complete immutable profile
+bytes and restore only into the exact matching configured assembly. The original
+whole mixed action, retained bytes, pending admission and replay share the same
+classifier. Genuine control ClientApplied requires original selected group,
+operation and response schema; invalid receipt authority still refuses through
+the existing independent authorization path.
+
+Selected Linux child-storage private controls pass4/0 in all features and4/0 in
+core-only; public selected-profile constructor and actual-wrapper profile getter
+pass2/0 in each configuration. Logs are target/root315/root327-profile-tests-final.log,
+root327-profile-core-tests.log, root327-public-profiles-final.log and
+root327-public-core-profiles.log. Exact source inputs are recorded in
+PROFILE327_SOURCE_SHA256.txt. The tracked pre-push hook completes terminal0
+with formatting and all four strict profiles at root327-four-strict.log.
+Earlier shared-target all-target checks incorrectly consumed obsolete library
+metadata and reported missing APIs present in the source; an isolated build
+identified actual type-alias lint causes, which were fixed. Clearing only the
+project build artifacts allowed the required canonical command to compile the
+current exports and pass. No lint level, threshold or hook was bypassed.
+A public fixture Default implementation resolves the newly exposed legitimate
+HostSnapshots new_without_default diagnostic. First invalid test-filter invocation
+executed no tests; corrected named profile runs above actually execute both tests.
+
+The actual parent observation driver now passes TCP/QUIC2/0 in
+ target/divide-provider/activation-driver-parent-all.log. It borrows a genuine
+LogicalNode around the actual activation wrapper, backed by three actual physical
+child voters. Original held lower completions prevent early Begin/Status results;
+observer cancellation, fresh Status with the same immutable phase IDs, exact
+first-position retry and retained Busy refusal all drain original credits before
+returning the parent. Begun is intermediate: no learner, Joint/Final or terminal
+Outcome/Release completion is claimed here. Initial fixture failures for using a
+claim from a different bridge and expecting Busy to have no first position were
+corrected against original ownership/retained-result contracts. The final fixture
+full-target/all-feature strict passes terminal0 at
+ target/divide-provider/activation-driver-full-strict-first.log.
+
+The one corresponding original nested TCP retry history fails0/1 in53.56s at
+ target/divide-shutdown/nested316-tcp-original-resume.log. Original proposal21464
+and durable23546 are followed by consumed Unknown(LeadershipChanged) at45399;
+the same immutable operation/content is accepted by the actual new upper leader,
+but is not yet Proposed at53555. The unchanged30s matched-progress watchdog
+expires correctly without treating roles, acceptance or uncertainty as progress.
+Nine actual middle checkpoint completions are retained. No Applied, read or close
+success is established. The next diagnosis must inspect the selected retry owner's
+actual readiness/persistence dependencies rather than repeat an unchanged run.
+
+Inventory now records126 contracts and27 partial provider reviews covering310
+operation names. Integrity and all33 metadata negative controls pass; these are
+metadata checks, separate from runtime qualification. Both-platform frozen327
+qualification is prepared for the affected query, SnapshotAck, profile and parent
+observation histories. The older324 failed Mac bundle remains unqualified and
+unchanged. Full nested service, child membership/terminal activation, parent-cell
+activation and recursive recovery remain explicit P8 work.
+
+### Mini plan328: original profile binding, administrative progression and terminal reserve
+
+| Mini item | Purpose and macro milestone | Dependencies | Completion checks |
+|---|---|---|---|
+| Current328: bind selected original image and administrative child path | Make P8 activation use actual matching storage and original membership operations. | Original consumed Claim/Image, complete wrapper-derived profile, sealed parent fresh Status guard and child configuration/read streams. | Wrong/missing parent profile returns unchanged owned parts; selected descriptors preserve exact profile; actual configuration admission/completion and fresh history remain correlated; genuine learner enrollment through drained detach/rebind; no scalar readiness or session reset shortcut; fmt/full strict0. |
+| Next: full original mixed terminal reservation | Preserve P8 terminal progress at ordinary quota. | Exact image/profile coupling and finite child-storage reserve, original application/router/release owned batches and configured bounds. | Reserve receipts and bytes before apply for a whole worst admissible mixed batch/capture; standalone Business remains ordinary; short selected budgets refuse before ownership transfer; actual full-quota Outcome/Release succeeds unchanged with cleanup. |
+| Following: full child and recursive qualification | Complete P8 activation and nesting. | Actual original learner/readiness/Joint/Final observations and terminal reserve; current nested failure diagnosis. | Full9+1 original owners, receipt-loss recovery at each phase, own checkpoint/suffix reopen, stale-session rejection, parent-cell and recursive paths, required models and Linux/macOS evidence; full goal audit. |
+
+Frozen327 is now saved at [slice327](../validation/baseline/slice327/README.md).
+Each platform passes66 actual named Rust tests, formatting/four strict profiles,
+metadata126/27/310/33 and matching1073-path source guards. Initial24-invocation
+runner executed64 actual tests and two cfg-disabled targets because native alone
+excludes TLS; its initial failed audit is preserved. Exactly the two genuinely
+unrun TLS histories were executed separately using features tls; combined audit
+covers26 actual invocations and66 tests with no repetition of passing histories.
+Root independently runs the saved verifier and133 saved content hash checks,
+both terminal0. This qualifies the bounded query/profile/Ack/parent observation
+scope and excludes deeper nesting and all newer328 changes.
+
+Root328 schema is written before edits at
+ target/root315/ACTIVATION328_IMAGE_BINDING_SCHEMA.md. VerifiedLogicalImage now
+retains the immutable storage selection from its actual backing assembly, minted
+when original Claim/quorum-read provenance is consumed. LogicalResponseCodec
+exposes a default None for its own consumed command-envelope profile; the actual
+activation wrapper returns its exact profile. A storage application's selection
+for its stored parent commands is deliberately distinct. LogicalNode compares
+these complete profiles before ownership transfer, preserving every original
+mapping/session/provider check and returning the original parts on failure.
+The descriptor factory now preserves the selected profile in its fresh exact
+configuration copy and refuses a mismatch with the original verified image.
+It already retains actual image.child_membership; later child membership requires
+a genuinely fresh consumed image/descriptor/plan, never mutation of a stale plan.
+
+The actual three-child TCP constructor/descriptor control passes1/0 in0.05s at
+ target/root315/root328-image-descriptor-native.log. Changed wrapper limits and
+missing parent application refuse without changing the original core; retained
+parts subsequently construct with the exact original wrapper and drain/join.
+Unselected child descriptors refuse an original selected image. Existing actual
+parent TCP/QUIC histories pass2/0 at root328-parent-regression.log. Public profile
+inspection passes2/0 all and2/0 core at root328-public-{profiles,core-profiles}.log,
+including default storage own-envelope None versus actual wrapper Some. Current
+formatting and all four strict profiles are zero at root328-four-strict-final.log.
+The first full strict check reported a114-line descriptor-test helper; extracting
+the bounded descriptor construction fixed the cause without a lint allowance.
+That failure remains at root328-strict-before-extraction.log, and the final actual
+constructor/descriptor test passes1/0 at root328-image-descriptor-final.log.
+Mac328 qualification and full parent/router/capture reservation remain pending.
+Metadata126/27/313/33 passes integrity/negative controls; frozen327 remains310.
+
+The corresponding new nested TCP readiness history has genuine original first
+Applied at50948: operation300000, index2/term1, value5 and duplicatefalse. It fails
+0/1 at78.28s waiting for all upper applications: leader101 hasapp2 while102/103
+remain Candidate2/app1 with original dependencies. The unchanged30s inactivity
+watch expires from original commit48254. No retry readiness branch is activated
+in this run; explicit duplicate, fresh read and cleanup do not run. Original
+cohort0 middle checkpoints complete through30. The next diagnosis inspects exact
+follower prefix/application dependencies and placement of the convergence check;
+no unchanged rerun, raised timer or dropped convergence requirement is approved.
+The evidence remains target/divide-shutdown/nested316-tcp-readiness-resume.log
+and NESTED316_PROGRESS.md. First Applied is meaningful progress, not full nesting.
+
+### Slice329: exact activation status-result reservation
+
+Schema precedes edits at target/root315/ACTIVATION329_READ_RESERVE_SCHEMA.md.
+The selected immutable profile now recognizes complete canonical v1 Status and
+Active query envelopes. Child command classification reserves an original whole
+ReadResult only with exact selected response schema, Read origin, and both ticket
+and barrier groups matching that parent. Business-wrapped, zero-ID, incomplete,
+trailing, unknown-tag and foreign-bound results remain ordinary. This changes
+capacity classification only: existing owner/session/configuration/barrier checks
+remain mandatory. A deliberately wrong original barrier term still produces
+InvalidResponse despite reserved admission; no scalar query becomes authority.
+
+Seven selected storage/profile tests pass in all features and seven in core-only
+(root329-storage-tests-corrected.log and root329-storage-core-tests.log). They
+include three new exhausted-ordinary-quota read-result controls and selected
+checkpoint/retry retention of the exact unchanged original command. One public
+actual-wrapper query test passes in all features at root329-query-public-all.log;
+it pins exact Status little-endian nonzero operation bytes and Active/Business
+separation, including short-buffer refusal. Initial test compile used Counter
+as a response codec, which it does not implement; root329-storage-tests.log
+retains this error. The correction uses the documented canonical bytes in the
+private quota controls and the actual public codec test for encoding evidence.
+
+The first broad strict check encounters a concurrently edited nested diagnostic
+attempt to clone original OwnerStep, which is not Clone (root329-strict.log).
+The fixture owner replaces that with bounded diagnostic metadata, preserving
+opaque ownership. The later core public-query compile fails before any tests
+while new shared admin328 modules are being registered (root329-query-public-core.log).
+Neither failed invocation counts as a semantic pass or a clean repository.
+Required final formatting/full strict and the unrun core public test will run
+once that shared module registration is coherent. Mac329 qualification remains
+pending. Inventory126/review27/operations313 integrity and direct33 negative
+controls pass; Node tracked readiness/cancellation, configuration-only drain and
+Raft pending-request inspection are inventoried as unqualified admin328 seams.
+
+Terminal reservation scope is reviewed in
+ target/root315/ACTIVATION330_TERMINAL_RESERVATION_SCHEMA.md (planned, not implemented).
+Actual inspection identifies additional client/read-intake and owner-class joints,
+not only ApplicationRouter receipts and release captures. All must use the same
+selected immutable profile and preserve whole original mixed batches, counts,
+bytes, original completion credits and checked construction bounds. No full-quota
+Outcome/Release or native membership qualification is claimed by child329 alone.
+The next deliverable in mini328 therefore includes these complete ownership
+lifetimes; adding the joints is needed because an original control cannot reach
+its reserved child log if an upstream ordinary queue already exhausted credits.
+
+Nested convergence refinement is approved before its edits in
+ target/divide-shutdown/NESTED316_CONVERGENCE_DIAGNOSIS.md. At most two original
+write watches remain in Host from before routing across duplicate/read/holds.
+Per-admission original owner/configuration and exact retained entry term/operation/
+full bytes precede independent durable/commit/apply bits; original deadlines never
+restart at Applied. The real duplicate and fresh read can proceed before the
+separate still-required all-three convergence gate. A compile failure during
+shared admin registration executes zero changed TCP histories, retained at
+ target/divide-shutdown/nested316-tcp-continuous-convergence.log. Its one changed
+actual socket history remains pending; all old failures remain failures.
+
+Read-only original Mac302 inspection at19:45:26UTC finds original shell20050,
+Cargo21495 and routed83714 still live; the original all-feature190-test routed log
+advances, with no profile exit or terminal guard. Original formatting/four strict
+exits0 do not prove tests complete. No process is restarted or stopped; evidence
+is target/divide-membership/mac302-inspection/inspection.log. This old baseline
+qualification is independent of frozen327 and newer328/329 source.
+
+The coherent shared admin328/child329 source subsequently passes the tracked
+pre-push hook: formatting and strict Clippy default/all/core/native all exit0 at
+ target/root315/root329-four-strict.log. The previously unrun core public actual
+query test now passes1/0 at root329-query-public-core-stable.log. Actual existing
+parent TCP/QUIC controls pass2/0 at
+ target/divide-provider/activation-admin-parent-regression.log. Those histories
+exercise original parent observations; the new administrative driver methods
+remain compile-qualified only. Final source then changes for the separate331
+export joint; these results do not certify those later edits.
+
+A separate unreviewed child-admin contract is inventoried, without inventing
+public conformance assertions for unexecuted native transitions. Corrected current
+inventory127/reviews27/313 operation assertions and direct33 controls pass at
+ root329-inventory-admin-corrected.log, root329-conformance-admin.log and
+ root329-conformance-controls-admin.log. The first inventory check used an
+incorrect physical/activation source path; that failure is retained at
+ root329-inventory-admin.log, then corrected using the actual file inventory.
+
+The single changed actual nested TCP history now runs and fails0/1 in103.87s at
+ target/divide-shutdown/nested316-tcp-continuous-convergence-ready.log. Unlike the
+older run with first Applied, this run produces no Applied. Cutoff diagnostics
+pin original store3001 index2/term1/op300000 with commit1; store3002 retains a
+term2 Noop at2 and same op300000 at3 with commit1; store3003 retains only index1.
+Their hard terms are4/4/5. This is new exact prefix evidence, not proof of which
+owned lower request blocks replication. Original watch deadlines/correlations
+remain enforced; no timer/capacity change or unchanged rerun is approved. The next
+focused diagnosis follows original pending persistence/capsule dependencies.
+
+### Mini plan331: live enrollment export, full child transition and terminal ownership
+
+| Mini item | Purpose and macro milestone | Dependencies | Completion checks |
+|---|---|---|---|
+| Current331: original live checkpoint export | Enroll an actual fourth physical child without changing the existing representative session; advances P8 child activation. | Actual durable checkpoint, existing selected SnapshotWorker Load without installation, sole SnapshotRouter consumer, original same-session continuation. Schema is target/root315/ACTIVATION331_SNAPSHOT_EXPORT_SCHEMA.md. | Exact anchor/worker/request and bounded image reservation; opaque output holds credits until consumed; wrong/late/oversized controls, cancellation, failure drain and shutdown/reclaim; real native live load plus actual enrollment; fmt/full strict0. Source copying or closing/reopening source is not acceptance. |
+| Next: complete original physical child transition | Make the parent-replicated activation intent reach actual Learners/readiness/Joint/Final and Outcome/Release; advances P8 logical lifecycle. | Qualified export, original parent Status/Applied guard and configured child history, actual authenticated learner readiness and bridge continuation. | Three actual logical parents backed by9 originals plus one enrolled child; parent pumps its own backing bridge independently of the target child; original phase IDs/first positions/fresh reads, detached rebind and lost-receipt/restart cleanup. Compile-only admin seams are not acceptance. |
+| Following: terminal quota and deep recovery qualification | Finish usable P8 lifecycle under bounded overload and recovery. | Root330 complete ownership budget plan, actual child transition, diagnosed nested service and existing models. | Whole mixed application/release work and client/read/owner intake remain reserved at ordinary quota; deep checkpoint/suffix/cold reopen and serialized parent-cell/recursive activation; Linux/macOS requirement-by-requirement audit and stop before P9/P10. |
+
+Scope review: live snapshot export is a new concrete enrollment dependency because
+existing native SnapshotWorker owns its store lock. Reopening that live store is
+unavailable, while stopping the representative changes its physical session and
+correctly invalidates original continuation. The additive composed export uses
+existing worker/provider I/O, not a new store or a fabricated activation fact.
+Provider331 implementation and public/native controls are in progress. Original
+Mac302 full matrix remains independently live; Mac qualification for328/329/331
+and complete P8 exit remain unproven.
+
+Root329 selected input guard pins seven exact root source/test/contract files at
+ target/root315/READ_RESERVE329_SOURCE_SHA256.txt and checks0 at
+ root329-input-guard.log. This is a scoped input guard, not a frozen whole-source
+platform qualification. Full standalone export331 remains an active separate
+slice. The proposed narrow nested causal observation is approved only in a guarded
+isolated source copy after coherent-source inspection: original durable mutation,
+Send/capsule, consumed child observation, actual authorized publication and actual
+native ingress/core processing are correlated without changing clocks/assertions.
+It is diagnostic evidence, not a production feature or a new authority interface.
+
+### Slice330A: whole selected application-result reservation
+
+Schema precedes edits at target/root315/ACTIVATION330A_APPLICATION_RESERVE_SCHEMA.md.
+The original VerifiedLogicalImage now selects its exact immutable activation
+profile and actual parent maximum entry count in private router construction.
+One complete-entry classifier serves both retained child mutations and application
+results. A mixed original batch needs complete selected envelopes and at least one
+control; malformed, foreign and standalone Business remain ordinary. Classification
+adds capacity only; original committed lease/core/application guards remain intact.
+
+All declared control windows (at least two) reserve whole configured batch receipt
+count and bytes, positions and Held metadata. Ordinary receipts have their own
+ceiling, alongside existing count/byte ceilings. Selected construction requires
+one complete ordinary batch and all complete control batches to fit, and the
+actual parent maximum batch to fit. Physical and unselected construction remains
+unchanged; selected default/short configurations refuse without ownership transfer.
+The actual selected fixture declares its existing maximum16-entry parent batch
+and complete wrapper/Counter receipt bound; two full captures fit existing64KiB.
+
+Seven private accounting/classification tests pass all features and seven core
+(root330a-application-tests-all.log and root330a-application-tests-core-coherent.log).
+The synthetic Held control tests credit ownership only, never protocol authority.
+The actual original three-child image constructor test passes1/0 at
+root330a-original-image-all-coherent.log, preserving original state across four
+short/default refusals and subsequent exact construction/drain. Six original
+physical application-router controls pass at root330a-physical-application-regression.log.
+These target/root315 logs prove this joint; they do not prove full terminal quota.
+The first native run could not acquire loopback listeners in the sandbox; the
+network-enabled attempt then encounters a concurrent new export-forwarding enum
+compile error and runs zero tests. Core first compile encounters that same cause.
+Both failures remain; only the coherent changed-source runs count as passes.
+
+### Slice331: original live checkpoint export
+
+The original sole SnapshotRouter/selected SnapshotWorker consumer now exports the
+exact durable anchor with Load install:false. It pins expected original metadata,
+reserves two image allowances and held metadata before admission, and preserves
+owner/worker/request/reference identity. Poll transfers opaque nonclone output
+while credits remain held. Cancellation/close and failed-only cleanup retain
+actual dependencies, including ordinary jobs, until their original terminal work
+settles. No source store is reopened and no representative session is replaced.
+
+Actual Linux export controls pass13 all features and12 core; existing snapshot
+routing controls pass14. The native storage/worker load control passes after a
+cohesive101-line helper extraction, with no lint waiver. It uses actual native
+snapshot storage/worker and explicitly host WAL; it proves same-session load,
+held credits and real worker join, not native Node or learner enrollment.
+Detailed actual evidence and preserved failures are
+ target/divide-membership/EXPORT331_EVIDENCE.md. Final16 owned/additive Node paths
+match EXPORT331_SOURCE_SHA256.json; this scoped final guard is not a retrospectively
+fabricated before-test whole-source certificate.
+
+The administrative bridge forwards the original Node export output unchanged and
+keeps accepted exports in its drain contract. Wrong endpoint completion returns
+the opaque output intact. Those forwarding methods are compiled; their actual
+fourth-child enrollment remains the next gate. Nine current native administrative
+controls pass TCP/QUIC at target/divide-provider/activation-admin-current-all2.log:
+parent observations, original readiness/cancel, absent learner refusal, canceled
+configuration before exact OwnerStep dispatch, and selected image/router binding.
+Compact explicit checkpoint limits obey unchanged native transport guards.
+The first current-target run has a TimeWentBack fixture failure when cleanup used
+MonoTime0 after real elapsed administration; helpers now use the same original
+clock. Failure and consequential mutex poison are preserved, not counted as passes.
+
+Repository formatting is zero at root330a-fmt.log, and current all-target/all-feature
+strict Clippy is zero at target/divide-provider/activation-admin-strict11.log after
+registration of the newer enrollment test and cohesive helper extraction. That
+new test is compiled, not yet executed. Inventory128, partial reviews28/audited
+operations321 and direct33 metadata negative controls pass at
+ target/root315/root330a331-{inventory,conformance,conformance-controls}.log.
+Node and administrative export-forwarding methods are inventoried without invented
+native qualification. macOS330A/331 qualification is being prepared against a
+separate guarded source cut. Original Mac302 shell20050/Cargo21495/routed83714
+are still genuinely live at20:06:23UTC with advancing all-test log; no restart,
+terminal result or final guard is claimed.
+
+### Mini plan332: original enrollment, terminal ownership and recursive liveness
+
+| Mini item | Purpose and macro milestone | Dependencies | Completion checks |
+|---|---|---|---|
+| Current332: actual fourth-child enrollment and canonical activation | Finish P8 child membership using original durable data and the existing representative session. | Qualified export joint and Linux one-parent/four-child pilot, sealed original parent observation/configuration guards, real native enrolled member startup and common selected catalog. | Three actual logical parents backed by nine physical originals plus a real enrolled fourth target child, independently pumped parent/target cells; actual live Node export, source anchor unchanged, original continuation rebind, authenticated readiness, Learners/Joint/Final and original Outcome/Release/fresh history; exact phase IDs, receipt loss/restart and complete cleanup. Parent-only9/0 is not completion. |
+| Next330C: typed owner reads and complete terminal pressure | Finish P8 full-quota activation beyond application330A, release330B, client330C1, read330C2 and owner-input330C3A joints. | Exact selected profile/request/one original typed query encoding, immutable verified owner and whole effect/input lifetimes. | Correlated private owner-read preflight/enqueue uses the same stored queue class; wrong scopes refuse unchanged; ordinary and total ceilings/cleanup hold; genuine full-quota Outcome/Release and Status complete. Client and read held-count pressure pass TCP/QUIC; complete terminal pressure remains pending. |
+| Following: recursive liveness/recovery and platform exit | Qualify complete P8 and stop before P9/P10. | Actual full activation, terminal reservation, diagnosed nested schedule and explicit hierarchical runtime contract. | Original nested retry, fresh reads, all-replica convergence, checkpoint/suffix reopen and joined cleanup; parent-cell/recursive activation and required fault/models; guarded Linux/macOS full requirements audit. No deadline invalidation or unchanged failing rerun. |
+
+Macro review: export331 removes the live native store-lock dependency without
+replacing the representative's session. Application330A, release330B, client330C1,
+read330C2 and owner-input330C3A implement their selected capacity joints. Typed
+owner reads and complete terminal pressure remain necessary to qualify control
+progress from original intake through reserved child storage. P8 remains incomplete.
+Performance optimization and performance promotion gates remain P9; dedicated
+security review remains P10, Windows deferred. Functional research is still P8.
+
+The approved single isolated nested causal run fails0/1 at93.62s; its guarded
+fixture is unchanged and508 trace events are untruncated. It consumes first Applied
+value5 at63569, then the original30s inactivity expires during same-ID retry.
+Both followers have their own exact entry2/term1 but commit/app1. Successful
+original Appended capsule authorization precedes genuinely due, nonstale follower
+Campaigns; later commit-announcement Append reaches an already newer term.
+Observed child release waits are seconds while original native ingress takes
+milliseconds. This diagnostic schedule is not an original-history qualification
+or a production fix. The next action reviews declared hierarchy liveness and
+original release ordering; blindly discarding due clocks would change the timer
+contract. No timer/capacity change or further rerun is approved by these results.
+
+### Slice331B and current platform/enrollment evidence
+
+The additive `SnapshotRouter::checkpoint_exports_are_drained` inspects only original
+export ownership. Ordinary healthy snapshot work retains its original lease and
+credits; whole-router drainage remains separate. Actual separate-group checkpoint
+work passes one all-feature and one core control, and externally held export
+inspection passes one all-feature control. Formatting and required full strict
+Clippy are zero at `target/divide-membership/export331-observer-{fmt,strict}.log`;
+root independently ran current full strict with zero diagnostics at
+`target/root315/root331b-current-strict.log`. The three owned inputs are pinned in
+`EXPORT331B_SOURCE_SHA256.json`. This newer getter is outside frozen Mac331.
+Inventory128 / partial reviews28 / audited names322 and direct33 negative controls
+pass in `target/root315/root331b-{inventory,conformance,conformance-controls-direct}.log`.
+The `node --test` wrapper reports one file; the direct invocation is the actual
+33-control evidence.
+
+Frozen Mac330A/331 now passes14 stages and54 named Rust tests: application7all/7core,
+exports13all/12core, ordinary snapshot routes14all and original image constructor1.
+Formatting and all four strict profiles pass. All1,112 source inputs and exact path
+closure match before/after/copy and terminal; manifest SHA256 is
+b258d1147a425a9e219a5c97e1781e74766630941c3f7f957c2adadfad90924a.
+`target/divide-membership/QUALIFY331_RESULTS.md` records the isolated macOS run;
+root independently reran the saved audit at `root331-mac-independent-audit.log`
+and checked the copied source manifest at
+`/tmp/voteboat-qualification331-local-source-audit.log`, both zero.
+The initial audit reporter mismatch is preserved and corrected without rerunning
+tests. This qualification excludes331B, later admin/timing changes and full P8.
+It also does not finish the independently running older Mac302 matrix.
+
+The Linux native enrollment pilot now passes4/0 at
+`target/divide-provider/activation-admin-enrollment-all.log`: TCP/QUIC actual live
+Node checkpoint/export, wrong-node opaque output retention, external cancellation,
+real fourth-member import, same-session continuation/fresh Metadata and history,
+authenticated readiness, canonical Learners/Joint/Final and parent Outcome/Release;
+two accepted-readiness cancellation histories also pass. Its topology is one
+logical parent backed by four physical children. The selected complete target
+subsequently passes13all/7TLS-only at `activation-admin-final-all3-diagnostic.log`
+and `activation-admin-final-tls.log`; native-only cfg-zero is not a test pass.
+Two earlier12/1 immediate bridge-close assertion failures remain unresolved;
+export-only inspection did not prove their cause, and the later13/0 preserves the
+same exact assertion with retained-usage diagnostics. Final pilot formatting/full
+strict pass and inputs are pinned in `ACTIVATION_ADMIN328_FINAL_SHA256.json`.
+Full three-parent/ten-physical-owner qualification is the current332 deliverable,
+with original parent12's backing802 pumped independently from target801.
+Its pre-edit schema is `ACTIVATION_TEN_OWNER332_SCHEMA.md`.
+
+The single changed upper hierarchy timer profile executes the original nested TCP
+history and fails0/1 at135.47s. It does consume first Applied(value5), converges the
+first write on all three upper applications, and consumes genuine same-ID duplicate
+Applied(value5,true). Fresh read is admitted but its original Event::Read has not
+stepped before the unchanged30s watch expires behind owned work. No fresh quorum
+read, final retry convergence, close/join or recovery acceptance is claimed.
+`target/divide-shutdown/NESTED316_HIERARCHY_PROFILE_RESULT.md` records exact original
+positions and binary hash16461a4c2b6856653f7e341a0bf78b654327ead21cf4869ec820dac697ec36fd.
+The1,087-input launch guard is zero; post-run guard has four changed shared files,
+not zero, while the fixture stayed unchanged. A single bounded isolated diagnostic
+will correlate the exact original read ticket with its preceding Send/capsule/child
+operation; no new deadline, quota or queue behavior follows from local role/term
+inspection alone. All failed histories remain evidence.
+
+### Slice330B: selected whole release-capture reservation
+
+Pre-edit schema: `target/root315/ACTIVATION330B_RELEASE_RESERVE_SCHEMA.md`.
+The logical replica factory privately binds its original owner authorization to
+its original result router, then selects the router's verified immutable profile
+and whole declared batch bound. Every declared control capture window (at least
+two), and one complete ordinary window, must fit before transfer. Constructor
+validation and actual capture use the same checked retained-byte formula.
+Complete original mixed committed batches and faithful canonical Status/Active
+queries select reserved release capacity. The original owner/lease/read checks
+and exact child capsule permits still govern publication. Pending captures carry
+their control classification through publication retry and failed cleanup.
+Public unselected release construction retains its behavior.
+
+The selected fixture retains pending16/control4/capsule8192 and whole batch16.
+Its previous128KiB control reserve could not retain one whole configured capture;
+explicit3MiB reserved within4MiB total now validates all four complete windows
+and one ordinary capture. This is required ownership capacity, not a performance
+result, larger protocol log, new authority, or timeout change.
+
+Five private tests pass all features and five core at
+`root330b-release-tests-{all,core}-final.log`. Synthetic retained records exercise
+credit accounting only. Actual verified-image construction passes1/0 at
+`root330b-original-constructor-all.log`: four default/short release configurations
+return original parts with unchanged core and authorization, followed by exact
+construction and original drained cleanup. Original Begin/fresh Status/retry/
+busy/cancel TCP/QUIC histories pass2/0 at `root330b-parent-regression-all.log`.
+All these logs are in `target/root315`.
+
+Repository formatting and strict default/all/core/native profiles are zero through
+the tracked pre-push script at `root330b-four-strict.log`; the hook remains enabled.
+Metadata128/28/322 and33 direct controls pass at `root330b-inventory.log`,
+`root330b-conformance-corrected.log`, `root330b-conformance-controls-corrected.log`.
+Preserved first failures: private binding-field access corrected to the existing
+public accessor, concurrent fixture's nonexistent image accessor corrected by its
+owner, then its formatting corrected. Initial conformance metadata rejected private
+unit-test paths; those remain inventory evidence and the public-test ledger retains
+only actual downstream test anchors. No lint level or verifier rule was weakened.
+
+This closes selected release construction/classification/accounting, not the
+full330 terminal quota milestone. Original client/read invocation/result and owner
+intake reserves, genuine end-to-end full-ordinary-quota activation and Mac330B
+qualification remain required. The next330C pre-edit contract review follows those
+original intake lifetimes while332's full three-parent fixture is being completed.
+
+### Current332 dependency review and next330C1 client slice
+
+The full three-parent/ten-owner fixture is registered and compile-qualified, but
+its first three exact TCP attempts fail before election. The first actual assembly
+requires real logical snapshots (`Replica(MissingSnapshots)`,0.14s). Adding the
+original snapshot worker/sole router then exposes its exact image+1024 command
+allowance (`InvalidLimits`,0.13s); the next selected-profile constructor requires
+two complete command envelopes in control storage. No enrollment, write or phase
+completion is inferred from these runs. The coherent cohort-only amendment derives
+command allowance from the full64KiB parent image bound, reserves twice that command
+size, and retains the original64KiB ordinary action headroom. It preserves parent
+1024-byte/16-entry limits, wrapper/catalog, native512KiB transport guard and330B.
+All coupled pure constructor/native bounds will be checked before another workload;
+missing snapshot support and short budgets are not bypassed.
+
+The isolated read diagnostic finishes0/1 at155.87s. It pins original request1,
+admission96261 and Event::Read125847, then real context12 acknowledgements reach
+native ingress133805/138783. A genuinely due earlier Heartbeat Visit46 owns four
+original Sends; its final Effect52 waits for exact child801 action after genuine
+Unknown(LeadershipChanged). Neither queued acknowledgement reaches the core before
+the unchanged30s watch expires; total read time59.598s remains below90s. All three
+upper applications now genuinely converge original entries2/3, term1. This explains
+the cutoff without treating ingress as a barrier or Unknown as authorization.
+The diagnostic has1,162 bounded events, no truncation, and6,834 unchanged final
+inputs plus unchanged executable. Original fixture bytes/caps stay unchanged.
+`target/divide-shutdown/nested316-read-diagnostic/REVIEW.md` records exact chronology.
+The intentional visit/child-proof ownership barrier remains intact. Any refined
+progress inspection must pin finite exact causal tickets/context and never reset
+on unrelated heartbeats/roles; no such production interface or timer change is made.
+
+A read-only next330C schema is saved at
+`target/divide-membership/ACTIVATION330C_INTAKE_SCHEMA.md`. It identifies client
+Pending, read invocation/execution Held and original owner intake separately.
+330C1 implementation starts with clients only: selected immutable profile,
+declared global/group count and whole-byte reservations, retained classification
+until terminal AND externally released cleanup. Oversized original selected
+control allocation will reject unchanged; it will not be shrunk or silently copied.
+Typed query encoding remains a later additive logical path, preserving physical
+traits and the one-active-read context. Full owner/read and terminal quota acceptance
+remain outstanding. Root owns shared evidence; client and full-cohort work use
+separate source ownership.
+
+Read-only original Mac302 inspection at20:29:09UTC confirms exact shell20050,
+Cargo21495 and routed83714 still live with an advancing routed log. Its formatting
+and four strict stages are zero, all-test stage still executing. The existing run
+and original cache are untouched; no terminal/full matrix result is claimed.
+
+### Slice330C1: selected client ownership and native held-quota progress
+
+Pre-edit client contract: `target/divide-membership/ACTIVATION330C_INTAKE_SCHEMA.md`.
+Original verified router construction selects its immutable parent/profile and
+validates global/group control counts and complete retained byte windows. Public
+client limits add control_requests/group_control_requests/control_bytes; defaults
+are2/2/4MiB, while physical/unselected behavior remains unchanged. Every declared
+selected window and one ordinary window must fit. Full original group/operation/
+command classification preserves normal proposal validation and owner admission.
+Oversized original selected control allocation rejects unchanged. Pending class
+and ordinary credits survive cancellation and held output until original terminal
+AND consumer release; no original command allocation is shrunk or copied away.
+
+Actual owned checks:8private all +8private core and11 original downstream client
+histories pass; latest parent/profile guard is followed by full strict and fmt0.
+These raw logs and eight frozen input hashes are described in
+`target/divide-membership/CLIENT330C1_EVIDENCE.md`. Actual native verified-image
+construction passes1/0 at `target/root315/root330c1-original-constructor-all.log`:
+five short client configurations refuse without changing original core, followed
+by exact construction and joined cleanup. Private accounting controls grant no
+protocol authority.
+
+Root pre-edit acceptance schema:
+`target/root315/ACTIVATION330C1_NATIVE_QUOTA_SCHEMA.md`. Native TCP/QUIC histories
+pass2/0 at `root330c1-intake-native-all.log`: original two business Applied outputs
+remain externally held at the ordinary client-count quota; another original
+business proposal refuses with identical allocation/content and unchanged credits.
+Canonical Begin, fresh scoped Status barrier/result and exact duplicate Begin
+complete through real child authorization while those credits stay charged2.
+Explicit selected client limits4total/2control, command1024/receipt8192,
+bytes128KiB/control64KiB validate whole windows; parent16, other routers, original
+owner and15s per-operation caps are unchanged. Completing original outputs then
+closing/draining original facade/bridge and joining native workers succeeds.
+This does not claim complete ordinary-byte, read, owner, result or terminal
+Outcome/Release pressure qualification, nor same-source macOS.
+
+Root first full strict correctly rejects an unconstrained generic read type in
+the new test router construction; explicit original response/query types fix
+the cause. Second full strict and formatting pass without weakening diagnostics.
+The linked next mini-plan now targets read/owner intake rather than redoing the
+qualified client-count joint. P8 is incomplete; P9/P10 remain deferred.
+
+Full332 advances beyond constructor validation to actual three-parent election,
+then its fifth changed TCP history fails with genuine Application(DedupCapacity).
+It does not qualify enrollment or cleanup. The earlier fourth constructor refusal
+was original physical client command64KiB below required70704; replacing only the
+unbound client router with the matching declared allowance preserves binding,
+other budgets and proposal contracts. Complete pure preflight and strict pass
+before the fifth workload. Actual retained dedup/action lifetimes are being
+inspected before another bounded change; no unchanged failure rerun follows.
+
+330C1 final tracked pre-push formatting and default/all/core/native strict pass0
+at `target/root315/root330c1-intake-four-strict.log`; hooksPath is `.githooks`.
+Inventory128/partial reviews28/operations322 and33 direct negative controls pass0
+at `root330c1-{inventory,conformance,conformance-controls}.log`. Inventory includes
+private accounting paths; the ledger references only genuine downstream runner
+and assertion functions. These metadata checks are not feature certification.
+
+Next330C2 pre-edit schema is reviewed at
+`target/divide-membership/ACTIVATION330C2_READ_SCHEMA.md`. Planned additive typed
+query submission derives complete Status/Active classification under the sealed
+profile, validates complete invocation/execution windows including inline query
+size, and retains class through original retry/cancel/held cleanup. Physical
+traits/generic submit remain unchanged and ordinary. The single active read per
+group stays intact; native acceptance will hold actual terminal ordinary outputs
+and one genuine selected read rather than invent parallel barriers. Original
+owner input remains Data until the separate330C3 reviewed joint. This plan is
+approved for implementation, not yet implemented or qualified.
+
+Read-only recursive startup review distinguishes the fixtures: nested logical
+owners already initialize TimedShard with actual lower.now(), unlike full332's
+old hardcoded0 owner construction. Native channel assembly and unpolled sibling
+construction leave a gap, but no captured deadline proves it caused the nested
+Unknown. The matched child801 first successful Applied remains term1 long after
+startup. Do not transfer the332 clock fix into nested as an established cause.
+Its middle-tier runtime/profile and exact causal progress joint remain under
+bounded review; no new nested history or timing relaxation has run.
+
+### Slice330C2 and330C3A: original read outputs and verified owner input reserves
+
+Reviewed schema before source changes: `target/divide-membership/ACTIVATION330C2_READ_SCHEMA.md`,
+`target/root315/ACTIVATION330C2_NATIVE_READ_QUOTA_SCHEMA.md` and
+`target/root315/ACTIVATION330C3A_OWNER_PROPOSAL_SCHEMA.md`. The C3A schema covers
+tracked input windows; complete effect-output windows remain a separate check.
+These joints advance functional P8 activation under bounded ordinary pressure.
+
+Implemented330C2 adds whole invocation/execution windows, protected global/group
+counts and bytes, and public typed `ReadRequests::submit_logical`. Defaults for
+protected requests/results are2 per global/group with4MiB bytes. Private selected
+constructors validate every whole window and one ordinary window before transfer;
+rejection returns the original execution router. Complete initialized bounded
+Status/Active query encoding derives class under the immutable selected profile,
+application schema and exact parent. Generic submit and unselected physical
+construction preserve ordinary semantics. Pending/Held class survives original
+retry/cancel/output ownership until terminal AND released cleanup. The original
+one-active-core-read contract remains; no parallel barriers are fabricated.
+
+Actual agent checks are48 passing executions:13 private all,13 core and22 existing
+physical downstream read histories. Raw commands, initial compile failure and
+15 scoped source hashes are retained in
+`target/divide-membership/READ330C2_EVIDENCE.md`. The first owned test compile found
+missing App Clone and a concurrently registered root test module not yet written;
+both causes were fixed. This is read-accounting evidence, not whole-owner progress.
+
+Root native held-read acceptance passes TCP/QUIC2/0 at
+`target/root315/root330c2-read-quota-native-all.log`. Two actual fresh business read
+outputs remain externally held at the ordinary count quota. Business refuses
+without changing original query or credits, while genuine Active and Status
+barriers/results fill the two selected remaining windows. Full total quota still
+refuses another Active. Completing all four original outputs, closing/draining
+original facade/bridge and joining original native workers succeeds. Core reads
+are sequential; retained terminal outputs supply real pressure without pretending
+there are parallel active core contexts. Whole ordinary-byte and complete terminal
+activation pressure, recovery and same-source macOS remain unqualified.
+
+Implemented330C3A privately installs the immutable input profile only during
+original verified logical owner assembly. Exact canonical Propose derives Control;
+raw Read, business, malformed and foreign envelopes remain Data. Selected original
+allocation above the command allowance rejects unchanged. Declared global/group
+control counts must be at least2 and every tracked command+Event+AdmissionTicket
+window, plus one ordinary window, must fit before profile installation. Queue
+placement supplies the stored class through next_class, visits and cleanup.
+
+Four private C3A controls pass all/core (8 executions) in
+`root330c3a-tests-all4.log`/`root330c3a-tests-core.log`. Genuine verified constructor
+refuses four short original owner input configurations with unchanged physical
+core, then constructs/drains the selected owner. Native constructor/parent/client
+regression run passes5/0 in `root330c3a-native-five2.log`. Initial test imports/owned
+GroupLog mismatch, scheduler max_groups mismatch and short-background fixture
+budget were focused fixture fixes. The first native constructor check used a
+one-byte control budget that prevented the original timed runtime from existing;
+correct whole-window-minus-one budgets preserve timer construction and test the
+selected constructor. Its first run2pass/3fail, including two mutex-poison followers,
+is retained at `root330c3a-native-five.log`; it is not a passing history.
+
+Final pre-C3B tracked pre-push formatting and default/all/core/native strict pass0
+at `target/root315/root330c2-c3a-four-strict.log`; hooks remain enabled. Initial
+C3A full strict encountered four concurrent provider preflight API compile errors,
+subsequently corrected; these failures remain in the raw logs. No threshold or
+lint level was weakened. Current source is advancing to C3B and must be checked
+again; a previous clean cut does not qualify subsequent edits.
+
+### Macro review and mini-plan dependency changes after330C2/330C3A
+
+The read and owner input windows are implemented; the next linked330C deliverable
+is the private typed owner-read joint. Reviewed pre-edit state/ownership schema:
+`target/divide-membership/ACTIVATION330C3B_OWNER_READ_SCHEMA.md`. One borrowed exact
+profile/request/initialized-query correlation is used identically for owner output
+preflight and original input enqueue. Actual logical authorization and installed
+profile must match; raw generic Read stays Data. No public classification flag,
+new authority, query allocation or second queue is introduced. Original queue
+class must persist through original visit/effect/terminal cleanup. Root owns owner
+sources; typed query linkage encodes once in the existing read submission joint.
+Acceptance needs exact scope refusal, ordinary count/byte and full total ceilings,
+original class/sequence/credit cleanup, downstream read/parent regressions and
+zero formatting/full strict. Full terminal activation remains outstanding.
+
+Full332 now exports the actual Learners checkpoint and enrolls the original fourth
+child, but the seventh changed TCP run fails before Joint with Application(DedupCapacity)
+(`target/divide-provider/activation-ten-tcp7.log`,0/1,11.12s). Read-only diagnosis
+finds selected command requirement70,704 but original native startup hardcodes
+actual WAL/core command capability65,536. Genuine readiness rejects that actual
+capability; wire/client selection alone is insufficient. The log does not capture
+an exact negative readiness reply, so that observation is not claimed. Repeated
+parent heartbeats consume the finite128 action history while readiness cannot
+qualify. Do not blindly enlarge128 or rerun the same source. The bounded next
+composition joint explicitly selects actual native LogLimits before IO and uses
+the same chosen limits for create/recover/import and recovered core; defaults and
+original rejection cleanup remain. This enables the intended functional readiness
+contract, not a performance optimisation. Schema:
+`target/divide-provider/ACTIVATION_NATIVE_LOG_LIMITS332_SCHEMA.md`.
+
+The one isolated nested middle-profile run fails0/1 at118.83s, despite genuine first
+and duplicate Applied receipts and all-upper convergence. All middle groups remain
+term1 at cutoff; the fresh read holds original child work and the upper visit.
+Formatting/full strict/no-run compilation,6,870 source guards and original binary
+before/after guards pass. Exact read causal queue/ack stages are unobserved, so
+no assumed RPC or byte cause is claimed. Preserve
+`target/divide-shutdown/nested316-middle-profile/RESULT.md` and raw history; do not
+repeat unchanged tests or change clocks again. The following recursive deliverable
+requires a finite original-ticket causal progress observer review and successful
+read/recovery/cleanup, then guarded Linux/macOS qualification. P8 stays active;
+functional research remains P8, performance P9 and dedicated security P10.
+
+### Slice330C3B: exact typed read correlation into original owner intake
+
+The reviewed C3B schema is now implemented. A private borrowed LogicalReadInput
+carries the original checked request, immutable selected profile and exact complete
+query bytes. EffectOwner output preflight, TimedShard actual logical authorization
+and Shard admission/enqueue use this same scope. Wrong profile/group/event/request
+refuses the original event before sequence or credit transfer. Complete Status or
+Active selects Control; generic raw Read and noncontrol queries remain Data.
+No positive read barrier/capsule or public authority factory is introduced.
+
+Typed submit retains one initialized17-byte candidate from one original encoding,
+uses it for both Pending classification and the owner seam, then drops the borrowed
+scope. Original queue placement retains class through next_class, visit accounting,
+active effect ownership and cleanup. Original query is unchanged on refusal;
+no profile clone, extra queue payload or query re-encoding is needed. Existing
+single live core read/owner visit is indivisible and is not preempted by reserves.
+
+Root targeted owner checks pass8all/7core at
+`target/root315/root330c3b-owner-all-final.log` and `root330c3b-owner-core.log`.
+Controls assert ordinary count/byte pressure, full total ceiling, exact canonical
+versus malformed/business scope, unchanged failed sequence/credits, original
+queued ticket/class and follower NotLeader followed by exact finish/stop cleanup.
+The native-only negative control shows selected metadata alone cannot grant a
+physical runtime logical read authority. These accounting fixtures do not mint
+logical authorization or ReadReady. Native positive and effect-pressure scope
+must be verified separately.
+
+Owned typed read checks pass11all/11core plus22 original public physical read
+regressions (44 executions). Three new controls retain complete bytes from one
+encoding and preserve original closed/wrong-profile query allocation, sequence and
+invocation/execution credits. The first all compile retains root private TimedShard
+field access and in-flight native startup type/helper errors; the root control now
+checks public core read_request_floor instead. Its first full strict finds only
+native prepare_with_options107/100; the provider extracts the cohesive original
+fresh-application validation instead of changing thresholds. Repository-wide
+cleanliness awaits the final integrated checks, not these focused passes.
+
+C2/C3 metadata checks pass128 inventory contracts,28 partial reviews/322 audited
+operation names and33 direct negative controls in
+`root330c2-c3-{inventory,conformance,conformance-controls-direct}.log`.
+submit_logical is inventoried on the previously unreviewed ReadRequests contract;
+this does not enlarge audited operation coverage or certify providers. Ledger
+anchors are genuine downstream constructor/held-read functions, not private
+unit paths. Initial inventory script referenced encoding.rs instead of the real
+classification.rs; corrected before inventory verification. The Node --test wrapper
+reports one wrapper execution; direct execution reports the33 actual controls and
+is the counted evidence.
+
+Read-only Mac302 inspection at21:07:17UTC confirms the same original shell20050,
+Cargo21495 and routed83714 remain live; the routed output has advanced to original
+insertion histories. The original all-feature stage has no terminal file.
+`target/root315/mac302-inspection-330c3b.log` retains processes and actual log tail;
+inspection exits1 only because the terminal-file read reports absence. Nothing
+was restarted or edited. This older source run does not qualify current C3B/native
+selected-limit changes or a complete platform matrix.
+
+C3B integrated native regression passes7/0 at
+`target/root315/root330c3b-native-seven-local.log` (1.83s): genuine selected
+constructor, original Begin/fresh Status/retry/cancel TCP/QUIC, held-client quota
+TCP/QUIC and held-read quota TCP/QUIC. This exercises positive original logical
+read admission/capsule/barrier consumption; it does not qualify full owner effect
+or ordinary-byte pressure. First restricted-sandbox run compiles but fails0/7:
+first owned TCP/UDP listener bind cannot succeed and six followers encounter the
+poisoned fixture mutex. Its raw log `root330c3b-native-seven.log` is retained. An
+explicitly loopback-authorized execution fixes the environment; no source,
+assertion or fixture budget is changed to hide that refusal.
+
+Current tracked hook formatting and default/all/core/native strict pass0 at
+`root330c3b-native-limits-four-strict.log`. C3B owned evidence is frozen at
+`target/divide-membership/READ330C3B_EVIDENCE.md`/`READ330C3B_SOURCE_SHA256.json`;
+root scoped15-source/five-log after-check record is
+`target/root315/ROOT330C3B_EVIDENCE_SHA256.json`. These are local scoped fingerprints,
+not a guarded whole-tree macOS qualification. No P8 completion follows.
+
+The recursive causal observer plan is saved at
+`target/divide-shutdown/NESTED316_READ_OBSERVER_SCHEMA.md`. Root reviewed the broad
+callback/event vocabulary and narrowed the next candidate to immutable original
+read/admission, actual held Visit/lease and original bridge accepted-child-ticket
+inspection, with one genuine completion-budget0 held-read acceptance first.
+Snapshot inspection can miss transitions inside one poll; this limitation stays
+explicit. The broad observer remains PLAN ONLY, with no watchdog/timer change,
+new authority or implementation approval. Its purpose is to expose the actual
+retained dependency before changing recursive progress semantics.
+
+### Slice332: selected native WAL/core capability and actual replacement path
+
+Implemented additive static/member `prepare_for_discovery_with_log_limits` and
+member `enroll_snapshot_with_log_limits`. Original defaults/timing/rotation methods
+delegate with default LogLimits. Private typed startup storage options carry the
+same selected limits into actual authoritative NativeLogStore create/recover and
+recovered Raft core. Pure limits/bootstrap/native worker validation precedes IO;
+original application/cleanup ownership and default recovery semantics remain.
+Explicit wire/client selection uses original empty prepared parts before unchanged
+Node assembly. Enrollment still provisions trusted imported data, not readiness.
+
+Dedicated original-native controls pass4all/4TLS; final all4/0 at
+`target/divide-provider/startup-limits-all3.log` includes exact70704 wire/client
+selection. Tests commit/apply a genuine70704-byte canonical Counter command through
+original NativeNode/worker, recover the original member and duplicate receipt,
+verify original file bytes and actual store limits, retain default smaller command
+refusal and reject default-too-small reopen. Invalid static/member selected limits
+refuse before files/listener ownership with original application/cleanup; invalid
+offline enrollment preserves application and target path. No limit rebinding,
+second WAL, fabricated readiness or unlimited history is used.
+
+Cohort selects actual physical max_command_bytes70704 consistently for original
+bootstrap, prepare/recovery, offline enrollment, wire and client. Pure preflight
+passes2/0 at `startup-limits-preflight.log`: lifetime remains128 actions, fixed
+canonical scope3041 and conservative whole checkpoint516640 < selected524288.
+Original16 parent records,1024 parent command, ordinary64KiB action storage,
+control/count bounds, timers and15s stage watches are unchanged.
+
+Full changed TCP8 reaches actual Learners export/fourth enrollment, authenticated
+readiness, Joint/Final, original Released/Outcome validation, original parent
+position/representative assertions and post-replacement business write, duplicate
+and fresh read. It then FAILS original independent cleanup0/1 at3.01s with
+Network(Closed), `target/divide-provider/activation-ten-tcp8.log`. This is concrete
+protocol progress, not a passing complete history. No QUIC/full platform claim.
+The actual Node poll already no-ops when Drained, so simply skipping drained nodes
+does not explain the failure. Original error site/session state/sending ticket are
+not captured in that log. Root approves ONE copied error-boundary diagnostic with
+source/binary guards to distinguish closed submit, EOF with original sending or
+previously failed close, retaining all obligations and unchanged watches/assertions.
+No production correction or ignored Closed error is approved yet.
+
+Latest owned formatting/full strict are0 at startup-limits-fmt2/strict4; initial
+107-line preparation and27-complexity preflight plus two unused imports were fixed
+by cohesive helper extraction/removing unused imports, without lint allowances.
+Root tracked four strict cut and native regression cut are recorded above.
+New native API inventory metadata passes128 contracts/28partial/322audited names/
+33direct controls at `root330c3b-limits-{inventory,conformance,conformance-controls}.log`;
+these native startup contracts remain unreviewed for full provider certification.
+Root script initially referenced a nonexistent cohort enrollment filename; corrected
+to the actual members.rs before validation. Functional P8 is still incomplete.
+
+Copied332 error-edge diagnostic completes1/0 at2.44s, with no error-edge observation:
+it does NOT reproduce TCP8's cleanup failure. Exact1,132 before/copy/after compilation
+input guards pass and the original binary is retained; only five copied error-only
+instrumentation files differ. Root production source is unchanged. This cannot
+identify or establish a fix for the earlier Closed path. The next bounded review
+uses controlled genuine accepted-send/remote-EOF ownership, distinguishing running
+failure from requested shutdown. Existing accepted-abort controls preserve the
+original batch and credits; they do not cover Quiescing/Draining. Root approves
+read-only cause/API planning before a production correction, not repeated whole
+histories or ignored close errors. Scoped source/results:
+`target/divide-provider/STARTUP_LIMITS332_RESULTS.md` and its source manifest.
+
+### Guarded selected Mac330C3B/native-limits qualification in progress
+
+Root capture validates1,145 exact Linux before/copy/after compilation+inventory
+inputs, excludes Git/ignored design pack and archived evidence, and records
+`target/root315/mac330c3b/CAPTURE.json`. Frozen Mac checkout:
+`/tmp/voteboat-macos-330c3b-BudUhF/repo`; isolated target-qualification cache and
+sequential feature executions preserve the original still-live Mac302 checkout.
+Planned stages: start/terminal source guards, formatting/four strict profiles,
+runtime unit all/core, original downstream reads, selected native storage, seven
+original constructor/parent/client/read native histories and metadata/direct controls.
+This is selected feature qualification, not full P8/platform completion.
+
+First runner55126 is terminal with9 failed compiler/test stages, format/metadata/
+start+terminal guards0. No Rust feature tests execute: fresh compilation encounters
+test-only raft-proto's unsuitable protobuf compiler fallback on Apple Silicon.
+Root omitted the existing reference compiler bootstrap when preparing the fresh
+runner. Read-only inspection of the original working Mac script identifies the
+already-provisioned compiler; no VoteBoat production change or downloaded dependency
+is needed. Failed logs and checks-first.sh remain. After verifying first runner
+terminal/no process, corrected checks-selected.sh selects the exact existing
+reference-tools296/bin/protoc with expected SHA256
+9f40368c858666e7036df0b9b58a4acd085fed58ab531294c3e5b5820f8af360,
+checks its real version, and uses the original4096 file limit. Results-selected
+is separate; the exact VoteBoat source manifest is unchanged. The capture recipe
+now includes validation/reference-tools.sh for future closures. Corrected runner
+is dispatched; qualification remains pending authoritative live/terminal checks.
+
+Corrected frozen Mac runner61881 was verified live by exact pgrep on its full
+checks-selected.sh/repo/results path. Reference compiler hash/version3.21.12,
+start-source guard, formatting and default/all strict are0; current stage is
+core strict. `target/root315/mac330c3b/inspection-selected.log` retains this actual
+snapshot. No terminal or runtime/native test result is inferred from it.
+
+### Selected Mac330C3B/native-limits terminal qualification
+
+Subsequent authoritative inspection finds runner61881 terminal, all16 stages0,
+and failures=0. Transferred raw logs independently verify runtime47all/46core,
+original downstream reads22, selected native storage4 and original native
+constructor/parent/client/read histories7 (TCP/QUIC,14.17s):126/0 Rust tests.
+Formatting/default/all/core/native strict report zero diagnostics. Both remote
+start/terminal source guards pass all1,145 inputs; root independently rehashes
+every copied source against the frozen CAPTURE.json and validates actual exits,
+test counts and diagnostic logs. Inventory remains128/28partial/322audited;
+direct metadata negative controls33/0. Evidence is
+`target/root315/mac330c3b/RESULTS.md`, `VERIFIED.txt`, transferred results-selected
+and scoped RESULTS_SHA256.json. The earlier nine compiler/environment failures
+remain recorded; no source change or extra dependency was needed for correction.
+This closes selected same-source platform qualification, not full332 cleanup,
+quota/terminal/restart, nested-read or whole-P8 acceptance. No later state of the
+independent older Mac302 process is inferred from its earlier live snapshot.
+
+### Mini-plan333: original native close ownership and complete activation
+
+| Deliverable | Purpose and macro milestone | Dependencies and schema | Completion checks |
+|---|---|---|---|
+| Current: controlled native owning close | Establish the cleanup contract needed for usable P8 logical membership. | Existing verified images/three backing cohorts and genuine authenticated channels; narrowed schema derived from `target/divide-provider/LOGICAL_CLOSE332_SCHEMA.md`. One original authorized send is accepted, progress is withheld explicitly, and the actual opposite endpoint closes. No invented EOF or authority. | Running failure preserves original batch/queue credit and enters recovery; exact recovery cleanup and joins. Requested-close cut records original service/transport obligations and actual phase. No assumed production fix. |
+| Next: bounded explicit shutdown collector | Retire all original accepted obligations while reporting unknown delivery honestly; advances the same P8 lifecycle milestone. | Controlled failure evidence, exact outbound cancel/complete contracts, original owner/replica/session state. Public API choice remains subject to concrete regression review. Local session close disables reads, so provider close and remote EOF must not be conflated. | Requested shutdown retains externally held outputs, cancels only never-session-accepted original batches, consumes exact Failed outputs without claiming Sent, preserves other provider/integrity failures, reaches true drained ownership and joins; formatting/four strict0. |
+| Following: full activation and deeper qualification | Complete P8 functional lifecycle and platform evidence. | Actual corrected cleanup, complete terminal quotas and recursive liveness contract. | One changed full332 TCP history with original transition/business/reclaim, then QUIC; receipt-loss/restart, full pressure, parent-cell/recursive paths and required models; guarded Linux/macOS complete requirements audit. Stop before P9/P10. |
+
+Macro review: selected original intake and native storage joints now have Linux
+and guarded macOS evidence. Full physical child replacement has real protocol and
+post-replacement business evidence but lacks qualified cleanup; source-supported
+close schedules still need controlled evidence. Recursive read/recovery and full
+roadmap acceptance remain open. Functional research remains P8; P9 performance
+and P10 dedicated security remain deferred. Previous confirmation-only goal turn
+made no progress; this turn records new authoritative platform qualification and
+starts the next available controlled lifecycle slice.
+
+Controlled333 schema is narrowed before edits in
+`target/divide-provider/LOGICAL_CLOSE332_CONTROL_SCHEMA.md`: one genuine native
+TCP accepted-send/running-peer-close control first, separate from requested
+shutdown. The test-only wrapper delegates native authentication, binding, poll,
+read/flush/close/revoke and terminal errors; it withholds only Ready-state write
+progress after seven original bytes. Actual opposite endpoint close supplies
+the error. No full332 rerun, authority manufacture or production change is
+approved at this stage. Root also reviews the read-only exact cleanup audit
+`target/divide-membership/LOGICAL_OWNER_SHUTDOWN_REVIEW.md`. The test must settle
+original lower WAL/snapshot/release/child obligations before failure or honestly
+retain the unresolved recovery bundle. Failed-owner reclaim is distinct from
+normal healthy drain; same-queue original Failed consumption releases transport
+credit without asserting remote delivery. The proposed broader shutdown API
+remains planned until the controlled ownership evidence is reviewed.
+
+### Logical owning explicit shutdown333: implemented and scoped acceptance
+
+Root reviews clean native running-close evidence before production edits. Exact
+605-byte authorized frame/7 actual plaintext bytes, real peer close and
+Network(Session(Closed)) move Running to RecoveryRequired; original Failed output
+keeps2 messages/6904 bytes until same-queue consumption releases exactly1/3452.
+Remaining unaccepted original batch cancels exactly and all9 physical workers/
+channels join/rebind. This scoped native control1/0 at0.21s is recorded in
+`target/divide-provider/CLOSE332_RESULTS.md`. Its first cache-linked diagnostic
+run is excluded: own-cache package artifacts were rebuilt from actual source.
+The contaminated binary hash was lost during clean; no retained hash is claimed.
+
+Pre-edit implementation schema is `target/root315/SHUTDOWN333_SCHEMA.md`.
+Production now adds LogicalNode::poll_shutdown, bounded original local-send and
+peer-closure progress, and a typed rejection retaining collected progress.
+Running calls refuse before effects; ordinary poll remains strict. After original
+service/result routers empty, explicit shutdown closes admission/timers and
+enters Draining before network progress. It cancels only never-session-accepted
+originals; accepted Failed completions consume exact original queue correlation.
+Only observed Closed/Session(Closed) with actual Failed transport and settled
+original output is reported as a scoped peer closure, once. Other failures stay
+recovery-required. Original replica/backing work continues and existing accepted
+drain predicates govern reclaim; provider joins remain host owned. No durability,
+remote receipt or successful delivery is inferred from local metadata.
+
+Final boxed-rejection/expect_err source native TCP pair2/0 at0.38s passes:
+unchanged running refusal plus requested-close positive. Positive reports exact
+Cancelled peer13/sequence2 and Failed peer12/sequence1, one Session(Closed)
+closure, no repeated completion, original owner/provider drain and9 native joins.
+All1,140 before/after inputs match; binary and eight owned sources are pinned in
+CLOSE333_FINAL_BINARY_SHA256/CLOSE333_SOURCE_SHA256. A prior mixed-cut passing
+pair is development evidence only: its guard detected three files changing
+during execution, and final coherent source was rebuilt before qualification.
+Raw accepted log: `target/divide-provider/close333-tcp-pair2-final.log`.
+
+Original held-checkpoint tests now use explicit shutdown during closing only:
+TCP/QUIC2/0 and TLS-only TCP1/0. All16 withheld-completion polls, original15s cap,
+unchanged anchor/base/bytes, accepted snapshot request and timer-close predicates
+remain; real3-child workers join after actual completion. Evidence:
+`target/divide-membership/SHUTDOWN333_CHECKPOINT_EVIDENCE.md`. First assertion
+used scalar comparison for Vec metadata and failed compile; corrected to is_empty.
+Sandbox temp-path collision and derivative mutex poison occurred before native
+assembly; dedicated TMPDIR/socket-authorized original execution passes.
+
+Root first strict found a208-byte Err variant; boxing retained error progress
+fixes the cause. Second strict found err_expect in the new test; expect_err fixes
+it. No lint levels/thresholds change. Final root formatting/default/all/core/native
+strict are0 in `root333-shutdown-final-exits.txt` and companion logs. Current
+metadata checks pass128 contracts/28partial/323 audited operations/33 direct
+negative controls: the added poll_shutdown operation has explicit selected
+assertions and remaining limitations, not certification.
+
+### Mini-plan334: full activation cleanup, remaining failure contracts and exit
+
+| Deliverable | Purpose and macro milestone | Dependencies/schema | Completion checks |
+|---|---|---|---|
+| Current: full332 original cleanup using explicit shutdown | Complete real P8 child replacement cleanup after the already-observed Joint/Final/Release/business path. | Qualified shutdown333; a small fixture adapter preserves independent original parent/target bridge pumping and uses poll_shutdown only after actual host close. Production API remains frozen. | One changed full TCP history preserves all original protocol/business assertions and exact reclaim/joins; QUIC follows only after TCP completes. No quota/deadline or role shortcut. |
+| Next: outstanding service/failure and full terminal pressure | Complete P8 lifecycle ownership under overload and faults. | Original held client/read outputs, exact accepted transport/worker boundaries and terminal reservations. | Service credits prevent premature Draining; later provider faults preserve collected progress/original unresolved work; full-quota Outcome/Release, receipt-loss/restart and required models. Selected send/checkpoint controls do not exhaust this scope. |
+| Following: recursive and platform qualification | Finish complete P0–P8 and stop for user review before P9/P10. | Actual child activation, diagnosed nested fresh-read dependency and stable selected lifecycle contracts. | Original nested retry/read/convergence, parent-cell/recursive activation and recovery, required durability/fault/models and guarded Linux/macOS complete requirement audit. |
+
+Macro review: explicit owning shutdown is now implemented with selected native
+send and checkpoint acceptance; full three-parent transition cleanup still needs
+the changed fixture history. Same-source Mac330C3B qualification covers the earlier
+intake/storage cut, not this newer API. Functional research remains P8 and the full
+goal stays active. No performance optimisation or dedicated security work starts.
+
+### Full physical child replacement334: TCP and QUIC completed on Linux
+
+The complete three-logical-parent/nine-original-native-owner workflow now enrolls
+a real tenth native owner and replaces child801 through Learners, authenticated
+readiness, Joint/Final and parent Outcome/Release. Both original business
+operations retain Applied/duplicate/fresh-read checks before and after replacement.
+All original owner/bridge/provider/channel reclaims, worker/connector/dialer joins
+and socket rebind complete. TCP passes1/0 (2.37s); QUIC passes1/0 (21.51s).
+Actual logs and source guards are in target/divide-provider/ACTIVATION334_RESULTS.md.
+
+Only the two cleanup/progress test helpers and minimal cfg(quic) registration
+changed. Explicit shutdown preserves the original independent bridge pumps;
+protocol IDs, assertions, timers, quotas and phase bounds are unchanged. TCP local
+metadata is empty; QUIC cancels one original never-session-accepted peer12 batch
+from parent13/sequence42. Neither result establishes the earlier Closed cause or
+remote delivery from local cancellation. Both histories have unchanged1,140-input
+start/end guards and pinned binaries. Root334 formatting/four strict checks pass
+for the TCP cut; the added wrapper is included in the new qualification cut.
+
+Macro review: first full physical child replacement and owning cleanup now have
+Linux TCP/QUIC acceptance. Guarded mac334 captures1,154 compilation/inventory inputs
+and runs the shutdown pair, held checkpoint, original running/recovery controls,
+full replacement, formatting/four strict and metadata checks in an isolated
+checkout. It is live, not yet qualified. Original service-result credit holds are
+next, followed by full terminal pressure/lost-receipt restart and recursive
+read/activation/recovery. These remain P8 functional work; P9/P10 remain deferred.
+
+### Shutdown335/336, original ownership inspection and snapshot337
+
+Genuine externally exported Applied and fresh-read outputs now have explicit
+shutdown acceptance in both completion orders: TCP/QUIC4/0 and TLS-only2/0.
+Sixteen polls preserve both original count/byte credits in Quiescing; consuming
+one output leaves the other blocking sixteen more polls. Exact second
+consumption permits true provider drain and native joins. Root adds exact
+LogicalNode::inspect_read exported/reclaimed controls; final integrated all4/0
+passes and TLS-only requalification is running. Original335 evidence remains
+a separate prior cut in SHUTDOWN335_SERVICE_EVIDENCE.md.
+
+Negative host-provider control336 passes all-feature1/0 and TLS-only1/0. A real
+seven-byte native send remains accepted while the same shutdown call first
+cancels peer13/sequence2, then receives one injected negative Io(Other) from
+a distinct supplied provider. Typed rejection preserves the exact cancellation
+metadata and original accepted peer12/sequence1 credit. Recovery consumes its
+actual Failed output and joins nine native workers. No successful output or
+quorum proof is injected. SHUTDOWN336_REJECTION_EVIDENCE.md preserves the initial
+derivative opposite-end partial-frame cleanup failure and corrected close order.
+
+Three immutable original read/Visit/bridge work views are implemented; diagnostic
+data grants no read/release authority. Actual9-child/3-parent TCP/QUIC controls
+match the original ReadProbe effect to its actual child command/ticket, hold64
+completion-withheld polls, then resume to a genuine authenticated quorum read5
+and exact output consumption/joins. Focused2/0 and affected network4/0 pass.
+HELD_READ_EVIDENCE.md records exact scope: nested316 remains unresolved.
+Current metadata checks record129 contracts/29partial reviews/327 audited
+operations; those references are not provider certification.
+
+Snapshot337 source review finds a concrete busy-versus-stale classification
+defect: a validated original checkpoint lease blocked by a retained same-group
+export returns StaleEffect, which ReplicaDriver treats as fatal. The reciprocal
+export path already treats this as backpressure. The focused fix returns
+Overloaded, preserving the original retry lease. A regression fails the original
+classification and now passes pending and externally held export cases, exact
+consumption and same-lease retry. All15 export tests,14core and14original
+snapshot-router regressions pass. Initial downstream-private-method and recovery
+fixture setup mistakes are preserved in root337 logs and corrected through
+public ownership checks and verified checkpoint/suffix restore into a fresh app.
+This does not yet identify the exact original Mac stale lease.
+
+### Mac334 terminal results and next linked mini-plan
+
+Frozen Mac334 source guards verify1,154 exact inputs. Formatting and all four
+strict profiles pass; original running/recovery controls, native close pair and
+held checkpoints total8 passing all-feature tests. The initial native-only
+checkpoint selection ran0 tests and is excluded from TLS evidence; corrected
+TLS-only supplemental run passes1/0 on unchanged source.
+
+Full QUIC fails during ordinary business at sibling parent13.poll with native
+Session(Truncated); grouped TCP only hits the resulting poisoned test lock.
+A fresh exact TCP process therefore runs that previously unexecuted history and
+fails during Learners checkpoint export with Snapshot(Owner(StaleEffect)). Both
+failures and all source guards remain in target/root315/mac334/results and
+results-tcp. No full activation/macOS acceptance is claimed. The copy-only QUIC
+error-edge diagnostic is prepared, but automatic approval review rejected source
+transfer; explicit user authorization is pending. Other local work continues.
+
+| Deliverable | Purpose and macro milestone | Dependencies/schema | Completion checks |
+|---|---|---|---|
+| Current: platform failure correction | Qualify actual P8 membership and owning lifecycle on macOS as well as Linux. | Snapshot337 schema/regression; original QUIC primitive cause remains unobserved. Prepared diagnostic copy retains original protocol and timeout policy. | Observe actual QUIC cause after source-transfer approval; focused correction only; changed-source full TCP/QUIC with unchanged assertions and original joins, fmt/four strict/source guards. |
+| Next: activation with held ordinary outputs | Make P8 terminal activation usable at ordinary service quotas. | Reviewed ACTIVATION_PRESSURE335_SCHEMA: admit only exact exported terminal ordinary observations; queued/inflight/control/cancelled/foreign work still refuses; no stolen output or released host credit. | Actual full count-pressured replacement through Begin/Status/Outcome/Release, preserved original external outputs and charges, exact reclaim then host consume/drain; separate byte/application/release pressure remains explicit. |
+| Following: recursive progression/recovery | Complete P8 nested feature and qualification. | Narrow immutable ownership views; exact original unresolved nested dependency must be observed, not guessed. | Fresh reads, same-original retry, parent-cell/recursive activation, lost-receipt restart/checkpoint/suffix/cold reopen and real cleanup; complete Linux/macOS requirements audit, then stop beforeP9/P10. |
+
+Macro review: Linux full replacement and selected ownership contracts advance;
+macOS exposes concrete functional failures, so P8 remains active. Performance
+measurements/tuning stayP9 and dedicated security staysP10.
+
+Root337 final integration also passes4all/2TLS service shutdown/read-forwarding
+controls. Snapshot export15all/14core and original snapshot-router14 pass.
+Root full strict all/default/core/native are0 in root337-{all,default,core,native}.log
+(all actual diagnostics zero). A subsequent provider pressure slice is in progress,
+so its final formatting/strict source cut will be recorded separately.
+Mac334 terminal evidence is independently verified in mac334/RESULTS.md and
+RESULTS_SHA256.json; selected9tests pass, complete activation remains failed.
+
+### Original service observers and full native activation pressure335/338
+
+Scoped original client/read inspection and sealed activation-parent observer
+clearing now allow attachment/reclaim while the host retains terminal ordinary
+outputs. Ready/unstepped/control/foreign/unresolved cancellation/execution work
+still refuses. Global Node/router drain remains false; only the host can consume
+the original nonclone outputs. Terminal Cancelled read output is eligible only
+after its exact cancel step clears remaining original ownership.
+
+Full count-pressure TCP1/0 and QUIC1/0 pass with3 actual logical parents and10
+native child owners: two original33301 first/duplicate Applied7 and two genuine
+fresh reads7 exhaust ordinary client/read count/group quotas, then complete
+Begin/Status/Learners/live export/fourth readiness/Joint/Final/Outcome/Release,
+reclaim with exact credits held, host consume,33302+5/retry/freshread12 and joins.
+A separate native refusal/cancellation/control/foreign/stale test passes1/0.
+The initial full history failed after activation at lifetime DedupCapacity: it
+had added unrelated operations. Read-only retained journal decoding confirms
+128 unique retained commands, not a byte limit; using the original business
+flow and separating destructive controls fixes the fixture without raising128.
+Count evidence and raw failure remain in PRESSURE335_RESULTS.md.
+
+Client byte-pressure338 also passes TCP/QUIC1/0 each. Original normal charge850
+derives the duplicate's retained allocation; one genuine duplicate output holds
+64687bytes in65536 ordinary bytes, leaving849<nextnormal850 while count1of2
+leaves a slot. Both before/after activation byte probes preserve rejected original
+pointer/capacity/content and exact usage. Two fresh reads retain1776bytes at
+count2 (read COUNT, not bytes). Same full protocol/business/joins pass. Only
+accurate wrapper rename/QUIC registration follows the TCP cut; old-name raw log
+is preserved and no unchanged TCP rerun is counted. BYTE338_RESULTS.md records
+1167 source/binary guards and actual arithmetic; no quota/timer increase.
+Formatting/full strict pass on each final slice; root integration metadata passes
+130 contracts/30partial reviews/330 audited operations/33 controls. Platform and
+read-byte/application/release capture remain explicitly separate.
+
+### Recursive service and concrete logical administration gap338/339
+
+The unchanged middle-profile fresh-read inspection cut now reaches firstwrite,
+converged duplicate and a genuine ReadOutcome5; it fails next ordinary owning
+close. The changed explicit-shutdown cut also reaches ReadOutcome5 and drains
+all three top owners, then exposes an upper bridge predicate requiring unrelated
+borrowed middle runtime work to be idle. Full native nested cleanup is still
+unqualified. Both failed source/binary-guarded histories are preserved; neither
+change retrospectively proves the prior fresh-read cause. The next scoped joint
+separates drained bridge observations from child-owned work, with the full old
+is_drained semantics retained and actual top→middle→physical handoff acceptance.
+
+Read-only P8_COMPLETION_AUDIT338.md confirms Program transactions and striped
+local WAL meet their declared functional scopes with unchanged frozen evidence.
+R-B distributed ordering remains a distinct unselected protocol; ordinary
+representative relays are distinct from logical representatives. The user confirms functional research belongs toP8. Ordinary relay functionality
+therefore remains a named P8 deliverable; only measurements/tuning move toP9. RELAY339_SCHEMA.md is planning only, not a working relay feature.
+
+The remaining parent-cell/recursive membership gap is real source capability:
+only physical Node implements LogicalActivationBackingChild. LogicalNode cannot
+yet execute tracked authorized configuration, enroll a logical learner, or use
+dynamic authenticated accepted-membership scopes. LOGICAL_ADMIN339_SCHEMA.md
+plans one original owner/configuration observer/release-gated path, planned
+learner capacity without fake endpoint authority, and actual lower durable
+enrollment before session attachment/readiness. The existing3→3 intent forbids
+a shrink shortcut. No trait-only completion or interface-only promise is made.
+
+| Deliverable | Purpose and macro milestone | Dependencies/schema | Completion checks |
+|---|---|---|---|
+| Current: recursive owning handoff and qualification | Make P8 two-level service write/retry/read/close usable. | Demonstrated explicit top drain; split original bridge observation ownership from borrowed child runtime ownership while preserving all fields and full-drain semantics. | Real held-child-work handoff control, unchanged full27-owner TCP thenQUIC, own checkpoint/suffix cold recovery and worker/session joins; observed failures remain evidence. |
+| Next: complete logical-cell administration/replacement | Supply actual P8 parent-cell/recursive membership capability. | Reviewed339schema reuses ConfigurationRequests/EffectOwner/ReplicaDriver, exact accepted membership/source-store roles and actual learner import/Claim/session. | Nine original+three new physical owners behind logical cells, real originalLearners/readiness/JointFinal/OutcomeRelease, postchange business and cleanup; explicit partial/lost/restart/representative fencing and unsupported-path refusal. |
+| Following: relay scope and platform closure | Finish every named functional P8 obligation and stop. | Confirmed functional relay scope; explicit original voter/context ingress capability, then complete model/native tree before advertising support. Supported Mac failures need focused diagnosis after transfer approval. | Remaining phase-loss/serialized overlap/models, guarded Linux/macOS complete requirement audit; keep ordinary mode and stop beforeP9/P10. |
+
+### Logical source live export joint340 and observation handoff
+
+Pre-edit LOGICAL_EXPORT340_SCHEMA.md reviews the existing SnapshotRouter and
+LogicalSnapshotWorker contracts. LogicalNode now forwards export/poll/complete/
+cancel/failed-only-drain through that SAME original consumer. This closes a real
+source-data interface gap for the planned logical learner enrollment; export
+bytes do not establish readiness, ballots or completed recursive membership.
+
+Actual singleton logical-voter histories backed by three native replicas pass
+4/0 all features (TCP/QUIC close and recovery) and2/0 TLS-only. Original live
+checkpoint/reference/bootstrap/membership/full application bytes match and
+restore to value5. Pending cancellation retains the accepted worker ticket/count/
+bytes until actual port pumping and sole consumer settle it. An external original
+image holds router credits, refuses another same-group export/stale cancellation,
+blocks shutdown, and survives actual owner fencing/failed-drain0 and recovery-part
+transfer. Exact completion releases credits; original workers drain/join.
+
+The old checkpoint-only fixture reserves exactly two images with no export
+metadata room. The new selected export-capable fixture declares one recovery
+observation and2*original load allowance+4096 bounded metadata bytes; it preserves
+worker/control limits and original fixtures. Initial compile/private shape,
+sandbox socket and incorrect budget/abort expectations are retained in root340
+logs and corrected against actual contracts. Native failed-pending-export drain,
+macOS and learner import are not qualified by these controls.
+
+The new bridge observations_are_drained getter includes every original bridge
+field and exclusive child client/read stream; full is_drained retains all child
+backing predicates. A guarded6912-input actual27-physical/9-middle/3-top TCP
+control passes1/0 in1.58s: the same child checkpoint request/owner/usage/command/
+child ticket survives top drain and checked borrow handoff, resumes to an actual
+checkpoint, and all original physical workers join/rebind. The full nested
+TCP history is running on that same pinned cut; QUIC/cold recovery remain open.
+
+Metadata checks pass131 contracts/31partial reviews/336 audited operations and
+33 checker controls. These references are not functional certification. The
+linked mini plan remains nested owning closure, complete logical-cell
+administration/enrollment, then ordinary relay/platform closure. The relay
+finite model is in progress; private authorized logical poll threading is an
+explicitly incomplete component of the full339/340 replacement path.
+
+### Qualified progress and remaining failures at340
+
+Root affected original facade family passes18/0 allfeatures, including the four
+new original export histories. The export-only TLS configuration passes2/0.
+Required strict all/default/core/native checks are terminal0 with zero diagnostics
+on their recorded cuts; test-only relay model and cleanup diagnostics are still
+being finalized, so their final coherent check cut remains to be recorded.
+
+The guarded full nested TCP handoff history is now terminal0passed/1failed after
+128.66s. It consumed firstApplied5 atMono24762, same-operation duplicate at65455,
+and original fresh quorumRead5 at101260. Original top drain, checked observation
+handoff, middle typed shutdown and lower drain guards passed. It failed next
+physical slot0/group811 cleanup at generic Cluster::wait15s. Snapshot files alone
+do not identify whether catch-up, checkpoint publication or close was pending.
+Source/binary guards stay0; QUIC and unchanged reruns remain held. A fixture-only
+typed stage/failure-edge original ownership diagnostic preserves every predicate,
+timeout and poll budget; it will identify the next original dependency.
+
+Private logical authorized poll339 now threads a crate-private callback through
+the SAME ReplicaDriver/ClientRouter advancement. Public ordinary polling still
+uses the exact original configuration_auth_required policy; root changes only
+that helper visibility to pub(crate), without another wrapper or public shortcut.
+Three actual native logical results/response controls pass. Original network
+acceptance remains failed: one control passes, another times out and two mutex-
+poisoned unrun controls subsequently execute in fresh processes but also time
+out. One actual backtrace identifies physical catch-up-before-checkpoint AFTER
+its frame control returned. These failures do not establish callback causality
+and no cap was raised. Strong logical backing administration, exact dynamic
+authenticated scopes, actual learner import/Claim and full replacement remain
+the complete339/340 deliverable. LOGICAL_ADMIN339_POLL_COMPONENT_EVIDENCE.md
+records terminal handles, scoped source hashes and failures.
+
+The unchanged old Mac302 runner was confirmed live at22:35UTC, with a different
+actual default-profile routed process14819. Its all-feature stage is now terminal
+101: counter_service QUIC multi-group shutdown timeout, startup original joint
+reconciliation timeout, and native_benchmark held-snapshot recovery NotApplied.
+Expected injected mutant panics are separate from these three FAILED targets.
+The default stage remains live, not qualified. Root read-only stage/failure
+logs are mac302-{inspection,progress,all-failures}-340.log. No source is copied
+or mutated, and no newer-source regression or exact primitive cause is inferred
+from this older frozen cut. The separate prepared Mac334 diagnostic source
+transfer remains blocked by automatic approval review pending explicit permission.
+
+The representative relay model's finite negative traces pass its first selected
+development cut; strict exploration hits its declared state resource cap and
+therefore is not qualified. Equivalent state representation and resource-bound
+review are in progress; require an exhausted graph/frontier0 rather than a cap-hit
+pass. No production relay, default promotion or P9 optimization is claimed.
+
+Root340 coherent final formatting and all four strict Clippy profiles are
+terminal0 with zero diagnostics in root340-{all,default,core,native,fmt}-coherent.log.
+ROOT340_FINAL_CHECK_SOURCE.json records the selected changed source snapshot
+after those checks; it is not a full-repository pre/post or macOS guard. The
+tracked pre-push hook remains configured as .githooks. Native socket tests and
+finite model qualification remain separate from lint success.
+
+### Scope confirmation341: every P0–P8 function before completion
+
+The user answered the relay scope question: “so when P8 is finished ALL
+functionality needs to be present”. This resolves the relay boundary: working
+ordinary voter relay trees belong inP8, their benchmarks/tuning inP9. No functional
+requirement is moved toP9 or treated as complete because a private seam/model
+exists. The original pack remains unchanged. This is a planning correction only;
+no implementation, passing protocol proof or platform acceptance is inferred.
+
+Macro plan: preserve the supported service and embedding while completing every
+P0–P8 capability and the declared recovery/fault/model/platform duties. The next
+mini deliverables remain (1) complete nested service and physical-child cleanup,
+(2) original logical-cell administration/learner enrollment/replacement/recovery,
+and (3) real representative relays plus full Linux/macOS requirement closure.
+Each must retain its existing schema, ownership and completion checks. Striped
+WAL and bounded Program transactions retain qualified frozen evidence; logical
+activation and relay research remain incomplete, not deferred away.
+
+The explicit original-design future options are not silently converted into
+implemented features: final audit must distinguish normative P0–P8 duties from
+optional adapters or alternative protocols, cite the governing design text and
+record any genuine scope ambiguity for the user. A blanket “research/later” label
+is insufficient grounds to omit required functionality. Windows remains outside
+the supported-platform scope. Stop after fully qualified P8; do not startP9/P10.
+
+### Functional progress342–344: observer, Mac qualification and QUIC lifecycle
+
+LogicalNode now owns the original ConfigurationRequests observer, constructed
+against the same RuntimeOwner before driver transfer. Five public methods expose
+configuration admission, polling, cancellation, drain inspection and historical
+status. Actual ReplicaProgress steps resolve accepted requests; cancellation stops
+the wait without rolling back owner work. Shutdown retains unconsumed metadata,
+and abort transfers the same observer with OwnerFailed outcomes. Invalid limits
+return original parts. The existing authorization policy is unchanged: nonempty
+promotion readiness requires authorization; these controls do not implement full
+logical learner enrollment or promotion.
+
+The actual TCP and QUIC observer histories pass on Linux (2 tests) and macOS
+(2 tests), including a genuinely committed same-electorate Learners record,
+held persistence, cancellation and original recovery transfer. Mac343 also passes
+four live-export histories, three original result/codec controls and fifteen
+snapshot-export regressions: 24 tests total, formatting and all four strict
+Clippy configurations, with 1288 captured inputs unchanged. The user explicitly
+authorized source copies and tests on their Mac; the earlier transfer blocker is
+resolved. Selected platform evidence is in
+`target/divide-admin342/MAC343_RESULTS.md`; it does not qualify full P8 or nested
+membership. Linux observer item-order formatting changed one source hash after
+its tests; reconstruction proves that change is only module declaration order.
+
+The frozen342 full nested TCP history passes: real first write5, same-operation
+duplicate, fresh quorum read5, maintenance, checked upper/middle handoff and all
+27 original physical owner/worker joins and socket rebinds. Its corresponding
+QUIC history fails during election. Copy-only diagnosis identifies the original
+Quinn Idle timer expiring on a quiet authenticated follower link despite a9ms
+poll gap. This is an observed transport expiry, not an inferred poll stall.
+
+Native QUIC now sends encrypted keepalive traffic every2s while retaining the
+original5s idle policy. It creates no application bytes, votes, durability or
+read authority. The current focused native QUIC target passes25 tests, including
+quiet7s ordinary/logical links, subsequent exact bidirectional payloads, real
+protocol closure and bounded failure when a peer stops responding. Copied
+formatting and full strict Clippy pass; all6924 captured inputs remain unchanged.
+Full current-production nested QUIC344 reaches both writes, convergence and all
+three middle checkpoints, then fails at the original fresh quorum-read watchdog
+after94.56s. The idle defect is corrected on this path, but the full history is
+still unqualified; original retained read dependencies are being inspected.
+Cold two-level recovery and corresponding Mac nested qualification remain open.
+
+Focused native QUIC344 is now also qualified on Mac:25 tests pass in0.07s,
+formatting and full strict all-feature Clippy pass, and all1185 captured source
+inputs remain unchanged before/after. Original quiet links, exact later payloads,
+actual protocol close and bounded stopped-peer failure pass. This does not make
+the separate failed nested-read history pass. Evidence:
+`target/divide-shutdown/new344-mac-quic/RESULT.md` and `VERIFIED.json`.
+
+Cold nested346 adds the required real-store recovery history: checkpoint top
+Counter5, append a distinct zero-add command as a genuine post-anchor suffix,
+close/join all original physical workers, reopen the same directories, obtain
+fresh Claims and reconstruct both logical tiers before election. Original GroupLog
+and application comparisons are assertions against recovered data, never recovery
+inputs. Fresh store sessions must advance; both original operation retries and
+fresh quorum read must pass, then all workers close again. The1196-input frozen
+cut compiles and passes formatting/full strict Clippy after one recorded
+private-unit clone-on-Copy correction. Its first actual TCP execution fails
+0passed/1failed in119.14s at the unchanged read watchdog, before close/reopen.
+All three real top checkpoints throughfrontier2 and the original post-anchor
+zero-add suffix complete, but cold recovery is not qualified. Postrun source
+and binary guards are unchanged. The common retained-read dependency is under
+one separate causal diagnosis; preserve the failed gate and original budgets.
+Evidence: `target/divide-shutdown/new346/RESULT.md`.
+
+The original-request-owning relay model has meaningful negative counterexamples,
+but its positive graph remains unqualified: the release search stops at
+5,000,001 states with606,667 unexplored states. No resource-cap hit is counted as
+a pass. The next bounded attempt changes only equivalent seen-state keys for
+local packet nonces, preserving actual states/traces and checking exact action,
+oracle and successor equivalence at every projected collision. It does not reduce
+the protocol/fault scope or implement native relays.
+
+All seven positive nonce-key relay344 profiles now exhaust their full declared
+graphs with frontier0: Election, Freshness, Append, Read, Configuration, Group
+and Store. Across those graphs the test explores29,264,916 states and265,181,956
+edges, with4,292,056 checked projected collisions; maximum depth66. The actual
+positive target passes1/0 in603.63s. Its eight focused/negative controls also pass.
+These finite graphs qualify the declared model scope, not native relay support
+or a general Raft proof. Mac model qualification remains separate.
+The root tracked pre-push script passes formatting
+and all four strict Clippy configurations with zero diagnostics on this cut;
+`target/root315/root344-pre-push-checks.log` records the actual commands.
+
+### Current mini plan344
+
+Macro review: functional striped storage and bounded transactions retain their
+qualified evidence. Nested TCP cleanup and selected Mac observer/export paths
+have advanced; logical enrollment/reconfiguration, native relays and complete
+functional platform closure remain P8 duties. Performance stays P9.
+
+| Deliverable | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| Current: nested QUIC and recovery | Keep real nested services usable through quiet links and owned closure; depends on the observed idle cause and tested transport lifecycle fix. | Original full QUIC business/read/maintenance/27-owner cleanup with unchanged budgets; actual cold checkpoint-plus-suffix reconstruction and Linux/macOS qualification. | Advanced functional composition, P8 |
+| Next: logical-cell membership | Add a genuine new logical learner and replace a child through replicated Learners/Joint/Final; depends on the original configuration observer, live source export, durable target import/Claim and dynamic authenticated peer scopes. | Real9+3 physical-owner TCP/QUIC history, consumed fresh target observations/readiness, post-change write/duplicate/read, lost-observation recovery, original cleanup and Mac tests. A constructor or private callback alone is insufficient. | Online membership within advanced composition, P4/P8 |
+| Following: representative relays and final closure | Deliver nonvoting transport helpers while retaining original voter evidence; depends on qualified request/ownership model and bounded authenticated hop contracts. | Exhausted declared positive models, reproducible negative traces, actual native relay lifecycle/recovery on both hosts, then requirement-by-requirement P0–P8 evidence audit. | Advanced functional composition and goal completion, P8 |
+
+### Functional progress345–350
+
+Candidate345 adds immutable candidate schema2 while preserving exact bootstrap
+schema1 bytes. Full original Learners/import lineage, snapshot data, first import
+position and target-owned generation1 survive retries, checkpoint/suffix and pin
+retirement. A bounded Enrollment read exposes lineage, not activation authority.
+Linux passes72 logical library tests,8 public application tests and2 original
+native TCP/QUIC facade tests; formatting and all four strict Clippy profiles
+are zero on the recorded cuts. Actual native new-learner enrollment remains open.
+Evidence: `target/divide-admin342/LEARNER345_RESULTS.md`.
+
+Common selected network346 retains one owning runtime and existing direct Node/
+NativeNode aliases while accepting a supplied concrete PeerNetwork. Construction
+refusal returns original inputs; lifecycle, routes, optional credentials and
+recovery preserve the provider. Authenticated source observation requires a real
+open transport, independently of the catalog. Linux passes65 node controls,
+32 PeerDriver controls,1 actual100-group TCP checkpoint/restart and2 original
+logical TCP/QUIC facade controls; formatting/full strict zero. This component
+enables actual relay work; delegated native relays are not implemented by it.
+Evidence: `target/divide-provider/NETWORK346_RESULTS.md`.
+
+Mac relay344 passes9/0 in623.04s. All seven finite positive graphs exhaust with
+the exact Linux aggregate29,264,916 states/265,181,956 edges/4,292,056 checked
+collisions and frontier0. All11 runner stages and source/archive/binary guards
+pass. Native relays remain separate. Evidence:
+`target/divide-provider/relay344-mac/RESULTS.md`.
+
+Read347 observes a genuine held ReadResult authorization milestone without
+consuming it. Twelve borrowed negative expectations reject foreign/stale/missing
+scope; they are not12 registered tests. Debug347 consumes real Read5 but fails
+physical checkpoint cleanup. The75MiB figure was an image reservation; actual
+accepted Publish input capacity was1,627,168B. Preserve that failed outcome.
+
+Exact unchanged frozen347 source in assertion-enabled release349 passes ONE
+full QUIC history1/0 in12.85s: actual add5/duplicate5/fresh quorum Read5,8 held
+polls, maintenance and all27 original worker/dialer joins plus TCP/UDP rebind.
+Debug assertions AND overflow checks remain enabled with actual rustc evidence.
+No production algorithm, timer, quota or assertion changed; no benchmark claim.
+All6938 input hashes and executable hash remain unchanged. Evidence:
+`target/divide-shutdown/release349/RESULT.md`.
+
+Same-binary coldTCP349 fails0/1 in51.48s after actually closing/joining all27
+owners, reopening the same stores, advancing sessions and restoring both logical
+checkpoint/suffix/application tiers before election. Original add5 retry consumes
+duplicate Applied5 at index5/term2; its all-owner convergence and next zero-add
+retry fail the original30s watchdog. Post-recovery read/final cleanup remain
+unqualified. Source/binary guards are unchanged; diagnosis follows original
+retained owners before another changed run. Evidence:
+`target/divide-shutdown/release349/COLD_TCP_RESULT.md`.
+
+Retained Learners350 replaces the driver's boolean with the full original
+consumed history/ticket/barrier/owner, reserving coexistence with later reads
+before authorization and checking actual retained allocation. Reattachment
+reobserves rather than reusing the old authority. Frozen1193-input345 plus
+exactly three driver files passes original native TCP/QUIC Learners refusal/
+cleanup2/0 in0.65s, formatting and all four strict profiles at zero. This does
+not qualify the source export factory or target-B edits still being implemented.
+Network346 registration now gives137 contracts/37 partial reviews/371 audited
+operations;33 metadata checker controls pass. Evidence:
+`target/divide-shutdown/learners350/RESULT.md`.
+
+Mac static349 has now failed0/1 in146.79s before its first add5 completes.
+Original write/convergence watchdog fires with index2 uncommitted and one
+original lease retained. Source/protoc/fmt/full strict/release build and launch
+guards pass; no read/cleanup acceptance. Keep this separate from the Linux pass
+and diagnose the original request path without changing clocks or limits.
+
+### Current mini plan350
+
+Macro review: finite relay model qualification is complete on both platforms;
+selected Linux static nested TCP and assertion-enabled QUIC cleanup pass.
+Candidate import and replaceable networking are tested components. Cold native
+nesting, genuine logical-cell membership, delegated native relay trees and full
+P0–P8 platform closure remain unfinished. Performance stays P9; security P10.
+
+| Deliverable | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| Current: cold nesting and Mac static closure | Finish restart/closure of two logical tiers; requires real ReadResult observation, original stores and focused original-request diagnostics for cold/Linux and static/Mac failures. | Same-store restore, original retry, all-owner convergence/fresh read/cleanup on Linux/Mac with original budgets. Static Mac QUIC failed first-write progress; diagnose before another changed run. | Advanced composition, P8 |
+| Next: native logical learner membership | Make candidate345 usable; requires retained full consumed Learners observation, original authorized source export, target Applied/fresh Enrollment→Image→Snapshot and dynamic authenticated peers. A boolean cannot authorize import, so retain the original observation and reserve its memory before admission. | Real9+3-owner TCP/QUIC enrollment, tracked readiness, Joint/Final, terminal Outcome/Release, post-change business, phase-loss recovery and Mac cleanup. Components alone are insufficient. | Online membership and advanced composition, P4/P8 |
+| Following: native relays and final closure | Deliver bounded nonvoting helpers through common network346; requires finite model and actual per-recipient ownership. Introduce internal request-window classification with its first real consumer. | Authenticated TCP/QUIC delegated origin, minority writes/reads, withheld WAL/late replies/restart/credits, general trees and both-host cleanup; then full normative P0–P8 audit. | Advanced composition and goal completion, P8 |
+
+### Functional progress347B,348 and351
+
+Target347B now moves an opaque enrollment grant through original Applied or
+Unknown/cancel/owned recovery and exact Outcome resolution, followed by fresh
+Enrollment→Image→Snapshot observations. Later normal Claim obtains a new current
+epoch/session while preserving import lineage. Actual native TCP and QUIC target
+histories pass with original three-worker joins/rebinds; the private deterministic
+source grant is component evidence, not genuine source authority. Frozen1222-input
+checks pass74 logical library controls,8 public application controls and2 original
+facade controls, formatting and all four strict profiles at zero. The resolved
+failure was an Outcome newer than its barrier: defer for a new real read instead
+of reporting corruption or treating it as authorized. No original operation is
+changed and no timeout becomes success. Guarded target evidence remains separate
+from full12-owner enrollment and Mac qualification.
+
+Relay348 now couples an internal actual-core per-recipient request classifier
+with original NativeOutbound batch ownership and the existing native codec.
+Capture/encode/completion refusal preserves original Vec/ticket/admission; local
+completion returns request scope separately from queue credit release. Actual
+17 core/native-output controls, formatting and full strict pass. Historical
+repair and genuine one-way outputs remain distinct; an unavailable voter's old
+Append context can remain current while a retired ReadAck must be refused.
+This is not authenticated delegated relay networking. Evidence:
+`target/divide-provider/RELAY348_RESULTS.md`.
+
+Source351 implements the owning driver's source-export factory: retained full
+Learners proof, actual endpoint/core/store/session, accepted AND committed stable
+assignment, current durable anchor/schema, target codecs and complete image
+memory precede original export consumption. Rejection preserves the original
+opaque completion, or its whole owned outcome after consumption. Genuine native
+backing-export missing-authority controls pass TCP/QUIC2/0, conserving original
+allocation/ticket/credits and all six worker joins. Successful authorized source
+mint remains unqualified until the real logical-cell history. Frozen1222-input
+source, executable, formatting and all four strict profiles pass their guards.
+Evidence: `target/divide-shutdown/enrollment351/RESULT.md`.
+
+The first observer-only cold349 diagnostic restores both tiers and reaches
+post-recovery duplicate5/all-owner convergence, then fails with original
+ApplicationRoute(Application(InvalidCommand)). Its128-record cap prevented
+identifying the exact failing entry; the last observed work is not assumed to
+be the errored input. A changed error-only observer reserves one record for the
+actual application return edge under the same total cap and original timers.
+Production remains unchanged. Mac static failure is a separate retained cut.
+The changed cold350 error observer now identifies the actual apply_batch edge
+with37 distinct records, without exhausting the cap: middle group801/store2001/
+session2, application applied86 receiving original entry87/term2 with469 bytes.
+It matches the second recovered zero-add retry300001, original receipt index6/
+term2/Value5/duplicate=true. Receipt preflight passed; the exact inner application
+branch remains to identify before a production fix. Evidence:
+`target/divide-shutdown/cold350-error/RESULT.md` and original command artifacts.
+
+Inventory now has140 implemented contracts,38 partial reviews and372 audited
+operations;33 integrity controls pass. Target enrollment and relay-output seams
+are inventoried with their actual private component tests; downstream source/
+network qualification remains explicitly open rather than inferred from metadata.
+
+### Current mini plan351
+
+Macro review: candidate target ownership, source factory and original relay output
+are implemented components. Usable new logical-member activation and delegated
+native relay trees still require real composed network histories. Static Mac and
+cold nesting failures remain unresolved. The goal stays active through ALL P8;
+P9/P10 do not start as a consequence of these component results.
+
+| Deliverable | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| Current: complete nested recovery | Resolve original application failure and Mac first-write stall; requires precise original error/input/owner evidence, not another unchanged run. | Same-store restore, duplicate/zero-add retry, fresh read and original27-owner cleanup on both hosts, original caps/clock limits unchanged. | Usable recursive composition, P8 |
+| Next: composed logical membership | Use source351 and target347B in a real new logical learner; requires genuine logical activation backing/control, bounded deferred sends until verified target/session attachment, current membership routes and tracked readiness. | Real9+3-owner source grant/import, TCP/QUIC session/catch-up/JointFinal/OutcomeRelease, post-change business, phase-loss recovery and Linux/Mac cleanup. | Online membership and advanced composition, P4/P8 |
+| Following: composed relays and closure | Connect network346 and output348 to genuine authenticated nonvoting helpers; requires distinct original physical source versus immediate hop and bounded per-recipient lifetime. | Real nativeTCP/QUIC relay trees, minority progress, held WAL/late replies/restart/credits/joins on both hosts, then full normative P0–P8 audit. | Advanced composition and goal completion, P8 |
+
+### Original capacity cause and source routing354–356
+
+Read-only replay of the surviving cold350 physical snapshot and durable WAL
+identifies the exact failure. Original physical group811 reconstructs the
+middle801 pinned checkpoint75 and committed suffix through86. The canonical
+logical application86 uses49,116 of49,152 checkpoint bytes. Applying the exact
+saved original Committed entry87 fills the encoder and fails its next8-byte
+write. The input is valid; the original application remains86 because application
+uses a temporary clone. The prior admission reserved raw action bytes without
+the serialized state footprint. No file, session, stored prefix or old fixture
+limit changed during this reconstruction. A capacity/admission correction is
+planned; deleting deduplication history is not an existing legal cleanup path.
+Child configuration history also needs a separate metadata bound: an action-only
+formula cannot certify a universal checkpoint envelope.
+
+Core354 now shares the original pure receive-source guards with dynamic logical
+intake. Ordinary higher-term replies require the original identity/context,
+without inventing an outstanding collector requirement. Readiness preserves
+actual negative catch-up responses; historical authority uses retained committed
+membership. Source preflight grants no readiness, receipt or term advancement.
+Frozen351 plus nine source/test files passes four original-exchange regressions
+core-only and74 membership tests all-features. Formatting and all four strict
+Clippy profiles return0, with1223 unchanged frozen inputs and zero root-overlay
+differences. Evidence: `target/root315/source354/RESULT.md`. Native logical
+membership is a separate composition gate.
+
+Mac302 is now terminal: all-feature and default-feature suites failed; core and
+native suites, formatting and all four strict Clippy profiles passed. This older
+cut does not qualify current source. The authorized isolated Mac356 run uses
+1222 guarded frozen351 source files and fresh temporary build/test directories.
+It has passed formatting/all four strict Clippy profiles and is building three
+original functional recovery cases: multi-group QUIC service shutdown, original
+joint/final checkpoint operation, and held-snapshot recovery. These cases remain
+functional P0–P8 acceptance, including the one housed in the benchmark example.
+No test result or whole-platform closure is claimed while the run is active.
+
+### Current mini plan356
+
+Macro review: component354 source guards are qualified on Linux; complete
+logical learner activation and native relay routing remain composed deliverables.
+The original nested recovery cause is now known, so further changes target
+capacity contracts rather than opaque receipt parsing or unchanged reruns. Mac
+functional closure remains required. ALL P0–P8 remains the stopping boundary;
+performance P9 and dedicated security P10 remain later work.
+
+| Deliverable | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| Current: admission and nested recovery | Prevent valid committed actions from exhausting the serialized checkpoint; depends on exact86/87 reconstruction, preserved deduplication/fences, pending/control reservation and a declared metadata envelope. Diagnose Mac static first-write separately and finish the active focused recovery checks. | Capacity refusal before new consensus admission preserves original request/state; coherent bounded histories restore/retry/read/drain on both hosts. Old failed48KiB cut remains recorded; no history deletion or inferred success. | Usable recursive composition, P8 |
+| Next: real logical learner activation | Compose source351, target347B and C355 control/dynamic peers through the same original owners; depends on coherent cross-layer checkpoint/import/command capacities and actual tracked readiness. | Three old logical voters plus a new learner, each backed by three physical owners: genuine source export/import, TCP/QUIC catch-up, Joint/Final, Outcome/Release, post-change business, phase-loss recovery and Linux/Mac cleanup. | Online membership and advanced composition, P4/P8 |
+| Following: native relay trees and final audit | Compose network346 and output348 with authenticated nonvoting helpers and per-recipient original request lifetimes. | Actual TCP/QUIC trees, minority progress, held durability, late replies, restart/credits/joins on both hosts; complete normative P0–P8 audit and stop. | Advanced composition and goal completion, P8 |
+
+### Focused Mac closure357 and selected capacity358/359
+
+Mac356 is terminal: genuine multi-group QUIC service recovery and original
+joint/final checkpoint operation pass. Held-snapshot recovery failed with an
+original NotApplied owner step. The changed357 harness captures only the bounded
+original automatic checkpoint admissions before polling and recognizes the
+exact scheduled request when its target is already covered by the actual durable
+base. It does not manufacture a checkpoint completion or discard unrelated
+errors. Mac QUIC records the actual node3/session2/group5 admission4, target2,
+not executed, NotApplied, durable base3/commit3. Both original TCP and QUIC
+held-recovery histories now pass on Linux and Mac, preserving recovery quota,
+foreground write, snapshot installation, restart/retry and cleanup. Mac1223-input
+source guards, executable guards, formatting and all four strict profiles pass.
+Evidence: `target/root315/mac356/RESULT.md`, `target/root315/mac357/RESULT.md`.
+Whole current platform qualification, Mac static nesting and new features remain
+separate gates.
+
+Root358/359 aligns selected client, native WAL worker and startup event envelopes
+for the1069056-byte bounded lower command required by coherent static nesting.
+The client can select up to16MiB, retaining64KiB defaults and checked allocation/
+copy/receipt/control windows. Native startup validates and uses the same actual
+selected store limits for its worker and event/visit/group/global byte budgets;
+counts, timers and control reserves retain their defaults. This does not select
+the host's snapshot/transport envelopes for it. Nine client controls and four
+native selected-limit controls pass, including original synchronized larger
+write, same-store recovery/dedup, independent retained-file reopen, unchanged
+70704-byte default-WAL refusal and invalid-profile pre-resource rejection.
+Formatting and all four strict profiles pass on the isolated1223-input cut.
+The necessary logical checkpoint conservation guard and fully coherent27-owner
+profile are being qualified separately; full metadata/lifetime admission is not
+certified by a raw retained-history comparison.
+
+The real12-owner logical-child membership history has reached its first TCP
+pass: genuine source export mint, new target import/fresh observations, attached
+authenticated sessions, readiness, Joint/Final, Outcome/Release, business/read
+and original cleanup. Stronger original deferred-ticket and refusal controls,
+QUIC, phase-loss recovery and Mac are still required before the composed milestone
+is marked complete. Authenticated native relay implementation remains underway.
+
+### Current360: composed membership and selected native ownership
+
+The first genuine12-owner logical learner replacement passes Linux TCP and QUIC:
+original source export, target import, tracked readiness, Joint/Final, Outcome/Release,
+post-change write/read and all original worker/session cleanup. Foreign source and
+session refusals conserve original opaque ownership; original deferred tickets,
+effect tickets, operation IDs, heap pointers and credits survive attachment. The
+1242-input frozen C355/native356 cut passes formatting and all four strict Clippy
+profiles. Repeated replacements/catalog retirement, phase-loss/cold reconstruction
+and current macOS qualification remain P8 work. Evidence:
+`target/divide-admin342/NATIVE356_RESULTS.md`.
+
+Focused authorised Mac356 service and Joint/Final recovery pass; its held-snapshot
+case initially fails with actual NotApplied. The changed357 harness recognises only
+the original pending automatic checkpoint whose target is already covered by the
+actual durable base. Original TCP/QUIC recovery checks then pass on Linux and Mac,
+with guarded source/executables, formatting and all four strict profiles. This is
+functional acceptance, not a performance result or complete platform sweep.
+
+Coherent nested capacity355 retains the original failed48KiB deployment evidence
+and declares finite checkpoint/command/transport envelopes for a fresh history.
+Its first cold TCP attempt refuses at startup, before election/business: the actual
+three-voter core requires470341760 bytes versus the default268435456 owner budget.
+Private native startup360 derives an owner profile from actual recovered cores and
+selected shard event bytes, preserving one ordinary and one protected control
+reservation within the existing4GiB ceiling. Defaults for small profiles stay exact.
+Derivation precedes worker spawn, but follows storage recovery and its existing
+cleanup obligations. Prospective membership growth still uses ordinary admission
+gates. Scalar controls pass3/0, formatting and all four strict profiles return0 on
+the frozen1224-input root cut; original native lifecycle controls are next.
+
+Authenticated native relay352 has selected Linux diagnostic TCP/QUIC business and
+cleanup passes plus actual TCP late-ReadAck rejection. Restart, general routing,
+final guards and Mac remain required; a diagnostic pass is not final qualification.
+
+ALL P0–P8 remains the stopping boundary. P9 performance and P10 dedicated security
+are deferred. The linked current mini plan will be updated as these slices complete.
+
+### Current mini plan360
+
+Macro review: the first composed12-owner learner path has Linux TCP/QUIC evidence;
+its repeated membership and restart paths remain P8. The original nested checkpoint
+capacity cause is preserved; a coherent selected profile must pass actual cold
+recovery before platform closure. Authorised Mac work continues without renewed
+permission. P9/P10 remain outside this goal.
+
+| Deliverable | Purpose and dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- |
+| Current: coherent nested cold recovery | Complete usable recursive restart. Depends on actual checkpoint output conservation and complete selected WAL/event/owner envelopes; root360 derives checked original ordinary/control ownership. Diagnose static Mac progress independently. | Guarded fresh-profile Linux TCP/QUIC and Mac restore, duplicate result, fresh read, maintenance and all27 original-owner joins; original failed profile/stores preserved. No cold rerun before its constructor cause is corrected. | Usable recursive composition, P8 |
+| Next: repeated logical member replacement and cold reconstruction | Complete the genuine12-owner membership path beyond its first Linux pass. Depends on verified current/rollback catalogs, exact session retirement and original durable intent/import observations. | Further candidate replacement, Unknown/imported/Joint restart, actual original tracked readiness/cancellation and unchanged opaque ownership; Linux/Mac TCP/QUIC business and cleanup. | Online membership and advanced composition, P4/P8 |
+| Following: native relay trees and final qualification | Deliver authenticated nonvoting helpers through original request scopes and bounded host backpressure. Depends on exact channel replacement/retirement and preserved collectors. | Actual TCP/QUIC trees, late replies, minority progress, restart, held durability, credit drain and joins on both hosts; normative P0–P8 audit and final current platform sweep. Stop at complete P8. | Advanced composition and goal completion, P8 |
+
+Root360 final selected lifecycle is4/0 in0.18s, owner controls3/0; fmt/all4 strict0.
+Frozen1224 inputs are unchanged before/after and all current root overlays match.
+The first exact-size360 implementation failed3/1 after a genuine Noop grew the
+core; final expanded windows include checked selected native retained-log growth
+headroom. The failed attempt remains recorded. The stable production pair was
+handed to capacity355 for changed guarded cold qualification. Evidence:
+`target/root315/startup360/RESULT.md`. No whole current root/Mac/nested claim.
+
+Preliminary combined integration361 captures1276 source/test/example/Cargo
+inputs. All-target strict Clippy passes all/default/core/native0. Formatting
+fails only the active C361 history fixture's four hunks; this is not a zero
+formatting/current-root qualification. The pre-push hook remains enabled.
+Inventory now records the four stable C355 public joints/rejection plus C361
+original-session retirement, with explicit unqualified cancellation/repeated
+execution scope. The partial ledger audits377 named operations across38 reviews;
+metadata integrity controls pass but are not runtime test certificates.
+
+New coherent cold360 reaches all physical claims, then fails at actual middle
+election with candidates retaining work while lower bridges are drained. Exact
+fixture review identifies release capacity4*capsule with no generic metadata:
+one declared capture is impossible. A shared checked footprint joint and complete
+finite static ordinary/control envelopes are planned; no guessed timer/cap fix.
+The original failure/source/binary remains recorded.
+
+Authorised Mac first-C TCP/QUIC fail before Enrolling. A separate immutable
+timeout diagnostic shows actual Learners membership2, commit/applied14, original
+Begin3 and retained leader/lower persistence, so the Learners dispatch did occur.
+Driver configuration/fresh-history observation is under exact-state review; no
+source cause or complete Mac membership pass is claimed.
+
+Coherent capacity363 cold qualification passes complete TCP1/0 (45.20s) and
+QUIC1/0 (53.78s) on the same guarded assertion/overflow-enabled binary. Original
+first-session writes/Read5, all27 owner joins, same-store reopening, both-tier
+anchors/suffix/application restoration, advanced sessions, both exact duplicate
+retries, fresh recovered Read5, final maintenance/checkpoint/drain/reclaims/joins/
+rebind/removal pass. Frozen1226 source/base/12overlays and executable guards match.
+Mac whitelisted qualification is next, using existing explicit authorisation.
+The public pure capture_reservation_bytes helper and exact internal delegate
+prevent guessed metadata budgets; original impossible-profile traces stay recorded.
+Static complete-batch ordinary/control reserves do not certify activation's
+every-control-window guarantee or general metadata/lifetime admission.
+
+Root peer-ingress363 focused controls pass2/0 after test fixture capacity/query
+corrections. Original consumed Receive source remains on the SAME Active until
+its actual Visit retires; per-peer queued/active inspection and original pending
+Send inspection guard C361 session retirement. No new source authority or
+completion. Final all4 strict and original runtime/effect controls remain active.
+
+Root ingress363 final qualification: new queued/active/leased source controls2/0,
+original effect-owner187/0 (179 non-socket plus8 authorised actual native controls
+in44.74s), original runtime53/0. Fmt/all4 strict0,1277 frozen inputs unchanged,
+current four root runtime overlays match. Actual native/runtime launch/terminal
+executable guards pass. Initial eight sandbox bind refusals did no native work;
+the authorised same-binary controls pass. Initial test fixture constructor/query
+corrections are preserved. Evidence: `target/root315/ingress363/RESULT.md`.
+C361 original retirement uses this exact queued/active source and pending Send
+predicate; genuine new membership histories remain separately qualified.
+
+Relay352 finalr2:12 actual TCP/QUIC star histories pass9.76s,17 original-core
+request-window controls pass, formatting/all4 strict0,1280 frozen inputs and
+actual executable hashes conserved. Unchanged-production direct regressionsr1
+separately pass Node65, PeerDriver32, native100-group checkpoint/reopen1 and
+direct facadeTCP/QUIC20. The r2 one-fixture delta additionally consumes its exact
+recovered read completion and verifies credits0; unchanged direct cases were not
+rerun. Evidence: `target/divide-provider/RELAY352_RESULTS.md`.
+Root inventory registers59 native operations, optional channel retirement/
+replacement+Node forwarding and delegated receiving/path observation:143
+contracts,39 partialreviews,383 audited operations; integrity controls pass.
+Source-hop dedicated attach, helper-to-helper trees and Mac remain unqualified.
+Approved364 nextslice uses two authenticated noWAL helpers with preserved actual
+leaf voter identities, bounded exact capturepath/credits, branchsurvival and
+fresh-path replay. Static topology is routing, not quorum authority.
+
+Exact guarded Mac cold363 is terminal: format/all4strict/releasebuild and36
+controls (8 release,3 capacity,25 QUIC) pass. ColdTCP fails first original write
+escape after~30s inactivity; coldQUIC fails upperClaim15s before topassembly.
+No cold reopening is reached. These differ instage; logs/source/executable
+guards are unchanged and no sharedprotocolcause is inferred. Authorised next
+QUIC observation is fixture-only at the unchanged failure gate, using exact
+original claim/attempt tickets and existing borrowed read/lease inspections.
+No unchanged rerun or inferred ACK/durability.
+
+Current mini plan360 review after qualified Linux cold recovery: current work is
+now exact Mac functional closure, using original-ticket/lease/read inspectors
+at the failed boundary before any further interface change. Next continues
+repeated/target-imported cold logical membership; approvedC365 closes only the
+new target's same3 stores and reconstructs fresh Claim/image/descriptor while
+source9 originals remain live. Its acceptance checks preserve actual Enrollment
+records, source continuation and exact pending inputs through readiness/JointFinal/
+OutcomeRelease; all12/fullUnknown/Joint cold histories remain separate. Following
+is approved actualtwo-helper relay364, then complete final platform qualification.
+Macro P8 remains incomplete and active; P9/P10 are not started.
+
+Current360 review: the status page now presents current capabilities and four
+remaining functional deliverables in42 lines, replacing271 lines of accumulated
+historical status. Exact historical implementation/validation evidence stays in
+this log, the acceptance map and validation records. This documentation-only
+change introduces no production API/state/ownership transition. The provider
+inventory integrity test passes1/0; it is not a runtime qualification claim.
+
+Lookahead for the current diagnostic: Raft's durable completion emits the whole
+newly committed prefix in one Committed effect. Logical release reserves all
+Command captures before consuming that original effect. The static unselected
+constructor does not preflight an entire declared application batch, unlike
+selected activation construction. A fixture with64 possible receipts and only
+an8MiB ordinary release window cannot retain three captures when one reservation
+is3148000B. This is a configuration capability gap, not a demonstrated cause of
+the Mac or repeated-membership failure. Before changing production, capture the
+actual rejected effect's count, control classification, reservation and usage.
+No budget, timer, wire contract or constructor was changed based on this review.
+
+The mini-plan dependencies remain: current Mac original-ticket diagnostics;
+next genuine repeated and phase-loss logical membership; following actual
+relay trees then final platform qualification. Tree364 production compiles and
+preserves12 star regressions, but its actual two-helper acceptance is pending.
+C365 TCP and QUIC test logs pass the imported target-only same-store recovery;
+final guarded qualification remains owned by its slice. Neither result certifies
+complete P8 or begins P9/P10.
+
+Root366 static construction slice is qualified on Linux. Schema:
+`target/root315/construction366/SCHEMA.md`; exact result/source/overlay records:
+`target/root315/construction366/RESULT.md`. The selected verified parent-log
+ceiling is now retained privately on the logical router. Static release
+construction refuses a profile unable to retain one whole ordinary commit batch
+plus one original protocol control capture. It uses the actual shared typed
+footprint; physical router defaults and selected activation every-control-window
+checks remain unchanged. Constructor refusal returns original complete parts;
+no resource, authority or queued work is consumed.
+
+Actual frozen checks: formatting/all4 strict0, application8/0, release11/0,
+original native facadeTCP/QUIC2/0 (0.49s) with too-short construction refusal and
+same-parts corrected assembly. All1279 frozen inputs unchanged and all11 overlays
+match current root. The stable shared helper types.rs is a dependency overlay;
+its initial omission caused recorded E0599 before the coherent source closure.
+A current-root first check found two lengths in actively edited relay fixtures,
+reported to their owner; this is not a current whole-root clean claim. Static
+capacity validation is not the observed Mac/repeated-history cause: actual
+telemetry showed no first release reserve rejection. Mac366 is queued after
+terminal Mac Claim364; neither cut will contaminate the other.
+
+C365 final guarded Linux qualification is complete: TCP1/0 (22.34s),QUIC1/0
+(36.21s), format/all4 strict0,1247 source inputs unchanged and three owned test
+files match. The exact original imported target3 stores checkpoint/suffix/reopen
+while source9 originals stay live; fresh actual Claim/Enrollment/Image/Snapshot
+reconstructs the new target descriptor. Full Enrollment lineage and original
+source pending/ticket/operation/heap conservation pass, followed by actual
+readiness/JointFinal/OutcomeRelease, business result/read and all12 final joins/
+rebind. Genuine follower tracked readiness NotLeader and original correlated
+cancellation plus wrong-group/closed refusal execute in BOTH histories. This is
+not full12-owner cold Joint/Unknown or Mac qualification. The post-run binary
+fingerprint is recorded honestly; no independent pre-run fingerprint exists.
+Evidence: `target/divide-admin342/C365_RESULTS.md`.
+
+Macro/mini review: imported-target cold is complete within its stated scope;
+current Mac exact-ticket diagnosis remains required. Next C367 reconstructs
+actual committed Joint after all12 original physical owners join, then fresh
+claims and a new same-intent driver complete Final/Outcome/Release. Original WAL
+recovery is sufficient for this specific boundary; an extra global checkpoint is
+not an invented prerequisite. Committed-Unknown and uncommitted-Unknown recovery
+remain separately required. Following stays native two-helper tree plus both-host
+qualification and the complete normative P0–P8 audit. P9/P10 have not begun.
+Inventory remains143 contracts/39 partialreviews/383 audited operations, now with
+actual C365 cancellation scope and366 static capability assertion. Metadata
+integrity controls pass1/0; these records are not broad runtime certification.
+
+Mac Claim364 changed diagnostic is terminal0/1 at the original first-write
+inactivity gate (146.96s overall). Claim succeeded, so its failure-only observer
+produced no records; this does not resolve the earlier Claim failure. Original
+op300000/add5 retained proposal+leader-entry evidence, with top101last2/commit1,
+top102last1/commit1 and original pending persistence, top103idle. No cold recovery
+or final cleanup. Formatting/all4strict/releasebuild and source/binary/runner
+terminal guards pass. Two earlier runner-only preflights launched no history;
+reused unchanged library provenance and absolute runner invocation corrected the
+evidence assumptions without rebuilding/repeating the actual history. Evidence:
+`target/divide-shutdown/mac-claim364/RESULT.md`. Next copied fixture observes only
+original failed write ticket/lease/capsule/lower links; no output consumption,
+public getter, watchdog refresh or production change. Mac resource is now root366.
+
+C367 guarded Linux TCP1/0 (28.79s)/QUIC1/0 (33.81s) qualifies all12-store Joint
+WAL reconstruction, fresh claims/descriptors and a NEW same-intent driver through
+Final/OutcomeRelease/business retry/read and all12 final joins/rebind. Profiles2/0,
+format/all4strict0,1251 frozen inputs unchanged; eight owned fixture and all11
+root366 overlay hashes match. The actual assertions prove Joint with no
+committed/applied Final. They do NOT directly establish zero Final admission;
+that stronger original mini-plan check stays explicitly open. No old grant,
+continuation or comparison scalar supplies new-owner authority. Original native
+checkpoint is not an extra prerequisite to this WAL boundary. Evidence:
+`target/divide-admin342/C367_RESULTS.md`.
+
+C368 guarded Linux TCP1/0 (22.63s)/QUIC1/0 (33.91s) qualifies actual cancelled
+Unknown import observation followed by committed target3 same-store cold resolve,
+with source9 originals live. Exact Applying→Resolving occurs BEFORE recovery or
+resume and matches the actual Unknown consumer branch; the private enum itself
+is not directly inspected. Original ticket/operation/bytes and whole sealed
+recovery survive; old recovery refuses fresh owners intact. Real materialization
+on all3, fresh Claim/Enrollment/Image/Snapshot, complete lineage/first position,
+higher sessions, source original pending ownership, activation/business/read and
+all12 final joins/rebind pass. Format/all4strict0,1252 inputs unchanged, four test
+overlays match. Between/afterQUIC executable hashes match; TCP independent
+pre-run hash was not recorded. Uncommitted Unknown, repeated receipt closure,
+stronger Final-admission boundary and Mac remain open. Evidence:
+`target/divide-admin342/C368_RESULTS.md`.
+
+Macro/mini review: Linux imported-target, committed-Unknown and applied-Joint
+cold paths now have bounded actual evidence. Current remains Mac diagnosis plus
+366 both-host constructor closure; next is uncommitted Unknown and repeated
+membership receipt closure without changing timers; following is guarded actual
+relay trees on both hosts and final normative P0–P8/current-platform audit.
+Root review exposed helper full-path/control envelope capability refusal missing
+from relay construction; the relay owner is correcting it through the existing
+whole-session/whole-parts handback contracts, not adding security/performance work.
+P9/P10 remain deferred and P8 remains active.
+
+Root inventory review now includes the four actual candidate enrollment/recovery
+operations under C368's two native runners, explicitly partial and committed-
+Unknown-only. Actual public Applying→Resolving before recovery/resume is the
+Unknown observation; old live-owner recovery cannot authorize fresh owners.
+Inventory143/partialreviews40/audited operations387; metadata integrity1/0.
+Neither counts nor anchors qualify uncommitted Unknown or Mac runtime.
+
+Root366 is now qualified for its bounded constructor/facade scope on BOTH Linux
+and macOS. Mac actual21 tests: application8/0,release11/0,facadeTCP1/0 (1.57s)
+andQUIC1/0 (1.78s). Format/all4strict0; all19 runner stages0, three actual
+assertion-enabled release compiler commands,1279 source inputs verified start/
+launch/terminal, two actual executable launch/terminal hashes and runner immutable.
+Initial remote cache-path preparation missed repo/ and terminated before checks;
+the recorded path was corrected without rerunning a native history. Original cache
+was cloned privately, package cleanup changed only new build366. Evidence:
+`target/root315/mac366/RESULT.md`. SSH3925 is terminal0, Mac resource handed to
+write367's one changed failure-only native observation (SSH63914). No broader
+Mac logical membership/nesting/current-root or P8 completion claim follows.
+
+C369 strengthens C367's actual boundary with committed Joint.index≤commit and
+≤applied BEFORE stopping, full retained configuration-log Final absence before/
+after shutdown, and actual original configuration observations drained. Linux
+TCP1/0 (29.39s),QUIC1/0 (33.75s),format/all4strict0,1252 inputs unchanged and exact
+one-file current overlay. Historical zero Final admission is still not directly
+observed; accepted/committed log absence is the actual scope. Full12 same-store
+cold recovery and terminal business/provider closure remain genuine passes.
+Evidence: `target/divide-admin342/C369_RESULTS.md`.
+
+Current mini-plan review: root366 both-host closure is complete; current Mac
+write367 observes exact original failed write dependencies. Next C370 bounds real
+uncommitted Unknown with an actual withheld native peer path, persisted original
+entry below commit and whole aborted NativeNodeRecovery retained while real
+network/worker terminal events and joins settle. Fresh same-store durable truth
+alone permits new authority; aborted old owners never resume against new providers.
+No fabricated EffectOwner failure or healthy-drain claim. Following stays actual
+relay tree Linux/Mac closure and final complete normative/current-platform audit.
+
+C370 final derived1 uncommitted-Unknown fault slice passes LinuxTCP1/0 (22.43s)
+andQUIC1/0 (36.67s),format/all4strict0,1254 frozen inputs unchanged, currentseven
+fixture overlays match. Exact original import bytes are durable in leader WAL
+while commit is below their index and all3 Enrollment absent, both before abort
+and same-store restore BEFORE new election. Whole inert original NativeNodeRecovery/
+owners/replicas/leases remain owned with actual PeerDriverProgress and worker
+terminal observations while real networks/stores join and sockets rebind. Genuine
+new election commits the surviving original entry; fresh correlated Claim/reads
+resolve full lineage before old aborted domain retirement. Source9 originals stay
+live through actual activation/business/read and all12 final closures. No fake
+EffectOwner failure, healthy reuse, dropped credit or old authority replay.
+Evidence: `target/divide-admin342/C370_RESULTS.md`. Current scope is Linux; full
+Mac membership/recovery and repeated receipt closure remain open.
+
+Relay364 initial Mac native20 is19pass/1fail: existing TCP helper restart reports
+Helper WrongBinding while native owners remain Running. All new tree cases pass;
+source/binary/transfer after-failure guards match. Existing SecureSession permits
+buffered plaintext after clean Closing/Closed; RelayHop incorrectly required
+Ready at retained IO validation. Focused relay371 preserves the original immutable
+authenticated binding for retained IO, keeps new admission/readiness Ready-only,
+and refuses changed binding with original frame/ticket intact. Actual old-runtime
+fresh crate repro fails WrongBinding; corrected genuine TLS controls2/0. Frozen
+1297-input Linuxformat/all4strict0,native22/0/core17/0 with executable guards;
+Mac changed targeted former failure passes, full suite remains active. No new
+security/performance objective. Source/model proof and public operation scopes
+remain separate. Earlier same-target cached old-source repro reused changed lib
+and was correctly excluded as proof.
+
+Public relay364 delta registers nine operations: checked tree construction and
+maxhops, native/helper for_tree, captured path, source delegation_path and three
+pure AuthenticatedDelegationPath observations. Native relay family64 operations
+remains unreviewed in the partial ledger; new path data family also unreviewed.
+Source delegation_path has actual two-helper Linux assertions. Inventory144,
+partialreviews40, auditedoperations388; metadata integrity1/0. Initial guessed
+runner names were rejected by the integrity guard and corrected to actual source
+symbols, preserving the failed check. No runtime success is inferred from metadata.
+
+Macro/mini review: remaining current work is original physical Mac first-write
+causal state, with exact upper→middle→native ticket/lease/capsule links now recorded;
+next copied observer matches exact operation/bytes on all3 physical cores under
+existing shared borrow. Unavailable channel association is reported honestly.
+Next also qualifies repeated membership receipt closure and approved C371 selected
+NetworkNode physical-backing adapter, retaining direct aliases and actual current
+source-view bindings. Following is complete relay Linux/Mac closure and final
+normative/current-source P0–P8 qualification. P8 remains active; P9/P10 not begun.
+
+### Current mini plan372
+
+Macro review: ordinary static physical-voter relay trees now qualify on BOTH
+Linux/macOS (corrected37122 native and17 core controls per host, format/all4strict0,
+1297 source/executable guards). Original helpers remain nonvoting/noWAL. Broader
+programs/striped storage and bounded root366 constructor scope retain both-host
+qualification. Logical imported/Joint/Unknown cold functions qualify Linux;
+Mac nested writes, logical administration and repeated receipt closure remain.
+No unfinished functionality moves to P9/P10; final current-source audit remains.
+
+| Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
+| --- | --- | --- | --- | --- |
+| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Functional385 Linux full cold TCP/QUIC passed with separate original-write and exact-all-convergence bounds; Mac381 failures remain recorded. Matching coherent source is prepared after the terminal Mac383 handoff. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Preserve any failure; no unchanged rerun or heartbeat progress credit. | Usable recursive composition, P8 |
+| Next: logical membership/recovery closure | Finish repeated replacement and cold membership resolution on both hosts. | Mac383 six imported/Unknown histories pass. Diagnostic387 confirms premature FULL-child wait; corrected388 Linux repeatedTCP and JointTCP/QUIC pass. RepeatedQUIC reaches subsequent actual middle close but misses15s; failure-only389 inspects original remaining work without changing bounds. Frozen388 Mac six-case run5119 is active. | Actual repeated replacement, imported-target/Joint/committed/uncommitted-Unknown recovery, business results, provider closure and Mac TCP/QUIC parity. Zero checks and original resource handbacks. | Online membership and advanced composition, P4/P8 |
+| Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, read-only full requirement audit, coherent current snapshot and existing source/model/durability records. | Every explicit functional requirement mapped to appropriate current Linux/macOS evidence; resolve contradictions/failures, required full checks and cleanup, no subset or metadata-only completion claim. Stop when P8 actually complete. | Goal completion, P0–P8 |
+
+Corrected relay371 Mac source results inspected by root:20 recorded stages0,
+native22/0 (28.19s),core17/0 (0.02s),targeted original failed TCP1/0 (0.80s),TLS
+closure2/0 (0.07s),1297 source lines before/after and actual binary/protoc/transfer
+checks0. Agent's earlier21-stage count included an external guard and is corrected.
+Evidence: `target/divide-provider/RELAY371_RESULTS.md` and
+`target/divide-provider/relay371-mac/VERIFIED.json`. Current owned46 hashes match.
+Prior Mac19/1 and old-runtime fresh counterexample stay preserved. The
+physical368 SSH9070 run is now terminal; the Mac is available for the next qualified
+functional check. No automatic performance/security work.
+
+Physical368 preserves one changed Mac QUIC failure (0/1,149.20s), with1229
+source guards, actual fresh compiler provenance, executable/runner/helper guards,
+formatting and all four strict configurations clean. The original native client
+operation18446744073709551960 and full1058-byte command match index347/term2
+on leaderNode2 alone; commit/applied346. Both followers have last/commit/applied346,
+no matching command, and one2066-byte persistence request with an original waiting
+visit. This identifies an actual dependency, not a persistence deadlock: Node.poll
+consumes worker events before submitting new persistence at the end of each poll.
+The next observation must distinguish turnover from the same retained stalled
+request. No timer, quota, output consumption or production change is justified by
+this snapshot alone. Evidence: `target/divide-shutdown/mac-physical368/RESULT.md`
+and `ORIGINAL_PHYSICAL_OBSERVER.txt`; all58 recorded artifact fingerprints match.
+
+C371's first real Linux relay-backed child fixture currently fails before the
+logical Claim read can be admitted: original leader no-op is last1/commit0,
+followers last0. The adapter compiles; this is not a passing composition claim.
+The next check compares actual helper pumping and original relay append ownership
+with the qualified static tree histories. The ordinary physical configuration
+control preserves the existing AuthenticationRequired refusal; no weak authorizer
+or timer increase was introduced. Owner: admin342, diagnostic derived4.
+
+C371 derived9 Linux is now qualified: actual relay-backed logical TCP1/0 (3.10s),
+QUIC1/0 (8.34s), direct facade regressions2/0 (1.37s), formatting/all4strict0,
+1305 source guards and16 current-owned overlays matching. Root inspected actual
+logs and C371_CHECKS/C371_FINAL_GUARD. The earlier host passed a default bridge
+budget with zero polls/completions/transitions; explicit existing normal budgets
+restore genuine host pumping. The constructor also correctly rejected the test's
+read profile smaller than its selected result reservation; the normal existing
+profile now satisfies that contract. Stronger initial committed-no-op waiting is
+an explicit fixture precondition, not the causal fix. Real Claim, checkpoint,
+same-store reopen/fresh Claim, retry7/new12/read and all native/helper joins pass.
+Three production files generalize the existing physical adapter to selected
+NetworkNode; no public operation/schema/wire changes. Matching guarded Mac
+qualification is now underway in a fresh folder. No deep/repeated logical
+membership claim follows from this static composition.
+
+C371 matching Mac qualification is now complete and root-inspected: TCP1/0
+(5.11s), QUIC1/0 (9.12s), original direct regressions2/0 (3.73s), format/all4strict0,
+1305 source hashes before/after unchanged and both actual executables unchanged.
+The actual exits.txt has15 runner stages0; the earlier agent16-stage count is
+corrected. Evidence: `target/divide-admin342/C371_RESULTS.md`/`.json` and
+`MAC371_RESULTS_SHA256.json`. Static selected-network composition is complete;
+dynamic relay-learner/restart combinations are not inferred. The existing backing
+inventory scope now records both hosts without adding a public operation.
+
+Bounded read-only scope audit372 maps14 P0–P8/VB000–011/chapter11/17/operator rows
+to actual sources and finite evidence. Root checked referenced paths and corrected
+the initial non-existent effect_owner.rs anchor to runtime/effects.rs. It finds no
+additional missing user-visible feature set; known logical/Mac/repeated/current
+qualification remains. It is neither a current test certificate nor a proof.
+Evidence: `target/divide-provider/final-scope372/AUDIT.json` plus fingerprints.
+Mac315b remains a10s wall-cap failure with original snapshot/persistence work
+pending; no new feature or P8 throughput threshold is inferred.
+
+Root373 current1305-input repeated TCP first encounters sandbox loopback EPERM
+before constructing owners (0.00s); that is environment failure, not membership
+evidence. The authorized native run subsequently fails first Enrolling→Released
+at39.72s, before any second replacement is constructed; all1305 source hashes
+remain unchanged. Existing failure375 schema introduces only a bounded
+failure-time original phase/work/read/readiness/Visit/port inspection. Current
+Mac374 original12-owner TCP separately fails Begun→Enrolling36.41s before source
+export/candidate; source/executable/protoc guards pass. Root owns the shared
+diagnostic; no timer/quota/production change and no guessed parent ticket.
+Sources: `target/root315/repeated373/{SCHEMA.md,TCP_NATIVE.log,AFTER_NATIVE_TCP.json}`
+and `target/divide-admin342/C374_RESULTS.md`/`.json`.
+
+Shared375 actual changed Linux repeated TCP0/1 (37.34s) reaches Completed:
+the driver consumed a genuine fresh quorum Status containing durable Outcome.
+Middle0/1/3 configuration4/commit/applied21, leaderlast22; original parent
+persistence is not drained, upper bridge Applying exact operation18446744073709551633
+with509 bytes, lower0 Applying physical operation18446744073709551978. Own bridge
+observations are not drained, so this snapshot does not justify a preflight guard
+change or prove a deadlock. All1306 source and actual binary before/after match;
+format/all4strict0; all1269 current Rust paths captured. Second replacement has
+not begun. Evidence: `target/root315/repeated375/RESULT.md` plus18 fingerprints.
+Matching Mac first-phase observer376 is now running after nested resource handoff.
+
+Mac temporal369 materially advances nested evidence: original add5 Applied at
+Mono171006,index2/term1/value5/duplicatefalse; all-top convergence184434. It then
+fails cold_upper_checkpoint at199438,15004ms later, before cold reopen or cleanup.
+The original first-write failure gate did not fire, so Timeline.emit printed zero
+records; its in-memory ring is unavailable and no turnover/cause inference is
+made. This observer is not described as a fix. Terminal source/binary/runner
+guards are reported0; original checkpoint dependency extraction is underway.
+Current edge moves to actual checkpoint ownership, not another write rerun.
+
+C376 shared Mac phase observer0/1 (36.44s) rules out the proposed initial-preflight
+cause: both observation/full drain predicates false, workNone but original
+configuration child_attempt1. Source has accepted Learners configuration2 and
+durablelast15/commit/applied14, original waiting persistence Visit203 and lower
+physical ClientTicket212/group811. Initial authorization already permitted this
+configuration work; Begun alone does not identify the internal stage. All export
+consumers are settled, all child read/client/result usages0, readinessNone; private
+configuration stream is not exposed. Source1306/binary/protoc and fmt/all4strict0.
+The proposed preflight production change is rejected, not implemented.
+
+Functional377 deliberately changes only the fixture's compound phase wait:
+90s absolute/30s inactivity, with each genuine Begun/Enrolling/Completed/Released
+stage earning progress once. Initial state, generic Observe/proposal/admission,
+Busy/Conflict, repeat states, unrelated logs and heartbeats earn no credit.
+Runtime timers/quotas, original polls, grants/continuations and FULL repeated
+JointFinal/OutcomeRelease/business/all15 provider assertions remain. Old15s
+failures remain timing evidence for P9; no pass is claimed before complete actual
+functional histories. Zero formatting/all4strict verified on the new1306-input
+cut; actual executable build is in progress. Schema: `target/root315/activation377/SCHEMA.md`.
+
+Root377 exact repeated TCP fails0/1 at120.44s after completing the FIRST
+replacement, Release and business checks. The SECOND Begin356100 at{7,1} stalls:
+bridge observations clear, work/actions/attempts/outputs0, parent ports drained,
+all export consumers settled and readinessNone, but full child drain false while
+original protocol Send work remains live. Active children0/1/3 retain config4,
+last/commit/applied34; removed2 retains config3. Source1306 and actual executable
+before/after unchanged. This new second-phase trace supports a preflight cause;
+it does not change the earlier376 first-phase cause classification.
+
+Root379 schema precedes a one-function production fix: activation_preflight uses
+own observation drain plus explicit snapshot-export settlement instead of whole
+child protocol drain. Closed/failure, genuine configuration stream drain, pending
+readiness, selected profile and deployment bounds remain checked. Original fresh
+parent Status authorization and execution checks remain; full detach/reclaim/
+export drain is unchanged. Independent protocol work stays owned and pumped.
+The fixture also marks semantic predecessor phases already seen, preventing a
+previously reached stage from refreshing inactivity. Source1306 differs from377
+in only activation.rs/progress.rs. Frozen formatting/all/default/core/native
+strict Clippy all0; actual repeated TCP is running. No functional pass claimed.
+Schema/checks: `target/root315/activation379/{SCHEMA.md,CHECK_EXITS.txt}`.
+
+Mac checkpoint378 is terminal0/1 (147.91s) at ORIGINAL upper_write inactivity,
+before checkpoint; its new observer emits0. Existing write ring emits13 states:
+matched native344/term2 replicates to all3 and leader commits it before next
+request343 appears. Top original Send103 stays held at commit1; middle original
+Visit348 sends202 then203 and stays commit23. Both retained lower Append bodies
+contain zero exact middle commands; missing previous-index/term and evicted keys
+prevent attributing prefix ACKs. No deadlock or heartbeat-progress inference.
+Source1235/five fixtures/production0, all4strict/fmt and actual source/binary/
+compiler/runner/protoc guards0. Evidence: `target/divide-shutdown/mac-checkpoint378/RESULT.md`.
+
+Root379 repeated Linux TCP now passes1/0 (71.86s): both genuine replacements, original business/read checks, all five three-owner clusters checkpoint/finish and address rebind. Original final marker says actual12 but finish_clusters also checks the second cluster, giving15 owners. QUIC fails0/1 (32.29s) during a Released wait (the original log does not identify first versus second intent) with child2 Network(Session(Truncated)), driver Failed. Source1306/actual binary unchanged for both, current root source equality0. TCP validates the preflight fix in its finite scope; QUIC needs exact provider cause before a closure-handling change. No deadline extension or broad Truncated allowance is inferred.
+
+Mini-plan refinement381: deep Mac write-only30s inactivity observes finite TOP bits, while original378 records native344 replication/commit and middle Send342→343 advancing under the still-owned parent Send. Source review confirms heartbeat retries preserve original request windows and runtime traffic rotates; it does not prove every completion. For P8 functional qualification, keep the existing90s absolute write deadline and require the same opaque Applied result/exact all-owner convergence, removing only the top-mask inactivity condition from write validity and convergence. Read/election30s/90s, accepted attempt/held-output caps, original host polls and all27 cleanup checks remain. Nested owns only the two fixture files and the guarded next cut; no production or protocol timer change. Old timing failures remain for P9. A90s expiry is still failure.
+
+Root379 original regression targets pass31 activation-driver,42 direct native logical and2 relay-backed logical histories (66.78s/11.45s/8.20s); actual executables and all1306source hashes unchanged. These include original source-export refusal, readiness/cancel, fresh Status, full quota/control ownership, selected recovery and cleanup. They establish the preflight fix preserves those contracts; separate repeatedQUIC32.29s Session(Truncated) remains unresolved. Evidence: activation379/REGRESSION_RESULTS.json and target logs/fingerprints.
+
+Copied observer380 changes only private diagnostic prints and failure inspection (1307inputs), retains exact QUIC behavior and all functional bounds, and fails0/1 (32.51s) with genuine ConnectionLost TimedOut. The changed observer explicitly records SECOND intent356100, active cfg6/commit/app36, removed2cfg3/last16. The earlier379 common marker did not identify first versus second intent; its report is corrected to unavailable instead of an inferred first phase. Outer original physical7→1 Ready session times out at32507 with no send/read/close; lower second-cluster13/14/15 idle sessions time out earlier. All actual source/binary/library guards and fmt/all4strict0.
+
+Mini schema383: test host constructs second physical cluster BEFORE preparing/exporting second learner transition, then adds it to Lower only afterward; it also parks returned settled peer203 transport sessions without polling them until final cleanup. Keep those original sessions owned and bounded under Lower, poll them with normal budgets while lifecycle work proceeds, return them to the same final close/join path, and defer second cluster construction until it can immediately join pumping. No consumed/dropped accepted outputs, new admission authority, ignored error, runtime timeout change or production delta. Relay owns only three nested membership fixture files. Qualify full repeatedTCP/QUIC with original business/all15 cleanup and zero checks; handshake callback is deferred unless separately demonstrated necessary.
+
+Root additionally ran all required commands directly against current source after the two381 write-only fixture edits: formatting/all/default/core/native strict all0 (session49289). Logs: target/root315/current381/CHECK_EXITS.txt and matching logs. Later383 edits require their own fresh zero check; this current381 record does not certify them in advance. No pre-push bypass or performance optimization.
+
+The planned383 host slice is captured as target/divide-provider/retired382 (numbering correction). It changes only history/lower/repeated fixtures: second cluster joins pumping immediately after creation, and at most three retired sessions retain their exact original RuntimeAuthorization while transport IO continues. Final explicit shutdown cancels only new never-admitted Received bytes, asserts no accepted send output is lost, and returns the SAME sessions to original close/join. Initial check caught an existing cold_joint caller of reclaim_middle; its original signature was preserved inside owned history.rs and the failure log retained. New frozen1306/current-source guards0, production379 unchanged, fmt/all/default/core/native strict/build0; full repeatedTCP thenQUIC now running. No fourth file or production error allowance.
+
+Exact production379 Mac first12TCP now reports1/0 (116.98s), original all12 joins/rebind, actual binary-after-case check0 and earlier fmt/all4/build/provenance0. Remaining cases and final whole-source guard are still running; this is interim evidence, not complete Mac379 qualification. Separate Mac377 firstTCP comparison1/0 (116.58s) preserves production-unchanged timing history.
+
+Production379 Mac first12QUIC also reports1/0 (121.93s), all12 joins/rebind and per-case binary guard0; TCP116.98s already passed. Repeated cases and final source guard still running. Retired382 LinuxTCP advances both actual replacements/business/middle close, then fails0/1 at60.81s in finish_clusters physical slot0 CheckpointPublished15s: genuine whole~75.5MB image/~76.1MB work remains pending, no observed provider/safety failure. Source/executable/library unchanged. Thus session pumping reaches later gates; no whole15-owner cleanup pass yet. Next focused schema reviews only this fixture checkpoint15s latency bound for bounded90s P8 completion, retaining original frontier/reference/bytes/ownership and all15 joins/rebind. Runtime snapshot policy/limits and errors are unchanged; old15s remains P9 timing evidence. No global deadline or optimization.
+
+Functional381 Linux full cold histories BOTH pass: TCP1/0 (249.06s), QUIC1/0 (277.26s), same asserted/overflow-checked release binary and source1306 guards unchanged. They retain actual original writes, zero-add/suffix/read, all27 store shutdown/reopen, own recovered anchors/suffix/application/session, duplicates/fresh reads and final27 maintenance/joins/reclaim/rebind. The WRITE-only90s bound is fixture policy; no production/diagnostic delta or performance claim. Matching Mac source is prepared and held behind the active membership check.
+
+Retired382 QUIC also reaches both replacements/business/top+middle cleanup and all logical channel close, then misses the same physical CheckpointPublished15s gate (0/1,66.63s). No idle Session error or theoretical retained-receive drain failure occurs. Evidence retains all original source/executable/library hashes unchanged. Derived383 changes ONE fixture deadline selector: CheckpointPublished90s absolute; the other four NativeWaitStage15s deadlines remain. Predicate, polls, immutable snapshot bytes, storage limits/runtime policy and all15 join/rebind checks unchanged; zero checks and full histories underway.
+
+Checkpoint383 full repeated Linux qualification is complete: TCP1/0 (72.77s),
+QUIC1/0 (87.95s), same actual assertion-enabled executable/library, all1306
+source guards and current mirror0. Both genuine replacements, original business
+and logical lifecycle gates, all FIVE physical clusters/15 owner checkpoint,
+join, cleanup and TCP/UDP rebind assertions complete. Old inherited actual12
+log marker is not the owner count; source finish_clusters includes secondSome.
+Format/all4strict/build0. Sealed evidence: target/divide-provider/checkpoint383/
+RESULT.md, QUALIFICATION.json and EVIDENCE_SHA256.json29 files. No production
+change beyond379; no provider timeout/failed-send/error allowance changed.
+
+Mac379 terminal source results now sealed: first12TCP1/0 (116.98s), QUIC1/0
+(121.93s), original all12 cleanup/rebind, both1306-line source guards and FIVE
+actual binary hash logs identical, format/all4strict/build/protoc/clone0. Old
+repeatedTCP0/1 (155.47s) explicitly SECOND Begin{7,1}, intent356100..104, Enrolling
+wait with original upper operation18446744073709551647 retained. Old repeatedQUIC
+0/1 (128.58s) retains SessionTruncated. Those do not qualify383 host corrections.
+Evidence: target/divide-admin342/MAC_PRODUCTION379_RESULTS.md/.json and45 log
+fingerprints. Mac381 actual authorized SSH11327 now owns the machine; prepared
+Mac383 ten repeated/recovery cases remain queued until explicit terminal handoff.
+
+Final coherent Linux384 matrix started as actual session33829 after copying
+all1306 current compilation inputs matching qualified383. It runs format/four
+strict profiles, then complete all-target test and doc suites for all/default/
+core/native sequentially, isolated target directory, optimized release WITH
+assertions and overflow checks. Original test/provider assertions and error
+handling unchanged; source/executable guards and actual Cargo artifacts recorded.
+No omitted test or early-success wrapper; failures determine focused next work.
+Current final requirement audit proceeds read-only alongside it. This is running
+qualification, not a passing matrix or P8 completion. Schema: target/root315/
+final384/SCHEMA.md. No P9 performance or P10 hardening work started.
+
+Final384 fresh-cache attempt1 stops before tests: the runner explicitly selected
+system protoc36.1, rejected by test-only protobuf-build0.14.1 (which requires3.x).
+Its logs/exits are retained in attempt1. Dependency source confirms the bundled
+Linux compiler path; use existing protoc3.9.0, SHA30c6f9b5c03fb4ad7c2f0ad2efa0297c1f4e349726b6c968a029a277e864d48e.
+No package/dependency/source/lint change. Corrected actual matrix session6548
+passes format/four strict profiles0 and release all-target build0 (124 actual
+executables recorded), complete all-feature tests now running sequentially.
+No completed matrix claim; subsequent configurations remain queued.
+
+Inventory wording correction: remove the already implemented native logical
+activation feature from not_yet_implemented; retain its explicit current Mac
+nesting/repeated/cold qualification under remaining_validation. Remove the
+already-qualified selected striped-WAL318/321 item from remaining_validation;
+final coherent P0–P8 audit remains separately listed. Public contract counts and
+operation reviews stay144/40/388. Inventory shape and provider-reference tests
+pass; these are metadata checks, not complete native-operation certification.
+
+Final384 bounded requirement audit sealed:19R/12VB/12I/24C and revisedP0–P8
+exits map to actual source/assertion families,631 referenced path/hash checks and
+388 operation anchors. Current383 compilation inputs1306 match0. Root changed
+two docs after inspection; packet explicitly records read-interval source instead
+of claiming immutable text. No additional missing named feature was found;
+known Mac histories, final coherent platform matrices and honest scope/status
+consolidation remain. Scope excludes arbitrary adapters/permutations/unbounded
+proofs and leaves original performance/security projects deferred. Evidence:
+target/divide-provider/final-audit384/AUDIT.md/.json and original scoped hashes.
+
+Mac381 original TCP completes genuine Applied before its90s write-total expiry:
+0/1 at199.69s, write-start marker109679,proposal117908, matching Applied consumed195843.
+The recorded Instant watchdog gives86.2657575s at consumption; a separate
+admission timestamp was not logged. Leader top101 log/commit/app2; both followers have exact entry2 but
+commit/app1 at199681. Thus client/quorum completion happened; all-three convergence,
+read/cold/full27 cleanup remains unqualified. Source/binary guards0. QUIC is still
+running unchanged. Next schema review separates these actual asynchronous phases,
+arming any subsequent bounded convergence wait only after original matching
+Applied consumption, never generic activity/heartbeats or apparent index progress.
+No production timer change, automatic blanket escalation or completion claim.
+
+Functional385 Linux full cold histories passTCP1/0 (71.21s),QUIC1/0 (119.25s), same asserted/overflow release executable. Both original business/read/dedup/own27-store close/reopen/exact anchors+suffix/app/freshsessions and final27 maintenance/joins/reclaim/rebind assertions pass. Three fixtures changed: immutable originalwrite90 then exact-all90 armed ONCE only by whole matching consumed Applied; upper constructor Claim90; cold upper checkpoint90 via private until_bounded. Watchdog read/election, bottom claims, normal until/close15 and every actual success predicate remain. Production379 unchanged, all1306/actualsource/library/bin guards0, fmt/all4strict0. Mac source local-only, held behind admin383. Evidence: target/divide-shutdown/functional385/RESULT.md and51 hashed artifacts.
+
+Mac383 repeatedTCP0/1 (152.68s) andQUIC0/1 (152.82s) explicitly SECOND intent Enrolling→Released; sampled201/204/205 allcfg7/commit/app38, original upper Applying18446744073709551647/ticket32 remains. Original logs do not identify which90/30 OR guard fired. Root approves386 only WantedReleased removal of coarse30s inactivity while retaining90 total; all other phase waits unchanged. Failure reports use the existing now value to show elapsed/inactivity/which guard. One fixture, no runtime/pump/authority change. Mac383 source remains frozen for its ten original comparisons; imported-targetTCP1/0 (114.11s) already passes, further results running.
+
+Shutdown387 mini schema: Linux386 repeatedTCP passes1/0 (104.21s), while QUIC
+fails0/1 (72.73s) at the original parent/bridge shutdown15s assertion, after both
+replacements. Mac383 JointTCP/QUIC fail the same gate. Those logs do not print
+which top/full-bridge conjunct remains; live child work versus borrow settlement
+is a source-backed hypothesis, not the established cause. Keep the original
+predicate, deadline, polling and reclamation unchanged. Add failure-only original
+top/bridge/middle/lower-port observations through existing inspection contracts,
+then retain the same panic. No new protocol effect, generation, watermark,
+completion or cancellation is introduced. Acceptance: zero formatting/four
+strict profiles; guarded affected execution and exact failed-state evidence,
+plus coherent385 Mac full cold qualification after the terminal383 handoff.
+Schema is target/root315/shutdown387/SCHEMA.md. Mac access was already authorized;
+no new approval is needed for these copied-source checks.
+
+Mac383 terminal results: imported-targetTCP1/0 (114.11s), QUIC1/0 (127.79s);
+committedUnknownTCP1/0 (116.97s), QUIC1/0 (124.73s); uncommittedUnknownTCP1/0
+(117.20s), QUIC1/0 (130.57s). Six complete original recovery histories pass;
+four repeated/Joint failures remain separately preserved. Format/four strict
+profiles/protoc/build/clone,1306 source guards and all11 executable comparisons0.
+Evidence: target/divide-admin342/MAC_RETIRED383_RESULTS.md/.json and99 log hashes.
+
+Shutdown388 contract/order correction: independent review confirms all3 fixture
+callers close only Top while middle Raft remains Running, yet request bridgeFULL
+before they close middle intake. Existing bridge docs explicitly allow borrow
+return at own-observation settlement while the owning host continues pumping
+child work. Split the original full predicate at that ownership boundary: fully
+drain Top + settle bridgeOWN, close/return bridge, then close/poll SAME middle to
+actual Middle::is_drained and explicitly require every work_is_drained (the exact
+backing_is_drained implementation). Normalhistory's premature full assertion is
+made consistent. All existing15s bounds, original accepted work, typed failures,
+Top/middle into_parts, Joint durable capture/noFinal, readiness-closed, channel
+closure, lowerFULL and physical checkpoints/joins/rebind remain. Failure-only387
+inspection remains. Production379 unchanged; no new helper/API/policy introduced.
+Schema: target/root315/shutdown388/SCHEMA.md. This is a contract correction;
+the exact old failed conjunct remains unprinted/unproven until387 observation.
+
+Independent388 read-only review checks all3 concrete callers and exact
+LogicalBackingChild::backing_is_drained→Middle::work_is_drained equivalence.
+SAME child vectors remain owned through actual close and original into_parts;
+no output polling/state stepping was introduced by failure-only inspection.
+Current versus frozen384: exactly7 expected fixture changes, production0,
+frozen384 changes0. Root direct fmt/all/default/core/native strict checks zero.
+This source/contract review is not execution acceptance; frozen387 diagnostic
+and coherent388 Linux/Mac histories are being prepared with isolated builds.
+
+Shutdown387 actual original-boundary diagnostic is terminal0/1 (160.17s), with
+source_start/terminal, exact selection and actual binary guards0. Top is
+Drained/is_drained/work_is_drained true; all printed top owner/persistence/read/
+client/result/outbound/release/snapshot work is zero/settled. UpperOWN true,
+FULL false, no failure, actions/attempts/retained/image/enrollment0, workNone.
+Original middle children still hold lower Applying operations/tickets, owned
+visits/leases and outbound consensus work; their intake has not been closed.
+This establishes the actual failed FULL-child conjunct for387, not the unprinted
+older Mac/386 failure state. The existing borrow-handback contract matches388's
+order correction. Original15s predicate/cleanup and failure logs remain archived.
+Changed388 Linux repeatedTCP is1/0 (181.85s), completing both genuine
+replacements and every original fifteen-owner business/cleanup/checkpoint/join/
+rebind assertion. Its QUIC and Joint comparisons remain active; no full388 or
+Mac qualification claim. Linux387/388 here use actual unoptimized debug test
+binaries; Mac388 uses explicit asserted/overflow-checked release for faster
+functional qualification. Those test timings are not performance guarantees.
+
+Shutdown388 Linux terminal selected results: repeatedTCP1/0 (181.85s), genuine
+all12 Joint coldTCP1/0 (35.81s) andQUIC1/0 (39.12s), each retaining own stores,
+Joint/noFinal capture, fresh owners/Claims, completion and final actual cleanup.
+RepeatedQUIC0/1 (83.83s) advances past corrected parent/own-observation handback,
+then misses the ORIGINAL middle-close15s gate. Exact original node state was not
+printed there; do not infer timeout-only slowness, session closure or accepted
+work loss. Source/executable/library/selection guards0. Next bounded389 adds only
+failure-side original middle/local/lower-state inspection, retaining15s, all
+existing polls, typed failures and whole-resource reclamation. Need the actual
+remaining obligation before any deadline/runtime change. Frozen388 Mac6 now
+actually runs SSH5119 on an APFS-cloned terminal381 cache with release assertions
+and overflow enabled; no Mac debug/native result is mixed in. Old caches/sources
+and388 native logs remain distinct from389.
+
+Portable383 evidence is now tracked in validation/baseline/slice383: actual
+Linux2 repeated passes and terminalMac10 (six pass/four fail), original source1306,
+commands/raw logs/guards/profile facts/cumulative6fixture deltas, seven old
+fixture versions for source reconstruction, original29/99 artifact fingerprints.
+All original copies/hashes and twelve actual summaries checked; archive140 files
+983,716bytes, under1MiB, no binary/cache or pending388 claim. Linux artifactopt0
+has explicit assertion/overflow evidence; Mac383 logs prove unoptimized debug
+and no--release, its overflow compiler flags were not observed. Public summaries
+must retain that distinction. Archive hash verifier and nine README links pass.
+
+Middle389 terminal qualification is1/0 (96.60s): the original two-replacement
+QUIC history completes all fifteen-owner close/reclaim/checkpoint/join/rebind
+checks with unchanged15s middle bounds. Failure-only observer executesZERO times.
+Thus current389 has selected full QUIC execution evidence; it DOES NOT explain
+or fix388's old failed middle boundary. No unchanged rerun or production/timer
+change. Format/four strict all-target profiles0; actual debugopt0/assertions/
+overflow library+fixture compiler flags and source1306/current2/production0/
+original388+newactual executable/library guards match. Evidence is sealed36
+artifacts in target/divide-shutdown/middle389/RESULT.md/.json/EVIDENCE_SHA256.json.
+Current two fixture files are handed back to root. Any later failed middle state
+must use the original observer instead of inventing a cause from this pass.

@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice327-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.44s
+     Running tests/logical_activation_driver.rs (/tmp/voteboat-macos-CzK1if/slice327-membership/build/debug/deps/logical_activation_driver-24ee4fea18c84d1f)
+
+running 2 tests
+test history::original_parent_begin_fresh_status_retry_busy_and_cancel_tcp ... ok
+test history::original_parent_begin_fresh_status_retry_busy_and_cancel_quic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.66s
+

@@ -1,0 +1,165 @@
+{
+  "source": "target/divide-provider/checkpoint383/SOURCE.json",
+  "inputs": 1306,
+  "mac": "/tmp/voteboat-macos-retired383-jHNT8fJC",
+  "ssh_handle": 70033,
+  "terminal_exit": 1,
+  "stages": {
+    "platform": 0,
+    "source_start": 0,
+    "prior_binary_clone": 0,
+    "protoc": 0,
+    "fmt": 0,
+    "clippy_all": 0,
+    "clippy_default": 0,
+    "clippy_core": 0,
+    "clippy_native": 0,
+    "build": 0,
+    "repeated_tcp": 101,
+    "repeated_tcp_selected_one": 0,
+    "repeated_tcp_binary_unchanged": 0,
+    "repeated_quic": 101,
+    "repeated_quic_selected_one": 0,
+    "repeated_quic_binary_unchanged": 0,
+    "imported_tcp": 0,
+    "imported_tcp_selected_one": 0,
+    "imported_tcp_binary_unchanged": 0,
+    "imported_quic": 0,
+    "imported_quic_selected_one": 0,
+    "imported_quic_binary_unchanged": 0,
+    "joint_tcp": 101,
+    "joint_tcp_selected_one": 0,
+    "joint_tcp_binary_unchanged": 0,
+    "joint_quic": 101,
+    "joint_quic_selected_one": 0,
+    "joint_quic_binary_unchanged": 0,
+    "committed_unknown_tcp": 0,
+    "committed_unknown_tcp_selected_one": 0,
+    "committed_unknown_tcp_binary_unchanged": 0,
+    "committed_unknown_quic": 0,
+    "committed_unknown_quic_selected_one": 0,
+    "committed_unknown_quic_binary_unchanged": 0,
+    "uncommitted_unknown_tcp": 0,
+    "uncommitted_unknown_tcp_selected_one": 0,
+    "uncommitted_unknown_tcp_binary_unchanged": 0,
+    "uncommitted_unknown_quic": 0,
+    "uncommitted_unknown_quic_selected_one": 0,
+    "uncommitted_unknown_quic_binary_unchanged": 0,
+    "binary_terminal_unchanged": 0,
+    "source_terminal": 0
+  },
+  "cases": {
+    "repeated_tcp": {
+      "passed": 0,
+      "failed": 1,
+      "seconds": 152.68,
+      "exit": 101,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "repeated_quic": {
+      "passed": 0,
+      "failed": 1,
+      "seconds": 152.82,
+      "exit": 101,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "imported_tcp": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 114.11,
+      "exit": 0,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "imported_quic": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 127.79,
+      "exit": 0,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "joint_tcp": {
+      "passed": 0,
+      "failed": 1,
+      "seconds": 69.53,
+      "exit": 101,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "joint_quic": {
+      "passed": 0,
+      "failed": 1,
+      "seconds": 70,
+      "exit": 101,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "committed_unknown_tcp": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 116.97,
+      "exit": 0,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "committed_unknown_quic": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 124.73,
+      "exit": 0,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "uncommitted_unknown_tcp": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 117.2,
+      "exit": 0,
+      "selected_one": true,
+      "binary_unchanged": true
+    },
+    "uncommitted_unknown_quic": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 130.57,
+      "exit": 0,
+      "selected_one": true,
+      "binary_unchanged": true
+    }
+  },
+  "binary_guards": {
+    "repeated_tcp": true,
+    "repeated_quic": true,
+    "imported_tcp": true,
+    "imported_quic": true,
+    "joint_tcp": true,
+    "joint_quic": true,
+    "committed_unknown_tcp": true,
+    "committed_unknown_quic": true,
+    "uncommitted_unknown_tcp": true,
+    "uncommitted_unknown_quic": true,
+    "terminal": true
+  },
+  "source_guards": {
+    "source_start": {
+      "inputs": 1306,
+      "failures": []
+    },
+    "source_terminal": {
+      "inputs": 1306,
+      "failures": []
+    }
+  },
+  "production_changes": [],
+  "all_four_strict_and_fmt_zero": true,
+  "protoc_sha256": "9f40368c858666e7036df0b9b58a4acd085fed58ab531294c3e5b5820f8af360",
+  "failures": {
+    "repeated": "SECOND356100 Begin{7,1}, cfg7/commit38/applied38 sampled, Enrolling→Released compound phase timeout; old exact deadline not printed",
+    "joint": "Original shutdown.rs11 same top and bridge original drain; scalar ownership state unavailable in original observer"
+  },
+  "scope": "Imported target and committed/uncommitted Unknown paths qualified six genuine cases; repeated and all12 Joint cold not broadly qualified",
+  "resource_released": true
+}

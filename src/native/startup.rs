@@ -33,6 +33,7 @@ use crate::{
 };
 use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBuf, sync::Arc};
 mod multi;
+mod owner_limits;
 mod peer_rotation;
 mod timing_profile;
 pub use multi::*;
@@ -85,6 +86,18 @@ enum StartupAuthorization {
     Static,
     Member(BTreeMap<NodeId, StoreIdentity>),
 }
+#[derive(Default)]
+struct StartupStorageOptions {
+    log_limits: LogLimits,
+    timings: Option<JournalTimings>,
+}
+struct StartupPreparation {
+    authorization: StartupAuthorization,
+    timers: TimerConfig,
+    storage: StartupStorageOptions,
+    rotation: Option<NativePeerRotationStartup>,
+    discovered_dials: bool,
+}
 impl StartupAuthorization {
     fn stores<'a>(&'a self, config: &'a NativeStartup) -> &'a BTreeMap<NodeId, StoreIdentity> {
         match self {
@@ -110,6 +123,19 @@ impl NativeMemberStartup {
         incoming: &Snapshot,
         application: &mut A,
     ) -> Result<(), NativeStartupError> {
+        self.enroll_snapshot_with_log_limits(incoming, application, LogLimits::default())
+    }
+    /// Import through one explicitly selected WAL capability. The same limits
+    /// must be selected when reopening the member; import grants no readiness.
+    /// Invalid limits are refused before opening files, including on retry.
+    pub fn enroll_snapshot_with_log_limits<A: CheckpointStateMachine>(
+        &self,
+        incoming: &Snapshot,
+        application: &mut A,
+        log_limits: LogLimits,
+    ) -> Result<(), NativeStartupError> {
+        let log_limits = checked(log_limits.validate())?;
+        validate_bootstrap_selection(&self.startup, log_limits)?;
         self.startup.validate_stores(&self.provisioned_stores)?;
         if self.startup.tls.wire_version() < 2
             || incoming.metadata.bootstrap != self.startup.bootstrap
@@ -131,7 +157,7 @@ impl NativeMemberStartup {
             || incoming.application.is_empty()
             || incoming.application.capacity() > SnapshotLimits::default().max_application_bytes
             || application.applied_index() != 0
-            || membership.retained_bytes() > LogLimits::default().max_batch_bytes
+            || membership.retained_bytes() > log_limits.max_batch_bytes
             || membership
                 .stable()
                 .voter_stores()
@@ -158,7 +184,7 @@ impl NativeMemberStartup {
             let mut log = NativeLogStore::create(
                 FileLogIo::create(&self.startup.directory)?,
                 self.startup.store,
-                LogLimits::default(),
+                log_limits,
             )?;
             let tickets =
                 log.append_batch(vec![LogMutation::Create(self.startup.bootstrap.clone())])?;
@@ -168,7 +194,7 @@ impl NativeMemberStartup {
             NativeLogStore::recover(
                 FileLogIo::open(&self.startup.directory)?,
                 self.startup.store,
-                LogLimits::default(),
+                log_limits,
             )?
         };
         let identity = SnapshotIdentity {
@@ -267,18 +293,46 @@ impl NativeMemberStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.startup.prepare_with_protocol_as(
+        self.prepare_for_discovery_with_log_limits(
+            protocol,
+            timers,
+            LogLimits::default(),
+            app,
+            wake,
+            now,
+        )
+    }
+    /// Prepare the member's actual WAL and recovered core with the same checked
+    /// limits. Wire/application/router selection remains host composition over
+    /// the returned original parts, followed by Node::from_parts validation.
+    pub fn prepare_for_discovery_with_log_limits<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        log_limits: LogLimits,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.startup.prepare_with_options(
             protocol,
             app,
             wake,
             now,
-            (
-                StartupAuthorization::Member(self.provisioned_stores),
+            StartupPreparation {
+                authorization: StartupAuthorization::Member(self.provisioned_stores),
                 timers,
-                None,
-                None,
-            ),
-            true,
+                storage: StartupStorageOptions {
+                    log_limits,
+                    timings: None,
+                },
+                rotation: None,
+                discovered_dials: true,
+            },
         )
     }
 }
@@ -557,7 +611,7 @@ impl NativeStartup {
                 (
                     StartupAuthorization::Static,
                     NativeTimingProfile::default().timers(),
-                    None,
+                    StartupStorageOptions::default(),
                 ),
                 &mut application,
                 &mut cleanup,
@@ -694,13 +748,46 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
-        self.prepare_with_protocol_as(
+        self.prepare_for_discovery_with_log_limits(
+            protocol,
+            timers,
+            LogLimits::default(),
+            app,
+            wake,
+            now,
+        )
+    }
+    /// Select one WAL capability before opening resources. Recovered Raft cores
+    /// inherit these exact limits from the same authoritative provider. Returned
+    /// parts still require the host's final Node::from_parts validation.
+    pub fn prepare_for_discovery_with_log_limits<A>(
+        self,
+        protocol: NativePeerProtocol,
+        timers: TimerConfig,
+        log_limits: LogLimits,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        self.prepare_with_options(
             protocol,
             app,
             wake,
             now,
-            (StartupAuthorization::Static, timers, None, None),
-            true,
+            StartupPreparation {
+                authorization: StartupAuthorization::Static,
+                timers,
+                storage: StartupStorageOptions {
+                    log_limits,
+                    timings: None,
+                },
+                rotation: None,
+                discovered_dials: true,
+            },
         )
     }
     fn prepare_with_protocol_as<A>(
@@ -721,12 +808,49 @@ impl NativeStartup {
         A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
         A::Receipt: ApplicationReceipt,
     {
+        let (authorization, timers, timings, rotation) = options;
+        self.prepare_with_options(
+            protocol,
+            app,
+            wake,
+            now,
+            StartupPreparation {
+                authorization,
+                timers,
+                storage: StartupStorageOptions {
+                    log_limits: LogLimits::default(),
+                    timings,
+                },
+                rotation,
+                discovered_dials,
+            },
+        )
+    }
+    fn prepare_with_options<A>(
+        self,
+        protocol: NativePeerProtocol,
+        app: A,
+        wake: Arc<dyn WorkerWake>,
+        now: MonoTime,
+        options: StartupPreparation,
+    ) -> Result<NativeNodeParts<A, NativeServiceConnector>, Box<NativeStartupRejected<A>>>
+    where
+        A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+        A::Receipt: ApplicationReceipt,
+    {
+        let StartupPreparation {
+            authorization,
+            timers,
+            storage,
+            rotation,
+            discovered_dials,
+        } = options;
         #[cfg(not(feature = "quic"))]
         let _ = discovered_dials;
-        let (authorization, timers, timings, rotation) = options;
         let mut cleanup = Cleanup::default();
         let mut application = Some(app);
         let result = (|| {
+            validate_storage_selection(&self, storage.log_limits)?;
             checked(timers.validate())?;
             if timers
                 .election_min_ms
@@ -740,23 +864,13 @@ impl NativeStartup {
             if let Some(rotation) = &rotation {
                 rotation.validate(&self, authorization.stores(&self))?;
             }
-            application
-                .as_ref()
-                .unwrap()
-                .validate_group(self.bootstrap.group)
-                .map_err(|_| error("application", "application rejects the configured group"))?;
-            if application.as_ref().unwrap().applied_index() != 0 {
-                return Err(error(
-                    "application",
-                    "provide a fresh application for verified restore/replay",
-                ));
-            }
+            validate_fresh_application(application.as_ref().unwrap(), self.bootstrap.group)?;
             match protocol {
                 NativePeerProtocol::TcpTls => {
                     let listener = TcpListener::bind(self.listen)?;
                     build_parts(
                         self,
-                        (authorization, timers, timings),
+                        (authorization, timers, storage),
                         &mut application,
                         &mut cleanup,
                         wake,
@@ -785,7 +899,7 @@ impl NativeStartup {
                     let socket = std::net::UdpSocket::bind(self.listen)?;
                     build_parts(
                         self,
-                        (authorization, timers, timings),
+                        (authorization, timers, storage),
                         &mut application,
                         &mut cleanup,
                         wake,
@@ -823,6 +937,85 @@ impl NativeStartup {
         })
     }
 }
+fn validate_fresh_application<A: CheckpointStateMachine>(
+    application: &A,
+    group: GroupIdentity,
+) -> Result<(), NativeStartupError> {
+    application
+        .validate_group(group)
+        .map_err(|_| error("application", "application rejects the configured group"))?;
+    if application.applied_index() != 0 {
+        return Err(error(
+            "application",
+            "provide a fresh application for verified restore/replay",
+        ));
+    }
+    Ok(())
+}
+fn validate_bootstrap_selection(
+    config: &NativeStartup,
+    limits: LogLimits,
+) -> Result<(), NativeStartupError> {
+    let mutations = [LogMutation::Create(config.bootstrap.clone())];
+    checked(crate::log::apply_batch(
+        &mut BTreeMap::new(),
+        &mutations,
+        limits,
+    ))?;
+    checked(NativeLogCodec.encode_batch(1, &mutations, limits))?;
+    Ok(())
+}
+fn validate_storage_selection(
+    config: &NativeStartup,
+    limits: LogLimits,
+) -> Result<(), NativeStartupError> {
+    let limits = checked(limits.validate())?;
+    let worker = startup_worker_limits(limits)?;
+    startup_shard_limits(limits, 1)?;
+    if worker.batch_units > limits.max_batch_units || worker.batch_bytes > limits.max_batch_bytes {
+        return Err(error(
+            "storage limits",
+            "native worker batch exceeds selected WAL limits",
+        ));
+    }
+    validate_bootstrap_selection(config, limits)
+}
+fn startup_worker_limits(limits: LogLimits) -> Result<WorkerLimits, NativeStartupError> {
+    let mut worker = WorkerLimits::default();
+    worker.batch_bytes = worker.batch_bytes.max(limits.max_batch_bytes);
+    let ordinary_and_control = worker
+        .batch_bytes
+        .checked_add(worker.control_bytes)
+        .ok_or_else(|| error("storage limits", "worker byte budget overflow"))?;
+    worker.max_bytes = worker.max_bytes.max(ordinary_and_control);
+    checked(worker.validate())
+}
+fn startup_shard_limits(log: LogLimits, groups: usize) -> Result<ShardLimits, NativeStartupError> {
+    let mut limits = ShardLimits {
+        max_groups: groups,
+        ..ShardLimits::default()
+    };
+    if log.max_batch_bytes > limits.max_event_bytes {
+        limits.max_event_bytes = log
+            .max_batch_bytes
+            .checked_add(std::mem::size_of::<crate::raft::Event>())
+            .ok_or_else(|| error("runtime limits", "event byte budget overflow"))?;
+        limits.visit_bytes = limits.visit_bytes.max(limits.max_event_bytes);
+        limits.group_bytes = limits.group_bytes.max(
+            limits
+                .max_event_bytes
+                .checked_add(limits.group_control_bytes)
+                .ok_or_else(|| error("runtime limits", "group byte budget overflow"))?,
+        );
+        limits.max_bytes = limits.max_bytes.max(
+            limits
+                .group_bytes
+                .checked_add(limits.control_bytes)
+                .ok_or_else(|| error("runtime limits", "shard byte budget overflow"))?,
+        );
+    }
+    checked(limits.validate())
+}
 struct StartupStorage {
     store: NativeLogStore<FileLogIo>,
     snapshots: NativeSnapshotStore<FileSnapshotIo>,
@@ -831,9 +1024,13 @@ struct StartupStorage {
 fn recover_storage<A: CheckpointStateMachine>(
     config: &NativeStartup,
     authorization: &StartupAuthorization,
-    timings: Option<JournalTimings>,
+    storage: StartupStorageOptions,
     app: &mut A,
 ) -> Result<StartupStorage, NativeStartupError> {
+    let StartupStorageOptions {
+        log_limits,
+        timings,
+    } = storage;
     let create = config.mode == NativeOpenMode::Create;
     let io = if create {
         FileLogIo::create(&config.directory)?
@@ -845,17 +1042,13 @@ fn recover_storage<A: CheckpointStateMachine>(
         None => io,
     };
     let store = if create {
-        let mut store = checked(NativeLogStore::create(
-            io,
-            config.store,
-            LogLimits::default(),
-        ))?;
+        let mut store = checked(NativeLogStore::create(io, config.store, log_limits))?;
         let tickets =
             checked(store.append_batch(vec![LogMutation::Create(config.bootstrap.clone())]))?;
         checked(store.barrier(&tickets))?;
         store
     } else {
-        NativeLogStore::recover(io, config.store, LogLimits::default())?
+        NativeLogStore::recover(io, config.store, log_limits)?
     };
     if !store.matches_startup_groups(&[config.bootstrap.group])? {
         return Err(error(
@@ -934,6 +1127,7 @@ struct StartupRuntime<S: SecureSession> {
     local: LocalIdentity,
     remote: BTreeMap<NodeId, StoreIdentity>,
     timed: TimedShard<FairScheduler, DeadlineQueue, JitterEntropy>,
+    owner_limits: EffectOwnerLimits,
     outbound: NativeOutbound,
     roster: PeerRoster<NativePeerTransport<S, NativeWireCodec>>,
     ingress: IngressRouter,
@@ -943,6 +1137,7 @@ fn prepare_runtime<S: SecureSession>(
     authorization: &StartupAuthorization,
     cores: Vec<crate::raft::Raft>,
     binding: StoreBinding,
+    log_limits: LogLimits,
     timers: TimerConfig,
     now: MonoTime,
 ) -> Result<StartupRuntime<S>, NativeStartupError> {
@@ -983,12 +1178,12 @@ fn prepare_runtime<S: SecureSession>(
         ));
     }
     let group_count = cores.len();
+    let shard_limits = startup_shard_limits(log_limits, group_count)?;
+    let owner_limits =
+        owner_limits::startup_owner_limits(&cores, shard_limits.max_event_bytes, log_limits)?;
     let mut shard = checked(Shard::new(
         owner_id,
-        ShardLimits {
-            max_groups: group_count,
-            ..ShardLimits::default()
-        },
+        shard_limits,
         checked(FairScheduler::new(group_count))?,
     ))?;
     for core in cores {
@@ -1037,6 +1232,7 @@ fn prepare_runtime<S: SecureSession>(
         local,
         remote,
         timed,
+        owner_limits,
         outbound,
         roster,
         ingress,
@@ -1048,33 +1244,21 @@ struct ApplicationRoutes<R, Q, V> {
     reads: ReadRequests<Q, V>,
 }
 fn application_routes<R: ApplicationReceipt, Q, V>(
-    owner_id: RuntimeOwner,
+    authorization: RuntimeAuthorization,
 ) -> Result<ApplicationRoutes<R, Q, V>, NativeStartupError> {
     let results = checked(ApplicationRouter::new(
-        ApplicationRouterBinding {
-            owner: owner_id,
-            generation: ApplicationRouterGeneration::new(1).unwrap(),
-        },
+        ApplicationRouterBinding::new(authorization, ApplicationRouterGeneration::new(1).unwrap()),
         ApplicationRouterLimits::default(),
     ))?;
     let clients = checked(ClientRouter::new(
-        ClientRouterBinding {
-            owner: owner_id,
-            generation: ClientRouterGeneration::new(1).unwrap(),
-        },
+        ClientRouterBinding::new(authorization, ClientRouterGeneration::new(1).unwrap()),
         ClientRouterLimits::default(),
     ))?;
     let reads = checked(ReadRequests::new(
-        ReadInvocationBinding {
-            owner: owner_id,
-            generation: ReadInvocationGeneration::new(1).unwrap(),
-        },
+        ReadInvocationBinding::new(authorization, ReadInvocationGeneration::new(1).unwrap()),
         ReadInvocationLimits::default(),
         checked(ReadRouter::new(
-            ReadRouterBinding {
-                owner: owner_id,
-                generation: ReadRouterGeneration::new(1).unwrap(),
-            },
+            ReadRouterBinding::new(authorization, ReadRouterGeneration::new(1).unwrap()),
             ReadRouterLimits::default(),
         ))?,
     ))?;
@@ -1112,7 +1296,7 @@ struct PreparedStartup<A> {
 }
 fn build<A, C: StartupConnector>(
     config: NativeStartup,
-    options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
+    options: (StartupAuthorization, TimerConfig, StartupStorageOptions),
     application: &mut Option<A>,
     cleanup: &mut Cleanup,
     wake: Arc<dyn WorkerWake>,
@@ -1139,7 +1323,7 @@ where
 }
 fn build_parts<A, C: StartupConnector>(
     config: NativeStartup,
-    options: (StartupAuthorization, TimerConfig, Option<JournalTimings>),
+    options: (StartupAuthorization, TimerConfig, StartupStorageOptions),
     application: &mut Option<A>,
     cleanup: &mut Cleanup,
     wake: Arc<dyn WorkerWake>,
@@ -1156,7 +1340,7 @@ where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
 {
-    let (authorization, timers, timings) = options;
+    let (authorization, timers, storage) = options;
     let StartupStorage {
         store,
         snapshots,
@@ -1164,7 +1348,7 @@ where
     } = recover_storage(
         &config,
         &authorization,
-        timings,
+        storage,
         application.as_mut().unwrap(),
     )?;
     let group = config.bootstrap.group;
@@ -1212,6 +1396,7 @@ where
         local,
         remote,
         timed,
+        owner_limits,
         outbound,
         roster,
         ingress,
@@ -1220,6 +1405,7 @@ where
         &authorization,
         std::mem::take(&mut prepared.cores),
         store.binding(),
+        store.limits(),
         timers,
         now,
     )?;
@@ -1227,18 +1413,19 @@ where
         results,
         clients,
         reads,
-    } = application_routes(owner_id)?;
+    } = application_routes(timed.authorization())?;
     let factory = transport_factory(config.tls.wire_version())?;
+    let worker_limits = startup_worker_limits(store.limits())?;
     cleanup.log = Some(checked(NativeLogWorker::spawn(
         store,
         StorageWorkerGeneration::new(1).unwrap(),
-        WorkerLimits::default(),
+        worker_limits,
         wake.clone(),
     ))?);
     let owner = checked(EffectOwner::new(
         timed,
         cleanup.log.as_ref().unwrap().binding(),
-        EffectOwnerLimits::default(),
+        owner_limits,
     ))?;
     cleanup.snapshots = Some(checked(NativeSnapshotWorker::spawn(
         std::mem::take(&mut prepared.snapshots),

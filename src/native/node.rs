@@ -25,7 +25,28 @@ use super::{
     wire::NativeWireCodec,
     worker::NativeLogWorker,
 };
-use crate::runtime::{Node, NodeLocalParts, NodeParts};
+use crate::runtime::{NetworkNode, NetworkNodeParts, Node, NodeLocalParts, NodeParts};
+/// Explicitly selected peer-network owner over the same native local providers.
+pub type NativeNetworkNode<A, N> = NetworkNode<
+    FairScheduler,
+    DeadlineQueue,
+    JitterEntropy,
+    A,
+    NativeLogWorker<NativeLogStore<FileLogIo>>,
+    NativeOutbound,
+    NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
+    N,
+>;
+pub type NativeNetworkNodeParts<A, N> = NetworkNodeParts<
+    FairScheduler,
+    DeadlineQueue,
+    JitterEntropy,
+    A,
+    NativeLogWorker<NativeLogStore<FileLogIo>>,
+    NativeOutbound,
+    NativeSnapshotWorker<NativeSnapshotStore<FileSnapshotIo>>,
+    N,
+>;
 pub type NativeNode<A, C = NativePeerConnector, F = NativeTransportFactory<NativeWireCodec>> = Node<
     FairScheduler,
     DeadlineQueue,

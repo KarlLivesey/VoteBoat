@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice324-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.82s
+     Running tests/logical_network.rs (/tmp/voteboat-macos-CzK1if/slice324-membership/build/debug/deps/logical_network-3624f06d20866a4d)
+
+running 4 tests
+test refusals::constructor_and_accepted_abort_preserve_original_channel_and_queue_ownership ... ok
+test controls::real_original_proof_short_io_flush_stale_owner_and_completion_preserve_credits ... ok
+
+thread 'controls::real_dispatched_rejected_batch_cancels_exact_original_after_close' (20490974) panicked at tests/logical_voter_network/cluster.rs:170:13:
+native logical child timeout: /var/folders/xk/vb061tws5wv3z_00cskjqtwr0000gn/T/voteboat-logical-nine-child-85674-7
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'refusals::real_frame_refuses_truncation_oversize_and_original_receipt_mismatches' (20490977) panicked at tests/logical_network/fixture.rs:30:34:
+called `Result::unwrap()` on an `Err` value: PoisonError { .. }
+test controls::real_dispatched_rejected_batch_cancels_exact_original_after_close ... FAILED
+test refusals::real_frame_refuses_truncation_oversize_and_original_receipt_mismatches ... FAILED
+
+failures:
+
+failures:
+    controls::real_dispatched_rejected_batch_cancels_exact_original_after_close
+    refusals::real_frame_refuses_truncation_oversize_and_original_receipt_mismatches
+
+test result: FAILED. 2 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 23.16s
+
+error: test failed, to rerun pass `--test logical_network`

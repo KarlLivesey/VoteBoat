@@ -620,11 +620,7 @@ fn abandoned_prepared_startup_closes_workers_and_releases_listener() {
         NativePeerProtocol::Quic,
     ] {
         let directory = root();
-        let mut config = config(directory.clone(), NativeOpenMode::Create);
-        let reservation = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
-        let address = reservation.local_addr().unwrap();
-        drop(reservation);
-        config.listen = address;
+        let config = config(directory.clone(), NativeOpenMode::Create);
         let mut parts = config
             .prepare_for_discovery(
                 protocol,
@@ -639,6 +635,23 @@ fn abandoned_prepared_startup_closes_workers_and_releases_listener() {
         let mut snapshots = parts.local.snapshots.take().unwrap();
         snapshots.worker.close();
         let mut peers = parts.peers.take().unwrap();
+        let address = match (protocol, &peers.connector) {
+            (NativePeerProtocol::TcpTls, NativeServiceConnector::Tcp(connector)) => {
+                connector.listener_addr().unwrap().unwrap()
+            }
+            #[cfg(feature = "quic")]
+            (NativePeerProtocol::Quic, NativeServiceConnector::Quic(connector)) => {
+                connector.local_addr()
+            }
+            _ => panic!("prepared connector does not match selected protocol"),
+        };
+        assert_ne!(address.port(), 0);
+        let live_bind = match protocol {
+            NativePeerProtocol::TcpTls => std::net::TcpListener::bind(address).map(drop),
+            #[cfg(feature = "quic")]
+            NativePeerProtocol::Quic => std::net::UdpSocket::bind(address).map(drop),
+        };
+        assert_eq!(live_bind.unwrap_err().kind(), std::io::ErrorKind::AddrInUse);
         peers.connector.close();
         let mut dialer = peers.connector.into_dialer().ok().unwrap();
         let mut log_done = false;
@@ -660,9 +673,12 @@ fn abandoned_prepared_startup_closes_workers_and_releases_listener() {
         }
         drop(parts);
         drop(snapshots);
-        let tcp = std::net::TcpListener::bind(address).unwrap();
-        let udp = std::net::UdpSocket::bind(address).unwrap();
-        drop((tcp, udp));
+        match protocol {
+            NativePeerProtocol::TcpTls => std::net::TcpListener::bind(address).map(drop),
+            #[cfg(feature = "quic")]
+            NativePeerProtocol::Quic => std::net::UdpSocket::bind(address).map(drop),
+        }
+        .unwrap();
         std::fs::remove_dir_all(directory).unwrap();
     }
 }

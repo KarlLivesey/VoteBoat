@@ -27,6 +27,15 @@ use std::{
 
 pub(crate) const HELLO: usize = 52;
 const ALPN: &[u8] = b"voteboat/1";
+fn alpn(version: u16) -> &'static [u8] {
+    if version == crate::logical_voter::LOGICAL_NETWORK_VERSION {
+        b"voteboat-logical/1"
+    } else if version == crate::native::relay::RELAY_NETWORK_VERSION {
+        b"voteboat-relay/2"
+    } else {
+        ALPN
+    }
+}
 /// Public DER material; private keys are consumed and never printed by this API.
 pub struct TlsCredentials {
     pub roots: Vec<Vec<u8>>,
@@ -114,8 +123,29 @@ impl NativeTlsConfig {
         if !(1..=8).contains(&version) {
             return Err(SessionError::IncompatibleProtocol);
         }
-        self.wire_version = version;
+        self.select_version(version);
         Ok(self)
+    }
+    /// Dedicated logical-envelope profile; ordinary wire versions cannot decode it.
+    /// This changes future negotiation only and creates no sessions or host resources.
+    pub fn with_logical_profile(mut self) -> Self {
+        self.select_version(crate::logical_voter::LOGICAL_NETWORK_VERSION);
+        self
+    }
+    /// Explicit ordinary physical-voter relay framing over authenticated hops.
+    /// The selected inner RPC version remains independent of this profile.
+    pub fn with_relay_profile(mut self) -> Self {
+        self.select_version(crate::native::relay::RELAY_NETWORK_VERSION);
+        self
+    }
+    fn select_version(&mut self, version: u16) {
+        self.wire_version = version;
+        let mut client = (*self.client).clone();
+        let mut server = (*self.server).clone();
+        client.alpn_protocols = vec![alpn(version).to_vec()];
+        server.alpn_protocols = vec![alpn(version).to_vec()];
+        self.client = Arc::new(client);
+        self.server = Arc::new(server);
     }
     pub fn wire_version(&self) -> u16 {
         self.wire_version
@@ -278,7 +308,7 @@ impl<I: Read + Write> NativeTlsSession<I> {
         }
         if !self.authenticated {
             if self.connection.protocol_version() != Some(rustls::ProtocolVersion::TLSv1_3)
-                || self.connection.alpn_protocol() != Some(ALPN)
+                || self.connection.alpn_protocol() != Some(alpn(self.wire_version))
             {
                 return Err(SessionError::IncompatibleProtocol);
             }

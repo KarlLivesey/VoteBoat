@@ -26,17 +26,17 @@ struct HostReads {
 impl HostReads {
     fn new() -> Self {
         Self {
-            binding: ReadInvocationBinding {
-                owner: RuntimeOwner {
+            binding: ReadInvocationBinding::new(
+                RuntimeAuthorization::physical(RuntimeOwner {
                     store: StoreBinding {
                         identity: support::identity(1),
                         session: StoreSession::new(1).unwrap(),
                     },
                     lane: ExecutionLaneId::new(1).unwrap(),
                     generation: RuntimeGeneration::new(1).unwrap(),
-                },
-                generation: ReadInvocationGeneration::new(1).unwrap(),
-            },
+                }),
+                ReadInvocationGeneration::new(1).unwrap(),
+            ),
             pending: None,
             started: 0,
             cancelled: 0,

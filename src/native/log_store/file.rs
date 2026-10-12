@@ -66,6 +66,8 @@ impl FileLogIo {
             "log.1.wal",
             "MANIFEST.0",
             "MANIFEST.1",
+            "STRIPE-LANE",
+            "STRIPE-CATALOG",
         ] {
             if directory.join(name).exists() {
                 return Err(io::Error::new(

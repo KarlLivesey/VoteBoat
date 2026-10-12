@@ -17,6 +17,12 @@
 use super::*;
 use crate::{log::LogEntry, worker::*};
 use std::collections::BTreeSet;
+#[path = "effect_inspection.rs"]
+mod inspection;
+pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
+#[cfg(all(test, feature = "native"))]
+#[path = "effects/peer_ingress_tests.rs"]
+mod peer_ingress_tests;
 
 #[derive(Clone, Copy, Debug)]
 pub struct EffectOwnerLimits {
@@ -37,6 +43,8 @@ impl Default for EffectOwnerLimits {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EffectOwnerError {
+    WrongAuthorization,
+    LogicalReleaseRequired,
     InvalidLimits,
     Overloaded,
     ReservationTooLarge,
@@ -88,6 +96,7 @@ pub struct OwnerStep {
 }
 struct Active {
     visit: VisitTicket,
+    received_from: Option<NodeId>,
     reserved: usize,
     continuation_bytes: usize,
     effects: VecDeque<Effect>,
@@ -96,6 +105,7 @@ struct Active {
     waiting: bool,
     ready: bool,
     control: bool,
+    read_captured: bool,
 }
 #[derive(Clone, Copy, Eq, PartialEq)]
 enum LeaseKind {
@@ -151,6 +161,44 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         worker: WorkerBinding,
         limits: EffectOwnerLimits,
     ) -> Result<Self, EffectOwnerError> {
+        if runtime.authorization().is_logical() {
+            return Err(EffectOwnerError::LogicalReleaseRequired);
+        }
+        Self::from_runtime(runtime, worker, limits)
+    }
+    pub(crate) fn new_logical(
+        runtime: TimedShard<Q, T, E>,
+        worker: WorkerBinding,
+        limits: EffectOwnerLimits,
+    ) -> Result<Self, EffectOwnerError> {
+        if !runtime.authorization().is_logical() {
+            return Err(EffectOwnerError::WrongAuthorization);
+        }
+        Self::from_runtime(runtime, worker, limits)
+    }
+    fn from_runtime(
+        runtime: TimedShard<Q, T, E>,
+        worker: WorkerBinding,
+        limits: EffectOwnerLimits,
+    ) -> Result<Self, EffectOwnerError> {
+        Self::validate_logical_construction(&runtime, worker, limits)?;
+        Ok(Self {
+            runtime,
+            worker,
+            limits,
+            active: BTreeMap::new(),
+            ready: VecDeque::new(),
+            requests: BTreeMap::new(),
+            reserved: 0,
+            sequence: 0,
+            failed: None,
+        })
+    }
+    pub(crate) fn validate_logical_construction(
+        runtime: &TimedShard<Q, T, E>,
+        worker: WorkerBinding,
+        limits: EffectOwnerLimits,
+    ) -> Result<(), EffectOwnerError> {
         runtime
             .validate_quiescent()
             .map_err(EffectOwnerError::Runtime)?;
@@ -178,17 +226,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 return Err(EffectOwnerError::ReservationTooLarge);
             }
         }
-        Ok(Self {
-            runtime,
-            worker,
-            limits,
-            active: BTreeMap::new(),
-            ready: VecDeque::new(),
-            requests: BTreeMap::new(),
-            reserved: 0,
-            sequence: 0,
-            failed: None,
-        })
+        Ok(())
     }
     fn check(&self) -> Result<(), EffectOwnerError> {
         self.failed.clone().map_or(Ok(()), Err)
@@ -214,6 +252,16 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     }
     pub fn identity(&self) -> RuntimeOwner {
         self.runtime.owner()
+    }
+    pub fn authorization(&self) -> RuntimeAuthorization {
+        self.runtime.authorization()
+    }
+    pub(super) fn require_physical(&self) -> Result<(), EffectOwnerError> {
+        if self.authorization().is_logical() {
+            Err(EffectOwnerError::LogicalReleaseRequired)
+        } else {
+            Ok(())
+        }
     }
     pub fn validate_quiescent(&self) -> Result<(), EffectOwnerError> {
         self.check()?;
@@ -293,6 +341,14 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                     .any(|e| matches!(e,Effect::Send(m) if m.to == peer))
         })
     }
+    /// Original queued inputs and dependent visits; no source authority.
+    pub(crate) fn has_pending_peer_ingress(&self, group: GroupIdentity, peer: NodeId) -> bool {
+        self.runtime.has_pending_peer_ingress(group, peer)
+            || self
+                .active
+                .get(&group)
+                .is_some_and(|a| a.received_from == Some(peer))
+    }
     pub fn deadline(&self, group: GroupIdentity) -> Option<TimerToken> {
         self.runtime.deadline(group)
     }
@@ -361,10 +417,44 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         group: GroupIdentity,
         event: &Event,
     ) -> Result<(), RuntimeError> {
+        self.check_input_reservation_scoped(group, event, None)
+    }
+    pub(super) fn admit_logical_read(
+        &mut self,
+        group: GroupIdentity,
+        request: ReadRequestId,
+        profile: &crate::logical_voter::LogicalActivationControlProfile,
+        query: &[u8],
+    ) -> Result<AdmissionTicket, Rejected> {
+        let event = Event::Read { request };
+        let read = super::logical_intake::LogicalReadInput {
+            request,
+            profile,
+            query,
+        };
+        if let Err(reason) = self.check_input_reservation_scoped(group, &event, Some(read)) {
+            return Err(Rejected {
+                reason,
+                event: Box::new(event),
+            });
+        }
+        self.runtime.admit_logical_read(group, event, read)
+    }
+    fn check_input_reservation_scoped(
+        &self,
+        group: GroupIdentity,
+        event: &Event,
+        read: Option<super::logical_intake::LogicalReadInput<'_>>,
+    ) -> Result<(), RuntimeError> {
         if self.failed.is_some() {
             return Err(RuntimeError::Fenced);
         }
-        let (class, _) = self.runtime.admission_shape(group, event)?;
+        let (class, _) = match read {
+            Some(read) => self
+                .runtime
+                .admission_shape_scoped(group, event, Some(read))?,
+            None => self.runtime.admission_shape(group, event)?,
+        };
         let capacity = if class == Class::Control {
             self.limits.reserved_bytes
         } else {
@@ -545,6 +635,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 visit.group,
                 Active {
                     visit,
+                    received_from: None,
                     reserved,
                     continuation_bytes: reserved,
                     effects: VecDeque::new(),
@@ -553,6 +644,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                     waiting: false,
                     ready: false,
                     control,
+                    read_captured: false,
                 },
             );
             let stepped = self
@@ -560,26 +652,38 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 .step_next_checked(visit, now, &mut check)
                 .map_err(EffectOwnerError::Runtime)?;
             if let Some(step) = stepped {
-                let (effects, error) = match step.result {
-                    Ok(e) => (e, None),
-                    Err(e) => (Vec::new(), Some(e)),
-                };
-                self.install(visit, effects)?;
-                steps.push(OwnerStep {
-                    admission: step.admission,
-                    proposed: step.proposed,
-                    visit,
-                    operation: step.operation,
-                    read: step.read,
-                    error,
-                });
+                steps.push(self.install_step(visit, step)?);
             } else {
                 self.refresh(visit.group)?;
             }
         }
         Ok(steps)
     }
+    fn install_step(
+        &mut self,
+        visit: VisitTicket,
+        step: Stepped,
+    ) -> Result<OwnerStep, EffectOwnerError> {
+        self.active.get_mut(&visit.group).unwrap().received_from = step.received_from;
+        let (effects, error) = match step.result {
+            Ok(e) => (e, None),
+            Err(e) => (Vec::new(), Some(e)),
+        };
+        self.install(visit, effects)?;
+        Ok(OwnerStep {
+            admission: step.admission,
+            proposed: step.proposed,
+            visit,
+            operation: step.operation,
+            read: step.read,
+            error,
+        })
+    }
     pub fn take_effect(&mut self) -> Result<Option<EffectLease>, EffectOwnerError> {
+        self.require_physical()?;
+        self.take_owned_effect()
+    }
+    pub(crate) fn take_owned_effect(&mut self) -> Result<Option<EffectLease>, EffectOwnerError> {
         self.check()?;
         while let Some(group) = self.ready.pop_front() {
             let Some(a) = self.active.get_mut(&group) else {
@@ -643,8 +747,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         self.reserved -= a.reserved;
         Ok(())
     }
-    pub(super) fn discard_failed_transfer(
-        &mut self,
+    pub(super) fn validate_failed_transfer(
+        &self,
         ticket: EffectTicket,
     ) -> Result<(), EffectOwnerError> {
         if self.failed.is_none()
@@ -655,6 +759,13 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         {
             return Err(EffectOwnerError::StaleEffect);
         }
+        Ok(())
+    }
+    pub(super) fn discard_failed_transfer(
+        &mut self,
+        ticket: EffectTicket,
+    ) -> Result<(), EffectOwnerError> {
+        self.validate_failed_transfer(ticket)?;
         let a = self.active.remove(&ticket.visit.group).unwrap();
         self.reserved -= a.reserved;
         Ok(())
@@ -702,7 +813,71 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         callback: impl FnOnce(&mut Raft, &Effect) -> Result<(Vec<Effect>, R), RaftError>,
     ) -> Result<R, EffectRejected> {
+        if let Err(reason) = self.require_physical() {
+            return Err(EffectRejected {
+                reason,
+                lease: Box::new(lease),
+            });
+        }
         self.complete_effect_inner(lease, applied_index, now, false, callback)
+    }
+    /// Internal completion of an original router-owned snapshot dependency.
+    /// Public generic callbacks remain a physical-mode embedding capability;
+    /// logical snapshot work uses the checked selected worker/router path.
+    pub(super) fn complete_snapshot_effect<R>(
+        &mut self,
+        lease: EffectLease,
+        applied_index: u64,
+        now: MonoTime,
+        callback: impl FnOnce(&mut Raft, &Effect) -> Result<(Vec<Effect>, R), RaftError>,
+    ) -> Result<R, EffectRejected> {
+        self.complete_effect_inner(lease, applied_index, now, false, callback)
+    }
+    pub(crate) fn capture_read<R>(
+        &mut self,
+        lease: &EffectLease,
+        applied_index: u64,
+        now: MonoTime,
+        callback: impl FnOnce() -> R,
+    ) -> Result<R, EffectOwnerError> {
+        self.validate_lease(lease)?;
+        let Effect::ReadReady(barrier) = &lease.effect else {
+            return Err(EffectOwnerError::StaleEffect);
+        };
+        if self.active[&lease.ticket.visit.group].read_captured {
+            return Err(EffectOwnerError::StaleEffect);
+        }
+        self.runtime
+            .with_core(lease.ticket.visit, now, |core| {
+                core.finish_read(barrier, applied_index)
+            })
+            .map_err(EffectOwnerError::Runtime)?
+            .map_err(EffectOwnerError::Consensus)?;
+        self.active
+            .get_mut(&lease.ticket.visit.group)
+            .unwrap()
+            .read_captured = true;
+        Ok(callback())
+    }
+    pub(crate) fn complete_read_capture(
+        &mut self,
+        lease: EffectLease,
+    ) -> Result<(), EffectRejected> {
+        let result = (|| {
+            self.validate_lease(&lease)?;
+            let a = self.active.get_mut(&lease.ticket.visit.group).unwrap();
+            if !matches!(a.kind, Some(LeaseKind::Read(_))) || !a.read_captured {
+                return Err(EffectOwnerError::StaleEffect);
+            }
+            a.leased = None;
+            a.kind = None;
+            a.read_captured = false;
+            self.refresh(lease.ticket.visit.group)
+        })();
+        result.map_err(|reason| EffectRejected {
+            reason,
+            lease: Box::new(lease),
+        })
     }
     /// Abandon only this exact ready read, including while application lags.
     /// No query executes and no durability/application evidence is produced.
@@ -773,6 +948,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             a.effects.extend(effects);
             a.leased = None;
             a.kind = None;
+            a.read_captured = false;
             self.refresh(lease.ticket.visit.group)?;
             Ok(result)
         })();
@@ -792,9 +968,30 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
     ) -> Result<(), EffectRejected> {
         self.complete_effect(lease, applied_index, now, |_| Ok((vec![], ())))
     }
+    pub(crate) fn complete_applied_capture(
+        &mut self,
+        lease: EffectLease,
+        applied_index: u64,
+        now: MonoTime,
+    ) -> Result<(), EffectRejected> {
+        if !matches!(lease.effect, Effect::Committed(_)) {
+            return Err(EffectRejected {
+                reason: EffectOwnerError::StaleEffect,
+                lease: Box::new(lease),
+            });
+        }
+        self.complete_effect_inner(lease, applied_index, now, false, |_, _| Ok((vec![], ())))
+    }
     /// Release a Send lease after its owned message has moved into another
     /// bounded queue. This avoids cloning a message merely to return its lease.
     pub fn release_transferred_send(
+        &mut self,
+        ticket: EffectTicket,
+    ) -> Result<(), EffectOwnerError> {
+        self.require_physical()?;
+        self.release_owned_send(ticket)
+    }
+    pub(crate) fn release_owned_send(
         &mut self,
         ticket: EffectTicket,
     ) -> Result<(), EffectOwnerError> {
@@ -806,6 +1003,34 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         a.leased = None;
         a.kind = None;
         self.refresh(ticket.visit.group)
+    }
+    /// Complete only the original logical send already accepted by its selected
+    /// proof-bearing queue. Generic physical transfers never reset this window.
+    pub(crate) fn release_accepted_logical_send(
+        &mut self,
+        ticket: EffectTicket,
+        vote: Option<&crate::raft::Message>,
+        now: MonoTime,
+    ) -> Result<(), EffectOwnerError> {
+        self.live(ticket)?;
+        if !self.authorization().is_logical() {
+            return Err(EffectOwnerError::ProviderContract);
+        }
+        let Some(LeaseKind::Send(peer)) = self.active[&ticket.visit.group].kind else {
+            return Err(EffectOwnerError::StaleEffect);
+        };
+        if let Some(message) = vote {
+            if message.group != ticket.visit.group || message.to != peer {
+                return Err(EffectOwnerError::StaleEffect);
+            }
+            self.runtime
+                .with_core(ticket.visit, now, |core| {
+                    core.note_logical_vote_transferred(message)
+                })
+                .map_err(EffectOwnerError::Runtime)?
+                .map_err(EffectOwnerError::Consensus)?;
+        }
+        self.release_owned_send(ticket)
     }
     pub fn submit_persists<W: PersistenceWorker>(
         &mut self,

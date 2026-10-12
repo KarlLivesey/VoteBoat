@@ -1,0 +1,255 @@
+{
+  "platform": "linux",
+  "declaredStages": 16,
+  "expected": [
+    "fmt",
+    "inventory",
+    "conformance",
+    "conformance_controls",
+    "all-clippy",
+    "all-vote-window",
+    "all-logical-native",
+    "all-logical-network",
+    "default-clippy",
+    "default-vote-window",
+    "default-logical-native",
+    "default-logical-network",
+    "core-clippy",
+    "core-vote-window",
+    "native-clippy",
+    "native-vote-window"
+  ],
+  "exits": [
+    "fmt=0",
+    "inventory=0",
+    "conformance=0",
+    "conformance_controls=0",
+    "all-clippy=0",
+    "all-vote-window=0",
+    "all-logical-native=0",
+    "all-logical-network=0",
+    "default-clippy=0",
+    "default-vote-window=0",
+    "default-logical-native=0",
+    "default-logical-network=0",
+    "core-clippy=0",
+    "core-vote-window=0",
+    "native-clippy=0",
+    "native-vote-window=0"
+  ],
+  "missing": [],
+  "unexpected": [],
+  "duplicates": [],
+  "stages": {
+    "fmt": {
+      "present": true,
+      "warning": false
+    },
+    "inventory": {
+      "present": true,
+      "warning": false
+    },
+    "conformance": {
+      "present": true,
+      "warning": false
+    },
+    "conformance_controls": {
+      "present": true,
+      "warning": false
+    },
+    "all-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "all-vote-window": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 155
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 3,
+      "missingTests": []
+    },
+    "all-logical-native": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 28,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 28,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 28,
+      "missingTests": []
+    },
+    "all-logical-network": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 6,
+      "failed": 0,
+      "expectedSummaries": 2,
+      "minimumPassed": 6,
+      "missingTests": []
+    },
+    "default-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "default-vote-window": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 154
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 3,
+      "missingTests": []
+    },
+    "default-logical-native": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 18,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 18,
+      "missingTests": []
+    },
+    "default-logical-network": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "expectedSummaries": 2,
+      "minimumPassed": 5,
+      "missingTests": []
+    },
+    "core-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "core-vote-window": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 123
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 3,
+      "missingTests": []
+    },
+    "native-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "native-vote-window": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 136
+        }
+      ],
+      "passed": 3,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 3,
+      "missingTests": []
+    }
+  },
+  "terminal": [
+    "run=0",
+    "source_guard=0"
+  ],
+  "excluded": [
+    "logical_nested_native",
+    "effect_owner native-only Mac315b",
+    "full P8 acceptance"
+  ],
+  "failed": false
+}

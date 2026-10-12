@@ -1,0 +1,2 @@
+initial_soft_nofile=1048576
+initial_hard_nofile=1048576

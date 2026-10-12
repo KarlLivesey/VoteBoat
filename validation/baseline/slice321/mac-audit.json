@@ -1,0 +1,688 @@
+{
+  "platform": "mac",
+  "declaredStages": 29,
+  "expected": [
+    "fmt",
+    "inventory",
+    "conformance",
+    "conformance_controls",
+    "all-clippy",
+    "all-functional",
+    "all-striped-provider",
+    "all-file-cuts",
+    "all-striped-node",
+    "all-owning-facade",
+    "all-logical-owner-regression",
+    "all-logical-network-regression",
+    "all-channel-regression",
+    "default-clippy",
+    "default-functional",
+    "default-striped-provider",
+    "default-striped-node",
+    "default-owning-facade",
+    "default-logical-owner-regression",
+    "default-logical-network-regression",
+    "default-channel-regression",
+    "core-clippy",
+    "core-functional",
+    "core-channel-regression",
+    "native-clippy",
+    "native-functional",
+    "native-striped-provider",
+    "native-file-cuts",
+    "native-channel-regression"
+  ],
+  "exits": [
+    "fmt=0",
+    "inventory=0",
+    "conformance=0",
+    "conformance_controls=0",
+    "all-clippy=0",
+    "all-functional=0",
+    "all-striped-provider=0",
+    "all-file-cuts=0",
+    "all-striped-node=0",
+    "all-owning-facade=0",
+    "all-logical-owner-regression=0",
+    "all-logical-network-regression=0",
+    "all-channel-regression=0",
+    "default-clippy=0",
+    "default-functional=0",
+    "default-striped-provider=0",
+    "default-striped-node=0",
+    "default-owning-facade=0",
+    "default-logical-owner-regression=0",
+    "default-logical-network-regression=0",
+    "default-channel-regression=0",
+    "core-clippy=0",
+    "core-functional=0",
+    "core-channel-regression=0",
+    "native-clippy=0",
+    "native-functional=0",
+    "native-striped-provider=0",
+    "native-file-cuts=0",
+    "native-channel-regression=0"
+  ],
+  "missing": [],
+  "unexpected": [],
+  "duplicates": [],
+  "stages": {
+    "fmt": {
+      "present": true,
+      "warning": false
+    },
+    "inventory": {
+      "present": true,
+      "warning": false
+    },
+    "conformance": {
+      "present": true,
+      "warning": false
+    },
+    "conformance_controls": {
+      "present": true,
+      "warning": false
+    },
+    "all-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "all-functional": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "expectedSummaries": 3,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "all-striped-provider": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 9,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 9,
+      "missingTests": []
+    },
+    "all-file-cuts": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 153
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "all-striped-node": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "all-owning-facade": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 17
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 4,
+      "missingTests": []
+    },
+    "all-logical-owner-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 4
+        }
+      ],
+      "passed": 17,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "all-logical-network-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 6,
+      "failed": 0,
+      "expectedSummaries": 2,
+      "minimumPassed": 6,
+      "missingTests": []
+    },
+    "all-channel-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 37,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 91,
+      "failed": 0,
+      "expectedSummaries": 4,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "default-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "default-functional": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "expectedSummaries": 3,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "default-striped-provider": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 9,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 9,
+      "missingTests": []
+    },
+    "default-striped-node": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 1,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "default-owning-facade": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 11
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "default-logical-owner-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2
+        }
+      ],
+      "passed": 11,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "default-logical-network-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 5,
+      "failed": 0,
+      "expectedSummaries": 2,
+      "minimumPassed": 5,
+      "missingTests": []
+    },
+    "default-channel-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 37,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 70,
+      "failed": 0,
+      "expectedSummaries": 4,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "core-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "core-functional": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 12,
+      "failed": 0,
+      "expectedSummaries": 3,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "core-channel-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 8,
+      "failed": 0,
+      "expectedSummaries": 4,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "native-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "native-functional": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 15,
+      "failed": 0,
+      "expectedSummaries": 3,
+      "minimumPassed": 1,
+      "missingTests": []
+    },
+    "native-striped-provider": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 9,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 9,
+      "missingTests": []
+    },
+    "native-file-cuts": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 134
+        }
+      ],
+      "passed": 2,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 2,
+      "missingTests": []
+    },
+    "native-channel-regression": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 36,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "result": "ok",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 57,
+      "failed": 0,
+      "expectedSummaries": 4,
+      "minimumPassed": 1,
+      "missingTests": []
+    }
+  },
+  "terminal": [
+    "run=0",
+    "source_guard=0"
+  ],
+  "excluded": [
+    "logical_nested_native",
+    "effect_owner native-only Mac315b",
+    "full P8 acceptance"
+  ],
+  "failed": false
+}

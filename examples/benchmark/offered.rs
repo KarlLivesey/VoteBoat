@@ -682,17 +682,17 @@ mod tests {
     use super::*;
     fn ticket(l: &Ledger, row: usize, sequence: u64) -> ClientTicket {
         ClientTicket {
-            binding: ClientRouterBinding {
-                owner: RuntimeOwner {
+            binding: ClientRouterBinding::new(
+                RuntimeAuthorization::physical(RuntimeOwner {
                     store: StoreBinding {
                         identity: store(1),
                         session: StoreSession::new(1).unwrap(),
                     },
                     lane: ExecutionLaneId::new(1).unwrap(),
                     generation: RuntimeGeneration::new(1).unwrap(),
-                },
-                generation: ClientRouterGeneration::new(1).unwrap(),
-            },
+                }),
+                ClientRouterGeneration::new(1).unwrap(),
+            ),
             sequence,
             group: l.rows[row].group,
             operation: OperationId::new(l.rows[row].operation as u128).unwrap(),

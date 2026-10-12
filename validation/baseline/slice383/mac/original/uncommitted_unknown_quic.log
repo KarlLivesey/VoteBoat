@@ -1,0 +1,14 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/logical_activation_nested.rs (/tmp/voteboat-macos-retired383-jHNT8fJC/build/debug/deps/logical_activation_nested-d47bb5f466ca5ee0)
+
+running 1 test
+356 original_nine_bootstraps
+356 original_Learners_source_export
+370 same3 original providers joined/rebound with exact import WAL uncommitted
+356 original_readiness_Joint_Final_Outcome_Release
+test history::quic_original_uncommitted_unknown_import_wal_cold_then_real_activation has been running for over 60 seconds
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+test history::quic_original_uncommitted_unknown_import_wal_cold_then_real_activation ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 130.57s
+

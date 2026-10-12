@@ -1,0 +1,2 @@
+initial_soft_nofile=256
+initial_hard_nofile=unlimited

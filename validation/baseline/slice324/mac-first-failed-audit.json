@@ -1,0 +1,223 @@
+{
+  "platform": "mac",
+  "declaredStages": 16,
+  "expected": [
+    "fmt",
+    "inventory",
+    "conformance",
+    "conformance_controls",
+    "all-clippy",
+    "all-activation-private",
+    "all-activation-public",
+    "all-logical-native",
+    "all-logical-network",
+    "default-clippy",
+    "default-logical-native",
+    "default-logical-network",
+    "core-clippy",
+    "core-activation-private",
+    "core-activation-public",
+    "native-clippy"
+  ],
+  "exits": [
+    "fmt=0",
+    "inventory=0",
+    "conformance=0",
+    "conformance_controls=0",
+    "all-clippy=0",
+    "all-activation-private=0",
+    "all-activation-public=0",
+    "all-logical-native=0"
+  ],
+  "missing": [
+    "all-logical-network",
+    "default-clippy",
+    "default-logical-native",
+    "default-logical-network",
+    "core-clippy",
+    "core-activation-private",
+    "core-activation-public",
+    "native-clippy"
+  ],
+  "unexpected": [],
+  "duplicates": [],
+  "stages": {
+    "fmt": {
+      "present": true,
+      "warning": false
+    },
+    "inventory": {
+      "present": true,
+      "warning": false
+    },
+    "conformance": {
+      "present": true,
+      "warning": false
+    },
+    "conformance_controls": {
+      "present": true,
+      "warning": false
+    },
+    "all-clippy": {
+      "present": true,
+      "warning": false
+    },
+    "all-activation-private": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 158
+        }
+      ],
+      "passed": 7,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 7,
+      "missingTests": []
+    },
+    "all-activation-public": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 4,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 4,
+      "missingTests": []
+    },
+    "all-logical-native": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "ok",
+          "passed": 30,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 30,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 30,
+      "missingTests": []
+    },
+    "all-logical-network": {
+      "present": true,
+      "warning": false,
+      "results": [
+        {
+          "result": "FAILED",
+          "passed": 2,
+          "failed": 2,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ],
+      "passed": 2,
+      "failed": 2,
+      "expectedSummaries": 2,
+      "minimumPassed": 6,
+      "missingTests": []
+    },
+    "default-clippy": {
+      "present": false,
+      "warning": false
+    },
+    "default-logical-native": {
+      "present": false,
+      "warning": false,
+      "results": [],
+      "passed": 0,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 19,
+      "missingTests": [
+        "facade::shutdown::logical_facade_close_drives_original_held_checkpoint_tcp",
+        "authority::vote_window::original_granted_reply_acceptance_preserves_full_follower_window",
+        "facade::abort::logical_facade_abort_retains_original_child_attempt_and_resolves_unknown_tcp",
+        "facade::cancel::logical_facade_cancelled_waits_retain_actual_child_work_tcp",
+        "facade::restart::logical_facade_checkpoint_suffix_cold_backing_recovery_tcp"
+      ]
+    },
+    "default-logical-network": {
+      "present": false,
+      "warning": false,
+      "results": [],
+      "passed": 0,
+      "failed": 0,
+      "expectedSummaries": 2,
+      "minimumPassed": 5,
+      "missingTests": []
+    },
+    "core-clippy": {
+      "present": false,
+      "warning": false
+    },
+    "core-activation-private": {
+      "present": false,
+      "warning": false,
+      "results": [],
+      "passed": 0,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 7,
+      "missingTests": [
+        "logical_voter::activation::tests::recovery::own_checkpoint_and_original_suffix_restore_busy_and_active_state",
+        "logical_voter::activation::tests::recovery::invalid_restore_is_atomic_and_rejects_history_materialization_and_profile",
+        "logical_voter::activation::tests::semantics::one_replicated_slot_retains_busy_terminal_and_first_positions",
+        "logical_voter::activation::tests::semantics::reserved_terminal_capacity_survives_full_business_and_intent_lifetimes",
+        "logical_voter::activation::tests::semantics::malformed_late_and_unprepared_phases_do_not_partially_apply",
+        "logical_voter::activation::tests::semantics::all_pending_and_retained_phase_aliases_refuse",
+        "logical_voter::activation::tests::semantics::malformed_configuration_or_cross_incarnation_cannot_begin"
+      ]
+    },
+    "core-activation-public": {
+      "present": false,
+      "warning": false,
+      "results": [],
+      "passed": 0,
+      "failed": 0,
+      "expectedSummaries": 1,
+      "minimumPassed": 4,
+      "missingTests": [
+        "contracts::original_business_content_retry_and_contiguous_control_positions",
+        "contracts::bounded_receipts_reads_and_faithful_response_tags",
+        "contracts::explicit_schema_mapping_and_lifetime_envelopes",
+        "contracts::selected_inner_context_is_forwarded_without_freezing_parent_configuration"
+      ]
+    },
+    "native-clippy": {
+      "present": false,
+      "warning": false
+    }
+  },
+  "terminal": [
+    "run=101",
+    "source_guard=0"
+  ],
+  "excluded": [
+    "logical_nested_native",
+    "effect_owner native-only Mac315b",
+    "full P8 acceptance"
+  ],
+  "failed": true
+}

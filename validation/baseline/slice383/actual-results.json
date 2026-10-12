@@ -1,0 +1,157 @@
+{
+  "source_inputs": 1306,
+  "source_manifest_sha256": "4128207a553e53d7826618324ca65aeb498ea5658a7535202eda4c245419374c",
+  "production": "379 unchanged",
+  "linux": {
+    "terminal_handles": {
+      "checks": 5723,
+      "tcp": 7221,
+      "quic": 10620
+    },
+    "cases": [
+      {
+        "label": "TCP",
+        "test": "history::tcp_fifteen_native_owners_two_original_logical_replacements",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 72.77,
+        "exit": 0,
+        "raw_log": "linux/TCP.log"
+      },
+      {
+        "label": "QUIC",
+        "test": "history::quic_fifteen_native_owners_two_original_logical_replacements",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 87.95,
+        "exit": 0,
+        "raw_log": "linux/QUIC.log"
+      }
+    ],
+    "format_four_strict_and_build_zero": true,
+    "source_and_actual_binary_guards_zero": true
+  },
+  "mac": {
+    "ssh_handle": 70033,
+    "remote": "/tmp/voteboat-macos-retired383-jHNT8fJC",
+    "terminal_exit": 1,
+    "cases": [
+      {
+        "label": "repeated_tcp",
+        "passed": 0,
+        "failed": 1,
+        "seconds": 152.68,
+        "exit": 101,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/repeated_tcp.log",
+        "original_command": "mac/original/repeated_tcp.command"
+      },
+      {
+        "label": "repeated_quic",
+        "passed": 0,
+        "failed": 1,
+        "seconds": 152.82,
+        "exit": 101,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/repeated_quic.log",
+        "original_command": "mac/original/repeated_quic.command"
+      },
+      {
+        "label": "imported_tcp",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 114.11,
+        "exit": 0,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/imported_tcp.log",
+        "original_command": "mac/original/imported_tcp.command"
+      },
+      {
+        "label": "imported_quic",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 127.79,
+        "exit": 0,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/imported_quic.log",
+        "original_command": "mac/original/imported_quic.command"
+      },
+      {
+        "label": "joint_tcp",
+        "passed": 0,
+        "failed": 1,
+        "seconds": 69.53,
+        "exit": 101,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/joint_tcp.log",
+        "original_command": "mac/original/joint_tcp.command"
+      },
+      {
+        "label": "joint_quic",
+        "passed": 0,
+        "failed": 1,
+        "seconds": 70,
+        "exit": 101,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/joint_quic.log",
+        "original_command": "mac/original/joint_quic.command"
+      },
+      {
+        "label": "committed_unknown_tcp",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 116.97,
+        "exit": 0,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/committed_unknown_tcp.log",
+        "original_command": "mac/original/committed_unknown_tcp.command"
+      },
+      {
+        "label": "committed_unknown_quic",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 124.73,
+        "exit": 0,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/committed_unknown_quic.log",
+        "original_command": "mac/original/committed_unknown_quic.command"
+      },
+      {
+        "label": "uncommitted_unknown_tcp",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 117.2,
+        "exit": 0,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/uncommitted_unknown_tcp.log",
+        "original_command": "mac/original/uncommitted_unknown_tcp.command"
+      },
+      {
+        "label": "uncommitted_unknown_quic",
+        "passed": 1,
+        "failed": 0,
+        "seconds": 130.57,
+        "exit": 0,
+        "selected_one": true,
+        "binary_unchanged": true,
+        "raw_log": "mac/original/uncommitted_unknown_quic.log",
+        "original_command": "mac/original/uncommitted_unknown_quic.command"
+      }
+    ],
+    "passed": 6,
+    "failed": 4,
+    "original_result_files": 99,
+    "format_four_strict_and_build_zero": true,
+    "source_and_actual_binary_guards_zero": true
+  },
+  "scope": "Recorded selected terminal383 qualification only; no full current/P8/platform acceptance; no388 evidence"
+}

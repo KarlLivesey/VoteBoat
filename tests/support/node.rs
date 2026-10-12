@@ -32,6 +32,8 @@ mod event_reporting;
 mod local_drain;
 #[path = "node_peer_credentials.rs"]
 mod peer_credentials;
+#[path = "node_network.rs"]
+mod selected_network;
 type Parts = NodeParts<
     Ready,
     Timers,

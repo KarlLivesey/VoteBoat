@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice327-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.30s
+     Running tests/logical_activation_driver.rs (/tmp/voteboat-macos-CzK1if/slice327-membership/build/debug/deps/logical_activation_driver-d57791e9e019ab97)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

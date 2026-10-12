@@ -20,10 +20,10 @@ mod application_results {
         limits: ApplicationRouterLimits,
     ) -> ApplicationRouter<R> {
         ApplicationRouter::new(
-            ApplicationRouterBinding {
-                owner: owner.identity(),
-                generation: ApplicationRouterGeneration::new(generation).unwrap(),
-            },
+            ApplicationRouterBinding::new(
+                owner.authorization(),
+                ApplicationRouterGeneration::new(generation).unwrap(),
+            ),
             limits,
         )
         .unwrap()
@@ -187,10 +187,10 @@ mod application_results {
         let mut app = Counter::new(10).unwrap();
         start(&mut owner, &mut worker, 1, &mut app);
         let lease = committed(&mut owner, &mut worker, 1, propose(1, 4));
-        let mut binding = ApplicationRouterBinding {
-            owner: owner.identity(),
-            generation: ApplicationRouterGeneration::new(1).unwrap(),
-        };
+        let mut binding = ApplicationRouterBinding::new(
+            owner.authorization(),
+            ApplicationRouterGeneration::new(1).unwrap(),
+        );
         binding.owner.generation = RuntimeGeneration::new(2).unwrap();
         let mut wrong =
             ApplicationRouter::new(binding, ApplicationRouterLimits::default()).unwrap();
@@ -403,18 +403,18 @@ mod client_admission {
             apps.insert(group(g), app);
         }
         let clients = Clients::new(
-            ClientRouterBinding {
-                owner: owner.identity(),
-                generation: ClientRouterGeneration::new(1).unwrap(),
-            },
+            ClientRouterBinding::new(
+                owner.authorization(),
+                ClientRouterGeneration::new(1).unwrap(),
+            ),
             ClientRouterLimits::default(),
         )
         .unwrap();
         let results = ApplicationRouter::new(
-            ApplicationRouterBinding {
-                owner: owner.identity(),
-                generation: ApplicationRouterGeneration::new(1).unwrap(),
-            },
+            ApplicationRouterBinding::new(
+                owner.authorization(),
+                ApplicationRouterGeneration::new(1).unwrap(),
+            ),
             ApplicationRouterLimits::default(),
         )
         .unwrap();
@@ -986,10 +986,10 @@ mod client_admission {
     fn per_group_budget_close_and_foreign_completion_preserve_shared_owner() {
         let (mut owner, mut worker, _, results, apps) = setup(2, 2);
         let mut clients = Clients::new(
-            ClientRouterBinding {
-                owner: owner.identity(),
-                generation: ClientRouterGeneration::new(2).unwrap(),
-            },
+            ClientRouterBinding::new(
+                owner.authorization(),
+                ClientRouterGeneration::new(2).unwrap(),
+            ),
             ClientRouterLimits {
                 requests: 2,
                 group_requests: 1,
@@ -1013,10 +1013,10 @@ mod client_admission {
         clients.cancel_wait(ticket).unwrap();
         let completion = clients.poll().unwrap();
         let mut other = Clients::new(
-            ClientRouterBinding {
-                owner: owner.identity(),
-                generation: ClientRouterGeneration::new(3).unwrap(),
-            },
+            ClientRouterBinding::new(
+                owner.authorization(),
+                ClientRouterGeneration::new(3).unwrap(),
+            ),
             ClientRouterLimits::default(),
         )
         .unwrap();
@@ -2779,10 +2779,10 @@ mod native {
             driver: None,
             reads: Vec::new(),
             clients: ClientRouter::new(
-                ClientRouterBinding {
-                    owner: runtime_owner,
-                    generation: ClientRouterGeneration::new(1).unwrap(),
-                },
+                ClientRouterBinding::new(
+                    RuntimeAuthorization::physical(runtime_owner),
+                    ClientRouterGeneration::new(1).unwrap(),
+                ),
                 ClientRouterLimits::default(),
             )
             .unwrap(),
@@ -2790,26 +2790,26 @@ mod native {
             client_unknown: 0,
             read_unavailable: 0,
             read_requests: ReadRequests::new(
-                ReadInvocationBinding {
-                    owner: runtime_owner,
-                    generation: ReadInvocationGeneration::new(1).unwrap(),
-                },
+                ReadInvocationBinding::new(
+                    RuntimeAuthorization::physical(runtime_owner),
+                    ReadInvocationGeneration::new(1).unwrap(),
+                ),
                 ReadInvocationLimits::default(),
                 ReadRouter::new(
-                    ReadRouterBinding {
-                        owner: runtime_owner,
-                        generation: ReadRouterGeneration::new(1).unwrap(),
-                    },
+                    ReadRouterBinding::new(
+                        RuntimeAuthorization::physical(runtime_owner),
+                        ReadRouterGeneration::new(1).unwrap(),
+                    ),
                     ReadRouterLimits::default(),
                 )
                 .unwrap(),
             )
             .unwrap(),
             results: ApplicationRouter::new(
-                ApplicationRouterBinding {
-                    owner: runtime_owner,
-                    generation: ApplicationRouterGeneration::new(1).unwrap(),
-                },
+                ApplicationRouterBinding::new(
+                    RuntimeAuthorization::physical(runtime_owner),
+                    ApplicationRouterGeneration::new(1).unwrap(),
+                ),
                 ApplicationRouterLimits::default(),
             )
             .unwrap(),
@@ -4079,10 +4079,10 @@ mod read_results {
     }
     fn router<R>(owner: &Owner, generation: u64, limits: ReadRouterLimits) -> ReadRouter<R> {
         ReadRouter::new(
-            ReadRouterBinding {
-                owner: owner.identity(),
-                generation: ReadRouterGeneration::new(generation).unwrap(),
-            },
+            ReadRouterBinding::new(
+                owner.authorization(),
+                ReadRouterGeneration::new(generation).unwrap(),
+            ),
             limits,
         )
         .unwrap()
@@ -4313,17 +4313,9 @@ mod read_results {
         assert_eq!(app.calls.get(), 0);
         let mut foreign = router::<Vec<u8>>(&owner, 2, ReadRouterLimits::default());
         // A different runtime generation is not the same owner even at this store.
-        foreign = ReadRouter::new(
-            ReadRouterBinding {
-                owner: RuntimeOwner {
-                    generation: RuntimeGeneration::new(999).unwrap(),
-                    ..foreign.binding().owner
-                },
-                ..foreign.binding()
-            },
-            ReadRouterLimits::default(),
-        )
-        .unwrap();
+        let mut foreign_binding = foreign.binding();
+        foreign_binding.owner.generation = RuntimeGeneration::new(999).unwrap();
+        foreign = ReadRouter::new(foreign_binding, ReadRouterLimits::default()).unwrap();
         let (reason, lease, _) = rejected(
             foreign
                 .submit(&mut owner, lease, &app, vec![], MonoTime(400))
@@ -4377,16 +4369,16 @@ mod read_invocations {
     type Requests = ReadRequests<Vec<u8>, Vec<u8>>;
     fn requests(owner: &Owner, generation: u64, limits: ReadInvocationLimits) -> Requests {
         ReadRequests::new(
-            ReadInvocationBinding {
-                owner: owner.identity(),
-                generation: ReadInvocationGeneration::new(generation).unwrap(),
-            },
+            ReadInvocationBinding::new(
+                owner.authorization(),
+                ReadInvocationGeneration::new(generation).unwrap(),
+            ),
             limits,
             ReadRouter::new(
-                ReadRouterBinding {
-                    owner: owner.identity(),
-                    generation: ReadRouterGeneration::new(generation).unwrap(),
-                },
+                ReadRouterBinding::new(
+                    owner.authorization(),
+                    ReadRouterGeneration::new(generation).unwrap(),
+                ),
                 ReadRouterLimits::default(),
             )
             .unwrap(),
@@ -4480,10 +4472,7 @@ mod read_invocations {
     fn failed_construction_returns_selected_execution_owner_and_held_result() {
         let (mut owner, app) = setup(1);
         let mut execution = ReadRouter::new(
-            ReadRouterBinding {
-                owner: owner.identity(),
-                generation: ReadRouterGeneration::new(1).unwrap(),
-            },
+            ReadRouterBinding::new(owner.authorization(), ReadRouterGeneration::new(1).unwrap()),
             ReadRouterLimits::default(),
         )
         .unwrap();
@@ -4501,10 +4490,10 @@ mod read_invocations {
             .submit(&mut owner, lease, &app, vec![7], MonoTime(400))
             .unwrap();
         let output = execution.poll().unwrap();
-        let binding = ReadInvocationBinding {
-            owner: owner.identity(),
-            generation: ReadInvocationGeneration::new(1).unwrap(),
-        };
+        let binding = ReadInvocationBinding::new(
+            owner.authorization(),
+            ReadInvocationGeneration::new(1).unwrap(),
+        );
         let mut rejected = Requests::new(binding, ReadInvocationLimits::default(), execution)
             .err()
             .unwrap();
@@ -4513,13 +4502,8 @@ mod read_invocations {
             rejected.execution.complete(output).unwrap().unwrap(),
             vec![7]
         );
-        let wrong = ReadInvocationBinding {
-            owner: RuntimeOwner {
-                generation: RuntimeGeneration::new(999).unwrap(),
-                ..owner.identity()
-            },
-            ..binding
-        };
+        let mut wrong = binding;
+        wrong.owner.generation = RuntimeGeneration::new(999).unwrap();
         let rejected = Requests::new(wrong, ReadInvocationLimits::default(), *rejected.execution)
             .err()
             .unwrap();
@@ -4546,10 +4530,10 @@ mod read_invocations {
         assert_eq!(read_value(&mut reads).1, vec![8]);
         assert!(reads.is_drained());
         let mut closed = ReadRouter::<Vec<u8>>::new(
-            ReadRouterBinding {
-                owner: owner.identity(),
-                generation: ReadRouterGeneration::new(99).unwrap(),
-            },
+            ReadRouterBinding::new(
+                owner.authorization(),
+                ReadRouterGeneration::new(99).unwrap(),
+            ),
             ReadRouterLimits::default(),
         )
         .unwrap();

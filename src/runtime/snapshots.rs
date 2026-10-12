@@ -18,6 +18,9 @@ use crate::{
     application::CheckpointStateMachine, contracts::StorageError, snapshot::CheckpointError,
     snapshot_worker::*,
 };
+mod export;
+use export::Exports;
+pub use export::*;
 
 #[derive(Clone, Copy, Debug)]
 pub struct SnapshotRouterLimits {
@@ -45,6 +48,10 @@ pub struct SnapshotRecoveryLimits {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum SnapshotRouteError {
+    Closed,
+    UnknownGroup,
+    MissingAnchor,
+    Exhausted,
     InvalidLimits,
     WrongOwner,
     WrongWorker,
@@ -88,6 +95,7 @@ pub struct SnapshotRouter {
     recovery: SnapshotRecoveryLimits,
     pending: BTreeMap<u64, Pending>,
     last_admission: u64,
+    exports: Exports,
 }
 impl SnapshotRouter {
     pub fn new(
@@ -133,12 +141,14 @@ impl SnapshotRouter {
             recovery,
             pending: BTreeMap::new(),
             last_admission: 0,
+            exports: Exports::default(),
         })
     }
     pub fn usage(&self) -> SnapshotRouterUsage {
         SnapshotRouterUsage {
-            requests: self.pending.len(),
-            image_bytes: self.pending.values().map(|p| p.allowance).sum(),
+            requests: self.pending.len() + self.exports.usage().requests,
+            image_bytes: self.pending.values().map(|p| p.allowance).sum::<usize>()
+                + self.exports.usage().image_bytes,
         }
     }
     pub fn recovery_limits(&self) -> SnapshotRecoveryLimits {
@@ -148,8 +158,9 @@ impl SnapshotRouter {
     pub fn recovery_usage(&self) -> SnapshotRouterUsage {
         let recovery = self.pending.values().filter(|p| p.recovery_bytes > 0);
         SnapshotRouterUsage {
-            requests: recovery.clone().count(),
-            image_bytes: recovery.map(|p| p.recovery_bytes).sum(),
+            requests: recovery.clone().count() + self.exports.usage().requests,
+            image_bytes: recovery.map(|p| p.recovery_bytes).sum::<usize>()
+                + self.exports.usage().image_bytes,
         }
     }
     pub fn owner(&self) -> RuntimeOwner {
@@ -159,7 +170,7 @@ impl SnapshotRouter {
         self.worker
     }
     pub fn is_drained(&self) -> bool {
-        self.pending.is_empty()
+        self.pending.is_empty() && self.exports.is_drained()
     }
     fn prepare_work<
         Q: ReadyScheduler,
@@ -197,15 +208,16 @@ impl SnapshotRouter {
         ) {
             return Err(SnapshotRouteError::NotSnapshot);
         }
-        if self.pending.len() >= self.limits.requests {
+        if self.usage().requests >= self.limits.requests {
             return Err(SnapshotRouteError::Overloaded);
         }
-        if self
-            .pending
-            .values()
-            .any(|p| p.lease.ticket.visit.group == lease.ticket.visit.group)
+        if self.exports.has_group(lease.ticket.visit.group)
+            || self
+                .pending
+                .values()
+                .any(|p| p.lease.ticket.visit.group == lease.ticket.visit.group)
         {
-            return Err(SnapshotRouteError::Owner(EffectOwnerError::StaleEffect));
+            return Err(SnapshotRouteError::Overloaded);
         }
         let allowance = worker
             .load_reservation(lease.ticket.visit.group)
@@ -349,6 +361,9 @@ impl SnapshotRouter {
         if owner.identity() != self.owner {
             return Err(SnapshotRouteError::WrongOwner);
         }
+        if self.exports.has_request(event.request.sequence) {
+            return self.deliver_export(owner, event);
+        }
         if event.request.binding != self.worker {
             return Err(SnapshotRouteError::StaleCompletion);
         }
@@ -391,7 +406,7 @@ impl SnapshotRouter {
         }
         let visit = p.lease.ticket.visit;
         let mut checkpoint_error = None;
-        let result = owner.complete_effect_with(
+        let result = owner.complete_snapshot_effect(
             p.lease,
             application.applied_index(),
             now,
@@ -452,6 +467,10 @@ impl SnapshotRouter {
             return Err(SnapshotRouteError::ProviderContract);
         }
         for (_, p) in std::mem::take(&mut self.pending) {
+            if !self.exports.is_drained() {
+                self.exports
+                    .remember_failed(p.request, p.lease.ticket.visit);
+            }
             owner
                 .discard_failed(p.lease)
                 .map_err(|e| SnapshotRouteError::Owner(e.reason))?;

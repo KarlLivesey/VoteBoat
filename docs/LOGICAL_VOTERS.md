@@ -1,10 +1,12 @@
-# Logical voters: protocol gate314
+# Logical voters
 
-**Model-qualified proposed protocol; no native logical-voter implementation is claimed.**
+**Native implementation exists; complete Linux/macOS qualification remains open.**
 The refinement and independent finite models are qualified in
-[slice314](../validation/baseline/slice314/README.md). Native
-assembly follows in315, then supported nesting and configuration qualification.
-Performance comparison and default promotion remain P9. Ordinary physical-voter
+[slice314](../validation/baseline/slice314/README.md). Selected native facade,
+recovery and relay-backed composition histories now pass on both platforms;
+deeper Mac composition and remaining membership cases are tracked in
+[feature status](FEATURE_STATUS.md). Performance comparison and default promotion
+remain P9. Ordinary physical-voter
 Raft stays supported. Recursive quorum policies already implemented in VoteBoat
 count physical voters; they do not implement this extension.
 
@@ -125,6 +127,14 @@ Release only after the selected final outcome is durable. Ordinary child busines
 writes require no parent intent or ancestor commit. Arbitrary overlapping layer
 transitions are unsupported until separately specified and qualified.
 
+Activation preflight checks the selected static application/deployment profile
+and settlement of the bridge's own observations, configuration requests,
+readiness requests and checkpoint-export consumers. It does not require live
+child consensus to become idle: unrelated protocol work remains owned and
+pumped. The original fresh parent Status result still authorizes the transition,
+and the core validates configuration and readiness at execution. Detach,
+checkpoint export and reclaim retain their full ownership-drain requirements.
+
 ## Checkpoint, recovery and failure
 
 Parent snapshot publication requires full child-owned bytes/metadata/pin before
@@ -171,11 +181,13 @@ checkpoint and suffix. Profiles that retain surviving child consensus authority
 across one physical crash do not qualify simultaneous loss of every child runtime.
 Catch-up-before-next-request and serial membership schedules must be reported as
 graph bounds; exhaustion of those graphs does not exhaust their omitted combinations.
-Native acceptance still owes actual whole-child restart and the supported nesting
-and lifecycle histories.
+Native acceptance records now include selected whole-child restart and Linux
+nested/lifecycle histories. Those finite results do not qualify an untested
+platform or composition.
 
-Model qualification precedes native315. Actual native acceptance must additionally
+Model qualification preceded native315. Actual native acceptance must additionally
 cover original child results, parent writes/reads/retries, representative failure,
 inner quorum loss, old checkpoint/suffix recovery, context refusal, public host
-composition and real drain/joins on Linux/macOS. Supported nested and parent/child
-activation histories remain316; remaining transaction scope also keeps P8 open.
+composition and real drain/joins on Linux/macOS. Selected broader transactions and
+striped storage qualify on both hosts in318/321. Remaining nested Mac and
+membership qualification, followed by the current-source sweep, keep P8 open.

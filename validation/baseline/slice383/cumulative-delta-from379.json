@@ -1,0 +1,38 @@
+{
+  "base": "target/root315/activation379/SOURCE.json",
+  "source": "target/divide-provider/checkpoint383/SOURCE.json",
+  "inputs": 1306,
+  "changes": [
+    {
+      "path": "tests/logical_activation_nested/cluster.rs",
+      "before": "da18f6e0c7d85bb5c19b32ce04cbf3596f9aa73f929e0b16f7d9451ec375849d",
+      "after": "a564f5a3cf5175682b1b9644cc90215f184092124f3fa3300570f0bf0ad4a4ae"
+    },
+    {
+      "path": "tests/logical_activation_nested/history.rs",
+      "before": "7540c19c5365d8bbf2760c3804c9183220a1b4439c9945866238cff747e656d0",
+      "after": "faae088a881765cc3a1e1e9adb23d5429222075b2579e95bb424b97545edacc0"
+    },
+    {
+      "path": "tests/logical_activation_nested/lower.rs",
+      "before": "0c303a11c52464a7d75f5aae282c5c96f350ae15036077a805f8db9ce1bea0f0",
+      "after": "194dbece3d2a3221791689c1286adae62e6a733395a39b7a770b4b877ef2d5cd"
+    },
+    {
+      "path": "tests/logical_activation_nested/repeated.rs",
+      "before": "2941959365441d6457a3e248f8f97b17c9ca4dd34c33cfe62ce1a23478e58b32",
+      "after": "de38d3eecfd5beeb7e2e3221da9e9bd37d8ba140644d4a17807dd47999bcee1d"
+    },
+    {
+      "path": "tests/logical_nested_native/convergence.rs",
+      "before": "1a97ef0a5dcd0634e02cea580f39484b812f49bf51df722abc29b14c309cf2db",
+      "after": "fb23efe1b117a2e48dfe1dcdab1486484d282fc19725e8c1dc1193532ed9b58b"
+    },
+    {
+      "path": "tests/logical_nested_native/watchdog.rs",
+      "before": "875bf1e2c8a8d02adce332ef156af920d5059910a5855381361a425806aa66ca",
+      "after": "22b01daee1f814ea4a64cd5937e1fa11479db55a6c0de7dc7a7ae1b63315405b"
+    }
+  ],
+  "production_changes": []
+}

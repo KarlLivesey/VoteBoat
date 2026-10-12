@@ -33,6 +33,11 @@ pub struct HostSnapshots {
     reference: Option<SnapshotRef>,
     pub pins: BTreeMap<SnapshotGeneration, (SnapshotRef, Snapshot)>,
 }
+impl Default for HostSnapshots {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl HostSnapshots {
     pub fn new() -> Self {
         Self {

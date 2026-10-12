@@ -153,7 +153,22 @@ impl Raft {
             })?;
         self.durable.membership_at(entry.index).ok()
     }
-    pub(super) fn receive_authority(&mut self, message: Message) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn authority_message_source(&self, message: &Message) -> Result<(), RaftError> {
+        self.authority_message_header(message)?;
+        match &message.rpc {
+            Rpc::AuthorityRequest {
+                candidate,
+                configuration,
+            } => self.authority_request_source(message, *candidate, *configuration),
+            Rpc::AuthorityReply {
+                candidate,
+                configuration,
+                ..
+            } => self.authority_reply_source(message, *candidate, *configuration),
+            _ => Err(RaftError::InvalidMessage),
+        }
+    }
+    fn authority_message_header(&self, message: &Message) -> Result<(), RaftError> {
         if message.group != self.durable.bootstrap.group
             || message.to != self.node
             || message.from == self.node
@@ -162,6 +177,57 @@ impl Raft {
         {
             return Err(RaftError::WrongIdentity);
         }
+        Ok(())
+    }
+    fn authority_request_source(
+        &self,
+        message: &Message,
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+    ) -> Result<(), RaftError> {
+        if message.context.origin != message.sender
+            || candidate.node == message.from
+            || candidate.node == self.node
+            || configuration <= message.configuration
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        let base = self
+            .authority_base(message.configuration)
+            .ok_or(RaftError::WrongIdentity)?;
+        if base.replica_store(message.from) != Some(message.sender.identity)
+            || base.voter_store(self.node) != Some(self.binding.identity)
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        Ok(())
+    }
+    fn authority_reply_source(
+        &self,
+        message: &Message,
+        candidate: PeerIdentity,
+        configuration: ConfigurationId,
+    ) -> Result<(), RaftError> {
+        let pending = self
+            .authority_request
+            .as_ref()
+            .ok_or(RaftError::WrongIdentity)?;
+        if pending.base != self.membership().id()
+            || message.configuration != pending.base
+            || pending.witness.node != message.from
+            || pending.witness.store != message.sender.identity
+            || self.membership().voter_store(message.from) != Some(message.sender.identity)
+            || pending.context != message.context
+            || message.context.origin != self.binding
+            || pending.candidate != candidate
+            || pending.configuration != configuration
+        {
+            return Err(RaftError::WrongIdentity);
+        }
+        Ok(())
+    }
+    pub(super) fn receive_authority(&mut self, message: Message) -> Result<Vec<Effect>, RaftError> {
+        self.authority_message_header(&message)?;
         match message.rpc {
             Rpc::AuthorityRequest {
                 candidate,
@@ -190,21 +256,7 @@ impl Raft {
         candidate: PeerIdentity,
         configuration: ConfigurationId,
     ) -> Result<Vec<Effect>, RaftError> {
-        if message.context.origin != message.sender
-            || candidate.node == message.from
-            || candidate.node == self.node
-            || configuration <= message.configuration
-        {
-            return Err(RaftError::WrongIdentity);
-        }
-        let base = self
-            .authority_base(message.configuration)
-            .ok_or(RaftError::WrongIdentity)?;
-        if base.replica_store(message.from) != Some(message.sender.identity)
-            || base.voter_store(self.node) != Some(self.binding.identity)
-        {
-            return Err(RaftError::WrongIdentity);
-        }
+        self.authority_request_source(message, candidate, configuration)?;
         let committed = self
             .durable
             .membership_at(self.durable.commit_index)
@@ -251,18 +303,7 @@ impl Raft {
             .authority_request
             .as_ref()
             .ok_or(RaftError::WrongIdentity)?;
-        if pending.base != self.membership().id()
-            || message.configuration != pending.base
-            || pending.witness.node != message.from
-            || pending.witness.store != message.sender.identity
-            || self.membership().voter_store(message.from) != Some(message.sender.identity)
-            || pending.context != message.context
-            || message.context.origin != self.binding
-            || pending.candidate != candidate
-            || pending.configuration != configuration
-        {
-            return Err(RaftError::WrongIdentity);
-        }
+        self.authority_reply_source(message, candidate, configuration)?;
         if (granted
             && (committed_index <= self.membership().last_configuration_index()
                 || committed_term == 0

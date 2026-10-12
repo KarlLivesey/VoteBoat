@@ -19,6 +19,8 @@ mod chunk_progress;
 mod closing_timer;
 #[path = "quic/frame_progress.rs"]
 mod frame_progress;
+#[path = "quic/keep_alive.rs"]
+mod keep_alive;
 #[path = "quic/peer_close.rs"]
 mod peer_close;
 mod support;
@@ -107,21 +109,25 @@ fn configured_pair_with<O>(
         generation: SecureSessionGeneration::new(n).unwrap(),
         limits,
     };
+    let configuration = |n, version| {
+        let config = support::tls::configuration(n);
+        if version == voteboat::logical_voter::LOGICAL_NETWORK_VERSION {
+            config.with_logical_profile()
+        } else {
+            config.with_wire_version(version).unwrap()
+        }
+    };
     let pair = (
         NativeQuicSession::client(
             a,
-            &support::tls::configuration(1)
-                .with_wire_version(a_version)
-                .unwrap(),
+            &configuration(1, a_version),
             options(1, 2, ba),
             MonoTime(0),
         )
         .unwrap(),
         NativeQuicSession::server(
             b,
-            &support::tls::configuration(2)
-                .with_wire_version(b_version)
-                .unwrap(),
+            &configuration(2, b_version),
             options(2, 1, aa),
             MonoTime(0),
         )

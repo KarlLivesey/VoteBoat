@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.10s
+     Running tests/logical_activation_driver.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/logical_activation_driver-a9aa92143c6f2032)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

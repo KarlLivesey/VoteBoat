@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.20s
+     Running tests/logical_activation_driver.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/logical_activation_driver-7bbbb2df920549b3)
+
+running 1 test
+test history::original_parent_begin_fresh_status_retry_busy_and_cancel_tcp ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.23s
+

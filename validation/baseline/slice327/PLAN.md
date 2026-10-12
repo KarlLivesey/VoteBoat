@@ -1,0 +1,19 @@
+# Frozen slice327 selected Linux/macOS qualification
+
+Purpose: qualify the original retained ConfigurationOperation queries, exact original SnapshotAck release predicate, immutable activation child-storage profile and actual parent-driver observation ownership. This supports functional logical-voter composition. It does not certify child-membership activation beyond parent Begin, complete nested logical composition, the failed Mac324 aggregate, Mac315b or full P8. The changed same-ID nested fixture is compilation-covered only; no nested executable is selected.
+
+Schema: an independently copied immutable compilation/fixture/metadata universe per platform, selected original commands and actual Node-backed histories, sequential executable feature profiles. Drivers retain actual PID/session ownership and terminal records. Read/write source guards bracket root capture/copy and each platform run. A failed gate records its original log, exit and unchanged source; it does not become a success through a later narrower check.
+
+Declared 24-stage matrix per platform (66 selected Rust tests):
+- Format and inventory/conformance/negative metadata controls (4 stages). Expected metadata 126 contracts, 27 partial reviews / 310 operation names and 33 negative controls.
+- Full-target strict Clippy in all/default/core/native profiles (4 stages).
+- All/core separately: private `--lib logical_voter::response::tests::` 15; public `--test logical_configuration_history` 7; private `--lib logical_voter::application::tests::control_profile::` 4; private `--lib logical_voter::activation::tests::control_profile::` 2; filtered `--test logical_voter_application profile` 1; filtered `--test logical_activation_application profile` 1 (12 stages).
+- All/native separately: `--test logical_voter_native authority::snapshot_ack::` 2/1 and `--test logical_activation_driver` 2/1 (4 stages). Native-only is real TLS; all includes TCP+QUIC. Parent-driver target itself requires TLS. Its result qualifies original parent Begin/fresh status/retry/busy/cancellation, not later learner/joint/final activation.
+
+Acceptance: every selected exact test name and exact count, no ignored/failing tests, actual process terminal 0, every source/file-list/runner guard 0, repository formatting and full four-profile strict zero diagnostics. No library filter is shared with an integration target. No test retry is planned; retained failures require a cause-specific next decision.
+
+Source ownership: root confirms final metadata freeze before capture. Existing complete selector includes every authoritative inventory conformance path and all compilation/fixture files, top-level validation scripts, manifests, config and hooks. It excludes design pack, ignored research handoff, Git and target directories. Root-before/root-after/local-copy/remote-copy/before/terminal manifests must match. Writers may resume after root/local guards pass; remote copy reads frozen local source only.
+
+Resources: fresh qualification327 repo/build/results and `/tmp/voteboat-macos-CzK1if/slice327-membership` on Mac. Inspect completed 324 donor caches before independent reflink/APFS clone; refuse live donors or symlinks. No shared target/debug executable cache. Process-local FD 8192 only after checking initial soft/hard limits. Existing pinned protoc is reused; no downloading/unzipping. Original Mac302 processes remain untouched. Linux uses a retained foreground tool session; Mac uses an actual persistent nohup driver PID plus terminal/stage files.
+
+Preservation: tracked partial slice324 evidence is immutable; successful separate nine-owner supplement stays separate. The single copy-only Mac324 diagnostic 1/0 did not reproduce its original election timeout and supplies no overall acceptance override. The objective remains stop after functional P0–P8, with P9/P10 later.

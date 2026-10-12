@@ -1,0 +1,41 @@
+✔ review counts only audited operations and retains unreviewed contracts (21.322583ms)
+✔ rejects unknown contract (7.291541ms)
+✔ rejects unknown operation (5.166291ms)
+✔ rejects missing operation (5.718667ms)
+✔ rejects duplicate operation (4.980916ms)
+✔ rejects missing assertion (4.798333ms)
+✔ rejects missing function (5.036833ms)
+✔ rejects missing test (4.610833ms)
+✔ rejects escaping path (5.07525ms)
+✔ rejects false completion claim (5.065417ms)
+✔ rejects missing limitation (4.894833ms)
+✔ rejects missing snapshot operation (5.578458ms)
+✔ rejects missing retention assertion (5.835417ms)
+✔ rejects missing admission operation (7.260042ms)
+✔ rejects missing admission assertion (7.418166ms)
+✔ rejects missing timer operation (4.891125ms)
+✔ rejects missing timer assertion (4.148334ms)
+✔ rejects missing timer limitation (4.3925ms)
+✔ rejects missing exact owner isolation assertion (4.691083ms)
+✔ rejects missing poll preservation assertion (4.637959ms)
+✔ rejects missing timer defective-provider runner (4.149666ms)
+✔ rejects missing transport operation (3.901583ms)
+✔ rejects missing transport assertion (3.190459ms)
+✔ rejects missing transport limitation (3.378083ms)
+✔ rejects missing transport inspection (3.945ms)
+✔ rejects missing inspection assertion (3.342917ms)
+✔ rejects missing inspection limitation (3.353834ms)
+✔ rejects missing wire operation (2.239625ms)
+✔ rejects missing wire assertion (1.864ms)
+✔ rejects missing wire limitation (1.889709ms)
+✔ rejects missing buffer operation (7.645375ms)
+✔ rejects missing buffer assertion (7.244417ms)
+✔ rejects missing buffer limitation (7.356083ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 181.162333

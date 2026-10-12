@@ -79,4 +79,35 @@ cargo +stable run --locked --offline --example embedded_transfer -- \
 It retains authoritative files for recovery and prints fresh account reads and
 worker joins. Native acceptance separately exercises three physical replicas over
 TCP/TLS and QUIC. This example is not a remote transaction command service;
-broader transaction scope and logical voters remain P8 work.
+logical-voter nesting and activation remain P8 work.
+
+## Multi-key programs
+
+`ProgramApplication` and `ProgramDriver` extend the transfer profile to bounded
+numeric-key read/write programs across participant groups. A `ProgramProfile`
+provides ordered coordinator and participant catalogs; the transaction ID selects
+its coordinator, so there is no required global coordinator.
+
+Build each `ParticipantProgram` from ordered `KeyAccess` records: `expected_version`
+validates a dependency, `write: None` retains a read dependency, and `Some(value)`
+sets a nonnegative final value on commit. A `Program` binds those participants and
+the transaction ID immutably. Whole-local prepare validates and locks every listed
+key atomically; conflict/version refusal uses no-wait abort rather than deadlock.
+Prepared keys stay locked while a decision is unavailable. Read-only dependencies
+also remain locked until the original release, and intermediate values are hidden.
+
+Select coordinator/participant `ProgramApplication`s in the ordinary Node map.
+Attach `ProgramDriver` to exclusively borrowed compatible Nodes; use `submit` or
+`resume`, explicit `advance` budgets, and original `poll_completion`/`complete`.
+`stop_waiting` cancels observation only. Continue original work and output cleanup
+until `is_drained`, then close and join the host's Nodes. Decisions, locks, phase
+IDs, opening catalogs and results survive checkpoint plus later suffix recovery.
+
+The profile has fixed key ownership, up to eight groups in each catalog and
+sixteen keys per participant. Lifetime transaction quotas reserve terminal work;
+records are retained rather than silently evicted. It does not provide arbitrary
+SQL, moving-key transactions or an atomic responsibility-wide scan.
+[Native five-group TCP/QUIC histories](../tests/program_transaction_driver/recovery.rs)
+exercise original lost-phase observations, locks, contention, leader replacement
+and cold recovery. [Frozen318](../validation/baseline/slice318/README.md) qualifies
+the selected application/model/driver scope on Linux and macOS.

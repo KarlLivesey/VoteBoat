@@ -31,8 +31,12 @@ mod clients;
 mod connections;
 mod effects;
 mod ingress;
+mod logical_authority;
+mod logical_intake;
+mod logical_release;
 mod maintenance;
 mod node;
+mod peer_network;
 mod peers;
 mod read_requests;
 mod reads;
@@ -47,8 +51,11 @@ pub use clients::*;
 pub use connections::ConnectionBudget;
 pub use effects::*;
 pub use ingress::*;
+pub use logical_authority::*;
+pub use logical_release::*;
 pub use maintenance::*;
 pub use node::*;
+pub use peer_network::*;
 pub use peers::*;
 pub use read_requests::*;
 pub use reads::*;
@@ -358,6 +365,8 @@ pub struct Stepped {
     pub proposed: Option<ProposalPosition>,
     pub operation: Option<OperationId>,
     pub read: Option<ReadRequestId>,
+    /// Actual consumed Receive source; inspection only, never authentication.
+    pub received_from: Option<NodeId>,
     /// A consumed live expiration. Stale queued timers produce no core effects.
     pub timer: Option<TimerToken>,
     pub result: Result<Vec<Effect>, RaftError>,
@@ -383,6 +392,7 @@ pub struct Shard<Q: ReadyScheduler> {
     sequence: u64,
     admission_sequence: u64,
     connection_budget: Option<ConnectionBudget>,
+    control_profile: Option<crate::logical_voter::LogicalActivationControlProfile>,
     now: MonoTime,
     closed: bool,
 }
@@ -405,6 +415,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             sequence: 0,
             admission_sequence: 0,
             connection_budget: None,
+            control_profile: None,
             now: MonoTime(0),
             closed: false,
         })
@@ -453,6 +464,14 @@ impl<Q: ReadyScheduler> Shard<Q> {
     pub fn group_usage(&self, group: GroupIdentity) -> Option<Usage> {
         self.groups.get(&group).map(|g| sum(&g.usage))
     }
+    pub(super) fn has_pending_peer_ingress(&self, group: GroupIdentity, peer: NodeId) -> bool {
+        self.groups.get(&group).is_some_and(|g| {
+            g.queues
+                .iter()
+                .flatten()
+                .any(|q| matches!(&q.event, Event::Receive(message) if message.from == peer))
+        })
+    }
     pub fn active_visits(&self) -> usize {
         self.groups.values().filter(|g| g.visit.is_some()).count()
     }
@@ -468,6 +487,14 @@ impl<Q: ReadyScheduler> Shard<Q> {
         group: GroupIdentity,
         event: &Event,
     ) -> Result<(Class, usize), RuntimeError> {
+        self.admission_shape_scoped(group, event, None)
+    }
+    fn admission_shape_scoped(
+        &self,
+        group: GroupIdentity,
+        event: &Event,
+        read: Option<logical_intake::LogicalReadInput<'_>>,
+    ) -> Result<(Class, usize), RuntimeError> {
         if self.closed {
             return Err(RuntimeError::Closed);
         }
@@ -478,7 +505,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
         if matches!(event, Event::Receive(m) if m.group != group) {
             return Err(RuntimeError::WrongOwner);
         }
-        event_cost(event, self.limits.max_event_bytes)
+        let (class, cost) = event_cost(event, self.limits.max_event_bytes)?;
+        Ok((self.input_class(group, event, class, read)?, cost))
     }
     fn admit_inner(
         &mut self,
@@ -486,8 +514,9 @@ impl<Q: ReadyScheduler> Shard<Q> {
         event: &Event,
         timer: Option<TimerToken>,
         tracked: bool,
+        read: Option<logical_intake::LogicalReadInput<'_>>,
     ) -> Result<(Class, usize), RuntimeError> {
-        let (class, mut cost) = self.admission_shape(group, event)?;
+        let (class, mut cost) = self.admission_shape_scoped(group, event, read)?;
         if connections::changes_connections(event) {
             self.check_connection_event(group, event)?;
         }
@@ -551,7 +580,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         group: GroupIdentity,
         event: Event,
     ) -> Result<AdmissionTicket, Rejected> {
-        self.admit_record(group, event, None, true)
+        self.admit_record(group, event, None, true, None)
             .map(|t| t.unwrap())
     }
     fn admit_tagged(
@@ -560,7 +589,8 @@ impl<Q: ReadyScheduler> Shard<Q> {
         event: Event,
         timer: Option<TimerToken>,
     ) -> Result<(), Rejected> {
-        self.admit_record(group, event, timer, false).map(|_| ())
+        self.admit_record(group, event, timer, false, None)
+            .map(|_| ())
     }
     fn admit_record(
         &mut self,
@@ -568,6 +598,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
         event: Event,
         timer: Option<TimerToken>,
         tracked: bool,
+        read: Option<logical_intake::LogicalReadInput<'_>>,
     ) -> Result<Option<AdmissionTicket>, Rejected> {
         let sequence = self.admission_sequence.checked_add(1);
         if tracked && sequence.is_none() {
@@ -576,7 +607,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
                 event: Box::new(event),
             });
         }
-        match self.admit_inner(group, &event, timer, tracked) {
+        match self.admit_inner(group, &event, timer, tracked, read) {
             Ok((class, cost)) => {
                 let g = self.groups.get_mut(&group).unwrap();
                 let admission = tracked.then(|| AdmissionTicket {
@@ -741,6 +772,10 @@ impl<Q: ReadyScheduler> Shard<Q> {
             Event::Read { request } => Some(*request),
             _ => None,
         };
+        let received_from = match &q.event {
+            Event::Receive(message) => Some(message.from),
+            _ => None,
+        };
         let timer = q.timer.filter(|token| g.timer == Some(*token));
         let stale_timer = q.timer.is_some() && timer.is_none();
         if timer.is_some() {
@@ -768,6 +803,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             proposed,
             operation,
             read,
+            received_from,
             timer,
             result,
         };
@@ -855,7 +891,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
     }
 }
 
-fn configuration_auth_required(event: &Event) -> Result<(), RaftError> {
+pub(crate) fn configuration_auth_required(event: &Event) -> Result<(), RaftError> {
     if matches!(event, Event::Configure(p) if !p.readiness.is_empty()) {
         Err(ConfigurationProposalError::AuthenticationRequired.into())
     } else {

@@ -49,7 +49,7 @@ impl Raft {
                 Ok(vec![Effect::Send(reply)])
             };
         }
-        self.validate_replica_message(&m)?;
+        self.authenticated_message_source(&m)?;
         if let Rpc::TimeoutNow {
             index, log_term, ..
         } = m.rpc
@@ -111,7 +111,7 @@ impl Raft {
             Rpc::Compacted { index, term } => self.receive_compacted(&m, hard, *index, *term),
         }
     }
-    fn validate_replica_message(&self, m: &Message) -> Result<(), RaftError> {
+    pub(super) fn validate_replica_message(&self, m: &Message) -> Result<(), RaftError> {
         // Replication and vote requests from an exact locally authorized voter
         // may bridge differing accepted heads. Replication proves only its
         // checked matching prefix. A vote uses the local electorate and freshness;

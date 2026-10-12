@@ -1,0 +1,14 @@
+{
+  "qualification_source_inputs": 1306,
+  "current_difference_files": [
+    "tests/logical_activation_nested/diagnostic.rs",
+    "tests/logical_activation_nested/history.rs",
+    "tests/logical_activation_nested/progress.rs",
+    "tests/logical_activation_nested/shutdown.rs",
+    "tests/logical_nested_native/cold_recovery.rs",
+    "tests/logical_nested_native/convergence.rs",
+    "tests/logical_nested_native/host.rs"
+  ],
+  "production_differences": [],
+  "meaning": "Read-time current tree differs from qualified383 in seven fixtures. Stored source-fixtures are exact383 bytes; this is not qualification of current source."
+}

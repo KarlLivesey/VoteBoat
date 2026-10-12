@@ -1,0 +1,21 @@
+{
+  "linux_original_fingerprint_entries_checked": 29,
+  "mac_original_fingerprint_entries_checked": 99,
+  "source_manifests_identical": true,
+  "source_inputs": 1306,
+  "actual_test_summaries_checked": 12,
+  "missing_or_conflicting_recorded_results": [],
+  "current_changed_fixtures": [
+    "tests/logical_activation_nested/diagnostic.rs",
+    "tests/logical_activation_nested/history.rs",
+    "tests/logical_activation_nested/progress.rs",
+    "tests/logical_activation_nested/shutdown.rs",
+    "tests/logical_nested_native/cold_recovery.rs",
+    "tests/logical_nested_native/convergence.rs",
+    "tests/logical_nested_native/host.rs"
+  ],
+  "current_production_differences": [],
+  "binary_manifest_identical_captures": 12,
+  "deduplicated_manifest_aliases": 11,
+  "verification": "Read-only comparisons of original raw records and bytes before archival; no new native execution, generated proof or summary-mirroring validation script"
+}

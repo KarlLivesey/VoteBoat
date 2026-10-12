@@ -1,0 +1,2 @@
+4164971    4617       00:00 50.0 S /usr/bin/zsh -c ps -eo pid,ppid,etime,pcpu,state,args | rg '4121793|qualification324/build|qualification324/repo|clippy-driver' > target/divide-membership/qualification324/results/linux-current-processes.log head -8 target/divide-membership/qualification324/results/linux-current-processes.log
+4164973 4164971       00:00  0.0 S rg 4121793|qualification324/build|qualification324/repo|clippy-driver

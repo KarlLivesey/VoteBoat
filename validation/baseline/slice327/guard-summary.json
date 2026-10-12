@@ -1,0 +1,54 @@
+{
+  "input_paths": 1073,
+  "source_manifest_sha256": "5c6e50d2f8281335b7359b2c6b33602cf27aa3a9f27ddfea2b97cde7e4bf8df9",
+  "source_file_list_sha256": "a03555f0da084a066831cae7ba2eebe260eaa29ff7578a2ee8357de158b4ba0c",
+  "same_frozen_platform_source_and_runners": true,
+  "direct_frozen_source_rehash": "passed",
+  "supported_platform_selected_scope": "passed; broader functional gaps remain",
+  "guards": {
+    "linux-before": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "linux-terminal": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "linux-tls-before": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "linux-tls-terminal": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "mac-before": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "mac-terminal": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "mac-tls-before": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "mac-tls-terminal": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "root-after": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "copied": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    },
+    "mac-copied": {
+      "successful_paths": 1073,
+      "sha256": "6ecd9c52cca7e9f7a71717eb2ba433f7f46a434ff69cb1a8a9551eca72a92524"
+    }
+  }
+}

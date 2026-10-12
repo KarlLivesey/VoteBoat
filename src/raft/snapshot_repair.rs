@@ -169,10 +169,10 @@ impl Raft {
         ))])
     }
 
-    pub(super) fn receive_repair_snapshot(
-        &mut self,
-        mut message: Message,
-    ) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn validate_repair_snapshot_source(
+        &self,
+        message: &Message,
+    ) -> Result<(), RaftError> {
         let (snapshot, final_checkpoint) = match &message.rpc {
             Rpc::LearnerRepairSnapshot { snapshot } => (snapshot, false),
             Rpc::CommittedLearnerRepairSnapshot { snapshot } if self.committed_snapshot_repair => {
@@ -230,6 +230,19 @@ impl Raft {
         } else if incoming != &committed || message.configuration <= incoming.id() {
             return Err(RaftError::InvalidMessage);
         }
+        Ok(())
+    }
+    pub(super) fn receive_repair_snapshot(
+        &mut self,
+        mut message: Message,
+    ) -> Result<Vec<Effect>, RaftError> {
+        self.validate_repair_snapshot_source(&message)?;
+        let snapshot = match &message.rpc {
+            Rpc::LearnerRepairSnapshot { snapshot }
+            | Rpc::CommittedLearnerRepairSnapshot { snapshot } => snapshot,
+            _ => unreachable!("validated original repair"),
+        };
+        let meta = &snapshot.metadata;
         let index = meta.index;
         let term = meta.term;
         message.rpc = Rpc::Snapshot {

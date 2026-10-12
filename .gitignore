@@ -1,5 +1,6 @@
 /target/
 /VoteBoat-Design-Pack/
+/research-handoff/
 **/target/
 *.tmp
 .DS_Store

@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.02s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 15 tests
+test logical_voter::response::tests::limits::accepted_state_growth_cannot_exceed_the_checked_response_envelope ... ok
+test logical_voter::response::tests::receipts::receipts_preserve_all_outcomes_and_original_fields ... ok
+test logical_voter::response::tests::limits::staged_response_capacity_never_exceeds_the_static_encoding_bound ... ok
+test logical_voter::response::tests::receipts::short_receipt_and_query_destinations_remain_unchanged ... ok
+test logical_voter::response::tests::receipts::exact_query_variants_and_every_snapshot_reference_field_are_distinct ... ok
+test logical_voter::response::tests::limits::full_image_framing_refuses_growth_even_when_parent_codec_fits ... ok
+test logical_voter::response::tests::limits::bounds_stay_stable_across_apply_checkpoint_and_restore ... ok
+test logical_voter::response::tests::reads::all_read_variants_preserve_exact_typed_values ... ok
+test logical_voter::response::tests::reads::complete_outcome_status_and_maximum_command_fit_the_static_bound ... ok
+test logical_voter::response::tests::reads::metadata_optional_and_counter_fields_are_retained ... ok
+test logical_voter::response::tests::reads::complete_image_membership_parent_and_pin_fields_are_retained ... ok
+test logical_voter::response::tests::providers::selected_snapshot_roundtrip_failure_leaves_output_and_state_unchanged ... ok
+test logical_voter::response::tests::providers::original_configuration_response_rejects_nonfaithful_selected_batch_codec ... ok
+test logical_voter::response::tests::limits::short_read_destinations_and_overbound_values_are_atomic ... ok
+test logical_voter::response::tests::providers::refusing_or_nonfaithful_selected_log_codecs_cannot_encode_image ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 127 filtered out; finished in 0.03s
+

@@ -1,0 +1,15 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.67s
+     Running tests/logical_configuration_history.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/logical_configuration_history-1201f6cfec57f5fb)
+
+running 7 tests
+test retention::invalid_configuration_progression_is_atomic ... ok
+test retention::unknown_is_scoped_inspection_and_future_prefix_is_not_applied ... ok
+test encoding::retained_allocations_are_charged_and_config_apply_refuses_small_envelope_atomically ... ok
+test encoding::exact_original_entries_and_additive_query_encoding_roundtrip ... ok
+test retention::original_configuration_positions_survive_own_checkpoint_and_suffix ... ok
+test encoding::truncated_trailing_overcount_and_wrong_scope_bytes_refuse ... ok
+test encoding::invalid_original_history_shapes_cannot_encode_and_short_buffers_are_atomic ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

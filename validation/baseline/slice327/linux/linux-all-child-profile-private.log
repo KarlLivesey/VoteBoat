@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 4 tests
+test logical_voter::application::tests::control_profile::selected_profile_is_immutable_and_checkpoint_binding_is_exact ... ok
+test logical_voter::application::tests::control_profile::control_result_reservation_requires_exact_schema_group_and_operation ... ok
+test logical_voter::application::tests::control_profile::malformed_and_business_wrapped_controls_do_not_use_reserved_capacity ... ok
+test logical_voter::application::tests::control_profile::original_mixed_action_uses_reserved_capacity_and_replays_without_splitting ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 170 filtered out; finished in 0.00s
+

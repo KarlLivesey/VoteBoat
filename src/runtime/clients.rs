@@ -14,12 +14,29 @@
 // rights and limitations under the RPL.
 //! Client proposal ownership, deterministic application admission and outcomes.
 use super::*;
-use crate::{application::*, log::EntryPayload};
+use crate::{application::*, log::EntryPayload, logical_voter::LogicalActivationControlProfile};
+mod control;
+mod observer_clear;
+#[cfg(test)]
+mod tests;
 use std::ops::Bound::{Excluded, Unbounded};
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ClientRouterBinding {
     pub owner: RuntimeOwner,
     pub generation: ClientRouterGeneration,
+    authorization: RuntimeAuthorization,
+}
+impl ClientRouterBinding {
+    pub fn new(authorization: RuntimeAuthorization, generation: ClientRouterGeneration) -> Self {
+        Self {
+            owner: authorization.owner(),
+            generation,
+            authorization,
+        }
+    }
+    pub fn authorization(self) -> RuntimeAuthorization {
+        self.authorization
+    }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ClientTicket {
@@ -39,8 +56,15 @@ pub struct ClientRouterLimits {
     pub requests: usize,
     pub group_requests: usize,
     pub bytes: usize,
+    /// Selected command ceiling, from1 byte through16MiB; defaults remain64KiB.
+    /// Admission also charges the original allocation, copy and receipt budget.
     pub command_bytes: usize,
     pub receipt_bytes: usize,
+    /// Selected logical activation windows; ignored by physical/unselected routers.
+    pub control_requests: usize,
+    pub group_control_requests: usize,
+    /// Retained whole selected windows, including original/copy bytes and receipt.
+    pub control_bytes: usize,
 }
 impl Default for ClientRouterLimits {
     fn default() -> Self {
@@ -50,6 +74,9 @@ impl Default for ClientRouterLimits {
             bytes: 32 * 1024 * 1024,
             command_bytes: 64 * 1024,
             receipt_bytes: 1024 * 1024,
+            control_requests: 2,
+            group_control_requests: 2,
+            control_bytes: 4 * 1024 * 1024,
         }
     }
 }
@@ -60,6 +87,7 @@ pub struct ClientUsage {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ClientError {
+    LogicalReleaseRequired,
     InvalidLimits,
     WrongBinding,
     UnknownGroup,
@@ -129,6 +157,7 @@ struct Pending<R> {
     term: u64,
     receipt_bound: usize,
     charged: usize,
+    control: bool,
     position: Option<ProposalPosition>,
     stepped: bool,
     terminal: bool,
@@ -150,12 +179,41 @@ pub struct ClientRouter<R> {
     groups: BTreeMap<GroupIdentity, usize>,
     ready: VecDeque<u64>,
     usage: ClientUsage,
+    bulk: ClientUsage,
+    bulk_groups: BTreeMap<GroupIdentity, usize>,
+    control_profile: Option<LogicalActivationControlProfile>,
     sequence: u64,
     cursor: u64,
     closed: bool,
 }
 impl<R: ApplicationReceipt> ClientRouter<R> {
     pub fn new(
+        binding: ClientRouterBinding,
+        limits: ClientRouterLimits,
+    ) -> Result<Self, ClientError> {
+        if binding.authorization.is_logical() {
+            return Err(ClientError::LogicalReleaseRequired);
+        }
+        Self::from_binding(binding, limits)
+    }
+    pub(crate) fn new_logical(
+        binding: ClientRouterBinding,
+        limits: ClientRouterLimits,
+        profile: Option<&LogicalActivationControlProfile>,
+    ) -> Result<Self, ClientError> {
+        if !binding.authorization.is_logical() {
+            return Err(ClientError::WrongBinding);
+        }
+        let router = Self::from_binding(binding, limits)?;
+        let Some(profile) = profile else {
+            return Ok(router);
+        };
+        if binding.authorization.logical().unwrap().mapping.parent != profile.parent() {
+            return Err(ClientError::WrongBinding);
+        }
+        router.select_activation(profile.clone())
+    }
+    fn from_binding(
         binding: ClientRouterBinding,
         limits: ClientRouterLimits,
     ) -> Result<Self, ClientError> {
@@ -166,7 +224,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             || limits.bytes == 0
             || limits.bytes > 1024 * 1024 * 1024
             || limits.command_bytes == 0
-            || limits.command_bytes > 1024 * 1024
+            || limits.command_bytes > 16 * 1024 * 1024
             || limits.receipt_bytes < size_of::<R>()
             || limits.receipt_bytes > 16 * 1024 * 1024
             || limits
@@ -185,6 +243,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             groups: BTreeMap::new(),
             ready: VecDeque::with_capacity(limits.requests),
             usage: ClientUsage::default(),
+            bulk: ClientUsage::default(),
+            bulk_groups: BTreeMap::new(),
+            control_profile: None,
             sequence: 0,
             cursor: 0,
             closed: false,
@@ -215,11 +276,13 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         owner: &EffectOwner<Q, T, E>,
         application: &A,
         request: &ClientRequest,
-    ) -> Result<(usize, usize, u64, u64), ClientError> {
+    ) -> Result<(usize, usize, u64, u64, bool), ClientError> {
         if self.closed {
             return Err(ClientError::Closed);
         }
-        if owner.identity() != self.binding.owner {
+        if owner.identity() != self.binding.owner
+            || owner.authorization() != self.binding.authorization
+        {
             return Err(ClientError::WrongBinding);
         }
         if owner.is_failed() {
@@ -234,11 +297,8 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         {
             return Err(ClientError::RequestTooLarge);
         }
-        if self.usage.requests >= self.limits.requests
-            || self.groups.get(&request.group).copied().unwrap_or(0) >= self.limits.group_requests
-        {
-            return Err(ClientError::Overloaded);
-        }
+        let control = self.request_control(request)?;
+        self.check_capacity(request.group, 0, control)?;
         let state = core.state();
         if application.applied_index() < state.base_index()
             || application.applied_index() > state.commit_index
@@ -274,11 +334,15 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             .and_then(|n| n.checked_add(receipt_bound))
             .and_then(|n| n.checked_add(size_of::<Pending<R>>()))
             .ok_or(ClientError::RequestTooLarge)?;
-        if charged > self.limits.bytes - self.usage.bytes {
-            return Err(ClientError::Overloaded);
-        }
+        self.check_capacity(request.group, charged, control)?;
         let sequence = self.sequence.checked_add(1).ok_or(ClientError::Exhausted)?;
-        Ok((receipt_bound, charged, sequence, state.hard_state.term))
+        Ok((
+            receipt_bound,
+            charged,
+            sequence,
+            state.hard_state.term,
+            control,
+        ))
     }
     pub fn submit<
         A: ProposalAdmission<Receipt = R>,
@@ -292,7 +356,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         request: ClientRequest,
     ) -> Result<ClientTicket, ClientRejected> {
         let check = self.check_submit(owner, application, &request);
-        let (receipt_bound, charged, sequence, term) = match check {
+        let (receipt_bound, charged, sequence, term, control) = match check {
             Ok(v) => v,
             Err(reason) => return Err(ClientRejected { reason, request }),
         };
@@ -308,7 +372,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 return Err(ClientRejected {
                     reason: ClientError::Runtime(rejected.reason),
                     request,
-                })
+                });
             }
         };
         self.sequence = sequence;
@@ -327,6 +391,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 term,
                 receipt_bound,
                 charged,
+                control,
                 position: None,
                 stepped: false,
                 terminal: false,
@@ -340,6 +405,11 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         *self.groups.entry(ticket.group).or_default() += 1;
         self.usage.requests += 1;
         self.usage.bytes += charged;
+        if !control {
+            self.bulk.requests += 1;
+            self.bulk.bytes += charged;
+            *self.bulk_groups.entry(ticket.group).or_default() += 1;
+        }
         Ok(ticket)
     }
     fn publish(&mut self, sequence: u64, outcome: ClientOutcome<R>) {
@@ -366,6 +436,15 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         }
         self.usage.requests -= 1;
         self.usage.bytes -= p.charged;
+        if !p.control {
+            self.bulk.requests -= 1;
+            self.bulk.bytes -= p.charged;
+            let n = self.bulk_groups.get_mut(&p.ticket.group).unwrap();
+            *n -= 1;
+            if *n == 0 {
+                self.bulk_groups.remove(&p.ticket.group);
+            }
+        }
         let n = self.groups.get_mut(&p.ticket.group).unwrap();
         *n -= 1;
         if *n == 0 {
@@ -405,7 +484,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         application: impl Fn(GroupIdentity) -> Option<&'a A>,
         mut configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, ClientError> {
-        if owner.identity() != self.binding.owner {
+        if owner.identity() != self.binding.owner
+            || owner.authorization() != self.binding.authorization
+        {
             return Err(ClientError::WrongBinding);
         }
         let steps = owner
@@ -505,16 +586,87 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         applications: &mut ApplicationRouter<R>,
         output: ApplicationResults<R>,
     ) -> Result<usize, ClientDeliveryRejected<R>> {
-        let preflight = (|| {
+        if owner.authorization().is_logical() || self.binding.authorization.is_logical() {
+            return Err(ClientDeliveryRejected {
+                reason: ClientError::LogicalReleaseRequired,
+                results: Box::new(output),
+            });
+        }
+        self.deliver_owned(owner, applications, output)
+    }
+    pub(crate) fn deliver_owned<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        applications: &mut ApplicationRouter<R>,
+        output: ApplicationResults<R>,
+    ) -> Result<usize, ClientDeliveryRejected<R>> {
+        let preflight = self.validate_delivery(owner, applications, &output);
+        let matches = match preflight {
+            Ok(v) => v,
+            Err(reason) => {
+                if reason == ClientError::ProviderViolation {
+                    let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
+                    self.closed = true;
+                }
+                return Err(ClientDeliveryRejected {
+                    reason,
+                    results: Box::new(output),
+                });
+            }
+        };
+        let receipts = match applications.complete_owned(output) {
+            Ok(v) => v,
+            Err(rejected) => {
+                return Err(ClientDeliveryRejected {
+                    reason: ClientError::StaleTicket,
+                    results: rejected.results,
+                });
+            }
+        };
+        let mut delivered = 0;
+        for (i, receipt) in receipts.into_iter().enumerate() {
+            if let Some(sequence) = matches.get(&i).copied() {
+                let p = self.pending.get_mut(&sequence).unwrap();
+                p.terminal = true;
+                let pos = p.position.unwrap();
+                self.positions
+                    .remove(&(p.ticket.group, pos.index, pos.term));
+                if !p.has_output {
+                    delivered += 1;
+                    self.publish(
+                        sequence,
+                        ClientOutcome::Applied {
+                            position: pos,
+                            receipt,
+                        },
+                    );
+                }
+                self.cleanup(sequence);
+            }
+        }
+        Ok(delivered)
+    }
+    pub(crate) fn validate_delivery<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
+        &self,
+        owner: &EffectOwner<Q, T, E>,
+        applications: &ApplicationRouter<R>,
+        output: &ApplicationResults<R>,
+    ) -> Result<BTreeMap<usize, u64>, ClientError> {
+        (|| {
             if owner.identity() != self.binding.owner
+                || owner.authorization() != self.binding.authorization
                 || output.effect().visit.owner != self.binding.owner
                 || applications.binding().owner != self.binding.owner
+                || applications.binding().authorization() != self.binding.authorization
             {
                 return Err(ClientError::WrongBinding);
             }
             if owner.is_failed() {
                 return Err(ClientError::Fenced);
             }
+            applications
+                .validate_result(output)
+                .map_err(|_| ClientError::StaleTicket)?;
             let group = output.effect().visit.group;
             let state = owner.core(group).ok_or(ClientError::UnknownGroup)?.state();
             let mut matches = BTreeMap::new();
@@ -548,51 +700,24 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 matches.insert(i, sequence);
             }
             Ok(matches)
-        })();
-        let matches = match preflight {
-            Ok(v) => v,
-            Err(reason) => {
-                if reason == ClientError::ProviderViolation {
-                    let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
-                    self.closed = true;
-                }
-                return Err(ClientDeliveryRejected {
-                    reason,
-                    results: Box::new(output),
-                });
-            }
-        };
-        let receipts = match applications.complete(output) {
-            Ok(v) => v,
-            Err(rejected) => {
-                return Err(ClientDeliveryRejected {
-                    reason: ClientError::StaleTicket,
-                    results: rejected.results,
-                })
-            }
-        };
-        let mut delivered = 0;
-        for (i, receipt) in receipts.into_iter().enumerate() {
-            if let Some(sequence) = matches.get(&i).copied() {
-                let p = self.pending.get_mut(&sequence).unwrap();
-                p.terminal = true;
-                let pos = p.position.unwrap();
-                self.positions
-                    .remove(&(p.ticket.group, pos.index, pos.term));
-                if !p.has_output {
-                    delivered += 1;
-                    self.publish(
-                        sequence,
-                        ClientOutcome::Applied {
-                            position: pos,
-                            receipt,
-                        },
-                    );
-                }
-                self.cleanup(sequence);
-            }
-        }
-        Ok(delivered)
+        })()
+    }
+    pub(crate) fn capture_clients<'a>(
+        &'a self,
+        output: &'a ApplicationResults<R>,
+    ) -> impl Iterator<Item = (usize, ClientTicket, ProposalPosition, &'a [u8])> {
+        output
+            .positions()
+            .iter()
+            .enumerate()
+            .filter_map(|(i, position)| {
+                let group = output.effect().visit.group;
+                let sequence = self
+                    .positions
+                    .get(&(group, position.index, position.term))?;
+                let pending = &self.pending[sequence];
+                Some((i, pending.ticket, *position, pending.bytes.as_slice()))
+            })
     }
     /// Cancel only the wait. Reservation survives until exact step/log/application
     /// evidence transfers capacity or a failed-owner abort makes it obsolete.
@@ -618,7 +743,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         owner: &EffectOwner<Q, T, E>,
         visits: usize,
     ) -> Result<usize, ClientError> {
-        if owner.identity() != self.binding.owner {
+        if owner.identity() != self.binding.owner
+            || owner.authorization() != self.binding.authorization
+        {
             return Err(ClientError::WrongBinding);
         }
         if visits > 65536 {
@@ -699,7 +826,9 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         &mut self,
         owner: &mut EffectOwner<Q, T, E>,
     ) -> Result<(), ClientError> {
-        if owner.identity() != self.binding.owner {
+        if owner.identity() != self.binding.owner
+            || owner.authorization() != self.binding.authorization
+        {
             return Err(ClientError::WrongBinding);
         }
         self.closed = true;

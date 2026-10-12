@@ -521,20 +521,7 @@ fn apply_records(
     Ok(())
 }
 
-/// Standard reflected CRC32C (Castagnoli), for accidental corruption only.
-pub(crate) fn crc32c(bytes: &[u8]) -> u32 {
-    crc32c_extend(0, bytes)
-}
-pub(crate) fn crc32c_extend(previous: u32, bytes: &[u8]) -> u32 {
-    let mut crc = !previous;
-    for byte in bytes {
-        crc ^= *byte as u32;
-        for _ in 0..8 {
-            crc = (crc >> 1) ^ (0x82f63b78 & 0u32.wrapping_sub(crc & 1));
-        }
-    }
-    !crc
-}
+pub(crate) use crate::format_crc::{crc32c, crc32c_extend};
 fn u64_at(bytes: &[u8], offset: usize) -> u64 {
     u64::from_le_bytes(bytes[offset..offset + 8].try_into().unwrap())
 }

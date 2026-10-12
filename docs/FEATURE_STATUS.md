@@ -1,73 +1,73 @@
 # Feature status
 
-Current priority: usable, feature-complete Rust embedding and networked service
-on Linux and macOS. Current work covers feature sets only. Performance tuning
-is deferred; completing feature qualification does not automatically start it.
-The current goal now includes functional P8 work and stops at its qualified
-completion. P9 performance and P10 security remain separate later phases.
+The goal is **all P0–P8 functionality, qualified on Linux and macOS**. P8 is
+still incomplete. Performance work is P9, dedicated security work is P10,
+and Windows is deferred. Stop after P8; do not begin those later phases automatically.
 
-| Capability | Implemented path |
+| Capability | Current evidence |
 | --- | --- |
-| Durable writes, quorum reads, retries and restart | Native Raft, WAL/checkpoints, public Node and counter service |
-| TCP/TLS and QUIC | Public connector/session/transport contracts and native providers |
-| Shared Multi-Raft and bounded work | Shared scheduling, workers, admission and owned shutdown |
-| Recursive quorums | Validated policies at elections, commitment and reads |
-| Membership changes | Learner catch-up/readiness, joint/final configuration and recovery |
-| Responsibilities and routing | Replicated manifests, selective placement, recursive directory and cache |
-| Split and compatible merge | Durable fence/import/publish/activate, retry lineage and retirement |
-| Replaceable infrastructure | Public application, storage, transport and runtime seams with native and downstream test providers |
+| Durable Raft, quorum reads, retries and restart | Native WAL/checkpoints, public Rust embedding and networked counter service; Linux/macOS acceptance records |
+| TCP/TLS and QUIC | Native providers through public session, connector and transport contracts |
+| Shared Multi-Raft, recursive quorums, routing and split/merge | Implemented paths with protocol, durability and selected native acceptance records |
+| Broader transactions and striped single-group storage | Selected Linux/macOS matrices in frozen318/321 |
+| Subgroup-backed logical voters | Selected Linux/macOS facade and recovery controls; current deeper composition remains under qualification |
+| Ordinary physical-voter relays | Guarded Linux/macOS static-tree TCP/QUIC histories and relay-backed logical storage pass, including branch loss/restart, retained TLS closure, checkpoint/recovery and cleanup |
 
-These mechanisms are implemented. The current Linux/macOS acceptance sweep is
-still running; **feature-complete qualification is not yet claimed**. Linux's
-original complete four-profile sweep passes5,661 test executions with zero
-failures ([terminal evidence](../validation/baseline/slice302/linux/README.md)).
-A controlled shutdown policy defect
-is corrected: the service respects an empty QUIC connection's original close
-timer after application work settles. The corrected complete counter target
-passes203 tests on Linux and202 on Mac, including the previously failing Mac
-multi-group history. Formatting and all four strict Clippy profiles are clean
-on both hosts. The public
-examples expose bounded profiles, and do not automate every library combination.
+The remaining functional work is:
 
-The finite remaining baseline acceptance is the current platform sweep and resolution
-of any failures it demonstrates. The prepared batch adds seeded parser campaigns,
-per-bucket split client histories and shared connector assertions. The shutdown
-correction pins existing protocol ownership once; it changes no provider timer
-or consensus rule. The original Mac failure lacked ownership observations, so
-its precise internal cause remains unknown. See the linked plan and actual evidence
-in [IMPLEMENTATION.md](IMPLEMENTATION.md).
+1. **Logical membership lifecycle.** The first genuine twelve-owner learner
+   replacement passes Linux TCP and QUIC, including export/import, readiness,
+   Joint/Final, Outcome/Release, business operations and cleanup. Imported-target
+   same-store cold recovery also passes both protocols, with the nine source
+   owners kept live. Linux also passes all-twelve-store Joint WAL reconstruction
+   and committed/uncommitted-Unknown import cold resolution. Repeated replacement
+   now passes Linux TCP and QUIC, including both replacements and all fifteen
+   owners' checkpoints, cleanup and port rebinds.
+   The Mac's first replacement passes over TCP and QUIC on the preflight-fix
+   source, with final source and binary guards verified. The Mac also passes
+   imported-target and committed/uncommitted-Unknown recovery over both protocols.
+   Repeated replacement
+   reaches durable Final but misses its fixture wait; the corrected phase wait
+   passes Linux TCP; QUIC reaches the same shutdown failure as Mac Joint recovery.
+   A guarded diagnostic identifies the failed conjunct: parent and bridge
+   observations are settled, while running children still own consensus work.
+   The corrected fixture closes and fully drains those same children next;
+   Linux repeated TCP now passes all fifteen owners' cleanup, and Joint cold
+   recovery passes both protocols. The latest repeated-QUIC run also passes
+   every cleanup check; its preceding child-close timeout remains unexplained.
+   Matching Mac qualification is running.
+2. **Mac logical composition.** Complete twenty-seven-owner cold recovery passes
+   Linux TCP and QUIC: same-store restore, duplicate results, fresh reads and all
+   owner joins. The matching Mac cut passes formatting, all four strict Clippy
+   configurations and 36 controls, but fails its initial TCP write and QUIC Claim.
+   A later guarded QUIC observation completes the original write and all three
+   top owners converge, then fails the checkpoint gate before cold recovery.
+   A subsequent checkpoint observer instead fails during the write, before
+   checkpointing, while lower durable work advances. The write test now keeps
+   its original write limit and gives subsequent exact replica convergence a
+   separate bounded wait. Full Linux cold histories pass both protocols;
+   matching Mac qualification is queued behind membership recovery.
+3. **Final current-source qualification.** Audit the complete P0–P8 requirement
+   map, resolve remaining demonstrated failures, and run the required Linux/macOS
+   checks against a coherent source snapshot. The current Linux matrix is running;
+   completion remains unproven until platform and requirement evidence is reviewed.
 
-Further reference checkpoint comparison, extra provider permutations and global
-orchestration are not new prerequisites for this feature milestone. External
-storage adapters still require implementation and conformance; the public seam
-does not certify a hypothetical backend or permit an unverified live migration.
-Subgroup-backed logical voters and broader transactions are newly included in
-P8. Native logical voters remain unimplemented; the first fixed transfer is usable.
-Existing recursive quorums and outbox
-support do not implement them. Their protocol/model/recovery contracts precede
-native qualification. The [transaction protocol model311](../validation/baseline/slice311/README.md)
-now passes on Linux/Mac in four profiles, including actual weakened-rule
-counterexamples. [Replicated transaction applications312](../validation/baseline/slice312/README.md)
-now pass17 unit/downstream tests per profile on both hosts, with zero formatting
-and four strict Clippy profiles. The [actual Node driver313](../validation/baseline/slice313/README.md)
-passes124 affected test executions per host, including TCP/QUIC, unavailable quorum
-with retained locks, checkpoint/suffix resume, original results and joined cleanup;
-formatting/four strict profiles are zero. [Rust embedding](TRANSACTIONS.md) is usable.
-The [logical-voter protocol models314](../validation/baseline/slice314/README.md)
-pass17 tests in each of four profiles on both hosts, with zero formatting and
-strict Clippy diagnostics. Nine declared positive graphs exhaust; actual weakened
-guard traces replay and safe counterparts progress. This qualifies the protocol
-gate, not a native logical-voter service or the omitted crash/lag histories.
-Remaining broader transaction scope and logical voters keep P8 incomplete.
-Striped single-group WAL and representative-relay optimization
-move to P9, along with the original performance gates and required research cost
-comparisons. Default research promotion remains gated by that evidence. Windows
-remains deferred. This goal completes only after its functional P0–P8 scope is
-qualified, then stops for the user's performance-planning review.
+Every implementation slice must pass formatting and strict all-target Clippy in
+all four supported feature configurations. The pre-push hook remains enabled.
+Frozen passing cuts establish their recorded scope; they do not certify the
+moving working tree or an untested combination. CI remains background feedback.
 
-Existing evidence includes the [mixed Linux/Mac service](../validation/baseline/slice256/README.md),
-[native snapshot recovery](../validation/baseline/slice294/README.md),
-[known-Raft comparison](../validation/baseline/slice296/README.md) and
-[interrupted recovery and owned close](../validation/baseline/slice297/README.md).
-Historical failures stay in those records and are not erased by selected later
-passes. The detailed [acceptance map](BASELINE_ACCEPTANCE.md) tracks their scope.
+The static logical constructor now rejects release profiles that cannot hold a
+whole supported commit batch. Linux controls and native facade histories pass;
+the matching Mac controls and both facade histories now pass too. This does not
+resolve the Mac nested-write failure.
+
+The latest bounded roadmap audit found no additional missing feature set beyond
+the logical composition and membership gates above. A preserved Mac hundred-group
+test misses its ten-second wall limit with persistence/snapshot work pending;
+that record is not evidence of a new missing feature or a performance target for P8.
+
+See the [current mini plan](IMPLEMENTATION.md#current-mini-plan372),
+[requirement and acceptance map](BASELINE_ACCEPTANCE.md), and
+[validation record](../validation/REPORT.md). Historical failures and exact
+source, executable and test evidence remain in those records.

@@ -16,12 +16,32 @@
 use super::*;
 use crate::application::*;
 use crate::log::{EntryPayload, LogEntry};
+use crate::logical_voter::LogicalActivationControlProfile;
+mod control;
+#[cfg(test)]
+mod tests;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ApplicationRouterBinding {
     pub owner: RuntimeOwner,
     /// Fresh host-reserved generation within this runtime lifetime.
     pub generation: ApplicationRouterGeneration,
+    authorization: RuntimeAuthorization,
+}
+impl ApplicationRouterBinding {
+    pub fn new(
+        authorization: RuntimeAuthorization,
+        generation: ApplicationRouterGeneration,
+    ) -> Self {
+        Self {
+            owner: authorization.owner(),
+            generation,
+            authorization,
+        }
+    }
+    pub fn authorization(self) -> RuntimeAuthorization {
+        self.authorization
+    }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ApplicationResultTicket {
@@ -33,7 +53,8 @@ pub struct ApplicationRouterLimits {
     pub batches: usize,
     pub receipts: usize,
     pub bytes: usize,
-    /// Reserved for committed batches without commands (e.g. election no-ops).
+    /// Reserved for command-free batches and, in an exact selected logical
+    /// activation assembly, whole batches containing valid activation control.
     pub control_batches: usize,
     pub control_bytes: usize,
     pub batch_receipts: usize,
@@ -60,6 +81,7 @@ pub struct ApplicationResultUsage {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ApplicationRouteError {
+    LogicalReleaseRequired,
     InvalidLimits,
     WrongBinding,
     WrongEffect,
@@ -112,6 +134,11 @@ pub struct ApplicationResultRejected<R> {
     pub reason: ApplicationRouteError,
     pub results: Box<ApplicationResults<R>>,
 }
+#[derive(Debug)]
+pub(crate) struct CapturedApplication<R> {
+    pub(crate) lease: EffectLease,
+    pub(crate) results: ApplicationResults<R>,
+}
 struct Held<R> {
     ticket: ApplicationResultTicket,
     output: Option<ApplicationResults<R>>,
@@ -130,12 +157,43 @@ pub struct ApplicationRouter<R> {
     ready: VecDeque<u64>,
     usage: ApplicationResultUsage,
     bulk: ApplicationResultUsage,
+    control_profile: Option<LogicalActivationControlProfile>,
+    logical_batch: Option<usize>,
+    control_receipts: usize,
     sequence: u64,
     closed: bool,
     failed: bool,
 }
 impl<R: ApplicationReceipt> ApplicationRouter<R> {
     pub fn new(
+        binding: ApplicationRouterBinding,
+        limits: ApplicationRouterLimits,
+    ) -> Result<Self, ApplicationRouteError> {
+        if binding.authorization.is_logical() {
+            return Err(ApplicationRouteError::LogicalReleaseRequired);
+        }
+        Self::from_binding(binding, limits)
+    }
+    pub(crate) fn new_logical(
+        binding: ApplicationRouterBinding,
+        limits: ApplicationRouterLimits,
+        profile: Option<&LogicalActivationControlProfile>,
+        max_committed_entries: usize,
+    ) -> Result<Self, ApplicationRouteError> {
+        if !binding.authorization.is_logical() {
+            return Err(ApplicationRouteError::WrongBinding);
+        }
+        let router =
+            Self::from_binding(binding, limits)?.select_logical_batch(max_committed_entries)?;
+        let Some(profile) = profile else {
+            return Ok(router);
+        };
+        if binding.authorization.logical().unwrap().mapping.parent != profile.parent() {
+            return Err(ApplicationRouteError::WrongBinding);
+        }
+        router.select_activation(profile.clone(), max_committed_entries)
+    }
+    fn from_binding(
         binding: ApplicationRouterBinding,
         limits: ApplicationRouterLimits,
     ) -> Result<Self, ApplicationRouteError> {
@@ -172,6 +230,9 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
             ready: VecDeque::with_capacity(limits.batches),
             usage: ApplicationResultUsage::default(),
             bulk: ApplicationResultUsage::default(),
+            control_profile: None,
+            logical_batch: None,
+            control_receipts: 0,
             sequence: 0,
             closed: false,
             failed: false,
@@ -212,7 +273,9 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         if self.closed {
             return Err(ApplicationRouteError::Closed);
         }
-        if owner.identity() != self.binding.owner {
+        if owner.identity() != self.binding.owner
+            || owner.authorization() != self.binding.authorization
+        {
             return Err(ApplicationRouteError::WrongBinding);
         }
         owner
@@ -266,17 +329,12 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
             )
             .and_then(|n| n.checked_add(size_of::<Held<R>>()))
             .ok_or(ApplicationRouteError::ResultTooLarge)?;
-        let control = count == 0;
-        let l = self.limits;
-        if self.usage.batches >= l.batches
-            || count > l.receipts - self.usage.receipts
-            || bytes > l.bytes - self.usage.bytes
-            || (!control
-                && (self.bulk.batches >= l.batches - l.control_batches
-                    || bytes > (l.bytes - l.control_bytes).saturating_sub(self.bulk.bytes)))
-        {
-            return Err(ApplicationRouteError::Overloaded);
-        }
+        let control = count == 0
+            || self
+                .control_profile
+                .as_ref()
+                .is_some_and(|p| p.is_control_batch(state.bootstrap.group, entries));
+        self.check_capacity(count, bytes, control)?;
         let sequence = self
             .sequence
             .checked_add(1)
@@ -295,6 +353,39 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         application: &mut A,
         now: MonoTime,
     ) -> Result<ApplicationResultTicket, ApplicationRouteRejected> {
+        if owner.authorization().is_logical() || self.binding.authorization.is_logical() {
+            return Err(ApplicationRouteRejected {
+                reason: ApplicationRouteError::LogicalReleaseRequired,
+                lease: Box::new(lease),
+            });
+        }
+        let captured = self.capture_owned(owner, lease, application)?;
+        let CapturedApplication { lease, results } = captured;
+        if let Err(rejected) = owner.release(lease, results.through, now) {
+            let _ = self.complete_owned(results);
+            self.failed = true;
+            let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
+            return Err(ApplicationRouteRejected {
+                reason: ApplicationRouteError::Owner(rejected.reason),
+                lease: rejected.lease,
+            });
+        }
+        let ticket = results.ticket;
+        self.held.get_mut(&ticket.sequence).unwrap().output = Some(results);
+        self.ready.push_back(ticket.sequence);
+        Ok(ticket)
+    }
+    pub(crate) fn capture_owned<
+        A: BoundedStateMachine<Receipt = R>,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        lease: EffectLease,
+        application: &mut A,
+    ) -> Result<CapturedApplication<R>, ApplicationRouteRejected> {
         let preflight = self.check_submit(owner, &lease, application);
         let (count, bound, bytes, control, sequence, through) = match preflight {
             Ok(v) => v,
@@ -353,14 +444,6 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         );
         let positions = positions.into_boxed_slice();
         let effect = lease.ticket;
-        if let Err(rejected) = owner.release(lease, through, now) {
-            self.failed = true;
-            let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
-            return Err(ApplicationRouteRejected {
-                reason: ApplicationRouteError::Owner(rejected.reason),
-                lease: rejected.lease,
-            });
-        }
         self.sequence = sequence;
         let ticket = ApplicationResultTicket {
             binding: self.binding,
@@ -383,19 +466,21 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
             sequence,
             Held {
                 ticket,
-                output: Some(ApplicationResults {
-                    ticket,
-                    effect,
-                    through,
-                    receipts,
-                    positions,
-                }),
+                output: None,
                 charged,
                 control,
             },
         );
-        self.ready.push_back(sequence);
-        Ok(ticket)
+        Ok(CapturedApplication {
+            lease,
+            results: ApplicationResults {
+                ticket,
+                effect,
+                through,
+                receipts,
+                positions,
+            },
+        })
     }
     fn validate_receipts(
         applied: u64,
@@ -428,6 +513,9 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         Some(())
     }
     pub fn poll(&mut self) -> Option<ApplicationResults<R>> {
+        if self.binding.authorization.is_logical() {
+            return None;
+        }
         let sequence = self.ready.pop_front()?;
         self.held.get_mut(&sequence)?.output.take()
     }
@@ -438,14 +526,35 @@ impl<R: ApplicationReceipt> ApplicationRouter<R> {
         &mut self,
         output: ApplicationResults<R>,
     ) -> Result<Vec<R>, ApplicationResultRejected<R>> {
-        let valid = output.ticket.binding == self.binding
-            && self
+        if self.binding.authorization.is_logical() {
+            return Err(ApplicationResultRejected {
+                reason: ApplicationRouteError::LogicalReleaseRequired,
+                results: Box::new(output),
+            });
+        }
+        self.complete_owned(output)
+    }
+    pub(crate) fn validate_result(
+        &self,
+        output: &ApplicationResults<R>,
+    ) -> Result<(), ApplicationRouteError> {
+        if output.ticket.binding != self.binding
+            || self
                 .held
                 .get(&output.ticket.sequence)
-                .is_some_and(|h| h.ticket == output.ticket && h.output.is_none());
-        if !valid {
+                .is_none_or(|h| h.ticket != output.ticket || h.output.is_some())
+        {
+            return Err(ApplicationRouteError::StaleResult);
+        }
+        Ok(())
+    }
+    pub(crate) fn complete_owned(
+        &mut self,
+        output: ApplicationResults<R>,
+    ) -> Result<Vec<R>, ApplicationResultRejected<R>> {
+        if let Err(reason) = self.validate_result(&output) {
             return Err(ApplicationResultRejected {
-                reason: ApplicationRouteError::StaleResult,
+                reason,
                 results: Box::new(output),
             });
         }

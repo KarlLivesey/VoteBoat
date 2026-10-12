@@ -14,10 +14,7 @@
 // rights and limitations under the RPL.
 //! Owning node facade over the same public local and peer providers.
 use super::*;
-use crate::{
-    application::*, connect::PeerConnector, outbound::*, snapshot_worker::*, transport::*,
-    worker::*,
-};
+use crate::{application::*, outbound::*, snapshot_worker::*, worker::*};
 mod drain;
 pub use drain::*;
 
@@ -74,7 +71,7 @@ where
         }
     }
 }
-pub struct NodeParts<
+pub struct NetworkNodeParts<
     S: ReadyScheduler,
     T: TimerService,
     E: ElectionEntropy,
@@ -82,14 +79,13 @@ pub struct NodeParts<
     W: PersistenceWorker,
     O: OutboundQueue,
     H: SnapshotWorker,
-    C: PeerConnector,
-    F: PeerTransportFactory<C::Session>,
+    N: PeerNetwork,
 > where
     A::Receipt: ApplicationReceipt,
 {
     pub local: NodeLocalParts<S, T, E, A, W, O, H>,
     /// Omission is valid only when all configured groups have no remote voters.
-    pub peers: Option<PeerParts<C, F>>,
+    pub peers: Option<N::Parts>,
 }
 #[derive(Clone, Copy, Debug, Default)]
 pub struct NodeLimits {
@@ -135,8 +131,8 @@ pub struct NodeRejected<P> {
 }
 pub type NodeBuild<N, P> = Result<N, NodeRejected<P>>;
 pub type NodeReclaim<N, P> = Result<P, Box<N>>;
-pub type NodeRecoveryParts<S, T, E, A, W, O, H, C, F> =
-    NodeRecovery<NodeLocalParts<S, T, E, A, W, O, H>, <A as StateMachine>::Receipt, C, F>;
+pub type NetworkNodeRecoveryParts<S, T, E, A, W, O, H, N> =
+    NetworkNodeRecovery<NodeLocalParts<S, T, E, A, W, O, H>, <A as StateMachine>::Receipt, N>;
 #[derive(Clone, Copy, Debug)]
 pub enum NodeControl {
     /// Volatile handoff; the host owns durable intent, timeout and result.
@@ -163,10 +159,10 @@ pub struct NodeProgress {
     pub replica: Option<ReplicaProgress>,
     pub peers: Option<PeerDriverProgress>,
 }
-pub struct NodeRecovery<L, R, C: PeerConnector, F: PeerTransportFactory<C::Session>> {
+pub struct NetworkNodeRecovery<L, R, N: PeerNetwork> {
     pub local: L,
     pub replica: ReplicaDriver<R>,
-    pub peers: Option<PeerDriver<C, F>>,
+    pub peers: Option<N>,
     pub reason: NodeError,
     pub configuration: ConfigurationRequests,
     pub maintenance: WalMaintenanceStatus,
@@ -175,7 +171,7 @@ pub struct NodeRecovery<L, R, C: PeerConnector, F: PeerTransportFactory<C::Sessi
 /// One owner of selected component handles, not a process-wide service. Provider
 /// scoped close/drain contracts leave shared host executors and unrelated users
 /// intact. Construction and polling never create hidden infrastructure.
-pub struct Node<
+pub struct NetworkNode<
     S: ReadyScheduler,
     T: TimerService,
     E: ElectionEntropy,
@@ -183,14 +179,13 @@ pub struct Node<
     W: PersistenceWorker,
     O: OutboundQueue,
     H: SnapshotWorker,
-    C: PeerConnector,
-    F: PeerTransportFactory<C::Session>,
+    N: PeerNetwork,
 > where
     A::Receipt: ApplicationReceipt,
 {
     local: NodeLocalParts<S, T, E, A, W, O, H>,
     replica: ReplicaDriver<A::Receipt>,
-    peers: Option<PeerDriver<C, F>>,
+    peers: Option<N>,
     state: NodeState,
     now: MonoTime,
     failure: Option<NodeError>,
@@ -208,20 +203,19 @@ impl<
         W: PersistenceWorker,
         O: OutboundQueue,
         H: SnapshotWorker,
-        C: PeerConnector,
-        F: PeerTransportFactory<C::Session>,
-    > Node<S, T, E, A, W, O, H, C, F>
+        N: PeerNetworkConfiguration,
+    > NetworkNode<S, T, E, A, W, O, H, N>
 where
     A::Receipt: ApplicationReceipt,
-    C::Endpoint: Clone,
+    N::Endpoint: Clone,
 {
     // Keep every selected provider visible and return its ownership on rejection.
     #[allow(clippy::type_complexity)]
     pub fn from_parts(
-        mut parts: NodeParts<S, T, E, A, W, O, H, C, F>,
+        mut parts: NetworkNodeParts<S, T, E, A, W, O, H, N>,
         limits: NodeLimits,
         now: MonoTime,
-    ) -> NodeBuild<Self, NodeParts<S, T, E, A, W, O, H, C, F>> {
+    ) -> NodeBuild<Self, NetworkNodeParts<S, T, E, A, W, O, H, N>> {
         let checked = (|| {
             let configuration =
                 ConfigurationRequests::new(parts.local.owner.identity(), limits.configuration)
@@ -239,27 +233,15 @@ where
                 .peers
                 .as_ref()
                 .map(|network| {
-                    let routes = match &network.admission_routes {
-                        Some(routes) => routes.clone(),
-                        None => network
-                            .routes
-                            .iter()
-                            .map(|(&node, direction)| {
-                                let peer = network
-                                    .roster
-                                    .peer_identity(node)
-                                    .ok_or(NodeError::WrongPeerStore)?;
-                                Ok((
-                                    node,
-                                    PeerRoute {
-                                        store: peer.store,
-                                        direction: direction.clone(),
-                                    },
-                                ))
-                            })
-                            .collect::<Result<BTreeMap<_, _>, NodeError>>()?,
-                    };
-                    let budget = PeerDriver::<C, F>::route_budget(network, &routes, limits.peers)
+                    let routes = network.initial_routes().map_err(|reason| {
+                        if reason == PeerDriverError::WrongBinding {
+                            NodeError::WrongPeerStore
+                        } else {
+                            NodeError::Peer(reason)
+                        }
+                    })?;
+                    let budget = network
+                        .route_budget(&routes, limits.peers)
                         .map_err(NodeError::Peer)?;
                     let budget = parts
                         .local
@@ -283,7 +265,7 @@ where
             }
         };
         let mut peers = if let Some(network) = parts.peers.take() {
-            match PeerDriver::new(
+            match N::build(
                 network,
                 parts.local.owner.identity(),
                 &parts.local.outbound,
@@ -320,14 +302,16 @@ where
             drain_history: None,
         })
     }
-    fn validate_group_parts(parts: &NodeParts<S, T, E, A, W, O, H, C, F>) -> Result<(), NodeError> {
+    fn validate_group_parts(
+        parts: &NetworkNodeParts<S, T, E, A, W, O, H, N>,
+    ) -> Result<(), NodeError> {
         for group in parts.local.owner.groups() {
             let core = parts.local.owner.core(group).unwrap();
             if core.configuration_replication_enabled()
                 && parts
                     .peers
                     .as_ref()
-                    .is_none_or(|p| p.roster.wire_version() < 2)
+                    .is_none_or(|p| p.original_wire_version() < 2)
             {
                 return Err(NodeError::IncompatiblePeerProtocol);
             }
@@ -336,7 +320,7 @@ where
                     // Wire8 retains wire7 repair semantics and adds only
                     // the explicitly selected leadership handoff RPC.
                     !matches!(
-                        (version, p.roster.wire_version()),
+                        (version, p.original_wire_version()),
                         (5, 5) | (6, 6) | (7, 7 | 8)
                     )
                 })
@@ -355,8 +339,7 @@ where
                 }
                 let network = parts.peers.as_ref().ok_or(NodeError::MissingPeers)?;
                 if network
-                    .roster
-                    .peer_identity(peer)
+                    .source_identity(peer)
                     .is_none_or(|p| p.store != store)
                 {
                     return Err(NodeError::WrongPeerStore);
@@ -374,12 +357,56 @@ where
     pub fn local(&self) -> &NodeLocalParts<S, T, E, A, W, O, H> {
         &self.local
     }
-    pub fn peers(&self) -> Option<&PeerDriver<C, F>> {
+    pub fn peers(&self) -> Option<&N> {
         self.peers.as_ref()
+    }
+    /// Transfer an actual replacement channel through the selected network's
+    /// checked lifecycle operation; never expose mutable network authority.
+    pub fn replace_peer_channel(
+        &mut self,
+        channel: N::Channel,
+        now: MonoTime,
+    ) -> Result<N::Channel, (NodeError, Box<N::Channel>)>
+    where
+        N: PeerNetworkChannelReplacement,
+    {
+        if !matches!(self.state, NodeState::Running | NodeState::Quiescing) {
+            return Err((NodeError::Closed, Box::new(channel)));
+        }
+        if now < self.now {
+            return Err((NodeError::TimeWentBack, Box::new(channel)));
+        }
+        let Some(network) = &mut self.peers else {
+            return Err((NodeError::MissingPeers, Box::new(channel)));
+        };
+        network
+            .replace_channel(channel, now)
+            .map_err(|r| (NodeError::Peer(r.reason), r.parts))
+    }
+    /// Stop admission to the selected adjacent channel, preserving the core
+    /// and original collectors while normal polling settles actual local IO.
+    pub fn retire_peer_channel(&mut self, now: MonoTime) -> Result<(), NodeError>
+    where
+        N: PeerNetworkChannelReplacement,
+    {
+        if !matches!(self.state, NodeState::Running | NodeState::Quiescing) {
+            return Err(NodeError::Closed);
+        }
+        if now < self.now {
+            return Err(NodeError::TimeWentBack);
+        }
+        self.peers
+            .as_mut()
+            .ok_or(NodeError::MissingPeers)?
+            .retire_channel(now)
+            .map_err(NodeError::Peer)
     }
     /// Non-owning diagnostics, including while draining. Does not poll the node
     /// or grant mutable access to its roster, providers or accepted work.
-    pub fn peer_drain_status(&mut self, peer: NodeId) -> Option<crate::transport::PeerDrainStatus> {
+    pub fn peer_drain_status(&mut self, peer: NodeId) -> Option<N::DrainStatus>
+    where
+        N: PeerNetworkInspection,
+    {
         self.peers.as_mut()?.peer_drain_status(peer)
     }
     /// Replace prepared peer credentials through the selected provider. The
@@ -388,16 +415,16 @@ where
         &mut self,
         expected: crate::authorization::CredentialGeneration,
         replacement: crate::authorization::CredentialGeneration,
-        material: <C as crate::connect::PeerCredentialControl>::Credentials,
+        material: <N as PeerNetworkCredentials>::Credentials,
     ) -> Result<
-        <C as crate::connect::PeerCredentialControl>::Credentials,
+        <N as PeerNetworkCredentials>::Credentials,
         (
             crate::connect::ConnectError,
-            <C as crate::connect::PeerCredentialControl>::Credentials,
+            <N as PeerNetworkCredentials>::Credentials,
         ),
     >
     where
-        C: crate::connect::PeerCredentialControl,
+        N: PeerNetworkCredentials,
     {
         if self.state != NodeState::Running {
             return Err((crate::connect::ConnectError::Closed, material));
@@ -479,6 +506,80 @@ where
     }
     pub fn checkpoints(&self) -> &CheckpointStatus {
         &self.checkpoints
+    }
+    /// Read-only export of the selected live worker's exact durable anchor.
+    /// This data is not a learner-readiness or quorum receipt.
+    pub fn export_checkpoint(
+        &mut self,
+        group: GroupIdentity,
+    ) -> Result<SnapshotExportTicket, SnapshotRouteError> {
+        if self.state != NodeState::Running {
+            return Err(SnapshotRouteError::Closed);
+        }
+        let snapshots = self
+            .local
+            .snapshots
+            .as_mut()
+            .ok_or(SnapshotRouteError::NotSnapshot)?;
+        let app = self
+            .local
+            .applications
+            .get(&group)
+            .ok_or(SnapshotRouteError::UnknownGroup)?;
+        let result = snapshots.router.export_checkpoint(
+            &mut self.local.owner,
+            &mut snapshots.worker,
+            app,
+            group,
+        );
+        if self.local.owner.is_failed() {
+            self.enter_recovery(NodeError::Owner(EffectOwnerError::ProviderContract));
+        }
+        result
+    }
+    pub fn poll_checkpoint_export(&mut self) -> Option<SnapshotExportCompletion> {
+        self.local.snapshots.as_mut()?.router.poll_export()
+    }
+    pub fn complete_checkpoint_export(
+        &mut self,
+        completion: SnapshotExportCompletion,
+    ) -> Result<SnapshotExportOutcome, SnapshotExportRejected> {
+        let Some(snapshots) = self.local.snapshots.as_mut() else {
+            return Err(SnapshotExportRejected {
+                reason: SnapshotRouteError::NotSnapshot,
+                completion: Box::new(completion),
+            });
+        };
+        snapshots.router.complete_export(completion)
+    }
+    pub fn cancel_checkpoint_export(
+        &mut self,
+        ticket: SnapshotExportTicket,
+    ) -> Result<(), SnapshotRouteError> {
+        self.local
+            .snapshots
+            .as_mut()
+            .ok_or(SnapshotRouteError::NotSnapshot)?
+            .router
+            .cancel_export(ticket)
+    }
+    /// Only after failure, replace the ordinary snapshot consumer with bounded
+    /// terminal cleanup. Held export results still need original completion.
+    pub fn drain_failed_checkpoint_exports(
+        &mut self,
+        limit: usize,
+    ) -> Result<usize, SnapshotRouteError> {
+        if self.state != NodeState::RecoveryRequired {
+            return Err(SnapshotRouteError::ProviderContract);
+        }
+        let snapshots = self
+            .local
+            .snapshots
+            .as_mut()
+            .ok_or(SnapshotRouteError::NotSnapshot)?;
+        snapshots
+            .router
+            .drain_failed_exports(&mut self.local.owner, &mut snapshots.worker, limit)
     }
     pub fn propose(&mut self, request: ClientRequest) -> Result<ClientTicket, ClientRejected> {
         if self.drain.is_some() {
@@ -570,7 +671,7 @@ where
                 if self
                     .peers
                     .as_ref()
-                    .is_none_or(|p| p.roster().wire_version() < 8)
+                    .is_none_or(|p| p.original_wire_version() < 8)
                 {
                     return Err(NodeError::IncompatiblePeerProtocol);
                 }
@@ -596,7 +697,7 @@ where
                 if self
                     .peers
                     .as_ref()
-                    .is_none_or(|p| p.roster().wire_version() < 3)
+                    .is_none_or(|p| p.original_wire_version() < 3)
                 {
                     return Err(NodeError::IncompatiblePeerProtocol);
                 }
@@ -628,6 +729,11 @@ where
             });
         }
         self.configuration.submit(&mut self.local.owner, request)
+    }
+    /// Whether this owner's original administrative observer stream is empty.
+    /// This does not report configuration commitment or whole-node quiescence.
+    pub fn configuration_requests_are_drained(&self) -> bool {
+        self.configuration.is_drained()
     }
     pub fn poll_configuration(&mut self) -> Option<ConfigurationCompletion> {
         self.configuration.poll()
@@ -699,27 +805,40 @@ where
         learner: NodeId,
         requirements: crate::raft::ReadinessRequirements,
     ) -> Result<(), NodeError> {
+        self.request_learner_readiness_tracked(group, learner, requirements)
+            .map(|_| ())
+    }
+    /// The original owner-scoped admission for matching its later OwnerStep.
+    /// Neither admission nor successful execution is promotion readiness.
+    pub fn request_learner_readiness_tracked(
+        &mut self,
+        group: GroupIdentity,
+        learner: NodeId,
+        requirements: crate::raft::ReadinessRequirements,
+    ) -> Result<AdmissionTicket, NodeError> {
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);
         }
         let network = self.peers.as_ref().ok_or(NodeError::MissingPeers)?;
-        let binding = network
-            .roster()
-            .binding(learner)
+        let source = network
+            .source_view(learner)
             .ok_or(NodeError::WrongPeerStore)?;
-        if binding.wire_version < 4 {
+        if source.source().node != learner {
+            return Err(NodeError::WrongPeerStore);
+        }
+        if source.original_wire_version() < 4 {
             return Err(NodeError::IncompatiblePeerProtocol);
         }
         self.local
             .owner
-            .admit(
+            .admit_tracked(
                 group,
                 Event::CheckLearnerReadiness {
                     learner: crate::secure::PeerIdentity {
                         node: learner,
-                        store: binding.peer.store.identity,
+                        store: source.source().store.identity,
                     },
-                    session: binding.peer.store.session,
+                    session: source.source().store.session,
                     requirements,
                 },
             )
@@ -729,12 +848,20 @@ where
     /// durable membership and takes effect only when the owner executes it.
     /// A host may then start a fresh round after a lost reply or changed session.
     pub fn cancel_learner_readiness(&mut self, group: GroupIdentity) -> Result<(), NodeError> {
+        self.cancel_learner_readiness_tracked(group).map(|_| ())
+    }
+    /// Original owner-scoped cancellation admission; observe its matching step
+    /// before replacing a volatile readiness exchange.
+    pub fn cancel_learner_readiness_tracked(
+        &mut self,
+        group: GroupIdentity,
+    ) -> Result<AdmissionTicket, NodeError> {
         if self.state != NodeState::Running {
             return Err(NodeError::Closed);
         }
         self.local
             .owner
-            .admit(group, Event::CancelLearnerReadiness)
+            .admit_tracked(group, Event::CancelLearnerReadiness)
             .map_err(|r| NodeError::Owner(EffectOwnerError::Runtime(r.reason)))
     }
     pub fn disconnect(&mut self, peer: NodeId, now: MonoTime) -> Result<(), NodeError> {
@@ -756,7 +883,7 @@ where
         &self,
         group: GroupIdentity,
         event: &crate::raft::Event,
-        routes: &BTreeMap<NodeId, crate::connect::ConnectDirection<C::Endpoint>>,
+        routes: &BTreeMap<NodeId, crate::connect::ConnectDirection<N::Endpoint>>,
         now: MonoTime,
     ) -> Result<(), PeerDriverError> {
         if self.state != NodeState::Running || self.peers.is_none() {
@@ -774,9 +901,9 @@ where
     /// cannot activate membership or provision credentials.
     pub fn reconcile_membership(
         &mut self,
-        routes: BTreeMap<NodeId, crate::connect::ConnectDirection<C::Endpoint>>,
+        routes: BTreeMap<NodeId, crate::connect::ConnectDirection<N::Endpoint>>,
         now: MonoTime,
-    ) -> Result<(), PeerReconcileRejected<C::Endpoint>> {
+    ) -> Result<(), PeerReconcileRejected<N::Endpoint>> {
         if self.state != NodeState::Running || self.peers.is_none() {
             return Err(PeerReconcileRejected {
                 reason: PeerDriverError::NotQuiescent,
@@ -797,6 +924,9 @@ where
         Ok(())
     }
     pub fn begin_shutdown(&mut self) {
+        if let Some(snapshots) = &mut self.local.snapshots {
+            snapshots.router.close_exports();
+        }
         if self.state == NodeState::Running {
             self.local.clients.close();
             self.local.reads.close();
@@ -806,9 +936,9 @@ where
     }
     pub fn set_admission_routes(
         &mut self,
-        routes: BTreeMap<NodeId, PeerRoute<C::Endpoint>>,
+        routes: BTreeMap<NodeId, PeerRoute<N::Endpoint>>,
         now: MonoTime,
-    ) -> Result<(), PeerRoutesRejected<C::Endpoint>> {
+    ) -> Result<(), PeerRoutesRejected<N::Endpoint>> {
         if self.state != NodeState::Running || self.peers.is_none() {
             return Err(PeerRoutesRejected {
                 reason: PeerDriverError::NotQuiescent,
@@ -1021,7 +1151,7 @@ where
         })
     }
     fn authorize_configuration(
-        network: Option<&PeerDriver<C, F>>,
+        network: Option<&N>,
         core: &Raft,
         event: &Event,
         authorize: &mut impl FnMut(
@@ -1042,17 +1172,20 @@ where
                 return Err(ConfigurationProposalError::MissingPeerTransport.into());
             }
         }
-        if network.is_some_and(|p| p.roster().wire_version() < 2) {
+        if network.is_some_and(|p| p.original_wire_version() < 2) {
             return Err(ConfigurationProposalError::UnsupportedWireVersion(
-                network.unwrap().roster().wire_version(),
+                network.unwrap().original_wire_version(),
             )
             .into());
         }
         for proof in &proposal.readiness {
             let request = proof.ready.request();
-            let binding = network.and_then(|p| p.roster().binding(request.learner.node));
-            if !binding.is_some_and(|b| b.wire_version >= 4 && b.peer.store == proof.authenticated)
-            {
+            let source = network.and_then(|p| p.source_view(request.learner.node));
+            if !source.is_some_and(|view| {
+                view.source().node == request.learner.node
+                    && view.original_wire_version() >= 4
+                    && view.source().store == proof.authenticated
+            }) {
                 return Err(ConfigurationProposalError::AuthenticationRequired.into());
             }
         }
@@ -1091,7 +1224,7 @@ where
     }
     // Reclamation preserves the concrete selected provider types.
     #[allow(clippy::type_complexity)]
-    pub fn into_parts(mut self) -> NodeReclaim<Self, NodeParts<S, T, E, A, W, O, H, C, F>> {
+    pub fn into_parts(mut self) -> NodeReclaim<Self, NetworkNodeParts<S, T, E, A, W, O, H, N>> {
         if !self.is_drained() {
             return Err(Box::new(self));
         }
@@ -1106,18 +1239,20 @@ where
         } else {
             None
         };
-        Ok(NodeParts {
+        Ok(NetworkNodeParts {
             local: self.local,
             peers,
         })
     }
     // Recovery transfers all selected providers and outstanding driver ownership.
     #[allow(clippy::type_complexity)]
-    pub fn into_recovery(self) -> NodeReclaim<Self, NodeRecoveryParts<S, T, E, A, W, O, H, C, F>> {
+    pub fn into_recovery(
+        self,
+    ) -> NodeReclaim<Self, NetworkNodeRecoveryParts<S, T, E, A, W, O, H, N>> {
         if self.state != NodeState::RecoveryRequired {
             return Err(Box::new(self));
         }
-        Ok(NodeRecovery {
+        Ok(NetworkNodeRecovery {
             local: self.local,
             replica: self.replica,
             peers: self.peers,
@@ -1128,3 +1263,11 @@ where
         })
     }
 }
+
+/// Compatibility direct-node facade over the same construction-selected runtime.
+pub type Node<S, T, E, A, W, O, H, C, F> = NetworkNode<S, T, E, A, W, O, H, PeerDriver<C, F>>;
+pub type NodeParts<S, T, E, A, W, O, H, C, F> =
+    NetworkNodeParts<S, T, E, A, W, O, H, PeerDriver<C, F>>;
+pub type NodeRecovery<L, R, C, F> = NetworkNodeRecovery<L, R, PeerDriver<C, F>>;
+pub type NodeRecoveryParts<S, T, E, A, W, O, H, C, F> =
+    NetworkNodeRecoveryParts<S, T, E, A, W, O, H, PeerDriver<C, F>>;

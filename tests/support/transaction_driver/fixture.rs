@@ -159,32 +159,32 @@ fn local_parts(
         persistence: HostWorker::new(store),
         applications: [(bootstrap_for(slot).group, application(slot))].into(),
         results: ApplicationRouter::new(
-            ApplicationRouterBinding {
-                owner: binding,
-                generation: ApplicationRouterGeneration::new(1).unwrap(),
-            },
+            ApplicationRouterBinding::new(
+                RuntimeAuthorization::physical(binding),
+                ApplicationRouterGeneration::new(1).unwrap(),
+            ),
             ApplicationRouterLimits::default(),
         )
         .unwrap(),
         clients: ClientRouter::new(
-            ClientRouterBinding {
-                owner: binding,
-                generation: ClientRouterGeneration::new(1).unwrap(),
-            },
+            ClientRouterBinding::new(
+                RuntimeAuthorization::physical(binding),
+                ClientRouterGeneration::new(1).unwrap(),
+            ),
             ClientRouterLimits::default(),
         )
         .unwrap(),
         reads: ReadRequests::new(
-            ReadInvocationBinding {
-                owner: binding,
-                generation: ReadInvocationGeneration::new(1).unwrap(),
-            },
+            ReadInvocationBinding::new(
+                RuntimeAuthorization::physical(binding),
+                ReadInvocationGeneration::new(1).unwrap(),
+            ),
             ReadInvocationLimits::default(),
             ReadRouter::new(
-                ReadRouterBinding {
-                    owner: binding,
-                    generation: ReadRouterGeneration::new(1).unwrap(),
-                },
+                ReadRouterBinding::new(
+                    RuntimeAuthorization::physical(binding),
+                    ReadRouterGeneration::new(1).unwrap(),
+                ),
                 ReadRouterLimits::default(),
             )
             .unwrap(),

@@ -1,0 +1,47 @@
+{
+  "input_paths": 1047,
+  "same_frozen_source_and_runner": true,
+  "direct_frozen_source_rehash": "passed",
+  "linux_scope": "passed",
+  "mac_scope": "failed",
+  "mac_unrun_only_continuation": "passed",
+  "hash_guards": {
+    "root-after-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "copied-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "linux-before-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "linux-terminal-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "mac-copied-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "mac-before-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "mac-terminal-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "mac-remaining-before-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    },
+    "mac-remaining-terminal-source.log": {
+      "successful_paths": 1047,
+      "sha256": "cc2635497bb9eeb11ec4f11ad173306395c488642cdcf15eb9b8fa6b804eb6f6"
+    }
+  },
+  "whole_supported_platform_scope": "partial; not qualified"
+}

@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.45s
+     Running tests/logical_voter_native.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/logical_voter_native-444f73685e4db31c)
+
+running 1 test
+test authority::snapshot_ack::original_duplicate_snapshot_ack_above_and_below_base_tcp ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 19 filtered out; finished in 0.13s
+

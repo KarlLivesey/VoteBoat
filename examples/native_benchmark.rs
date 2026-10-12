@@ -235,6 +235,8 @@ struct PollTotals {
     snapshot_send_refusals: [usize; 3],
     snapshot_supplies: usize,
 }
+#[path = "benchmark/checkpoint_steps.rs"]
+mod checkpoint_steps;
 fn poll<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     clock: &Instant,
@@ -253,6 +255,7 @@ fn poll_selected<L: LogStore + Send + 'static>(
         if paused == Some(i) {
             continue;
         }
+        let checkpoints = replica.checkpoints().pending.clone();
         let progress = checked(replica.poll(
             MonoTime(clock.elapsed().as_millis() as u64),
             NodePollBudget::default(),
@@ -266,6 +269,17 @@ fn poll_selected<L: LogStore + Send + 'static>(
             totals.snapshot_send_refusals[i] += p.snapshot_send_refusals;
             totals.snapshot_supplies += p.snapshot_supplies;
             for step in p.steps {
+                if checkpoint_steps::covered_checkpoint(replica, &checkpoints, &step) {
+                    let admission = step.admission.unwrap();
+                    let original = checkpoints[&admission.group];
+                    let core = replica.local().owner.core(admission.group).unwrap();
+                    eprintln!(
+                        "covered automatic checkpoint: original={original:?} step={step:?} durable_base={} commit={}",
+                        core.state().base_index(),
+                        core.state().commit_index
+                    );
+                    continue;
+                }
                 if let Some(e) = step.error {
                     return Err(format!("runtime step failed: {e:?}").into());
                 }

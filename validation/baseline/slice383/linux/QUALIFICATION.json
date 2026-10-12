@@ -1,0 +1,48 @@
+{
+  "platform": "Linux",
+  "inputs": 1306,
+  "production": "frozen379 unchanged",
+  "source_manifest_sha256": "4128207a553e53d7826618324ca65aeb498ea5658a7535202eda4c245419374c",
+  "current_after_mismatches": [],
+  "checks_handle": 5723,
+  "checks": {
+    "fmt": "0",
+    "all": "0",
+    "default": "0",
+    "core": "0",
+    "native": "0",
+    "build": "0"
+  },
+  "tcp": {
+    "test": "history::tcp_fifteen_native_owners_two_original_logical_replacements",
+    "command": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/checkpoint383-build/debug/deps/logical_activation_nested-f271d6116c20e281",
+      "--exact",
+      "history::tcp_fifteen_native_owners_two_original_logical_replacements",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "status": 0,
+    "sourceMismatches": [],
+    "binaryAndLibraryUnchanged": true
+  },
+  "quic": {
+    "test": "history::quic_fifteen_native_owners_two_original_logical_replacements",
+    "command": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/checkpoint383-build/debug/deps/logical_activation_nested-f271d6116c20e281",
+      "--exact",
+      "history::quic_fifteen_native_owners_two_original_logical_replacements",
+      "--nocapture",
+      "--test-threads=1"
+    ],
+    "status": 0,
+    "sourceMismatches": [],
+    "binaryAndLibraryUnchanged": true
+  },
+  "tcp_elapsed_seconds": 72.77,
+  "quic_elapsed_seconds": 87.95,
+  "tcp_handle": 7221,
+  "quic_handle": 10620,
+  "mac": "not run by this agent",
+  "whole_p0_p8_complete": false
+}

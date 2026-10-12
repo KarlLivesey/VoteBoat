@@ -15,6 +15,7 @@
 //! Bounded caller-driven local replica assembly over selected public providers.
 use super::snapshot_send::SnapshotSendRetries;
 use super::*;
+mod logical;
 use crate::{application::*, outbound::*, snapshot_worker::*, worker::*};
 
 pub struct ReplicaSnapshots<'a> {
@@ -84,7 +85,7 @@ impl Default for ReplicaPollBudget {
     }
 }
 impl ReplicaPollBudget {
-    pub(super) fn valid(self) -> bool {
+    pub(crate) fn valid(self) -> bool {
         [
             self.worker_events,
             self.snapshot_events,
@@ -100,6 +101,7 @@ impl ReplicaPollBudget {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ReplicaError {
+    Logical(LogicalReleaseError),
     InvalidLimits,
     WrongBinding,
     NotQuiescent,
@@ -192,6 +194,9 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             || p.results.binding().owner != owner
             || p.clients.binding().owner != owner
             || p.reads.binding().owner != owner
+            || p.results.binding().authorization() != p.owner.authorization()
+            || p.clients.binding().authorization() != p.owner.authorization()
+            || p.reads.binding().authorization() != p.owner.authorization()
         {
             return Err(ReplicaError::WrongBinding);
         }
@@ -217,6 +222,41 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         })
     }
     pub fn new<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: StateMachine<Receipt = R> + ReadableStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        parts: &ReplicaParts<'_, S, T, E, A, W, O>,
+        limits: ReplicaDriverLimits,
+        now: MonoTime,
+    ) -> Result<Self, ReplicaError> {
+        parts
+            .owner
+            .require_physical()
+            .map_err(ReplicaError::Owner)?;
+        Self::from_parts(parts, limits, now)
+    }
+    pub(crate) fn new_logical<
+        S: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+        A: StateMachine<Receipt = R> + ReadableStateMachine,
+        W: PersistenceWorker,
+        O: OutboundQueue,
+    >(
+        parts: &ReplicaParts<'_, S, T, E, A, W, O>,
+        limits: ReplicaDriverLimits,
+        now: MonoTime,
+    ) -> Result<Self, ReplicaError> {
+        if !parts.owner.authorization().is_logical() {
+            return Err(ReplicaError::WrongBinding);
+        }
+        Self::from_parts(parts, limits, now)
+    }
+    fn from_parts<
         S: ReadyScheduler,
         T: TimerService,
         E: ElectionEntropy,
@@ -422,6 +462,10 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
         budget: ReplicaPollBudget,
         configuration: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<ReplicaProgress, ReplicaError> {
+        parts
+            .owner
+            .require_physical()
+            .map_err(ReplicaError::Owner)?;
         if Self::bindings(parts)? != self.binding {
             return Err(ReplicaError::WrongBinding);
         }
@@ -582,7 +626,7 @@ impl<R: ApplicationReceipt> ReplicaDriver<R> {
             if self.usage().leases() == self.limits.leases {
                 break;
             }
-            let Some(lease) = owner.take_effect().map_err(ReplicaError::Owner)? else {
+            let Some(lease) = owner.take_owned_effect().map_err(ReplicaError::Owner)? else {
                 break;
             };
             out.effects += 1;

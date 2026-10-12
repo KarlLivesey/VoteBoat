@@ -16,6 +16,10 @@
 use super::*;
 use crate::membership::ConfigurationChange;
 
+pub(super) struct RepairReplyScope {
+    checkpoint: Option<super::snapshot_repair::CheckpointRepairScope>,
+    historical: Option<(LogEntry, u64, StoreIdentity)>,
+}
 impl Raft {
     /// Opt in during assembly only after selecting a transport/codec supporting
     /// LearnerRepair (native wire format 5). Restart must repeat this selection.
@@ -65,7 +69,7 @@ impl Raft {
 
     // Historical repair retains the exact old-view voter/learner relationship.
     // A repair acknowledgement never supplies ballot or commit authority.
-    fn repair_joint(
+    pub(super) fn repair_joint(
         &self,
         peer: NodeId,
         configuration: Option<ConfigurationId>,
@@ -250,13 +254,10 @@ impl Raft {
         self.reset_election()?;
         Ok(effects)
     }
-    fn receive_learner_repaired(
-        &mut self,
-        message: Message,
-        success: bool,
-        matching_index: u64,
-        matching_term: u64,
-    ) -> Result<Vec<Effect>, RaftError> {
+    pub(super) fn repair_reply_scope(
+        &self,
+        message: &Message,
+    ) -> Result<RepairReplyScope, RaftError> {
         let checkpoint = self
             .repair_requests
             .get(&message.from)
@@ -285,6 +286,22 @@ impl Raft {
         {
             return Err(RaftError::WrongIdentity);
         }
+        Ok(RepairReplyScope {
+            checkpoint,
+            historical,
+        })
+    }
+    fn receive_learner_repaired(
+        &mut self,
+        message: Message,
+        success: bool,
+        matching_index: u64,
+        matching_term: u64,
+    ) -> Result<Vec<Effect>, RaftError> {
+        let RepairReplyScope {
+            checkpoint,
+            historical,
+        } = self.repair_reply_scope(&message)?;
         if message.term > self.durable.hard_state.term {
             return self.receive_higher_repair_term(message, matching_index);
         }
@@ -363,7 +380,10 @@ impl Raft {
         };
         self.receive_inner(message)
     }
-    fn validate_learner_repair_request(&self, message: &Message) -> Result<(), RaftError> {
+    pub(super) fn validate_learner_repair_request(
+        &self,
+        message: &Message,
+    ) -> Result<(), RaftError> {
         let Rpc::LearnerRepair {
             joint,
             previous_index,

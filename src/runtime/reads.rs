@@ -14,12 +14,30 @@
 // rights and limitations under the RPL.
 //! Bounded ownership of results from original one-use quorum read barriers.
 use super::*;
+use crate::logical_voter::LogicalActivationControlProfile;
+mod control;
+#[cfg(test)]
+mod tests;
 use crate::application::{ApplicationError, BoundedReadableStateMachine};
+pub(super) use control::ReadCapacityClass;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ReadRouterBinding {
     pub owner: RuntimeOwner,
     pub generation: ReadRouterGeneration,
+    authorization: RuntimeAuthorization,
+}
+impl ReadRouterBinding {
+    pub fn new(authorization: RuntimeAuthorization, generation: ReadRouterGeneration) -> Self {
+        Self {
+            owner: authorization.owner(),
+            generation,
+            authorization,
+        }
+    }
+    pub fn authorization(self) -> RuntimeAuthorization {
+        self.authorization
+    }
 }
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct ReadResultTicket {
@@ -33,6 +51,10 @@ pub struct ReadRouterLimits {
     pub bytes: usize,
     pub query_bytes: usize,
     pub result_bytes: usize,
+    /// Whole selected activation windows; physical/unselected routers ignore these.
+    pub control_results: usize,
+    pub group_control_results: usize,
+    pub control_bytes: usize,
 }
 impl Default for ReadRouterLimits {
     fn default() -> Self {
@@ -42,6 +64,9 @@ impl Default for ReadRouterLimits {
             bytes: 16 * 1024 * 1024,
             query_bytes: 64 * 1024,
             result_bytes: 1024 * 1024,
+            control_results: 2,
+            group_control_results: 2,
+            control_bytes: 4 * 1024 * 1024,
         }
     }
 }
@@ -52,6 +77,7 @@ pub struct ReadResultUsage {
 }
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum ReadRouteError {
+    LogicalReleaseRequired,
     InvalidLimits,
     WrongBinding,
     WrongEffect,
@@ -104,9 +130,15 @@ pub struct ReadResultRejected<R> {
     pub reason: ReadRouteError,
     pub results: Box<ReadResults<R>>,
 }
+#[derive(Debug)]
+pub(crate) struct CapturedRead<R> {
+    pub(crate) lease: EffectLease,
+    pub(crate) results: ReadResults<R>,
+}
 struct Held<R> {
     group: GroupIdentity,
     charged: usize,
+    class: ReadCapacityClass,
     output: Option<ReadResults<R>>,
 }
 /// The host retains original query/request correlation until ReadReady arrives.
@@ -119,6 +151,9 @@ pub struct ReadRouter<R> {
     groups: BTreeMap<GroupIdentity, usize>,
     ready: VecDeque<u64>,
     usage: ReadResultUsage,
+    bulk: ReadResultUsage,
+    bulk_groups: BTreeMap<GroupIdentity, usize>,
+    control_profile: Option<LogicalActivationControlProfile>,
     sequence: u64,
     closed: bool,
 }
@@ -136,6 +171,32 @@ impl<R> ReadRouter<R> {
                 .is_some_and(|n| n <= self.limits.bytes)
     }
     pub fn new(
+        binding: ReadRouterBinding,
+        limits: ReadRouterLimits,
+    ) -> Result<Self, ReadRouteError> {
+        if binding.authorization.is_logical() {
+            return Err(ReadRouteError::LogicalReleaseRequired);
+        }
+        Self::from_binding(binding, limits)
+    }
+    pub(crate) fn new_logical<Q>(
+        binding: ReadRouterBinding,
+        limits: ReadRouterLimits,
+        profile: Option<&LogicalActivationControlProfile>,
+    ) -> Result<Self, ReadRouteError> {
+        if !binding.authorization.is_logical() {
+            return Err(ReadRouteError::WrongBinding);
+        }
+        let router = Self::from_binding(binding, limits)?;
+        let Some(profile) = profile else {
+            return Ok(router);
+        };
+        if binding.authorization.logical().unwrap().mapping.parent != profile.parent() {
+            return Err(ReadRouteError::WrongBinding);
+        }
+        router.select_activation::<Q>(profile.clone())
+    }
+    fn from_binding(
         binding: ReadRouterBinding,
         limits: ReadRouterLimits,
     ) -> Result<Self, ReadRouteError> {
@@ -162,6 +223,9 @@ impl<R> ReadRouter<R> {
             groups: BTreeMap::new(),
             ready: VecDeque::with_capacity(limits.results),
             usage: ReadResultUsage::default(),
+            bulk: ReadResultUsage::default(),
+            bulk_groups: BTreeMap::new(),
+            control_profile: None,
             sequence: 0,
             closed: false,
         })
@@ -193,11 +257,14 @@ impl<R> ReadRouter<R> {
         lease: &EffectLease,
         application: &A,
         query: &A::Query,
+        class: ReadCapacityClass,
     ) -> Result<(ReadBarrier, usize, usize, u64), ReadRouteError> {
         if self.closed {
             return Err(ReadRouteError::Closed);
         }
-        if owner.identity() != self.binding.owner || lease.ticket.visit.owner != self.binding.owner
+        if owner.identity() != self.binding.owner
+            || owner.authorization() != self.binding.authorization
+            || lease.ticket.visit.owner != self.binding.owner
         {
             return Err(ReadRouteError::WrongBinding);
         }
@@ -205,11 +272,7 @@ impl<R> ReadRouter<R> {
         let Effect::ReadReady(barrier) = lease.effect else {
             return Err(ReadRouteError::WrongEffect);
         };
-        if self.usage.results == self.limits.results
-            || self.groups.get(&barrier.group()).copied().unwrap_or(0) >= self.limits.group_results
-        {
-            return Err(ReadRouteError::Overloaded);
-        }
+        self.check_capacity(barrier.group(), 0, class)?;
         let nested = application
             .query_bytes(query, self.limits.query_bytes)
             .map_err(ReadRouteError::Application)?;
@@ -227,9 +290,7 @@ impl<R> ReadRouter<R> {
             .and_then(|n| n.checked_add(bound))
             .and_then(|n| n.checked_add(size_of::<Held<R>>()))
             .ok_or(ReadRouteError::ResultTooLarge)?;
-        if charged > self.limits.bytes - self.usage.bytes {
-            return Err(ReadRouteError::Overloaded);
-        }
+        self.check_capacity(barrier.group(), charged, class)?;
         let sequence = self
             .sequence
             .checked_add(1)
@@ -258,7 +319,66 @@ impl<R> ReadRouter<R> {
         query: A::Query,
         now: MonoTime,
     ) -> Result<ReadResultTicket, ReadSubmitError<A::Query>> {
-        let checked = self.check_submit(owner, &lease, application, &query);
+        if owner.authorization().is_logical() || self.binding.authorization.is_logical() {
+            return Err(ReadSubmitError::Rejected {
+                reason: ReadRouteError::LogicalReleaseRequired,
+                lease: Box::new(lease),
+                query,
+            });
+        }
+        let CapturedRead { lease, results } =
+            self.capture_owned(owner, lease, application, query, now)?;
+        if let Err(rejected) = owner.complete_read_capture(lease) {
+            let _ = self.complete_owned(results);
+            self.closed = true;
+            let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
+            let _ = owner.discard_failed(*rejected.lease);
+            return Err(ReadSubmitError::Failed {
+                reason: ReadRouteError::Owner(rejected.reason),
+            });
+        }
+        let ticket = results.ticket;
+        self.held.get_mut(&ticket.sequence).unwrap().output = Some(results);
+        self.ready.push_back(ticket.sequence);
+        Ok(ticket)
+    }
+    pub(crate) fn capture_owned<
+        A: BoundedReadableStateMachine<ReadResult = R>,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        lease: EffectLease,
+        application: &A,
+        query: A::Query,
+        now: MonoTime,
+    ) -> Result<CapturedRead<R>, ReadSubmitError<A::Query>> {
+        self.capture_invocation(
+            owner,
+            lease,
+            application,
+            query,
+            now,
+            ReadCapacityClass::Ordinary,
+        )
+    }
+    pub(super) fn capture_invocation<
+        A: BoundedReadableStateMachine<ReadResult = R>,
+        Q: ReadyScheduler,
+        T: TimerService,
+        E: ElectionEntropy,
+    >(
+        &mut self,
+        owner: &mut EffectOwner<Q, T, E>,
+        lease: EffectLease,
+        application: &A,
+        query: A::Query,
+        now: MonoTime,
+        class: ReadCapacityClass,
+    ) -> Result<CapturedRead<R>, ReadSubmitError<A::Query>> {
+        let checked = self.check_submit(owner, &lease, application, &query, class);
         let (barrier, bound, charged, sequence) = match checked {
             Ok(v) => v,
             Err(reason) => {
@@ -273,27 +393,16 @@ impl<R> ReadRouter<R> {
         let mut query = Some(query);
         // No intervening event can change authority between finish_read and the
         // immutable application callback. Insufficient catchup leaves both intact.
-        let output = owner.complete_effect(lease, application.applied_index(), now, |_| {
-            Ok((
-                vec![],
-                application.read_at(barrier.index(), query.take().unwrap()),
-            ))
+        let output = owner.capture_read(&lease, application.applied_index(), now, || {
+            application.read_at(barrier.index(), query.take().unwrap())
         });
         let result = match output {
             Ok(result) => result,
-            Err(rejected) => {
-                let Some(query) = query else {
-                    self.closed = true;
-                    let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
-                    let _ = owner.discard_failed(*rejected.lease);
-                    return Err(ReadSubmitError::Failed {
-                        reason: ReadRouteError::Owner(rejected.reason),
-                    });
-                };
+            Err(reason) => {
                 return Err(ReadSubmitError::Rejected {
-                    reason: ReadRouteError::Owner(rejected.reason),
-                    lease: rejected.lease,
-                    query,
+                    reason: ReadRouteError::Owner(reason),
+                    lease: Box::new(lease),
+                    query: query.unwrap(),
                 });
             }
         };
@@ -306,6 +415,7 @@ impl<R> ReadRouter<R> {
             {
                 self.closed = true;
                 let _ = owner.fail::<()>(EffectOwnerError::ProviderContract);
+                let _ = owner.discard_failed(lease);
                 return Err(ReadSubmitError::Failed {
                     reason: ReadRouteError::ProviderViolation,
                 });
@@ -321,21 +431,32 @@ impl<R> ReadRouter<R> {
             Held {
                 group: barrier.group(),
                 charged,
-                output: Some(ReadResults {
-                    ticket,
-                    effect,
-                    barrier,
-                    result,
-                }),
+                class,
+                output: None,
             },
         );
         *self.groups.entry(barrier.group()).or_default() += 1;
-        self.ready.push_back(sequence);
         self.usage.results += 1;
         self.usage.bytes += charged;
-        Ok(ticket)
+        if class == ReadCapacityClass::Ordinary {
+            self.bulk.results += 1;
+            self.bulk.bytes += charged;
+            *self.bulk_groups.entry(barrier.group()).or_default() += 1;
+        }
+        Ok(CapturedRead {
+            lease,
+            results: ReadResults {
+                ticket,
+                effect,
+                barrier,
+                result,
+            },
+        })
     }
     pub fn poll(&mut self) -> Option<ReadResults<R>> {
+        if self.binding.authorization.is_logical() {
+            return None;
+        }
         let sequence = self.ready.pop_front()?;
         self.held.get_mut(&sequence)?.output.take()
     }
@@ -343,20 +464,47 @@ impl<R> ReadRouter<R> {
         &mut self,
         output: ReadResults<R>,
     ) -> Result<Result<R, ApplicationError>, ReadResultRejected<R>> {
+        if self.binding.authorization.is_logical() {
+            return Err(ReadResultRejected {
+                reason: ReadRouteError::LogicalReleaseRequired,
+                results: Box::new(output),
+            });
+        }
+        self.complete_owned(output)
+    }
+    pub(crate) fn validate_result(&self, output: &ReadResults<R>) -> Result<(), ReadRouteError> {
         if output.ticket.binding != self.binding
             || self
                 .held
                 .get(&output.ticket.sequence)
                 .is_none_or(|h| h.output.is_some() || h.group != output.barrier.group())
         {
+            return Err(ReadRouteError::StaleResult);
+        }
+        Ok(())
+    }
+    pub(crate) fn complete_owned(
+        &mut self,
+        output: ReadResults<R>,
+    ) -> Result<Result<R, ApplicationError>, ReadResultRejected<R>> {
+        if let Err(reason) = self.validate_result(&output) {
             return Err(ReadResultRejected {
-                reason: ReadRouteError::StaleResult,
+                reason,
                 results: Box::new(output),
             });
         }
         let held = self.held.remove(&output.ticket.sequence).unwrap();
         self.usage.results -= 1;
         self.usage.bytes -= held.charged;
+        if held.class == ReadCapacityClass::Ordinary {
+            self.bulk.results -= 1;
+            self.bulk.bytes -= held.charged;
+            let count = self.bulk_groups.get_mut(&held.group).unwrap();
+            *count -= 1;
+            if *count == 0 {
+                self.bulk_groups.remove(&held.group);
+            }
+        }
         let count = self.groups.get_mut(&held.group).unwrap();
         *count -= 1;
         if *count == 0 {

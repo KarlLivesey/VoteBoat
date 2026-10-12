@@ -1,0 +1,863 @@
+{
+  "copied_or_deduplicated_originals": 143,
+  "files": [
+    {
+      "original": "target/divide-provider/checkpoint383/SOURCE.json",
+      "archived": "SOURCE.json",
+      "sha256": "4128207a553e53d7826618324ca65aeb498ea5658a7535202eda4c245419374c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_SOURCE_SHA256.txt",
+      "archived": "source.sha256",
+      "sha256": "1f41ef732a30ee6cf8be828a92aba8902bf7a0c3f2df56a3b69c5ab36a571332",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_CUMULATIVE_DELTA.json",
+      "archived": "cumulative-delta-from379.json",
+      "sha256": "dcf1c87561b2b717adb466d000f45610217c22868c167e5b0e83e1c3481c2bfc",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/SCHEMA.md",
+      "archived": "publication-schema.md",
+      "sha256": "dfdeb9ca7b32e0d627ad1d522e5d943e9d9cb6fbd213f3856058c2ef069de499",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/DELTA.json",
+      "archived": "publication-delta.json",
+      "sha256": "60a5b86f454b0e64fddff42847ccd9f8adafc24e2c1c4dece8c0593f6a39435c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CAPTURE_GUARD.json",
+      "archived": "capture-guard.json",
+      "sha256": "331f5938395ed9fb4e09a79f078b93b39f415adc59c442349f2b835d5a3b6d7e",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/EVIDENCE_SHA256.json",
+      "archived": "linux-original-fingerprints.json",
+      "sha256": "12c96019cadcf7fd53fe27ffb2bc08bde350a393586abd801c08b21644275e90",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/RESULT.md",
+      "archived": "linux/RESULT.md",
+      "sha256": "cebf344271375a940407e0f13f74eab791caa1c4a9a043815c3a9e1f3360696c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/QUALIFICATION.json",
+      "archived": "linux/QUALIFICATION.json",
+      "sha256": "7c01fac1ede55b4195b939c68c08b8fcabe3fa4f65f234603c2c4b4ee2817854",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/BEFORE_TCP.json",
+      "archived": "linux/BEFORE_TCP.json",
+      "sha256": "9913226e95100c17ea1c5c58648b50ec5abe7875846dfcc162287f9b0fb4202d",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/AFTER_TCP.json",
+      "archived": "linux/AFTER_TCP.json",
+      "sha256": "9913226e95100c17ea1c5c58648b50ec5abe7875846dfcc162287f9b0fb4202d",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/BEFORE_QUIC.json",
+      "archived": "linux/BEFORE_QUIC.json",
+      "sha256": "9913226e95100c17ea1c5c58648b50ec5abe7875846dfcc162287f9b0fb4202d",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/AFTER_QUIC.json",
+      "archived": "linux/AFTER_QUIC.json",
+      "sha256": "9913226e95100c17ea1c5c58648b50ec5abe7875846dfcc162287f9b0fb4202d",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/TCP.log",
+      "archived": "linux/TCP.log",
+      "sha256": "f389cf8081b9b9aa9237f046faa2bd239c6477803e5a7581df67c925e0feb91f",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/QUIC.log",
+      "archived": "linux/QUIC.log",
+      "sha256": "5d31369da2aab2ce5139226892d6b76913aeef5569a8e34894cc3fba23644473",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/TCP_RESULT.json",
+      "archived": "linux/TCP_RESULT.json",
+      "sha256": "b5e9a3e6ce68e35c2e4a14586711f14909c9a736cb533ab53ff3a0edcf97cdcd",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/QUIC_RESULT.json",
+      "archived": "linux/QUIC_RESULT.json",
+      "sha256": "322d785178de9671f7e7b5e08b919c9b1982bd1014bd2936622a3a7b62161b3b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CHECKS_BEFORE.json",
+      "archived": "linux/CHECKS_BEFORE.json",
+      "sha256": "97817a0582c2264a50e6a6fb4bffb200a6dcb425428ad4841a4ab1d7a88e428a",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CHECKS_AFTER.json",
+      "archived": "linux/CHECKS_AFTER.json",
+      "sha256": "9913226e95100c17ea1c5c58648b50ec5abe7875846dfcc162287f9b0fb4202d",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CHECK_EXITS.txt",
+      "archived": "linux/CHECK_EXITS.txt",
+      "sha256": "dbc945190aad9c2214dd7cf91fb15398234a50a179cb8d354822012633e3cb28",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/FMT.log",
+      "archived": "linux/FMT.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CLIPPY_all.log",
+      "archived": "linux/CLIPPY_all.log",
+      "sha256": "91a9e34000a36ec9d5b5e71d186e639830093dbe8a4d951336fab5d658338b59",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CLIPPY_default.log",
+      "archived": "linux/CLIPPY_default.log",
+      "sha256": "37599b02e22d7039b4344aacb2c18a814232057e408089b0464425cf0dbabcc2",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CLIPPY_core.log",
+      "archived": "linux/CLIPPY_core.log",
+      "sha256": "47fa181118fd2726e2d3a9a20c16e95d2d9c3e162240abb903e3ae7a8510c5e8",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/CLIPPY_native.log",
+      "archived": "linux/CLIPPY_native.log",
+      "sha256": "16c30430eb99365fa6b49384de59a455cb544e0e4ec92e9907cb943a424bf2a7",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/BUILD.log",
+      "archived": "linux/BUILD.log",
+      "sha256": "e05a49f8f0136c8e6b2b082daef3093b02ed02b0c215a029ed30097e3986c213",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/BUILD.jsonl",
+      "archived": "linux/BUILD.jsonl",
+      "sha256": "5245bfda2747d331d19fba9e2fea9dec60d2a90ac9b16b7a840dedea978a42b7",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/checks.sh",
+      "archived": "linux/checks.sh",
+      "sha256": "5efd739808b7891392bb66e34c0d4a0a44a141d5c169e1ea3b07e2a8e8e12058",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/run.py",
+      "archived": "linux/run.py",
+      "sha256": "a1d27835d78e53e47ea44cd699c72045a183b34cc07f72e4f743b940c6ec66c3",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_RESULTS.md",
+      "archived": "mac/RESULT.md",
+      "sha256": "343a3ca1a4727f54f72e5b90e2f8b77f5e2742556d7fd08c9a9a80ede0f37038",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_RESULTS.json",
+      "archived": "mac/RESULT.json",
+      "sha256": "d62ad1ffddcf9b7a19649300e5f0bcd32dc6344c614200b32d41338e2fed73a2",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_PREPARATION.json",
+      "archived": "mac/PREPARATION.json",
+      "sha256": "d9a1016defc3e0c8b74cc559f3fc9429f6a956ab5bea64ea5dec56a85f7cd3a2",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_SCHEMA.md",
+      "archived": "mac/SCHEMA.md",
+      "sha256": "5224c0ba96a4ef85bf14d5e1bf34f7ae760a5874aace4681389fb4bdd72db802",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_SOURCE_SCHEMA.md",
+      "archived": "mac/SOURCE_SCHEMA.md",
+      "sha256": "dfdeb9ca7b32e0d627ad1d522e5d943e9d9cb6fbd213f3856058c2ef069de499",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-checks.sh",
+      "archived": "mac/checks.sh",
+      "sha256": "65497140ceccdf182704c19010968487ee1a184063805cf2d83a9240b7b7492b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-transfer-hashes.log",
+      "archived": "mac/transfer-hashes.log",
+      "sha256": "c6406abf199bf2d136336b5484216c2c01d9107272c69f0ca3bf1f8a3b6b55fa",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/MAC_RETIRED383_LOGS_SHA256.json",
+      "archived": "mac/original-99-fingerprints.json",
+      "sha256": "86580fedc9fc69250cc18d1e56788e29bf25a5c3d17ec2b200576ba75c66262b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_committed_unknown_quic.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_committed_unknown_tcp.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_imported_quic.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_imported_tcp.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_joint_quic.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_joint_tcp.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_repeated_quic.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_repeated_tcp.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_uncommitted_unknown_quic.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_after_uncommitted_unknown_tcp.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_start.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_terminal.log",
+      "archived": "mac/original/binary_start.log",
+      "sha256": "0566a7444761d4ca07cc56b50528af8d705ba0001bbbbca4678044841c76d972",
+      "operation": "deduplicated-identical-original-manifest"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_terminal_unchanged.command",
+      "archived": "mac/original/binary_terminal_unchanged.command",
+      "sha256": "88dc438c1b13d4700a703a2b558900a3d5de112040b520c711c6fdf3446e2a3d",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/binary_terminal_unchanged.log",
+      "archived": "mac/original/binary_terminal_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/build.command",
+      "archived": "mac/original/build.command",
+      "sha256": "7500612aed62fd7828b555ead395b2c4d145975a3cb96f7e7d1467191e25e375",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/build.log",
+      "archived": "mac/original/build.log",
+      "sha256": "dd1d7cd7ecd04b1a0a3a1e15993221888b6dc2dc43d931b6c011c81a5098275f",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_all.command",
+      "archived": "mac/original/clippy_all.command",
+      "sha256": "509c7a429f0ec0ca80690333def3926cab62ef95600ab57a425775258047c04f",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_all.log",
+      "archived": "mac/original/clippy_all.log",
+      "sha256": "defebffb03cc7760c580e3bb4b43ce0f9dbd2648d6f1b7d9f6062d0a64172329",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_core.command",
+      "archived": "mac/original/clippy_core.command",
+      "sha256": "6260051ce8d9dc97821723a3b473dc5fa09dd30ee081abeda2e91c09e680f8aa",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_core.log",
+      "archived": "mac/original/clippy_core.log",
+      "sha256": "8c233a54790c4800d3dd585436af679aa838da259bfdb129412e2d51cdb75cdc",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_default.command",
+      "archived": "mac/original/clippy_default.command",
+      "sha256": "4da79b8440e88f910a4f7684b395ef8724be33743f5a29d6ba48106d54b3f65b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_default.log",
+      "archived": "mac/original/clippy_default.log",
+      "sha256": "462dfca7551649dfbae81e32f59289e073866dd79031afacfe9e16f0420dd715",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_native.command",
+      "archived": "mac/original/clippy_native.command",
+      "sha256": "a1ca7e00ad8b1d9b19b201010a6cca7de01c249c1a8d19fd2a6aef414f8b3c1b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/clippy_native.log",
+      "archived": "mac/original/clippy_native.log",
+      "sha256": "99f71393b9903dca098310bb446022a4bdee195ea9996f351a787195555210a6",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_quic.command",
+      "archived": "mac/original/committed_unknown_quic.command",
+      "sha256": "6c1fce9037dcdb2f81315f893cb3fb563ddab0c94f3128119b6bb3edbdaeb961",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_quic.log",
+      "archived": "mac/original/committed_unknown_quic.log",
+      "sha256": "5cfc55a06d7937fdb890697744aa3a6742e468648654e3824d4f14a7d8dab79b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_quic_binary_unchanged.command",
+      "archived": "mac/original/committed_unknown_quic_binary_unchanged.command",
+      "sha256": "fd621a87d258ab40a8d78ef02224f6153e2d9f3a52e729d968ac6eb1fb9f5cda",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_quic_binary_unchanged.log",
+      "archived": "mac/original/committed_unknown_quic_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_quic_selected_one.command",
+      "archived": "mac/original/committed_unknown_quic_selected_one.command",
+      "sha256": "889a9dbdff30993c98aae47aef06f0d549526763ff16623daccbed643fc661e5",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_quic_selected_one.log",
+      "archived": "mac/original/committed_unknown_quic_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_tcp.command",
+      "archived": "mac/original/committed_unknown_tcp.command",
+      "sha256": "4db4a34bef39b26f226a907319feb1233cb105bfd33227ee4fc47635f1e209a9",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_tcp.log",
+      "archived": "mac/original/committed_unknown_tcp.log",
+      "sha256": "aad45aa0c727355b28089faec3fe96bd646e518b7e6c6c39143b8f671db9a9f0",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_tcp_binary_unchanged.command",
+      "archived": "mac/original/committed_unknown_tcp_binary_unchanged.command",
+      "sha256": "89dfd4614ddd6c191db836fddee1da8a439718922f6470874f5f14f8e2370e0e",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_tcp_binary_unchanged.log",
+      "archived": "mac/original/committed_unknown_tcp_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_tcp_selected_one.command",
+      "archived": "mac/original/committed_unknown_tcp_selected_one.command",
+      "sha256": "6559ffe58820c3531cf3d5bd8db27f23dc5130292588311f90bc4649b07727dd",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/committed_unknown_tcp_selected_one.log",
+      "archived": "mac/original/committed_unknown_tcp_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/exits.txt",
+      "archived": "mac/original/exits.txt",
+      "sha256": "8d749c5d1ff16d7db8a7195225b888f516a8ae01ede120aa06d759c0b12e0abc",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/fmt.command",
+      "archived": "mac/original/fmt.command",
+      "sha256": "7960ce018e2e60dd99f5b5b008d281c4df3aa4a630b0fe711bc8e0edaf7cfc87",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/fmt.log",
+      "archived": "mac/original/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_quic.command",
+      "archived": "mac/original/imported_quic.command",
+      "sha256": "02a4dc4fffd067dbcc2055d6d64bea75b265ce0aa673e6dd78bef728f79bff5e",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_quic.log",
+      "archived": "mac/original/imported_quic.log",
+      "sha256": "677c0a04d97a048ca3c871eec13a1a8e11f85b891abbe5e203bf60a5814febc5",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_quic_binary_unchanged.command",
+      "archived": "mac/original/imported_quic_binary_unchanged.command",
+      "sha256": "26b0aae0cf88421df212c3e20f2b26361312b6aa155b1cd530ea3d1d9237baa2",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_quic_binary_unchanged.log",
+      "archived": "mac/original/imported_quic_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_quic_selected_one.command",
+      "archived": "mac/original/imported_quic_selected_one.command",
+      "sha256": "066c0e7bf7fd8b93b9bb942540c5e001844949f180a23b7ad82f39e117ea965e",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_quic_selected_one.log",
+      "archived": "mac/original/imported_quic_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_tcp.command",
+      "archived": "mac/original/imported_tcp.command",
+      "sha256": "01e9f12db174fb7f93e15308d7a01c7807eb57476e0aeca6e9d7dbbc6aec42ac",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_tcp.log",
+      "archived": "mac/original/imported_tcp.log",
+      "sha256": "d2d02e8096f153ec6595e0b132788374744abffabdf0a46c24002036d5f819c8",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_tcp_binary_unchanged.command",
+      "archived": "mac/original/imported_tcp_binary_unchanged.command",
+      "sha256": "82b56faeb4eae811ebef8505d9f3d44de0caf60fb422645705c81cd2ff43932c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_tcp_binary_unchanged.log",
+      "archived": "mac/original/imported_tcp_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_tcp_selected_one.command",
+      "archived": "mac/original/imported_tcp_selected_one.command",
+      "sha256": "4e17ab851f8093d1511f00f56b7ca0c30f6c79571dd2cefedec8da33b4b6cb5c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/imported_tcp_selected_one.log",
+      "archived": "mac/original/imported_tcp_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_quic.command",
+      "archived": "mac/original/joint_quic.command",
+      "sha256": "6b8cca6783b5b7dc9de9597b3c95e96a369efc0fa3bd31bdc54f95d6823970d3",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_quic.log",
+      "archived": "mac/original/joint_quic.log",
+      "sha256": "3a1869b8090caf8420103f7dce97377f1fa703bff08bf3b79b81a7a039160a50",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_quic_binary_unchanged.command",
+      "archived": "mac/original/joint_quic_binary_unchanged.command",
+      "sha256": "d792faa23ed78d87ae0f7d18078650e76b0f4fb3bbbed380f04b5a82fe3585d4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_quic_binary_unchanged.log",
+      "archived": "mac/original/joint_quic_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_quic_selected_one.command",
+      "archived": "mac/original/joint_quic_selected_one.command",
+      "sha256": "3fae3427de234580fa9dec54e369219bbefdf00bfc7160dfe1d29123c871d694",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_quic_selected_one.log",
+      "archived": "mac/original/joint_quic_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_tcp.command",
+      "archived": "mac/original/joint_tcp.command",
+      "sha256": "bcde299d9c7f8a4282901ec91162ca30eb8fdd083d42e2597cc5cb69bdbd8608",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_tcp.log",
+      "archived": "mac/original/joint_tcp.log",
+      "sha256": "b71a54eeb66edda2f572c663c0c5aad3d0268ecf42cc21c41175d61fdde67820",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_tcp_binary_unchanged.command",
+      "archived": "mac/original/joint_tcp_binary_unchanged.command",
+      "sha256": "19ea4469f09eb03292cf5c13c929a77fe885beb9ccf01ec79b853974098f0e62",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_tcp_binary_unchanged.log",
+      "archived": "mac/original/joint_tcp_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_tcp_selected_one.command",
+      "archived": "mac/original/joint_tcp_selected_one.command",
+      "sha256": "029c45bf8f413441db03cd5efe87025f226c75ea64565f620588033fdcc1cc53",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/joint_tcp_selected_one.log",
+      "archived": "mac/original/joint_tcp_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/platform.command",
+      "archived": "mac/original/platform.command",
+      "sha256": "d50a950773c27ed6fef549568fc058a10194200a6fd3962a0c1026d7456fb187",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/platform.log",
+      "archived": "mac/original/platform.log",
+      "sha256": "8a6fd4241583d3c662acca65b45665b7e05b61b26cc1557e953a696744fd9fe5",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/prior_binary_clone.command",
+      "archived": "mac/original/prior_binary_clone.command",
+      "sha256": "6e3cf91a45e2130d84463a619b218dd01fb0c570e9f6826387255092a5bc5464",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/prior_binary_clone.log",
+      "archived": "mac/original/prior_binary_clone.log",
+      "sha256": "778cdabdd89bed83380f24723066312da97029aa5ba505f34d24614bbbbfa2d6",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/protoc.command",
+      "archived": "mac/original/protoc.command",
+      "sha256": "9df1af82577974cf4d3cc68ad59320234e732dc936de4049a1157af40efd1c9f",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/protoc.log",
+      "archived": "mac/original/protoc.log",
+      "sha256": "67fe6ea6325a7c969b923c21dc10e42d505e916feadafa5af1440ce4e6022b30",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_quic.command",
+      "archived": "mac/original/repeated_quic.command",
+      "sha256": "2ed58232f800ee5e8f2505818319356ead902c00808cb833739d920162906659",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_quic.log",
+      "archived": "mac/original/repeated_quic.log",
+      "sha256": "2c36881dce1d6df44175f728a636b4533a3f7bf27c54c329a4177e81e7fcbdd5",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_quic_binary_unchanged.command",
+      "archived": "mac/original/repeated_quic_binary_unchanged.command",
+      "sha256": "e946821ff4e423a047c4752114bd6d58065f9336fe2409387d015702ed164c21",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_quic_binary_unchanged.log",
+      "archived": "mac/original/repeated_quic_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_quic_selected_one.command",
+      "archived": "mac/original/repeated_quic_selected_one.command",
+      "sha256": "24ab6c08565d0e28c2a3d396c80357c625ee5c938e2e23bd4894af15d1629583",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_quic_selected_one.log",
+      "archived": "mac/original/repeated_quic_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_tcp.command",
+      "archived": "mac/original/repeated_tcp.command",
+      "sha256": "22221f35e192084eff8b62313e509e3cce045200c4e89a50a510e2f552d2d357",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_tcp.log",
+      "archived": "mac/original/repeated_tcp.log",
+      "sha256": "c3ac8e6b32b0baa0c27bb169ed2d8e813aaf86eb599d0ca88d7675834dc015a7",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_tcp_binary_unchanged.command",
+      "archived": "mac/original/repeated_tcp_binary_unchanged.command",
+      "sha256": "3d023f8fcd0196c68deb93fff791aac2448a705ec073f01366ec56a93c768724",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_tcp_binary_unchanged.log",
+      "archived": "mac/original/repeated_tcp_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_tcp_selected_one.command",
+      "archived": "mac/original/repeated_tcp_selected_one.command",
+      "sha256": "cffb101727214b880636366a686643ea94a2b41252584b14fffeee5095e0b551",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/repeated_tcp_selected_one.log",
+      "archived": "mac/original/repeated_tcp_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/source_start.command",
+      "archived": "mac/original/source_start.command",
+      "sha256": "27333d573a0e596086fda6d6d5572e5219d84d72854655635034e45ba32f3537",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/source_start.log",
+      "archived": "mac/original/source_start.log",
+      "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/source_terminal.command",
+      "archived": "mac/original/source_terminal.command",
+      "sha256": "27333d573a0e596086fda6d6d5572e5219d84d72854655635034e45ba32f3537",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/source_terminal.log",
+      "archived": "mac/original/source_terminal.log",
+      "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/stage.txt",
+      "archived": "mac/original/stage.txt",
+      "sha256": "770b1fadc4019d4de6b2fd32561beaa2c8cffa7837f43c85cbeff1e211c60702",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/terminal.txt",
+      "archived": "mac/original/terminal.txt",
+      "sha256": "1465c5c3873a2b0c86f5d135a34f76268d11b511383d534ed721dea14960ec03",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_quic.command",
+      "archived": "mac/original/uncommitted_unknown_quic.command",
+      "sha256": "6dd0c1a5f214c191b3e23c667d996318c96f5faeb04f926ed593ca0fbad9056c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_quic.log",
+      "archived": "mac/original/uncommitted_unknown_quic.log",
+      "sha256": "8cbe42f20423bface7dcc3b749346ad87587dbbcbc17c6cb59ff81dc763ecffa",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_quic_binary_unchanged.command",
+      "archived": "mac/original/uncommitted_unknown_quic_binary_unchanged.command",
+      "sha256": "76cb23d82969861108883cfdfe5bf2e4539018f0f311f2bf89f4ec039f024765",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_quic_binary_unchanged.log",
+      "archived": "mac/original/uncommitted_unknown_quic_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_quic_selected_one.command",
+      "archived": "mac/original/uncommitted_unknown_quic_selected_one.command",
+      "sha256": "f83d577d64fb35778a5adeebf0b92d03c4051c552f785bf9633538df58f8466a",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_quic_selected_one.log",
+      "archived": "mac/original/uncommitted_unknown_quic_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_tcp.command",
+      "archived": "mac/original/uncommitted_unknown_tcp.command",
+      "sha256": "df162c200b97150ddbbff6e0ceb901acbc52c29501ce1455b2e3a560665f4382",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_tcp.log",
+      "archived": "mac/original/uncommitted_unknown_tcp.log",
+      "sha256": "d48dc1b138b3197956b0421bdb39a91f9cd476fed049a06988f48deb7948f543",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_tcp_binary_unchanged.command",
+      "archived": "mac/original/uncommitted_unknown_tcp_binary_unchanged.command",
+      "sha256": "4ec029efb121877c6c22fb729e680cc367584aa8fb0267b9cae107b58181c3ed",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_tcp_binary_unchanged.log",
+      "archived": "mac/original/uncommitted_unknown_tcp_binary_unchanged.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_tcp_selected_one.command",
+      "archived": "mac/original/uncommitted_unknown_tcp_selected_one.command",
+      "sha256": "ada15791abd064543e0c7689982e2cbf96b8fb1ea67d05b8e9d305dc1da1efde",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-retired383-results/uncommitted_unknown_tcp_selected_one.log",
+      "archived": "mac/original/uncommitted_unknown_tcp_selected_one.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_activation_nested/diagnostic.rs",
+      "archived": "source-fixtures/tests/logical_activation_nested/diagnostic.rs",
+      "sha256": "31b822f18a28c75f1a95a44ce8e9eadac6d41c2d3dfe8cac465d9be338da3062",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_activation_nested/history.rs",
+      "archived": "source-fixtures/tests/logical_activation_nested/history.rs",
+      "sha256": "faae088a881765cc3a1e1e9adb23d5429222075b2579e95bb424b97545edacc0",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_activation_nested/progress.rs",
+      "archived": "source-fixtures/tests/logical_activation_nested/progress.rs",
+      "sha256": "e63dcdeb1989cbda5b50519509904299e2bc37bbdac5f0caad29c757f680f77f",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_activation_nested/shutdown.rs",
+      "archived": "source-fixtures/tests/logical_activation_nested/shutdown.rs",
+      "sha256": "3c567b220fc7ff4c59889667c0aed64c759c8eb6533be978de71ba621d623a08",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_nested_native/cold_recovery.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/cold_recovery.rs",
+      "sha256": "b53482da38560c5c9803bda67cb9090886ff0056fc94f21f4f26e1e32bb3f1c3",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_nested_native/convergence.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/convergence.rs",
+      "sha256": "fb23efe1b117a2e48dfe1dcdab1486484d282fc19725e8c1dc1193532ed9b58b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-provider/checkpoint383/repo/tests/logical_nested_native/host.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/host.rs",
+      "sha256": "f4f1776500aa52cf9f9765fc50e44b95e36fff10311998832fddf9edcfe90f58",
+      "operation": "byte-identical-copy"
+    }
+  ]
+}

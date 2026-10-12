@@ -1,0 +1,3 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-retired383-jHNT8fJC/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.50s
+  Executable tests/logical_activation_nested.rs (/tmp/voteboat-macos-retired383-jHNT8fJC/build/debug/deps/logical_activation_nested-d47bb5f466ca5ee0)

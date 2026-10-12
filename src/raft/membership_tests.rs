@@ -16,8 +16,13 @@
 //! public ingress/recovery gates remain closed. This does not model the complete
 //! reconfiguration protocol or certify a storage provider's durability.
 use super::*;
+#[path = "source_tests.rs"]
+mod authenticated_sources;
 #[path = "leadership_membership_tests.rs"]
 mod leadership;
+#[cfg(feature = "native")]
+#[path = "request_window_tests.rs"]
+mod relay_request_windows;
 use crate::{membership::*, quorum::*};
 
 fn node(n: u64) -> NodeId {

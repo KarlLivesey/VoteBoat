@@ -1,0 +1,6 @@
+Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+rustc 1.98.1 (48a229cea 2026-09-01)
+CARGO_TARGET_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build
+soft_nofile=8192
+hard_nofile=1048576

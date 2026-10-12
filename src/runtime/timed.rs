@@ -74,6 +74,7 @@ struct Managed {
 /// failure latches an error: stop/drain groups and recover under a fresh owner.
 /// Previously submitted effects may have unknown outcomes, never rollback.
 pub struct TimedShard<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> {
+    authorization: RuntimeAuthorization,
     shard: Shard<Q>,
     timers: T,
     entropy: E,
@@ -112,6 +113,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
             return Err(RuntimeError::Closed);
         }
         let mut runtime = Self {
+            authorization: RuntimeAuthorization::physical(shard.owner),
             shard,
             timers,
             entropy,
@@ -239,6 +241,33 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn owner(&self) -> RuntimeOwner {
         self.shard.owner
     }
+    pub fn authorization(&self) -> RuntimeAuthorization {
+        self.authorization
+    }
+    pub(crate) fn bind_logical_authority(
+        &mut self,
+        authorization: RuntimeAuthorization,
+        profile: Option<&crate::logical_voter::LogicalActivationControlProfile>,
+    ) -> Result<(), RuntimeError> {
+        self.validate_quiescent()?;
+        let logical = authorization.logical().ok_or(RuntimeError::WrongOwner)?;
+        if authorization.owner() != self.owner()
+            || self.authorization.is_logical()
+            || self.groups().count() != 1
+            || self.core(logical.mapping.parent).is_none_or(|core| {
+                core.local_node() != logical.mapping.voter
+                    || core.storage_binding() != authorization.owner().store
+            })
+        {
+            return Err(RuntimeError::WrongOwner);
+        }
+        if let Some(profile) = profile {
+            self.shard.validate_control_profile(profile)?;
+            self.shard.control_profile = Some(profile.clone());
+        }
+        self.authorization = authorization;
+        Ok(())
+    }
     pub fn limits(&self) -> ShardLimits {
         self.shard.limits
     }
@@ -292,6 +321,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
     pub fn group_usage(&self, group: GroupIdentity) -> Option<Usage> {
         self.shard.group_usage(group)
     }
+    pub(super) fn has_pending_peer_ingress(&self, group: GroupIdentity, peer: NodeId) -> bool {
+        self.shard.has_pending_peer_ingress(group, peer)
+    }
     pub fn active_visits(&self) -> usize {
         self.shard.active_visits()
     }
@@ -305,34 +337,41 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         self.managed.get(&group).map(|m| m.token)
     }
     pub fn admit(&mut self, group: GroupIdentity, event: Event) -> Result<(), Rejected> {
-        self.admit_input(group, event, false).map(|_| ())
+        self.admit_input(group, event, false, None).map(|_| ())
     }
     pub fn admit_tracked(
         &mut self,
         group: GroupIdentity,
         event: Event,
     ) -> Result<AdmissionTicket, Rejected> {
-        self.admit_input(group, event, true).map(|t| t.unwrap())
+        self.admit_input(group, event, true, None)
+            .map(|t| t.unwrap())
+    }
+    pub(super) fn admit_logical_read(
+        &mut self,
+        group: GroupIdentity,
+        event: Event,
+        read: super::logical_intake::LogicalReadInput<'_>,
+    ) -> Result<AdmissionTicket, Rejected> {
+        self.admit_input(group, event, true, Some(read))
+            .map(|t| t.unwrap())
     }
     fn admit_input(
         &mut self,
         group: GroupIdentity,
         event: Event,
         tracked: bool,
+        read: Option<super::logical_intake::LogicalReadInput<'_>>,
     ) -> Result<Option<AdmissionTicket>, Rejected> {
-        let error = self.check().err().or_else(|| {
-            self.shard
-                .core(group)
-                .filter(|c| c.is_fenced())
-                .map(|_| RuntimeError::Fenced)
-        });
-        if let Some(reason) = error {
+        if let Err(reason) = self.admission_shape_scoped(group, &event, read) {
             return Err(Rejected {
                 reason,
                 event: Box::new(event),
             });
         }
-        if tracked {
+        if read.is_some() {
+            self.shard.admit_record(group, event, None, tracked, read)
+        } else if tracked {
             self.shard.admit_tracked(group, event).map(Some)
         } else {
             self.shard.admit(group, event).map(|_| None)
@@ -447,6 +486,14 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         group: GroupIdentity,
         event: &Event,
     ) -> Result<(Class, usize), RuntimeError> {
+        self.admission_shape_scoped(group, event, None)
+    }
+    pub(super) fn admission_shape_scoped(
+        &self,
+        group: GroupIdentity,
+        event: &Event,
+        read: Option<super::logical_intake::LogicalReadInput<'_>>,
+    ) -> Result<(Class, usize), RuntimeError> {
         self.check()?;
         if self.shard.core(group).is_some_and(Raft::is_fenced) {
             return Err(RuntimeError::Fenced);
@@ -454,7 +501,19 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         if self.closed {
             return Err(RuntimeError::Closed);
         }
-        self.shard.admission_shape(group, event)
+        if let Some(read) = read {
+            if self
+                .authorization
+                .logical()
+                .is_none_or(|a| a.mapping.parent != group || read.profile.parent() != group)
+            {
+                return Err(RuntimeError::WrongOwner);
+            }
+        }
+        match read {
+            Some(read) => self.shard.admission_shape_scoped(group, event, Some(read)),
+            None => self.shard.admission_shape(group, event),
+        }
     }
     pub fn with_core<R>(
         &mut self,

@@ -1194,18 +1194,18 @@ fn failed_local_owner_can_drain_network_and_cancel_held_ingress_without_core_acc
     f.poll_with_no_ingress();
     let id = f.owner.identity();
     let execution = ReadRouter::new(
-        ReadRouterBinding {
-            owner: id,
-            generation: ReadRouterGeneration::new(1).unwrap(),
-        },
+        ReadRouterBinding::new(
+            RuntimeAuthorization::physical(id),
+            ReadRouterGeneration::new(1).unwrap(),
+        ),
         ReadRouterLimits::default(),
     )
     .unwrap();
     let mut reads = ReadRequests::<(), i64>::new(
-        ReadInvocationBinding {
-            owner: id,
-            generation: ReadInvocationGeneration::new(1).unwrap(),
-        },
+        ReadInvocationBinding::new(
+            RuntimeAuthorization::physical(id),
+            ReadInvocationGeneration::new(1).unwrap(),
+        ),
         ReadInvocationLimits::default(),
         execution,
     )

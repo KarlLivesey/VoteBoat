@@ -1,0 +1,11 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-macos-CzK1if/slice323-membership/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.70s
+     Running unittests src/lib.rs (/tmp/voteboat-macos-CzK1if/slice323-membership/build/debug/deps/voteboat-5e6bd92568224565)
+
+running 3 tests
+test raft::send_window::tests::unrelated_roles_and_old_campaign_are_unchanged_and_overflow_refuses ... ok
+test raft::send_window::tests::only_exact_current_candidate_vote_refreshes ... ok
+test raft::send_window::tests::granted_reply_requires_exact_original_follower_ballot_context_and_store ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 155 filtered out; finished in 0.01s
+

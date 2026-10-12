@@ -10,6 +10,10 @@ Target macOS and Linux; Windows is deferred. CI provides background feedback,
 not a required merge check or a reason to stop implementation. Run relevant
 local checks and keep making progress while remote CI runs.
 
+Commit and push each meaningful checked slice during implementation. Do not
+wait for final goal qualification or remote CI before publishing progress.
+Keep the pre-push checks enabled and document any outstanding test failures.
+
 Maintain two linked plans in `docs/IMPLEMENTATION.md`: a macro plan of user-visible
 milestones and a mini plan for the current deliverable and the next two. For each
 mini-plan item, state its purpose, dependencies, completion checks and the macro

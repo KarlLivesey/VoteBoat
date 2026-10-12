@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-membership/qualification327/build/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 2 tests
+test logical_voter::activation::tests::control_profile::profile_encoding_is_bounded_and_pins_all_selected_limits_and_inner_schema ... ok
+test logical_voter::activation::tests::control_profile::actual_profile_classifies_complete_control_envelopes_without_promoting_business ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 140 filtered out; finished in 0.00s
+

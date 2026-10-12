@@ -1,0 +1,11 @@
+{
+  "inputs": 1306,
+  "mismatches": [],
+  "artifacts": {
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/checkpoint383-build/debug/deps/logical_activation_nested-f271d6116c20e281",
+    "sha256": {
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/checkpoint383-build/debug/deps/logical_activation_nested-f271d6116c20e281": "55a4b445c0fb426e302abeb26debdd26bf4990bbc46e029b9532a96a14d482ea",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/checkpoint383-build/debug/deps/libvoteboat-f4d8231677413189.rlib": "a86b1e4e7a4934bbe84480dcd712022e08adcc237b153a1416f3e0f0ca5f36c7"
+    }
+  }
+}
