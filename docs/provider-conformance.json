@@ -4174,7 +4174,7 @@
             }
           ],
           "remaining": [
-            "Selected deterministic host injection and separate native unit conversion/epoch controls do not certify every future provider or wall-clock synchronization behavior. Matching macOS execution of the new diagnostic API remains pending slice401."
+            "Selected deterministic host injection and separate native unit conversion/epoch controls do not certify every future provider or wall-clock synchronization behavior. Matching Mac401 public injection and native diagnostic controls pass; these selected checks do not certify every future provider."
           ]
         }
       ]

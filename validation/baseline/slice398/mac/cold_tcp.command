@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --release --all-features --test logical_nested_native cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores -- --exact --nocapture --test-threads=1 

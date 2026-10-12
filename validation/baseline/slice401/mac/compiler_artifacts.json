@@ -1,0 +1,126 @@
+{
+  "compiler_records": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-clock401-19408bff49/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-clock401-19408bff49/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "runtime",
+        "src_path": "/private/tmp/voteboat-macos-clock401-19408bff49/repo/tests/runtime.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/runtime-b0fd7b7b1b5e021e"
+      ],
+      "executable": "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/runtime-b0fd7b7b1b5e021e",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-clock401-19408bff49/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-clock401-19408bff49/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-macos-clock401-19408bff49/repo/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/voteboat-5e6bd92568224565"
+      ],
+      "executable": "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/voteboat-5e6bd92568224565",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-clock401-19408bff49/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-clock401-19408bff49/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-macos-clock401-19408bff49/repo/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/libvoteboat-459027915835400b.rlib",
+        "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/libvoteboat-459027915835400b.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  ],
+  "launch_files": [
+    "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/runtime-b0fd7b7b1b5e021e",
+    "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/voteboat-5e6bd92568224565",
+    "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/libvoteboat-459027915835400b.rlib"
+  ],
+  "before_sha256": {
+    "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/runtime-b0fd7b7b1b5e021e": "289fee9729182dce505358e79ffa1d85116491a85ed9e56b81924e2f9a327fdd",
+    "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/voteboat-5e6bd92568224565": "8adc3830a3309bcb888c45ad6bee9e63234315e3170e8de89762cd8d72c023bd",
+    "/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/libvoteboat-459027915835400b.rlib": "a1882e57fd75cd24d5e0c250e949fd7dea68f4add6c323439bf0c77d64eb7c1b"
+  }
+}

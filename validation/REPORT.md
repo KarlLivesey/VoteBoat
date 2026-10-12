@@ -1,5 +1,13 @@
 # Validation report
 
+Current403: Mac398 is terminal; both repeated-replacement histories pass with
+all original ownership cleanup, while both cold cases fail final publication
+under the original15s watchdog. Mac401 clock injection1/native controls2 pass.
+The exact native-only100-group Mac test remains an unclosed older failure and
+is included with the pending402 cold sequence. Audit403 records71 explicit
+rows/149 inspected hashes; final source reconciliation remains. Earlier status
+paragraphs below are historical and do not supersede these outcomes.
+
 402 functional checkpoint qualification: use90s only for physical
 CheckpointPublished, matching the original upper checkpoint watchdog. Actual
 frontier/base/SnapshotRef/router/worker completion and other15s/provider/close

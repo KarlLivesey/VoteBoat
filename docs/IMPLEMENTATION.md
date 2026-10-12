@@ -34,7 +34,7 @@ completion alone does not claim those gates passed or enable a new default.
 [Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
 component catalogue entries to source/evidence and explicit unresolved work.
 It is a working ledger, not a completion certificate.
-The [current mini plan402](#current-mini-plan402)
+The [current mini plan403](#current-mini-plan403)
 covers recursive owning handoff, logical-cell membership, relays and platform closure.
 Historical mini plans below preserve the evidence and decisions at their source cuts.
 
@@ -31396,22 +31396,20 @@ NetworkNode physical-backing adapter, retaining direct aliases and actual curren
 source-view bindings. Following is complete relay Linux/Mac closure and final
 normative/current-source P0–P8 qualification. P8 remains active; P9/P10 not begun.
 
-### Current mini plan402
+### Current mini plan403
 
-Macro review: C12's previously missing diagnostic wall-clock interface is now
-implemented and passes Linux full runtime profiles54/54/37/54 plus native2
-controls; matching Mac checks remain. The final Mac deep/repeated histories are
-still required.402 changes only the manual physical checkpoint test watchdog
-from15 to90s, matching the same history's upper checkpoint allowance. No original
-functional requirement specifies15s; durable-frontier/router/worker assertions,
-provider timers, other15s stages and original ownership cleanup remain intact.
-The original398 coldTCP failure stays failed. Performance measurements remain P9.
+Macro review: terminal Mac398 now passes both complete repeated-replacement
+histories (163.75s TCP,172.51s QUIC), while both original cold cases fail final
+checkpoint publication under15s. Mac401 closes C12 with public injection1/0 and
+native signed/shared-epoch controls2/0. The explicit71-row audit found a remaining
+old native-only100-group qualification failure; its exact test is included in the
+current Mac sequence. No new functional scope, performance tuning or security work.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac deep checkpoint/cleanup402 | Finish actual two-tier cold recovery with original27 owners. | Same397 durable frontier predicate; stage-specific402 watchdog; terminal398 handback. Complete Linux all9/default7 pass. | Original opaque write/read/retry, anchor/suffix/same-store/session recovery, real published checkpoint coverage, all27 joins/rebind on Mac TCP/QUIC. Preserve old failure and source limits. | Recursive composition, P8 |
-| Next: Mac clock and repeated replacement closure | Qualify new C12 and both genuine membership replacements. | Exact401 clock source and selected1+2 controls prepared; sole398 Mac job owns the machine and repeated2 cases remain queued. | Actual host injection/native signed-clock controls and both TCP/QUIC Joint/Final/Outcome/Release/business/read histories with all15 original handbacks. | Replaceable interfaces and membership, P0/P4/P8 |
-| Following: complete explicit source/platform audit | Establish P0–P8 completion against actual finished code. | Above closures, normative requirements, historical384 matrix,399/400 reconciliation and additive401/fixture402 checks. | Map each explicit R/VB/I/named P8 requirement to appropriate Linux/macOS evidence; reconcile source changes and failed records. Mark complete and stop only after required checks pass. | Goal completion, P0–P8 |
+| Current: Mac native-only and deep recovery qualification | Finish the remaining platform-specific recovery evidence. | Exact402 source and original100-group test; terminal398 and401 handback. Linux complete nested all9/default7 pass; current Mac sequence is being launched with persisted PID. | Original native-only100-group snapshot/reopen/read/cleanup case; full TCP/QUIC cold histories with real frontier/ref/base/router/worker conditions and all27 joins/rebind. Preserve previous failures. | Shared runtime and recursive composition, P2/P8 |
+| Next: final source and requirement reconciliation | Establish full requested functional coverage against the final source. | Current checks and71-row audit, raw Mac398/401 results, historical384 plus399/400/401/402 source map. | Close Q-100-MAC/Q-DEEP-MAC with actual outcomes; inspect every R/VB/I/C and named P8 row, source differences, required local checks and historical failures. | Goal completion, P0–P8 |
+| Following: publish final milestone and stop | Hand over the completed functional release boundary. | Fully satisfied prior row and clean enabled pre-push checks. | Commit/push final concise status and evidence, mark goal complete, leave P9 performance planning/P10 security/Windows untouched. | Requested stopping boundary after P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
 native22/0 (28.19s),core17/0 (0.02s),targeted original failed TCP1/0 (0.80s),TLS
@@ -32217,3 +32215,27 @@ native library; cached records are not fresh compilation. Git delta vs401 is
 only the checkpoint fixture; production/Cargo unchanged. Formatter/four strict0.
 Portable logs/results: validation/baseline/slice402; post-test fingerprints only.
 Matching Mac cold402 and diagnostic401 tests remain pending after398 handback.
+
+### Slice403: recovered terminal Mac results and explicit audit
+
+After the interrupted tool turn, the old90457 handle was unavailable. Root
+revalidated the actual Mac process table (no matching job) and inspected the
+original398 terminal marker/exits; no job was restarted. Both complete repeated
+histories pass with original15-owner cleanup, while both cold cases remain
+CheckpointPublished failures. All1306 inputs match at eight stages, original
+executables/library match after each case and terminal, and original formatter/
+four strict/protoc/profile/clone checks pass. Raw results: slice398/mac.
+
+Exact committed401 Mac public diagnostic injection1/0 and native epoch/subsecond/
+shared-monotonic controls2/0 pass. Source1306 and artifact guards are clean; actual
+compiler records confirm the normal debug profile with assertions/overflow and
+all features. Raw results: slice401/mac. This closes C12, not the whole roadmap.
+
+Independent final audit403 maps71 R/VB/I/C/named-P8 rows and20 assertion bundles
+to149 cited inputs; root verified every hash. Besides pending Mac402 deep
+recovery and final source consolidation, it located the explicitly preserved
+Mac315b native-only effect_owner100-group failure. Its entire test file is still
+identical, but production changed, so no old failure cause or current pass is
+inferred. The exact original normal-profile native-only test is included before
+Mac402 cold checks with its10s watchdog unchanged. Portable audit and original
+failure: validation/baseline/slice403.

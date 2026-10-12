@@ -1,0 +1,126 @@
+{
+  "compiler_records": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-combined398-pgwQVN9H/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-combined398-pgwQVN9H/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "logical_nested_native",
+        "src_path": "/private/tmp/voteboat-macos-combined398-pgwQVN9H/repo/tests/logical_nested_native.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_nested_native-4dbba713a780d579"
+      ],
+      "executable": "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_nested_native-4dbba713a780d579",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-combined398-pgwQVN9H/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-combined398-pgwQVN9H/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "logical_activation_nested",
+        "src_path": "/private/tmp/voteboat-macos-combined398-pgwQVN9H/repo/tests/logical_activation_nested.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_activation_nested-bf0aeb6b12ce7eb5"
+      ],
+      "executable": "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_activation_nested-bf0aeb6b12ce7eb5",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-combined398-pgwQVN9H/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-combined398-pgwQVN9H/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-macos-combined398-pgwQVN9H/repo/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+        "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/libvoteboat-ca76d170795d1aa6.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  ],
+  "launch_files": [
+    "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_nested_native-4dbba713a780d579",
+    "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_activation_nested-bf0aeb6b12ce7eb5",
+    "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib"
+  ],
+  "before_sha256": {
+    "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_nested_native-4dbba713a780d579": "57015a1f3b362338262757b3fdaae3ab9ad40be0312358b44b31cda426a38a18",
+    "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/logical_activation_nested-bf0aeb6b12ce7eb5": "3048ca49debd60fcdbbd7f5f4c97acb5bcec7e0ff659b11038cb581804ee9a4e",
+    "/tmp/voteboat-macos-combined398-pgwQVN9H/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib": "89926a63cc23505b8a01cf17f46ad289908ed8b7f93ac5d37c0839d3d180a7db"
+  }
+}

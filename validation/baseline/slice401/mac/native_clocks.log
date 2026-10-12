@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.03s
+     Running unittests src/lib.rs (/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/voteboat-5e6bd92568224565)
+
+running 2 tests
+test native::runtime::diagnostic_clock_tests::native_diagnostic_clock_preserves_signed_epoch_and_subseconds ... ok
+test native::runtime::diagnostic_clock_tests::native_diagnostic_sampling_keeps_the_shared_monotonic_epoch ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 272 filtered out; finished in 0.01s
+

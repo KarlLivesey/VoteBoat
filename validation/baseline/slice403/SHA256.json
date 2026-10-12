@@ -1,0 +1,22 @@
+[
+  {
+    "file": "FINAL_REQUIREMENTS.json",
+    "bytes": 70828,
+    "sha256": "3b8a7aae848821610635ef6a5cc32d687892369f433f281ea141f1b2864f0813"
+  },
+  {
+    "file": "FINAL_REQUIREMENTS.md",
+    "bytes": 6296,
+    "sha256": "ca63abd8f1c385076a145ba51409cc6391c3c5b8826672b07c3ecee58629dc0e"
+  },
+  {
+    "file": "README.md",
+    "bytes": 1053,
+    "sha256": "ffc841d8d2b84be33c85e462784965b0666cd730a3203aec9d9fc110fa6da162"
+  },
+  {
+    "file": "mac315b-native-original.log",
+    "bytes": 21476,
+    "sha256": "54c9e2351ba0211b519cc0f23d732cd7eeba300b0074a9c6e34f78c6f7eeee7e"
+  }
+]

@@ -1,0 +1,2 @@
+release_debug_assertions=true
+release_overflow_checks=true

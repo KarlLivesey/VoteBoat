@@ -1,0 +1,1486 @@
+{
+  "kind": "Read-only explicit requirements and assertion audit; not an execution/completion certificate",
+  "reviewed_at_utc": "2026-10-12T18:15:32.317699+00:00",
+  "head": "9d3e863ba3ab8e0e7e3df9f5d2d5eacf46cfa4fa",
+  "review_status": "P0-P8 completion NOT established while open obligations remain",
+  "new_absent_named_functionality_found": [],
+  "important_correction": "Earlier384 no-missing conclusion incorrectly treated C12 diagnostic wall time as optional.401 now implements it, Linux checked, Mac pending.",
+  "open_obligations": [
+    {
+      "id": "Q-DEEP-MAC",
+      "status": "pending",
+      "requirement": "Actual full deep logical cold recovery and final cleanup on macOS",
+      "evidence": "validation/baseline/slice402/README.md",
+      "next": "Run already-prepared402 exact original coldTCP and coldQUIC. Keep frontier/ref/base/router/worker conditions and all27 joins.398 failures stay historical.",
+      "notes": "15 or90 seconds is fixture watchdog, not a normative performance SLA."
+    },
+    {
+      "id": "Q-CLOCK-MAC",
+      "status": "pending",
+      "requirement": "New C12 native signed wall clock and public injected separation on macOS",
+      "evidence": "validation/baseline/slice401/README.md",
+      "next": "Selected401 Mac runtime/diagnostic controls after prior Mac owner is terminal."
+    },
+    {
+      "id": "Q-100-MAC",
+      "status": "unresolved prior test failure",
+      "requirement": "Exact native-only100-compacted-group shared runtime integration on macOS",
+      "evidence": "target/divide-membership/qualification315b/mac-results/mac-native-components.log:185",
+      "next": "Run original unchanged effect_owner::native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport in current native-only build. If it fails inspect owned work; do not infer deadlock.",
+      "notes": "Whole tests/effect_owner.rs cmp-equal to315b frozen repo; production dependencies subsequently changed. Original ten-second guard failure is not a ten-second product requirement."
+    },
+    {
+      "id": "Q-SOURCE-CONSOLIDATION",
+      "status": "pending",
+      "requirement": "Final source-specific evidence reconciliation and preserved failed records",
+      "evidence": "target/root315/audit399/COHERENCE.json",
+      "next": "Extend399 source map through401 additive clock +402 one fixture. Do not label pre401 binaries current or metadata counts provider certification."
+    }
+  ],
+  "source_primary": [
+    "VoteBoat-Design-Pack/AGENTS.md",
+    "VoteBoat-Design-Pack/docs/01-requirements-and-boundaries.md",
+    "VoteBoat-Design-Pack/docs/11-testing-and-safety-case.md",
+    "VoteBoat-Design-Pack/docs/12-implementation-roadmap.md",
+    "VoteBoat-Design-Pack/docs/16-research-track.md",
+    "VoteBoat-Design-Pack/docs/17-native-first-composition.md",
+    "VoteBoat-Design-Pack/specs/component-contracts.md",
+    "VoteBoat-Design-Pack/specs/component-contracts.json",
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "Cargo.toml",
+    ".githooks/pre-push"
+  ],
+  "rows": [
+    {
+      "id": "R01",
+      "requirement": "Ordinary crash-fault consensus",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft",
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R02",
+      "requirement": "Recursive responsibility decomposition",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R03",
+      "requirement": "Horizontal growth of one logical responsibility",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R04",
+      "requirement": "Hierarchical quorums",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "quorum"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R05",
+      "requirement": "Selective participation",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R06",
+      "requirement": "Shared, high-throughput WAL",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R07",
+      "requirement": "Cheap mostly-idle groups",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R08",
+      "requirement": "No ancestor in the normal commit path",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R09",
+      "requirement": "Safe transitions",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "membership",
+        "routing",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R10",
+      "requirement": "Honest ordering and durability API",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft",
+        "application"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R11",
+      "requirement": "Deterministic testing",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft",
+        "timer",
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R12",
+      "requirement": "Bounded overload",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "runtime",
+        "buffers"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R13",
+      "requirement": "Build native implementations first",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R14",
+      "requirement": "Public integration seams throughout",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "timer",
+        "clock",
+        "buffers",
+        "application",
+        "policy",
+        "observability",
+        "credentials"
+      ],
+      "open_obligations": [
+        "Q-CLOCK-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R15",
+      "requirement": "Embeddable composition",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "transport",
+        "application",
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R16",
+      "requirement": "Optional compile-time adapters",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "runtime",
+        "transport"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R17",
+      "requirement": "Purpose-built persistence contract",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R18",
+      "requirement": "Single authoritative persistence path",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "R19",
+      "requirement": "Contract-wide safety and bounds",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "buffers",
+        "credentials",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-000",
+      "requirement": "Define the inventory in chapter 17, dependency direction, typed admission/completions and host-owned lifetime rules. Establish a core/interfaces-only build and downstream injection tests. Avoid a generic read/write store or a monolithic universal backend trait.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "runtime",
+        "clock"
+      ],
+      "open_obligations": [
+        "Q-CLOCK-MAC",
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-001",
+      "requirement": "Define separate group, node/store, configuration, ownership and lane generations. Reject reused/unknown incarnations in a bounded decoder.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-002",
+      "requirement": "Append framed batches; support scoped barriers, hard state, range fetch, suffix/prefix operations, snapshot binding, interrupted-tail recovery and corruption detection. Expose durability tokens rather than booleans. Keep platform I/O replaceable below the logical store; never automatically stack alternative log stores.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-003",
+      "requirement": "Implement explicit event/effect types and persistence dependency ordering. A mock storage completion must not release unrelated or future acknowledgements.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "raft",
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-004",
+      "requirement": "Implement durable voting, log replication, ordered application, request IDs and unknown outcomes. Prove basic histories with the simulator before real transport.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft",
+        "application"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-005",
+      "requirement": "Host 100 groups, then scale the count and active fraction. Add bounded admission and fair scheduling before increasing maximum buffers.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-006",
+      "requirement": "Enumerate every majority use and replace only through the validated policy abstraction. Add joint-configuration test cases, not just election examples.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "quorum",
+        "membership"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-007",
+      "requirement": "Build `/services/x/orders` and `/services/y/jobs` with distinct assignment sets. Demonstrate cached child progress without the root.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-008",
+      "requirement": "Implement the conservative freeze-based range split, including actual target data durability and duplicated client retries. Optimize pause only after recovery is correct.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-009",
+      "requirement": "Exercise the same public seams with native components and local downstream test doubles. No actual third-party adapter is required. Verify host-owned resources, construction failure cleanup and shutdown with in-flight work.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "transport",
+        "runtime",
+        "clock"
+      ],
+      "open_obligations": [
+        "Q-CLOCK-MAC",
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-010",
+      "requirement": "Keep core/contracts free of concrete providers. Distinguish compiled availability from selected implementation. Reject unknown providers, incompatible formats and unsupported durability before service starts. Record enabled dependency features and component identities.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "transport",
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "VB-011",
+      "requirement": "Turn the specification's storage, transport, scheduler, codec and supporting-provider obligations into reusable tests. A future external adapter may not advertise support until these tests and relevant durable histories pass.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "snapshots",
+        "timer",
+        "clock",
+        "buffers",
+        "application",
+        "observability",
+        "credentials"
+      ],
+      "open_obligations": [
+        "Q-CLOCK-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I01",
+      "requirement": "A voter never durably grants two different candidates a vote in the same term/group incarnation.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I02",
+      "requirement": "No two different entries become committed at one index in the same group history.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft",
+        "quorum"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I03",
+      "requirement": "Durable progress is a contiguous matching prefix, not a maximum completed index.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage",
+        "striped"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I04",
+      "requirement": "A persistence-dependent effect never escapes before all its dependencies succeed.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "raft",
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I05",
+      "requirement": "Every activated policy is validated and all relevant quorum checks use its correct effective configuration.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "quorum",
+        "membership"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I06",
+      "requirement": "At most one group can successfully serve a transferred scope at a time under the lifecycle contract.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I07",
+      "requirement": "An acknowledged operation remains recoverable under the documented failure/durability assumptions.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "raft",
+        "storage",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I08",
+      "requirement": "Replay does not duplicate an in-contract operation ID's application effect.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "application",
+        "routing",
+        "transactions"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I09",
+      "requirement": "Snapshot/checkpoint publication never exposes a boundary without its required state.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "snapshots",
+        "logical",
+        "striped"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I10",
+      "requirement": "Queues and retained resources remain bounded under overload and quorum loss.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "runtime",
+        "buffers"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I11",
+      "requirement": "An old store/group/lane incarnation cannot supply valid evidence for a replacement incarnation.",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "storage",
+        "transport",
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "I12",
+      "requirement": "Unrelated parent/control failure does not create a new authority or silently weaken a child's quorum.",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing",
+        "quorum"
+      ],
+      "open_obligations": [],
+      "scope": "Must be read with bundle assertions and exact recorded source/platform limits; not universal completion."
+    },
+    {
+      "id": "C01",
+      "requirement": "Public append_batch, persist_hard_state, fetch_range, replace_suffix, truncate_prefix, recover",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C02",
+      "requirement": "Public barrier, poll_durable, fence_failure",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C03",
+      "requirement": "Public begin_stage, write_chunk, seal, publish, install, recover, reclaim",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C04",
+      "requirement": "Public submit_vectored, poll_completion, sync_data, publish_manifest, sync_directory",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "storage",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C05",
+      "requirement": "Public apply_batch, read_at_barrier, checkpoint, restore, deduplicate",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "application"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C06",
+      "requirement": "Public try_send_batch, poll_events, reserve_peer_budget, drain",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C07",
+      "requirement": "Public encoded_len, encode_into, decode_bounded, negotiate",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "formats",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C08",
+      "requirement": "Public encode_batch, verify_frame, decode_recovery, check_version",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "formats",
+        "storage"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C09",
+      "requirement": "Public establish, bind_identity, renew, revoke, close",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "credentials",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C10",
+      "requirement": "Public enqueue_ready, poll_budgeted, reschedule, drain",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C11",
+      "requirement": "Public register, cancel, poll_expired",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "timer"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C12",
+      "requirement": "Public monotonic_now, diagnostic_wall_time",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "clock"
+      ],
+      "open_obligations": [
+        "Q-CLOCK-MAC"
+      ],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C13",
+      "requirement": "Public sample_jitter, seed_test_source",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "timer"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C14",
+      "requirement": "Public reserve, acquire, transfer, release",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "buffers"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C15",
+      "requirement": "Public reserve_credits, account_inflight, release, reject",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "buffers",
+        "runtime"
+      ],
+      "open_obligations": [
+        "Q-100-MAC"
+      ],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C16",
+      "requirement": "Public route_key, validate_scope, propose_split",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C17",
+      "requirement": "Public resolve_hint, cache, invalidate, bound_retry",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing",
+        "transport"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C18",
+      "requirement": "Public eligible_hosts, score, propose_move",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "policy"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C19",
+      "requirement": "Public record_bounded, snapshot_counters, export",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "observability"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C20",
+      "requirement": "Public parse_typed, validate, submit_intent, report_receipt",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "policy",
+        "membership"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C21",
+      "requirement": "Public bind_principal, check_scope, refresh, audit",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "credentials"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C22",
+      "requirement": "Public checksum, verify, encode_bounded, decode_bounded",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "formats"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C23",
+      "requirement": "Public export_scope, import_scope, finish_checkpoint, recover_import",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "routing",
+        "snapshots"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "C24",
+      "requirement": "Public capabilities, prepare, decide, recover",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "transactions"
+      ],
+      "open_obligations": [],
+      "scope": "Proposed operation names are semantic, not mandatory Rust spelling; no third-party adapter requirement."
+    },
+    {
+      "id": "P8-striped",
+      "requirement": "P8-striped",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "striped"
+      ],
+      "open_obligations": []
+    },
+    {
+      "id": "P8-relays",
+      "requirement": "P8-relays",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "relays"
+      ],
+      "open_obligations": []
+    },
+    {
+      "id": "P8-logical",
+      "requirement": "P8-logical",
+      "status": "implemented_pending_selected_qualification",
+      "assertion_bundles": [
+        "logical"
+      ],
+      "open_obligations": [
+        "Q-DEEP-MAC"
+      ]
+    },
+    {
+      "id": "P8-transactions",
+      "requirement": "P8-transactions",
+      "status": "implemented_with_scoped_recorded_evidence",
+      "assertion_bundles": [
+        "transactions"
+      ],
+      "open_obligations": []
+    }
+  ],
+  "assertion_bundles": {
+    "raft": {
+      "assertions_reviewed": [
+        "Exact durable ticket releases one vote; wrong session/ticket and second candidate are refused.",
+        "Applied histories compare entries at each index, preserve acknowledged operations over native disk recovery, repair divergent suffixes after partitions, and require current-term quorum reads."
+      ],
+      "production_sources": [
+        "src/raft.rs",
+        "src/vote.rs",
+        "src/native/log_store.rs"
+      ],
+      "test_sources": [
+        "tests/vote.rs",
+        "tests/raft.rs",
+        "tests/raft/fault_schedule.rs",
+        "tests/raft/reference.rs",
+        "tests/history.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice297/mac-all-raft.log",
+        "validation/baseline/slice297/linux-all-raft.log",
+        "validation/baseline/slice297/README.md",
+        "target/root315/final384/TESTS_all.log"
+      ],
+      "limits": "Native/host fault schedules and compatible raft-rs differential traces are finite; no Byzantine or all-media-loss claim."
+    },
+    "storage": {
+      "assertions_reviewed": [
+        "Shared LogStore exercise checks forged scoped tickets, accepted-versus-durable visibility, old-generation barrier refusal, exact bounded fetch, protected committed prefix, and cross-store independence.",
+        "Native/host reopened stores retain hard state and exact histories; crash cuts fence failed publication."
+      ],
+      "production_sources": [
+        "src/log.rs",
+        "src/native/log_store.rs",
+        "src/native/log_store/file.rs"
+      ],
+      "test_sources": [
+        "tests/provider_conformance.rs",
+        "tests/provider_conformance/log_store.rs",
+        "tests/log_store.rs",
+        "tests/log_reclaim.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice297/mac-all-raft.log",
+        "target/root315/final384/TESTS_all.log"
+      ],
+      "limits": "Tests support the selected native journal and public host implementations; arbitrary third-party storage is not certified."
+    },
+    "snapshots": {
+      "assertions_reviewed": [
+        "Stage identity, exact reference, immutable content and two independent log anchors are checked.",
+        "Failed/unfinished publication cannot provide restore or reclamation authority; replay checks schema, dedup and suffix."
+      ],
+      "production_sources": [
+        "src/snapshot.rs",
+        "src/native/snapshot_store.rs"
+      ],
+      "test_sources": [
+        "tests/provider_conformance/snapshot.rs",
+        "tests/provider_conformance/snapshot_native.rs",
+        "tests/provider_conformance/snapshot_worker.rs",
+        "tests/snapshot.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice294/README.md",
+        "target/root315/final384/TESTS_all.log"
+      ],
+      "limits": "Final deep logical native Mac402 checkpoint path remains open separately; old snapshot cannot count for new frontier."
+    },
+    "runtime": {
+      "assertions_reviewed": [
+        "Hundred-group histories use one shared store/scheduler and recover acknowledged state.",
+        "Held dependencies let unrelated groups run; admission reserves control credit, tests identity/byte limits, and preserves host resources after one instance closes."
+      ],
+      "production_sources": [
+        "src/runtime.rs",
+        "src/runtime/effects.rs",
+        "src/native/worker.rs",
+        "src/native/runtime.rs"
+      ],
+      "test_sources": [
+        "tests/runtime.rs",
+        "tests/effect_owner.rs",
+        "tests/provider_conformance/admission.rs",
+        "tests/support/node.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice401/runtime_all.log",
+        "validation/baseline/slice401/runtime_native.log",
+        "target/root315/final384/TESTS_native.log",
+        "target/divide-membership/qualification315b/mac-results/mac-native-components.log"
+      ],
+      "limits": "Mac315b exact native-only compacted100-group effect_owner history still failed in located evidence; no10-second product SLA is inferred. Performance thresholds are P9."
+    },
+    "quorum": {
+      "assertions_reviewed": [
+        "All nine-voter quorum combinations intersect and optimized frontier matches reference.",
+        "Duplicate leaves/depth/overflow/weight errors fail validation; effective old/Joint/final predicates control elections, reads and commit rather than bootstrap majority."
+      ],
+      "production_sources": [
+        "src/quorum.rs",
+        "src/membership.rs",
+        "src/raft.rs"
+      ],
+      "test_sources": [
+        "tests/quorum.rs",
+        "tests/activation_model.rs",
+        "tests/ballot_model.rs",
+        "tests/member_recovery.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice297/mac-all-raft.log",
+        "target/root315/final384/TESTS_all.log"
+      ],
+      "limits": "Finite validated fixed policies; arbitrary quorum predicates and utilization-based hot changes excluded."
+    },
+    "membership": {
+      "assertions_reviewed": [
+        "Old checkpoint plus genuine Final-to-Joint rollback restores actual election policy through139 native failure schedules.",
+        "Dynamic learners cannot vote/campaign/read; recovered assignments, exact readiness, configured peer routing and Joint/Final receipts gate promotion."
+      ],
+      "production_sources": [
+        "src/membership.rs",
+        "src/native/startup.rs",
+        "src/runtime/node.rs"
+      ],
+      "test_sources": [
+        "tests/member_recovery.rs",
+        "tests/member_recovery/older_checkpoint.rs",
+        "tests/support/node.rs",
+        "tests/startup/maintenance/membership_drain.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice297/mac-all-raft.log",
+        "validation/baseline/slice396/README.md",
+        "validation/baseline/slice393/mac/original/joint_tcp.log",
+        "validation/baseline/slice393/mac/original/joint_quic.log"
+      ],
+      "limits": "Actual physical and Joint logical paths qualified as recorded; latest repeated398 Mac result was reported by root, not independently inspected here."
+    },
+    "routing": {
+      "assertions_reviewed": [
+        "Host policy resolves exact disjoint scopes; cycles/gaps/overlaps and stale generations are rejected.",
+        "Downstream discovery fetches only needed path, leaves unrelated child absent, and a warm child remains usable after parent source closes.",
+        "Native nested merge retirement restarts with only one old owner retired, rejects old fenced owner, preserves original retries on target and finally reopens retired stores."
+      ],
+      "production_sources": [
+        "src/routing.rs",
+        "src/directory.rs",
+        "src/native/lookup_discovery.rs",
+        "src/transfer_source.rs",
+        "src/transfer_target.rs"
+      ],
+      "test_sources": [
+        "tests/routing.rs",
+        "tests/delegation.rs",
+        "tests/routed/split/history.rs",
+        "tests/routed/nested_merge_retirement.rs"
+      ],
+      "recorded_evidence": [
+        "target/root315/final384/TESTS_all.log"
+      ],
+      "limits": "Per-owner ordering only; evidence does not promise global total order across partitioned lanes."
+    },
+    "transport": {
+      "assertions_reviewed": [
+        "Supplied NetworkNode construction refusal returns original provider; own poll/drain/reclaim occurs without granting catalogue authority.",
+        "Local send completion is separated from remote durability, bounded buffers and exact original peer/context guard ingress; revoked/closed secure sessions cannot silently succeed."
+      ],
+      "production_sources": [
+        "src/transport.rs",
+        "src/runtime/peer_network.rs",
+        "src/native/transport.rs",
+        "src/native/quic.rs"
+      ],
+      "test_sources": [
+        "tests/support/node_network.rs",
+        "tests/support/node.rs",
+        "tests/transport.rs",
+        "tests/quic.rs",
+        "tests/wire.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice297/mac-all-raft.log",
+        "target/divide-provider/NETWORK346_RESULTS.md",
+        "target/divide-admin342/C371_RESULTS.md"
+      ],
+      "limits": "Only implemented TLS/QUIC and selected host contracts; no unsupported arbitrary transport/codec Cartesian combinations."
+    },
+    "timer": {
+      "assertions_reviewed": [
+        "Shared host/native timer obligations check exact owner/token/generation cancellation, bounded poll ordering and refusal; five defective providers are detected.",
+        "Caller monotonic time drives deterministic events and election jitter."
+      ],
+      "production_sources": [
+        "src/runtime.rs",
+        "src/native/runtime.rs",
+        "src/runtime/timed.rs"
+      ],
+      "test_sources": [
+        "tests/runtime.rs",
+        "tests/runtime/timer_contract.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice297/README.md",
+        "validation/baseline/slice401/runtime_all.log"
+      ],
+      "limits": "Timer waking does not establish quorum authority; unbounded generations and arbitrary provider implementation are not proved."
+    },
+    "clock": {
+      "assertions_reviewed": [
+        "DiagnosticClock is separate from monotonic Clock; signed epoch/subsecond conversion is native SystemTime-only.",
+        "Injected wall jumps i128 extremes leave exact election deadline and monotonic value unchanged; explicit diagnostic read count does not increase inside consensus timing."
+      ],
+      "production_sources": [
+        "src/runtime.rs",
+        "src/native/runtime.rs"
+      ],
+      "test_sources": [
+        "tests/runtime.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice401/runtime_all.log",
+        "validation/baseline/slice401/runtime_default.log",
+        "validation/baseline/slice401/runtime_core.log",
+        "validation/baseline/slice401/runtime_native.log",
+        "validation/baseline/slice401/native_diagnostic.log"
+      ],
+      "limits": "Linux54/54/37/54 +2 pass; Mac401 remains pending. Earlier384 catalogue omission is corrected, not silently treated optional."
+    },
+    "buffers": {
+      "assertions_reviewed": [
+        "Generated host/native buffer histories retain per-owner/per-class byte credits across transfers and cross-thread final releases; bad early-release provider is detected."
+      ],
+      "production_sources": [
+        "src/buffer.rs",
+        "src/admission.rs"
+      ],
+      "test_sources": [
+        "tests/provider_conformance/buffer.rs",
+        "tests/provider_conformance/buffer_mutants.rs",
+        "tests/provider_conformance/admission.rs"
+      ],
+      "recorded_evidence": [
+        "target/root315/final384/TESTS_all.log",
+        "target/divide-membership/qualification315b/mac-results/mac-all-components.log"
+      ],
+      "limits": "Bounded test pools and selected native/host implementations, not allocator throughput measurements."
+    },
+    "application": {
+      "assertions_reviewed": [
+        "Shared native/host application checker enforces original replies, no partial apply on refusal, barrier reads, checkpoint restoration and dedup.",
+        "Client queues distinguish admitted/written/committed/applied and retain Unknown until original recovery."
+      ],
+      "production_sources": [
+        "src/application.rs",
+        "src/runtime/clients.rs",
+        "src/runtime/applications.rs"
+      ],
+      "test_sources": [
+        "tests/provider_conformance/application.rs",
+        "tests/application.rs",
+        "tests/support/node.rs",
+        "tests/history.rs"
+      ],
+      "recorded_evidence": [
+        "target/root315/final384/TESTS_all.log",
+        "validation/baseline/slice297/README.md"
+      ],
+      "limits": "Application schema-specific atomicity; no SQL or unspecified transaction semantics."
+    },
+    "policy": {
+      "assertions_reviewed": [
+        "Assignment intent binds exact group/store/configuration and is refused before persistence if invalid/overbudget.",
+        "Learners do not supply quorum/domain survival; weighted/recursive policy remains authority, not placement score."
+      ],
+      "production_sources": [
+        "src/placement.rs",
+        "src/runtime/administration.rs"
+      ],
+      "test_sources": [
+        "tests/placement.rs",
+        "tests/support/node.rs"
+      ],
+      "recorded_evidence": [
+        "target/root315/final384/TESTS_all.log",
+        "validation/baseline/slice396/README.md"
+      ],
+      "limits": "Placement is proposal-only; automatic cluster orchestration is not a promised initial service."
+    },
+    "observability": {
+      "assertions_reviewed": [
+        "Wrong owner/session/generation and regressing diagnostics are refused; fixed counters saturate and exported values have independent lifetime.",
+        "Closing one observer leaves another owner alive; diagnostics refusal cannot change write/read/shutdown."
+      ],
+      "production_sources": [
+        "src/observability.rs",
+        "src/native/observability.rs"
+      ],
+      "test_sources": [
+        "tests/observability.rs",
+        "tests/support/node.rs"
+      ],
+      "recorded_evidence": [
+        "target/root315/final384/TESTS_all.log",
+        "target/divide-membership/qualification315b/mac-results/mac-all-components.log"
+      ],
+      "limits": "No claim of P9 measurement completeness or production telemetry integration beyond public bounded adapters."
+    },
+    "credentials": {
+      "assertions_reviewed": [
+        "Host validity prevents provider I/O when invalid and suppresses success if invalidated during I/O; returning raw session first revokes it.",
+        "Native rotation closes old channels, returns exact accepted work as failed, and new pins preserve stable peer identity."
+      ],
+      "production_sources": [
+        "src/secure.rs"
+      ],
+      "test_sources": [
+        "tests/credential_refresh/host.rs",
+        "tests/credential_refresh/native.rs",
+        "tests/credential_refresh/keys.rs",
+        "tests/provider_conformance/credential.rs",
+        "tests/provider_conformance/credential_native.rs"
+      ],
+      "recorded_evidence": [
+        "target/root315/final384/TESTS_all.log",
+        "target/divide-membership/qualification315b/mac-results/mac-all-components.log"
+      ],
+      "limits": "Existing authentication/failure contracts only; dedicated security review/hardening is P10."
+    },
+    "formats": {
+      "assertions_reviewed": [
+        "Bounded codecs reject truncation, every single-bit log-frame mutation, unknown mandatory formats and contradictory lengths.",
+        "Snapshot and native log codecs preserve distinct persistent contracts; optional compression is absent rather than advertised."
+      ],
+      "production_sources": [
+        "src/wire.rs",
+        "src/native/log_store.rs",
+        "src/native/snapshot_store.rs"
+      ],
+      "test_sources": [
+        "tests/log_store.rs",
+        "tests/wire.rs",
+        "tests/parser_campaign.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice301/README.md",
+        "target/root315/final384/TESTS_all.log"
+      ],
+      "limits": "16896 selected deterministic corpus cases are not exhaustive fuzzing or security certification."
+    },
+    "striped": {
+      "assertions_reviewed": [
+        "Independent prefix/suffix/snapshot graphs require no frontier and replay four intentionally weakened failures.",
+        "Actual native file tests cut30 publication and reclaim/parity transitions, reopen original stores, require exact acknowledged prefix and safe next generation.",
+        "Actual striped Node histories use one ordinary ordered Raft log with separate local device payload lanes."
+      ],
+      "production_sources": [
+        "src/native/log_store/striped.rs",
+        "src/native/log_store/striped/file.rs"
+      ],
+      "test_sources": [
+        "tests/striped_wal_model.rs",
+        "tests/striped_log_store.rs",
+        "tests/striped_node.rs",
+        "src/native/log_store/striped/file/tests.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice321/linux-audit.json",
+        "validation/baseline/slice321/mac-audit.json",
+        "validation/baseline/slice321/README.md"
+      ],
+      "limits": "Fixed selected layouts and surviving-device assumptions; not globally ordered distributed lanes or all-device-loss recovery."
+    },
+    "relays": {
+      "assertions_reviewed": [
+        "Seven finite graphs preserve original source identity and durable evidence across relays; weakenings reveal invented/duplicate/written-only/stale acknowledgments.",
+        "Two-helper actual TCP/QUIC trees cover minority loss, late replies, helper restart and same-WAL/checkpoint replay; helpers never become voter evidence."
+      ],
+      "production_sources": [
+        "src/native/relay/network.rs",
+        "src/native/relay/network/plan/tree.rs",
+        "src/transport/source/path.rs"
+      ],
+      "test_sources": [
+        "tests/representative_relay_model/tests.rs",
+        "tests/native_relay/tree_restart.rs",
+        "tests/native_relay/tree_history.rs"
+      ],
+      "recorded_evidence": [
+        "target/divide-provider/RELAY371_RESULTS.md",
+        "target/divide-provider/relay371-mac/VERIFIED.json"
+      ],
+      "limits": "Static checked topology max16 hops; automatic dialing/arbitrary topology proof not advertised; benchmarks are P9."
+    },
+    "logical": {
+      "assertions_reviewed": [
+        "Independent nine logical graphs preserve promises, payload dependencies and serialized replicated activation intents; original weakening counterexamples replay.",
+        "Full native deep test writes5, records checkpoint plus suffix, joins27 original owners, recovers same stores and newer sessions, requires exact duplicate replies/read5 and final27 joins.",
+        "Joint tests reopen12 stores at actual committed Joint; repeated replacement preserves genuine Learners/Joint/Final/Outcome/Release."
+      ],
+      "production_sources": [
+        "src/logical_voter.rs",
+        "src/logical_voter/bridge.rs",
+        "src/logical_voter/node.rs"
+      ],
+      "test_sources": [
+        "tests/logical_voter_promises.rs",
+        "tests/logical_voter_activation.rs",
+        "tests/logical_nested_native/cold_recovery.rs",
+        "tests/logical_nested_native/cluster.rs",
+        "tests/logical_activation_nested/repeated.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice314/README.md",
+        "validation/baseline/slice393/README.md",
+        "validation/baseline/slice398/README.md",
+        "validation/baseline/slice402/all.log",
+        "validation/baseline/slice402/default.log"
+      ],
+      "limits": "Mac deep full recovery currently failed398 and pending402; Linux9/7 pass402. Representative refinement uses qualified ordinary child consensus; finite models are not an unbounded proof."
+    },
+    "transactions": {
+      "assertions_reviewed": [
+        "Finite three-participant two-key model checks atomicity/isolation and four original weakening violations.",
+        "Actual five-group programs preserve prepare locks across checkpoint/suffix cold recovery, recorded decisions, contention abort and coordinator-leader replacement; retries retain original outcomes."
+      ],
+      "production_sources": [
+        "src/transaction.rs",
+        "src/program_transaction.rs"
+      ],
+      "test_sources": [
+        "tests/program_transaction_model.rs",
+        "tests/program_transaction_driver/history.rs",
+        "tests/program_transaction_driver/recovery.rs"
+      ],
+      "recorded_evidence": [
+        "validation/baseline/slice318/linux-audit.json",
+        "validation/baseline/slice318/mac-audit.json",
+        "validation/baseline/slice318/README.md"
+      ],
+      "limits": "Fixed-key numeric versioned programs are supported; SQL, moving keys and atomic global scans are not implied by broader transactions."
+    }
+  },
+  "fidelity_notes": [
+    "Reviewed executable assertion bodies rather than accepting catalogue count144/145 or review count40/41.",
+    "All test execution referred to here was performed elsewhere; this audit ran no tests, no Mac commands, no Git mutation.",
+    "Unchanged effect_owner test file does not imply unchanged production or a passed Mac native-only test.",
+    "Root reported terminal398 repeatedTCP1/0 163.75s and repeatedQUIC1/0 172.51s; this audit did not independently inspect those raw logs. They remain reported, not newly certified here.",
+    "No universal claim that all145 contracts are interchangeable provider certifications; protected core invariants and constrained inputs are intentionally not replaceable."
+  ],
+  "excluded_per_user": {
+    "P9": "Performance optimization, sustainable throughput/p99, allocation/RSS/CPU and comparative benchmark gates, including research tradeoff measurement.",
+    "P10": "Dedicated security audit/hardening; current authentication/ownership/bounds remain required.",
+    "Windows": "Deferred target.",
+    "future_unselected": "Explicit chapter16 R-B global ordered distributed lanes and R-D dormancy/parallel application are distinct optional research directions, not one of four promoted P8 features. Third-party adapters, SQL and moving-key/global-scan transactions not promised."
+  },
+  "input_sha256": {
+    ".githooks/pre-push": "4adca8d65c571a717098ad784e08ac561d60e8b92196283fde50ab0e8a70769f",
+    "Cargo.toml": "5155ea53a21565bd3006d8b56af3393573d3f16b0fe0ef0e69547500ab14ceaa",
+    "VoteBoat-Design-Pack/AGENTS.md": "1e3f5bc2ea8263c16d45a26047d13310eb4e37a03cd7248106a5a2a06fc7e426",
+    "VoteBoat-Design-Pack/docs/01-requirements-and-boundaries.md": "581a3f2daff4818a83f1bd5f11e9b49d1eca5f4d9e58860eb2b85ac1a0612bea",
+    "VoteBoat-Design-Pack/docs/11-testing-and-safety-case.md": "19914fbfd927b6cb3b49d00532aea9a6bb1daf057fc3f53de60a450e4853e28c",
+    "VoteBoat-Design-Pack/docs/12-implementation-roadmap.md": "a51356f8fc00c30a6083e92e75e4d802fa8e2e7fa47445d99826ac0034c13140",
+    "VoteBoat-Design-Pack/docs/16-research-track.md": "186538b1b611fa419fd0bf28bb27025aa5f64b743a09f8bd3cd5fde900419f41",
+    "VoteBoat-Design-Pack/docs/17-native-first-composition.md": "4e66e749565ab58c69ae45813185c0845dea97e2aeebf404552fdd855328fc3c",
+    "VoteBoat-Design-Pack/specs/component-contracts.json": "df9a0a4fca5ad220ba7288080a5a3378450d6d929d3e9e23d1b9065f357f4e12",
+    "VoteBoat-Design-Pack/specs/component-contracts.md": "a522f73081d50591d4881c6cbcb4bf137ca648becdd228c977949028387beccb",
+    "docs/component-contracts.json": "83e4017bc578a703c0d81b46ca847847c844d00c79c251364b82c578a2de08d4",
+    "docs/provider-conformance.json": "596cb45b2f0dcea743175a7daf0550db9ce0ed84006f63b86d3f180b716e1e83",
+    "src/admission.rs": "4e25fb8ee77387785fee706e016185075188157d2de93066477d0063502e7977",
+    "src/application.rs": "a6479bd8341583e3b0975ecf77957455a16caea8408b127ebfdfa86eea4e5dc2",
+    "src/buffer.rs": "b2873f6c8b06715b015e8a369b72e8192a29423d7614ce8ac99125989c4a6b9e",
+    "src/directory.rs": "8359dac65004551585bf14db7e3d7afccb43e40aa8c8638e21658f7e85ab636d",
+    "src/log.rs": "f53f9549dcdada9382b3bc40d302e0dff2812ff56cc818d96b8cbf4aa5fbdfe4",
+    "src/logical_voter.rs": "d9c855a36832fddd9e1b9af42cd1e26374c489dbe97ca7c49b3f6832056a1d49",
+    "src/logical_voter/bridge.rs": "3f0e78763d2b69599e372e80981830003247784a4b11578db041a67ecb8ec269",
+    "src/logical_voter/node.rs": "2368dea24b712014e2d8bfea94cfa39f209452f4c067b43bcddee77924520133",
+    "src/membership.rs": "5935ba4bd7e13bb1126d23d633ecfb0e440e94e882eef33327b6636ba7b7c9a2",
+    "src/native/log_store.rs": "af505d167a62be2e804d3ab5432af4d5586421600535b7ca9230d3d585c70402",
+    "src/native/log_store/file.rs": "689c2ddc8d10ddb86c061253bbd99626d2243a9eb4ba2a4d388b5218bb4cd553",
+    "src/native/log_store/striped.rs": "1a76ea9edfd66abfc9bea31a8c304fd507cc45d854b51335fe39a0541220ca6e",
+    "src/native/log_store/striped/file.rs": "6fabc00c0faa4bf270f1921e3549793ce5525451a729e3406acf077c6dd16bae",
+    "src/native/log_store/striped/file/tests.rs": "de3849b724423bebdd3f4b0bd2ff347f3feb213cb982ab6e673f5ead1f0291d4",
+    "src/native/lookup_discovery.rs": "2093977da7adce1de2be10a53fd5d9de81e70780a60b517865f281ff7dd4def5",
+    "src/native/observability.rs": "a2854d5fcc66b1c38a276b6e1b66e43e3ab16d5abec854bd968b8fa9ef4b3d56",
+    "src/native/quic.rs": "eff2a52303771aa9cd6e2942a541988228d9395043a854a343671fd0f876aa9a",
+    "src/native/relay/network.rs": "fe9e5ec205c59ce2befda3041123fadfad9dc0908abda7aef8404158688bce80",
+    "src/native/relay/network/plan/tree.rs": "22baa2a44b8fbd92f5856aa2877e0a2a84dd18d31a94e7ada3e40d50452d705b",
+    "src/native/runtime.rs": "91282b74deb11e814210383d5baec89785f2b9e6dd26d22964acf5d6788241d4",
+    "src/native/snapshot_store.rs": "fecf7eec47ba343d85cfcd0dcb570001ad66f8bc7be4f98d5310986703e1bf85",
+    "src/native/startup.rs": "4c2c3ad51fd207ffb722081c5acae0c6b04c2352637212097dc04c17dbccd566",
+    "src/native/transport.rs": "eca504e83702e8614ac61aaf0a9605db04e82e908ccf31f3f356e97984cff6e8",
+    "src/native/worker.rs": "16e180d86f2940099a3f0b67e0b8c8af3ff1aab1546fb5801fa31d003a30bfa7",
+    "src/observability.rs": "8f77bfeda0b4836e7b43736a3e2526795cfe2e38997f41d12a7afb523f12f247",
+    "src/placement.rs": "af979f3ba2968972a6685ba42a4ba1858657f227bc2e5221859a42455d4eaecf",
+    "src/program_transaction.rs": "bc39f9f586c2d61caa0103bfd4793ffec4681953aac330fa3d77a1a07c72a212",
+    "src/quorum.rs": "8429a9cac6074c00c486ab8fb17fa67157a69e501691af2148142e7a43e5655a",
+    "src/raft.rs": "936bcc5ccb6c2cde075dfafe0e970f883796c68cddb63956af6e07a612e24225",
+    "src/routing.rs": "94d25dd96b56072fb4eb8a145055e1922b7b7f1da252c96de074b27f3cc590f5",
+    "src/runtime.rs": "0a6e42ed17ecca72340f7df24fa6d27b5e1c32e425ac7fa4b2916a087192c055",
+    "src/runtime/administration.rs": "e1df5e9de4ce76ec8d110ad682eeafa3920813f55ac952c8fa239d7aea97dd8d",
+    "src/runtime/applications.rs": "4c8c24da308e1ff9b0dd41d94b5e2077634ed64dbb461b4e6a5eff5f2a3e4791",
+    "src/runtime/clients.rs": "fbd929860cf337328236da0b0e8ddec094463083da489515a19d81b04d93e33b",
+    "src/runtime/effects.rs": "ff1181efe01be93e26c13a9251778bf7abf1854f443be75999231b5a227e8636",
+    "src/runtime/node.rs": "fadfa8a1b1143de6e884f29320baae42dd0a38c3e5d346e1f901a7423eb66116",
+    "src/runtime/peer_network.rs": "f2d9accad1053f7b273061dd1f8453dd7e65b48c5b7d2fd0fbdedebc2ac0f368",
+    "src/runtime/timed.rs": "c8e5efdcccac455e9d4091075f8ce801236f4112c05f7d29ad143885dbb85709",
+    "src/secure.rs": "bc29e382ecc298030bc04cddb2e642758eef55f79805949cb18e5dc9788fc0f1",
+    "src/snapshot.rs": "66b9738b66b6e982defe17209140191986e9d25304a4a7ac961c2b4ccb036c81",
+    "src/transaction.rs": "363af1b08cb87b15f67631bb72e4f3fa7ae253b511aa765ba1fcd0e8af0e9bc9",
+    "src/transfer_source.rs": "c19a6424360ae1c06bf4471e7171d3b7f78d1574a6d36157a6d6457bd953f879",
+    "src/transfer_target.rs": "f7dd44fee234b39ffca2884a91b93b41b8d57ab75e07bf457dccb4e98f3dd77a",
+    "src/transport.rs": "58bc66f3d909067d35ae18e30bd61eeb910b54b363197d79a58d10da8be5cf12",
+    "src/transport/source/path.rs": "600452e342216d2086fea6ddfb8b191f728a3d1ecee76ea5a90f0ff31cad788a",
+    "src/vote.rs": "9573797aa130956f1bf06db31316d229bb29cc7d010890bde6d1152ef8721144",
+    "src/wire.rs": "c29e14ab3f007d852f2ad1fbe8b0d1a7b47d6f769ed3704ab9f874cb3867cfe1",
+    "target/divide-admin342/C371_RESULTS.md": "745fd326bba8ecfd397ad483f7222a7cf09ab0be011ad52fc0c9dcc3c59d201a",
+    "target/divide-membership/qualification315b/mac-results/mac-all-components.log": "6db63c16b57e942e642e6d3b668954340feacfae4484e11561f60eb799067e0d",
+    "target/divide-membership/qualification315b/mac-results/mac-native-components.log": "54c9e2351ba0211b519cc0f23d732cd7eeba300b0074a9c6e34f78c6f7eeee7e",
+    "target/divide-provider/NETWORK346_RESULTS.md": "b08bd51b2b1fa14e57531a1b96f9af7b9e5cc3c800e8b5531378c74e217b7991",
+    "target/divide-provider/RELAY371_RESULTS.md": "39468b3da1604fc749743e058c22e663f45d4ca344e44e28c6f87039b12ccae9",
+    "target/divide-provider/relay371-mac/VERIFIED.json": "81fde2a5c7dc9fc7414316f46aa8ffbc1c6212e06171b6b23a79bd6858a56979",
+    "target/root315/final384/TESTS_all.log": "bf316242a33462352717ca01291d4c78cfd1554faaffd495ed6f751b5392e7a4",
+    "target/root315/final384/TESTS_native.log": "c0eb3367b9205bbe02e4a53e876bb1b6f41dcf9b961bd376354b5038411f7427",
+    "tests/activation_model.rs": "8e5eaafd1cddb33c023300dd88007336f705c32271600c0e36e0fbea9b36ada5",
+    "tests/application.rs": "d07a27fb40e3b375982ddae7afd9e865e3c5adc308b290fb8d3390966ec00257",
+    "tests/ballot_model.rs": "2d1069ddccfa6b6b657005075475141fd4cadef76200b30251ca3722ef0dbfd9",
+    "tests/credential_refresh/host.rs": "3e9cdcf55aaaf2bb3a630df037b2f08761a4587dbfcb144d03dc75803a971cac",
+    "tests/credential_refresh/keys.rs": "a50fecf8467afebea1138c9e4abcc974d6a46d5c13085e721c0c2519e807d251",
+    "tests/credential_refresh/native.rs": "8587814da64228345d281f0398ba53021253fdc5f910ac29290bba841faf8dbf",
+    "tests/delegation.rs": "8aedf684731e04e1fc8eae12e923aa67d53d7977b7a2276ea71769556a84d208",
+    "tests/effect_owner.rs": "fa5c54ca954f893c72df658a2f7a1cf43e0457fc9e6be87f43903a7481e0004b",
+    "tests/history.rs": "ac84b5df7e5b0fcad828bc61cb89140185e1d1f5efc61a336c2ca5add4419282",
+    "tests/log_reclaim.rs": "b09893f317a8626bd386f4ff246a7cc4deb719adb52d8a233d5ae40947f8742b",
+    "tests/log_store.rs": "49f3700f17da6812ec539a5861af76eeb0f5b63f3449138e49e533eceb135259",
+    "tests/logical_activation_nested/repeated.rs": "de38d3eecfd5beeb7e2e3221da9e9bd37d8ba140644d4a17807dd47999bcee1d",
+    "tests/logical_nested_native/cluster.rs": "e5dd18ceaeb6f7267cb30a268016c58fefc7638f8f11671ef6d3146d91ed6c0d",
+    "tests/logical_nested_native/cold_recovery.rs": "f5a833f48afc5bc23db0d6afb6421c9a66ac19dc3867de94f723bb99cae745bd",
+    "tests/logical_voter_activation.rs": "8f09fa89fd56f0ea4347829ef38ae1cf6de5274870e565f88d3de68837501568",
+    "tests/logical_voter_promises.rs": "a9c56b5f4ec6b771a3962cbbe3c25f8195b1033b6154c39b44c8707b81a79b7f",
+    "tests/member_recovery.rs": "7563c4061b32fe4aacf0a08ed329454ece92404aab1680986f9b5cd042b9c459",
+    "tests/member_recovery/older_checkpoint.rs": "d9b222831ab4363519b55811db24c185721ef41c8c172551dc541a81e1a715a0",
+    "tests/native_relay/tree_history.rs": "40779add1f7727dd9a33960a647e28ce27c9dfeee50ab3dc11185e0e9d29ac48",
+    "tests/native_relay/tree_restart.rs": "c5bece3b2c04abe3080b379145df37b93ed3ad169c83d6f73d0708894da1c624",
+    "tests/observability.rs": "52c8062d4467d9e2b7aa14daa257c861d71bddd1978a89872703c4b1cccd822f",
+    "tests/parser_campaign.rs": "cb24806cf6ff46fa1078b955f698ad0111e8efaa67b7eea98dae50d54442349d",
+    "tests/placement.rs": "ee3bfc35215333838302bed5151270ec149b46edbbbaa309c4b8331825d288fd",
+    "tests/program_transaction_driver/history.rs": "a2ade1d20462fc424b7167199e13c52c80cc1b397bad8d01b5d59886bbdaff96",
+    "tests/program_transaction_driver/recovery.rs": "42d8b10f5641331514394310dfbff6b08b49d01978d18f38e74098aa42ada879",
+    "tests/program_transaction_model.rs": "25cac6d4df6c94732b7d750fa65e41aa3861f9ea98e0e1499788303fe33b7872",
+    "tests/provider_conformance.rs": "c99e32b13193bc8ddb8a7251770815aa91e2fa7fff81050f045224f432ecc4f0",
+    "tests/provider_conformance/admission.rs": "34df031ebe5cd2fadceb340ee0cfe19b1711366113c1f85eef33fe328d668aa7",
+    "tests/provider_conformance/application.rs": "bc0fa0a079e8f391fa69556093cea1bbe92a5088eb4a2f06814809cf6cb854e4",
+    "tests/provider_conformance/buffer.rs": "fa2853f645784014c8cff9c92bbc4cd7541dd28f388c1206eb33f969db494cb4",
+    "tests/provider_conformance/buffer_mutants.rs": "b1052b13cfe7ae37772e3641c6351990e295fbae070d597b6a3f4d9aa783fec2",
+    "tests/provider_conformance/credential.rs": "5f25a18f98be2ab5f1018ec80938e2a7c8075ca5c9791888b075705b24a0b85d",
+    "tests/provider_conformance/credential_native.rs": "c1d8d66a0412d5a3d6ece2961a2d2493c962aa75be35badd5b66969edb3d3e90",
+    "tests/provider_conformance/log_store.rs": "e86a53125c99692cbb6508f5900cf4a21ed89f6f19aceced8db6ce9db23fbb94",
+    "tests/provider_conformance/snapshot.rs": "cbfcf4fb2758857330252d6c054c65dfade38b8c71244189d23b0e20e523e675",
+    "tests/provider_conformance/snapshot_native.rs": "05207bb5611b417a77994484e753d19c93244b7e4b0936d8a458ce2d47e81b68",
+    "tests/provider_conformance/snapshot_worker.rs": "494cab28828d9510afce6a56860fd59ec8d2f51f6801b96ebb106fc3fc166775",
+    "tests/quic.rs": "c5098d78a00f5810bf95068c6356c7e6eea5fb22836c57c13e21581a59f7efe5",
+    "tests/quorum.rs": "900b959c0eaff7902bfe1a1004acb61367d122e28296555e3182e7787bc76347",
+    "tests/raft.rs": "898261b3e79550b0e9c02839ca6fb22e25a5c1576fcef0a084858dde46f97708",
+    "tests/raft/fault_schedule.rs": "e9f38694dad97b90201ac105c70c23092e6026794833b6d2f1d9d45b92f49393",
+    "tests/raft/reference.rs": "6d8d65175b034d89e975cce626f2e3efcc93823c459f1c4316d13f07a65697ba",
+    "tests/representative_relay_model/tests.rs": "068a9fb3f5e24dac70a3fd67e9e005992b5965ceabd0c55a5e5a15e17e36dc22",
+    "tests/routed/nested_merge_retirement.rs": "cbd0cefa420b1d60c7dcd3b937ed06989b640bb7058fc2421fb590f55d7c1b42",
+    "tests/routed/split/history.rs": "ca8acc487cfafb8c7b1643b2a7ad779ec1026ff389a51ccd168cf0fd33f8e0a0",
+    "tests/routing.rs": "f15f5d9a27de6ee9913b39fe875cdd17ce67f58e4cf1f8f8eae6464f7bc155f5",
+    "tests/runtime.rs": "6a4e5241e916a83725d3907d8db755c9009e4d806d75c66cac45f976612750f3",
+    "tests/runtime/timer_contract.rs": "981363ee949add7022ddf0fe422cc5ab65ac6a59e001f2f878d1ed30f07a8132",
+    "tests/snapshot.rs": "5bdf0c91427f473d9622fac5699786b71db489e14c7dd9f94acf13479fd079fc",
+    "tests/startup/maintenance/membership_drain.rs": "f8a519930f8984a1764d3020de910c43e94fb48580a40c7030f54d1a1854e00d",
+    "tests/striped_log_store.rs": "c46a6ea46c2f173ecf4967c219c7df03252b0f7eff9aa9c4ef5f7c660377408b",
+    "tests/striped_node.rs": "aa953d14b582c0086b834edd859d0e15d3a0aedb75d6a50407feb301b1847689",
+    "tests/striped_wal_model.rs": "99ebc2878c36fe936a56b41be6e370886fd76b445d928a07519745945b7b23ef",
+    "tests/support/node.rs": "bc49832a244eea51ef9ff075c83e387032f656fc54753bd57a09e246a32c38e1",
+    "tests/support/node_network.rs": "8d6434042ec89d1d051c978e16d9cd31d20af44bf750c771f7a53e280a0d3133",
+    "tests/transport.rs": "0e0508189a3bc6cd1300069bd1a30bb3d41138333b250c56f86dc2f36dbfaa6a",
+    "tests/vote.rs": "938e53102a0bea1ffe3d7c42ced75613fd56c26c672af7e95d1fc0c4a9cd7388",
+    "tests/wire.rs": "b529832e2a1d44df6243f477970838ba252e83d39c37a218e3b4ef8c8662f310",
+    "validation/baseline/slice294/README.md": "d5cc4c57f16c63849d22b30926c4262aedd6d89703f8a3eb645573e9ceb35e93",
+    "validation/baseline/slice297/README.md": "d4dbb48285a510347f3e417327e9c140bf90269118c9600dfd664b504cedab14",
+    "validation/baseline/slice297/linux-all-raft.log": "e97800c0ecc1dfb68fc9944599b5aa488b50f950103c81b08abbd3bc73b063d4",
+    "validation/baseline/slice297/mac-all-raft.log": "56e1206ef7aa41b1fd4e122c4118585de50a00ce41ba44a48129cccae8f97feb",
+    "validation/baseline/slice301/README.md": "99190452f37522df8da7fa2248010172a1f916ed467e16de748577e05cdcefcb",
+    "validation/baseline/slice314/README.md": "2f82f89f422532cb5e0b84652f90601cd00f4b2f51c4e35a002e9228aaffba77",
+    "validation/baseline/slice318/README.md": "c5556f3e716f434b123840e47a85e175f492578fc3bfa48fe5fe5dfabf656234",
+    "validation/baseline/slice318/linux-audit.json": "a0c6269959317937f416aa27e90e673a35e0367da4d000b367891eae2423d17c",
+    "validation/baseline/slice318/mac-audit.json": "3b335c53e50aa14beaaaa42d934e01245733b0504b99108c3e79107e9555c82f",
+    "validation/baseline/slice321/README.md": "418658a12f551441e97239bd6458dcaa7caa442fe6b0c17a305a9ed4ae7f7ebb",
+    "validation/baseline/slice321/linux-audit.json": "18120984fcb27cc820805e8f194fed9151b532ae3282f9a02f637945204bd6f5",
+    "validation/baseline/slice321/mac-audit.json": "f883f020075b2e7381226c42fb680a563c23da09dae670fef8bf9cff04ebbf56",
+    "validation/baseline/slice393/README.md": "d199dd53744987f966501675cd58dac3be591622fdc35821271957fc1b0efa05",
+    "validation/baseline/slice393/mac/original/joint_quic.log": "bae04a4d46772ac8565ade292a990105b6bdde16a61a9b48477ff56f95a4244b",
+    "validation/baseline/slice393/mac/original/joint_tcp.log": "351f01b3c88466b8bd3af428ee2f7cd754cfd538d9d7c56a17d25003bfbf58cf",
+    "validation/baseline/slice396/README.md": "4ec9049f6922d01b54596fdcbb2bfb910d00e72874a5e57b9f00e07874b94cb2",
+    "validation/baseline/slice398/README.md": "ff72ebd83887fc50b284c3cab74ac3b738fbed284794271491aaf58f1bc878e2",
+    "validation/baseline/slice401/native_diagnostic.log": "c764dc0a89b00dbe1f295ae99f7fc43c91812bde4f3249c63aab1b2b0fb2c49f",
+    "validation/baseline/slice401/runtime_all.log": "e0bc51d0b4fb679941bfafbbd42f2b40d2385dbdea1371fdbb9024fb0aeb184c",
+    "validation/baseline/slice401/runtime_core.log": "8e519d12ca6221f8da2dfc654ef39a4d1901e6844bb2694d2951dd6937ef812b",
+    "validation/baseline/slice401/runtime_default.log": "8370678738d56c56a19e90868818e7201d1ea190a132990e36145bb613ee9def",
+    "validation/baseline/slice401/runtime_native.log": "b9430d778a59d3459fcacd290a57c4f674b4bbc71ca604aa62b308fdaaf3832f",
+    "validation/baseline/slice402/all.log": "a0e8a0f0842775eb38365e2257c11d2da72fd333ca8c6c9c46cf17e54165e7f1",
+    "validation/baseline/slice402/default.log": "bed3b641947a2ed63fc12526fd35a2d3b6c5faf01bde173ef76325e36aa4d104"
+  },
+  "method": "Primary requirements read directly; existing384 used only as locator. Current selected source assertion bodies, actual297/315b/318/321/393/401/402 results and catalogued runtime constraints inspected. Finite models scoped to declared bounds and assumptions."
+}

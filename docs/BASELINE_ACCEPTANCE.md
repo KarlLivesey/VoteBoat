@@ -1,5 +1,13 @@
 # Baseline acceptance map
 
+Current403: Mac398 is terminal; both repeated-replacement histories pass with
+all original ownership cleanup, while both cold cases fail final publication
+under the original15s watchdog. Mac401 clock injection1/native controls2 pass.
+The exact native-only100-group Mac test remains an unclosed older failure and
+is included with the pending402 cold sequence. Audit403 records71 explicit
+rows/149 inspected hashes; final source reconciliation remains. Earlier status
+paragraphs below are historical and do not supersede these outcomes.
+
 402 functional checkpoint qualification: use90s only for physical
 CheckpointPublished, matching the original upper checkpoint watchdog. Actual
 frontier/base/SnapshotRef/router/worker completion and other15s/provider/close
@@ -60,7 +68,7 @@ changed inputs to only startup/nested/activation fixtures, with production0.
 Current default logical target execution, Mac startup/nested/repeated gates and
 final source-specific evidence consolidation remain. These cuts do not rewrite
 old failed records or certify the whole moving source. See the
-[current mini plan372](IMPLEMENTATION.md#current-mini-plan402).
+[current mini plan372](IMPLEMENTATION.md#current-mini-plan403).
 The [portable383 packet](../validation/baseline/slice383/README.md) preserves
 the original Linux repeated passes and all ten Mac results, including failures.
 Portable [397](../validation/baseline/slice397/README.md) and

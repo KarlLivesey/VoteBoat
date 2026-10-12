@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/runtime.rs (/tmp/voteboat-macos-clock401-19408bff49/build/debug/deps/runtime-b0fd7b7b1b5e021e)
+
+running 1 test
+test diagnostic_wall_clock_jumps_never_enter_monotonic_election_timing ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 53 filtered out; finished in 0.00s
+
