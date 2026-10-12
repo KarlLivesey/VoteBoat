@@ -103,16 +103,26 @@ pub fn elect_middle(lower: &mut Lower<'_>, nodes: &mut [Middle]) {
         lower.middle(nodes);
         let core = nodes[0].local().owner.core(setup::middle().group).unwrap();
         let index = core.state().commit_index;
-        if core.role() == Role::Leader
-            && core.state().term_at(index) == Some(core.state().hard_state.term)
-            && nodes
-                .iter()
-                .all(|n| n.local().applications[&setup::middle().group].applied_index() >= index)
-            && nodes.iter().all(Middle::work_is_drained)
-        {
+        let leader = core.role() == Role::Leader;
+        let pending = core.has_pending_dependency();
+        let committed_term = core.state().term_at(index);
+        let current_term = committed_term == Some(core.state().hard_state.term);
+        let applied = nodes
+            .iter()
+            .all(|n| n.local().applications[&setup::middle().group].applied_index() >= index);
+        // Durable election readiness precedes the actual verified Claim; normal
+        // child consensus work need not be globally idle while intake is open.
+        if leader && !pending && current_term && applied {
             return;
         }
-        assert!(Instant::now() < end, "original middle election");
+        if Instant::now() >= end {
+            eprintln!(
+                "393 original middle election leader={leader} pending={pending} current_term={current_term} all_applied={applied} old_all_work_drained={} term={} commit={index} committed_term={committed_term:?}",
+                nodes.iter().all(Middle::work_is_drained), core.state().hard_state.term
+            );
+            super::diagnostic::middle_shutdown(lower, nodes);
+            panic!("original middle election");
+        }
     }
 }
 pub fn claim_upper(lower: &mut Lower<'_>, bridge: &mut UpperBridge<'_>) -> VerifiedLogicalImage {

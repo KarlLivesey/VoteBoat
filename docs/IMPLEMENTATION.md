@@ -31751,3 +31751,67 @@ original388+newactual executable/library guards match. Evidence is sealed36
 artifacts in target/divide-shutdown/middle389/RESULT.md/.json/EVIDENCE_SHA256.json.
 Current two fixture files are handed back to root. Any later failed middle state
 must use the original observer instead of inventing a cause from this pass.
+
+Publishing checkpoint:6eff359 is pushed to public main; enabled pre-push fmt
+and all four strict Clippy profiles pass0. Repository instructions now require
+regular checked commits/pushes without waiting for full qualification or CI.
+The local research archive directory is ignored because its handoff ZIP includes
+the excluded design pack. Existing GitHub CLI keyring authentication is used by
+this repository's credential helper; no token is written into tracked files.
+
+READ392 current Linux full cold qualification passesTCP1/0 (71.85s), QUIC1/0
+(236.42s). Both consume original warm and recovered Read5: TCP17556/session1 and
+54795/session2; QUIC72847/session1 and205632/session2. Actual group/request/barrier,
+anchors/suffix/application/freshsessions/dedup, all27 maintenance/joins/reclaim/
+TCP+UDP rebind/directory cleanup remain. EXACT2 read-only guard substitutions
+select the existing immutable90s bound across routing/all4attempts/eight holds;
+no original start resets, generic activity credit, runtime timer or policy change.
+Original Mac38830s coarse expiry remains separately retained. All1306/source391/
+current2/production0/oldterminalcache/new actual executable/library guards match;
+fmt/four strict profiles0, fresh asserted/overflow opt3 build. Evidence52files:
+target/divide-shutdown/read392/RESULT.md/.json/EVIDENCE_SHA256.json.
+
+Mac388 terminal six-case source retains repeatedTCP1/0 (161.96s)/all15 cleanup;
+repeatedQUIC0/1 (166.36s) originalMiddleclose15. ColdTCP359.75s/QUIC339.56s
+fail actual warm fresh-read30s coarse guard, before own-store reopen. JointTCP
+73.50s/QUIC76.84s complete originalall12 closure/rebind and fresh4 images/same
+logs/newsessions, then fail recoveredMiddle election15 before fresh TopClaim.
+Its remaining conjunct is unprinted/unknown. All exact selections, actual7
+executable/library comparisons, both1306 guards and fmt/all4strict/build/protoc/
+cache/profile checks0. Raw compiler commands proveopt3/debugassert; overflow
+profile envtrue is recorded without inventing a separate compiler flag. Sealed
+73files in target/divide-admin342/MAC_SHUTDOWN388_RESULTS.md/.json and hashes.
+
+Election393 schema/independent review: established deeper Middle/Top readiness
+is actualLeader + no pending core dependency + current-term committed prefix +
+all original apps applied through that SAMEprefix. Activation fixture previously
+required whole autonomous work idle while all Middle remainedRunning. Actual
+UpperBridge construction independently verifies Running/identity/shape/exclusive
+client/read streams; genuine original quorum Claim reads/verified images supply
+authority, never this sampled predicate. Align ONE fixture predicate, retain15s,
+campaign/pumping, every freshClaim/coldJoint/noFinal/business/fullreclaim check.
+Failure-only scalar conjuncts and existing bounded own-accounting observation
+precede the original panic; no new helper, effect, clock reset or production/API
+change. Source393 production379delta0; fmt/four strict/build0. Both original
+Linux Joint cold cases pass within the full14 target, which remains running.
+Old Mac failed conjunct remains unknown, not retrospectively inferred. Schema:
+target/root315/election393/SCHEMA.md; immutable evidence/runner packet:
+target/divide-provider/election393. MacJoint393 waits for exclusive394 handoff.
+
+Mac394 actual run83515 uses IMMUTABLE392 source1306, including original389 Middle
+failure observer: original complete coldTCP, coldQUIC, then repeatedQUIC once.
+Initial profile/source/cache/protoc/fmt/all4strict0, asserted release build running.
+No Mac393 or newer-main qualification is inferred. Source-only rsync and terminal
+cache clone preserve previous evidence. Current macro boundary remains allP0–P8
+functional Linux/macOS qualification, then stop beforeP9/P10.
+
+Final384 all-feature suite is terminal2436passed/2failed across121 targets;
+all doc tests pass, original1306 and124actual executable guards unchanged.
+Failures are startup discovery AddrInUse before preparation and maintenance's
+unprinted non-Applied client result after synchronous source-only drain. Selected
+listener ownership390 passes1/0, retaining actual selected-protocol live bind
+refusal and post-close rebind under original5sworker joins; sourceport0 removes
+unowned free-port selection. Failure-only391 originalQUIC passes1/0 (1.36s)
+with no diagnostics, so the old result/cause remains unobserved. Neither these
+selected passes nor old383 full sweep certify whole current source. Full default,
+core and native matrices continue sequentially; production is unchanged379.
