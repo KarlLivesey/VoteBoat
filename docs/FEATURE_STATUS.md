@@ -16,7 +16,8 @@ deferred. Stop after P8.
 
 Remaining:
 
-1. **Mac deep cold recovery.** Linux402 passes all9/default7 nested tests. Its
+1. **Mac QUIC deep cold recovery.** Full Mac TCP402 now passes1/0 with all27
+   owners cleaned up. Linux402 passes all9/default7 nested tests. Its
    checkpoint-only90s watchdog retains actual durable-frontier and cleanup
    assertions. Both old Mac398 cold failures under15s remain preserved.
 2. **Final source and requirements reconciliation.** The71-row audit records

@@ -1,0 +1,87 @@
+{
+  "compiler_records": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-checkpoint402-19408bff49/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-checkpoint402-19408bff49/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "logical_nested_native",
+        "src_path": "/private/tmp/voteboat-macos-checkpoint402-19408bff49/repo/tests/logical_nested_native.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/logical_nested_native-4dbba713a780d579"
+      ],
+      "executable": "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/logical_nested_native-4dbba713a780d579",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-checkpoint402-19408bff49/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-checkpoint402-19408bff49/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-macos-checkpoint402-19408bff49/repo/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+        "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/libvoteboat-ca76d170795d1aa6.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  ],
+  "launch_files": [
+    "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/logical_nested_native-4dbba713a780d579",
+    "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib"
+  ],
+  "before_sha256": {
+    "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/logical_nested_native-4dbba713a780d579": "f811c4f136e4cedc675f0386629f52ee3358351f8c8c8267a633fc231913babe",
+    "/tmp/voteboat-macos-checkpoint402-19408bff49/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib": "6f64c8f243eda3752fcb9cdb75194d91a9403dceb1259e788afd83277f38a617"
+  }
+}

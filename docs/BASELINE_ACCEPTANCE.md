@@ -1,5 +1,10 @@
 # Baseline acceptance map
 
+Mac402 full cold TCP passes1/0 in850.99s with original durability/recovery/
+all27 cleanup and matching source/artifact guards. QUIC is running and remains
+the only native test case required before final audit completion. See
+validation/baseline/slice402/mac_tcp for actual evidence.
+
 Native100 closure403: the exact current Mac native-only test passes1/0 in90.03s
 with original10s per-drain watchdog and whole test file unchanged from315b.
 Q-100-MAC is closed; both deep Mac cold histories and final reconciliation remain.
