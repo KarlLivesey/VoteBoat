@@ -1,0 +1,21 @@
+{
+  "original_binary_sha256": "3a64b76a1cffa8218f0064b22355edd1d1066b060c7fa5fcb937232470de1618",
+  "library_and_fixture_actual_artifacts": "linux/BINARY.json",
+  "actual_rustc_commands": "linux/actual-rustc-flags.txt",
+  "source_and_library_guards": "linux/source-guards",
+  "Mac392": "pending; no qualification claim",
+  "linux_actual_library_profile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": false
+  },
+  "linux_actual_fixture_profile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "qualification_source_inputs": 1306,
+  "current395_difference_files": [
+    "tests/logical_activation_nested/progress.rs",
+    "tests/startup.rs",
+    "tests/startup/maintenance/drain.rs"
+  ],
+  "production_differences": [],
+  "hashes": {
+    "tests/logical_activation_nested/progress.rs": {
+      "source392": "e4a13b31a95f46bc1c6d0471941c7d0a453d007c60d6c7567959266dd7adc529",
+      "current395": "7a3a3cd9a697ff9ffb04acf9322a43c15bdca76fc1044322f66e93c9849d3681"
+    },
+    "tests/startup.rs": {
+      "source392": "bf320c98a2931bb122fa9725fadca03a622796c05c5aedae06c263409a00574c",
+      "current395": "1f708105a49cf409da7f93b873ebb2c72b3c4fcf1195dba8645e75b35c6f1974"
+    },
+    "tests/startup/maintenance/drain.rs": {
+      "source392": "a72195e995993ec19c65421c829cbe932b24a95b421367be8300edc0df78af02",
+      "current395": "e8fd8d39670975713ad20b30de9903e4c159b1281b37bd60116440dab02aca8e"
+    }
+  },
+  "meaning": "Historical392 is exact old compilation cut; these three current395 fixtures differ. Production hashes unchanged. This archive does not qualify current395 or Mac."
+}

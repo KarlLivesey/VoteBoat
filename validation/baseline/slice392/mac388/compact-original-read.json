@@ -1,0 +1,2815 @@
+{
+  "original_failed_log": "target/divide-admin342/mac-shutdown388-progress-results/cold_tcp.log",
+  "original_failed_log_sha256": "e7be46ad719b8b636f76b30d857afa809bdba2123043d97f34640d35c4795543",
+  "test_seconds": 359.75,
+  "first_warm_session_not_cold_recovery": true,
+  "original_invocation": {
+    "_type": "ReadInvocationInspection",
+    "ticket": {
+      "_type": "ReadInvocationTicket",
+      "binding": {
+        "_type": "ReadInvocationBinding",
+        "owner": {
+          "_type": "RuntimeOwner",
+          "store": {
+            "_type": "StoreBinding",
+            "identity": {
+              "_type": "StoreIdentity",
+              "id": {
+                "_type": "StoreId",
+                "value": 3001
+              },
+              "incarnation": {
+                "_type": "StoreIncarnation",
+                "value": 1
+              }
+            },
+            "session": {
+              "_type": "StoreSession",
+              "value": 1
+            }
+          },
+          "lane": {
+            "_type": "ExecutionLaneId",
+            "value": 1
+          },
+          "generation": {
+            "_type": "RuntimeGeneration",
+            "value": 1
+          }
+        },
+        "generation": {
+          "_type": "ReadInvocationGeneration",
+          "value": 1
+        },
+        "authorization": {
+          "_type": "RuntimeAuthorization",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 3001
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "logical": {
+            "_type": "LogicalRuntimeAuthority",
+            "mapping": {
+              "_type": "LogicalStoreMapping",
+              "parent": {
+                "_type": "GroupIdentity",
+                "id": {
+                  "_type": "GroupId",
+                  "value": 800
+                },
+                "incarnation": {
+                  "_type": "GroupIncarnation",
+                  "value": 1
+                }
+              },
+              "voter": {
+                "_type": "NodeId",
+                "value": 101
+              },
+              "store": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 3001
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "child": {
+                "_type": "GroupIdentity",
+                "id": {
+                  "_type": "GroupId",
+                  "value": 801
+                },
+                "incarnation": {
+                  "_type": "GroupIncarnation",
+                  "value": 1
+                }
+              }
+            },
+            "representative": {
+              "_type": "RepresentativeBinding",
+              "epoch": {
+                "_type": "RepresentativeEpoch",
+                "value": 1
+              },
+              "physical": {
+                "_type": "PeerIdentity",
+                "node": {
+                  "_type": "NodeId",
+                  "value": 201
+                },
+                "store": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                }
+              },
+              "physical_session": {
+                "_type": "StoreSession",
+                "value": 1
+              },
+              "logical_session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            }
+          }
+        }
+      },
+      "sequence": 1,
+      "group": {
+        "_type": "GroupIdentity",
+        "id": {
+          "_type": "GroupId",
+          "value": 800
+        },
+        "incarnation": {
+          "_type": "GroupIncarnation",
+          "value": 1
+        }
+      },
+      "request": {
+        "_type": "ReadRequestId",
+        "value": 1
+      }
+    },
+    "admission": {
+      "_type": "AdmissionTicket",
+      "owner": {
+        "_type": "RuntimeOwner",
+        "store": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 3001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "lane": {
+          "_type": "ExecutionLaneId",
+          "value": 1
+        },
+        "generation": {
+          "_type": "RuntimeGeneration",
+          "value": 1
+        }
+      },
+      "group": {
+        "_type": "GroupIdentity",
+        "id": {
+          "_type": "GroupId",
+          "value": 800
+        },
+        "incarnation": {
+          "_type": "GroupIncarnation",
+          "value": 1
+        }
+      },
+      "sequence": 3
+    },
+    "cancellation": null,
+    "stepped": true,
+    "terminal": false,
+    "has_output": false,
+    "exported": false
+  },
+  "watch": {
+    "_type": "Watchdog",
+    "start": {
+      "_type": "Instant",
+      "tv_sec": 1123026,
+      "tv_nsec": 834112958
+    },
+    "last": {
+      "_type": "Instant",
+      "tv_sec": 1123032,
+      "tv_nsec": 843900500
+    },
+    "seen": 1
+  },
+  "watch_last_minus_start_seconds": 6.009787542,
+  "original_step_now": 329663,
+  "last_once_only_milestone_now": 329685,
+  "failure_now": 359686,
+  "inactivity_marker_seconds": 30.001,
+  "absolute_marker_seconds_approx": 36.010787542,
+  "coarse30_guard_failed": true,
+  "90_absolute_not_expired": true,
+  "result_authorization_output_consumption_seen": false,
+  "chains": {
+    "top=0": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 3001
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 800
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 55
+        },
+        "leased": {
+          "_type": "EffectTicket",
+          "visit": {
+            "_type": "VisitTicket",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 3001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 800
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "sequence": 55
+          },
+          "sequence": 61
+        },
+        "kind": {
+          "_type": "Send",
+          "value": {
+            "_type": "NodeId",
+            "value": 103
+          }
+        },
+        "remaining": 0,
+        "waiting": false
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709551676)",
+      "command_length": 460,
+      "command_sha256": "859bd98d591d6a916843ba5f140506a01803cd288bc1719b34ba1c2605646313",
+      "rpc": "ReadProbe",
+      "context": {
+        "_type": "RequestContext",
+        "origin": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 3001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "sequence": 17
+      },
+      "exact_lease_association": "exactOriginalHeldEffect",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2001
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 1
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": {
+              "_type": "LogicalRuntimeAuthority",
+              "mapping": {
+                "_type": "LogicalStoreMapping",
+                "parent": {
+                  "_type": "GroupIdentity",
+                  "id": {
+                    "_type": "GroupId",
+                    "value": 801
+                  },
+                  "incarnation": {
+                    "_type": "GroupIncarnation",
+                    "value": 1
+                  }
+                },
+                "voter": {
+                  "_type": "NodeId",
+                  "value": 201
+                },
+                "store": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "child": {
+                  "_type": "GroupIdentity",
+                  "id": {
+                    "_type": "GroupId",
+                    "value": 811
+                  },
+                  "incarnation": {
+                    "_type": "GroupIncarnation",
+                    "value": 1
+                  }
+                }
+              },
+              "representative": {
+                "_type": "RepresentativeBinding",
+                "epoch": {
+                  "_type": "RepresentativeEpoch",
+                  "value": 1
+                },
+                "physical": {
+                  "_type": "PeerIdentity",
+                  "node": {
+                    "_type": "NodeId",
+                    "value": 1
+                  },
+                  "store": {
+                    "_type": "StoreIdentity",
+                    "id": {
+                      "_type": "StoreId",
+                      "value": 1001
+                    },
+                    "incarnation": {
+                      "_type": "StoreIncarnation",
+                      "value": 1
+                    }
+                  }
+                },
+                "physical_session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                },
+                "logical_session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              }
+            }
+          }
+        },
+        "sequence": 61,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 801
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709551676
+        }
+      }
+    },
+    "middle=0/0": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2001
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 801
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 859
+        },
+        "leased": {
+          "_type": "EffectTicket",
+          "visit": {
+            "_type": "VisitTicket",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 801
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "sequence": 859
+          },
+          "sequence": 859
+        },
+        "kind": {
+          "_type": "Send",
+          "value": {
+            "_type": "NodeId",
+            "value": 202
+          }
+        },
+        "remaining": 1,
+        "waiting": false
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709552469)",
+      "command_length": 985,
+      "command_sha256": "e23fe87a05bf06e1dd37bf528654048b0b48109df4400542b9f5f5fae3c11071",
+      "rpc": {
+        "_type": "Append",
+        "previous_index": 61,
+        "previous_term": 1,
+        "leader_commit": 61,
+        "entries_count": 1,
+        "entry_operations": [
+          18446744073709551676
+        ]
+      },
+      "context": {
+        "_type": "RequestContext",
+        "origin": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 2001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "sequence": 206
+      },
+      "exact_lease_association": "exactOriginalHeldEffect",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 1002
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 2
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 1002
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": null
+          }
+        },
+        "sequence": 854,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 811
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709552469
+        }
+      }
+    },
+    "middle=0/1": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2002
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 801
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 329
+        },
+        "leased": {
+          "_type": "EffectTicket",
+          "visit": {
+            "_type": "VisitTicket",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2002
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 801
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "sequence": 329
+          },
+          "sequence": 522
+        },
+        "kind": {
+          "_type": "Send",
+          "value": {
+            "_type": "NodeId",
+            "value": 201
+          }
+        },
+        "remaining": 0,
+        "waiting": false
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709552077)",
+      "command_length": 469,
+      "command_sha256": "32f7e33e31e5654e47e4e20b97396a970459b523a239196cc4c65744e9e93911",
+      "rpc": {
+        "_type": "Appended",
+        "success": true,
+        "matching_index": 62,
+        "entries_count": null,
+        "entry_operations": []
+      },
+      "context": {
+        "_type": "RequestContext",
+        "origin": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 2001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "sequence": 206
+      },
+      "exact_lease_association": "exactOriginalHeldEffect",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 1005
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 2
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 1005
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": null
+          }
+        },
+        "sequence": 462,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 812
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709552077
+        }
+      }
+    },
+    "middle=0/2": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2003
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 801
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 333
+        },
+        "leased": null,
+        "kind": null,
+        "remaining": 0,
+        "waiting": true
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709552079)",
+      "command_length": 928,
+      "command_sha256": "cce71e624e3c6f15cc745d30085647caa863f0df616edf7104142bc4442e0717",
+      "rpc": null,
+      "context": null,
+      "exact_lease_association": "AssociationUnavailable: no held lease or no Authorize capsule",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 1009
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 2
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 1009
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": null
+          }
+        },
+        "sequence": 464,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 813
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709552079
+        }
+      }
+    },
+    "middle=1/0": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2004
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 802
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 1045
+        },
+        "leased": {
+          "_type": "EffectTicket",
+          "visit": {
+            "_type": "VisitTicket",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2004
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 802
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "sequence": 1045
+          },
+          "sequence": 864
+        },
+        "kind": {
+          "_type": "Send",
+          "value": {
+            "_type": "NodeId",
+            "value": 205
+          }
+        },
+        "remaining": 1,
+        "waiting": false
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709552476)",
+      "command_length": 488,
+      "command_sha256": "430d76dcfacf6dff17fd75391cc2b9b7751644a1c2b15eb6354ce9e4e76cbadf",
+      "rpc": {
+        "_type": "Append",
+        "previous_index": 36,
+        "previous_term": 1,
+        "leader_commit": 36,
+        "entries_count": 0,
+        "entry_operations": []
+      },
+      "context": {
+        "_type": "RequestContext",
+        "origin": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 2004
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "sequence": 295
+      },
+      "exact_lease_association": "exactOriginalHeldEffect",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 1011
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 2
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 1011
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": null
+          }
+        },
+        "sequence": 861,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 814
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709552476
+        }
+      }
+    },
+    "middle=2/0": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2007
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 803
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 1065
+        },
+        "leased": {
+          "_type": "EffectTicket",
+          "visit": {
+            "_type": "VisitTicket",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2007
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 803
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "sequence": 1065
+          },
+          "sequence": 871
+        },
+        "kind": {
+          "_type": "Send",
+          "value": {
+            "_type": "NodeId",
+            "value": 208
+          }
+        },
+        "remaining": 1,
+        "waiting": false
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709552484)",
+      "command_length": 488,
+      "command_sha256": "cf59ea8d71866b4b47d4a078efec6aa97002535012d5c1dfe56a9b56f620c6fc",
+      "rpc": {
+        "_type": "Append",
+        "previous_index": 35,
+        "previous_term": 1,
+        "leader_commit": 35,
+        "entries_count": 0,
+        "entry_operations": []
+      },
+      "context": {
+        "_type": "RequestContext",
+        "origin": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 2007
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "sequence": 300
+      },
+      "exact_lease_association": "exactOriginalHeldEffect",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 1019
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 2
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 1019
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": null
+          }
+        },
+        "sequence": 869,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 817
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709552484
+        }
+      }
+    },
+    "middle=2/2": {
+      "original_held": {
+        "_type": "EffectVisitInspection",
+        "visit": {
+          "_type": "VisitTicket",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 2009
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 803
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "sequence": 380
+        },
+        "leased": {
+          "_type": "EffectTicket",
+          "visit": {
+            "_type": "VisitTicket",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 2009
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 803
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "sequence": 380
+          },
+          "sequence": 490
+        },
+        "kind": {
+          "_type": "Send",
+          "value": {
+            "_type": "NodeId",
+            "value": 207
+          }
+        },
+        "remaining": 0,
+        "waiting": false
+      },
+      "phase_operation": "phase=Applying,operation=OperationId(18446744073709552071)",
+      "command_length": 469,
+      "command_sha256": "174ce85078bf030a1312fb233d746b7852447915268252e0c508e496502bc40b",
+      "rpc": {
+        "_type": "Appended",
+        "success": true,
+        "matching_index": 35,
+        "entries_count": null,
+        "entry_operations": []
+      },
+      "context": {
+        "_type": "RequestContext",
+        "origin": {
+          "_type": "StoreBinding",
+          "identity": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 2007
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          }
+        },
+        "sequence": 299
+      },
+      "exact_lease_association": "exactOriginalHeldEffect",
+      "retained_output": false,
+      "actual_child_ticket": {
+        "_type": "ClientTicket",
+        "binding": {
+          "_type": "ClientRouterBinding",
+          "owner": {
+            "_type": "RuntimeOwner",
+            "store": {
+              "_type": "StoreBinding",
+              "identity": {
+                "_type": "StoreIdentity",
+                "id": {
+                  "_type": "StoreId",
+                  "value": 1025
+                },
+                "incarnation": {
+                  "_type": "StoreIncarnation",
+                  "value": 1
+                }
+              },
+              "session": {
+                "_type": "StoreSession",
+                "value": 1
+              }
+            },
+            "lane": {
+              "_type": "ExecutionLaneId",
+              "value": 1
+            },
+            "generation": {
+              "_type": "RuntimeGeneration",
+              "value": 1
+            }
+          },
+          "generation": {
+            "_type": "ClientRouterGeneration",
+            "value": 2
+          },
+          "authorization": {
+            "_type": "RuntimeAuthorization",
+            "owner": {
+              "_type": "RuntimeOwner",
+              "store": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 1025
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "lane": {
+                "_type": "ExecutionLaneId",
+                "value": 1
+              },
+              "generation": {
+                "_type": "RuntimeGeneration",
+                "value": 1
+              }
+            },
+            "logical": null
+          }
+        },
+        "sequence": 456,
+        "group": {
+          "_type": "GroupIdentity",
+          "id": {
+            "_type": "GroupId",
+            "value": 819
+          },
+          "incarnation": {
+            "_type": "GroupIncarnation",
+            "value": 1
+          }
+        },
+        "operation": {
+          "_type": "OperationId",
+          "value": 18446744073709552071
+        }
+      }
+    }
+  },
+  "original_exact_byte_and_context_matches": {
+    "middle_entry_index": 62,
+    "middle_entry_term": 1,
+    "whole_original_top_child_command_bytes_equal": true,
+    "whole_middle_send_ack_context_equal": true,
+    "ack_success_matching_index62": true
+  },
+  "middle_scalar_states": [
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 201
+        },
+        "Leader",
+        1,
+        62,
+        61,
+        61,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 1944
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 1,
+          "reserved_bytes": 4970648,
+          "leased": 1,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 202
+        },
+        "Follower",
+        1,
+        62,
+        61,
+        61,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 1,
+          "reserved_bytes": 4970124,
+          "leased": 1,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 203
+        },
+        "Follower",
+        1,
+        61,
+        61,
+        61,
+        true,
+        {
+          "_type": "WorkerUsage",
+          "requests": 1,
+          "units": 1,
+          "bytes": 1836
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 1,
+          "reserved_bytes": 4969600,
+          "leased": 0,
+          "persistence_requests": 1
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 204
+        },
+        "Leader",
+        1,
+        36,
+        36,
+        36,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 1,
+          "reserved_bytes": 4972730,
+          "leased": 1,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 205
+        },
+        "Follower",
+        1,
+        36,
+        35,
+        35,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 0,
+          "reserved_bytes": 0,
+          "leased": 0,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 206
+        },
+        "Follower",
+        1,
+        36,
+        35,
+        35,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 0,
+          "reserved_bytes": 0,
+          "leased": 0,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 207
+        },
+        "Leader",
+        1,
+        35,
+        35,
+        35,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 1,
+          "reserved_bytes": 4972206,
+          "leased": 1,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 208
+        },
+        "Follower",
+        1,
+        35,
+        35,
+        35,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 0,
+          "reserved_bytes": 0,
+          "leased": 0,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 209
+        },
+        "Follower",
+        1,
+        35,
+        35,
+        35,
+        false,
+        {
+          "_type": "WorkerUsage",
+          "requests": 0,
+          "units": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "EffectOwnerUsage",
+          "active_visits": 1,
+          "reserved_bytes": 4972206,
+          "leased": 1,
+          "persistence_requests": 0
+        },
+        {
+          "_type": "OutboundUsage",
+          "batches": 0,
+          "messages": 0,
+          "bytes": 0
+        }
+      ]
+    ]
+  ],
+  "bottom_scalar_states": [
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 1
+        },
+        "Follower",
+        2,
+        855,
+        854,
+        854,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 2
+        },
+        "Leader",
+        2,
+        855,
+        855,
+        855,
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 2994
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 3
+        },
+        "Follower",
+        2,
+        855,
+        854,
+        854,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 4
+        },
+        "Follower",
+        2,
+        463,
+        462,
+        462,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 5
+        },
+        "Leader",
+        2,
+        463,
+        463,
+        463,
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 1962
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 6
+        },
+        "Follower",
+        2,
+        463,
+        462,
+        462,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 7
+        },
+        "Follower",
+        2,
+        465,
+        464,
+        464,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 8
+        },
+        "Follower",
+        2,
+        465,
+        464,
+        464,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 9
+        },
+        "Leader",
+        2,
+        465,
+        465,
+        465,
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 2880
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 10
+        },
+        "Follower",
+        2,
+        862,
+        861,
+        861,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 11
+        },
+        "Leader",
+        2,
+        862,
+        862,
+        862,
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 2000
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 12
+        },
+        "Follower",
+        2,
+        862,
+        861,
+        861,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 13
+        },
+        "Leader",
+        1,
+        449,
+        449,
+        449,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 14
+        },
+        "Follower",
+        1,
+        449,
+        449,
+        449,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 15
+        },
+        "Follower",
+        1,
+        449,
+        449,
+        449,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 16
+        },
+        "Leader",
+        1,
+        453,
+        453,
+        453,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 17
+        },
+        "Follower",
+        1,
+        453,
+        453,
+        453,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 18
+        },
+        "Follower",
+        1,
+        453,
+        453,
+        453,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 19
+        },
+        "Leader",
+        1,
+        870,
+        869,
+        869,
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 2000
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 20
+        },
+        "Follower",
+        1,
+        869,
+        869,
+        869,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 21
+        },
+        "Follower",
+        1,
+        869,
+        869,
+        869,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 22
+        },
+        "Leader",
+        1,
+        455,
+        455,
+        455,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 23
+        },
+        "Follower",
+        1,
+        455,
+        455,
+        455,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 24
+        },
+        "Follower",
+        1,
+        455,
+        455,
+        455,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ],
+    [
+      [
+        {
+          "_type": "NodeId",
+          "value": 25
+        },
+        "Leader",
+        1,
+        457,
+        456,
+        456,
+        {
+          "_type": "ClientUsage",
+          "requests": 1,
+          "bytes": 1962
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 26
+        },
+        "Follower",
+        1,
+        457,
+        456,
+        456,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ],
+      [
+        {
+          "_type": "NodeId",
+          "value": 27
+        },
+        "Follower",
+        1,
+        456,
+        456,
+        456,
+        {
+          "_type": "ClientUsage",
+          "requests": 0,
+          "bytes": 0
+        },
+        {
+          "_type": "ReadInvocationUsage",
+          "requests": 0,
+          "bytes": 0
+        }
+      ]
+    ]
+  ],
+  "top_diagnostic": [
+    "node=NodeId(101),originalOwner=RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3001), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) },configuration=ConfigurationId(1),role=Leader,hard=HardState { term: 1, voted_for: Some(NodeId(101)) },base=2,last=3,commit=3,entries=[LogEntry { index: 3, term: 1, payload: Command { operation: OperationId(300001), bytes: [0, 0, 0, 0, 0, 0, 0, 0] } }],reset=4,pending=false,applied=3,commit_term=Some(1),deadline=Some(TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3001), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(800), incarnation: GroupIncarnation(1) }, kind: Heartbeat, sequence: 18, deadline: MonoTime(340304) }),owner=EffectOwnerUsage { active_visits: 1, reserved_bytes: 4396232, leased: 1, persistence_requests: 0 },worker=WorkerUsage { requests: 0, units: 0, bytes: 0 },outbound=OutboundUsage { batches: 0, messages: 0, bytes: 0 },clients=ClientUsage { requests: 0, bytes: 0 },reads=ReadInvocationUsage { requests: 1, bytes: 808 }",
+    "node=NodeId(102),originalOwner=RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3002), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) },configuration=ConfigurationId(1),role=Follower,hard=HardState { term: 1, voted_for: Some(NodeId(101)) },base=2,last=3,commit=3,entries=[LogEntry { index: 3, term: 1, payload: Command { operation: OperationId(300001), bytes: [0, 0, 0, 0, 0, 0, 0, 0] } }],reset=25,pending=false,applied=3,commit_term=Some(1),deadline=Some(TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3002), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(800), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 26, deadline: MonoTime(405515) }),owner=EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 },worker=WorkerUsage { requests: 0, units: 0, bytes: 0 },outbound=OutboundUsage { batches: 0, messages: 0, bytes: 0 },clients=ClientUsage { requests: 0, bytes: 0 },reads=ReadInvocationUsage { requests: 0, bytes: 0 }",
+    "node=NodeId(103),originalOwner=RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3003), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) },configuration=ConfigurationId(1),role=Follower,hard=HardState { term: 1, voted_for: Some(NodeId(101)) },base=2,last=3,commit=3,entries=[LogEntry { index: 3, term: 1, payload: Command { operation: OperationId(300001), bytes: [0, 0, 0, 0, 0, 0, 0, 0] } }],reset=24,pending=false,applied=3,commit_term=Some(1),deadline=Some(TimerToken { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3003), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(800), incarnation: GroupIncarnation(1) }, kind: Election, sequence: 25, deadline: MonoTime(404870) }),owner=EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 },worker=WorkerUsage { requests: 0, units: 0, bytes: 0 },outbound=OutboundUsage { batches: 0, messages: 0, bytes: 0 },clients=ClientUsage { requests: 0, bytes: 0 },reads=ReadInvocationUsage { requests: 0, bytes: 0 }"
+  ],
+  "typed_error_markers": 0,
+  "single_snapshot_no_turnover_or_duration_proof": true,
+  "physical_original_entry_positions_and_outputs_unavailable": true
+}

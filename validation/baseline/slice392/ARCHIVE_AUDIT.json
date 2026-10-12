@@ -1,0 +1,25 @@
+{
+  "linux_original_fingerprint_entries_checked": 52,
+  "original_fingerprint_changes": [],
+  "byte_identical_original_copies": 50,
+  "copy_conflicts": [],
+  "source_inputs": 1306,
+  "original_native_tests_checked": 2,
+  "raw_actual_results": {
+    "tcp": "1/0 71.85",
+    "quic": "1/0 236.42"
+  },
+  "original_opaque_Read5_lines_checked": 4,
+  "original_all27_reclaim_source_files": 5,
+  "Mac388_raw_failure_log_sha256_unchanged": true,
+  "Mac392_results_included": false,
+  "current395_changed_fixtures": [
+    "tests/logical_activation_nested/progress.rs",
+    "tests/startup.rs",
+    "tests/startup/maintenance/drain.rs"
+  ],
+  "current_production_differences": [],
+  "compiled_binary_library_cache_files_archived": 0,
+  "pre_capture_refusal_preserved_not_reclassified_zero": true,
+  "verification": "Read-only checks of raw original result records/command/profile/source and byte-identical copies; no native rerun or new summary-mirroring verification wrapper"
+}

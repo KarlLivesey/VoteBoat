@@ -371,29 +371,34 @@ fn history(protocol: NativePeerProtocol, checkpoint: bool, final_observation: Ob
     );
     h.elect(1);
     let source = h.nodes.remove(0);
-    drain_wire_nodes(vec![source], h.clock);
-    assert!(matches!(
-        h.submit(
-            0,
-            OperationId::new(19723).unwrap(),
-            Maintenance::<HostApplication>::data(&3i64.to_le_bytes(), 100).unwrap()
-        ),
-        ClientOutcome::Applied { .. }
-    ));
-    assert!(matches!(
-        h.submit(
-            0,
-            OperationId::new(19722).unwrap(),
-            Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap()
-        ),
-        ClientOutcome::Applied {
-            receipt: MaintenanceReceipt::Data(CounterReceipt {
-                duplicate: true,
+    drain_wire_nodes_with(vec![source], h.clock, || h.poll());
+    let outcome = h.submit(
+        0,
+        OperationId::new(19723).unwrap(),
+        Maintenance::<HostApplication>::data(&3i64.to_le_bytes(), 100).unwrap(),
+    );
+    assert!(
+        matches!(outcome, ClientOutcome::Applied { .. }),
+        "{protocol:?}: {outcome:?}"
+    );
+    let outcome = h.submit(
+        0,
+        OperationId::new(19722).unwrap(),
+        Maintenance::<HostApplication>::data(&7i64.to_le_bytes(), 100).unwrap(),
+    );
+    assert!(
+        matches!(
+            outcome,
+            ClientOutcome::Applied {
+                receipt: MaintenanceReceipt::Data(CounterReceipt {
+                    duplicate: true,
+                    ..
+                }),
                 ..
-            }),
-            ..
-        }
-    ));
+            }
+        ),
+        "{protocol:?}: {outcome:?}"
+    );
     h.close();
 }
 #[test]

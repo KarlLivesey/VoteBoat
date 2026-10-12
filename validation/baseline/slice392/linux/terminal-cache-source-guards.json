@@ -1,0 +1,18 @@
+[
+  {
+    "cache": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/middle389/build",
+    "artifacts": {
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/middle389/build/debug/deps/logical_activation_nested-f271d6116c20e281": "9c295d489b24403052cd252b349ad5de8bff4c845392b606bdda46c896473b69",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/middle389/build/debug/deps/libvoteboat-f4d8231677413189.rlib": "5cc45db14503c4968a889def58c87bb6405a0fd339e2e8b309a94ea2de1415ce",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/middle389/build/debug/deps/libvoteboat-f4d8231677413189.rmeta": "cd44548d3d8dc523be6b57618719812bc48531181253bed8c61121218e254e8f"
+    }
+  },
+  {
+    "cache": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/functional385/build-release",
+    "artifacts": {
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/functional385/build-release/release/deps/logical_nested_native-50c00f3e35e6a2bb": "e4c5a6da5a6c20097b7edd44eb3287d8dd300d98ab5bc1dd2fce9320661a4b5b",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/functional385/build-release/release/deps/libvoteboat-be40bd833a88996f.rlib": "ffeb13d72e6fb692233e0f8f34ce08070f3465419abfa293869f7755bcff3a8f",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/functional385/build-release/release/deps/libvoteboat-be40bd833a88996f.rmeta": "db22e4f3983db8ecb09fa72e931512fe74ed40c854666bab58fe9ee0e729a849"
+    }
+  }
+]

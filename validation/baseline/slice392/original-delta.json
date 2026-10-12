@@ -1,0 +1,11 @@
+{
+  "inputs": 1306,
+  "changed": [
+    "tests/logical_nested_native/read.rs",
+    "tests/logical_nested_native/requests.rs"
+  ],
+  "production_delta": 0,
+  "actual_diff": "two one-line guard substitutions only",
+  "old391_frozen_changes": 0,
+  "immutable_start_four_attempts_eight_holds_masks_opaque_Read5_cold27_unchanged": true
+}

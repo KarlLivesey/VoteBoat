@@ -1,0 +1,22 @@
+--- 391/tests/logical_nested_native/read.rs
++++ 392/tests/logical_nested_native/read.rs
+@@ -56,7 +56,7 @@
+ }
+ fn check(host: &Host<'_, '_>, watch: &Watchdog, node: usize, ticket: ReadInvocationTicket) {
+     assert!(
+-        watch.valid(),
++        watch.within_absolute_bound(),
+         "original fresh quorum read functional timeout: {}; watch={watch:?}; {}",
+         super::read_inspection::retained(host, node, ticket),
+         super::diagnostic::retained(host)
+--- 391/tests/logical_nested_native/requests.rs
++++ 392/tests/logical_nested_native/requests.rs
+@@ -34,7 +34,7 @@
+ }
+ pub fn check(host: &Host<'_, '_>, watch: &Watchdog, request: &str) {
+     assert!(
+-        watch.valid(),
++        watch.within_absolute_bound(),
+         "original {request} functional timeout: {}",
+         super::diagnostic::retained(host)
+     );

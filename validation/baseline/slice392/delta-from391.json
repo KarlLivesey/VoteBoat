@@ -1,0 +1,15 @@
+{
+  "baseline": "exact frozen391",
+  "changes": {
+    "tests/logical_nested_native/read.rs": {
+      "before": "fd57bf28672bd45b223b79e7b05ca1d8eabcf480270ac0be811f58deb3d6f9ce",
+      "after": "2f3b04cbbc7473b528c979eec7da1dfaf8c7c9f0dc9d19579efe0613936e740b"
+    },
+    "tests/logical_nested_native/requests.rs": {
+      "before": "6b4aef8c5d17666481c94a6e01b20825c0e83ca9d602de1985088f92e38b9582",
+      "after": "594c7f155ca9ae28f60963ba7696918d423238133bd94a04bab09b3a4bba0818"
+    }
+  },
+  "unchanged_other_compilation_inputs": 1304,
+  "delta": "two existing guard predicates only; source guard schema does not introduce a runtime or clock"
+}

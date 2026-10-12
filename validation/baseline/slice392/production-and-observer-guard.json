@@ -1,0 +1,18 @@
+{
+  "production_base": "exactroot379",
+  "production_compilation_hashes_differ": [],
+  "immutable391_source_base": "target/divide-provider/drain391/SOURCE.json",
+  "392_delta_only": [
+    "tests/logical_nested_native/read.rs",
+    "tests/logical_nested_native/requests.rs"
+  ],
+  "included389_middle_observer_hash_equal": {
+    "tests/logical_activation_nested/diagnostic.rs": true,
+    "tests/logical_activation_nested/shutdown.rs": true
+  },
+  "hashes": {
+    "tests/logical_activation_nested/diagnostic.rs": "81cdee69749683bcde39f90356ef7f7d714913722d9a8b9880ada48fee3cb1f9",
+    "tests/logical_activation_nested/shutdown.rs": "7e078e20346a58b8ad756fa4c43b2802229665e3c9375620e1fa7cb0973d56f4"
+  },
+  "source_inputs": 1306
+}

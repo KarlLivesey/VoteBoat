@@ -1,0 +1,35 @@
+[
+  {
+    "stage": "fmt",
+    "exit": 0,
+    "seconds": 2.15
+  },
+  {
+    "stage": "strict-all",
+    "exit": 0,
+    "seconds": 17.06
+  },
+  {
+    "stage": "strict-default",
+    "exit": 0,
+    "seconds": 15.85
+  },
+  {
+    "stage": "strict-none",
+    "exit": 0,
+    "seconds": 7.95
+  },
+  {
+    "stage": "strict-native",
+    "exit": 0,
+    "seconds": 10.68
+  },
+  {
+    "stage": "release-no-run",
+    "exit": 0,
+    "seconds": 69.2,
+    "target_dir": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build",
+    "debug_assertions": true,
+    "overflow_checks": true
+  }
+]

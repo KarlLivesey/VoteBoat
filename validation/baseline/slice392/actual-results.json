@@ -1,0 +1,470 @@
+{
+  "source_inputs": 1306,
+  "production379_deltas": 0,
+  "read_bound": "same immutable90 start across routing/all4attempts/output/8holds; original30 read inactivity omitted for P8; all other scopes unchanged",
+  "cases": {
+    "tcp": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 71.85,
+      "original_reads": [
+        {
+          "now": 17556,
+          "store": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 3001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          },
+          "runtime_generation": {
+            "_type": "RuntimeGeneration",
+            "value": 1
+          },
+          "lane": {
+            "_type": "ExecutionLaneId",
+            "value": 1
+          },
+          "router_generation": {
+            "_type": "ReadInvocationGeneration",
+            "value": 1
+          },
+          "sequence": 1,
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 800
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "request": {
+            "_type": "ReadRequestId",
+            "value": 1
+          },
+          "barrier": {
+            "_type": "ReadBarrier",
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 800
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "configuration": {
+              "_type": "ConfigurationId",
+              "value": 1
+            },
+            "term": 1,
+            "context": {
+              "_type": "RequestContext",
+              "origin": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 3001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "sequence": 15
+            },
+            "request": {
+              "_type": "ReadRequestId",
+              "value": 1
+            },
+            "index": 3
+          },
+          "consumed_original_value": 5
+        },
+        {
+          "now": 54795,
+          "store": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 3001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 2
+          },
+          "runtime_generation": {
+            "_type": "RuntimeGeneration",
+            "value": 1
+          },
+          "lane": {
+            "_type": "ExecutionLaneId",
+            "value": 1
+          },
+          "router_generation": {
+            "_type": "ReadInvocationGeneration",
+            "value": 1
+          },
+          "sequence": 1,
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 800
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "request": {
+            "_type": "ReadRequestId",
+            "value": 1
+          },
+          "barrier": {
+            "_type": "ReadBarrier",
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 800
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "configuration": {
+              "_type": "ConfigurationId",
+              "value": 1
+            },
+            "term": 2,
+            "context": {
+              "_type": "RequestContext",
+              "origin": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 3001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 2
+                }
+              },
+              "sequence": 11
+            },
+            "request": {
+              "_type": "ReadRequestId",
+              "value": 1
+            },
+            "index": 6
+          },
+          "consumed_original_value": 5
+        }
+      ],
+      "original_receipts": [
+        {
+          "now": 6546,
+          "operation": 300000,
+          "index": 2,
+          "term": 1,
+          "value": 5,
+          "duplicate": false
+        },
+        {
+          "now": 13079,
+          "operation": 300001,
+          "index": 3,
+          "term": 1,
+          "value": 5,
+          "duplicate": false
+        },
+        {
+          "now": 39420,
+          "operation": 300000,
+          "index": 5,
+          "term": 2,
+          "value": 5,
+          "duplicate": true
+        },
+        {
+          "now": 48474,
+          "operation": 300001,
+          "index": 6,
+          "term": 2,
+          "value": 5,
+          "duplicate": true
+        }
+      ],
+      "all_original_27_owner_close_reclaim_rebind_and_recovery_assertions_reached": true,
+      "raw_log": "linux/tcp.log",
+      "runner_record": "linux/tcp-RUN.json"
+    },
+    "quic": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 236.42,
+      "original_reads": [
+        {
+          "now": 72847,
+          "store": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 3001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 1
+          },
+          "runtime_generation": {
+            "_type": "RuntimeGeneration",
+            "value": 1
+          },
+          "lane": {
+            "_type": "ExecutionLaneId",
+            "value": 1
+          },
+          "router_generation": {
+            "_type": "ReadInvocationGeneration",
+            "value": 1
+          },
+          "sequence": 1,
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 800
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "request": {
+            "_type": "ReadRequestId",
+            "value": 1
+          },
+          "barrier": {
+            "_type": "ReadBarrier",
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 800
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "configuration": {
+              "_type": "ConfigurationId",
+              "value": 1
+            },
+            "term": 1,
+            "context": {
+              "_type": "RequestContext",
+              "origin": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 3001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 1
+                }
+              },
+              "sequence": 16
+            },
+            "request": {
+              "_type": "ReadRequestId",
+              "value": 1
+            },
+            "index": 3
+          },
+          "consumed_original_value": 5
+        },
+        {
+          "now": 205632,
+          "store": {
+            "_type": "StoreIdentity",
+            "id": {
+              "_type": "StoreId",
+              "value": 3001
+            },
+            "incarnation": {
+              "_type": "StoreIncarnation",
+              "value": 1
+            }
+          },
+          "session": {
+            "_type": "StoreSession",
+            "value": 2
+          },
+          "runtime_generation": {
+            "_type": "RuntimeGeneration",
+            "value": 1
+          },
+          "lane": {
+            "_type": "ExecutionLaneId",
+            "value": 1
+          },
+          "router_generation": {
+            "_type": "ReadInvocationGeneration",
+            "value": 1
+          },
+          "sequence": 1,
+          "group": {
+            "_type": "GroupIdentity",
+            "id": {
+              "_type": "GroupId",
+              "value": 800
+            },
+            "incarnation": {
+              "_type": "GroupIncarnation",
+              "value": 1
+            }
+          },
+          "request": {
+            "_type": "ReadRequestId",
+            "value": 1
+          },
+          "barrier": {
+            "_type": "ReadBarrier",
+            "group": {
+              "_type": "GroupIdentity",
+              "id": {
+                "_type": "GroupId",
+                "value": 800
+              },
+              "incarnation": {
+                "_type": "GroupIncarnation",
+                "value": 1
+              }
+            },
+            "configuration": {
+              "_type": "ConfigurationId",
+              "value": 1
+            },
+            "term": 2,
+            "context": {
+              "_type": "RequestContext",
+              "origin": {
+                "_type": "StoreBinding",
+                "identity": {
+                  "_type": "StoreIdentity",
+                  "id": {
+                    "_type": "StoreId",
+                    "value": 3001
+                  },
+                  "incarnation": {
+                    "_type": "StoreIncarnation",
+                    "value": 1
+                  }
+                },
+                "session": {
+                  "_type": "StoreSession",
+                  "value": 2
+                }
+              },
+              "sequence": 12
+            },
+            "request": {
+              "_type": "ReadRequestId",
+              "value": 1
+            },
+            "index": 6
+          },
+          "consumed_original_value": 5
+        }
+      ],
+      "original_receipts": [
+        {
+          "now": 24138,
+          "operation": 300000,
+          "index": 2,
+          "term": 1,
+          "value": 5,
+          "duplicate": false
+        },
+        {
+          "now": 56005,
+          "operation": 300001,
+          "index": 3,
+          "term": 1,
+          "value": 5,
+          "duplicate": false
+        },
+        {
+          "now": 164353,
+          "operation": 300000,
+          "index": 5,
+          "term": 2,
+          "value": 5,
+          "duplicate": true
+        },
+        {
+          "now": 187916,
+          "operation": 300001,
+          "index": 6,
+          "term": 2,
+          "value": 5,
+          "duplicate": true
+        }
+      ],
+      "all_original_27_owner_close_reclaim_rebind_and_recovery_assertions_reached": true,
+      "raw_log": "linux/quic.log",
+      "runner_record": "linux/quic-RUN.json"
+    }
+  },
+  "Mac392_results_included": false,
+  "oldMac388_failure": "original warm read30 inactivity failure; retained causal bytes/context do not prove continuous progress/deadlock exclusion/runtime fix",
+  "original_precapture_refusal_retained": true
+}

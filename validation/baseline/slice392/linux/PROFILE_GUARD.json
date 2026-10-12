@@ -1,0 +1,9 @@
+{
+  "fresh_actual_library_flags": 1,
+  "fresh_actual_fixture_flags": 1,
+  "optimized": 3,
+  "debug_assertions": true,
+  "overflow_checks": true,
+  "production_base": "root379",
+  "READ_only_guard_changes": 2
+}

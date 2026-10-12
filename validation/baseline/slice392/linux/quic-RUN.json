@@ -1,0 +1,33 @@
+{
+  "test": "cold_recovery::quic_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+  "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+  "binary_sha256": "3a64b76a1cffa8218f0064b22355edd1d1066b060c7fa5fcb937232470de1618",
+  "profile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": true
+  },
+  "source_inputs": 1306,
+  "pending_write_seconds": 90,
+  "convergence_after_original_consumed_applied_seconds": 90,
+  "upper_constructor_claim_seconds": 90,
+  "cold_upper_checkpoint_seconds": 90,
+  "write_top_inactivity_gate": false,
+  "read_immutable_total_seconds": 90,
+  "read30_inactivity_gate": false,
+  "election_total_inactivity_seconds": [
+    90,
+    30
+  ],
+  "other_until_and_physical_seconds": 15,
+  "launch": true,
+  "exit": 0,
+  "seconds": 236.43,
+  "binary_after_sha256": "3a64b76a1cffa8218f0064b22355edd1d1066b060c7fa5fcb937232470de1618",
+  "library_after_sha256": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libvoteboat-be40bd833a88996f.rlib": "140ba0e2e2b67b0e79da89e48ebb3130505cb803cd9503e6fa68db2f52252c02",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libvoteboat-be40bd833a88996f.rmeta": "20318460a701f7124edbf73f91f43623b1d6ea4c659a090739505e15cf30453f"
+  }
+}

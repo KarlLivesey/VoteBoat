@@ -1,0 +1,7 @@
+{
+  "preliminary_guard": "assertion failed; expected-before capture was not saved",
+  "approved_source_patch_applied_before_result_inspected": true,
+  "prior_native_or_check_launches": 0,
+  "new_coherent_cut_basis": "latest frozen3911306 independently verified; exact two approved substitutions only",
+  "failed_precheck_not_claimed_zero": true
+}

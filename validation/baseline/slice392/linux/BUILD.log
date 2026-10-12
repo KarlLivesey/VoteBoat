@@ -1,0 +1,73 @@
+warning: failed to save last-use data
+This may prevent cargo from accurately tracking what is being used in its global cache. This information is used for automatically removing unused data in the cache.
+
+attempt to write a readonly database
+
+Caused by:
+  Error code 8: attempt to write a readonly database
+       Fresh cfg-if v1.0.5
+       Fresh libc v0.2.190
+       Fresh unicode-ident v1.0.26
+       Fresh proc-macro2 v1.0.107
+       Fresh getrandom v0.2.17
+       Fresh quote v1.0.47
+       Fresh find-msvc-tools v0.1.14
+       Fresh shlex v2.0.1
+       Fresh rand_core v0.10.1
+       Fresh cc v1.6.0
+       Fresh untrusted v0.9.0
+       Fresh once_cell v1.21.4
+       Fresh memchr v2.8.3
+       Fresh zeroize v1.9.1
+       Fresh aho-corasick v1.1.5
+       Fresh rustls-pki-types v1.15.1
+       Fresh ring v0.17.14
+       Fresh syn v3.0.6
+       Fresh regex-syntax v0.8.11
+       Fresh bytes v1.12.1
+       Fresh cpufeatures v0.3.1
+       Fresh regex-automata v0.4.18
+       Fresh chacha20 v0.10.2
+       Fresh rustls-webpki v0.103.15
+       Fresh thiserror-impl v2.0.21
+       Fresh getrandom v0.4.3
+       Fresh tracing-core v0.1.36
+       Fresh pin-project-lite v0.2.17
+       Fresh subtle v2.6.1
+       Fresh rustls v0.23.45
+       Fresh tracing v0.1.44
+       Fresh rand v0.10.3
+       Fresh thiserror v2.0.21
+       Fresh protobuf-codegen v2.28.0
+       Fresh regex v1.13.1
+       Fresh rand_pcg v0.10.2
+       Fresh slab v0.4.12
+       Fresh rustc-hash v2.1.3
+       Fresh tinyvec v1.13.3
+       Fresh lru-slab v0.1.3
+       Fresh bitflags v1.3.2
+       Fresh protobuf-build v0.14.1
+       Fresh quinn-proto v0.11.19
+       Fresh zerocopy v0.8.62
+       Fresh syn v2.0.119
+       Fresh ppv-lite86 v0.2.21
+       Dirty voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/repo): the file `src/logical_voter/node/backing.rs` has changed (1791822369.301482703s, 53m 40s after last build at 1791819149.816833650s)
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/repo)
+       Fresh rand_core v0.6.4
+       Fresh rand_chacha v0.3.1
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name voteboat --edition=2021 src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=e7fd73d520774851 -C extra-filename=-be40bd833a88996f --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libbytes-21832c44e3a8b0c6.rmeta --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libquinn_proto-8c6612f67003a4e7.rmeta --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libring-a30cbf4057fa3105.rmeta --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/librustls-a4a8755ce8162719.rmeta -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/build/ring-ecbdc9ab25929811/out`
+       Fresh protobuf v2.28.0
+       Fresh thiserror-impl v1.0.69
+       Fresh byteorder v1.5.0
+       Fresh fxhash v0.2.1
+       Fresh thiserror v1.0.69
+       Fresh raft-proto v0.7.0
+       Fresh rand v0.8.8
+       Fresh slog v2.7.0
+       Fresh getset v0.1.7
+       Fresh raft v0.7.0
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name voteboat_transfer --edition=2021 src/bin/transfer_service.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=caaf7a6e1c267ef9 -C extra-filename=-361d0cd0221ec6e6 --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libbytes-21832c44e3a8b0c6.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libquinn_proto-8c6612f67003a4e7.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libring-a30cbf4057fa3105.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/librustls-a4a8755ce8162719.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libvoteboat-be40bd833a88996f.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/build/ring-ecbdc9ab25929811/out`
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name logical_nested_native --edition=2021 tests/logical_nested_native.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --test --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=201bbf523f29b375 -C extra-filename=-50c00f3e35e6a2bb --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libbytes-21832c44e3a8b0c6.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libquinn_proto-8c6612f67003a4e7.rlib --extern raft_reference=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libraft-622438d62e64bd01.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libring-a30cbf4057fa3105.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/librustls-a4a8755ce8162719.rlib --extern slog=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libslog-1548afd236727c98.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libvoteboat-be40bd833a88996f.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/build/ring-ecbdc9ab25929811/out`
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name voteboat_directory --edition=2021 src/bin/directory_service.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=a5b8b2bdc8d2fd2a -C extra-filename=-de8db1d7a8fd57ba --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libbytes-21832c44e3a8b0c6.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libquinn_proto-8c6612f67003a4e7.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libring-a30cbf4057fa3105.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/librustls-a4a8755ce8162719.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libvoteboat-be40bd833a88996f.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/build/ring-ecbdc9ab25929811/out`
+     Running `/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/rustc --crate-name voteboat_counter --edition=2021 src/bin/counter_service.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type bin --emit=dep-info,link -C opt-level=3 -C embed-bitcode=no '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --cfg 'feature="default"' --cfg 'feature="native"' --cfg 'feature="quic"' --cfg 'feature="tls"' --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values("default", "native", "quic", "tls"))' -C metadata=9e2085082119c537 -C extra-filename=-021f21d414a7470d --out-dir /home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps -C strip=debuginfo -L dependency=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps --extern bytes=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libbytes-21832c44e3a8b0c6.rlib --extern quinn_proto=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libquinn_proto-8c6612f67003a4e7.rlib --extern ring=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libring-a30cbf4057fa3105.rlib --extern rustls=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/librustls-a4a8755ce8162719.rlib --extern voteboat=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/libvoteboat-be40bd833a88996f.rlib -L native=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/build/ring-ecbdc9ab25929811/out`
+    Finished `release` profile [optimized] target(s) in 1m 09s

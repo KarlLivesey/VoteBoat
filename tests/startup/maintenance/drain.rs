@@ -64,7 +64,7 @@ fn drain(protocol: NativePeerProtocol) {
     );
     // Shutdown still owns all accepted effects; readiness itself never stops workers.
     let source = h.nodes.remove(0);
-    drain_wire_nodes(vec![source], h.clock);
+    drain_wire_nodes_with(vec![source], h.clock, || h.poll());
     let operation = rejected.request.operation;
     let outcome = h.submit(0, operation, rejected.request.bytes);
     if !matches!(&outcome, ClientOutcome::Applied { .. }) {

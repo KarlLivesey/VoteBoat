@@ -1,0 +1,43 @@
+{
+  "provenance": "Recorded selected RUN binary and original-runner.py literal argv; original tool dispatches TCP10586/QUIC92513. No regenerated verification wrapper.",
+  "native": {
+    "tcp": {
+      "tool_session": 10586,
+      "runner_invocation": [
+        "python3",
+        "target/divide-shutdown/read392/run_history.py",
+        "tcp"
+      ],
+      "original_executed_argv": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+        "--exact",
+        "cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/repo",
+      "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/test-tmp",
+      "same_binary_sha256": "3a64b76a1cffa8218f0064b22355edd1d1066b060c7fa5fcb937232470de1618"
+    },
+    "quic": {
+      "tool_session": 92513,
+      "runner_invocation": [
+        "python3",
+        "target/divide-shutdown/read392/run_history.py",
+        "quic"
+      ],
+      "original_executed_argv": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+        "--exact",
+        "cold_recovery::quic_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+        "--nocapture",
+        "--test-threads=1"
+      ],
+      "cwd": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/repo",
+      "TMPDIR": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-shutdown/read392/test-tmp",
+      "same_binary_sha256": "3a64b76a1cffa8218f0064b22355edd1d1066b060c7fa5fcb937232470de1618"
+    }
+  },
+  "compile": "original-build.py + BUILD.log/BUILD.jsonl",
+  "fmt_clippy": "original-checks.py + CHECKS.json/raw logs"
+}

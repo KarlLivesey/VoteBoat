@@ -902,8 +902,19 @@ fn reconcile_wire_nodes(
 }
 
 fn drain_wire_nodes<A>(
+    nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
+    host_clock: Instant,
+) where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
+    drain_wire_nodes_with(nodes, host_clock, || {});
+}
+
+fn drain_wire_nodes_with<A>(
     mut nodes: Vec<NativeNode<A, voteboat::native::connect::NativeServiceConnector>>,
     host_clock: Instant,
+    mut serve_remaining: impl FnMut(),
 ) where
     A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
     A::Receipt: ApplicationReceipt,
@@ -913,6 +924,7 @@ fn drain_wire_nodes<A>(
     }
     let clock = Instant::now();
     loop {
+        serve_remaining();
         for node in &mut nodes {
             node.poll(
                 MonoTime(host_clock.elapsed().as_millis() as u64),
@@ -938,6 +950,7 @@ fn drain_wire_nodes<A>(
         let mut snapshots = parts.local.snapshots.take().unwrap();
         let (mut log_done, mut snapshot_done) = (false, false);
         loop {
+            serve_remaining();
             let dial_done = dialer
                 .as_mut()
                 .is_none_or(|dialer| dialer.try_finish().unwrap());

@@ -1,0 +1,362 @@
+{
+  "byte_identical_copies": [
+    {
+      "original": "target/divide-shutdown/read392/SOURCE.json",
+      "archived": "SOURCE.json",
+      "sha256": "6ea8a4b2f5447e6d8c9d3b51ee2d360746242d40da1238b0629b3014534cce25",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/EVIDENCE_SHA256.json",
+      "archived": "original52-fingerprints.json",
+      "sha256": "39da499a9df3c235aacecc68939240bad3d887165e14941b4509e6fe83a41a41",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/PATCH.diff",
+      "archived": "read-guard.patch",
+      "sha256": "5d1c4e06a3c7e13eed50e5dbed3bbac66f0047d8d1fd32ea7ccd184be59c6d35",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/DELTA.json",
+      "archived": "original-delta.json",
+      "sha256": "208a57fcd959d7881143aa85cef15bd03f7a4fe45067bca9402685853f8ae92f",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/PRECAPTURE_REFUSAL.json",
+      "archived": "pre-capture-refusal.json",
+      "sha256": "fff09608b7b858519bf8a8763fb7eca62d1f073f2100932617896c7902ca8a36",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/CONTROL_FLOW_REVIEW.md",
+      "archived": "control-flow-review.md",
+      "sha256": "5d6cc0897ea68780e4d0b38a0bf415fa46177744e460ba09ad6276f209630a19",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/PRODUCTION_AND_OBSERVER_GUARD.json",
+      "archived": "production-and-observer-guard.json",
+      "sha256": "1a03589e5fe88cb11c4efdac3f1c2108d45776a31aca4131b82607c1ef4b52ea",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/BINARY.json",
+      "archived": "linux/BINARY.json",
+      "sha256": "9aab286f55d930a8a06986c05cb513eb38861b385a485d0e2262bd6be7950d3c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/ACTUAL_COMPILER_FLAGS.txt",
+      "archived": "linux/actual-rustc-flags.txt",
+      "sha256": "50c26a436a69c15bc3530b4bc0c6b7be215c4307d1745697ef2108092a65bc8b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/BUILD.jsonl",
+      "archived": "linux/BUILD.jsonl",
+      "sha256": "b9848c304c29386edeac55e65bd92a750042bd73c614fbdab06f8a1984a40bd1",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/BUILD.log",
+      "archived": "linux/BUILD.log",
+      "sha256": "bdd25380b8ced8887e55a5ae9fa986bab1e13d27b9ce6c07976e0743de55ed26",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/CHECKS.json",
+      "archived": "linux/CHECKS.json",
+      "sha256": "4fe50ead32bdc623ae7666d8353c4f47aead89996c416ddf32648a7e4c98b8a7",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/tcp.log",
+      "archived": "linux/tcp.log",
+      "sha256": "87c09cb8b434932d764fa65668d176e3ec6faefa44a6a4acad42932391b5ced2",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/quic.log",
+      "archived": "linux/quic.log",
+      "sha256": "3b7c0832c1ff9730e632623e017d1b56998ce7c88b3893257679e9bb97526793",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/tcp-RUN.json",
+      "archived": "linux/tcp-RUN.json",
+      "sha256": "515bf73cdcf99914ff1a668b348044a9af787a99f859f5490b34a830b35fc749",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/quic-RUN.json",
+      "archived": "linux/quic-RUN.json",
+      "sha256": "def4d53fc80f9859563f75fbfa03f2c5432e5123a915751156f814cfc51ddd24",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/run_history.py",
+      "archived": "linux/original-runner.py",
+      "sha256": "3acc008d11b7c00309efce480afe4254fb550c95cbc5f0a642c631a1542dca0c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/build_release.py",
+      "archived": "linux/original-build.py",
+      "sha256": "b80fd387ef3b99420750e3da9cfbfe16efe46cf3df2cbc9e90e0610f4a83e828",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/checks.py",
+      "archived": "linux/original-checks.py",
+      "sha256": "3058b08ff211b9492ac576253192ebcc3b7167c3f224c5e7bf328bab63189c06",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/guard.py",
+      "archived": "linux/original-source-guard.py",
+      "sha256": "867a2de421d86772cec4e3ce52974c6606d674eaec6a88fa2bdf523425401053",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/CACHE_SOURCE_GUARDS.json",
+      "archived": "linux/terminal-cache-source-guards.json",
+      "sha256": "96620909bdf32f7016028780d46cdf4f687afa58e751a327c83abd6df27a297e",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/PROFILE_GUARD.json",
+      "archived": "linux/PROFILE_GUARD.json",
+      "sha256": "5597cfd76a36cae71f15706617c757609ef2ffc0a5791186b38e3bc0d4812fa7",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/COMPACT_ORIGINAL_READ.json",
+      "archived": "mac388/compact-original-read.json",
+      "sha256": "0a25c4aae513c222ef55ecadb398647c80ffc343aa9a9afc279f4b48abae8058",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/ORIGINAL_LOG_GUARD.json",
+      "archived": "mac388/original-log-guard.json",
+      "sha256": "47fe83a13f64bdfb060cf455644374bb8b9736b9e0c7de91b49c7d55a21b9e75",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/ORIGINAL_STEP_AND_MILESTONES.txt",
+      "archived": "mac388/original-step-and-milestones.txt",
+      "sha256": "2bf83b5f692ed1508e3e770e91047bdc1ef9be3234b61c9c235f591af89325a8",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/after-build-guard.json",
+      "archived": "linux/source-guards/after-build-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/after-checks-guard.json",
+      "archived": "linux/source-guards/after-checks-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/after-quic-guard.json",
+      "archived": "linux/source-guards/after-quic-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/after-tcp-guard.json",
+      "archived": "linux/source-guards/after-tcp-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/before-build-guard.json",
+      "archived": "linux/source-guards/before-build-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/before-checks-guard.json",
+      "archived": "linux/source-guards/before-checks-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/before-quic-guard.json",
+      "archived": "linux/source-guards/before-quic-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/before-tcp-guard.json",
+      "archived": "linux/source-guards/before-tcp-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/terminal-guard.json",
+      "archived": "linux/source-guards/terminal-guard.json",
+      "sha256": "824764d62830a0cc674c9382b84970a05805cc5fdedd0bd78a7b414b86d061e4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/fmt.log",
+      "archived": "linux/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/strict-all.log",
+      "archived": "linux/strict-all.log",
+      "sha256": "4dc057c1db1405555391e53471c99336b0025ef44282c84c0c406a2a0abb04f1",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/strict-default.log",
+      "archived": "linux/strict-default.log",
+      "sha256": "38a250f789c1ccf8015ccbec3d376bdaf1df0066034c96033d6b0fccf17d5e01",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/strict-none.log",
+      "archived": "linux/strict-none.log",
+      "sha256": "0809074ec176a8798ac3ac4c449d030736639909e270c8c1a599abbd5e11c330",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/strict-native.log",
+      "archived": "linux/strict-native.log",
+      "sha256": "42f7a8869d87127d19720825bbd58e7cdaac585bbe7b945d669af3d223f7a0cc",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-admin342/mac-shutdown388-progress-results/cold_tcp.log",
+      "archived": "mac388/original-cold-tcp.log",
+      "sha256": "e7be46ad719b8b636f76b30d857afa809bdba2123043d97f34640d35c4795543",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_activation_nested/progress.rs",
+      "archived": "source-fixtures/tests/logical_activation_nested/progress.rs",
+      "sha256": "e4a13b31a95f46bc1c6d0471941c7d0a453d007c60d6c7567959266dd7adc529",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/startup.rs",
+      "archived": "source-fixtures/tests/startup.rs",
+      "sha256": "bf320c98a2931bb122fa9725fadca03a622796c05c5aedae06c263409a00574c",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/startup/maintenance/drain.rs",
+      "archived": "source-fixtures/tests/startup/maintenance/drain.rs",
+      "sha256": "a72195e995993ec19c65421c829cbe932b24a95b421367be8300edc0df78af02",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/read.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/read.rs",
+      "sha256": "2f3b04cbbc7473b528c979eec7da1dfaf8c7c9f0dc9d19579efe0613936e740b",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/requests.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/requests.rs",
+      "sha256": "594c7f155ca9ae28f60963ba7696918d423238133bd94a04bab09b3a4bba0818",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/cold_recovery.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/cold_recovery.rs",
+      "sha256": "f5a833f48afc5bc23db0d6afb6421c9a66ac19dc3867de94f723bb99cae745bd",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/cluster.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/cluster.rs",
+      "sha256": "4c7c664c0946f690a20079b943e6976b00e470feabfacb03814b162e1f47ebab",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/cleanup.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/cleanup.rs",
+      "sha256": "0b2da76906197ebef03754ff799b038ca750f1a09d37c12fdbef9aff897813d4",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/middle.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/middle.rs",
+      "sha256": "04065c0588c11755c012dd8265c42a6708601180bedda69f9295f2b46eb77ad9",
+      "operation": "byte-identical-copy"
+    },
+    {
+      "original": "target/divide-shutdown/read392/repo/tests/logical_nested_native/shutdown.rs",
+      "archived": "source-fixtures/tests/logical_nested_native/shutdown.rs",
+      "sha256": "e7b13538896cc6e95b3a444be987e4d4d072d618a05c2ad0394812e95254372a",
+      "operation": "byte-identical-copy"
+    }
+  ],
+  "original52_entries_not_copied": {
+    "BASE_SOURCE.json": {
+      "sha256": "3cfc9d25159cdf56883464240a140cc56182ee2c97c3f5d04d6a14362b4b2292",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "MAC_COPY_MANIFEST.json": {
+      "sha256": "1d343ac834897b14d2b635dc84fc8edb6f130aab15c5387d749412180da83141",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "MAC_TRANSFER_SHA256.txt": {
+      "sha256": "f332213a55249d49e0deb27d90ead5e67ba7a3af810a65650dd66374aedeb16f",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "ORIGINAL_FAILURE.txt": {
+      "sha256": "c54f486c19558a626f91e099a5466fdbf567bcb3cafc0e331578b93e4998498e",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "PROPOSED_PATCH.diff": {
+      "sha256": "f3c330b6e1c8ac89f121c0900b72cf3ec2165420de33ffc035e8826a5ae15842",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "QUIC_ORIGINAL_ACCEPTANCE.txt": {
+      "sha256": "cba2ddaf77a513f385a0692f0bdd81d96f14e48acb2c7454db37d56cce1baf05",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "RESULT.json": {
+      "sha256": "119022c66e098a3559aae206cf3a2a2ff0a101dcea862af6bde23023a64e62cf",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "RESULT.md": {
+      "sha256": "c1aca771f3c9e0176e7a2b37d6dae69aa7fa6cad99acb1671229ecec2a4ffeb5",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "SCHEMA_PROPOSAL.md": {
+      "sha256": "5321ad6b3f9fc3626de211544f0f1ca85967c7f5f9863330e1c35a031fc93075",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "SOURCE_SHA256.txt": {
+      "sha256": "3f132ec6c5dff2b3f05dc4e98027b4762a4ab6b1fddb916f0b1bd0b724239d8d",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "TCP_ORIGINAL_ACCEPTANCE.txt": {
+      "sha256": "ba933d09939852c5ea5233d6a324280302e40c5a0255fed2d429404d4679d680",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "mac_checks.sh": {
+      "sha256": "365dd590a15dd23bd977f3f22f9fc80444aeb792f7e6679edde390d45e43bf0c",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "mac_provenance.py": {
+      "sha256": "9f056af1473261e94eb60ea21a80bc0e6c454e04b49bdd1b82aba11d7fd39865",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    },
+    "source.tar.gz": {
+      "sha256": "0db2cbe02406c2ff35b4768b526569a642fb92d6fe02340d639b44891b388360",
+      "reason": "Excluded duplicate summary/acceptance/manifest or Mac-preparation/archive/cache artifacts; full original raw logs, source hashes, profile, commands and guard records are retained. No Mac392 result imported."
+    }
+  }
+}

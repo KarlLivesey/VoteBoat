@@ -31408,9 +31408,9 @@ No unfinished functionality moves to P9/P10; final current-source audit remains.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Functional385 Linux full cold TCP/QUIC passed with separate original-write and exact-all-convergence bounds; Mac381 failures remain recorded. Matching coherent source is prepared after the terminal Mac383 handoff. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Preserve any failure; no unchanged rerun or heartbeat progress credit. | Usable recursive composition, P8 |
-| Next: logical membership/recovery closure | Finish repeated replacement and cold membership resolution on both hosts. | Mac383 six imported/Unknown histories pass. Diagnostic387 confirms premature FULL-child wait; corrected388 Linux repeatedTCP and JointTCP/QUIC pass. RepeatedQUIC reaches subsequent actual middle close but misses15s; failure-only389 inspects original remaining work without changing bounds. Frozen388 Mac six-case run5119 is active. | Actual repeated replacement, imported-target/Joint/committed/uncommitted-Unknown recovery, business results, provider closure and Mac TCP/QUIC parity. Zero checks and original resource handbacks. | Online membership and advanced composition, P4/P8 |
-| Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, read-only full requirement audit, coherent current snapshot and existing source/model/durability records. | Every explicit functional requirement mapped to appropriate current Linux/macOS evidence; resolve contradictions/failures, required full checks and cleanup, no subset or metadata-only completion claim. Stop when P8 actually complete. | Goal completion, P0–P8 |
+| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Frozen392 complete Linux cold TCP/QUIC pass, archived in validation/baseline/slice392. Exclusive Mac394 runs that source. TCP reaches cold recovery but fails final physical close; QUIC and repeated replacement are pending. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Diagnose actual failed ownership/state; preserve original failures and authority checks. | Usable recursive composition, P8 |
+| Next: membership and startup closure | Finish repeated replacement, cold membership and serving-voter drain qualification. | Linux393 all14 logical activation tests pass; Mac Joint393 waits for exclusive394 handback. Startup395 all-feature56/1 and default42/0; cooperative396 extends normal survivor polling to the remaining membership-drain fixture. | Actual repeated replacement and Joint recovery on Mac; complete startup all/default target after396; actual business and duplicate receipts, provider closure and zero lint diagnostics. | Online membership and advanced composition, P4/P8 |
+| Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, read-only full requirement audit, coherent current snapshot and existing source/model/durability records. Linux384 broad matrix remains running on its frozen source. | Map every explicit functional requirement to appropriate Linux/macOS evidence; reconcile source differences and failures, required checks and cleanup. Stop when P8 actually complete. | Goal completion, P0–P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
 native22/0 (28.19s),core17/0 (0.02s),targeted original failed TCP1/0 (0.80s),TLS
@@ -31815,3 +31815,45 @@ unowned free-port selection. Failure-only391 originalQUIC passes1/0 (1.36s)
 with no diagnostics, so the old result/cause remains unobserved. Neither these
 selected passes nor old383 full sweep certify whole current source. Full default,
 core and native matrices continue sequentially; production is unchanged379.
+
+### Cooperative startup shutdown395/396 and publication
+
+Schema before edits: the test host owns the removed source separately from its
+two surviving voters. A synchronous source-only cleanup helper left those live
+voters unpolled through a permitted ten-second drain and worker-join interval.
+The smallest correction adds a private callback to the existing helper, called
+in both original loops. Complete-shutdown callers retain a no-op callback.
+Local-drain395 and membership-drain396 supply their ordinary `h.poll()`.
+
+All original Joint/Final/reopen checks, source draining, provider ownership and
+worker joins remain required. The same host epoch and single ten-second cleanup
+clock are retained; no retry, extra campaign, forced leadership or runtime timer
+change was added. Membership396 saves each actual outcome once and prints it only
+on assertion failure; both the new Applied operation and original duplicate
+receipt remain mandatory. Production is unchanged. This corrects a host fixture
+contract; it does not prove the cause of the earlier unprinted client outcome.
+
+Actual guarded startup395: all features56 passed/1 failed in57.20s; default42
+passed/0 failed in25.42s, sequentially. Both corrected local-drain protocols and
+the selected-listener ownership check passed. The remaining all-feature failure
+was the unchanged QUIC membership-drain post-submit assertion; its outcome was
+unprinted and remains unknown. Formatting and all four strict Clippy profiles
+were zero. Source/executable/library guards passed; optimized code retained debug
+assertions and overflow checks. Packet: target/divide-provider/cooperative395.
+
+Startup396 qualification is dispatched, not yet a pass. Root formatting and
+all-target/all-feature strict Clippy are zero. Its callback reuse follows the
+same schema, with no additional helper. Current macro/mini plan above records
+Mac394's final physical-close failure and pending QUIC/repeated/Joint checks.
+No P8 completion or performance/security claim follows from this publication.
+
+Portable frozen392 evidence is archived in validation/baseline/slice392:
+60files/1,029,856bytes, including both complete Linux cold histories, original
+Read5/session/barrier and all27 cleanup scope, original52 fingerprints, and the
+preserved Mac388 read failure/pre-capture refusal. This historical packet does
+not qualify the current source or claim Mac392 success.
+
+Publication policy is active: meaningful checked slices are committed and pushed
+without waiting for remote CI or final qualification. Commits6eff359 andfa746a6
+are already on origin/main. The full pre-push formatting/four-profile strict
+Clippy hook remains enabled; outstanding test failures stay recorded.

@@ -1,0 +1,30 @@
+{
+  "original_frozen_source": {
+    "tests/logical_nested_native/cold_recovery.rs": {
+      "source392_sha256": "f5a833f48afc5bc23db0d6afb6421c9a66ac19dc3867de94f723bb99cae745bd",
+      "current_source_equal": true
+    },
+    "tests/logical_nested_native/cluster.rs": {
+      "source392_sha256": "4c7c664c0946f690a20079b943e6976b00e470feabfacb03814b162e1f47ebab",
+      "current_source_equal": true
+    },
+    "tests/logical_nested_native/cleanup.rs": {
+      "source392_sha256": "0b2da76906197ebef03754ff799b038ca750f1a09d37c12fdbef9aff897813d4",
+      "current_source_equal": true
+    },
+    "tests/logical_nested_native/middle.rs": {
+      "source392_sha256": "04065c0588c11755c012dd8265c42a6708601180bedda69f9295f2b46eb77ad9",
+      "current_source_equal": true
+    },
+    "tests/logical_nested_native/shutdown.rs": {
+      "source392_sha256": "e7b13538896cc6e95b3a444be987e4d4d072d618a05c2ad0394812e95254372a",
+      "current_source_equal": true
+    }
+  },
+  "scope": "cold_recovery::history constructs nine Cluster owners, each holds three real native nodes. It checkpoints and closes all27 before Recover, restores anchors/suffix/app/fresh sessions, then calls final cluster.checkpoint+finish for all nine. cluster.close retains actual catch-up, begin_shutdown, all-native is_drained, cleanup.join and TCP+UDP rebind; finish removes directory. cleanup.join retains exact into_parts/connector drain and WAL/snapshot/dialer joins. middle.close/shutdown retain original full logical observations and ownership handback. Both entire original tests passed; no cleanup assertion removed.",
+  "raw_pass_logs": [
+    "linux/tcp.log",
+    "linux/quic.log"
+  ],
+  "reclaim_not_inferred_from_partial_or_failed_mac_run": true
+}

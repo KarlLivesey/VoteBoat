@@ -1,0 +1,5 @@
+nested original read now=MonoTime(329663): OwnerStep { admission: Some(AdmissionTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3001), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(800), incarnation: GroupIncarnation(1) }, sequence: 3 }), proposed: None, visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(3001), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(800), incarnation: GroupIncarnation(1) }, sequence: 52 }, operation: None, read: Some(ReadRequestId(1)), error: None }
+nested original progress now=MonoTime(329685) added=0x1 seen=0x1
+nested original checkpoint completed middle=0 base=60 frontier=60
+nested original checkpoint completed middle=1 base=60 frontier=60
+nested original checkpoint completed middle=2 base=61 frontier=61
