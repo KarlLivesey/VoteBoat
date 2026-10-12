@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+use crate::support;
+use voteboat::identity::*;
 use voteboat::{
     outbound::{MessageClass, OutboundBinding, SendTicket},
     secure::{LocalIdentity, PeerIdentity, SessionDrainStatus},
@@ -56,7 +58,7 @@ fn pending(close: ProtocolClose) -> Remaining {
 #[test]
 fn captured_future_close_timer_pins_the_original_cutoff_and_never_renews() {
     let original = ProtocolClose::inspect(captured()).unwrap();
-    let window = ProtocolWindow::pin(pending(original), MonoTime(57874)).unwrap();
+    let mut window = ProtocolWindow::pin(pending(original), MonoTime(57874)).unwrap();
     assert_eq!(window.end, MonoTime(60926));
     assert_eq!(window.end.0 - 57874, 3052);
     assert!(window.retains(&pending(original), MonoTime(60925)));
@@ -83,7 +85,7 @@ fn settled_close_window_keeps_the_maximum_original_timer_after_another_owner_ret
         ((2, support::node(2)), second),
     ]
     .into();
-    let window = ProtocolWindow::pin(remaining, MonoTime(57874)).unwrap();
+    let mut window = ProtocolWindow::pin(remaining, MonoTime(57874)).unwrap();
     assert_eq!(window.end, MonoTime(61926));
     let retired = [((2, support::node(2)), second)].into();
     assert!(window.retains(&retired, MonoTime(60926)));
@@ -198,4 +200,29 @@ fn fresh_connection_unread_input_and_nonclosing_identity_refuse_cleanup() {
         .unwrap()
         .state = SessionState::Ready;
     assert!(ProtocolClose::inspect(changed).is_none());
+}
+
+#[test]
+fn retired_peer_cannot_reappear_even_with_its_original_binding_and_deadline() {
+    let first = ProtocolClose::inspect(captured()).unwrap();
+    let mut second = first;
+    second.binding.peer.node = support::node(2);
+    let original: Remaining = [
+        ((2, support::node(1)), first),
+        ((2, support::node(2)), second),
+    ]
+    .into();
+    let mut window = ProtocolWindow::pin(original.clone(), MonoTime(57874)).unwrap();
+    assert!(window.retains(&pending(first), MonoTime(58000)));
+    assert!(!window.retains(&original, MonoTime(58001)));
+    assert!(window.retains(&pending(first), MonoTime(58002)));
+}
+#[test]
+fn caller_time_cannot_regress_within_an_original_protocol_window() {
+    let close = ProtocolClose::inspect(captured()).unwrap();
+    let mut window = ProtocolWindow::pin(pending(close), MonoTime(57874)).unwrap();
+    assert!(!window.retains(&pending(close), MonoTime(57873)));
+    assert!(window.retains(&pending(close), MonoTime(58000)));
+    assert!(!window.retains(&pending(close), MonoTime(57999)));
+    assert!(window.retains(&pending(close), MonoTime(58000)));
 }

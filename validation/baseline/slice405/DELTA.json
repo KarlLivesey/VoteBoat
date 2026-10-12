@@ -1,0 +1,16 @@
+{
+  "against": "9d3e863ba3ab8e0e7e3df9f5d2d5eacf46cfa4fa",
+  "changed": [
+    "tests/logical_nested_native.rs",
+    "tests/logical_nested_native/cluster.rs",
+    "tests/routed.rs",
+    "tests/routed/shutdown.rs",
+    "tests/routed/shutdown/long_rtt.rs",
+    "tests/support/protocol_close.rs",
+    "tests/support/protocol_close/contract.rs"
+  ],
+  "removed": [
+    "tests/routed/shutdown/contract.rs"
+  ],
+  "productionChanged": []
+}

@@ -1,0 +1,11 @@
+# Shared test-only close405 schema
+
+Purpose: reuse the already qualified routed close contract for final nested native cleanup. This advances P8 macOS actual cold recovery qualification. Mac402 never exposed its retained session states; the valid long-RTT control is not a causal diagnosis of that failure.
+
+Data/API: tests/support/protocol_close.rs owns exact ProtocolClose(SessionBinding, MonoTime), remaining map keyed by original node index and peer, and one ProtocolWindow with immutable original deadline map plus shrinking live-key set and last accepted time. Generic drive accepts original NativeNode array, original Instant epoch, caller poll closure, and caller diagnostic closure. Routed wraps it without changing its background polling. Only test modules change; no native provider or timer changes.
+
+Transitions: ordinary15-second work cutoff -> either actual all-node drain, fail if any local/accepted work remains, or capture one nonempty set of authenticated flushed Closing sessions with close_started and protocol_drained=false and strictly future deadlines. Poll exactly the same nodes through maximum original deadline. Surviving bindings/deadlines must remain exact, times cannot regress, removed peers cannot reappear. Only actual node is_drained ends success. No timeout renewal, fabricated completion, drop/abort shortcut or clock advance.
+
+Ownership/recovery: all nodes retain original workers/sockets until actual drain and existing caller join/rebind. Pure borrowed inspection does not consume outputs or drive I/O. Require connector/router/worker/persistence/outbound/client/read/results owner settled, no pending checkpoint, and collected closing channels exactly match roster connection count. Missing protocol details refuse the extension. Diagnostics obtain actual mutable peer_drain_status before caller detail.
+
+Acceptance: preserve four original contract controls and real native long-RTT control; add disappearance/reappearance and backwards-time controls. Run shared controls in routed and nested (sequential) plus relevant long-RTT, format and strict all-target checks. Root owns nested integration and wider qualification; this subtask cannot certify the Mac failed test.

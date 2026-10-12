@@ -24,6 +24,8 @@ mod lower;
 mod middle;
 #[path = "logical_nested_native/parts.rs"]
 mod parts;
+#[path = "support/protocol_close.rs"]
+mod protocol_close;
 #[path = "logical_nested_native/setup.rs"]
 mod setup;
 mod support;

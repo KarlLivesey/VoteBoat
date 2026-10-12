@@ -144,7 +144,7 @@ fn actual_native_long_rtt_close_retains_original_timer_past_fixture_cutoff() {
     let at_cutoff = ProtocolClose::inspect(inspected(&mut channel)).unwrap();
     assert_eq!(at_cutoff, original);
     let pending = [((2, support::node(1)), at_cutoff)].into();
-    let window = ProtocolWindow::pin(pending, cutoff).unwrap();
+    let mut window = ProtocolWindow::pin(pending, cutoff).unwrap();
     assert_eq!(window.end, original.deadline);
     let before = MonoTime(original.deadline.0 - 1);
     channel.poll(before, budget).unwrap();

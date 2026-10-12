@@ -16,7 +16,9 @@ deferred. Stop after P8.
 
 Remaining:
 
-1. **Mac QUIC deep cold recovery.** Full Mac TCP402 now passes1/0 with all27
+1. **Mac QUIC deep cold recovery.** Mac QUIC402 reached final shutdown but failed its15s close guard;
+   follow-up405 must verify original protocol deadlines and actual closure.
+   Full Mac TCP402 now passes1/0 with all27
    owners cleaned up. Linux402 passes all9/default7 nested tests. Its
    checkpoint-only90s watchdog retains actual durable-frontier and cleanup
    assertions. Both old Mac398 cold failures under15s remain preserved.

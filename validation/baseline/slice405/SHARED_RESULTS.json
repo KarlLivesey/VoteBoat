@@ -1,0 +1,29 @@
+{
+  "scope": "Shared test-only close core; original elapsed deadlines and actual drain retained; no production change or Mac execution by this worker.",
+  "profile": "release opt3 requested, CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=true, CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=true; existing402 cache",
+  "cases": [
+    {
+      "log": "shared-controls-release.log",
+      "passed": 6,
+      "failed": 0,
+      "sha256": "5287760242b9ebc8e19315b222751c15c33da147cb755c55fc3fe95250615223"
+    },
+    {
+      "log": "routed-long-rtt-exact.log",
+      "passed": 1,
+      "failed": 0,
+      "sha256": "e6d9cf75012a21920b382ba731800da282dbff3b55d2069c455b093fafcf8cc7"
+    },
+    {
+      "log": "quic-long-rtt.log",
+      "passed": 1,
+      "failed": 0,
+      "sha256": "f07ef7ab00b0ed300adc016b9606e9c96c918c14d61f5c37ff4485246380c7a7"
+    }
+  ],
+  "retained_nonacceptance": [
+    "shared-controls.log: first compilation missing OutboundQueue import, no tests; corrected",
+    "routed-long-rtt.log: unqualified exact filter selected zero; not counted"
+  ],
+  "root_owned": "Root reported fmt and allfour strict0; this worker did not run these checks or claim own output. Root owns nested full target and Mac qualification."
+}

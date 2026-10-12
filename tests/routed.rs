@@ -20,6 +20,9 @@ mod host;
 #[cfg(feature = "tls")]
 #[path = "routed/native.rs"]
 mod native;
+#[cfg(feature = "tls")]
+#[path = "support/protocol_close.rs"]
+mod protocol_close;
 #[cfg(feature = "native")]
 mod support;
 #[derive(Clone)]

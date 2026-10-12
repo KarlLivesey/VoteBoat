@@ -30,7 +30,6 @@ enum NativeWaitStage {
     CheckpointCatchUp,
     CheckpointPublished,
     CloseCatchUp,
-    CloseDrained,
 }
 pub static HISTORY: Mutex<()> = Mutex::new(());
 static NEXT: AtomicU64 = AtomicU64::new(1);
@@ -324,9 +323,23 @@ impl Cluster {
         for node in self.nodes.iter_mut() {
             node.begin_shutdown();
         }
-        self.wait(NativeWaitStage::CloseDrained, |host| {
-            host.all().all(ChildNode::is_drained)
-        });
+        let slot = self.slot;
+        super::protocol_close::drive(
+            &mut self.nodes,
+            &self.clock,
+            |nodes, clock| {
+                let now = MonoTime(clock.elapsed().as_millis() as u64);
+                for node in nodes {
+                    node.poll(now, NodePollBudget::default()).unwrap();
+                }
+            },
+            |nodes, _| {
+                eprintln!(
+                    "native logical child close slot={slot}; original_nodes={:?}",
+                    super::cluster_inspection::retained(slot, nodes),
+                );
+            },
+        );
         for node in self.nodes.drain(..) {
             cleanup::join(node);
         }

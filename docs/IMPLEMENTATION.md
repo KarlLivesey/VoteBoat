@@ -31398,6 +31398,14 @@ normative/current-source P0–P8 qualification. P8 remains active; P9/P10 not be
 
 ### Current mini plan403
 
+Update405: Mac402 QUIC failed only final CloseDrained15s after843.17s.
+Actual secure deadlines were not captured; do not infer the cause. Reuse the
+existing routed protocol-only close window with strict original identity/timer
+checks and actual drains/joins, then repeat this failed case on frozen source.
+Schema: `target/root315/close405/SCHEMA.md`; raw failure:
+[Mac402 QUIC](../validation/baseline/slice402/mac_quic/README.md). No production
+change or new feature scope. Successful TCP/native100/clock checks stay recorded.
+
 Macro review: terminal Mac398 now passes both complete repeated-replacement
 histories (163.75s TCP,172.51s QUIC), while both original cold cases fail final
 checkpoint publication under15s. Mac401 closes C12 with public injection1/0 and
@@ -31407,7 +31415,7 @@ current Mac sequence. No new functional scope, performance tuning or security wo
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac deep recovery qualification | Finish the remaining platform-specific recovery evidence. | Exact402 source; terminal398/401 handback and native-only100-group pass. Linux complete nested all9/default7 pass; corrected Mac continuation is active with persisted PID. | Full QUIC cold history with real frontier/ref/base/router/worker conditions and all27 joins/rebind; TCP now passes850.99s. Preserve previous failures. | Shared runtime and recursive composition, P2/P8 |
+| Current: Mac deep recovery qualification | Finish the remaining platform-specific recovery evidence. | Exact402 source; terminal398/401 handback and native-only100-group pass. Linux complete nested all9/default7 pass; Mac402 is terminal; the follow-up405 source reuses strict protocol-only cleanup. | Full QUIC cold history with real frontier/ref/base/router/worker conditions and all27 joins/rebind; TCP now passes850.99s. Preserve previous failures. | Shared runtime and recursive composition, P2/P8 |
 | Next: final source and requirement reconciliation | Establish full requested functional coverage against the final source. | Current checks and71-row audit, raw Mac398/401 results, historical384 plus399/400/401/402 source map. | Close Q-DEEP-MAC with actual outcomes and incorporate closed Q-100-MAC/Q-CLOCK-MAC; inspect every R/VB/I/C and named P8 row, source differences, required local checks and historical failures. | Goal completion, P0–P8 |
 | Following: publish final milestone and stop | Hand over the completed functional release boundary. | Fully satisfied prior row and clean enabled pre-push checks. | Commit/push final concise status and evidence, mark goal complete, leave P9 performance planning/P10 security/Windows untouched. | Requested stopping boundary after P8 |
 
@@ -32257,3 +32265,16 @@ executable/library fingerprints match; actual opt3/debug/overflow compiler
 records are preserved in validation/baseline/slice402/mac_tcp. The corrected
 continuation has started QUIC, the only remaining native case. No runtime
 source changed and no completed case was repeated.
+
+
+### Original protocol close405 — Linux qualification
+
+The test-only shared close path retains exact bindings/deadlines, zero owned work,
+actual drained state and all original joins/rebinds. Full Linux nested all15/0
+(124.51s) and default13/0 (46.77s) pass sequentially; counts include six shared
+contract controls. Existing real routed QUIC long-RTT1/0 and original QUIC
+clock control1/0 pass. Formatting/all four strict Clippy configurations are zero.
+Mac405 passes those six controls and both actual timer controls and is running
+only the remaining full QUIC cold history. Full routed regression is running
+because its helper now shares the same stricter original-close checks.
+No production files changed. [Evidence405](../validation/baseline/slice405/README.md).

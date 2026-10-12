@@ -1,0 +1,14 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `release` profile [optimized] target(s) in 18.23s
+     Running tests/routed.rs (target/root315/checkpoint402/build/release/deps/routed-c46258bcc6d8f083)
+
+running 6 tests
+test protocol_close::contract::accepted_original_work_and_unsupported_protocol_detail_cannot_enter_cleanup ... ok
+test protocol_close::contract::caller_time_cannot_regress_within_an_original_protocol_window ... ok
+test protocol_close::contract::captured_future_close_timer_pins_the_original_cutoff_and_never_renews ... ok
+test protocol_close::contract::fresh_connection_unread_input_and_nonclosing_identity_refuse_cleanup ... ok
+test protocol_close::contract::retired_peer_cannot_reappear_even_with_its_original_binding_and_deadline ... ok
+test protocol_close::contract::settled_close_window_keeps_the_maximum_original_timer_after_another_owner_retires ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 186 filtered out; finished in 0.00s
+
