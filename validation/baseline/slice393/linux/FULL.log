@@ -1,0 +1,77 @@
+
+running 14 tests
+test cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final ... 356 actual_targetB_enrollment
+367 all12 original physical workers joined and sockets rebound at Joint
+367 restored all12 original provider owners joined and sockets rebound
+ok
+test cold_joint::tcp_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final ... 356 actual_targetB_enrollment
+367 all12 original physical workers joined and sockets rebound at Joint
+367 restored all12 original provider owners joined and sockets rebound
+ok
+test history::quic_fifteen_native_owners_two_original_logical_replacements ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+356 actual_targetB_enrollment
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::quic_original_import_lost_image_target_stores_cold_claim_then_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+365 same3 original target native workers joined; reopening imported stores
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::quic_original_uncommitted_unknown_import_wal_cold_then_real_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+370 same3 original providers joined/rebound with exact import WAL uncommitted
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::quic_original_unknown_import_target_cold_resolves_then_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+368 canceled original import observation; same3 stores committed and joined before cold Claim
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::quic_twelve_native_owners_original_logical_learner_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+356 actual_targetB_enrollment
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::tcp_fifteen_native_owners_two_original_logical_replacements ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+356 actual_targetB_enrollment
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::tcp_original_import_lost_image_target_stores_cold_claim_then_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+365 same3 original target native workers joined; reopening imported stores
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::tcp_original_uncommitted_unknown_import_wal_cold_then_real_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+370 same3 original providers joined/rebound with exact import WAL uncommitted
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::tcp_original_unknown_import_target_cold_resolves_then_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+368 canceled original import observation; same3 stores committed and joined before cold Claim
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test history::tcp_twelve_native_owners_original_logical_learner_activation ... 356 original_nine_bootstraps
+356 original_Learners_source_export
+356 actual_targetB_enrollment
+356 original_readiness_Joint_Final_Outcome_Release
+356 actual12 original WAL/snapshot/dialer owners joined and TCP/UDP rebound
+ok
+test profile::declared_full_middle_and_top_batches_fit_separate_release_windows ... 367 declared full batches middle=201467968 control=402935936 total=604403904 top=1119296 control=2238592 total=3357888
+ok
+test profile::selected_complete_upper_canonical_history_fits_lower_snapshot_and_import ... 356 finite upper bound=370714 fixed=3674 cap=524288 lower_import_cap=1048576
+ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 101.88s
+

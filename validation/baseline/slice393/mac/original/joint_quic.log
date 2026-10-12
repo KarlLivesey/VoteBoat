@@ -1,0 +1,9 @@
+
+running 1 test
+test cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final ... 356 actual_targetB_enrollment
+367 all12 original physical workers joined and sockets rebound at Joint
+367 restored all12 original provider owners joined and sockets rebound
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 127.36s
+

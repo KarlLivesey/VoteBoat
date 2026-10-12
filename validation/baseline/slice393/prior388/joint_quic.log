@@ -1,0 +1,21 @@
+    Finished `release` profile [optimized] target(s) in 0.04s
+     Running tests/logical_activation_nested.rs (/tmp/voteboat-macos-shutdown388-ZMiYNJdu/build/release/deps/logical_activation_nested-bf0aeb6b12ce7eb5)
+
+running 1 test
+356 actual_targetB_enrollment
+367 all12 original physical workers joined and sockets rebound at Joint
+test cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final has been running for over 60 seconds
+
+thread 'cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final' (22429875) panicked at tests/logical_activation_nested/progress.rs:115:9:
+original middle election
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final ... FAILED
+
+failures:
+
+failures:
+    cold_joint::quic_all_twelve_stores_joint_and_parent_intent_cold_reconstruct_then_final
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 13 filtered out; finished in 76.84s
+
+error: test failed, to rerun pass `--test logical_activation_nested`

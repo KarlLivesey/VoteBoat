@@ -1,0 +1,217 @@
+{
+  "platform": "Darwin arm64",
+  "sshHandle": 16152,
+  "terminalExit": 0,
+  "remoteDirectory": "/tmp/voteboat-macos-startup396-wIywQCmi",
+  "source": "exact frozen3961306, production3790; new397/current398 fixtures excluded",
+  "sourceManifestSha256": "7121850d64bdc3d0c6f26e0d9f7567b48af07872d1bf89bef732fb8946c36847",
+  "profiles": {
+    "all": {
+      "passed": 57,
+      "failed": 0,
+      "seconds": 98.43,
+      "actualCompilerRecords": {
+        "startup": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///private/tmp/voteboat-macos-startup396-wIywQCmi/repo#voteboat@0.1.0",
+          "manifest_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/Cargo.toml",
+          "target": {
+            "kind": [
+              "test"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "startup",
+            "src_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/tests/startup.rs",
+            "edition": "2021",
+            "doc": false,
+            "doctest": false,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": true,
+            "overflow_checks": true,
+            "test": true
+          },
+          "features": [
+            "default",
+            "native",
+            "quic",
+            "tls"
+          ],
+          "filenames": [
+            "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-3c3111aeda1a13fc"
+          ],
+          "executable": "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-3c3111aeda1a13fc",
+          "fresh": false
+        },
+        "voteboat": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///private/tmp/voteboat-macos-startup396-wIywQCmi/repo#voteboat@0.1.0",
+          "manifest_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "voteboat",
+            "src_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/src/lib.rs",
+            "edition": "2021",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": true,
+            "overflow_checks": true,
+            "test": false
+          },
+          "features": [
+            "default",
+            "native",
+            "quic",
+            "tls"
+          ],
+          "filenames": [
+            "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+            "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-ca76d170795d1aa6.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        }
+      },
+      "actualBinaryManifest": "b4283daa9b6e7d406f0b27511b8474f05f80a1f0500ada4ac909f3846797b27e  /tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-3c3111aeda1a13fc\n1ce236afa78e9118141f628138dd963452283153460c7062a20a49b45fee8f71  /tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib\n"
+    },
+    "default": {
+      "passed": 42,
+      "failed": 0,
+      "seconds": 46.2,
+      "actualCompilerRecords": {
+        "startup": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///private/tmp/voteboat-macos-startup396-wIywQCmi/repo#voteboat@0.1.0",
+          "manifest_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/Cargo.toml",
+          "target": {
+            "kind": [
+              "test"
+            ],
+            "crate_types": [
+              "bin"
+            ],
+            "name": "startup",
+            "src_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/tests/startup.rs",
+            "edition": "2021",
+            "doc": false,
+            "doctest": false,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": true,
+            "overflow_checks": true,
+            "test": true
+          },
+          "features": [
+            "default",
+            "native",
+            "tls"
+          ],
+          "filenames": [
+            "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-5155e10c27f1b1b4"
+          ],
+          "executable": "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-5155e10c27f1b1b4",
+          "fresh": false
+        },
+        "voteboat": {
+          "reason": "compiler-artifact",
+          "package_id": "path+file:///private/tmp/voteboat-macos-startup396-wIywQCmi/repo#voteboat@0.1.0",
+          "manifest_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/Cargo.toml",
+          "target": {
+            "kind": [
+              "lib"
+            ],
+            "crate_types": [
+              "lib"
+            ],
+            "name": "voteboat",
+            "src_path": "/private/tmp/voteboat-macos-startup396-wIywQCmi/repo/src/lib.rs",
+            "edition": "2021",
+            "doc": true,
+            "doctest": true,
+            "test": true
+          },
+          "profile": {
+            "opt_level": "3",
+            "debuginfo": 0,
+            "debug_assertions": true,
+            "overflow_checks": true,
+            "test": false
+          },
+          "features": [
+            "default",
+            "native",
+            "tls"
+          ],
+          "filenames": [
+            "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-075cea5ba8cb25a2.rlib",
+            "/tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-075cea5ba8cb25a2.rmeta"
+          ],
+          "executable": null,
+          "fresh": false
+        }
+      },
+      "actualBinaryManifest": "aea45ed64fbb66c0c32a13c16c97d7cddd0c217eec3ff6130c7798b38ca98be0  /tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-5155e10c27f1b1b4\nd972e78c7224417fdb20a3c92397203818d22c35274962cbc406aaff10c444f8  /tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-075cea5ba8cb25a2.rlib\n"
+    }
+  },
+  "runnerStages": {
+    "transfer_before": "0",
+    "old394_binary_before": "0",
+    "old394_source_before": "0",
+    "old393_binary_before": "0",
+    "old393_source_before": "0",
+    "source_before": "0",
+    "protoc_before": "0",
+    "platform": "0",
+    "fmt": "0",
+    "strict_all": "0",
+    "strict_default": "0",
+    "strict_core": "0",
+    "strict_native": "0",
+    "build_all": "0",
+    "actual_test_all": "0",
+    "actual_library_all": "0",
+    "source_before_all": "0",
+    "list_all": "0",
+    "all": "0",
+    "binary_after_all": "0",
+    "source_after_all": "0",
+    "build_default": "0",
+    "prior_all_unchanged": "0",
+    "actual_test_default": "0",
+    "actual_library_default": "0",
+    "source_before_default": "0",
+    "list_default": "0",
+    "default": "0",
+    "binary_after_default": "0",
+    "prior_all_terminal": "0",
+    "source_terminal": "0",
+    "protoc_terminal": "0",
+    "transfer_terminal": "0",
+    "old394_binary_terminal": "0",
+    "old394_source_terminal": "0",
+    "old393_binary_terminal": "0",
+    "old393_source_terminal": "0"
+  },
+  "oldCacheGuards": "old3941306+3binaries and old3931306+2binaries before/after0; zero cacheclone/mutation",
+  "original395FailureVariantAndCause": "UNKNOWN: new396 passed and failedassert-only outcome did not print",
+  "scope": "two complete original startup profiles only, not fullcurrent/P8",
+  "noAdditionalNativeJobs": true
+}

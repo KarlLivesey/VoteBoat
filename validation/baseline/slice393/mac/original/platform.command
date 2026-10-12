@@ -1,0 +1,1 @@
+bash -c uname\ -sm\;\ cargo\ +stable\ --version\;\ rustc\ +stable\ -vV\;\ printf\ \"test_debug_assertions=%s\\ntest_overflow_checks=%s\\n\"\ \"\$CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS\"\ \"\$CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS\" 

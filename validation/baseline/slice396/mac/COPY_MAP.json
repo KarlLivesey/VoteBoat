@@ -1,0 +1,548 @@
+[
+  {
+    "original": "target/divide-provider/cooperative396-mac/RESULT.md",
+    "archive": "provenance/RESULT.md",
+    "sha256": "7da58d333ce39f5112a511da7133376e0d1ef2e61f7d3d6b1f5826dd792591b9",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/QUALIFICATION.json",
+    "archive": "provenance/QUALIFICATION.json",
+    "sha256": "3e3c5cce51830ab6d3e9a9a2334de89855bebd6f1b9901ff61ba99036c18dbc3",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/EVIDENCE_SHA256.json",
+    "archive": "provenance/EVIDENCE_SHA256.json",
+    "sha256": "7e41189fd8f5213bf39ffde1d3b8b5ac62459d432401d06c90bafd2a94165df7",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/SCHEMA.md",
+    "archive": "provenance/SCHEMA.md",
+    "sha256": "54a5835083220c13211d4ef8849f0e4e20448c83aca5f735fedca8746c385b26",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/SOURCE.json",
+    "archive": "provenance/SOURCE.json",
+    "sha256": "7121850d64bdc3d0c6f26e0d9f7567b48af07872d1bf89bef732fb8946c36847",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/checks-Mac.sh",
+    "archive": "provenance/checks-Mac.sh",
+    "sha256": "e7f59d09c93e71f38e37b7740b941fb621de9aba496c90fe3374488a4310f0fd",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/TRANSFER_SHA256.txt",
+    "archive": "provenance/TRANSFER_SHA256.txt",
+    "sha256": "3db135a680889a8dbd8f3e2bac0f97f4dc9d3167af75e0571851cc10632be88c",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/ACTUAL_startup_all.json",
+    "archive": "original/ACTUAL_startup_all.json",
+    "sha256": "6eac8db0883fbc2a71c9a60bf8c64ab1223add53424603568fc02bb84f5f3200",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/ACTUAL_startup_default.json",
+    "archive": "original/ACTUAL_startup_default.json",
+    "sha256": "da79146bc7af72780db3e24e9d7dee1886ce404af33f98c02391e099180b1dc3",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/ACTUAL_voteboat_all.json",
+    "archive": "original/ACTUAL_voteboat_all.json",
+    "sha256": "8026fc17bfa22149202b7e1d8450b92eff2367a11cafe81f1b777c515c029bb7",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/ACTUAL_voteboat_default.json",
+    "archive": "original/ACTUAL_voteboat_default.json",
+    "sha256": "7b32cd83024ae260a89d7f6d0dff697e33bf606627dbe556625769c4803ac158",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/BINARY_all.txt",
+    "archive": "original/BINARY_all.txt",
+    "sha256": "082e24c6b2ed475a94b5372f0d4f51b5b46274ac418245efea82f5bd504be796",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/BINARY_default.txt",
+    "archive": "original/BINARY_default.txt",
+    "sha256": "36b9d3f8856ffab3b66f2901734d57bfd2c8f2f72b11cf18fb756ccc31b3ab8f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_library_all.command",
+    "archive": "original/actual_library_all.command",
+    "sha256": "3c236a4d45a40bbfd57f84253b2a87e494dc4e06a3c3929ddc521beaa8b99df1",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_library_all.log",
+    "archive": "original/actual_library_all.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_library_default.command",
+    "archive": "original/actual_library_default.command",
+    "sha256": "7abf7eaa348d6f33b774a3ff15032d3df31089115b1aa3444858d2294e174948",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_library_default.log",
+    "archive": "original/actual_library_all.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_test_all.command",
+    "archive": "original/actual_test_all.command",
+    "sha256": "5e6b5bea2f38bc812047bef4af5930ffdd66c551c5e95cf19dd20ea3c13d8ee9",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_test_all.log",
+    "archive": "original/actual_library_all.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_test_default.command",
+    "archive": "original/actual_test_default.command",
+    "sha256": "e9d535909c5ab95ead467a775e6804728617ca5bba4a327d4535c27a11a042ce",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/actual_test_default.log",
+    "archive": "original/actual_library_all.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/all.command",
+    "archive": "original/all.command",
+    "sha256": "6eaaaaefda982dcdee4eb92d11bf84bd52aa2aa1b3427ab910e7ed688c000043",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/all.log",
+    "archive": "original/all.log",
+    "sha256": "a0264e1b7b3229ed4bdf933708d9452092ca10b274f7f9f071e53440acf25ba2",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/binary_after_all.command",
+    "archive": "original/binary_after_all.command",
+    "sha256": "64610cd70f03d34344e280b49e0d003a327e389f6fb1ba1fc2d91aaed79fc64f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/binary_after_all.log",
+    "archive": "original/binary_after_all.log",
+    "sha256": "eeeb3c99d1bd01c966a2c54ab14ed07cf91c2be589bd82fde1a901fb0df10a88",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/binary_after_default.command",
+    "archive": "original/binary_after_default.command",
+    "sha256": "b89975f2832747e2c3bb1b55c403de2d13c2d8799bf0cd50d99c048fe5a3e11b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/binary_after_default.log",
+    "archive": "original/binary_after_default.log",
+    "sha256": "204ccd96ab6367a7092011276f8a8f79b927d1648d19e326bec0b856d58e8f35",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/build_all.command",
+    "archive": "original/build_all.command",
+    "sha256": "3f244b57d009ea74d5abcb653ab1c47a679855c9463229624eeaf38b91c7ce09",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/build_all.log",
+    "archive": "original/build_all.log",
+    "sha256": "628edf6306df782c67f7bbfe262ffb0735d6f537dedbf67d7d4676d5666cb480",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/build_default.command",
+    "archive": "original/build_default.command",
+    "sha256": "099fe1cbcec71719a0b09f2af3f9f6fef506d8b144f0aa9a78a9310d50b87dec",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/build_default.log",
+    "archive": "original/build_default.log",
+    "sha256": "d541e5e3ca1085d2ea3e9e644d113001d80a94266e60e53c9c1f9afa9ff72e7b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/default.command",
+    "archive": "original/default.command",
+    "sha256": "571c7ab0cd7e5bb2d3482a069c70696b878043a86b27bdb635770eabe84f738f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/default.log",
+    "archive": "original/default.log",
+    "sha256": "ca08c8be0ba018b38cbedd2f56091c8c32163d5f38a47d7a56b32eb271db2609",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/exits.txt",
+    "archive": "original/exits.txt",
+    "sha256": "1ff27e7b00b25eb7dd3d95d10190f49f5ead45239fbc21dbc560aee35f941d12",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/fmt.command",
+    "archive": "original/fmt.command",
+    "sha256": "7960ce018e2e60dd99f5b5b008d281c4df3aa4a630b0fe711bc8e0edaf7cfc87",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/fmt.log",
+    "archive": "original/actual_library_all.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/list_all.command",
+    "archive": "original/list_all.command",
+    "sha256": "1bdfeb478c8cf72cb311cbfb1e3b1e580dc9fac1854c4b27338feed4311279aa",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/list_all.log",
+    "archive": "original/list_all.log",
+    "sha256": "0a1ff698685a6f7a57a10ee53b573ac0856df29a59306f5f03786edbd01535e2",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/list_default.command",
+    "archive": "original/list_default.command",
+    "sha256": "f7c408c5ccd28e7f5a667e940a87e2efae2529c374f2f89f2361cd86f6978592",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/list_default.log",
+    "archive": "original/list_default.log",
+    "sha256": "af440e9cf1db9472b00b6eb15bc6be5ad8d510e4802ae073d989ce0adb201311",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_binary_before.command",
+    "archive": "original/old393_binary_before.command",
+    "sha256": "79d1847f12c833e04065cee3f7795c02a82c111ba018e4de8178839dcf971ffa",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_binary_before.log",
+    "archive": "original/old393_binary_before.log",
+    "sha256": "725ef5afdc4152708dddb9534aadfa4b5dca3c00829fa15c3482463478fd6767",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_binary_terminal.command",
+    "archive": "original/old393_binary_terminal.command",
+    "sha256": "79d1847f12c833e04065cee3f7795c02a82c111ba018e4de8178839dcf971ffa",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_binary_terminal.log",
+    "archive": "original/old393_binary_before.log",
+    "sha256": "725ef5afdc4152708dddb9534aadfa4b5dca3c00829fa15c3482463478fd6767",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_source_before.command",
+    "archive": "original/old393_source_before.command",
+    "sha256": "66a1d4718840bb429f411fcb5895a29e4fae64539991e28c53701f8a01f3c5bf",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_source_before.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_source_terminal.command",
+    "archive": "original/old393_source_terminal.command",
+    "sha256": "66a1d4718840bb429f411fcb5895a29e4fae64539991e28c53701f8a01f3c5bf",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old393_source_terminal.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_binary_before.command",
+    "archive": "original/old394_binary_before.command",
+    "sha256": "65835932ea721c12bd00d79e76b3c33afebf4ab6e8bbbf106731e050197ec2f3",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_binary_before.log",
+    "archive": "original/old394_binary_before.log",
+    "sha256": "477ba1ef8dde033e474a633120de8e07f7848aabc1721e40c93e90262c8729b0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_binary_terminal.command",
+    "archive": "original/old394_binary_terminal.command",
+    "sha256": "65835932ea721c12bd00d79e76b3c33afebf4ab6e8bbbf106731e050197ec2f3",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_binary_terminal.log",
+    "archive": "original/old394_binary_before.log",
+    "sha256": "477ba1ef8dde033e474a633120de8e07f7848aabc1721e40c93e90262c8729b0",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_source_before.command",
+    "archive": "original/old394_source_before.command",
+    "sha256": "11792e1573e0297815345807bb55425e018af6f722dcd3d17aed78c246495977",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_source_before.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_source_terminal.command",
+    "archive": "original/old394_source_terminal.command",
+    "sha256": "11792e1573e0297815345807bb55425e018af6f722dcd3d17aed78c246495977",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/old394_source_terminal.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/platform.command",
+    "archive": "original/platform.command",
+    "sha256": "af385af9db9060cce614eb666fb26719c841371dbd9610a6dc7b741219ea7d32",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/platform.log",
+    "archive": "original/platform.log",
+    "sha256": "db4523e853f5051ac5c1be26f8e74690d04496bdc08049381e886828e184f991",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/prior_all_terminal.command",
+    "archive": "original/prior_all_terminal.command",
+    "sha256": "64610cd70f03d34344e280b49e0d003a327e389f6fb1ba1fc2d91aaed79fc64f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/prior_all_terminal.log",
+    "archive": "original/binary_after_all.log",
+    "sha256": "eeeb3c99d1bd01c966a2c54ab14ed07cf91c2be589bd82fde1a901fb0df10a88",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/prior_all_unchanged.command",
+    "archive": "original/prior_all_unchanged.command",
+    "sha256": "64610cd70f03d34344e280b49e0d003a327e389f6fb1ba1fc2d91aaed79fc64f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/prior_all_unchanged.log",
+    "archive": "original/binary_after_all.log",
+    "sha256": "eeeb3c99d1bd01c966a2c54ab14ed07cf91c2be589bd82fde1a901fb0df10a88",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/protoc_before.command",
+    "archive": "original/protoc_before.command",
+    "sha256": "4516df36b388675f6fbb3333a9c407bab59f496f0ed7cfd96567a8ee7f2e02f4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/protoc_before.log",
+    "archive": "original/protoc_before.log",
+    "sha256": "67fe6ea6325a7c969b923c21dc10e42d505e916feadafa5af1440ce4e6022b30",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/protoc_terminal.command",
+    "archive": "original/protoc_terminal.command",
+    "sha256": "4516df36b388675f6fbb3333a9c407bab59f496f0ed7cfd96567a8ee7f2e02f4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/protoc_terminal.log",
+    "archive": "original/protoc_before.log",
+    "sha256": "67fe6ea6325a7c969b923c21dc10e42d505e916feadafa5af1440ce4e6022b30",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_after_all.command",
+    "archive": "original/source_after_all.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_after_all.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_before.command",
+    "archive": "original/source_before.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_before.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_before_all.command",
+    "archive": "original/source_before_all.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_before_all.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_before_default.command",
+    "archive": "original/source_before_default.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_before_default.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_terminal.command",
+    "archive": "original/source_terminal.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/source_terminal.log",
+    "archive": "original/old393_source_before.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/startup_all.path",
+    "archive": "original/startup_all.path",
+    "sha256": "9604ef715bdfe86b652a920e597bacee9b410fc25d6e8a5d1f83e4c6aa39a12c",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/startup_default.path",
+    "archive": "original/startup_default.path",
+    "sha256": "de0a84e2d2db563f1aac329d76e363f3cad1838960f66dde45fb356833f3a5be",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_all.command",
+    "archive": "original/strict_all.command",
+    "sha256": "509c7a429f0ec0ca80690333def3926cab62ef95600ab57a425775258047c04f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_all.log",
+    "archive": "original/strict_all.log",
+    "sha256": "6c92f11a0302f0d545087b89ed4a1b97437cf0601600242d08f2f42cd8418b67",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_core.command",
+    "archive": "original/strict_core.command",
+    "sha256": "6260051ce8d9dc97821723a3b473dc5fa09dd30ee081abeda2e91c09e680f8aa",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_core.log",
+    "archive": "original/strict_core.log",
+    "sha256": "9e476d3e47ad2a198f05cc7591ed64c822a14528863a6bab22cd80a0fef8ca20",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_default.command",
+    "archive": "original/strict_default.command",
+    "sha256": "4da79b8440e88f910a4f7684b395ef8724be33743f5a29d6ba48106d54b3f65b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_default.log",
+    "archive": "original/strict_default.log",
+    "sha256": "c5235dfaa1e9d627909eec9ec193ff2fd7bd88bb2ded57d11fcddcba84308c5e",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_native.command",
+    "archive": "original/strict_native.command",
+    "sha256": "a1ca7e00ad8b1d9b19b201010a6cca7de01c249c1a8d19fd2a6aef414f8b3c1b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/strict_native.log",
+    "archive": "original/strict_native.log",
+    "sha256": "cbc2f2dc38cf61dff4839a5a697eec08fb22758832761a7f17dd668a79a5bce1",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/terminal.txt",
+    "archive": "original/terminal.txt",
+    "sha256": "583e1ea0122869a38fb43df311de9e977edebf0469dd66d4266bf57e03446a66",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/transfer_before.command",
+    "archive": "original/transfer_before.command",
+    "sha256": "1f2cb950814f41beaf2c792d7cce012930e7b8eb35f087e1353f1d5d8df58b55",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/transfer_before.log",
+    "archive": "original/transfer_before.log",
+    "sha256": "9a6f669aa137d7c6ae09ad8a8f2b7bd1a2144d97408ccc8b57166fe6cb0c3eb2",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/transfer_terminal.command",
+    "archive": "original/transfer_terminal.command",
+    "sha256": "1f2cb950814f41beaf2c792d7cce012930e7b8eb35f087e1353f1d5d8df58b55",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/cooperative396-mac/results/transfer_terminal.log",
+    "archive": "original/transfer_before.log",
+    "sha256": "9a6f669aa137d7c6ae09ad8a8f2b7bd1a2144d97408ccc8b57166fe6cb0c3eb2",
+    "identicalAlias": true
+  }
+]

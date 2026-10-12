@@ -1,0 +1,2 @@
+case_failures=0
+exit=0

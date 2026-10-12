@@ -1,0 +1,6 @@
+{
+  "tests/logical_activation_nested/progress.rs": {
+    "before": "e4a13b31a95f46bc1c6d0471941c7d0a453d007c60d6c7567959266dd7adc529",
+    "after": "7a3a3cd9a697ff9ffb04acf9322a43c15bdca76fc1044322f66e93c9849d3681"
+  }
+}

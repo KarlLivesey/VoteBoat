@@ -1,0 +1,2 @@
+b4283daa9b6e7d406f0b27511b8474f05f80a1f0500ada4ac909f3846797b27e  /tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/startup-3c3111aeda1a13fc
+1ce236afa78e9118141f628138dd963452283153460c7062a20a49b45fee8f71  /tmp/voteboat-macos-startup396-wIywQCmi/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib

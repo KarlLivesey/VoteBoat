@@ -32083,3 +32083,25 @@ final normative/source evidence review. All original failed cuts remain preserve
 completion stays unproven. This closes actual default-feature execution gaps,
 without assuming all-feature TCP covers a different configuration. No production,
 performance or security changes, and no automatic P9/P10 work.
+
+### Portable Joint/startup platform archives and final Mac dispatch
+
+Root inspected and verified checksums for validation/baseline/slice393 and
+validation/baseline/slice396/mac; both returned0. Existing Linux396 checksums also
+remain0 and its files are unchanged. Archive393 preserves frozen Linux14/0 and
+matching Mac JointTCP/QUIC passes, actual profiles/source guards and original388
+failed logs. The Mac396 subtree preserves both complete startup target passes
+and feature-specific actual lists/guards. No binaries, caches or old-cause claims
+were added; each packet remains below1MiB.
+
+The combined398 job was prepared when startup396 handed back the Mac. Root found
+that the completed preparation agent had only received a non-waking message and
+explicitly resumed it with followup_task; no live test was restarted or falsely
+counted as a wait. Actual SSH90457 is now live in a fresh Mac directory, with no
+competing job. Its exact3981306 source retains all397 selected code plus the
+original two-line retired receive fix. Only a terminal394 APFS cache clone is
+used in a distinct build; no stores are copied. Actual shared compiler records,
+format/four strict profiles/source/protoc/old-cache guards are zero. Maintenance
+controls pass2/0 in1.66s; full coldTCP is active, followed by coldQUIC and both
+repeated histories. The original15/90s guards and complete handbacks remain.
+No Mac fullcold/repeated pass or goal completion is claimed yet.

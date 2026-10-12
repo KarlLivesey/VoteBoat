@@ -1,0 +1,48 @@
+{
+  "platform": "Darwin arm64",
+  "actualSshHandle": 94002,
+  "terminalExit": 0,
+  "remoteDirectory": "/tmp/voteboat-macos-joint393-44XuvTd2",
+  "source": "exact frozen3931306; production3790; progress.rs only delta versus392",
+  "cases": {
+    "joint_tcp": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 121.88
+    },
+    "joint_quic": {
+      "passed": 1,
+      "failed": 0,
+      "seconds": 127.36
+    }
+  },
+  "allRunnerStages": {
+    "transfer_before": "0",
+    "source_before": "0",
+    "protoc_before": "0",
+    "platform": "0",
+    "fmt": "0",
+    "strict_all": "0",
+    "strict_default": "0",
+    "strict_core": "0",
+    "strict_native": "0",
+    "build": "0",
+    "actual_profile": "0",
+    "actual_library_profile": "0",
+    "binary_before": "0",
+    "joint_tcp": "0",
+    "tcp_selected_one": "0",
+    "tcp_binary_unchanged": "0",
+    "joint_quic": "0",
+    "quic_selected_one": "0",
+    "binary_after": "0",
+    "source_after": "0",
+    "protoc_after": "0",
+    "transfer_after": "0"
+  },
+  "old394Guards": "1306 source and3 actual binary hashes before/after0; no clone or mutation",
+  "profile": "actual fresh opt3 release + assertions/overflow true test andlibrary",
+  "priorMacFailureConjunct": "UNPRINTED/UNKNOWN, not inferred from pass",
+  "scope": "original Joint TCP+QUIC only; no fullcurrent/P8 acceptance",
+  "archiveProvenance": "original archive/runner initial+terminal hashes0"
+}

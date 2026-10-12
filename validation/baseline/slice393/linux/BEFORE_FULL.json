@@ -1,0 +1,18 @@
+{
+  "inputs": 1306,
+  "mismatches": [],
+  "artifacts": {
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/election393-build/release/deps/logical_activation_nested-8e09feec40a6f4eb",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": true
+    },
+    "sha256": {
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/election393-build/release/deps/logical_activation_nested-8e09feec40a6f4eb": "fb1f871f19356889844a153232770d7e7882aa10b3213972ea3a1e1a8430ddcd",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/election393-build/release/deps/libvoteboat-be40bd833a88996f.rlib": "d82ee441def738c163ae9af206e16251c845492f5a1b7ec3ddc1ecb44afcf60c"
+    }
+  }
+}

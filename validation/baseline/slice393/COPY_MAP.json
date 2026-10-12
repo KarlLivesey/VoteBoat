@@ -1,0 +1,632 @@
+[
+  {
+    "original": "target/divide-provider/election393/ACTUAL_TEST_LIST.txt",
+    "archive": "linux/ACTUAL_TEST_LIST.txt",
+    "sha256": "fb5be2489616baedc370403519935d6ec1961600222d910ae464a6b96346fec0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/AFTER_FULL.json",
+    "archive": "linux/AFTER_FULL.json",
+    "sha256": "da385610aec65142ffc06b99dd136e4868017627c0e63befacbeb62a28922cb5",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/BEFORE_FULL.json",
+    "archive": "linux/BEFORE_FULL.json",
+    "sha256": "da385610aec65142ffc06b99dd136e4868017627c0e63befacbeb62a28922cb5",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/BUILD.jsonl",
+    "archive": "linux/BUILD.jsonl",
+    "sha256": "1df3fb305ace759f304edf45c19188c5369686b0d84be5019c6549d3a6657e46",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/BUILD.log",
+    "archive": "linux/BUILD.log",
+    "sha256": "51e0763ff58273ec47106dc82c7510a1cbbf5ee1dc28c3a953366ddd6f3504d6",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CAPTURE_GUARD.json",
+    "archive": "linux/CAPTURE_GUARD.json",
+    "sha256": "d9c322420bd33a243318f236fd584dd4a29259aa5b7bb4799294990656331921",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CARGO_VERSION.txt",
+    "archive": "linux/CARGO_VERSION.txt",
+    "sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CHECKS_AFTER.json",
+    "archive": "linux/CHECKS_AFTER.json",
+    "sha256": "da385610aec65142ffc06b99dd136e4868017627c0e63befacbeb62a28922cb5",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CHECKS_BEFORE.json",
+    "archive": "linux/CHECKS_BEFORE.json",
+    "sha256": "97817a0582c2264a50e6a6fb4bffb200a6dcb425428ad4841a4ab1d7a88e428a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CHECK_EXITS.txt",
+    "archive": "linux/CHECK_EXITS.txt",
+    "sha256": "dbc945190aad9c2214dd7cf91fb15398234a50a179cb8d354822012633e3cb28",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CHECK_RUN.log",
+    "archive": "linux/CHECK_RUN.log",
+    "sha256": "4197a425e6370a5ba2eaef30bf47ae90f9f0b1b782202b6bce9fb411de144a11",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CLIPPY_all.log",
+    "archive": "linux/CLIPPY_all.log",
+    "sha256": "0659bb30ece754206a2ee4da57a548a87f9a3f3ac04d74fc87f28be8c75780e8",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CLIPPY_core.log",
+    "archive": "linux/CLIPPY_core.log",
+    "sha256": "6a70ce641afbe4980fb255a3e95819a28896f2aee608fdf0e62e522a8a4fda12",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CLIPPY_default.log",
+    "archive": "linux/CLIPPY_default.log",
+    "sha256": "fce6b14f6c744d385e9c3a21a20e88c2122ec8818b5df5a62c616981dea5a2c7",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CLIPPY_native.log",
+    "archive": "linux/CLIPPY_native.log",
+    "sha256": "c9fa51e9581c091b81a8b044c023f65dcafa5bebb615a8bd44d4443346f67923",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/CURRENT_SCOPE_COMPARISON.json",
+    "archive": "linux/CURRENT_SCOPE_COMPARISON.json",
+    "sha256": "76f57967b32a3b680a17500f549ecbcce6fc95302c87f8ccf9c4b543ae8f4f1a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/DELTA_FROM392.json",
+    "archive": "linux/DELTA_FROM392.json",
+    "sha256": "e51047d87edcd1b08a5905e91012b4ad36d51b25efd080dd4a34bce8b2c1f239",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/EVIDENCE_SHA256.json",
+    "archive": "linux/EVIDENCE_SHA256.json",
+    "sha256": "73036b7b0f721dd185a5dafb25b6545e4d68e60ef12a550e59587cd8319cbcbc",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/FMT.log",
+    "archive": "linux/FMT.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/FULL.command.json",
+    "archive": "linux/FULL.command.json",
+    "sha256": "a068fe2c772742b4691b5b382c7d7a39709adf2a34a2503ba4272a8c75a46eb4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/FULL.log",
+    "archive": "linux/FULL.log",
+    "sha256": "95d96bf1c717fab0f60a5c5d5e292584c13dfca03826a13a29e26e0286cb4e54",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/FULL_RESULT.json",
+    "archive": "linux/FULL_RESULT.json",
+    "sha256": "ea75d694d371559aed0eb0b8ec3f381e42a2a59830a3e6a92aa301a6609596f0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/PRODUCTION_GUARD.json",
+    "archive": "linux/PRODUCTION_GUARD.json",
+    "sha256": "5b3892860d8cb845916234049992096cc97ca10b07e1f85dea948521e06aa7c0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/PROTOC_VERSION.txt",
+    "archive": "linux/PROTOC_VERSION.txt",
+    "sha256": "41654adf2af1c3734c95808b5d5333d2fe1381fca76b4799f5c30198e38fc1fe",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/QUALIFICATION.json",
+    "archive": "linux/QUALIFICATION.json",
+    "sha256": "333dc404f0689f1547bd1f66169f2894bb916ca9ed17ad6fce9ee1cd9fcba012",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/QUALIFICATION_SCHEMA.md",
+    "archive": "linux/QUALIFICATION_SCHEMA.md",
+    "sha256": "8dd54bf4bcfb95e09b614349f2e3f6bbd819a80347efd30c894381910afe361e",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/RESULT.md",
+    "archive": "linux/RESULT.md",
+    "sha256": "f05c2044f590adb521cd9999e24536d4be5877a60a5252c71e8579de404ead24",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/ROOT_SCHEMA.md",
+    "archive": "linux/ROOT_SCHEMA.md",
+    "sha256": "bc0b1f54494e80c82a688316abd93909534b9831bc3b7e3da76fb15f6c7ee7fc",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/RUSTC_VERSION.txt",
+    "archive": "linux/RUSTC_VERSION.txt",
+    "sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/SOURCE.json",
+    "archive": "linux/SOURCE.json",
+    "sha256": "dd6956bbc7d5f89d9727bf80ea1e360b43d51b0396f1fcc6d2fd785e0b38b671",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/SOURCE_SHA256.txt",
+    "archive": "linux/SOURCE_SHA256.txt",
+    "sha256": "9b4732a54626437daebfd1ca4c4dc90c857a9125d09c9409169bed0d40aaf0ee",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/checks.sh",
+    "archive": "linux/checks.sh",
+    "sha256": "e12aacd728c356307add5691d50fdaa508256699d779e7bfb09835818779b2b0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393/run.py",
+    "archive": "linux/run.py",
+    "sha256": "f53ce13e42a37ec2a4fdbe9cf6576b96577fe432b28b2cbade7deb832b9eed3f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/RESULT.md",
+    "archive": "mac/RESULT.md",
+    "sha256": "998a7b78b402dba2376a0949557b978d2e052bc9014b3375e81e39191bd05b63",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/QUALIFICATION.json",
+    "archive": "mac/QUALIFICATION.json",
+    "sha256": "c54fdacbed877858f57f8c1643f18af52006f93e10389972b6349e2556c40cfa",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/EVIDENCE_SHA256.json",
+    "archive": "mac/EVIDENCE_SHA256.json",
+    "sha256": "d2f012ebaa57d7e9d22835132ba820d15a00a6434aca24574edf90d3c8e30e8a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/SCHEMA.md",
+    "archive": "mac/SCHEMA.md",
+    "sha256": "3a05003affac6fc139f289bb28d81dfe3010c8d61abec9f4bc581640427a7d03",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/checks-Mac.sh",
+    "archive": "mac/checks-Mac.sh",
+    "sha256": "492ddb569f7f65937b4585c6144c9478c5bf1b33c5a3662e639b693c176433a0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/dispatch.sh",
+    "archive": "mac/dispatch.sh",
+    "sha256": "6df0afc83666761a0643803d959a6dc91b14adb8018b60d79b720b5210f3e99a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/TRANSFER_SHA256.txt",
+    "archive": "mac/TRANSFER_SHA256.txt",
+    "sha256": "6615569d3dcf8753fd55d2ecd6eee3e9399926d98736d2495006ff891aed30f3",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/DISPATCH_SHA256.txt",
+    "archive": "mac/DISPATCH_SHA256.txt",
+    "sha256": "cdfb0d0ac225ada480a6173cbbd2a5bcf878294f8297a8b74a2db3352faa41f4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/ACTUAL_LIBRARY_ARTIFACT.json",
+    "archive": "mac/original/ACTUAL_LIBRARY_ARTIFACT.json",
+    "sha256": "8b2e14662370a54ee0e3cc4a010e4bf7a3d2bbd6e8242381d6d7c1c7a467da27",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/ACTUAL_TEST_ARTIFACT.json",
+    "archive": "mac/original/ACTUAL_TEST_ARTIFACT.json",
+    "sha256": "98fde4b2289a5cd6993ecd1a52366b049b92fe31513a6d4f412dcf137397ec79",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/BINARY_BEFORE.txt",
+    "archive": "mac/original/BINARY_BEFORE.txt",
+    "sha256": "2574288d049ece7fb3832a1cf0bd7438157eefc800c4173919b0ed05ffedf536",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/DISPATCH_TERMINAL.txt",
+    "archive": "mac/original/DISPATCH_TERMINAL.txt",
+    "sha256": "25a215e74198ce91fdc0c299574e89ee74d3b16d6e6c2b07ee9eaf9a7fbe6569",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/actual_library_profile.command",
+    "archive": "mac/original/actual_library_profile.command",
+    "sha256": "6373c7bb432a7c8ff6aefbb232a4291201c2440d1ee8db89861c949315741cae",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/actual_library_profile.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/actual_profile.command",
+    "archive": "mac/original/actual_profile.command",
+    "sha256": "838b69d96ad9372b505b8309bfc79e897039af0cce63ea7d0a067a3463225cfc",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/actual_profile.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/binary_after.command",
+    "archive": "mac/original/binary_after.command",
+    "sha256": "941e6709022ef66b41dcdde57681ef315e37653651cd5a7787b3040b36acc226",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/binary_after.log",
+    "archive": "mac/original/binary_after.log",
+    "sha256": "725ef5afdc4152708dddb9534aadfa4b5dca3c00829fa15c3482463478fd6767",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/binary_before.command",
+    "archive": "mac/original/binary_before.command",
+    "sha256": "04b9e1abef7f443672f78c0e2be7ad9d9dd7af76644af5ad560d014ce274d4f2",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/binary_before.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/build.command",
+    "archive": "mac/original/build.command",
+    "sha256": "5c7131091936a4ea92b92d23d31a41e05e66f6f7cbd5526547de3ea8f28afbf6",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/build.log",
+    "archive": "mac/original/build.log",
+    "sha256": "5b1a45df8278db57dff322c04bdc7ef1d20ff6db87e414764c1031c5b743d209",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/dispatch_initial.log",
+    "archive": "mac/original/dispatch_initial.log",
+    "sha256": "087a8ef12945d176f219c873f83150938b14e1ad7c7a56746ee081ec297bd039",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/dispatch_terminal.log",
+    "archive": "mac/original/dispatch_initial.log",
+    "sha256": "087a8ef12945d176f219c873f83150938b14e1ad7c7a56746ee081ec297bd039",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/driver.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/exits.txt",
+    "archive": "mac/original/exits.txt",
+    "sha256": "36c758e9a45379c493557956fdeea2cb2b689163312c5a236df1f5f4658e79a7",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/fmt.command",
+    "archive": "mac/original/fmt.command",
+    "sha256": "7960ce018e2e60dd99f5b5b008d281c4df3aa4a630b0fe711bc8e0edaf7cfc87",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/fmt.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/joint_quic.command",
+    "archive": "mac/original/joint_quic.command",
+    "sha256": "3868f15096e855dbdf2250bdeb38af41e85da8d48bc4ed01a4746390d9011e0e",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/joint_quic.log",
+    "archive": "mac/original/joint_quic.log",
+    "sha256": "bae04a4d46772ac8565ade292a990105b6bdde16a61a9b48477ff56f95a4244b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/joint_tcp.command",
+    "archive": "mac/original/joint_tcp.command",
+    "sha256": "d7c33ba0f0c18e28745e0c6f6912d3e2ba5489d34a1b1d5ec3d06dec8bffba60",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/joint_tcp.log",
+    "archive": "mac/original/joint_tcp.log",
+    "sha256": "351f01b3c88466b8bd3af428ee2f7cd754cfd538d9d7c56a17d25003bfbf58cf",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/logical_activation_nested.path",
+    "archive": "mac/original/logical_activation_nested.path",
+    "sha256": "4b3a0c1ddfb6dd4b8abac3ae570b5c683ffd3c76485cc2acc063d07959a442c7",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/old394_binary_after.log",
+    "archive": "mac/original/old394_binary_after.log",
+    "sha256": "477ba1ef8dde033e474a633120de8e07f7848aabc1721e40c93e90262c8729b0",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/old394_binary_before.log",
+    "archive": "mac/original/old394_binary_after.log",
+    "sha256": "477ba1ef8dde033e474a633120de8e07f7848aabc1721e40c93e90262c8729b0",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/old394_source_after.log",
+    "archive": "mac/original/old394_source_after.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/old394_source_before.log",
+    "archive": "mac/original/old394_source_after.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/platform.command",
+    "archive": "mac/original/platform.command",
+    "sha256": "c033751ab26015e08100456c1004bc6e7176a62f68261aa7587b84cc4e2d288c",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/platform.log",
+    "archive": "mac/original/platform.log",
+    "sha256": "350b4c3f2f139c59c761894798ddc8543b627a266ddf47d8cc827f7c2d1745ab",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/protoc_after.command",
+    "archive": "mac/original/protoc_after.command",
+    "sha256": "4516df36b388675f6fbb3333a9c407bab59f496f0ed7cfd96567a8ee7f2e02f4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/protoc_after.log",
+    "archive": "mac/original/protoc_after.log",
+    "sha256": "67fe6ea6325a7c969b923c21dc10e42d505e916feadafa5af1440ce4e6022b30",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/protoc_before.command",
+    "archive": "mac/original/protoc_before.command",
+    "sha256": "4516df36b388675f6fbb3333a9c407bab59f496f0ed7cfd96567a8ee7f2e02f4",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/protoc_before.log",
+    "archive": "mac/original/protoc_after.log",
+    "sha256": "67fe6ea6325a7c969b923c21dc10e42d505e916feadafa5af1440ce4e6022b30",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/quic_selected_one.command",
+    "archive": "mac/original/quic_selected_one.command",
+    "sha256": "d4ab3bb2ee8facdcae977e5dda9d853f3c4bf03ac31800e6ac4128b55e92af85",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/quic_selected_one.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/source_after.command",
+    "archive": "mac/original/source_after.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/source_after.log",
+    "archive": "mac/original/old394_source_after.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/source_before.command",
+    "archive": "mac/original/source_before.command",
+    "sha256": "82a475dc52a09fec146b46e8bba118667917b06d1d9d3df257d40449a9ff0764",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/source_before.log",
+    "archive": "mac/original/old394_source_after.log",
+    "sha256": "ed32996c1e4413f496db23ad116649eb09246bca85fba08324c5bea620931eb4",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_all.command",
+    "archive": "mac/original/strict_all.command",
+    "sha256": "509c7a429f0ec0ca80690333def3926cab62ef95600ab57a425775258047c04f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_all.log",
+    "archive": "mac/original/strict_all.log",
+    "sha256": "0d1423975f00cde29066b069b3317270474c3884a294d63fc0bb569ac22fba2a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_core.command",
+    "archive": "mac/original/strict_core.command",
+    "sha256": "6260051ce8d9dc97821723a3b473dc5fa09dd30ee081abeda2e91c09e680f8aa",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_core.log",
+    "archive": "mac/original/strict_core.log",
+    "sha256": "6fa9c45903d590780c401c8fb6c5c0227e2cea0c3fbcf8c1a83b923b6286476a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_default.command",
+    "archive": "mac/original/strict_default.command",
+    "sha256": "4da79b8440e88f910a4f7684b395ef8724be33743f5a29d6ba48106d54b3f65b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_default.log",
+    "archive": "mac/original/strict_default.log",
+    "sha256": "caa6b5cd761cd289e47d2bff5ba775de568d6959d55df052b462191fa47c1337",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_native.command",
+    "archive": "mac/original/strict_native.command",
+    "sha256": "a1ca7e00ad8b1d9b19b201010a6cca7de01c249c1a8d19fd2a6aef414f8b3c1b",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/strict_native.log",
+    "archive": "mac/original/strict_native.log",
+    "sha256": "374c84a1b556736d9f5ee507c4f01a1487c5fb71c0757e233203fb5c209ed63a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/tcp_binary_unchanged.command",
+    "archive": "mac/original/tcp_binary_unchanged.command",
+    "sha256": "941e6709022ef66b41dcdde57681ef315e37653651cd5a7787b3040b36acc226",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/tcp_binary_unchanged.log",
+    "archive": "mac/original/binary_after.log",
+    "sha256": "725ef5afdc4152708dddb9534aadfa4b5dca3c00829fa15c3482463478fd6767",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/tcp_selected_one.command",
+    "archive": "mac/original/tcp_selected_one.command",
+    "sha256": "a9bd0781c992fcbe6f98d70e5285650986a789b24b7fab70922efef89a7fbe9a",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/tcp_selected_one.log",
+    "archive": "mac/original/actual_library_profile.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/terminal.txt",
+    "archive": "mac/original/terminal.txt",
+    "sha256": "583e1ea0122869a38fb43df311de9e977edebf0469dd66d4266bf57e03446a66",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/transfer_after.command",
+    "archive": "mac/original/transfer_after.command",
+    "sha256": "1f2cb950814f41beaf2c792d7cce012930e7b8eb35f087e1353f1d5d8df58b55",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/transfer_after.log",
+    "archive": "mac/original/transfer_after.log",
+    "sha256": "9a6f669aa137d7c6ae09ad8a8f2b7bd1a2144d97408ccc8b57166fe6cb0c3eb2",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/transfer_before.command",
+    "archive": "mac/original/transfer_before.command",
+    "sha256": "1f2cb950814f41beaf2c792d7cce012930e7b8eb35f087e1353f1d5d8df58b55",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/transfer_before.log",
+    "archive": "mac/original/transfer_after.log",
+    "sha256": "9a6f669aa137d7c6ae09ad8a8f2b7bd1a2144d97408ccc8b57166fe6cb0c3eb2",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393-mac/results/transfer_initial.log",
+    "archive": "mac/original/transfer_after.log",
+    "sha256": "9a6f669aa137d7c6ae09ad8a8f2b7bd1a2144d97408ccc8b57166fe6cb0c3eb2",
+    "identicalAlias": true
+  },
+  {
+    "original": "target/divide-provider/election393/repo/tests/logical_activation_nested/progress.rs",
+    "archive": "source-fixtures/tests/logical_activation_nested/progress.rs",
+    "sha256": "7a3a3cd9a697ff9ffb04acf9322a43c15bdca76fc1044322f66e93c9849d3681",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-admin342/mac-shutdown388-results/joint_tcp.log",
+    "archive": "prior388/joint_tcp.log",
+    "sha256": "dc59887866d54493ba39087f3bc03d566dbc9dc4034bf951ebce48bd28c239cf",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-admin342/mac-shutdown388-results/joint_quic.log",
+    "archive": "prior388/joint_quic.log",
+    "sha256": "cf5d7aa09db077e4de5192a7ee0fb3d9cd41a3658437318593a0ded92287d37d",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-admin342/mac-shutdown388-results/joint_tcp.command",
+    "archive": "prior388/joint_tcp.command",
+    "sha256": "50d7c08f9821df6851ed2112159c32aa6943c4f524724842298cfec82042382f",
+    "identicalAlias": false
+  },
+  {
+    "original": "target/divide-admin342/mac-shutdown388-results/joint_quic.command",
+    "archive": "prior388/joint_quic.command",
+    "sha256": "8fa7304eb4ffbe8c20915ee28b33a4cedab2ed25c820e0f048fdfbdcd0ec9fd2",
+    "identicalAlias": false
+  }
+]
