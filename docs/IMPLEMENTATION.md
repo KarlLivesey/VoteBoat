@@ -31857,3 +31857,27 @@ Publication policy is active: meaningful checked slices are committed and pushed
 without waiting for remote CI or final qualification. Commits6eff359 andfa746a6
 are already on origin/main. The full pre-push formatting/four-profile strict
 Clippy hook remains enabled; outstanding test failures stay recorded.
+
+### Actual broad Linux384 default completion and Mac394 progress
+
+The original running384 matrix now completed default features:121 target results,
+2124passed/0failed; actual tested_default source1306/executable124 and after_default
+source guards are zero. Default documentation is zero. Core build follows on the
+same sequential runner6548. All-feature results remain2436/2, with the preserved
+old startup listener/local-drain failures. This is frozen383-source qualification,
+not current396; later fixture deltas remain separate and production unchanged.
+No rerun of unchanged successful targets was launched.
+
+Mac394's exact392 coldTCP advanced beyond the original warm-read failure, through
+same-store cold recovery and retry, then failed final physical CloseDrained in
+slot0/group811 at17.462610083s against its original15s fixture limit. The sampled
+three original nodes are Draining, failureNone, and their peer drivers/connectors/
+ingress are drained. Node1 retains one outbound batch; Node2 has a leased owner
+visit; Node3 retains one persistence request. This snapshot identifies retained
+work, not a proven deadlock, runtime cause or timing-only explanation. Original
+QUIC and repeated cases continue unchanged on exclusive SSH83515. No failed
+Mac case is reported as a pass or global feature qualification.
+
+Source-only review follows the actual Quiescing/Draining, accepted visit and
+closed peer completion contracts before choosing another change. No production
+change or longer timeout is justified by a single retained-work snapshot alone.
