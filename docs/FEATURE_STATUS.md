@@ -19,14 +19,15 @@ Remaining:
    histories and all nine nested-owner tests. Linux398 passes both complete
    repeated-replacement histories. Matching Mac checks are prepared; Mac394's
    three final-cleanup failures remain preserved.
-2. **Startup platform closure.** Linux396 passes all-feature57/0 and default42/0;
-   matching Mac qualification is running. Mac393 now passes original Joint cold
-   recovery over TCP and QUIC, including all old and restored owners' cleanup.
+2. **Startup and Joint recovery are qualified.** Linux396 passes all-feature57/0
+   and default42/0; Mac396 passes the same complete targets. Mac393 also passes
+   original Joint cold recovery over TCP and QUIC, including all old and restored
+   owners' cleanup. Remaining advanced membership work is the Mac repeated path.
 3. **Final configuration and requirement audit.** Broad Linux384 is terminal:
    default2124/0, core1028/0, native1511/0, all features2436/2. Its old startup
    failures remain failed records. All sixteen later changed inputs are fixtures
    in three targets; production is unchanged. Their replacement all-feature
-   checks pass; current default logical targets are running. Complete the Mac
+   checks pass; current default logical targets pass7/0 and8/0. Complete the Mac
    gates and source-specific P0–P8 evidence review before declaring completion.
 
 Formatting and strict all-target Clippy remain zero for all four supported

@@ -31402,15 +31402,15 @@ Macro review: ordinary static physical-voter relay trees now qualify on BOTH
 Linux/macOS (corrected37122 native and17 core controls per host, format/all4strict0,
 1297 source/executable guards). Original helpers remain nonvoting/noWAL. Broader
 programs/striped storage and bounded root366 constructor scope retain both-host
-qualification. Logical imported/Joint/Unknown cold functions qualify Linux;
-Mac nested writes, logical administration and repeated receipt closure remain.
+qualification. Logical imported/Joint/Unknown cold functions now qualify both hosts;
+Mac complete nested/repeated cleanup and final source reconciliation remain.
 No unfinished functionality moves to P9/P10; final current-source audit remains.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Mac394 cold TCP/QUIC fail final physical close. Corrected397 checkpoint frontier contract passes Linux controls2/0 and complete cold TCP/QUIC1/0 each; its exact old-predicate negative fails as expected. Matching Mac397 is locally prepared behind393/396. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Preserve original failures and authority checks; await actual new checkpoint coverage. | Usable recursive composition, P8 |
-| Next: membership and startup closure | Finish repeated replacement, cold membership and serving-voter drain qualification. | Linux393 all14 activation tests pass; Mac Joint393 is running, then startup396. Linux startup396 all-feature57/0 and default42/0. Mac394 repeatedQUIC retains three obsolete outbound messages; independent receive-drain correction398 is under Linux qualification. | Actual repeated replacement and Joint recovery on Mac; complete startup all/default target; original business and duplicate receipts, accepted send completions, provider closure and zero lint diagnostics. | Online membership and advanced composition, P4/P8 |
-| Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, read-only full requirement audit, coherent current snapshot and existing source/model/durability records. Linux384 broad matrix remains running on its frozen source. | Map every explicit functional requirement to appropriate Linux/macOS evidence; reconcile source differences and failures, required checks and cleanup. Stop when P8 actually complete. | Goal completion, P0–P8 |
+| Current: Mac nested recovery qualification | Complete original nested recovery and cleanup. | Mac394 cold TCP/QUIC fail final physical close. Corrected397 passes Linux all nine cases, including both complete cold histories and meaningful old-predicate negative; default400 passes the complete seven-case target. Combined398 Mac source preserves exact397 selected code and is ready after terminal startup396. | Original opaque write/read/retry, own-store anchor/suffix/session recovery and all27 joins/rebind on Mac TCP/QUIC. Preserve original failures and authority checks; await actual new checkpoint coverage. | Usable recursive composition, P8 |
+| Next: repeated membership closure | Finish both genuine replacements with original send/receipt and full ownership handback. | Mac393 Joint TCP/QUIC and startup396 all57/default42 pass. Linux398 repeated TCP/QUIC pass, and default400 completes all eight activation cases. Combined398 Mac source includes the exact two-line receive-drain correction. | Complete original repeated TCP/QUIC with both Joint/Final/Outcome/Release/business/read results; exact accepted send completions, all15 provider joins/rebind and zero lint diagnostics. | Online membership and advanced composition, P4/P8 |
+| Following: complete normative/current-platform qualification | Establish requested P0–P8 completion against the finished implementation. | Above remaining functions, normative384 map, source399 reconciliation and terminal Linux384 broad four-profile run. All16 changed fixtures map to three targets; production is unchanged. | Map every explicit functional requirement to appropriate Linux/macOS evidence; reconcile source differences and preserved failures, required checks and cleanup. Stop when P8 actually complete. | Goal completion, P0–P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
 native22/0 (28.19s),core17/0 (0.02s),targeted original failed TCP1/0 (0.80s),TLS
@@ -32001,7 +32001,7 @@ results separately. No performance/security phase starts.
 ### Acceptance reconciliation399 — completed broad matrix, scoped replacements
 
 The prior goal turn made concrete progress: published397 checkpoint frontier
-+regression and398 retained receive-drain corrections. This turn inspected their
+regression and398 retained receive-drain corrections. This turn inspected their
 actual results and finished missing affected-case qualification, with no runtime
 or production edits. Schema399 is in target/root315/audit399/SCHEMA.md.
 
@@ -32055,3 +32055,31 @@ The primary pack's original62 files verify byte-for-byte. GitHub visibility is
 PUBLIC, default branch main; Cargo/LICENSE remain RPL-1.5 (GitHub's license label
 is Other). Final requirement/platform closure remains unproven until the listed
 Mac/default gates and source-specific assertion review complete. No P9/P10 work.
+
+### Default400 and Mac396 terminal platform progress
+
+Inspected actual default400 results: exact398 source1306, logical_nested_native
+7passed/0failed in90.39s and logical_activation_nested8/0 in91.66s, each zero ignored
+or filtered. Both targets run once, sequentially, preserving their original
+business/read/recovery/ownership/worker/channel/port/directory assertions. Cargo
+records explicitly contain only default/native/tls, optimization3, assertions and
+overflow. Both fixture executables compiled fresh; the library was cached with
+Cargo fresh=true and exact original default library/rmeta fingerprints/profile.
+No fresh library invocation is claimed. Source/new default/original398 artifact
+and empty-temp guards are zero. Prior398 format/four-strict checks are reused only
+after exact1306-input equality, explicitly recorded as reuse, not fresh lint.
+Packet: target/divide-shutdown/default400. No unchanged all-feature run repeated.
+
+Mac396 is now terminal0: full all-feature57/0 in98.43s, followed by default42/0
+in46.20s. Exact1306 source, actual profile/test/library, source/executable/protoc/
+transfer and old394+393 source/five original binaries remain guarded before and
+after; ALL artifacts survived the sequential DEFAULT rebuild. Old395 failure
+variant/cause stays unknown. The Mac resource was handed directly to combined398
+checkpoint/repeated qualification; no second live job was started concurrently.
+Mac393's terminal Joint qualification remains a distinct source/result scope.
+
+The current mini plan now has only the remaining Mac deep/repeated closure and
+final normative/source evidence review. All original failed cuts remain preserved;
+completion stays unproven. This closes actual default-feature execution gaps,
+without assuming all-feature TCP covers a different configuration. No production,
+performance or security changes, and no automatic P9/P10 work.
