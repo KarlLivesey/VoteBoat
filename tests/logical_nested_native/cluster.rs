@@ -259,7 +259,13 @@ impl Cluster {
     }
     fn wait(&mut self, stage: NativeWaitStage, mut done: impl FnMut(&Self) -> bool) {
         let started = Instant::now();
-        let end = started + Duration::from_secs(15);
+        // Publication checks durability using the same bounded watchdog as
+        // the original upper checkpoint history.
+        let allowance = match stage {
+            NativeWaitStage::CheckpointPublished => Duration::from_secs(90),
+            _ => Duration::from_secs(15),
+        };
+        let end = started + allowance;
         while !done(self) {
             self.poll();
             assert!(

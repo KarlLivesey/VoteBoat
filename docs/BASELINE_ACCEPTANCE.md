@@ -1,5 +1,12 @@
 # Baseline acceptance map
 
+402 functional checkpoint qualification: use90s only for physical
+CheckpointPublished, matching the original upper checkpoint watchdog. Actual
+frontier/base/SnapshotRef/router/worker completion and other15s/provider/close
+limits remain unchanged. Linux complete all-feature nested target passes9/0;
+default7 also passes. Matching Mac cold histories and clock401 controls remain
+pending after398. This is no performance improvement or15-second SLA claim.
+
 Current401 correction: C12 explicitly requires diagnostic wall time as well as
 monotonic time. The final audit found the public diagnostic operation absent;
 401 adds it with separate host injection and native signed Unix-time conversion.
@@ -53,7 +60,7 @@ changed inputs to only startup/nested/activation fixtures, with production0.
 Current default logical target execution, Mac startup/nested/repeated gates and
 final source-specific evidence consolidation remain. These cuts do not rewrite
 old failed records or certify the whole moving source. See the
-[current mini plan372](IMPLEMENTATION.md#current-mini-plan401).
+[current mini plan372](IMPLEMENTATION.md#current-mini-plan402).
 The [portable383 packet](../validation/baseline/slice383/README.md) preserves
 the original Linux repeated passes and all ten Mac results, including failures.
 Portable [397](../validation/baseline/slice397/README.md) and

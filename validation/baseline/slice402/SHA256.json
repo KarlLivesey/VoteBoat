@@ -1,0 +1,92 @@
+[
+  {
+    "file": "SCHEMA.md",
+    "bytes": 2019,
+    "sha256": "1d6cac4d83fd21e4a7b413b473ebf6d800b9223eea36fc4aeaaad001ec3a9790"
+  },
+  {
+    "file": "all.log",
+    "bytes": 3923,
+    "sha256": "a0e8a0f0842775eb38365e2257c11d2da72fd333ca8c6c9c46cf17e54165e7f1"
+  },
+  {
+    "file": "default.log",
+    "bytes": 1153,
+    "sha256": "bed3b641947a2ed63fc12526fd35a2d3b6c5faf01bde173ef76325e36aa4d104"
+  },
+  {
+    "file": "checks.json",
+    "bytes": 1263,
+    "sha256": "afd0fe5a03e602483ce976285bd87711858dd05533d237780da889de6403449e"
+  },
+  {
+    "file": "fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "clippy_default.log",
+    "bytes": 148,
+    "sha256": "d70087770498533e85c103d3af6a9219e93986d163b699ab7384c0d9a419ed0e"
+  },
+  {
+    "file": "clippy_all.log",
+    "bytes": 148,
+    "sha256": "f30f1143b054cf16b6b225dffcc1a2a5f8a683d36d22103a2710dabd21657dc0"
+  },
+  {
+    "file": "clippy_core.log",
+    "bytes": 72,
+    "sha256": "a13905646e2aed93ec6ea9ed6ac91490a4e01f91af0215c3965279a910612149"
+  },
+  {
+    "file": "clippy_native.log",
+    "bytes": 72,
+    "sha256": "a13905646e2aed93ec6ea9ed6ac91490a4e01f91af0215c3965279a910612149"
+  },
+  {
+    "file": "compiler_all.jsonl",
+    "bytes": 73302,
+    "sha256": "f8af8a4a83d35aae2306ea684caa80192b32da1a98ca421e5d2e4b072878eb77"
+  },
+  {
+    "file": "compiler_all.log",
+    "bytes": 62,
+    "sha256": "222a02ed477d249a21359df8cae975864a62d848f4739cadc5b00b6190a963c6"
+  },
+  {
+    "file": "compiler_default.jsonl",
+    "bytes": 55805,
+    "sha256": "b1f566cfa4530d20a1388a3068d49e79b8e57f8bd2b0b375d3c5a485163842e3"
+  },
+  {
+    "file": "compiler_default.log",
+    "bytes": 62,
+    "sha256": "6bfa9e18ffdef821c711a542cfebd7db0982665615563e5a191285e489609c6f"
+  },
+  {
+    "file": "compiler_profiles.json",
+    "bytes": 6003,
+    "sha256": "d1856c074be9450994ca257afa40f380ac665cf419def71318cd231f4d4aa6fe"
+  },
+  {
+    "file": "results.json",
+    "bytes": 1286,
+    "sha256": "d3db27a9d35207ea522a2319b0dee40806243df3aebbe7d5893e52e35a940b09"
+  },
+  {
+    "file": "artifact_after_tests.json",
+    "bytes": 2014,
+    "sha256": "d6b00727a44c03b14f62cb4109c6cd1e3e5d9bfb197d0c97583f42479b4696fc"
+  },
+  {
+    "file": "source_delta.json",
+    "bytes": 339,
+    "sha256": "836d579b9be795cb5b12e1ef52c0376aae51d6ddcffa2d162922d1e2de3d1d1c"
+  },
+  {
+    "file": "README.md",
+    "bytes": 1372,
+    "sha256": "50ae25ca80e5a1e9c1f1217ce14b44d86539cb0d1dba5d63082c1094e0b24889"
+  }
+]

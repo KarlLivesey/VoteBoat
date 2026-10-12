@@ -1,5 +1,12 @@
 # Validation report
 
+402 functional checkpoint qualification: use90s only for physical
+CheckpointPublished, matching the original upper checkpoint watchdog. Actual
+frontier/base/SnapshotRef/router/worker completion and other15s/provider/close
+limits remain unchanged. Linux complete all-feature nested target passes9/0;
+default7 also passes. Matching Mac cold histories and clock401 controls remain
+pending after398. This is no performance improvement or15-second SLA claim.
+
 Current401 correction: C12 explicitly requires diagnostic wall time as well as
 monotonic time. The final audit found the public diagnostic operation absent;
 401 adds it with separate host injection and native signed Unix-time conversion.

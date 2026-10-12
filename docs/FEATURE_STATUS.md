@@ -1,5 +1,12 @@
 # Feature status
 
+402 functional checkpoint qualification: use90s only for physical
+CheckpointPublished, matching the original upper checkpoint watchdog. Actual
+frontier/base/SnapshotRef/router/worker completion and other15s/provider/close
+limits remain unchanged. Linux complete all-feature nested target passes9/0;
+default7 also passes. Matching Mac cold histories and clock401 controls remain
+pending after398. This is no performance improvement or15-second SLA claim.
+
 The goal is **all P0–P8 functionality, qualified on Linux and macOS**. P8 remains
 incomplete. Performance is P9, dedicated security work is P10, and Windows is
 deferred. Stop after P8.
@@ -34,7 +41,7 @@ Formatting and strict all-target Clippy remain zero for all four supported
 configurations, enforced by the enabled pre-push hook. CI runs in the background.
 Historical failures and exact source/runtime evidence remain recorded.
 
-See the [current mini plan](IMPLEMENTATION.md#current-mini-plan401),
+See the [current mini plan](IMPLEMENTATION.md#current-mini-plan402),
 [requirement map](BASELINE_ACCEPTANCE.md), and
 [checkpoint recovery evidence](../validation/baseline/slice397/README.md), and
 [repeated-replacement evidence](../validation/baseline/slice398/README.md).

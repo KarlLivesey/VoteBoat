@@ -1,0 +1,197 @@
+[
+  {
+    "name": "all",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--release",
+      "--locked",
+      "--offline",
+      "--all-features",
+      "--test",
+      "logical_nested_native",
+      "--no-run",
+      "--message-format=json"
+    ],
+    "environment": {
+      "CARGO_TARGET_DIR": "target/root315/checkpoint402/build",
+      "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS": "true",
+      "CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS": "true"
+    },
+    "exit": 0,
+    "artifacts": [
+      {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+        ],
+        "executable": null,
+        "fresh": true
+      },
+      {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "logical_nested_native",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/tests/logical_nested_native.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/logical_nested_native-50c00f3e35e6a2bb"
+        ],
+        "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+        "fresh": true
+      }
+    ]
+  },
+  {
+    "name": "default",
+    "command": [
+      "cargo",
+      "+stable",
+      "test",
+      "--release",
+      "--locked",
+      "--offline",
+      "--test",
+      "logical_nested_native",
+      "--no-run",
+      "--message-format=json"
+    ],
+    "environment": {
+      "CARGO_TARGET_DIR": "target/root315/checkpoint402/build",
+      "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS": "true",
+      "CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS": "true"
+    },
+    "exit": 0,
+    "artifacts": [
+      {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-436591ee7768556c.rlib",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-436591ee7768556c.rmeta"
+        ],
+        "executable": null,
+        "fresh": true
+      },
+      {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "logical_nested_native",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/tests/logical_nested_native.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "default",
+          "native",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/logical_nested_native-65b9de5f12b79ad9"
+        ],
+        "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/logical_nested_native-65b9de5f12b79ad9",
+        "fresh": true
+      }
+    ]
+  }
+]

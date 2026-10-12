@@ -1,0 +1,41 @@
+{
+  "scope": "Post-test fingerprints only. Compiler JSON was queried after the runs and identifies their original executable filenames and asserted release profiles; no before/after custody claim.",
+  "artifacts": [
+    {
+      "configuration": "all",
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+      "sha256": "6f0fb4c9a1e07e7b92ad05266cc45ad6d93bfd05456379f4f0990067e7bfc9ac",
+      "bytes": 35641398
+    },
+    {
+      "configuration": "all",
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-be40bd833a88996f.rmeta",
+      "sha256": "a51502c8beff6ae532ff01a37837db6868a676f42726544f3d91aef2f06d9cca",
+      "bytes": 25472334
+    },
+    {
+      "configuration": "all",
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/logical_nested_native-50c00f3e35e6a2bb",
+      "sha256": "585ebd3025dd0775c51c49765c2333b62a05db4d1e3814d9a5b4f1f68d6708b5",
+      "bytes": 11431416
+    },
+    {
+      "configuration": "default",
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-436591ee7768556c.rlib",
+      "sha256": "5fc9cec73c237b9d4e554a7609d68e50a9b64d7cf3e97f01a9171857a9af691c",
+      "bytes": 34476882
+    },
+    {
+      "configuration": "default",
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/libvoteboat-436591ee7768556c.rmeta",
+      "sha256": "0cb1e04f8db951d87a0147e53a50fd0848271b34e400560995155017d1845239",
+      "bytes": 25341864
+    },
+    {
+      "configuration": "default",
+      "file": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/root315/checkpoint402/build/release/deps/logical_nested_native-65b9de5f12b79ad9",
+      "sha256": "2797acfe493bb3066d7d200acc404777cad999895bb3f33acba801030ab099ab",
+      "bytes": 9700688
+    }
+  ]
+}

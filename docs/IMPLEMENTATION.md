@@ -34,7 +34,7 @@ completion alone does not claim those gates passed or enable a new default.
 [Baseline acceptance map](BASELINE_ACCEPTANCE.md) links roadmap exits and all24
 component catalogue entries to source/evidence and explicit unresolved work.
 It is a working ledger, not a completion certificate.
-The [current mini plan372](#current-mini-plan372)
+The [current mini plan402](#current-mini-plan402)
 covers recursive owning handoff, logical-cell membership, relays and platform closure.
 Historical mini plans below preserve the evidence and decisions at their source cuts.
 
@@ -31396,22 +31396,22 @@ NetworkNode physical-backing adapter, retaining direct aliases and actual curren
 source-view bindings. Following is complete relay Linux/Mac closure and final
 normative/current-source P0–P8 qualification. P8 remains active; P9/P10 not begun.
 
-### Current mini plan401
+### Current mini plan402
 
-Macro review: the final requirement audit found C12's explicit diagnostic wall
-clock operation absent from the public interface. Earlier scope limits and
-"no missing named feature" conclusions do not satisfy this requirement. Slice401
-closes that additive P0 seam; it does not introduce performance/security work.
-Previously qualified logical/startup features remain historical evidence. Mac398
-is executing the final deep/repeated histories. Its cold TCP case failed while
-waiting for the actual new checkpoint frontier; no complete Mac cold pass is
-claimed. New401 production inputs require their own qualification.
+Macro review: C12's previously missing diagnostic wall-clock interface is now
+implemented and passes Linux full runtime profiles54/54/37/54 plus native2
+controls; matching Mac checks remain. The final Mac deep/repeated histories are
+still required.402 changes only the manual physical checkpoint test watchdog
+from15 to90s, matching the same history's upper checkpoint allowance. No original
+functional requirement specifies15s; durable-frontier/router/worker assertions,
+provider timers, other15s stages and original ownership cleanup remain intact.
+The original398 coldTCP failure stays failed. Performance measurements remain P9.
 
 | Deliverable | Purpose | Dependencies | Completion checks | Macro milestone |
 | --- | --- | --- | --- | --- |
-| Current: C12 diagnostic clock401 | Supply the required independently injected wall clock while keeping consensus monotonic. | Existing Clock/MonoTime and original chapter17 C12; pre-edit schema at target/root315/clock401/SCHEMA.md. | Downstream backward/extreme wall-time injection, native signed epoch conversion, full runtime four configurations, formatter/four strict Clippy zero, selected matching Mac clock tests after398 handback. | Replaceable Rust interfaces, P0/P8 closure |
-| Next: Mac deep/repeated recovery closure | Finish genuine cold recovery and both replacements with original ownership cleanup. | Existing397 checkpoint frontier and398 receive-drain fixes; live sole Mac398 owner. Cold TCP failed CheckpointPublished and requires focused diagnosis from actual pending dependencies. | Actual checkpoint covers original applied frontier, original quorum-authorized read/retry, same-store recovery, both Joint/Final/Outcome/Release histories, all original joins/rebind on TCP/QUIC. Preserve original timers and failed evidence. | Recursive composition and online membership, P4/P8 |
-| Following: final explicit requirement audit | Establish P0–P8 completion against actual finished source. | Above closures, normative requirements, historical384 matrix,399/400 source reconciliation and additive401 checks. | Map every explicit R/VB/I and named P8 function to appropriate Linux/macOS evidence; reconcile source changes and preserved failures. Mark complete and stop only after required checks pass. | Goal completion, P0–P8 |
+| Current: Mac deep checkpoint/cleanup402 | Finish actual two-tier cold recovery with original27 owners. | Same397 durable frontier predicate; stage-specific402 watchdog; terminal398 handback. Complete Linux all9/default7 pass. | Original opaque write/read/retry, anchor/suffix/same-store/session recovery, real published checkpoint coverage, all27 joins/rebind on Mac TCP/QUIC. Preserve old failure and source limits. | Recursive composition, P8 |
+| Next: Mac clock and repeated replacement closure | Qualify new C12 and both genuine membership replacements. | Exact401 clock source and selected1+2 controls prepared; sole398 Mac job owns the machine and repeated2 cases remain queued. | Actual host injection/native signed-clock controls and both TCP/QUIC Joint/Final/Outcome/Release/business/read histories with all15 original handbacks. | Replaceable interfaces and membership, P0/P4/P8 |
+| Following: complete explicit source/platform audit | Establish P0–P8 completion against actual finished code. | Above closures, normative requirements, historical384 matrix,399/400 reconciliation and additive401/fixture402 checks. | Map each explicit R/VB/I/named P8 requirement to appropriate Linux/macOS evidence; reconcile source changes and failed records. Mark complete and stop only after required checks pass. | Goal completion, P0–P8 |
 
 Corrected relay371 Mac source results inspected by root:20 recorded stages0,
 native22/0 (28.19s),core17/0 (0.02s),targeted original failed TCP1/0 (0.80s),TLS
@@ -32170,3 +32170,50 @@ after adding C12 (actual41). Updated expected41/389 counts and selected buffer
 negative controls by their named contract rather than the final ledger row.
 The direct Node checker rerun passes39/0; original failed wrapper log remains
 in slice401. This focused metadata correction changes no Rust input.
+
+### Slice402: checkpoint publication functional watchdog
+
+Schema was recorded before editing target/root315/checkpoint402/SCHEMA.md. Original
+chapter11 I09 requires genuine checkpoint boundary state; chapter12 specifies no
+15-second manual publication deadline. User scope moves time/performance gates
+to P9. Existing cold upper checkpoint uses90 seconds. Select that same bounded
+watchdog only for NativeWaitStage::CheckpointPublished; all other15-second
+stages, provider timers, real durable-frontier/router/worker predicate and owner
+joins remain unchanged. No production change or optimization is introduced.
+
+Mac398 coldTCP failed at17.618 seconds with old snapshot900 and actual snapshot
+work still owned. That failed record is preserved; it does not prove stationary
+age, identify every manual request or establish a production deadlock.402 must
+actually finish the same checkpoint/recovery/read/retry and all27 owner cleanup
+on both protocols. An increased watchdog is not qualification by itself.
+
+Mini-plan review: current402 closes the Mac deep durability gate; depends on
+actual397 frontier predicate and terminal398 handback, with full Linux nested
+all/default, four strict checks and actual Mac original histories as completion
+checks (P8). Next: Mac401 clock controls and repeated398 results, depending on
+immutable401 source and terminal398; require actual1+2 clock controls and both
+complete replacements/all15 handbacks (P0/P4/P8). Following: explicit source-
+specific requirements audit; depends on these closures and384/399/400 evidence,
+requires every functional R/VB/I/P8 item supported and stops at P8 completion.
+
+Independent normative review confirms no original README/checklist/docs/specs
+manual-checkpoint15-second SLA; chapter01 treats timing as eventual progress,
+chapter04 requires the durable application/applied boundary, and I09 requires
+actual publication. The reported75MB router usage is reserved image accounting,
+not a measurement of serialized I/O.402 changes no completion assertion or
+consensus/provider deadline and makes no cost or deadlock-cause claim.
+
+402 complete Linux all-feature logical_nested_native target passes9/0 in128.36s
+after28.75s release build, explicit release debug assertions and overflow checks.
+Both complete cold histories and original checkpoint/cleanup assertions pass.
+Formatting/four strict Clippy are zero. Default target follows sequentially in
+the same isolated target directory. These are functional checks, not an SLA or
+measured optimization. All three401 Rust input fingerprints remain identical.
+
+402 local qualification completes default7/0 in49.00s after all9/0 in128.36s,
+sequential isolated release. Post-run actual Cargo artifact JSON verifies opt3
+with debug assertions/overflow checks for the same executable filenames and
+native library; cached records are not fresh compilation. Git delta vs401 is
+only the checkpoint fixture; production/Cargo unchanged. Formatter/four strict0.
+Portable logs/results: validation/baseline/slice402; post-test fingerprints only.
+Matching Mac cold402 and diagnostic401 tests remain pending after398 handback.

@@ -1,0 +1,83 @@
+[
+  {
+    "name": "fmt",
+    "command": [
+      "cargo",
+      "+stable",
+      "fmt",
+      "--all",
+      "--",
+      "--check"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "clippy_default",
+    "command": [
+      "cargo",
+      "+stable",
+      "clippy",
+      "--locked",
+      "--offline",
+      "--keep-going",
+      "--all-targets",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "clippy_all",
+    "command": [
+      "cargo",
+      "+stable",
+      "clippy",
+      "--locked",
+      "--offline",
+      "--keep-going",
+      "--all-targets",
+      "--all-features",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "clippy_core",
+    "command": [
+      "cargo",
+      "+stable",
+      "clippy",
+      "--locked",
+      "--offline",
+      "--keep-going",
+      "--all-targets",
+      "--no-default-features",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0
+  },
+  {
+    "name": "clippy_native",
+    "command": [
+      "cargo",
+      "+stable",
+      "clippy",
+      "--locked",
+      "--offline",
+      "--keep-going",
+      "--all-targets",
+      "--no-default-features",
+      "--features",
+      "native",
+      "--",
+      "-D",
+      "warnings"
+    ],
+    "exit": 0
+  }
+]

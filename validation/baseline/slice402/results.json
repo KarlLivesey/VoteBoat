@@ -1,0 +1,50 @@
+{
+  "scope": "Complete target runs sequentially; actual durable frontier and original owner cleanup required. No15-second SLA or cost improvement claim. Matching Mac source402 cold checks pending.",
+  "runs": [
+    {
+      "name": "all",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--all-features",
+        "--test",
+        "logical_nested_native"
+      ],
+      "environment": {
+        "CARGO_TARGET_DIR": "target/root315/checkpoint402/build",
+        "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS": "true",
+        "CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS": "true"
+      },
+      "exit": 0,
+      "passed": 9,
+      "failed": 0,
+      "test_seconds": 128.36
+    },
+    {
+      "name": "default",
+      "command": [
+        "cargo",
+        "+stable",
+        "test",
+        "--release",
+        "--locked",
+        "--offline",
+        "--test",
+        "logical_nested_native"
+      ],
+      "environment": {
+        "CARGO_TARGET_DIR": "target/root315/checkpoint402/build",
+        "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS": "true",
+        "CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS": "true"
+      },
+      "exit": 0,
+      "passed": 7,
+      "failed": 0,
+      "test_seconds": 49
+    }
+  ]
+}

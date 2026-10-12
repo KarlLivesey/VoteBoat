@@ -1,0 +1,17 @@
+   Compiling once_cell v1.21.4
+   Compiling rustls v0.23.45
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `release` profile [optimized] target(s) in 22.04s
+     Running tests/logical_nested_native.rs (target/root315/checkpoint402/build/release/deps/logical_nested_native-65b9de5f12b79ad9)
+
+running 7 tests
+test setup::profile::whole_static_history_and_cross_layer_capabilities_are_declared_before_activation ... ok
+test setup::profile::complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds ... ok
+test cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores ... ok
+test handoff_control::tcp_observation_handoff_retains_original_child_checkpoint_until_actual_drain ... ok
+test history::tcp_two_logical_levels_use_twenty_seven_native_owners ... ok
+test maintenance_controls::original_backing_checkpoint_admission_preserves_scope_and_waits_for_durability ... ok
+test maintenance_controls::recovered_backing_checkpoint_covers_new_original_claim_before_join ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 49.00s
+

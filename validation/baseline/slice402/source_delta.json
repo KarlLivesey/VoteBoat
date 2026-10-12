@@ -1,0 +1,9 @@
+{
+  "base": "a399346",
+  "implementation_changes": [
+    "tests/logical_nested_native/cluster.rs"
+  ],
+  "production_changes": 0,
+  "cluster_sha256": "e5dd18ceaeb6f7267cb30a268016c58fefc7638f8f11671ef6d3146d91ed6c0d",
+  "scope": "Git implementation delta vs401; test input and production comparison, not a full1306-input custody guard."
+}
