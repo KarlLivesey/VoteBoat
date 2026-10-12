@@ -1,0 +1,745 @@
+{
+  "inputs": 1306,
+  "sourceSha256": "7121850d64bdc3d0c6f26e0d9f7567b48af07872d1bf89bef732fb8946c36847",
+  "lintExits": [
+    "fmt=0",
+    "all=0",
+    "default=0",
+    "core=0",
+    "native=0"
+  ],
+  "buildExits": [
+    "build_ALL=0",
+    "build_DEFAULT=0"
+  ],
+  "profiles": {
+    "ALL": {
+      "actualRun": {
+        "profile": "ALL",
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "actualSelectedCount": 57,
+        "actualTests": [
+          "discovery::abandoned_prepared_startup_closes_workers_and_releases_listener",
+          "discovery::prepared_member_rejects_create_before_creating_files",
+          "discovery::prepared_shared_groups_reject_missing_application_before_creating_files",
+          "discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application",
+          "discovery::quic_prepared_member_recovers_with_host_discovery",
+          "discovery::quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts",
+          "discovery::quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts",
+          "discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts",
+          "discovery::tcp_prepared_member_recovers_with_host_discovery",
+          "discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts",
+          "discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts",
+          "explicit_startup_timers_validate_before_files_and_use_host_deadlines",
+          "host_application_and_non_demo_identities_write_and_recover_through_startup",
+          "invalid_startup_is_side_effect_free_and_returns_the_host_application",
+          "late_constructor_failure_returns_application_and_joins_every_started_worker",
+          "log_limits::default_native_prepare_keeps_default_wal_and_core_command_refusal",
+          "log_limits::invalid_native_selected_limits_refuse_before_files_or_listener_binding",
+          "log_limits::invalid_selected_enrollment_limits_leave_original_application_and_files_untouched",
+          "log_limits::selected_native_create_and_member_recovery_preserve_original_large_command",
+          "maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint",
+          "maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp",
+          "maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic",
+          "maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp",
+          "maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints",
+          "maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal",
+          "maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic",
+          "maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp",
+          "maintenance::leadership_node_control_refuses_old_wire_before_admitting_work",
+          "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_quic_checkpoint_operation",
+          "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation",
+          "maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints",
+          "maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp",
+          "multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers",
+          "multi::multi_startup_rejects_invalid_inventory_before_creating_files",
+          "multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers",
+          "multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group",
+          "multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group",
+          "multi::peer_rotation::quic_peer_rotation_checkpoint_and_unobserved_rollout_recover_all_groups",
+          "multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups",
+          "native_administration_receipts_commit_joint_and_final_and_reopen_exact_history",
+          "peer_rotation::material_digest_binds_local_tls_and_every_peer_field",
+          "peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application",
+          "peer_rotation::rejected_rotating_quic_owner_releases_socket_and_workers",
+          "peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers",
+          "peer_rotation::static_and_member_startup_install_the_recorded_generation",
+          "quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers",
+          "quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four",
+          "shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources",
+          "startup_selects_exact_wire_eight_for_tcp_and_quic",
+          "startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines",
+          "stopping_one_startup_does_not_stop_another_or_the_shared_host_wake",
+          "tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four",
+          "timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window",
+          "timing_profile::native_defaults_plain_tcp_use_service_election_window",
+          "timing_profile::native_defaults_static_member_and_rotated_use_service_election_window",
+          "timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection",
+          "timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application"
+        ],
+        "status": 0,
+        "sourceMismatches": [],
+        "binaryAndLibraryUnchanged": true
+      },
+      "summary": {
+        "passed": 57,
+        "failed": 0,
+        "seconds": 52.18
+      },
+      "actualCases": [
+        {
+          "test": "discovery::abandoned_prepared_startup_closes_workers_and_releases_listener",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::prepared_member_rejects_create_before_creating_files",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::prepared_shared_groups_reject_missing_application_before_creating_files",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::quic_prepared_member_recovers_with_host_discovery",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::quic_prepared_shared_groups_recover_checkpoints_and_distinct_receipts",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::quic_prepared_startup_accepts_host_discovery_and_recovers_original_receipts",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::tcp_prepared_member_recovers_with_host_discovery",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts",
+          "status": "PASS"
+        },
+        {
+          "test": "explicit_startup_timers_validate_before_files_and_use_host_deadlines",
+          "status": "PASS"
+        },
+        {
+          "test": "host_application_and_non_demo_identities_write_and_recover_through_startup",
+          "status": "PASS"
+        },
+        {
+          "test": "invalid_startup_is_side_effect_free_and_returns_the_host_application",
+          "status": "PASS"
+        },
+        {
+          "test": "late_constructor_failure_returns_application_and_joins_every_started_worker",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::default_native_prepare_keeps_default_wal_and_core_command_refusal",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::invalid_native_selected_limits_refuse_before_files_or_listener_binding",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::invalid_selected_enrollment_limits_leave_original_application_and_files_untouched",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::selected_native_create_and_member_recovery_preserve_original_large_command",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::binding::original_handoff_binding_admitted_after_target_election_quic_checkpoint",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::drain::local_drain_handoff_keeps_two_voters_serving_quic",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_quic_checkpoints",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::durable_leadership_handoff_reopens_pending_and_completed_checkpoints_quic",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::leadership_node_control_refuses_old_wire_before_admitting_work",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_quic_checkpoint_operation",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_quic_checkpoints",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::multi_startup_quic_late_failure_returns_all_apps_and_joins_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::multi_startup_rejects_invalid_inventory_before_creating_files",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::native_multi_startup_quic_shares_one_store_and_recovers_every_group",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::peer_rotation::quic_peer_rotation_checkpoint_and_unobserved_rollout_recover_all_groups",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups",
+          "status": "PASS"
+        },
+        {
+          "test": "native_administration_receipts_commit_joint_and_final_and_reopen_exact_history",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::material_digest_binds_local_tls_and_every_peer_field",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::rejected_rotating_quic_owner_releases_socket_and_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::static_and_member_startup_install_the_recorded_generation",
+          "status": "PASS"
+        },
+        {
+          "test": "quic_startup_rejection_releases_udp_socket_and_joins_started_storage_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "quic_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four",
+          "status": "PASS"
+        },
+        {
+          "test": "shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources",
+          "status": "PASS"
+        },
+        {
+          "test": "startup_selects_exact_wire_eight_for_tcp_and_quic",
+          "status": "PASS"
+        },
+        {
+          "test": "startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines",
+          "status": "PASS"
+        },
+        {
+          "test": "stopping_one_startup_does_not_stop_another_or_the_shared_host_wake",
+          "status": "PASS"
+        },
+        {
+          "test": "tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::native_defaults_plain_tcp_use_service_election_window",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::native_defaults_static_member_and_rotated_use_service_election_window",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application",
+          "status": "PASS"
+        }
+      ],
+      "artifactGuard": {
+        "inputs": 1306,
+        "mismatches": [],
+        "artifacts": {
+          "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3",
+          "records": [
+            {
+              "reason": "compiler-artifact",
+              "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo#voteboat@0.1.0",
+              "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/Cargo.toml",
+              "target": {
+                "kind": [
+                  "test"
+                ],
+                "crate_types": [
+                  "bin"
+                ],
+                "name": "startup",
+                "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/tests/startup.rs",
+                "edition": "2021",
+                "doc": false,
+                "doctest": false,
+                "test": true
+              },
+              "profile": {
+                "opt_level": "3",
+                "debuginfo": 0,
+                "debug_assertions": true,
+                "overflow_checks": true,
+                "test": true
+              },
+              "features": [
+                "default",
+                "native",
+                "quic",
+                "tls"
+              ],
+              "filenames": [
+                "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3"
+              ],
+              "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3",
+              "fresh": false
+            },
+            {
+              "reason": "compiler-artifact",
+              "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo#voteboat@0.1.0",
+              "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/Cargo.toml",
+              "target": {
+                "kind": [
+                  "lib"
+                ],
+                "crate_types": [
+                  "lib"
+                ],
+                "name": "voteboat",
+                "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/src/lib.rs",
+                "edition": "2021",
+                "doc": true,
+                "doctest": true,
+                "test": true
+              },
+              "profile": {
+                "opt_level": "3",
+                "debuginfo": 0,
+                "debug_assertions": true,
+                "overflow_checks": true,
+                "test": false
+              },
+              "features": [
+                "default",
+                "native",
+                "quic",
+                "tls"
+              ],
+              "filenames": [
+                "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+                "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+              ],
+              "executable": null,
+              "fresh": false
+            }
+          ],
+          "sha256": {
+            "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3": "1f441d74a5cccfe696b73a02b510a27d2f8d2efb92adff7004495b7a83c3fb0e",
+            "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-be40bd833a88996f.rlib": "8b542970e25923e59ecedd7c4a47af077ce2c82481c7ed812538425077d7f297"
+          }
+        }
+      }
+    },
+    "DEFAULT": {
+      "actualRun": {
+        "profile": "DEFAULT",
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-d9ccebfc6da5c822",
+          "--nocapture",
+          "--test-threads=1"
+        ],
+        "actualSelectedCount": 42,
+        "actualTests": [
+          "discovery::abandoned_prepared_startup_closes_workers_and_releases_listener",
+          "discovery::prepared_member_rejects_create_before_creating_files",
+          "discovery::prepared_shared_groups_reject_missing_application_before_creating_files",
+          "discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application",
+          "discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts",
+          "discovery::tcp_prepared_member_recovers_with_host_discovery",
+          "discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts",
+          "discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts",
+          "explicit_startup_timers_validate_before_files_and_use_host_deadlines",
+          "host_application_and_non_demo_identities_write_and_recover_through_startup",
+          "invalid_startup_is_side_effect_free_and_returns_the_host_application",
+          "late_constructor_failure_returns_application_and_joins_every_started_worker",
+          "log_limits::default_native_prepare_keeps_default_wal_and_core_command_refusal",
+          "log_limits::invalid_native_selected_limits_refuse_before_files_or_listener_binding",
+          "log_limits::invalid_selected_enrollment_limits_leave_original_application_and_files_untouched",
+          "log_limits::selected_native_create_and_member_recovery_preserve_original_large_command",
+          "maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp",
+          "maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp",
+          "maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal",
+          "maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp",
+          "maintenance::leadership_node_control_refuses_old_wire_before_admitting_work",
+          "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation",
+          "maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp",
+          "multi::multi_startup_rejects_invalid_inventory_before_creating_files",
+          "multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers",
+          "multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group",
+          "multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups",
+          "native_administration_receipts_commit_joint_and_final_and_reopen_exact_history",
+          "peer_rotation::material_digest_binds_local_tls_and_every_peer_field",
+          "peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application",
+          "peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers",
+          "peer_rotation::static_and_member_startup_install_the_recorded_generation",
+          "shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources",
+          "startup_selects_exact_wire_eight_for_tcp_and_quic",
+          "startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines",
+          "stopping_one_startup_does_not_stop_another_or_the_shared_host_wake",
+          "tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four",
+          "timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window",
+          "timing_profile::native_defaults_plain_tcp_use_service_election_window",
+          "timing_profile::native_defaults_static_member_and_rotated_use_service_election_window",
+          "timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection",
+          "timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application"
+        ],
+        "status": 0,
+        "sourceMismatches": [],
+        "binaryAndLibraryUnchanged": true
+      },
+      "summary": {
+        "passed": 42,
+        "failed": 0,
+        "seconds": 26.44
+      },
+      "actualCases": [
+        {
+          "test": "discovery::abandoned_prepared_startup_closes_workers_and_releases_listener",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::prepared_member_rejects_create_before_creating_files",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::prepared_shared_groups_reject_missing_application_before_creating_files",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::prepared_startup_invalid_timing_and_missing_recovery_return_original_application",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::rejected_prepared_composition_keeps_host_source_open_and_returns_native_parts",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::tcp_prepared_member_recovers_with_host_discovery",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::tcp_prepared_shared_groups_recover_checkpoints_and_distinct_receipts",
+          "status": "PASS"
+        },
+        {
+          "test": "discovery::tcp_prepared_startup_accepts_host_discovery_and_recovers_original_receipts",
+          "status": "PASS"
+        },
+        {
+          "test": "explicit_startup_timers_validate_before_files_and_use_host_deadlines",
+          "status": "PASS"
+        },
+        {
+          "test": "host_application_and_non_demo_identities_write_and_recover_through_startup",
+          "status": "PASS"
+        },
+        {
+          "test": "invalid_startup_is_side_effect_free_and_returns_the_host_application",
+          "status": "PASS"
+        },
+        {
+          "test": "late_constructor_failure_returns_application_and_joins_every_started_worker",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::default_native_prepare_keeps_default_wal_and_core_command_refusal",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::invalid_native_selected_limits_refuse_before_files_or_listener_binding",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::invalid_selected_enrollment_limits_leave_original_application_and_files_untouched",
+          "status": "PASS"
+        },
+        {
+          "test": "log_limits::selected_native_create_and_member_recovery_preserve_original_large_command",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::binding::original_handoff_binding_admitted_after_target_election_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::drain::local_drain_handoff_keeps_two_voters_serving_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::drain_recovery::durable_drain_and_cancellation_recover_with_native_tcp_wal",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::durable_leadership_handoff_reopens_pending_and_completed_intents_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::leadership_node_control_refuses_old_wire_before_admitting_work",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_tcp_evacuating_operation",
+          "status": "PASS"
+        },
+        {
+          "test": "maintenance::membership_drain::membership_drain_resumes_original_joint_and_final_over_tcp",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::multi_startup_rejects_invalid_inventory_before_creating_files",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::multi_startup_tcp_late_failure_returns_all_apps_and_joins_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::native_multi_startup_tcp_shares_one_store_and_recovers_every_group",
+          "status": "PASS"
+        },
+        {
+          "test": "multi::peer_rotation::tcp_peer_rotation_and_unobserved_durable_rollout_recover_all_groups",
+          "status": "PASS"
+        },
+        {
+          "test": "native_administration_receipts_commit_joint_and_final_and_reopen_exact_history",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::material_digest_binds_local_tls_and_every_peer_field",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::mismatched_rotation_records_reject_before_files_or_bind_and_return_application",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::rejected_rotating_tcp_owner_releases_socket_and_workers",
+          "status": "PASS"
+        },
+        {
+          "test": "peer_rotation::static_and_member_startup_install_the_recorded_generation",
+          "status": "PASS"
+        },
+        {
+          "test": "shutdown_clock::native_shutdown_retains_elapsed_host_epoch_and_reopens_owned_resources",
+          "status": "PASS"
+        },
+        {
+          "test": "startup_selects_exact_wire_eight_for_tcp_and_quic",
+          "status": "PASS"
+        },
+        {
+          "test": "startup_uses_the_hosts_initial_monotonic_time_for_owner_and_deadlines",
+          "status": "PASS"
+        },
+        {
+          "test": "stopping_one_startup_does_not_stop_another_or_the_shared_host_wake",
+          "status": "PASS"
+        },
+        {
+          "test": "tcp_startup_selects_matching_wire_codec_roster_and_sessions_for_versions_two_three_and_four",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::explicit_legacy_timers_preserve_the_earlier_election_window",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::native_defaults_plain_tcp_use_service_election_window",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::native_defaults_static_member_and_rotated_use_service_election_window",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::profiles_keep_host_timer_contract_and_refuse_unknown_selection",
+          "status": "PASS"
+        },
+        {
+          "test": "timing_profile::rotated_static_and_member_timers_reject_before_io_and_return_application",
+          "status": "PASS"
+        }
+      ],
+      "artifactGuard": {
+        "inputs": 1306,
+        "mismatches": [],
+        "artifacts": {
+          "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-d9ccebfc6da5c822",
+          "records": [
+            {
+              "reason": "compiler-artifact",
+              "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo#voteboat@0.1.0",
+              "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/Cargo.toml",
+              "target": {
+                "kind": [
+                  "test"
+                ],
+                "crate_types": [
+                  "bin"
+                ],
+                "name": "startup",
+                "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/tests/startup.rs",
+                "edition": "2021",
+                "doc": false,
+                "doctest": false,
+                "test": true
+              },
+              "profile": {
+                "opt_level": "3",
+                "debuginfo": 0,
+                "debug_assertions": true,
+                "overflow_checks": true,
+                "test": true
+              },
+              "features": [
+                "default",
+                "native",
+                "tls"
+              ],
+              "filenames": [
+                "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-d9ccebfc6da5c822"
+              ],
+              "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-d9ccebfc6da5c822",
+              "fresh": false
+            },
+            {
+              "reason": "compiler-artifact",
+              "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo#voteboat@0.1.0",
+              "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/Cargo.toml",
+              "target": {
+                "kind": [
+                  "lib"
+                ],
+                "crate_types": [
+                  "lib"
+                ],
+                "name": "voteboat",
+                "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/src/lib.rs",
+                "edition": "2021",
+                "doc": true,
+                "doctest": true,
+                "test": true
+              },
+              "profile": {
+                "opt_level": "3",
+                "debuginfo": 0,
+                "debug_assertions": true,
+                "overflow_checks": true,
+                "test": false
+              },
+              "features": [
+                "default",
+                "native",
+                "tls"
+              ],
+              "filenames": [
+                "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-436591ee7768556c.rlib",
+                "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-436591ee7768556c.rmeta"
+              ],
+              "executable": null,
+              "fresh": false
+            }
+          ],
+          "sha256": {
+            "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-d9ccebfc6da5c822": "da86405613efcfb5f8f1c9ec00eb38f03593c43ac66e38ca473a5e2657c42e5c",
+            "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-436591ee7768556c.rlib": "04326e2e131295792a1dff83b625576f4519bc629b6e1ef54e4a45b0cc2c960c"
+          }
+        }
+      }
+    }
+  },
+  "production379Changes": [],
+  "deltaFrom395": [
+    "tests/startup/maintenance/membership_drain.rs"
+  ],
+  "prior395Failure": {
+    "test": "maintenance::membership_drain::final_leadership_uncertainty_keeps_original_quic_checkpoint_operation",
+    "returnedNonAppliedVariant": "UNKNOWN",
+    "cause": "UNPROVEN; case passed on changed396 and no failure-only diagnostic fired"
+  },
+  "fullInvocations": "ALL once terminal before DEFAULTbuild/run once",
+  "macJobs": false,
+  "new397": "not qualified by396",
+  "fullCurrentOrP8Acceptance": false
+}

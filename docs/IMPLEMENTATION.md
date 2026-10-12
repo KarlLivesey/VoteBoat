@@ -31881,3 +31881,51 @@ Mac case is reported as a pass or global feature qualification.
 Source-only review follows the actual Quiescing/Draining, accepted visit and
 closed peer completion contracts before choosing another change. No production
 change or longer timeout is justified by a single retained-work snapshot alone.
+
+### Startup396 completed and physical checkpoint397 correction
+
+Actual396 complete Linux startup qualification is green: all-feature57passed/0
+failed in52.18s, then default42/0 in26.44s, with source1306 and executable/library
+before/after guards zero. Formatting/all four strict profiles and both asserted,
+overflow-checked optimized builds are zero. The old395 unprinted failure remains
+unknown. Portable exact results, raw logs/commands and frozen fixtures are now
+in validation/baseline/slice396 (68files/810,768bytes); all checksums passed.
+This is selected Linux startup qualification, not Mac startup completion.
+
+Schema397 was written before edits. The original physical `Cluster::checkpoint`
+wait tested nonzero base, empty automatic scheduling map and snapshot router
+idle. Manual `NodeControl::Checkpoint` only enqueues an event and does not enter
+that automatic map. A recovered existing nonzero base can therefore satisfy
+that wait before the new manual checkpoint executes. This is an independently
+confirmed fixture contract gap, not a demonstrated cause of Mac394's close
+failure.
+
+The fixture now captures each original node's applied frontier after the same
+catch-up, submits the same controls, and requires its durable SnapshotRef.index
+and compacted base to cover that immutable frontier. The original pending-map
+and router checks remain; selected snapshot worker drain is explicitly required
+as well. No new production API/helper, timer increase, retry or cancellation was
+introduced. Local checkpoint durability grants no quorum authority. Original
+all27 node/provider joins, port rebinds and directory cleanup remain required.
+
+A real recovered-store regression performs original Claim400001, checkpoint,
+all-three-node close/join/rebind and same-store Recover, followed by fresh
+Claim400002. It verifies exact store identity, advanced session and each new
+applied prefix above its old snapshot, then requires the new checkpoint to cover
+that prefix and both snapshot providers to drain before final joins. Bridge-owned
+observations settle at borrow handback; the same children's full drain is still
+enforced by the original Cluster shutdown. One private advance function factors
+the existing test's unchanged pumping budget.
+
+Actual397 selected controls:2passed/0failed in0.09s, including the new recovered
+regression and original backing checkpoint control. Fresh compiler records show
+optimization3, debug assertions and overflow checks; source1306 and exact test/
+library artifacts are guarded. Root formatting and strict all-feature Clippy
+are zero. Full original cold TCP is running on this frozen source; QUIC follows
+sequentially. A separately frozen, production-identical negative restores exactly
+the old cluster fixture while retaining the new regression; its build is pending,
+not a proved negative yet. The first negative-build shell attempt failed before
+compilation because its output path used the wrong working directory; corrected
+invocation uses the isolated mutant directory. No native test was restarted.
+Mac394 continues on unchanged392 source; this publication does not claim its
+qualification or final goal completion.

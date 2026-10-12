@@ -1,0 +1,8 @@
+{
+  "inputs": 1306,
+  "differences": [
+    "tests/logical_nested_native/cluster.rs"
+  ],
+  "productionDifferences": [],
+  "qualifiedSource": "frozen396 ONLY; current397 is excluded"
+}

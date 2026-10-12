@@ -21,6 +21,7 @@ use voteboat::{
     },
     raft::Role,
     runtime::*,
+    snapshot_worker::SnapshotWorker,
 };
 pub type ChildNode = NativeNode<LogicalApplication, NativeServiceConnector>;
 #[derive(Clone, Copy, Debug)]
@@ -292,14 +293,23 @@ impl Cluster {
     pub fn checkpoint(&mut self) {
         let group = setup::lower_mapping(self.slot).child;
         self.catch_up(NativeWaitStage::CheckpointCatchUp);
+        let frontiers = self
+            .all()
+            .map(|node| node.local().applications[&group].applied_index())
+            .collect::<Vec<_>>();
         for node in self.nodes.iter_mut() {
             node.control(group, NodeControl::Checkpoint).unwrap();
         }
         self.wait(NativeWaitStage::CheckpointPublished, |host| {
-            host.all().all(|node| {
+            host.all().zip(&frontiers).all(|(node, &frontier)| {
+                let state = node.local().owner.core(group).unwrap().state();
                 node.checkpoints().pending.is_empty()
-                    && node.local().owner.core(group).unwrap().state().base_index() > 0
+                    && state.base_index() >= frontier
+                    && state
+                        .snapshot
+                        .is_some_and(|snapshot| snapshot.index >= frontier)
                     && node.local().snapshots.as_ref().unwrap().router.is_drained()
+                    && node.local().snapshots.as_ref().unwrap().worker.is_drained()
             })
         });
     }

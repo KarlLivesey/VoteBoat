@@ -1,0 +1,6 @@
+{
+  "tests/startup/maintenance/membership_drain.rs": {
+    "before": "298822474ca1e8a347491d90623b4e19feb8346e8fcd7f41a83dd121b51c7405",
+    "after": "f8a519930f8984a1764d3020de910c43e94fb48580a40c7030f54d1a1854e00d"
+  }
+}

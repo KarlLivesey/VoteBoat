@@ -1,0 +1,317 @@
+[
+  {
+    "original": "target/divide-provider/cooperative396/AFTER_ALL.json",
+    "archive": "provenance/AFTER_ALL.json",
+    "sha256": "35fc6cc18e7007ec41a6d50c6fa567488877cbd4cfdd5b8eece691802d2317d4"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/AFTER_BUILD_ALL.json",
+    "archive": "provenance/AFTER_BUILD_ALL.json",
+    "sha256": "35fc6cc18e7007ec41a6d50c6fa567488877cbd4cfdd5b8eece691802d2317d4"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/AFTER_BUILD_DEFAULT.json",
+    "archive": "provenance/AFTER_BUILD_DEFAULT.json",
+    "sha256": "25bfea494ddb4b8449e407d0b9d2bc138b470ba6cb7bb3a164e50d367442bb70"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/AFTER_DEFAULT.json",
+    "archive": "provenance/AFTER_DEFAULT.json",
+    "sha256": "25bfea494ddb4b8449e407d0b9d2bc138b470ba6cb7bb3a164e50d367442bb70"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/AFTER_DEFAULT_BUILD_PRIOR_ALL.json",
+    "archive": "provenance/AFTER_DEFAULT_BUILD_PRIOR_ALL.json",
+    "sha256": "35fc6cc18e7007ec41a6d50c6fa567488877cbd4cfdd5b8eece691802d2317d4"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/ALL.command.json",
+    "archive": "linux/ALL.command.json",
+    "sha256": "f7307431731a86eaf4556b4406c1510e9eeaae7b559593719dfb4990348e2a13"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/ALL.log",
+    "archive": "linux/ALL.log",
+    "sha256": "641f8d9ddf4c67159779f97671ad28c898dbc00af90746d315ada7c858ff2b41"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/ALL_ACTUAL_TEST_LIST.txt",
+    "archive": "provenance/ALL_ACTUAL_TEST_LIST.txt",
+    "sha256": "0a1ff698685a6f7a57a10ee53b573ac0856df29a59306f5f03786edbd01535e2"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/ALL_RESULT.json",
+    "archive": "provenance/ALL_RESULT.json",
+    "sha256": "cced287f1c0202ccae69ebd5e9f089532dd455b1acfbd225f7a874803c3f4ecd"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BEFORE_ALL.json",
+    "archive": "provenance/BEFORE_ALL.json",
+    "sha256": "35fc6cc18e7007ec41a6d50c6fa567488877cbd4cfdd5b8eece691802d2317d4"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BEFORE_BUILD_ALL.json",
+    "archive": "provenance/BEFORE_BUILD_ALL.json",
+    "sha256": "97817a0582c2264a50e6a6fb4bffb200a6dcb425428ad4841a4ab1d7a88e428a"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BEFORE_BUILD_DEFAULT.json",
+    "archive": "provenance/BEFORE_BUILD_DEFAULT.json",
+    "sha256": "97817a0582c2264a50e6a6fb4bffb200a6dcb425428ad4841a4ab1d7a88e428a"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BEFORE_DEFAULT.json",
+    "archive": "provenance/BEFORE_DEFAULT.json",
+    "sha256": "25bfea494ddb4b8449e407d0b9d2bc138b470ba6cb7bb3a164e50d367442bb70"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BEFORE_DEFAULT_BUILD_PRIOR_ALL.json",
+    "archive": "provenance/BEFORE_DEFAULT_BUILD_PRIOR_ALL.json",
+    "sha256": "35fc6cc18e7007ec41a6d50c6fa567488877cbd4cfdd5b8eece691802d2317d4"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_ALL.jsonl",
+    "archive": "linux/BUILD_ALL.jsonl",
+    "sha256": "afa1741079e82473e5779c44cc63b972fc284405547bf90d16b287b6fe205cab"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_ALL.log",
+    "archive": "linux/BUILD_ALL.log",
+    "sha256": "096639da1eca0c60112edece401f08299f7617389e70dfb0bd7c021fb57c2580"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_ALL_RUN.log",
+    "archive": "linux/BUILD_ALL_RUN.log",
+    "sha256": "6c452255c0bad26e88f9df3900c53931cf90cf13ff3954a6f9fa9f32453777e7"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_DEFAULT.jsonl",
+    "archive": "linux/BUILD_DEFAULT.jsonl",
+    "sha256": "1f548d21fae1d540d3f22f9b00a37e632e2a1006bf3b5b6959ac6bae5690e381"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_DEFAULT.log",
+    "archive": "linux/BUILD_DEFAULT.log",
+    "sha256": "91e20873ee19aed0aa630ead47be0bd6db734955f4ae8487fd5087e639f2d32d"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_DEFAULT_RUN.log",
+    "archive": "linux/BUILD_DEFAULT_RUN.log",
+    "sha256": "378b2739538d0440a9e9c027dee20334bb3a2473b8d841e78bad01379c11318b"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/BUILD_EXITS.txt",
+    "archive": "provenance/BUILD_EXITS.txt",
+    "sha256": "f419e84f08e24073153b5a30a5813dc73beadbc6a5d024af7dcd3f3680b5d562"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CAPTURE_GUARD.json",
+    "archive": "provenance/CAPTURE_GUARD.json",
+    "sha256": "d9c322420bd33a243318f236fd584dd4a29259aa5b7bb4799294990656331921"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CARGO_VERSION.txt",
+    "archive": "provenance/CARGO_VERSION.txt",
+    "sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CHECKS_AFTER.json",
+    "archive": "provenance/CHECKS_AFTER.json",
+    "sha256": "97817a0582c2264a50e6a6fb4bffb200a6dcb425428ad4841a4ab1d7a88e428a"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CHECKS_BEFORE.json",
+    "archive": "provenance/CHECKS_BEFORE.json",
+    "sha256": "97817a0582c2264a50e6a6fb4bffb200a6dcb425428ad4841a4ab1d7a88e428a"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CHECK_EXITS.txt",
+    "archive": "provenance/CHECK_EXITS.txt",
+    "sha256": "27cfb18d803fd9e3ca3ebd51a16509c43b0d42d11ffe8e0fcee9e916eb8bf5d0"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CHECK_RUN.log",
+    "archive": "linux/CHECK_RUN.log",
+    "sha256": "38605a8184783b89d7bb5087d416a7db7883e4a22f4facc6d8ac5c37569ce3ad"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CLIPPY_all.log",
+    "archive": "linux/CLIPPY_all.log",
+    "sha256": "c3b2437c058690ba204a87c7b0563a2253f94fded99af0875a42343a10739356"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CLIPPY_core.log",
+    "archive": "linux/CLIPPY_core.log",
+    "sha256": "8e6e3302fa7c00f89afe4798f63784eef935f89d59a02e611d9c1d5ab5e33410"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CLIPPY_default.log",
+    "archive": "linux/CLIPPY_default.log",
+    "sha256": "50d9a7f3702c3b018ae4ce55ff920c8cb2415a5d31a15dec72adf1a6a5a086b7"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CLIPPY_native.log",
+    "archive": "linux/CLIPPY_native.log",
+    "sha256": "919066e29c07e91c6c02d02f9474ea607e9cc2cac193b7ea6cb4a854c30be7c9"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/CURRENT_SCOPE_COMPARISON.json",
+    "archive": "provenance/CURRENT_SCOPE_COMPARISON.json",
+    "sha256": "1beb5a390e1585a399dc47fc845c8cf37980cfc6eeecb9e73244bdad701d72ab"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/DEFAULT.command.json",
+    "archive": "linux/DEFAULT.command.json",
+    "sha256": "eeb9a2cd7a14d64d4218f5974c41d810d5a635f2fb1db8fbcfe64a7f9622c1fc"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/DEFAULT.log",
+    "archive": "linux/DEFAULT.log",
+    "sha256": "148df08af944ab480bd6b784284f228a7bc3567f3ce7dc3bbddbd8163fc2821e"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/DEFAULT_ACTUAL_TEST_LIST.txt",
+    "archive": "provenance/DEFAULT_ACTUAL_TEST_LIST.txt",
+    "sha256": "af440e9cf1db9472b00b6eb15bc6be5ad8d510e4802ae073d989ce0adb201311"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/DEFAULT_PRIOR_GUARD.log",
+    "archive": "linux/DEFAULT_PRIOR_GUARD.log",
+    "sha256": "c654bee35013fd89af502ce76b5bc3f400a0d6c1bd43a1773ac8e95be066b079"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/DEFAULT_RESULT.json",
+    "archive": "provenance/DEFAULT_RESULT.json",
+    "sha256": "2ad84769330d3c19ff52be54db62a87d5e116d735e65ec4a754bf7782eff5981"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/DELTA_FROM395.json",
+    "archive": "provenance/DELTA_FROM395.json",
+    "sha256": "b7961d25f66b98747719cb8ce680bdbe0c7534183f3b71e8af17441f647b6b41"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/EVIDENCE_SHA256.json",
+    "archive": "provenance/EVIDENCE_SHA256.json",
+    "sha256": "c135a0b902ef67fe839e93205781a115888977552dad9faf64590283a4ebef98"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/FMT.log",
+    "archive": "linux/FMT.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/PRIOR_SCOPE.json",
+    "archive": "provenance/PRIOR_SCOPE.json",
+    "sha256": "02bd9b1f1d5cc66e423974e944a25ba516e48f0d52d78d269134f1e25d4c95e9"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/PRODUCTION_GUARD.json",
+    "archive": "provenance/PRODUCTION_GUARD.json",
+    "sha256": "8ee6128b47ab301a6c94cf1229e9d243b22b4f44787517994bda6a6171b302d0"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/PROTOC_VERSION.txt",
+    "archive": "provenance/PROTOC_VERSION.txt",
+    "sha256": "41654adf2af1c3734c95808b5d5333d2fe1381fca76b4799f5c30198e38fc1fe"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/QUALIFICATION.json",
+    "archive": "provenance/QUALIFICATION.json",
+    "sha256": "c85792e7deaafa66bf7988f74bd6ee1e6e050190fb9e85df3d412cf323335f2e"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/QUALIFICATION_SCHEMA.md",
+    "archive": "provenance/QUALIFICATION_SCHEMA.md",
+    "sha256": "1577e8add6fa02a3654e36023e3cfe66a83f0cfb1d6be97efbb3e3eba529fe09"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/RESULT.md",
+    "archive": "provenance/RESULT.md",
+    "sha256": "53efd87335dac3b9930fa385e90684f0f0b918adbdd75bd47091e24e7ad2efdb"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/ROOT_SCHEMA.md",
+    "archive": "provenance/ROOT_SCHEMA.md",
+    "sha256": "ffc4da0ef54a37b6becb060ff8599a860bba612c15e0f7e70aa46610bf3becb7"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/RUSTC_VERSION.txt",
+    "archive": "provenance/RUSTC_VERSION.txt",
+    "sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/SOURCE.json",
+    "archive": "provenance/SOURCE.json",
+    "sha256": "7121850d64bdc3d0c6f26e0d9f7567b48af07872d1bf89bef732fb8946c36847"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/SOURCE_SHA256.txt",
+    "archive": "provenance/SOURCE_SHA256.txt",
+    "sha256": "9409f0402e1941b06883c3fb1e89c15c8723aa349b39dfe23755fbc5a0dea4cc"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/build.sh",
+    "archive": "linux/build.sh",
+    "sha256": "c0b0b2680a70919f5107587f8d67c0b804041085637f5bf6464f04c0cbe8f263"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/checks.sh",
+    "archive": "linux/checks.sh",
+    "sha256": "2512b0a1243b78fa22b61ea7180dccfce5302415456a8b43ac45533e260399e4"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/run.py",
+    "archive": "linux/run.py",
+    "sha256": "c5c5d5b276e13d29112871e69bca1289abea82507ae77c0e25942ef4a094a6b2"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/repo/tests/startup.rs",
+    "archive": "source-fixtures/tests/startup.rs",
+    "sha256": "1f708105a49cf409da7f93b873ebb2c72b3c4fcf1195dba8645e75b35c6f1974"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/repo/tests/startup/maintenance/drain.rs",
+    "archive": "source-fixtures/tests/startup/maintenance/drain.rs",
+    "sha256": "e8fd8d39670975713ad20b30de9903e4c159b1281b37bd60116440dab02aca8e"
+  },
+  {
+    "original": "target/divide-provider/cooperative396/repo/tests/startup/maintenance/membership_drain.rs",
+    "archive": "source-fixtures/tests/startup/maintenance/membership_drain.rs",
+    "sha256": "f8a519930f8984a1764d3020de910c43e94fb48580a40c7030f54d1a1854e00d"
+  },
+  {
+    "original": "target/divide-provider/cooperative395/ALL.log",
+    "archive": "prior395/ALL.log",
+    "sha256": "019594ce33ba6295f9876900c98dc3014c7227815dfa0197d44ec08b8d24e9f5"
+  },
+  {
+    "original": "target/divide-provider/cooperative395/ALL_RESULT.json",
+    "archive": "prior395/ALL_RESULT.json",
+    "sha256": "6c1ade59d84c0a95dd47bb35f22870f4dcb1164e0320c6c97af5be267c17ea25"
+  },
+  {
+    "original": "target/divide-provider/cooperative395/SOURCE.json",
+    "archive": "prior395/SOURCE.json",
+    "sha256": "9ef8f6f8bc9b1146cce331e0a5656adee6cedea1752b68d954c999d3c6f905d7"
+  },
+  {
+    "original": "target/divide-provider/cooperative395/EVIDENCE_SHA256.json",
+    "archive": "prior395/EVIDENCE_SHA256.json",
+    "sha256": "9e043aab180ac1cf32418c0e67718c9cc4b3e9f88f4dfc6a80fa7aa2068e2352"
+  },
+  {
+    "original": "target/divide-provider/cooperative395/repo/tests/startup/maintenance/membership_drain.rs",
+    "archive": "prior395/membership_drain-before.rs",
+    "sha256": "298822474ca1e8a347491d90623b4e19feb8346e8fcd7f41a83dd121b51c7405"
+  },
+  {
+    "original": "target/divide-provider/cooperative395/DELTA_FROM393.json",
+    "archive": "provenance/DELTA_FROM393.json",
+    "sha256": "adbb41c27cc9110ffbcb60bc874614bac0b25af9188be8b4ec76fedf28c41177"
+  },
+  {
+    "original": "target/divide-provider/election393/DELTA_FROM392.json",
+    "archive": "provenance/DELTA_FROM392.json",
+    "sha256": "e51047d87edcd1b08a5905e91012b4ad36d51b25efd080dd4a34bce8b2c1f239"
+  }
+]

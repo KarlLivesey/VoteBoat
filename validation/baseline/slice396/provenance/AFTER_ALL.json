@@ -1,0 +1,88 @@
+{
+  "inputs": 1306,
+  "mismatches": [],
+  "artifacts": {
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3",
+    "records": [
+      {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/Cargo.toml",
+        "target": {
+          "kind": [
+            "test"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "startup",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/tests/startup.rs",
+          "edition": "2021",
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": true
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3"
+        ],
+        "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3",
+        "fresh": false
+      },
+      {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396/repo/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      }
+    ],
+    "sha256": {
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/startup-a652963101851db3": "1f441d74a5cccfe696b73a02b510a27d2f8d2efb92adff7004495b7a83c3fb0e",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/divide-provider/cooperative396-build/release/deps/libvoteboat-be40bd833a88996f.rlib": "8b542970e25923e59ecedd7c4a47af077ce2c82481c7ed812538425077d7f297"
+    }
+  }
+}

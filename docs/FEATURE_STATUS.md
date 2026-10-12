@@ -22,9 +22,9 @@ Remaining:
    resolved and all original joins/rebinds completed.
 2. **Membership and startup closure.** Linux393 passes all fourteen logical
    activation tests. Mac Joint qualification is prepared. Startup395 passes
-   default42/0 and all-feature56/1; the remaining QUIC membership-drain failure
-   follows a source-only cleanup that parks surviving voters. Published396 keeps
-   those voters polled; its complete startup qualification is running.
+   default42/0 and all-feature56/1 on395. Published396 keeps surviving voters
+   polled during source cleanup and passes the complete startup target:
+   all-feature57/0 and default42/0. Mac startup qualification remains pending.
 3. **Final requirement and platform qualification.** Frozen Linux384 passes all
    default tests2124/0; all features2436/2 fail in startup fixtures subsequently
    corrected. Core/native profiles are pending. Reconcile these historical cuts

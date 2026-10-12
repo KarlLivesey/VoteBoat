@@ -1,0 +1,17 @@
+{
+  "395": {
+    "all": {
+      "passed": 56,
+      "failed": 1,
+      "seconds": 57.2
+    },
+    "default": {
+      "passed": 42,
+      "failed": 0,
+      "seconds": 25.42
+    },
+    "remainingActualOutcome": "UNKNOWN: QUIC original19723data3 bareAppliedassertion",
+    "evidence": "../cooperative395/EVIDENCE_SHA256.json"
+  },
+  "396": "changed original membership helper caller+failure-only outcomes; no runtime/clock/timer/leadership/assertion weakening"
+}

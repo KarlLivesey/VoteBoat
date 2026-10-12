@@ -1,0 +1,19 @@
+{
+  "copiesCompared": 63,
+  "copyMismatches": [],
+  "sourceInputs": 1306,
+  "sourceSnapshot396Paths": [
+    "tests/startup.rs",
+    "tests/startup/maintenance/drain.rs",
+    "tests/startup/maintenance/membership_drain.rs"
+  ],
+  "sourceSnapshotHashMismatches": [],
+  "rawActualResults": {
+    "ALL": "57/0 52.18s terminal0",
+    "DEFAULT": "42/0 26.44s terminal0"
+  },
+  "guardedCompilerProfile": "actual Cargo opt3/debug_assertions true/overflow_checks true/fresh false test+library per profile",
+  "prior395": "ALL56/1 57.20s; actualnonApplied19723 variant/cause unknown; originalfailure preserved",
+  "excludedCurrent397": "tests/logical_nested_native/cluster.rs differs current root and is not source396",
+  "nativeOrMacJobsRunForArchive": false
+}
