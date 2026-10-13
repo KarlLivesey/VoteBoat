@@ -1,0 +1,10 @@
+{
+  "commit": "8d59724cb29769b4edba8a2babee8d33ec784561",
+  "original_compiled_commit": "230e037ac8369465d728b777414e0a0dcbe3c612",
+  "byte_identical_to_compiled_source": true,
+  "preserved_source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/baseline8d59724",
+  "original_linux_compiler_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/source",
+  "original_mac_compiler_path": "/tmp/voteboat-matched230-mac/source",
+  "scope": "Cargo.toml Cargo.lock src benchmarks/matched examples",
+  "manifest_sha256": "39ca50fe68850195ef6c63a08d59fe1e8b4f576bd1489888f1ac53c498b631c4"
+}

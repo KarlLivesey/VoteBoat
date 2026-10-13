@@ -1,0 +1,128 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling unicode-ident v1.0.27
+   Compiling quote v1.0.47
+   Compiling libc v0.2.190
+   Compiling siphasher v1.0.4
+   Compiling autocfg v1.5.1
+   Compiling cfg-if v1.0.5
+   Compiling serde_core v1.0.229
+   Compiling rand_core v0.6.4
+   Compiling version_check v0.9.5
+   Compiling regex-syntax v0.8.11
+   Compiling serde v1.0.229
+   Compiling core-foundation-sys v0.8.7
+   Compiling phf_shared v0.11.3
+   Compiling rand v0.8.8
+   Compiling pin-project-lite v0.2.17
+   Compiling futures-sink v0.3.34
+   Compiling futures-core v0.3.34
+   Compiling generic-array v0.14.7
+   Compiling iana-time-zone v0.1.65
+   Compiling memchr v2.8.3
+   Compiling num-traits v0.2.19
+   Compiling typenum v1.20.1
+   Compiling futures-channel v0.3.34
+   Compiling phf_generator v0.11.3
+   Compiling phf v0.11.3
+   Compiling phf_codegen v0.11.3
+   Compiling futures-task v0.3.34
+   Compiling rand_core v0.10.1
+   Compiling futures-io v0.3.34
+   Compiling getrandom v0.4.3
+   Compiling slab v0.4.12
+   Compiling utf8parse v0.2.2
+   Compiling chacha20 v0.10.2
+   Compiling anstyle-parse v1.0.0
+   Compiling anstyle v1.0.14
+   Compiling regex-automata v0.4.18
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling unicode-segmentation v1.13.3
+   Compiling colorchoice v1.0.5
+   Compiling anstyle-query v1.1.5
+   Compiling semver v1.0.28
+   Compiling anstream v1.0.0
+   Compiling thiserror v2.0.21
+   Compiling convert_case v0.10.0
+   Compiling cpufeatures v0.2.17
+   Compiling syn v3.0.9
+   Compiling syn v2.0.119
+   Compiling chrono v0.4.45
+   Compiling crypto-common v0.1.7
+   Compiling block-buffer v0.10.4
+   Compiling unicode-width v0.2.2
+   Compiling heck v0.5.0
+   Compiling rand v0.10.3
+   Compiling digest v0.10.7
+   Compiling shlex v2.0.1
+   Compiling unicode-xid v0.2.6
+   Compiling fnv v1.0.7
+   Compiling bytes v1.12.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling strsim v0.11.1
+   Compiling bytecount v0.6.9
+   Compiling once_cell v1.21.4
+   Compiling clap_lex v1.1.1
+   Compiling papergrid v0.17.0
+   Compiling cc v1.8.0
+   Compiling clap_builder v4.6.7
+   Compiling tracing-core v0.1.36
+   Compiling sha2 v0.10.9
+   Compiling regex v1.13.1
+   Compiling zmij v1.0.23
+   Compiling either v1.19.0
+   Compiling parse-zoneinfo v0.3.1
+   Compiling itertools v0.15.0
+   Compiling serde_json v1.0.154
+   Compiling parse-size v1.1.0
+   Compiling smallvec v1.16.3
+   Compiling maplit v1.0.2
+   Compiling anyhow v1.0.104
+   Compiling peel-off v0.1.1
+   Compiling base2histogram v0.2.3
+   Compiling chrono-tz-build v0.2.1
+   Compiling tabled v0.20.0
+   Compiling backoff-series v0.1.1
+   Compiling getrandom v0.2.17
+   Compiling itoa v1.0.18
+   Compiling chrono-tz v0.8.6
+   Compiling untrusted v0.9.0
+   Compiling ring v0.17.14
+   Compiling derive_more-impl v2.1.1
+   Compiling tracing-attributes v0.1.31
+   Compiling serde_derive v1.0.229
+   Compiling futures-macro v0.3.34
+   Compiling tokio-macros v2.7.2
+   Compiling openraft-macros v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling clap_derive v4.6.7
+   Compiling thiserror-impl v2.0.21
+   Compiling tokio v1.53.2
+   Compiling futures-util v0.3.34
+   Compiling tracing v0.1.44
+   Compiling clap v4.6.7
+   Compiling derive_more v2.1.1
+   Compiling anyerror v0.1.13
+   Compiling validit v0.2.6
+   Compiling openraft-rt v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling futures-executor v0.3.34
+   Compiling quorum-set v0.2.2
+   Compiling futures v0.3.34
+   Compiling voteboat v0.1.0 (/tmp/voteboat-matched230-mac/source)
+   Compiling openraft-rt-tokio v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling display-more v0.2.6
+   Compiling openraft v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling openraft-legacy v0.10.0-alpha.37 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling bench-minimal v0.1.0 (https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#e88bb407)
+   Compiling voteboat-matched-framework v0.1.0 (/tmp/voteboat-matched230-mac/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 24.14s
+     Running unittests src/main.rs (/tmp/voteboat-matched230-mac/target-checks/debug/deps/voteboat_matched_framework-dfd76e99c69b6bc3)
+
+running 6 tests
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+

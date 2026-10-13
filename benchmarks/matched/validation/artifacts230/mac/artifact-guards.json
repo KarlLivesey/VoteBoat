@@ -1,0 +1,114 @@
+{
+  "harness": {
+    "compiler_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-matched230-mac/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+      "manifest_path": "/tmp/voteboat-matched230-mac/source/benchmarks/matched/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-matched-framework",
+        "src_path": "/tmp/voteboat-matched230-mac/source/benchmarks/matched/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-matched230-mac/target-harness/release/voteboat-matched-framework",
+        "/tmp/voteboat-matched230-mac/target-harness/release/voteboat-matched-framework.dSYM"
+      ],
+      "executable": "/tmp/voteboat-matched230-mac/target-harness/release/voteboat-matched-framework",
+      "fresh": false
+    },
+    "source_guard": "before_after_SHA256_passed",
+    "artifact_sha256": "7c20fa0a740b375a4a1b2aab1cba303843fdd1204fc147f52f61ead9867580ec"
+  },
+  "upstream": {
+    "compiler_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-openraft230-mac/benchmarks/minimal#bench-minimal@0.1.0",
+      "manifest_path": "/tmp/voteboat-openraft230-mac/benchmarks/minimal/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench",
+        "src_path": "/tmp/voteboat-openraft230-mac/benchmarks/minimal/src/bin/bench.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "filenames": [
+        "/tmp/voteboat-matched230-mac/target-upstream/release/bench",
+        "/tmp/voteboat-matched230-mac/target-upstream/release/bench.dSYM"
+      ],
+      "executable": "/tmp/voteboat-matched230-mac/target-upstream/release/bench",
+      "fresh": false
+    },
+    "source_guard": "before_after_SHA256_passed",
+    "artifact_sha256": "b3f2878f4146b4cf03174617a82c979bb9aec8558f3ab8fb2e45918691be8a6f"
+  },
+  "voteboat-cli": {
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "scope": "debug_functional_only"
+  },
+  "openraft-cli": {
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "scope": "debug_functional_only"
+  },
+  "compiler": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "host": "Darwin Karls-MacBook-Pro.local 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:20:40 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T6020 arm64\nApple M2 Max",
+  "flags": {
+    "opt_level": 3,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "lto": "thin",
+    "codegen_units": 1
+  },
+  "lock_sha256_lines": [
+    "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d  /tmp/voteboat-matched230-mac/source/benchmarks/matched/Cargo.lock",
+    "3ef72b525fd94d0aa3d7f106b4e003a6c5e2a7ccc0ded39f776470d92787af0b  /tmp/voteboat-openraft230-mac/benchmarks/minimal/Cargo.lock"
+  ],
+  "protoc": "/tmp/voteboat-macos-CzK1if/reference-tools296/bin/protoc\n/tmp/voteboat-macos-CzK1if/reference-tools296/bin/protoc: OK\nlibprotoc 3.21.12"
+}

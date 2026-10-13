@@ -1,0 +1,1326 @@
+{
+  "all_shared_versions_match": false,
+  "shared_packages": [
+    {
+      "package": "aho-corasick",
+      "harness": [
+        "1.1.5"
+      ],
+      "upstream": [
+        "1.1.5"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "android_system_properties",
+      "harness": [
+        "0.1.6"
+      ],
+      "upstream": [
+        "0.1.6"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anstream",
+      "harness": [
+        "1.0.0"
+      ],
+      "upstream": [
+        "1.0.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anstyle",
+      "harness": [
+        "1.0.14"
+      ],
+      "upstream": [
+        "1.0.14"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anstyle-parse",
+      "harness": [
+        "1.0.0"
+      ],
+      "upstream": [
+        "1.0.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anstyle-query",
+      "harness": [
+        "1.1.5"
+      ],
+      "upstream": [
+        "1.1.5"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anstyle-wincon",
+      "harness": [
+        "3.0.11"
+      ],
+      "upstream": [
+        "3.0.11"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anyerror",
+      "harness": [
+        "0.1.13"
+      ],
+      "upstream": [
+        "0.1.13"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "anyhow",
+      "harness": [
+        "1.0.104"
+      ],
+      "upstream": [
+        "1.0.104"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "autocfg",
+      "harness": [
+        "1.5.1"
+      ],
+      "upstream": [
+        "1.5.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "backoff-series",
+      "harness": [
+        "0.1.1"
+      ],
+      "upstream": [
+        "0.1.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "base2histogram",
+      "harness": [
+        "0.2.3"
+      ],
+      "upstream": [
+        "0.2.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "bench-minimal",
+      "harness": [
+        "0.1.0"
+      ],
+      "upstream": [
+        "0.1.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "block-buffer",
+      "harness": [
+        "0.10.4"
+      ],
+      "upstream": [
+        "0.10.4"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "bumpalo",
+      "harness": [
+        "3.20.3"
+      ],
+      "upstream": [
+        "3.20.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "bytecount",
+      "harness": [
+        "0.6.9"
+      ],
+      "upstream": [
+        "0.6.9"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "bytes",
+      "harness": [
+        "1.12.1"
+      ],
+      "upstream": [
+        "1.12.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "cc",
+      "harness": [
+        "1.8.0"
+      ],
+      "upstream": [
+        "1.8.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "cfg-if",
+      "harness": [
+        "1.0.5"
+      ],
+      "upstream": [
+        "1.0.5"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "chacha20",
+      "harness": [
+        "0.10.2"
+      ],
+      "upstream": [
+        "0.10.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "chrono",
+      "harness": [
+        "0.4.45"
+      ],
+      "upstream": [
+        "0.4.45"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "chrono-tz",
+      "harness": [
+        "0.8.6"
+      ],
+      "upstream": [
+        "0.8.6"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "chrono-tz-build",
+      "harness": [
+        "0.2.1"
+      ],
+      "upstream": [
+        "0.2.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "clap",
+      "harness": [
+        "4.6.7"
+      ],
+      "upstream": [
+        "4.6.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "clap_builder",
+      "harness": [
+        "4.6.7"
+      ],
+      "upstream": [
+        "4.6.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "clap_derive",
+      "harness": [
+        "4.6.7"
+      ],
+      "upstream": [
+        "4.6.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "clap_lex",
+      "harness": [
+        "1.1.1"
+      ],
+      "upstream": [
+        "1.1.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "colorchoice",
+      "harness": [
+        "1.0.5"
+      ],
+      "upstream": [
+        "1.0.5"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "convert_case",
+      "harness": [
+        "0.10.0"
+      ],
+      "upstream": [
+        "0.10.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "core-foundation-sys",
+      "harness": [
+        "0.8.7"
+      ],
+      "upstream": [
+        "0.8.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "cpufeatures",
+      "harness": [
+        "0.2.17",
+        "0.3.1"
+      ],
+      "upstream": [
+        "0.2.17",
+        "0.3.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "crypto-common",
+      "harness": [
+        "0.1.7"
+      ],
+      "upstream": [
+        "0.1.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "derive_more",
+      "harness": [
+        "2.1.1"
+      ],
+      "upstream": [
+        "2.1.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "derive_more-impl",
+      "harness": [
+        "2.1.1"
+      ],
+      "upstream": [
+        "2.1.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "digest",
+      "harness": [
+        "0.10.7"
+      ],
+      "upstream": [
+        "0.10.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "display-more",
+      "harness": [
+        "0.2.6"
+      ],
+      "upstream": [
+        "0.2.6"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "either",
+      "harness": [
+        "1.19.0"
+      ],
+      "upstream": [
+        "1.19.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "find-msvc-tools",
+      "harness": [
+        "0.1.14"
+      ],
+      "upstream": [
+        "0.1.14"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "fnv",
+      "harness": [
+        "1.0.7"
+      ],
+      "upstream": [
+        "1.0.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-channel",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-core",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-executor",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-io",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-macro",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-sink",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-task",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "futures-util",
+      "harness": [
+        "0.3.34"
+      ],
+      "upstream": [
+        "0.3.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "generic-array",
+      "harness": [
+        "0.14.7"
+      ],
+      "upstream": [
+        "0.14.7"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "getrandom",
+      "harness": [
+        "0.2.17",
+        "0.4.3"
+      ],
+      "upstream": [
+        "0.4.3"
+      ],
+      "same_versions": false
+    },
+    {
+      "package": "heck",
+      "harness": [
+        "0.5.0"
+      ],
+      "upstream": [
+        "0.5.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "iana-time-zone",
+      "harness": [
+        "0.1.65"
+      ],
+      "upstream": [
+        "0.1.65"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "iana-time-zone-haiku",
+      "harness": [
+        "0.1.2"
+      ],
+      "upstream": [
+        "0.1.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "is_terminal_polyfill",
+      "harness": [
+        "1.70.2"
+      ],
+      "upstream": [
+        "1.70.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "itertools",
+      "harness": [
+        "0.15.0"
+      ],
+      "upstream": [
+        "0.14.0",
+        "0.15.0"
+      ],
+      "same_versions": false
+    },
+    {
+      "package": "itoa",
+      "harness": [
+        "1.0.18"
+      ],
+      "upstream": [
+        "1.0.18"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "js-sys",
+      "harness": [
+        "0.3.106"
+      ],
+      "upstream": [
+        "0.3.106"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "libc",
+      "harness": [
+        "0.2.190"
+      ],
+      "upstream": [
+        "0.2.190"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "log",
+      "harness": [
+        "0.4.34"
+      ],
+      "upstream": [
+        "0.4.34"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "maplit",
+      "harness": [
+        "1.0.2"
+      ],
+      "upstream": [
+        "1.0.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "memchr",
+      "harness": [
+        "2.8.3"
+      ],
+      "upstream": [
+        "2.8.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "num-traits",
+      "harness": [
+        "0.2.19"
+      ],
+      "upstream": [
+        "0.2.19"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "once_cell",
+      "harness": [
+        "1.21.4"
+      ],
+      "upstream": [
+        "1.21.4"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "once_cell_polyfill",
+      "harness": [
+        "1.70.2"
+      ],
+      "upstream": [
+        "1.70.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "openraft",
+      "harness": [
+        "0.10.0-alpha.37"
+      ],
+      "upstream": [
+        "0.10.0-alpha.37"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "openraft-legacy",
+      "harness": [
+        "0.10.0-alpha.37"
+      ],
+      "upstream": [
+        "0.10.0-alpha.37"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "openraft-macros",
+      "harness": [
+        "0.10.0-alpha.37"
+      ],
+      "upstream": [
+        "0.10.0-alpha.37"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "openraft-rt",
+      "harness": [
+        "0.10.0-alpha.37"
+      ],
+      "upstream": [
+        "0.10.0-alpha.37"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "openraft-rt-tokio",
+      "harness": [
+        "0.10.0-alpha.37"
+      ],
+      "upstream": [
+        "0.10.0-alpha.37"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "papergrid",
+      "harness": [
+        "0.17.0"
+      ],
+      "upstream": [
+        "0.17.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "parse-size",
+      "harness": [
+        "1.1.0"
+      ],
+      "upstream": [
+        "1.1.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "parse-zoneinfo",
+      "harness": [
+        "0.3.1"
+      ],
+      "upstream": [
+        "0.3.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "peel-off",
+      "harness": [
+        "0.1.1"
+      ],
+      "upstream": [
+        "0.1.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "phf",
+      "harness": [
+        "0.11.3"
+      ],
+      "upstream": [
+        "0.11.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "phf_codegen",
+      "harness": [
+        "0.11.3"
+      ],
+      "upstream": [
+        "0.11.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "phf_generator",
+      "harness": [
+        "0.11.3"
+      ],
+      "upstream": [
+        "0.11.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "phf_shared",
+      "harness": [
+        "0.11.3"
+      ],
+      "upstream": [
+        "0.11.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "pin-project-lite",
+      "harness": [
+        "0.2.17"
+      ],
+      "upstream": [
+        "0.2.17"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "proc-macro2",
+      "harness": [
+        "1.0.107"
+      ],
+      "upstream": [
+        "1.0.107"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "quorum-set",
+      "harness": [
+        "0.2.2"
+      ],
+      "upstream": [
+        "0.2.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "quote",
+      "harness": [
+        "1.0.47"
+      ],
+      "upstream": [
+        "1.0.47"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "r-efi",
+      "harness": [
+        "6.0.0"
+      ],
+      "upstream": [
+        "6.0.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "rand",
+      "harness": [
+        "0.10.3",
+        "0.8.8"
+      ],
+      "upstream": [
+        "0.10.3",
+        "0.8.8"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "rand_core",
+      "harness": [
+        "0.10.1",
+        "0.6.4"
+      ],
+      "upstream": [
+        "0.10.1",
+        "0.6.4"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "regex",
+      "harness": [
+        "1.13.1"
+      ],
+      "upstream": [
+        "1.13.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "regex-automata",
+      "harness": [
+        "0.4.18"
+      ],
+      "upstream": [
+        "0.4.18"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "regex-syntax",
+      "harness": [
+        "0.8.11"
+      ],
+      "upstream": [
+        "0.8.11"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "rustc_version",
+      "harness": [
+        "0.4.1"
+      ],
+      "upstream": [
+        "0.4.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "rustversion",
+      "harness": [
+        "1.0.23"
+      ],
+      "upstream": [
+        "1.0.23"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "semver",
+      "harness": [
+        "1.0.28"
+      ],
+      "upstream": [
+        "1.0.28"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "serde",
+      "harness": [
+        "1.0.229"
+      ],
+      "upstream": [
+        "1.0.229"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "serde_core",
+      "harness": [
+        "1.0.229"
+      ],
+      "upstream": [
+        "1.0.229"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "serde_derive",
+      "harness": [
+        "1.0.229"
+      ],
+      "upstream": [
+        "1.0.229"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "serde_json",
+      "harness": [
+        "1.0.154"
+      ],
+      "upstream": [
+        "1.0.154"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "sha2",
+      "harness": [
+        "0.10.9"
+      ],
+      "upstream": [
+        "0.10.9"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "shlex",
+      "harness": [
+        "2.0.1"
+      ],
+      "upstream": [
+        "2.0.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "siphasher",
+      "harness": [
+        "1.0.4"
+      ],
+      "upstream": [
+        "1.0.4"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "slab",
+      "harness": [
+        "0.4.12"
+      ],
+      "upstream": [
+        "0.4.12"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "smallvec",
+      "harness": [
+        "1.16.3"
+      ],
+      "upstream": [
+        "1.16.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "strsim",
+      "harness": [
+        "0.11.1"
+      ],
+      "upstream": [
+        "0.11.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "syn",
+      "harness": [
+        "2.0.119",
+        "3.0.9"
+      ],
+      "upstream": [
+        "2.0.119",
+        "3.0.9"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "tabled",
+      "harness": [
+        "0.20.0"
+      ],
+      "upstream": [
+        "0.20.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "testing_table",
+      "harness": [
+        "0.3.0"
+      ],
+      "upstream": [
+        "0.3.0"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "thiserror",
+      "harness": [
+        "2.0.21"
+      ],
+      "upstream": [
+        "2.0.21"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "thiserror-impl",
+      "harness": [
+        "2.0.21"
+      ],
+      "upstream": [
+        "2.0.21"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "tokio",
+      "harness": [
+        "1.53.2"
+      ],
+      "upstream": [
+        "1.53.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "tokio-macros",
+      "harness": [
+        "2.7.2"
+      ],
+      "upstream": [
+        "2.7.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "tracing",
+      "harness": [
+        "0.1.44"
+      ],
+      "upstream": [
+        "0.1.44"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "tracing-attributes",
+      "harness": [
+        "0.1.31"
+      ],
+      "upstream": [
+        "0.1.31"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "tracing-core",
+      "harness": [
+        "0.1.36"
+      ],
+      "upstream": [
+        "0.1.36"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "typenum",
+      "harness": [
+        "1.20.1"
+      ],
+      "upstream": [
+        "1.20.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "unicode-ident",
+      "harness": [
+        "1.0.27"
+      ],
+      "upstream": [
+        "1.0.27"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "unicode-segmentation",
+      "harness": [
+        "1.13.3"
+      ],
+      "upstream": [
+        "1.13.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "unicode-width",
+      "harness": [
+        "0.2.2"
+      ],
+      "upstream": [
+        "0.2.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "unicode-xid",
+      "harness": [
+        "0.2.6"
+      ],
+      "upstream": [
+        "0.2.6"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "utf8parse",
+      "harness": [
+        "0.2.2"
+      ],
+      "upstream": [
+        "0.2.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "validit",
+      "harness": [
+        "0.2.6"
+      ],
+      "upstream": [
+        "0.2.6"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "version_check",
+      "harness": [
+        "0.9.5"
+      ],
+      "upstream": [
+        "0.9.5"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "wasi",
+      "harness": [
+        "0.11.1+wasi-snapshot-preview1"
+      ],
+      "upstream": [
+        "0.11.1+wasi-snapshot-preview1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "wasm-bindgen",
+      "harness": [
+        "0.2.129"
+      ],
+      "upstream": [
+        "0.2.129"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "wasm-bindgen-macro",
+      "harness": [
+        "0.2.129"
+      ],
+      "upstream": [
+        "0.2.129"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "wasm-bindgen-macro-support",
+      "harness": [
+        "0.2.129"
+      ],
+      "upstream": [
+        "0.2.129"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "wasm-bindgen-shared",
+      "harness": [
+        "0.2.129"
+      ],
+      "upstream": [
+        "0.2.129"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-core",
+      "harness": [
+        "0.62.2"
+      ],
+      "upstream": [
+        "0.62.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-implement",
+      "harness": [
+        "0.60.2"
+      ],
+      "upstream": [
+        "0.60.2"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-interface",
+      "harness": [
+        "0.59.3"
+      ],
+      "upstream": [
+        "0.59.3"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-link",
+      "harness": [
+        "0.2.1"
+      ],
+      "upstream": [
+        "0.2.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-result",
+      "harness": [
+        "0.4.1"
+      ],
+      "upstream": [
+        "0.4.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-strings",
+      "harness": [
+        "0.5.1"
+      ],
+      "upstream": [
+        "0.5.1"
+      ],
+      "same_versions": true
+    },
+    {
+      "package": "windows-sys",
+      "harness": [
+        "0.52.0",
+        "0.61.2"
+      ],
+      "upstream": [
+        "0.61.2"
+      ],
+      "same_versions": false
+    },
+    {
+      "package": "zmij",
+      "harness": [
+        "1.0.23"
+      ],
+      "upstream": [
+        "1.0.23"
+      ],
+      "same_versions": true
+    }
+  ]
+}

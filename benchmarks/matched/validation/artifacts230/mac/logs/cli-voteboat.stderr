@@ -1,0 +1,3 @@
+   Compiling voteboat-matched-framework v0.1.0 (/tmp/voteboat-matched230-mac/source/benchmarks/matched)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 4.68s
+     Running `/tmp/voteboat-matched230-mac/target-checks/debug/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 16384 --warmup 1024`

@@ -36,9 +36,17 @@ subsequently populated the normal cache. Earlier draft dependency pins were
 replaced by upstream-compatible requirements before this final qualification;
 older debug controls remain ignored diagnostic data under target/p9/matched-validation.
 
-This does not qualify Mac, full20-million-operation cells, sustained memory/debt,
+Both-host independent asserted-release build identities and Mac scoped
+qualification are recorded in [artifacts230/REPORT.md](artifacts230/REPORT.md).
+The [Linux primary pilot](pilot-linux131072/REPORT.md) completes18/18 short cases
+with exact original counts, maintenance and source/artifact guards. VoteBoat
+completes115487 writes/s at1/batch1 and731407/s at4096/batch4; untouched upstream
+completes22818/s and3170394/s respectively. These short medians establish the
+high-concurrency gap, not a minimum-floor pass. Mac pilot timing is pending.
+
+This does not qualify full20-million-operation cells, sustained memory/debt,
 all fault cases, generic application histories or performance victory. Historical
 VoteBoat image-frontier versus OpenRaft latest-image/retained-log differences and
 engine/host scheduling remain explicit in [SCHEMA.md](../SCHEMA.md). Independent
-release artifacts, complete primary curves, hardware/flags/lock identities and
-policy review remain required. The report comparison gate stays pending.
+complete primary curves and policy review remain required. The report comparison
+gate stays pending.

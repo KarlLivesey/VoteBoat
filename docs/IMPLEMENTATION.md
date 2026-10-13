@@ -51,7 +51,17 @@ six Linux controls (including real maintenance and paused-follower snapshot
 installation), formatting and strict all-target Clippy. Both actual1/16-runtime
 debug CLI controls return16384 original results and three frontiers17409. The
 independent lock follows the pinned upstream dependency requirements; comparison
-dependencies stay outside production. Mac/release/full curves remain pending.
+dependencies stay outside production. Both-host independent asserted-release
+builds and Mac's six controls now pass; exact compiler/lock/source/artifact
+identities are [archived](../benchmarks/matched/validation/artifacts230/REPORT.md).
+The Linux short primary pilot completes all18 cases with exact counts and guards.
+At1 client/batch1, VoteBoat completes115487 writes/s versus untouched upstream
+22818/s; at4096 clients/batch4,731407/s versus3170394/s (medians of three trials).
+Every unified replica reaches applied frontier132097. Default maintenance runs
+throughout, including actual follower snapshot installations.
+[Linux pilot](../benchmarks/matched/validation/pilot-linux131072/REPORT.md).
+These131072-original short cases do not establish sustained capacity or the
+complete minimum curve. Mac timing and full curves remain pending.
 The push hook now explicitly checks that workspace's formatter and strict lint.
 
 The [native batch observer](../validation/performance/native-batching/README.md)
@@ -67,9 +77,14 @@ window32 uses32 singleton visits plus two16-command batches and44 publications.
 Exact receipts/recovery/joins, weighted counts and source/artifact guards pass.
 Production scheduling/durability policy is unchanged; private queue causes remain
 unobserved. [Native attribution](../validation/performance/native-batching/README.md).
-The current mini plan covers measured campaigns, then the qualified concurrent
-comparison, then bounded configured resource/connection summaries. Planned
-work remains separate from passing evidence; no minimum floor is achieved.
+The current mini plan now prioritizes concurrent batching/persistence capacity
+after the measured comparison. Plain bootstrap checkpoints do not introduce
+snapshot membership, so configured connection caching does not address this
+pilot's high-concurrency gap; it remains planned for configured workloads.
+Native disk-backed window32 medians are36.655 TCP/33.603 QUIC writes/s on Linux
+and55.521 TCP/50.450 QUIC writes/s on M2 Max, with three replicas sharing each
+host/filesystem. CPU staging ratios do not predict these end-to-end durable rates.
+Planned work remains separate from passing evidence; no minimum floor is achieved.
 
 The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance

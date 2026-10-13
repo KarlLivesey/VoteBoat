@@ -1,0 +1,92 @@
+{
+  "harness": {
+    "compiler_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/source/benchmarks/matched/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-matched-framework",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/source/benchmarks/matched/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-harness/release/voteboat-matched-framework",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-harness/release/voteboat-matched-framework.dwp"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-harness/release/voteboat-matched-framework",
+      "fresh": false
+    },
+    "artifact_sha256": "83a3e9ccafbb2f48276320b0a8b8ab55177d44bd5b357ec7a02221b8ab12582e",
+    "artifact_bytes": 11470640,
+    "source_guard": "passed_before_after",
+    "lock_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d"
+  },
+  "upstream": {
+    "compiler_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-openraft230-linux/benchmarks/minimal#bench-minimal@0.1.0",
+      "manifest_path": "/tmp/voteboat-openraft230-linux/benchmarks/minimal/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench",
+        "src_path": "/tmp/voteboat-openraft230-linux/benchmarks/minimal/src/bin/bench.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/bench",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/bench.dwp"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/bench",
+      "fresh": false
+    },
+    "artifact_sha256": "30146a5688ea4c287f17dfa5c4926ea8212f0b2a11524bf1b2df24e236a0e7dd",
+    "artifact_bytes": 12844784,
+    "source_guard": "passed_before_after",
+    "lock_sha256": "3ef72b525fd94d0aa3d7f106b4e003a6c5e2a7ccc0ded39f776470d92787af0b"
+  },
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "flags": {
+    "opt_level": 3,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "lto": "thin",
+    "codegen_units": 1
+  }
+}
