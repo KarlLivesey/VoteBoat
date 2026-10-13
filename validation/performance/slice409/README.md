@@ -1,5 +1,8 @@
 # Validated log deltas
 
+[Matching Apple M2 Max measurements](m2-max/README.md) use the same96 workload
+cases in isolated reference/candidate builds; platform results remain separate.
+
 Core and native storage stage plain appends and metadata changes without copying
 unchanged history. Cached allocation/membership inspection avoids old scans.
 Configuration history, snapshots and replacement keep the full validator path.

@@ -1,0 +1,122 @@
+[
+  {
+    "variant": "reference",
+    "target": "voteboat",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-batch407/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-perf409/artifacts/reference-libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "30f73686a11636bc850cec421f98d0906067e4a1493d81023a001bbe745fce63"
+  },
+  {
+    "variant": "reference",
+    "target": "log_staging_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-batch407/build/release/examples/log_staging_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409/artifacts/reference-log_staging_benchmark",
+    "sha256": "e2a71a1feee20c0f425db096c31603d9ef5cfd8424ad1aeb538ba7578e478748"
+  },
+  {
+    "variant": "reference",
+    "target": "framework_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-batch407/build/release/examples/framework_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409/artifacts/reference-framework_benchmark",
+    "sha256": "4a5ea543f08045e5374ab2ee52092ff773bb142f4d7460d1e77084cb7b22622a"
+  },
+  {
+    "variant": "candidate",
+    "target": "voteboat",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-batch407/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-perf409/artifacts/candidate-libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "30f73686a11636bc850cec421f98d0906067e4a1493d81023a001bbe745fce63"
+  },
+  {
+    "variant": "candidate",
+    "target": "log_staging_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-batch407/build/release/examples/log_staging_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409/artifacts/candidate-log_staging_benchmark",
+    "sha256": "e2a71a1feee20c0f425db096c31603d9ef5cfd8424ad1aeb538ba7578e478748"
+  },
+  {
+    "variant": "candidate",
+    "target": "framework_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-batch407/build/release/examples/framework_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409/artifacts/candidate-framework_benchmark",
+    "sha256": "4a5ea543f08045e5374ab2ee52092ff773bb142f4d7460d1e77084cb7b22622a"
+  }
+]

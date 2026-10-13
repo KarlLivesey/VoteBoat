@@ -1,0 +1,12 @@
+hardware=0
+source_reference_start=0
+build_reference=0
+collect_reference=0
+source_reference_built=0
+source_candidate_start=0
+build_candidate=0
+collect_candidate=0
+source_candidate_built=0
+measurement=0
+source_reference_terminal=0
+source_candidate_terminal=0

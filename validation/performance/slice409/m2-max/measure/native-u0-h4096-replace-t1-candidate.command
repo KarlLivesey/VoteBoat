@@ -1,0 +1,1 @@
+/tmp/voteboat-p9-perf409-isolated/artifacts/candidate-log_staging_benchmark /tmp/voteboat-p9-perf409-isolated/measure/native-u0-h4096-replace-t1-candidate.csv 0 4096 512

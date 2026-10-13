@@ -1,0 +1,1 @@
+bash -c sysctl\ -n\ machdep.cpu.brand_string\;\ sysctl\ -n\ hw.physicalcpu\;\ sysctl\ -n\ hw.logicalcpu\;\ sysctl\ -n\ hw.memsize\;\ sw_vers\;\ uname\ -sm\;\ rustc\ +stable\ --version\;\ cargo\ +stable\ --version\;\ node\ --version 

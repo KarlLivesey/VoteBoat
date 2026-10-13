@@ -1,0 +1,134 @@
+[
+  {
+    "variant": "reference",
+    "target": "voteboat",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "compiler_fresh": false,
+    "compiler_source": "/private/tmp/voteboat-p9-perf409-isolated/reference/repo/src/lib.rs",
+    "original": "/tmp/voteboat-p9-perf409-isolated/build-reference/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-perf409-isolated/artifacts/reference-libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "fcead1610700e7f06b57308d9fc9581fc0f045b2f0c4f8113f600c23a77e3957"
+  },
+  {
+    "variant": "reference",
+    "target": "log_staging_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "compiler_fresh": false,
+    "compiler_source": "/private/tmp/voteboat-p9-perf409-isolated/reference/repo/examples/log_staging_benchmark.rs",
+    "original": "/tmp/voteboat-p9-perf409-isolated/build-reference/release/examples/log_staging_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409-isolated/artifacts/reference-log_staging_benchmark",
+    "sha256": "3c98cda81ec6b4f478f37c63c0558f61fe321a397d03c49f1359008e4f4abe0a"
+  },
+  {
+    "variant": "reference",
+    "target": "framework_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "compiler_fresh": false,
+    "compiler_source": "/private/tmp/voteboat-p9-perf409-isolated/reference/repo/examples/framework_benchmark.rs",
+    "original": "/tmp/voteboat-p9-perf409-isolated/build-reference/release/examples/framework_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409-isolated/artifacts/reference-framework_benchmark",
+    "sha256": "afbacf2a21909abb3ec4dd6a34a77685c69d6e0bd825a8b94d007b257101f5c4"
+  },
+  {
+    "variant": "candidate",
+    "target": "voteboat",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "compiler_fresh": false,
+    "compiler_source": "/private/tmp/voteboat-p9-perf409-isolated/candidate/repo/src/lib.rs",
+    "original": "/tmp/voteboat-p9-perf409-isolated/build-candidate/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-perf409-isolated/artifacts/candidate-libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "43e6ba342834fb6ef3ae5239db4b5abaec0106deee7700cc9ff16b6cfbc1d844"
+  },
+  {
+    "variant": "candidate",
+    "target": "log_staging_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "compiler_fresh": false,
+    "compiler_source": "/private/tmp/voteboat-p9-perf409-isolated/candidate/repo/examples/log_staging_benchmark.rs",
+    "original": "/tmp/voteboat-p9-perf409-isolated/build-candidate/release/examples/log_staging_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409-isolated/artifacts/candidate-log_staging_benchmark",
+    "sha256": "347006f87563c8545a93c3966046fe11513ddd7551a7cbc57b04b865e6d0a6c1"
+  },
+  {
+    "variant": "candidate",
+    "target": "framework_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "compiler_fresh": false,
+    "compiler_source": "/private/tmp/voteboat-p9-perf409-isolated/candidate/repo/examples/framework_benchmark.rs",
+    "original": "/tmp/voteboat-p9-perf409-isolated/build-candidate/release/examples/framework_benchmark",
+    "copy": "/tmp/voteboat-p9-perf409-isolated/artifacts/candidate-framework_benchmark",
+    "sha256": "69604abdd7836e1cfc386451478931c7e66d17b4620eb7326230fe58ee64a9a2"
+  }
+]

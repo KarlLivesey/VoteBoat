@@ -1,0 +1,1 @@
+cargo +stable build --locked --offline --release --all-features --example framework_benchmark --example log_staging_benchmark --message-format=json; CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=true CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=true

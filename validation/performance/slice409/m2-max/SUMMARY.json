@@ -1,0 +1,196 @@
+{
+  "scope": "Unmatched volatile CPU diagnostics on Apple M2 Max; not an OpenRaft floor or durable application comparison",
+  "hardware": {
+    "chip": "Apple M2 Max",
+    "physical_cores": 12,
+    "logical_cores": 12,
+    "memory_bytes": 103079215104,
+    "os": "macOS 27.0 build 26A428 / Darwin arm64"
+  },
+  "cases": 96,
+  "successful_case_exits": 96,
+  "source_guards": [
+    {
+      "variant": "reference",
+      "phase": "start",
+      "matching_inputs": 1319
+    },
+    {
+      "variant": "reference",
+      "phase": "built",
+      "matching_inputs": 1319
+    },
+    {
+      "variant": "reference",
+      "phase": "terminal",
+      "matching_inputs": 1319
+    },
+    {
+      "variant": "candidate",
+      "phase": "start",
+      "matching_inputs": 1328
+    },
+    {
+      "variant": "candidate",
+      "phase": "built",
+      "matching_inputs": 1328
+    },
+    {
+      "variant": "candidate",
+      "phase": "terminal",
+      "matching_inputs": 1328
+    }
+  ],
+  "immutable_artifacts_verified": 6,
+  "separate_target_directories": true,
+  "variant_artifacts_distinct": true,
+  "invalid_attempt": "attempt-shared-cache; excluded because both variants selected identical reference artifacts",
+  "aggregation": "Median of three trials for each variant; native values are medians of per-trial 512-row means",
+  "framework": [
+    {
+      "clients": 1,
+      "batch": 1,
+      "reference_ops_s": 4473.8534580168625,
+      "candidate_ops_s": 8903.921173411947,
+      "speedup": 1.9902129689689956,
+      "reference_request_p99_ms": 0.4295,
+      "candidate_request_p99_ms": 0.214542
+    },
+    {
+      "clients": 1,
+      "batch": 4,
+      "reference_ops_s": 17811.01232280282,
+      "candidate_ops_s": 35549.512447029076,
+      "speedup": 1.9959287997075983,
+      "reference_request_p99_ms": 0.429541,
+      "candidate_request_p99_ms": 0.216583
+    },
+    {
+      "clients": 64,
+      "batch": 1,
+      "reference_ops_s": 20625.729441309213,
+      "candidate_ops_s": 39768.84050760886,
+      "speedup": 1.9281180149662889,
+      "reference_request_p99_ms": 5.1165,
+      "candidate_request_p99_ms": 2.5205
+    },
+    {
+      "clients": 64,
+      "batch": 4,
+      "reference_ops_s": 67977.05608397556,
+      "candidate_ops_s": 131319.4057604527,
+      "speedup": 1.9318195480284859,
+      "reference_request_p99_ms": 5.988625,
+      "candidate_request_p99_ms": 2.82975
+    },
+    {
+      "clients": 256,
+      "batch": 1,
+      "reference_ops_s": 20983.92002618236,
+      "candidate_ops_s": 39917.69898244464,
+      "speedup": 1.902299424160879,
+      "reference_request_p99_ms": 18.935167,
+      "candidate_request_p99_ms": 9.405625
+    },
+    {
+      "clients": 256,
+      "batch": 4,
+      "reference_ops_s": 66577.08775856547,
+      "candidate_ops_s": 128521.11295016512,
+      "speedup": 1.9304105552984367,
+      "reference_request_p99_ms": 20.729,
+      "candidate_request_p99_ms": 10.235666
+    },
+    {
+      "clients": 1024,
+      "batch": 1,
+      "reference_ops_s": 20956.90936587457,
+      "candidate_ops_s": 41201.440440984166,
+      "speedup": 1.9660074737964472,
+      "reference_request_p99_ms": 67.853667,
+      "candidate_request_p99_ms": 34.916792
+    },
+    {
+      "clients": 1024,
+      "batch": 4,
+      "reference_ops_s": 66110.14385751302,
+      "candidate_ops_s": 121142.36182472929,
+      "speedup": 1.832432282795013,
+      "reference_request_p99_ms": 61.648209,
+      "candidate_request_p99_ms": 33.653375
+    }
+  ],
+  "native": [
+    {
+      "unrelated": 0,
+      "initial_history": 256,
+      "mode": "append",
+      "reference_mean_ns": 21912.59765625,
+      "candidate_mean_ns": 2702.890625,
+      "speedup": 8.10709743619389
+    },
+    {
+      "unrelated": 0,
+      "initial_history": 256,
+      "mode": "replace",
+      "reference_mean_ns": 10382.83203125,
+      "candidate_mean_ns": 7442.048828125,
+      "speedup": 1.3951577409719738
+    },
+    {
+      "unrelated": 0,
+      "initial_history": 4096,
+      "mode": "append",
+      "reference_mean_ns": 173131.263671875,
+      "candidate_mean_ns": 2660.724609375,
+      "speedup": 65.06921575493048
+    },
+    {
+      "unrelated": 0,
+      "initial_history": 4096,
+      "mode": "replace",
+      "reference_mean_ns": 161139.23046875,
+      "candidate_mean_ns": 89339.265625,
+      "speedup": 1.803677580529138
+    },
+    {
+      "unrelated": 8,
+      "initial_history": 256,
+      "mode": "append",
+      "reference_mean_ns": 21830.806640625,
+      "candidate_mean_ns": 2676.50390625,
+      "speedup": 8.156463582827996
+    },
+    {
+      "unrelated": 8,
+      "initial_history": 256,
+      "mode": "replace",
+      "reference_mean_ns": 10259.54296875,
+      "candidate_mean_ns": 7291.814453125,
+      "speedup": 1.4069945189503748
+    },
+    {
+      "unrelated": 8,
+      "initial_history": 4096,
+      "mode": "append",
+      "reference_mean_ns": 175112.470703125,
+      "candidate_mean_ns": 2925.77734375,
+      "speedup": 59.85160527584149
+    },
+    {
+      "unrelated": 8,
+      "initial_history": 4096,
+      "mode": "replace",
+      "reference_mean_ns": 161987.14453125,
+      "candidate_mean_ns": 91600.841796875,
+      "speedup": 1.7684023569396528
+    }
+  ],
+  "limitations": [
+    "Volatile exact-ticket CPU diagnostics; no physical persistence or real network",
+    "Unmatched OpenRaft comparison; these do not establish any framework floor",
+    "Single cooperative framework driver; not multicore or independent-group scaling evidence",
+    "Framework p99 unit is all original results in one client batch",
+    "Native append histories grow by 528 entries including warmup; replacement histories remain fixed"
+  ]
+}

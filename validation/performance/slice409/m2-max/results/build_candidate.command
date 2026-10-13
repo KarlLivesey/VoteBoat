@@ -1,0 +1,1 @@
+CARGO_TARGET_DIR=/tmp/voteboat-p9-perf409-isolated/build-candidate CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=true CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=true cargo +stable build --locked --offline --release --all-features --example framework_benchmark --example log_staging_benchmark --message-format=json
