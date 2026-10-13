@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 //! Standalone comparison-only runtime; no production Tokio/OpenRaft adapter.
 mod application;
+mod attribution;
 mod openraft_engine;
 mod snapshots;
 mod store;
@@ -52,6 +53,7 @@ struct Settings {
     warmup: usize,
     maintenance: Maintenance,
     envelopes: Envelopes,
+    attribution: bool,
 }
 impl Settings {
     fn parse() -> Result<(String, Self), Failure> {
@@ -64,12 +66,14 @@ impl Settings {
             warmup: 1024,
             maintenance: Maintenance::DefaultRetention,
             envelopes: Envelopes::UpstreamDefault,
+            attribution: false,
         };
         let mut args = env::args().skip(1);
         while let Some(name) = args.next() {
             let value = args.next().ok_or("every option requires a value")?;
             match name.as_str() {
                 "--engine" => engine = value,
+                "--attribution" => settings.attribution = value.parse()?,
                 "--clients" => settings.clients = value.parse()?,
                 "--batch" => settings.batch = value.parse()?,
                 "--operations" => settings.requested_operations = value.parse()?,
@@ -93,6 +97,9 @@ impl Settings {
         }
         if !matches!(engine.as_str(), "voteboat" | "openraft") {
             return Err("engine must be voteboat or openraft".into());
+        }
+        if engine == "openraft" && settings.attribution {
+            return Err("elapsed phase attribution is available only for voteboat".into());
         }
         Ok((engine, settings.validate()?))
     }
@@ -141,8 +148,9 @@ fn main() -> Result<(), Failure> {
     });
     // Cleanup runs for successful/failed/timeout campaigns alike.
     let cleanup = server.block_on(cluster.shutdown());
-    let report = result?;
+    let mut report = result?;
     cleanup?;
+    report.attach_attribution(&cluster);
     println!("{}", serde_json::to_string(&report)?);
     Ok(())
 }
@@ -160,6 +168,7 @@ mod tests {
             warmup: 1024,
             maintenance: Maintenance::DefaultRetention,
             envelopes: Envelopes::UpstreamDefault,
+            attribution: false,
         }
         .validate()
         .unwrap();

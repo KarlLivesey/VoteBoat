@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Exact-ticket volatile completion, including snapshot anchor transitions.
+use crate::attribution::{Phase, Recorder};
 use voteboat::{contracts::StorageError, identity::*, log::*};
 
-pub(super) struct MemoryStore {
+pub(super) struct MemoryStore<const TRACE: bool = false> {
+    pub attribution: Recorder<TRACE>,
     binding: StoreBinding,
     limits: LogLimits,
     state: OwnedLogState,
     sequence: u64,
     pending: Vec<LogTicket>,
 }
-impl MemoryStore {
+impl<const TRACE: bool> MemoryStore<TRACE> {
     pub fn new(
         binding: StoreBinding,
         limits: LogLimits,
@@ -19,6 +21,7 @@ impl MemoryStore {
         let mut state = OwnedLogState::new(limits)?;
         state.apply_batch(vec![LogMutation::Create(bootstrap)])?;
         Ok(Self {
+            attribution: Recorder::default(),
             binding,
             limits,
             state,
@@ -35,20 +38,8 @@ impl MemoryStore {
             .ok_or(StorageError::Rejected("unknown group"))
     }
 }
-impl LogStore for MemoryStore {
-    fn binding(&self) -> StoreBinding {
-        self.binding
-    }
-    fn limits(&self) -> LogLimits {
-        self.limits
-    }
-    fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
-        self.completed_state(group).cloned()
-    }
-    fn append_batch(
-        &mut self,
-        mutations: Vec<LogMutation>,
-    ) -> Result<Vec<LogTicket>, StorageError> {
+impl<const TRACE: bool> MemoryStore<TRACE> {
+    fn append(&mut self, mutations: Vec<LogMutation>) -> Result<Vec<LogTicket>, StorageError> {
         if !self.pending.is_empty() {
             return Err(StorageError::Rejected(
                 "one outstanding volatile transition",
@@ -85,7 +76,7 @@ impl LogStore for MemoryStore {
         self.pending.clone_from(&tickets);
         Ok(tickets)
     }
-    fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError> {
+    fn complete(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError> {
         if dependencies.is_empty() || self.pending.as_slice() != dependencies {
             return Err(StorageError::StaleTicket);
         }
@@ -93,6 +84,37 @@ impl LogStore for MemoryStore {
         Ok(DurableLog {
             tickets: dependencies.to_vec(),
         })
+    }
+}
+
+impl<const TRACE: bool> LogStore for MemoryStore<TRACE> {
+    fn binding(&self) -> StoreBinding {
+        self.binding
+    }
+    fn limits(&self) -> LogLimits {
+        self.limits
+    }
+    fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
+        self.completed_state(group).cloned()
+    }
+    fn append_batch(
+        &mut self,
+        mutations: Vec<LogMutation>,
+    ) -> Result<Vec<LogTicket>, StorageError> {
+        let started = Recorder::<TRACE>::start();
+        let result = self.append(mutations);
+        self.attribution
+            .finish(Phase::StoreAppend, started, result.is_err(), 0)
+            .map_err(|_| StorageError::Rejected("attribution exhausted"))?;
+        result
+    }
+    fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError> {
+        let started = Recorder::<TRACE>::start();
+        let result = self.complete(dependencies);
+        self.attribution
+            .finish(Phase::StoreBarrier, started, result.is_err(), 0)
+            .map_err(|_| StorageError::Rejected("attribution exhausted"))?;
+        result
     }
     fn fetch_range(
         &self,

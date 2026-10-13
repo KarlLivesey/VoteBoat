@@ -3,7 +3,7 @@
 mod actor;
 mod stats;
 use super::{application::Noop, snapshots::MemorySnapshots, store::MemoryStore, Failure, Settings};
-use crate::CHANNEL_CAPACITY;
+use crate::{attribution::Attribution, CHANNEL_CAPACITY};
 pub(crate) use stats::Diagnostics;
 use std::{
     collections::BTreeMap,
@@ -28,7 +28,8 @@ struct Request {
 pub(super) struct Client(mpsc::Sender<Request>);
 pub(super) struct Cluster {
     senders: Vec<mpsc::Sender<Request>>,
-    actors: Vec<JoinHandle<Result<(), Failure>>>,
+    actors: Vec<JoinHandle<Result<Option<Attribution>, Failure>>>,
+    attribution: Vec<Attribution>,
     frontiers: Arc<[AtomicU64; 3]>,
     stopping: Arc<AtomicBool>,
     stop: watch::Sender<bool>,
@@ -51,6 +52,13 @@ impl Drop for Cluster {
 }
 impl Cluster {
     pub async fn new(settings: Settings) -> Result<Self, Failure> {
+        if settings.attribution {
+            Self::create::<true>(settings).await
+        } else {
+            Self::create::<false>(settings).await
+        }
+    }
+    async fn create<const TRACE: bool>(settings: Settings) -> Result<Self, Failure> {
         let bootstrap = bootstrap()?;
         let group = bootstrap.group;
         let limits = LogLimits {
@@ -82,7 +90,7 @@ impl Cluster {
                 identity: bootstrap.voter_stores[&node],
                 session: StoreSession::new(1).unwrap(),
             };
-            let store = MemoryStore::new(binding, limits, bootstrap.clone())?;
+            let store = MemoryStore::<TRACE>::new(binding, limits, bootstrap.clone())?;
             let mut core =
                 Raft::recover(node, binding, store.state(group)?, limits).map_err(debug_error)?;
             core.configure_batch_limits(batch_limits)
@@ -115,11 +123,12 @@ impl Cluster {
         // Validate all fallible replica construction before starting any actor.
         let actors = parts
             .into_iter()
-            .map(|parts| tokio::spawn(actor::Actor::new(parts).run()))
+            .map(|parts| tokio::spawn(actor::Actor::<TRACE>::new(parts).run()))
             .collect();
         let cluster = Self {
             senders,
             actors,
+            attribution: Vec::new(),
             frontiers,
             stopping,
             stop,
@@ -142,6 +151,9 @@ impl Cluster {
     }
     pub fn diagnostics(&self) -> Vec<Diagnostics> {
         self.stats.iter().map(stats::Stats::read).collect()
+    }
+    pub fn attribution(&self) -> &[Attribution] {
+        &self.attribution
     }
     pub fn batch_limits(&self) -> BatchLimits {
         self.batch_limits
@@ -183,8 +195,12 @@ impl Cluster {
         let _ = self.stop.send(true);
         let mut first = None;
         for actor in self.actors.drain(..) {
-            if let Err(error) = actor.await.map_err(Failure::from).and_then(|r| r) {
-                first.get_or_insert(error);
+            match actor.await.map_err(Failure::from).and_then(|r| r) {
+                Ok(Some(attribution)) => self.attribution.push(attribution),
+                Ok(None) => {}
+                Err(error) => {
+                    first.get_or_insert(error);
+                }
             }
         }
         first.map_or(Ok(()), Err)
@@ -275,10 +291,13 @@ mod tests {
     }
     #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
     async fn queued_three_voter_originals_keep_every_receipt_and_respect_the_bound() {
-        for envelopes in [
+        for (envelopes, attribution) in [
             crate::Envelopes::UpstreamDefault,
             crate::Envelopes::Common64,
-        ] {
+        ]
+        .into_iter()
+        .flat_map(|envelopes| [false, true].map(|attribution| (envelopes, attribution)))
+        {
             let settings = Settings {
                 clients: 1024,
                 batch: 4,
@@ -287,6 +306,7 @@ mod tests {
                 warmup: 0,
                 maintenance: crate::Maintenance::DefaultRetention,
                 envelopes,
+                attribution,
             }
             .validate()
             .unwrap();
@@ -324,34 +344,54 @@ mod tests {
     }
     #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
     async fn compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install() {
-        let settings = Settings {
-            clients: 1,
-            batch: 4,
-            requested_operations: 12_000,
-            operations: 12_000,
-            warmup: 0,
-            maintenance: crate::Maintenance::DefaultRetention,
-            envelopes: crate::Envelopes::UpstreamDefault,
+        for attribution in [false, true] {
+            let settings = Settings {
+                clients: 1,
+                batch: 4,
+                requested_operations: 12_000,
+                operations: 12_000,
+                warmup: 0,
+                maintenance: crate::Maintenance::DefaultRetention,
+                envelopes: crate::Envelopes::UpstreamDefault,
+                attribution,
+            }
+            .validate()
+            .unwrap();
+            let mut cluster = Cluster::new(settings).await.unwrap();
+            cluster.pause_follower(2, true);
+            let client = cluster.client();
+            for start in (1..=12_000).step_by(4) {
+                let originals: Vec<_> = (start..start + 4).map(|n| n as u128).collect();
+                assert_eq!(client.write(&originals).await.unwrap(), 4);
+            }
+            assert!(cluster.frontiers[2].load(Ordering::Acquire) < 4001);
+            cluster.pause_follower(2, false);
+            let result = cluster.verify(12_000, 0).await;
+            let installed = cluster.stats[2].snapshot_installs.load(Ordering::Relaxed);
+            let cleanup = cluster.shutdown().await;
+            assert_eq!(result.unwrap(), vec![12_001; 3]);
+            assert!(
+                installed > 0,
+                "follower must install a verified anchored image"
+            );
+            cleanup.unwrap();
+            if attribution {
+                let follower = serde_json::to_value(
+                    cluster
+                        .attribution()
+                        .iter()
+                        .find(|value| serde_json::to_value(value).unwrap()["replica_slot"] == 2)
+                        .unwrap(),
+                )
+                .unwrap();
+                let helpers = follower["phases"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .find(|phase| phase["phase"] == "snapshot_helpers_inclusive")
+                    .unwrap();
+                assert!(helpers["calls"].as_u64().unwrap() >= installed as u64);
+            }
         }
-        .validate()
-        .unwrap();
-        let mut cluster = Cluster::new(settings).await.unwrap();
-        cluster.pause_follower(2, true);
-        let client = cluster.client();
-        for start in (1..=12_000).step_by(4) {
-            let originals: Vec<_> = (start..start + 4).map(|n| n as u128).collect();
-            assert_eq!(client.write(&originals).await.unwrap(), 4);
-        }
-        assert!(cluster.frontiers[2].load(Ordering::Acquire) < 4001);
-        cluster.pause_follower(2, false);
-        let result = cluster.verify(12_000, 0).await;
-        let installed = cluster.stats[2].snapshot_installs.load(Ordering::Relaxed);
-        let cleanup = cluster.shutdown().await;
-        assert_eq!(result.unwrap(), vec![12_001; 3]);
-        assert!(
-            installed > 0,
-            "follower must install a verified anchored image"
-        );
-        cleanup.unwrap();
     }
 }

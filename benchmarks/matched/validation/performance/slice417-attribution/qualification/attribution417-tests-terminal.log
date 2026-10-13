@@ -1,0 +1,19 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.74s
+     Running unittests src/main.rs (target/p9/attribution417-checks/debug/deps/voteboat_matched_framework-74d0de8a287da0e5)
+
+running 11 tests
+test attribution::tests::disabled_recorder_reads_no_clock_and_emits_no_record ... ok
+test workload::tests::unavailable_upstream_attribution_is_rejected_explicitly ... ok
+test attribution::tests::interval_accounting_is_checked_and_overflow_is_atomic ... ok
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test voteboat_engine::actor::tests::preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.68s
+

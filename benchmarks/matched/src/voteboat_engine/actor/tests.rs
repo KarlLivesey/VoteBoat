@@ -2,7 +2,9 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
-fn ready_actor(envelopes: crate::Envelopes) -> (Actor, mpsc::Sender<Request>) {
+fn ready_actor<const TRACE: bool>(
+    envelopes: crate::Envelopes,
+) -> (Actor<TRACE>, mpsc::Sender<Request>) {
     let node = NodeId::new(1).unwrap();
     let mut bootstrap = bootstrap().unwrap();
     bootstrap.voter_stores.retain(|member, _| *member == node);
@@ -13,7 +15,7 @@ fn ready_actor(envelopes: crate::Envelopes) -> (Actor, mpsc::Sender<Request>) {
         session: StoreSession::new(1).unwrap(),
     };
     let limits = LogLimits::default();
-    let store = MemoryStore::new(binding, limits, bootstrap).unwrap();
+    let store = MemoryStore::<TRACE>::new(binding, limits, bootstrap).unwrap();
     let mut core = Raft::recover(node, binding, store.state(group).unwrap(), limits).unwrap();
     core.configure_batch_limits(envelopes.voteboat_limits())
         .unwrap();
@@ -25,6 +27,7 @@ fn ready_actor(envelopes: crate::Envelopes) -> (Actor, mpsc::Sender<Request>) {
         warmup: 0,
         maintenance: Maintenance::DefaultRetention,
         envelopes,
+        attribution: TRACE,
     }
     .validate()
     .unwrap();
@@ -75,11 +78,15 @@ fn preload(sender: &mpsc::Sender<Request>) -> Vec<(OperationId, oneshot::Receive
 
 #[test]
 fn preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals() {
+    checked_ready::<false>();
+    checked_ready::<true>();
+}
+fn checked_ready<const TRACE: bool>() {
     for envelopes in [
         crate::Envelopes::UpstreamDefault,
         crate::Envelopes::Common64,
     ] {
-        let (mut actor, sender) = ready_actor(envelopes);
+        let (mut actor, sender) = ready_actor::<TRACE>(envelopes);
         let waits = preload(&sender);
         while let Ok(request) = actor.parts.receiver.try_recv() {
             actor.requests(request).unwrap();

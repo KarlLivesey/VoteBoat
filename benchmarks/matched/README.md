@@ -50,3 +50,14 @@ untouched published-default driver. Internal OpenRaft queue/retention occupancy 
 unavailable through its minimal provider; it is not reported as zero. Long curves
 and policy review remain outstanding. Reports keep the comparison gate
 pending until that evidence exists.
+
+`--engine voteboat --attribution true` adds bounded per-replica elapsed phase
+intervals after actor shutdown. The default path reads no attribution clocks and
+omits that object. Records include campaign, warmup and follower drain. Persistence
+and maintenance are inclusive; store append/barrier intervals are nested. Actors
+overlap, so sums describe neither CPU time nor the request critical path. Upstream
+phase attribution is unavailable and explicitly rejected. Instrumented rates are
+diagnostic and cannot qualify the performance minimum.
+[Attribution checks](validation/performance/slice417-attribution/REPORT.md) cover
+the default and enabled paths, every original result, maintenance and snapshot
+installation; actual elapsed diagnostic trials remain pending.

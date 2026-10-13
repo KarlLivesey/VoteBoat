@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-use crate::Maintenance;
+use crate::{
+    attribution::{Attribution, Phase, Recorder},
+    Maintenance,
+};
 use std::{collections::VecDeque, mem::size_of, time::Instant};
 use voteboat::{application::StateMachine, snapshot::*};
 
 #[cfg(test)]
 mod tests;
 
-pub(super) struct Parts {
+pub(super) struct Parts<const TRACE: bool = false> {
     pub slot: usize,
     pub core: Raft,
-    pub store: MemoryStore,
+    pub store: MemoryStore<TRACE>,
     pub snapshots: MemorySnapshots,
     pub application: Noop,
     pub receiver: mpsc::Receiver<Request>,
@@ -29,24 +32,36 @@ pub(super) struct Parts {
     pub frontiers: Arc<[AtomicU64; 3]>,
     pub settings: Settings,
 }
-pub(super) struct Actor {
-    parts: Parts,
+pub(super) struct Actor<const TRACE: bool = false> {
+    parts: Parts<TRACE>,
+    attribution: Recorder<TRACE>,
     pending: BTreeMap<OperationId, Reply>,
     deferred: Option<Request>,
     last_snapshot_at: u64,
     last_contact: Instant,
 }
-impl Actor {
-    pub fn new(parts: Parts) -> Self {
+impl<const TRACE: bool> Actor<TRACE> {
+    pub fn new(parts: Parts<TRACE>) -> Self {
         Self {
             parts,
+            attribution: Recorder::default(),
             pending: BTreeMap::new(),
             deferred: None,
             last_snapshot_at: 0,
             last_contact: Instant::now(),
         }
     }
-    pub async fn run(mut self) -> Result<(), Failure> {
+    pub async fn run(mut self) -> Result<Option<Attribution>, Failure> {
+        let started = Recorder::<TRACE>::start();
+        let result = self.run_inner().await;
+        self.attribution
+            .finish(Phase::ActorLifetime, started, result.is_err(), 0)?;
+        result?;
+        Ok(self
+            .attribution
+            .report(self.parts.slot, &self.parts.store.attribution))
+    }
+    async fn run_inner(&mut self) -> Result<(), Failure> {
         let mut tick = tokio::time::interval(Duration::from_millis(50));
         tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
         if self.parts.slot == 0 {
@@ -57,16 +72,27 @@ impl Actor {
             if let Some(request) = self.deferred.take() {
                 self.requests(request)?;
             } else {
+                let started = Recorder::<TRACE>::start();
                 tokio::select! {
                     biased;
-                    _ = self.parts.stopped.changed() => return Ok(()),
+                    _ = self.parts.stopped.changed() => {
+                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        return Ok(());
+                    }
                     message = self.parts.peer_receiver.recv(), if self.accepts_peer() => {
+                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
                         let message = message.ok_or("peer actor input closed")?;
                         self.last_contact = Instant::now();
                         self.step(Event::Receive(message))?;
                     }
-                    request = self.parts.receiver.recv(), if self.accepts_proposals() => self.requests(request.ok_or("client actor input closed")?)?,
-                    _ = tick.tick() => self.tick()?,
+                    request = self.parts.receiver.recv(), if self.accepts_proposals() => {
+                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        self.requests(request.ok_or("client actor input closed")?)?;
+                    }
+                    _ = tick.tick() => {
+                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        self.tick()?;
+                    }
                 }
             }
             let stats = &self.parts.stats[self.parts.slot];
@@ -144,10 +170,41 @@ impl Actor {
             _ => size_of::<Event>(),
         };
         self.reserve(input)?;
-        let effects = self.parts.core.step(event).map_err(debug_error)?;
+        let started = Recorder::<TRACE>::start();
+        let result = self.parts.core.step(event);
+        self.attribution
+            .finish(Phase::Core, started, result.is_err(), 0)?;
+        let effects = result.map_err(debug_error)?;
         self.effects(effects)
     }
     fn requests(&mut self, first: Request) -> Result<(), Failure> {
+        let started = Recorder::<TRACE>::start();
+        let proposals = self.collect(first);
+        self.attribution.finish(
+            Phase::HostAdmission,
+            started,
+            proposals.is_err(),
+            proposals.as_ref().map_or(0, Vec::len),
+        )?;
+        let mut proposals = proposals?;
+        let width = proposals.len();
+        let started = Recorder::<TRACE>::start();
+        let result = if width == 1 {
+            let proposal = proposals.pop().unwrap();
+            self.parts.core.step(Event::Propose {
+                operation: proposal.operation,
+                bytes: proposal.bytes,
+            })
+        } else {
+            self.parts.core.propose_batch(proposals)
+        };
+        self.attribution
+            .finish(Phase::Core, started, result.is_err(), width)?;
+        let effects = result.map_err(debug_error)?;
+        self.parts.stats[self.parts.slot].record_proposals(width)?;
+        self.effects(effects)
+    }
+    fn collect(&mut self, first: Request) -> Result<Vec<Proposal>, Failure> {
         let capacity = self.parts.core.batch_limits().max_proposal_entries;
         let mut proposals = Vec::with_capacity(first.proposals.len());
         self.include(first, &mut proposals)?;
@@ -167,19 +224,7 @@ impl Actor {
             }
         }
         self.reserve(size_of::<Vec<Proposal>>() + proposals.capacity() * size_of::<Proposal>())?;
-        let width = proposals.len();
-        let effects = if width == 1 {
-            let proposal = proposals.pop().unwrap();
-            self.parts.core.step(Event::Propose {
-                operation: proposal.operation,
-                bytes: proposal.bytes,
-            })
-        } else {
-            self.parts.core.propose_batch(proposals)
-        }
-        .map_err(debug_error)?;
-        self.parts.stats[self.parts.slot].record_proposals(width)?;
-        self.effects(effects)
+        Ok(proposals)
     }
     fn include(&mut self, request: Request, proposals: &mut Vec<Proposal>) -> Result<(), Failure> {
         if request.proposals.is_empty()
@@ -207,89 +252,136 @@ impl Actor {
                     self.parts.stats[self.parts.slot]
                         .persistence_units
                         .fetch_add(1, Ordering::Relaxed);
-                    effects.extend(
-                        persist_effect(&mut self.parts.core, &mut self.parts.store, update)
-                            .map_err(debug_error)?,
-                    );
+                    let started = Recorder::<TRACE>::start();
+                    let result =
+                        persist_effect(&mut self.parts.core, &mut self.parts.store, update);
+                    self.attribution
+                        .finish(Phase::PersistHelper, started, result.is_err(), 0)?;
+                    effects.extend(result.map_err(debug_error)?);
                 }
-                Effect::Send(message) => {
-                    let slot = usize::try_from(message.to.get() - 1)?;
-                    let sent = self
-                        .parts
-                        .peers
-                        .get(slot)
-                        .ok_or("unknown recipient")?
-                        .try_send(message);
-                    if sent.is_err() && !self.parts.stopping.load(Ordering::Acquire) {
-                        return Err("peer queue overflow/closed".into());
-                    }
-                }
-                Effect::Committed(entries) => {
-                    let results = self
-                        .parts
-                        .application
-                        .apply_batch(&entries)
-                        .map_err(debug_error)?;
-                    if self.parts.slot == 0 {
-                        for operation in results {
-                            let reply = self
-                                .pending
-                                .remove(&operation)
-                                .ok_or("missing/duplicate original applied result")?;
-                            reply
-                                .send(operation)
-                                .map_err(|_| "original client dropped result wait")?;
-                        }
-                    }
-                }
-                Effect::SnapshotRequired {
-                    to,
-                    context,
-                    reference,
-                } => effects.extend(
-                    supply_snapshot(
-                        &self.parts.core,
-                        &mut self.parts.snapshots,
-                        to,
-                        context,
-                        reference,
-                    )
-                    .map_err(debug_error)?,
-                ),
-                Effect::StageSnapshot(message) => effects.extend(
-                    stage_snapshot_effect(
-                        &mut self.parts.core,
-                        &mut self.parts.store,
-                        &mut self.parts.snapshots,
-                        &self.parts.application,
-                        message,
-                    )
-                    .map_err(debug_error)?,
-                ),
-                Effect::SnapshotInstalled(reference) => {
-                    self.parts.stats[self.parts.slot]
-                        .snapshot_installs
-                        .fetch_add(1, Ordering::Relaxed);
-                    effects.extend(
-                        finish_snapshot_install(
-                            &mut self.parts.core,
-                            &self.parts.store,
-                            &mut self.parts.snapshots,
-                            &mut self.parts.application,
-                            reference,
-                        )
-                        .map_err(debug_error)?,
-                    );
-                }
-                Effect::CheckpointCompacted(reference) => {
-                    self.parts.snapshots.reconcile_log(Some(reference))?;
+                Effect::Send(message) => self.send(message)?,
+                Effect::Committed(entries) => self.apply(entries)?,
+                snapshot @ (Effect::SnapshotRequired { .. }
+                | Effect::StageSnapshot(_)
+                | Effect::SnapshotInstalled(_)
+                | Effect::CheckpointCompacted(_)) => {
+                    let started = Recorder::<TRACE>::start();
+                    let result = self.snapshot(snapshot);
+                    self.attribution.finish(
+                        Phase::SnapshotMaintenance,
+                        started,
+                        result.is_err(),
+                        0,
+                    )?;
+                    effects.extend(result?);
                 }
                 _ => return Err("unexpected read/configuration effect in framework run".into()),
             }
         }
         Ok(())
     }
+    fn send(&mut self, message: Message) -> Result<(), Failure> {
+        let started = Recorder::<TRACE>::start();
+        let result = self.send_inner(message);
+        self.attribution
+            .finish(Phase::Send, started, result.is_err(), 1)?;
+        result
+    }
+    fn send_inner(&self, message: Message) -> Result<(), Failure> {
+        let slot = usize::try_from(message.to.get() - 1)?;
+        let sent = self
+            .parts
+            .peers
+            .get(slot)
+            .ok_or("unknown recipient")?
+            .try_send(message);
+        if sent.is_err() && !self.parts.stopping.load(Ordering::Acquire) {
+            return Err("peer queue overflow/closed".into());
+        }
+        Ok(())
+    }
+    fn apply(&mut self, entries: Vec<LogEntry>) -> Result<(), Failure> {
+        let started = Recorder::<TRACE>::start();
+        let results = self.parts.application.apply_batch(&entries);
+        self.attribution.finish(
+            Phase::Application,
+            started,
+            results.is_err(),
+            results.as_ref().map_or(0, Vec::len),
+        )?;
+        let results = results.map_err(debug_error)?;
+        if self.parts.slot == 0 {
+            let started = Recorder::<TRACE>::start();
+            let count = results.len();
+            let result = self.deliver(results);
+            self.attribution
+                .finish(Phase::Results, started, result.is_err(), count)?;
+            result?;
+        }
+        Ok(())
+    }
+    fn deliver(&mut self, results: Vec<OperationId>) -> Result<(), Failure> {
+        for operation in results {
+            let reply = self
+                .pending
+                .remove(&operation)
+                .ok_or("missing/duplicate original applied result")?;
+            reply
+                .send(operation)
+                .map_err(|_| "original client dropped result wait")?;
+        }
+        Ok(())
+    }
+    fn snapshot(&mut self, effect: Effect) -> Result<Vec<Effect>, Failure> {
+        match effect {
+            Effect::SnapshotRequired {
+                to,
+                context,
+                reference,
+            } => supply_snapshot(
+                &self.parts.core,
+                &mut self.parts.snapshots,
+                to,
+                context,
+                reference,
+            )
+            .map_err(debug_error),
+            Effect::StageSnapshot(message) => stage_snapshot_effect(
+                &mut self.parts.core,
+                &mut self.parts.store,
+                &mut self.parts.snapshots,
+                &self.parts.application,
+                message,
+            )
+            .map_err(debug_error),
+            Effect::SnapshotInstalled(reference) => {
+                self.parts.stats[self.parts.slot]
+                    .snapshot_installs
+                    .fetch_add(1, Ordering::Relaxed);
+                finish_snapshot_install(
+                    &mut self.parts.core,
+                    &self.parts.store,
+                    &mut self.parts.snapshots,
+                    &mut self.parts.application,
+                    reference,
+                )
+                .map_err(debug_error)
+            }
+            Effect::CheckpointCompacted(reference) => {
+                self.parts.snapshots.reconcile_log(Some(reference))?;
+                Ok(Vec::new())
+            }
+            _ => Err("not a snapshot effect".into()),
+        }
+    }
     fn maintain(&mut self) -> Result<(), Failure> {
+        let started = Recorder::<TRACE>::start();
+        let result = self.maintain_inner();
+        self.attribution
+            .finish(Phase::Maintenance, started, result.is_err(), 0)?;
+        result
+    }
+    fn maintain_inner(&mut self) -> Result<(), Failure> {
         if self.parts.settings.maintenance != Maintenance::DefaultRetention {
             return Ok(());
         }

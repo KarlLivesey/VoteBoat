@@ -99,3 +99,19 @@ artifacts/policy review; seven cells, at least three interleaved trials, exact
 counts/p99/errors/raw reports, source/lock/artifact/hardware identities). The
 comparison gate remains pending; no performance acceptance closes from these
 functional controls alone.
+# Elapsed diagnostic attribution
+
+The optional `--attribution true` VoteBoat mode uses the same const-generic actor
+and MemoryStore code as the default untimed mode. Fixed local counters record
+calls, failures, items, elapsed totals and maxima; checked overflow fails the run.
+There are no per-entry traces. Actor reports become available only after owned
+shutdown/join, including campaign, warmup, follower drain and shutdown. Default
+reports omit attribution; unavailable upstream phases are explicitly rejected.
+
+Direct Core intervals exclude helper continuation. Persistence helpers include
+their store append/barrier and Core continuation. Maintenance ticks include their
+effects and any snapshot helper intervals. Store and snapshot subintervals remain
+labeled as nested. Intervals are monotonic elapsed wall time; actor overlap and
+descheduling prevent CPU or critical-path inference. No phase totals should be
+summed as exclusive work. Existing original counts, request latencies and all
+applied-frontier checks retain their independent meaning.

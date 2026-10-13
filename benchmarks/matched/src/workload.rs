@@ -16,6 +16,9 @@ enum Client {
 }
 impl Cluster {
     pub async fn new(engine: &str, settings: Settings) -> Result<Self, Failure> {
+        if engine == "openraft" && settings.attribution {
+            return Err("elapsed phase attribution is available only for voteboat".into());
+        }
         match engine {
             "openraft" => Ok(Self::Openraft(
                 openraft_engine::Cluster::new(settings).await?,
@@ -80,6 +83,17 @@ pub(super) struct Report {
     request_p50_ns: u64,
     request_p99_ns: u64,
     applied_frontiers: Vec<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    attribution: Option<Vec<crate::attribution::Attribution>>,
+}
+impl Report {
+    pub fn attach_attribution(&mut self, cluster: &Cluster) {
+        if self.settings.attribution {
+            if let Cluster::Voteboat(cluster) = cluster {
+                self.attribution = Some(cluster.attribution().to_vec());
+            }
+        }
+    }
 }
 struct Completed {
     originals: usize,
@@ -171,6 +185,7 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
         operations_per_second: completed as f64 / seconds,
         request_p50_ns: percentile(&latencies, 50), request_p99_ns: percentile(&latencies, 99),
         applied_frontiers: frontiers,
+        attribution: None,
     })
 }
 fn percentile(sorted: &[u64], percent: usize) -> u64 {
@@ -190,6 +205,7 @@ mod tests {
             warmup: 4,
             maintenance: crate::Maintenance::DefaultRetention,
             envelopes: crate::Envelopes::UpstreamDefault,
+            attribution: false,
         }
         .validate()
         .unwrap()
@@ -198,49 +214,118 @@ mod tests {
         let mut cluster = Cluster::new(engine, settings).await.unwrap();
         let result = tokio::time::timeout(crate::TIMEOUT, run(&mut cluster, settings)).await;
         cluster.shutdown().await.unwrap();
-        result.unwrap().unwrap()
+        let mut report = result.unwrap().unwrap();
+        report.attach_attribution(&cluster);
+        report
+    }
+    fn check_attribution(report: &Report) {
+        let Some(records) = &report.attribution else {
+            assert!(!report.settings.attribution);
+            assert!(serde_json::to_value(report)
+                .unwrap()
+                .get("attribution")
+                .is_none());
+            return;
+        };
+        assert!(report.settings.attribution);
+        assert_eq!(records.len(), 3);
+        for record in records {
+            let value = serde_json::to_value(record).unwrap();
+            assert!(value["scope"]
+                .as_str()
+                .unwrap()
+                .contains("warmup_follower_drain"));
+            assert!(value["clock"]
+                .as_str()
+                .unwrap()
+                .contains("not_cpu_or_critical_path"));
+            assert!(value["nesting"].as_str().unwrap().contains("do_not_sum"));
+            let phases = value["phases"].as_array().unwrap();
+            assert_eq!(phases.len(), 12);
+            let get = |name| phases.iter().find(|p| p["phase"] == name).unwrap();
+            assert_eq!(get("actor_lifetime_inclusive")["calls"], 1);
+            assert!(get("core_direct")["calls"].as_u64().unwrap() > 0);
+            let append = get("store_append_nested")["calls"].as_u64().unwrap();
+            assert!(append > 0);
+            assert_eq!(
+                append,
+                get("store_barrier_nested")["calls"].as_u64().unwrap()
+            );
+            for phase in phases {
+                assert_eq!(phase["failures"], 0);
+                assert!(
+                    phase["total_elapsed_ns"].as_u64().unwrap()
+                        >= phase["maximum_elapsed_ns"].as_u64().unwrap()
+                );
+            }
+            if value["replica_slot"] == 0 {
+                let expected = (report.settings.operations + report.settings.warmup) as u64;
+                for name in ["host_admission", "core_direct", "application", "results"] {
+                    assert_eq!(get(name)["items"], expected, "{name}");
+                }
+            }
+        }
+    }
+    #[tokio::test]
+    async fn unavailable_upstream_attribution_is_rejected_explicitly() {
+        assert!(Cluster::new(
+            "openraft",
+            Settings {
+                attribution: true,
+                ..settings(1, 128)
+            }
+        )
+        .await
+        .is_err());
     }
     #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
     async fn both_engines_finish_every_original_for_single_and_four_entry_requests() {
         for engine in ["voteboat", "openraft"] {
-            for batch in [1, 4] {
-                for envelopes in [
-                    crate::Envelopes::UpstreamDefault,
-                    crate::Envelopes::Common64,
-                ] {
-                    let report = checked_run(
-                        engine,
-                        Settings {
-                            envelopes,
-                            ..settings(batch, 128)
-                        },
-                    )
-                    .await;
-                    assert_eq!(report.completed_originals, 128);
-                    assert_eq!(report.completed_requests, 128 / batch);
-                    assert_eq!(report.applied_frontiers, vec![133; 3]);
-                    let limits = envelopes.voteboat_limits();
-                    assert_eq!(report.api_entry_batch_capacity, limits.max_proposal_entries);
-                    assert_eq!(
-                        report.append_entry_batch_capacity,
-                        limits.max_proposal_entries
-                    );
-                    assert_eq!(
-                        report.replication_entry_capacity,
-                        limits.max_replication_entries
-                    );
-                    if let Some(diagnostics) = report.diagnostics {
-                        let leader = serde_json::to_value(&diagnostics[0]).unwrap();
-                        assert_eq!(leader["proposed_originals"], 132);
-                        let widths = leader["proposal_widths"].as_array().unwrap();
-                        let originals: u64 = widths
-                            .iter()
-                            .map(|w| {
-                                w["original_entries"].as_u64().unwrap()
-                                    * w["batches"].as_u64().unwrap()
-                            })
-                            .sum();
-                        assert_eq!(originals, 132);
+            for attribution in [false, true] {
+                if engine == "openraft" && attribution {
+                    continue;
+                }
+                for batch in [1, 4] {
+                    for envelopes in [
+                        crate::Envelopes::UpstreamDefault,
+                        crate::Envelopes::Common64,
+                    ] {
+                        let report = checked_run(
+                            engine,
+                            Settings {
+                                envelopes,
+                                attribution,
+                                ..settings(batch, 128)
+                            },
+                        )
+                        .await;
+                        assert_eq!(report.completed_originals, 128);
+                        assert_eq!(report.completed_requests, 128 / batch);
+                        assert_eq!(report.applied_frontiers, vec![133; 3]);
+                        let limits = envelopes.voteboat_limits();
+                        assert_eq!(report.api_entry_batch_capacity, limits.max_proposal_entries);
+                        assert_eq!(
+                            report.append_entry_batch_capacity,
+                            limits.max_proposal_entries
+                        );
+                        assert_eq!(
+                            report.replication_entry_capacity,
+                            limits.max_replication_entries
+                        );
+                        check_attribution(&report);
+                        if let Some(diagnostics) = report.diagnostics {
+                            let leader = serde_json::to_value(&diagnostics[0]).unwrap();
+                            assert_eq!(leader["proposed_originals"], 132);
+                            let widths = leader["proposal_widths"].as_array().unwrap();
+                            let originals: u64 = widths
+                                .iter()
+                                .map(|w| {
+                                    w["original_entries"].as_u64().unwrap()
+                                        * w["batches"].as_u64().unwrap()
+                                })
+                                .sum();
+                            assert_eq!(originals, 132);
+                        }
                     }
                 }
             }
@@ -250,14 +335,27 @@ mod tests {
     async fn actual_maintenance_keeps_original_results_and_all_follower_prefixes() {
         let settings = settings(4, 12_000);
         for engine in ["voteboat", "openraft"] {
-            let report = checked_run(engine, settings).await;
-            assert_eq!(report.completed_originals, 12_000);
-            assert_eq!(report.applied_frontiers, vec![12_005; 3]);
-            if let Some(stats) = report.diagnostics {
-                for value in stats {
-                    let value = serde_json::to_value(value).unwrap();
-                    assert!(value["checkpoint_count"].as_u64().unwrap() >= 2);
-                    assert!(value["retained_entries"].as_u64().unwrap() < 5000);
+            for attribution in [false, true] {
+                if engine == "openraft" && attribution {
+                    continue;
+                }
+                let report = checked_run(
+                    engine,
+                    Settings {
+                        attribution,
+                        ..settings
+                    },
+                )
+                .await;
+                assert_eq!(report.completed_originals, 12_000);
+                assert_eq!(report.applied_frontiers, vec![12_005; 3]);
+                check_attribution(&report);
+                if let Some(stats) = report.diagnostics {
+                    for value in stats {
+                        let value = serde_json::to_value(value).unwrap();
+                        assert!(value["checkpoint_count"].as_u64().unwrap() >= 2);
+                        assert!(value["retained_entries"].as_u64().unwrap() < 5000);
+                    }
                 }
             }
         }

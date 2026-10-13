@@ -2,6 +2,16 @@
 
 ## Active P9 plan — 13 October 2026
 
+417 adds opt-in, bounded elapsed phase attribution to the standalone comparison.
+Eleven controls and four actual off/on CLI cases retain every original result,
+all replica prefixes, maintenance and snapshot installation. Formatter, all four
+strict root profiles and standalone strict checks pass with zero diagnostics.
+The default specialization reads no attribution clocks. Records finalize after
+owned actor shutdown and include startup/warmup/drain; nested persistence/store
+and maintenance intervals are labeled and cannot be summed as CPU time or a
+critical path. [Qualification](../benchmarks/matched/validation/performance/slice417-attribution/REPORT.md).
+No diagnostic rate or performance win is inferred from these functional checks.
+
 Latest user requirement: pass OpenRaft with a healthy margin. The working
 acceptance target is sustained 1.5× the larger of each published floor or matched
 upstream rate on each supported host, keeping the full curve and existing
