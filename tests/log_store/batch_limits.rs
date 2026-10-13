@@ -4,6 +4,8 @@
 use super::*;
 use std::collections::VecDeque;
 use voteboat::raft::{persist_effect, BatchLimits, Effect, Event, Proposal, Raft};
+#[path = "batch_limits/aggregate.rs"]
+mod aggregate;
 #[path = "batch_limits/ready_items.rs"]
 mod ready_items;
 

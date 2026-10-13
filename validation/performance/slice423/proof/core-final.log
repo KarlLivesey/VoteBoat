@@ -1,0 +1,26 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice423-overlay/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.18s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice423-checks/root/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 8 tests
+test raft::proposals::tests::batch_limit_tests::startup_limits_reject_invalid_settings_and_lock_on_the_first_refused_event ... ok
+test raft::proposals::tests::batch_limit_tests::aggregate::aggregate_ceiling_preserves_default_locked_and_fenced_error_precedence ... ok
+test raft::proposals::tests::batch_limit_tests::larger_outbound_envelope_keeps_exact_final_short_chunk_and_original_results ... ok
+test raft::proposals::tests::batch_limit_tests::configured_owned_capacity_bytes_and_retained_budget_reject_atomically ... ok
+test raft::proposals::tests::batch_limit_tests::aggregate::aggregate_count_does_not_override_allocated_staging_retained_or_command_budgets ... ok
+test raft::proposals::tests::batch_limit_tests::large_original_batch_requires_exact_durability_then_replicates_in_bounded_chunks ... ok
+test raft::proposals::tests::batch_limit_tests::aggregate::aggregate16384_originals_require_exact_durability_then_replicate_in1024_chunks ... ok
+
+thread 'raft::proposals::tests::batch_limit_tests::aggregate::flow::aggregate_partial1024_quorum_prefixes_keep_all_results_delayed_peer_and_finite_notifications' (318) panicked at src/raft/proposals/tests/batch_limits/aggregate/flow.rs:151:5:
+assertion failed: core.requests.is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test raft::proposals::tests::batch_limit_tests::aggregate::flow::aggregate_partial1024_quorum_prefixes_keep_all_results_delayed_peer_and_finite_notifications ... FAILED
+
+failures:
+
+failures:
+    raft::proposals::tests::batch_limit_tests::aggregate::flow::aggregate_partial1024_quorum_prefixes_keep_all_results_delayed_peer_and_finite_notifications
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 364 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `--lib`

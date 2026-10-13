@@ -1,0 +1,33 @@
+{
+  "pinned_commit": "e88bb40707f2e511d8ecc44d31edcb1d814a11a8",
+  "upstream_source_sha256": {
+    "benchmarks/minimal/src/store.rs": "87802c409765a4a9511356d78369357f585612e3238a4a0ced954abf8e05da86",
+    "benchmarks/minimal/src/network.rs": "148118282618ca9c61cdc88a3a64faa15a8dfe183ca3fdb977e98489ee233b06",
+    "benchmarks/minimal/src/bin/bench.rs": "25d570366f0ba6652764d07515a52b5856b61d3c36157b74d093194faa634a37",
+    "openraft/src/batch/inline_batch.rs": "e330c777c9d7c2c2db7a8ac2068051b4fe2a0c4d949223b9a6df1e659957ec39"
+  },
+  "matched_source_sha256": {
+    "benchmarks/matched/src/main.rs": "11c9f50cdb6f9e19ba58c9d90e572276e19f7e7382b6697498985741295afec5",
+    "benchmarks/matched/src/workload.rs": "b085b29547786b9ab756149f0fc4bc666663fd6e5bb69cfb93c4426e367d16a8",
+    "benchmarks/matched/src/store.rs": "c32b56d7aceda723f0728402fdca9e2eb749ba403a438a9643375a7427744225",
+    "benchmarks/matched/src/snapshots.rs": "9cee0c0e31f6489b8a6dc46993ac29b1e20a028b40cc1dd1669aba2d7a764de3",
+    "benchmarks/matched/src/openraft_engine.rs": "0b20a55ef06193d6d04e98e6cd4601158791849826a2e4918a1b7cdd87038895",
+    "benchmarks/matched/run-curve.sh": "8953d706c66b88d91355669897797e419772d8661f64903d41966b3104d0cf7e",
+    "benchmarks/matched/run-upstream-curve.sh": "3d354bf20d09ba6f431c93c6ea4afdc2d2ba98b2ea2ab8ff1a277018cf09aaf3"
+  },
+  "projection": {
+    "originals": 20000000,
+    "internal_timeout_seconds_both_drivers": 400,
+    "observed_short_untouched_Mac414_rates": [
+      12287.613948896917,
+      10233.220457868907,
+      10004.548456149385
+    ],
+    "median_rate": 10233.220457868907,
+    "seconds_at_median": 1954.4189517211914,
+    "seconds_at_best": 1627.6553025817873,
+    "seconds_at_11000": 1818.1818181818182,
+    "seconds_at_49500": 404.04040404040404,
+    "limitation": "projections from short records; not sustained rates"
+  }
+}

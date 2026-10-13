@@ -12,25 +12,37 @@ Mac419 scoped source/correctness/formatter/four strict/fresh-artifact qualificat
 and all51 paired cases are terminal. Mac bulk medians2,556,825→2,780,973/s
 (paired+8.6%); singleton regresses2.8%, and real native runs show no consistent
 durable gain. Every regression and slow tail is retained.
-[Mac419 exact scope](../validation/performance/mac419-paired/README.md). 421's explicit
-native visit quantum is source-frozen after focused controls; root broader startup,
-member, runtime, owner and maintenance398 controls, real services8, actual TCP/QUIC
-startup/shared flags8 and full formatter/four strict/standalone hook pass.
-Its publication is next; Mac qualification and paired native throughput remain open.
-422's finer checkpoint observation stays in an isolated exact419 overlay until
-qualified, preserving the existing helper algorithms and every verification check.
+[Mac419 exact scope](../validation/performance/mac419-paired/README.md). Native
+ready-quantum421 is published at1091610. Root398 broader controls, eight real
+service histories, eight actual startup/shared TCP/QUIC flag controls and the full
+strict hook pass. Mac421 qualifies exact1396 published inputs,32 publication cuts,
+scoped platform controls, eight actual flag runs and a fresh asserted native release.
+[Mac421 scope](../validation/performance/mac421/README.md). Native performance
+measurement remains open; correctness qualification is not a throughput claim.
 
 The user's like-for-like request exposed a capacity-unit mismatch: upstream's4096
-API capacity counts requests, whereas VoteBoat's4096 counts originals. At batch4,
+API capacity counts requests, whereas VoteBoat's4096 counted originals. At batch4,
 upstream can collect16384 originals; its append setting is a merge threshold and
-does not split that first batch. The old common64 profile has the same mismatch.
-Both engines do create per-original completion channels. Same-engine before/after
-results stay valid; no cross-engine capacity win is accepted from legacy labels.
-[Verified source audit](../benchmarks/matched/validation/performance/parity-audit/REVIEW.md)
-and [comparison contract](../benchmarks/matched/COMPARISON.md) define the correction.
-Next qualify a bounded opt-in16384-original Core/harness envelope with explicit
-staging bytes while preserving native defaults and unchanged upstream reference;
-then apply qualified helper attribution and measure remaining maintenance work.
+does not split that first batch. Both engines create per-original completion
+channels. Historical same-engine comparisons stay valid within their scope;
+legacy labels establish no cross-engine capacity win.
+[Comparison contract](../benchmarks/matched/COMPARISON.md) records the differences.
+Combined422/423 now qualifies the opt-in16384-original ceiling, explicit bounded
+empty-payload staging bytes and finer checkpoint provider observation on Linux.
+The default/native policies, upstream engine and helper proofs remain intact.
+All-feature/core libraries372/296, log-store17, provider conformance29/14,
+standalone18, nine actual original/frontier CLI controls and the full enabled
+formatter/four-strict/standalone hook pass, with19 exact source guards before/after.
+[Combined qualification](../validation/performance/slice423/combined/README.md).
+Mac qualification and fresh release timings for this combined source remain open.
+
+The next measurement-correctness slice aligns latency aggregation outside the
+throughput clock and replaces the insufficient400s campaign guard with a finite
+common budget. A full20M slow singleton cannot fit400s. The untouched upstream
+artifact remains separate; any guard-extended reference driver will have its exact
+patch and identity disclosed. Then measure finer maintenance scopes and actual
+native quantum capacity before selecting the next algorithm or pipeline change.
+[Provider/timing audit](../benchmarks/matched/validation/performance/provider-parity-audit/REPORT.md).
 
 Mac418 paired primary18 and diagnostic9 are terminal with exact originals,
 frontiers, policies and source/library/executable guards. Bulk primary medians rise
@@ -58,8 +70,8 @@ pass; formatter/four strict root configurations and standalone checks are zero.
 Current-source Mac qualification passes on exact1390 inputs, scoped incoming/log/
 accepted/Raft controls, real services8, formatter/four strict and standalone checks.
 [Mac419 scope and fresh artifacts](../validation/performance/mac419/README.md).
-Linux short throughput is measured above; Mac paired and both-host sustained
-performance acceptance remain open.
+Linux and Mac short paired throughput is measured above; both-host sustained
+performance acceptance remains open.
 A corrective publication also includes an omitted, already-qualified codec test
 module; actual pushes now require committed build inputs so a local untracked
 module cannot mask an incomplete published source tree.

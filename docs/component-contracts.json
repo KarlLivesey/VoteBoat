@@ -17,12 +17,14 @@
       "native": "Deterministic Core count envelopes, with original LogStore/worker/transport/application ownership and provider byte budgets.",
       "conformance": [
         "src/raft/proposals/tests/batch_limits.rs",
+        "src/raft/proposals/tests/batch_limits/aggregate.rs",
+        "tests/log_store/batch_limits/aggregate.rs",
         "src/raft/request_window_tests.rs",
         "src/runtime/ready_batch/tests/routine.rs",
         "tests/log_store/batch_limits.rs",
         "benchmarks/matched/src/voteboat_engine.rs"
       ],
-      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima4096/1024. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate."
+      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate."
     },
     {
       "design_id": "C10/C15",

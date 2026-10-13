@@ -1,0 +1,9 @@
+# Frozen Mac421 startup ready-policy qualification
+
+Purpose: qualify explicit bounded ready quantums and early refusal/cleanup across startup/enrollment/manual/shared assembly on exact1091610a1d348a473e491c54834ae2fe341da419. No timing authorized. Copy1396 compiled input paths: previous4191390 path inventory plus six421child modules. Read every source blob from publishedGitcommit, neverlive422/423. Check exact421SOURCEhashes, trackedinventory and fullsource manifest.
+
+Acceptance: libready17; all/coreowner/runtime ready controls; logstore ready power-loss cuts; selected/invalidearly startup/enrollment and existingstartup/timing/member/maintenancecontrols; nativeCLI3 getter/argumentcontrols. ActualTCP/TLS+QUICretry/recovery2+maintenance6; debugstartup/shared TCP/QUICq32/64 functional8 mustverify64originals, values/indices, recovered128,retry/workersjoin and requested/effective quantums. Preserve boundedqueue/visit/time/bytes, classfairness, protectedcontrol and singleton/legacybehavior.
+
+Ownership/state: one originalremote runner/PID/stage/exits, sequential configurations withsource-specific targets, testfixtureTMPDIRcleanupfailurepaths retained. Rootformat/fourstrict andstandalonefmt/test11/strict. Freshnative release only afterqualification, separatetarget andexplicitdefaultLTO/codegen, opt3/assertions/overflow. Actualrootlibrary/exe fresh:false andcompiler paths/sourcehashes required; immutablecopies+fullhashes before/after.
+
+Failure: retain rawfirst failures; fixonlyfocusedsource/refreeze whenneeded. Observationtimeouts donotcause unchangedrestarts. No frameworkbuild, no source/interfaceedits, no measuredthroughput orpublishedfloorclaim. The priorprimarycomparison original/requestunit mismatch is independentlydocumented; tests/artifacts do notestablishfaircomparability.

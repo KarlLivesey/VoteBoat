@@ -1,0 +1,229 @@
+{
+  "commit": "1091610a1d348a473e491c54834ae2fe341da419",
+  "source_inputs": 1396,
+  "source_unchanged": true,
+  "clippy_config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521",
+  "scope": "Frozen1091610 Mac421 boundedstartupready policy correctness/cleanup and native artifact only; no timedperformance or fairfloorclaim",
+  "test_counts": {
+    "lib_ready_all": [
+      17
+    ],
+    "owner_runtime_log_ready_all": [
+      16,
+      1,
+      3
+    ],
+    "startup_member_maintenance_all": [
+      9,
+      5,
+      50,
+      60
+    ],
+    "owner_runtime_ready_core": [
+      16,
+      3
+    ],
+    "native_original_recovery": [
+      2
+    ],
+    "native_maintenance": [
+      6
+    ],
+    "native_cli_ready": [
+      3
+    ],
+    "matched_tests": [
+      11
+    ]
+  },
+  "functional_original_controls": [
+    {
+      "name": "functional-startup-tcp-q32",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "startup",
+        "groups": "1",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-startup-tcp-q32/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-startup-tcp-q64",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "startup",
+        "groups": "1",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-startup-tcp-q64/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-startup-quic-q32",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "startup",
+        "groups": "1",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-startup-quic-q32/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-startup-quic-q64",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "startup",
+        "groups": "1",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-startup-quic-q64/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-shared-tcp-q32",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "shared",
+        "groups": "2",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-shared-tcp-q32/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-shared-tcp-q64",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "shared",
+        "groups": "2",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-shared-tcp-q64/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-shared-quic-q32",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "shared",
+        "groups": "2",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-shared-quic-q32/samples.csv",
+      "performance_claim": false
+    },
+    {
+      "name": "functional-shared-quic-q64",
+      "exact_originals": 64,
+      "settings": {
+        "operations": "64",
+        "warmup": "64",
+        "recovered_value": "128",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "assembly": "shared",
+        "groups": "2",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "samples": "/tmp/voteboat-mac421-1091610/functional-shared-quic-q64/samples.csv",
+      "performance_claim": false
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "native",
+      "target": "voteboat",
+      "original": "/tmp/voteboat-mac421-1091610/target-native-release/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+      "copy": "/tmp/voteboat-mac421-1091610/artifacts/native/libvoteboat-ca76d170795d1aa6.rlib",
+      "sha256": "1f1a45ced539ed695ba9587d87fd1a4d049acdc8edf334238c08aea54981e0ca"
+    },
+    {
+      "kind": "native",
+      "target": "native_benchmark",
+      "original": "/tmp/voteboat-mac421-1091610/target-native-release/release/examples/native_benchmark",
+      "copy": "/tmp/voteboat-mac421-1091610/artifacts/native/native_benchmark",
+      "sha256": "b816f5e4308bbbb6a18aa449a3adf825bf7510da6b113ed86bab000c859db5d8"
+    }
+  ],
+  "profiles": {
+    "native": "opt3/assertions/overflow/defaultLTO/defaultCodegen"
+  },
+  "fresh_root_library_and_executable_each": true
+}

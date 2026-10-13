@@ -1,0 +1,76 @@
+{
+  "base_commit": "1091610a1d348a473e491c54834ae2fe341da419",
+  "qualification_scope": "isolated423-only source, excludes root422 overlay",
+  "files": {
+    "benchmarks/matched/src/envelopes.rs": {
+      "before_sha256": null,
+      "after_sha256": "320bc7eabe45dfe463cd88e3f107e6ffb1da8828a15298e9935d47b8e3497970",
+      "new": true
+    },
+    "benchmarks/matched/src/envelopes/tests.rs": {
+      "before_sha256": null,
+      "after_sha256": "5f54e13e983b9b41955abdd5ec23bbdd8752f97d4bb7584017cdcd01df5dfa70",
+      "new": true
+    },
+    "benchmarks/matched/src/main.rs": {
+      "before_sha256": "5a3234364eb2b62d19da0a42c569e027f0cdeb8ad08d1c1d594a7073d67e5641",
+      "after_sha256": "11c9f50cdb6f9e19ba58c9d90e572276e19f7e7382b6697498985741295afec5",
+      "new": false
+    },
+    "benchmarks/matched/src/voteboat_engine.rs": {
+      "before_sha256": "c9881be21917a789172476632ebfac59502cc22bf9c6493a8779cc23cdfae1a4",
+      "after_sha256": "eaa431a5f2f4ea328ccdb73638dedbe966a1ae49af1cf6739a227f55ea6d18b6",
+      "new": false
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs": {
+      "before_sha256": "60cbc79657f1fd41965f0efdc562f55b43f635dc0da3d907ff231a044c609267",
+      "after_sha256": "d05834f8d432f87ae9e811f4be4e239a4ae85276065a0efd538bfca70be94940",
+      "new": false
+    },
+    "benchmarks/matched/src/voteboat_engine/stats.rs": {
+      "before_sha256": "029b0167456ca8d8a6b9374c0f75ea9d78c03926635ddd212e24bbcc7932c733",
+      "after_sha256": "8b5d39e1baa03ec03f37beea3b9490b204f9f66c455465e5e212e1c91158a113",
+      "new": false
+    },
+    "benchmarks/matched/src/workload.rs": {
+      "before_sha256": "3d2fbad8e6ebe1000bc2d185b96aa6e1c9bd821f458e4c69a3751dda35b477fa",
+      "after_sha256": "6cca790fba3569ec36bf9e12990cd4b97a527a0f655680d93184f0686ee05d52",
+      "new": false
+    },
+    "docs/component-contracts.json": {
+      "before_sha256": "1f828eeaf5f19ba00565eaa0d9db29406f420f600ed2e1df418b15ebd825e881",
+      "after_sha256": "41796cc5388d6f54c71bd26c12e10d13974f1e000b4705f2e881cbec5a4ec720",
+      "new": false
+    },
+    "src/raft/batch_limits.rs": {
+      "before_sha256": "c2b27e2d603346bc9cba6fb09886a4f379d214a680b71fc9970367c692372913",
+      "after_sha256": "71de8ea344da994118532c3f1b6c228086f0dbb25252e16e0c93ace88796acda",
+      "new": false
+    },
+    "src/raft/proposals/tests/batch_limits.rs": {
+      "before_sha256": "3ce0e7ccc5d5d2d3042f86b727b504ce0a82ce6e9f95f24927a512e884fa4f1c",
+      "after_sha256": "f4358a88c8dc872235f3fd801f30555f44f76a2eba212b877ddfced085fe599f",
+      "new": false
+    },
+    "src/raft/proposals/tests/batch_limits/aggregate.rs": {
+      "before_sha256": null,
+      "after_sha256": "38c4472126a8c2fd53e6866f05170519988f3ecc9a2f8a05fb72328c32d191dd",
+      "new": true
+    },
+    "src/raft/proposals/tests/batch_limits/aggregate/flow.rs": {
+      "before_sha256": null,
+      "after_sha256": "79dac9b319932e294bdd9e97b185243200099a1434bbceec3d40927168cf54a4",
+      "new": true
+    },
+    "tests/log_store/batch_limits.rs": {
+      "before_sha256": "eb894a7b6b6f49ec09b441eecc8b71f50c731882823a200a554cede18539f1eb",
+      "after_sha256": "8bf5e8df5040e46bb8e36b76ffe453b1268121a98bbf44de8ef889934e42fe94",
+      "new": false
+    },
+    "tests/log_store/batch_limits/aggregate.rs": {
+      "before_sha256": null,
+      "after_sha256": "faa2035a27b92347adddce74b9012c885a0fec13982d887d9a8fa15ae997897a",
+      "new": true
+    }
+  }
+}

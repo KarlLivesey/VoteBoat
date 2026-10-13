@@ -95,7 +95,17 @@ impl<const TRACE: bool> LogStore for MemoryStore<TRACE> {
         self.limits
     }
     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
-        self.completed_state(group).cloned()
+        let started = Recorder::<TRACE>::start();
+        let result = self.completed_state(group).cloned();
+        // Disabled attribution does not even inspect the result's retained length.
+        let items = if TRACE {
+            result.as_ref().map_or(0, |state| state.entries.len())
+        } else {
+            0
+        };
+        self.attribution
+            .finish(Phase::StoreState, started, result.is_err(), items);
+        result
     }
     fn append_batch(
         &mut self,
@@ -104,16 +114,14 @@ impl<const TRACE: bool> LogStore for MemoryStore<TRACE> {
         let started = Recorder::<TRACE>::start();
         let result = self.append(mutations);
         self.attribution
-            .finish(Phase::StoreAppend, started, result.is_err(), 0)
-            .map_err(|_| StorageError::Rejected("attribution exhausted"))?;
+            .finish(Phase::StoreAppend, started, result.is_err(), 0);
         result
     }
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError> {
         let started = Recorder::<TRACE>::start();
         let result = self.complete(dependencies);
         self.attribution
-            .finish(Phase::StoreBarrier, started, result.is_err(), 0)
-            .map_err(|_| StorageError::Rejected("attribution exhausted"))?;
+            .finish(Phase::StoreBarrier, started, result.is_err(), 0);
         result
     }
     fn fetch_range(

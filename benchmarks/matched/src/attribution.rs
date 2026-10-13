@@ -3,7 +3,7 @@
 //! Bounded elapsed intervals; inclusive and nested, never phase CPU attribution.
 use crate::Failure;
 use serde::Serialize;
-use std::time::Instant;
+use std::{cell::Cell, time::Instant};
 
 #[derive(Clone, Copy)]
 pub(super) enum Phase {
@@ -19,8 +19,29 @@ pub(super) enum Phase {
     SnapshotMaintenance,
     HostWait,
     ActorLifetime,
+    CheckpointReserve,
+    CheckpointPublish,
+    CheckpointCompact,
+    CheckpointEffects,
+    StoreState,
+    SnapshotBegin,
+    SnapshotWrite,
+    SnapshotSeal,
+    SnapshotPublish,
+    SnapshotAbort,
+    SnapshotLoad,
+    SnapshotLatest,
+    SnapshotPin,
+    SnapshotLoadPinned,
+    SnapshotReconcile,
 }
-const PHASES: usize = 12;
+const PHASES: usize = 27;
+const SCOPES: [Phase; 4] = [
+    Phase::CheckpointReserve,
+    Phase::CheckpointPublish,
+    Phase::CheckpointCompact,
+    Phase::CheckpointEffects,
+];
 const NAMES: [&str; PHASES] = [
     "host_admission",
     "core_direct",
@@ -34,7 +55,27 @@ const NAMES: [&str; PHASES] = [
     "snapshot_helpers_inclusive",
     "host_wait",
     "actor_lifetime_inclusive",
+    "checkpoint_reserve_inclusive",
+    "checkpoint_publish_inclusive",
+    "checkpoint_compact_inclusive",
+    "checkpoint_effects_inclusive",
+    "store_state_clone_nested",
+    "snapshot_begin_nested",
+    "snapshot_write_chunk_nested",
+    "snapshot_seal_nested",
+    "snapshot_publish_nested",
+    "snapshot_abort_nested",
+    "snapshot_load_nested",
+    "snapshot_latest_reference_nested",
+    "snapshot_pin_for_log_nested",
+    "snapshot_load_pinned_nested",
+    "snapshot_reconcile_log_inclusive_nested",
 ];
+fn provider_phase(index: usize) -> bool {
+    index == Phase::StoreAppend as usize
+        || index == Phase::StoreBarrier as usize
+        || index >= Phase::StoreState as usize
+}
 #[derive(Clone, Copy, Default, Debug, Serialize, PartialEq, Eq)]
 pub(super) struct Interval {
     calls: u64,
@@ -68,13 +109,47 @@ impl Interval {
         Ok(())
     }
 }
+/// Additive scoped counters deliberately omit maxima: maxima cannot be differenced.
+#[derive(Clone, Copy, Default, Debug, Serialize, PartialEq, Eq)]
+struct ScopedInterval {
+    calls: u64,
+    failures: u64,
+    total_elapsed_ns: u64,
+    items: u64,
+}
+impl ScopedInterval {
+    fn advance(self, before: Interval, after: Interval) -> Option<Self> {
+        Some(Self {
+            calls: self
+                .calls
+                .checked_add(after.calls.checked_sub(before.calls)?)?,
+            failures: self
+                .failures
+                .checked_add(after.failures.checked_sub(before.failures)?)?,
+            total_elapsed_ns: self.total_elapsed_ns.checked_add(
+                after
+                    .total_elapsed_ns
+                    .checked_sub(before.total_elapsed_ns)?,
+            )?,
+            items: self
+                .items
+                .checked_add(after.items.checked_sub(before.items)?)?,
+        })
+    }
+}
+pub(super) struct ProviderSnapshot([Interval; PHASES]);
+#[derive(Clone)]
 pub(super) struct Recorder<const ENABLED: bool> {
-    intervals: [Interval; PHASES],
+    intervals: [Cell<Interval>; PHASES],
+    scopes: [Cell<[ScopedInterval; PHASES]>; 4],
+    invalid: Cell<bool>,
 }
 impl<const ENABLED: bool> Default for Recorder<ENABLED> {
     fn default() -> Self {
         Self {
-            intervals: [Interval::default(); PHASES],
+            intervals: std::array::from_fn(|_| Cell::new(Interval::default())),
+            scopes: std::array::from_fn(|_| Cell::new([ScopedInterval::default(); PHASES])),
+            invalid: Cell::new(false),
         }
     }
 }
@@ -86,43 +161,125 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
             None
         }
     }
-    pub fn finish(
-        &mut self,
-        phase: Phase,
-        started: Option<Instant>,
-        failed: bool,
-        items: usize,
-    ) -> Result<(), Failure> {
+    /// Observation failure never substitutes for a provider/protocol outcome.
+    pub fn finish(&self, phase: Phase, started: Option<Instant>, failed: bool, items: usize) {
         if ENABLED {
-            let elapsed = u64::try_from(
-                started
-                    .ok_or("missing attribution start")?
-                    .elapsed()
-                    .as_nanos(),
-            )?;
-            self.intervals[phase as usize].add(elapsed, failed, u64::try_from(items)?)?;
+            let measured = started
+                .and_then(|start| u64::try_from(start.elapsed().as_nanos()).ok())
+                .zip(u64::try_from(items).ok());
+            if let Some((elapsed, items)) = measured {
+                self.record(phase, elapsed, failed, items);
+            } else {
+                self.invalid.set(true);
+            }
         }
-        Ok(())
     }
-    pub fn report(&self, slot: usize, store: &Self) -> Option<Attribution> {
-        ENABLED.then(|| Attribution {
+    fn record(&self, phase: Phase, elapsed: u64, failed: bool, items: u64) {
+        if ENABLED {
+            let cell = &self.intervals[phase as usize];
+            let mut interval = cell.get();
+            if interval.add(elapsed, failed, items).is_ok() {
+                cell.set(interval);
+            } else {
+                self.invalid.set(true);
+            }
+        }
+    }
+    pub fn provider_snapshot(store: &Self, snapshots: &Self) -> Option<ProviderSnapshot> {
+        if ENABLED {
+            Some(ProviderSnapshot(std::array::from_fn(|i| {
+                if i == Phase::StoreAppend as usize
+                    || i == Phase::StoreBarrier as usize
+                    || i == Phase::StoreState as usize
+                {
+                    store.intervals[i].get()
+                } else {
+                    snapshots.intervals[i].get()
+                }
+            })))
+        } else {
+            None
+        }
+    }
+    pub fn finish_scope(
+        &self,
+        phase: Phase,
+        before: Option<ProviderSnapshot>,
+        store: &Self,
+        snapshots: &Self,
+    ) {
+        if ENABLED {
+            let scoped = SCOPES
+                .iter()
+                .position(|scope| *scope as usize == phase as usize);
+            if let (Some(slot), Some(before), Some(after)) =
+                (scoped, before, Self::provider_snapshot(store, snapshots))
+            {
+                let mut next = self.scopes[slot].get();
+                for (i, value) in next
+                    .iter_mut()
+                    .enumerate()
+                    .filter(|(i, _)| provider_phase(*i))
+                {
+                    let Some(delta) = value.advance(before.0[i], after.0[i]) else {
+                        self.invalid.set(true);
+                        return;
+                    };
+                    *value = delta;
+                }
+                self.scopes[slot].set(next);
+            } else {
+                self.invalid.set(true);
+            }
+        }
+    }
+    pub fn report(
+        &self,
+        slot: usize,
+        store: &Self,
+        snapshots: &Self,
+    ) -> Result<Option<Attribution>, Failure> {
+        if !ENABLED {
+            return Ok(None);
+        }
+        if self.invalid.get() || store.invalid.get() || snapshots.invalid.get() {
+            return Err("invalid attribution counters; provider outcomes were preserved".into());
+        }
+        let provider = Self::provider_snapshot(store, snapshots).unwrap();
+        Ok(Some(Attribution {
             replica_slot: slot,
-            scope: "whole_actor_lifetime_including_campaign_warmup_follower_drain_and_shutdown",
+            scope: "whole_actor_lifetime_including_campaign_warmup_follower_drain_and_shutdown;provider_maxima_whole_provider_lifetime_including_setup",
             clock: "monotonic_elapsed_wall_intervals_not_cpu_or_critical_path",
-            nesting: "store_append_and_barrier_nested_in_persist_or_maintenance;maintenance_tick_includes_effects_and_nested_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
-            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;other=zero",
+            nesting: "checkpoint_intervals_nested_in_maintenance;provider_intervals_nested_in_helpers;reconcile_contains_load_pinned;effects_contain_persist_and_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
+            residual: "helper_elapsed_outside_known_provider_methods_is_unattributed_Eq_validation_application_restore_Core_staging_completion_and_marshalling;not_pure_Core;scoped_provider_sums_are_not_additive_when_nested",
+            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;snapshot_write=attempted_application_bytes;other=zero",
             phases: NAMES.iter().enumerate().map(|(i, &phase)| PhaseReport {
-                phase,
-                interval: if i == Phase::StoreAppend as usize || i == Phase::StoreBarrier as usize { store.intervals[i] } else { self.intervals[i] },
+                phase, interval: if provider_phase(i) { provider.0[i] } else { self.intervals[i].get() },
             }).collect(),
-        })
+            checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
+                let values = self.scopes[slot].get();
+                ScopeReport { scope: NAMES[phase as usize], methods: NAMES.iter().enumerate()
+                    .filter(|(i, _)| provider_phase(*i)).map(|(i, &method)| MethodReport { method, interval: values[i] }).collect() }
+            }).collect(),
+        }))
     }
 }
 #[derive(Clone, Debug, Serialize)]
-pub(super) struct PhaseReport {
+struct PhaseReport {
     phase: &'static str,
     #[serde(flatten)]
     interval: Interval,
+}
+#[derive(Clone, Debug, Serialize)]
+struct MethodReport {
+    method: &'static str,
+    #[serde(flatten)]
+    interval: ScopedInterval,
+}
+#[derive(Clone, Debug, Serialize)]
+struct ScopeReport {
+    scope: &'static str,
+    methods: Vec<MethodReport>,
 }
 #[derive(Clone, Debug, Serialize)]
 pub(super) struct Attribution {
@@ -130,41 +287,10 @@ pub(super) struct Attribution {
     scope: &'static str,
     clock: &'static str,
     nesting: &'static str,
+    residual: &'static str,
     item_units: &'static str,
     phases: Vec<PhaseReport>,
+    checkpoint_provider_scopes: Vec<ScopeReport>,
 }
-
 #[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn disabled_recorder_reads_no_clock_and_emits_no_record() {
-        let mut recorder = Recorder::<false>::default();
-        assert!(Recorder::<false>::start().is_none());
-        recorder
-            .finish(Phase::Core, None, true, usize::MAX)
-            .unwrap();
-        assert_eq!(recorder.intervals, [Interval::default(); PHASES]);
-        assert!(recorder.report(0, &recorder).is_none());
-    }
-    #[test]
-    fn interval_accounting_is_checked_and_overflow_is_atomic() {
-        let mut interval = Interval::default();
-        interval.add(7, false, 4).unwrap();
-        interval.add(3, true, 1).unwrap();
-        assert_eq!(
-            interval,
-            Interval {
-                calls: 2,
-                failures: 1,
-                total_elapsed_ns: 10,
-                maximum_elapsed_ns: 7,
-                items: 5
-            }
-        );
-        interval.calls = u64::MAX;
-        let before = interval;
-        assert!(interval.add(1, false, 1).is_err());
-        assert_eq!(interval, before);
-    }
-}
+mod tests;

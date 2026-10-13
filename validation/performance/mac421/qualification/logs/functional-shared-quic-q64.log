@@ -1,0 +1,4 @@
+phase=warmup protocol=Quic window=32
+phase=measurement operations=64 groups=2 leaders=1:1,2:1
+phase=recovery-verification
+protocol=Quic replicas=3 groups=2 assembly=shared leader_placement=1:1,2:1 wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup=64 operations=64 window=32 max_inflight=32 elapsed_s=0.282855 applied_ops_s=226.264 p50_us=88081.458 p95_us=194243.042 p99_us=194273.875 max_us=194273.875 recovered_value=128 recovery_retries=0 retry_verified=true workers_joined=true poll_rounds=797 host_poll_ms=165.493 max_host_poll_ms=0.953 persistence_batches=23 worker_events=44 application_deliveries=11 ready_visit_items_requested=64 ready_visit_items_effective=64 core_proposal_entries=64 ready_visit_bytes=1048576 ready_visit_ms=2 ready_batch_capable=true

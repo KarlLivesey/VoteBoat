@@ -4,10 +4,14 @@ use crate::{Failure, MAX_PROPOSAL_ENTRIES};
 use serde::Serialize;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-struct Widths([AtomicUsize; MAX_PROPOSAL_ENTRIES + 1]);
+struct Widths(Box<[AtomicUsize]>);
 impl Default for Widths {
     fn default() -> Self {
-        Self(std::array::from_fn(|_| AtomicUsize::new(0)))
+        Self(
+            (0..=MAX_PROPOSAL_ENTRIES)
+                .map(|_| AtomicUsize::new(0))
+                .collect(),
+        )
     }
 }
 

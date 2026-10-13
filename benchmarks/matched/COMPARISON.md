@@ -15,7 +15,7 @@ acceptance win until sustained results and the policy/unit audit pass.
 | Maintenance | Same declared5000/1000/1024 cadence/retention/purge policy; actual snapshot representation differs below |
 | Observation | Attribution off for capacity comparison; on/off diagnostics separate; all trials and regressions retained |
 
-## Capacity units require correction
+## Capacity units and qualified correction
 
 The legacy JSON name `api_entry_batch_capacity` reports a configuration value,
 not equal units. Pinned OpenRaft `BatchRaftMsgReceiver` counts incoming messages
@@ -26,11 +26,23 @@ OpenRaft's4096 append setting limits merging additional append commands; it does
 not split an already larger first command. These are source-derived upper bounds,
 not observed upstream batch widths. Existing raw records remain unchanged.
 
-Before a fair capacity claim, report each setting's unit and hard/soft meaning,
-qualify VoteBoat's bounded equivalent original envelope while preserving upstream
-defaults, and read back actual limits. A separately tuned common-original profile
-is diagnostic; it cannot replace the untouched published-default floor. Same-engine
-418→419 comparisons keep the same envelopes and remain valid within their scope.
+Current422/423 selects a bounded VoteBoat original envelope of4096*batch for the
+primary profile and64*batch for common64, while preserving upstream settings.
+Explicit empty-payload staging-byte accounting and effective readback qualify on
+Linux with exact original results, partial1024-entry acknowledgements and crash
+controls. Mac qualification and fresh release measurements remain outstanding.
+The legacy JSON field remains for historical continuity; capacity_contract records
+requests versus originals, hard versus soft limits and source-derived bounds.
+A separately tuned common profile is diagnostic and cannot replace the published
+reference floor. Same-engine418→419 comparisons retain their original envelopes.
+
+The provider/timing audit additionally finds our latency-vector flattening occurs
+inside the throughput clock, unlike the pinned driver's post-clock aggregation.
+Both drivers'400s internal guard can censor the full20M singleton workload.
+The next bounded slice aligns aggregation and records a common finite campaign
+budget. Any reference with an extended guard must be named guard-extended and
+carry its exact patch/artifact proof; the untouched reference stays distinct.
+[Read-only audit and schema](validation/performance/provider-parity-audit/REPORT.md).
 
 ## Engine and representation differences
 

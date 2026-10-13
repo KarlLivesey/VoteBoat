@@ -15,7 +15,7 @@ pub(super) struct Parts<const TRACE: bool = false> {
     pub slot: usize,
     pub core: Raft,
     pub store: MemoryStore<TRACE>,
-    pub snapshots: MemorySnapshots,
+    pub snapshots: MemorySnapshots<TRACE>,
     pub application: Noop,
     pub receiver: mpsc::Receiver<Request>,
     pub peer_receiver: mpsc::Receiver<Message>,
@@ -55,11 +55,13 @@ impl<const TRACE: bool> Actor<TRACE> {
         let started = Recorder::<TRACE>::start();
         let result = self.run_inner().await;
         self.attribution
-            .finish(Phase::ActorLifetime, started, result.is_err(), 0)?;
+            .finish(Phase::ActorLifetime, started, result.is_err(), 0);
         result?;
-        Ok(self
-            .attribution
-            .report(self.parts.slot, &self.parts.store.attribution))
+        self.attribution.report(
+            self.parts.slot,
+            &self.parts.store.attribution,
+            &self.parts.snapshots.attribution,
+        )
     }
     async fn run_inner(&mut self) -> Result<(), Failure> {
         let mut tick = tokio::time::interval(Duration::from_millis(50));
@@ -76,21 +78,21 @@ impl<const TRACE: bool> Actor<TRACE> {
                 tokio::select! {
                     biased;
                     _ = self.parts.stopped.changed() => {
-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        self.attribution.finish(Phase::HostWait, started, false, 0);
                         return Ok(());
                     }
                     message = self.parts.peer_receiver.recv(), if self.accepts_peer() => {
-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        self.attribution.finish(Phase::HostWait, started, false, 0);
                         let message = message.ok_or("peer actor input closed")?;
                         self.last_contact = Instant::now();
                         self.step(Event::Receive(message))?;
                     }
                     request = self.parts.receiver.recv(), if self.accepts_proposals() => {
-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        self.attribution.finish(Phase::HostWait, started, false, 0);
                         self.requests(request.ok_or("client actor input closed")?)?;
                     }
                     _ = tick.tick() => {
-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+                        self.attribution.finish(Phase::HostWait, started, false, 0);
                         self.tick()?;
                     }
                 }
@@ -173,7 +175,7 @@ impl<const TRACE: bool> Actor<TRACE> {
         let started = Recorder::<TRACE>::start();
         let result = self.parts.core.step(event);
         self.attribution
-            .finish(Phase::Core, started, result.is_err(), 0)?;
+            .finish(Phase::Core, started, result.is_err(), 0);
         let effects = result.map_err(debug_error)?;
         self.effects(effects)
     }
@@ -185,7 +187,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             started,
             proposals.is_err(),
             proposals.as_ref().map_or(0, Vec::len),
-        )?;
+        );
         let mut proposals = proposals?;
         let width = proposals.len();
         let started = Recorder::<TRACE>::start();
@@ -199,7 +201,7 @@ impl<const TRACE: bool> Actor<TRACE> {
             self.parts.core.propose_batch(proposals)
         };
         self.attribution
-            .finish(Phase::Core, started, result.is_err(), width)?;
+            .finish(Phase::Core, started, result.is_err(), width);
         let effects = result.map_err(debug_error)?;
         self.parts.stats[self.parts.slot].record_proposals(width)?;
         self.effects(effects)
@@ -256,7 +258,7 @@ impl<const TRACE: bool> Actor<TRACE> {
                     let result =
                         persist_effect(&mut self.parts.core, &mut self.parts.store, update);
                     self.attribution
-                        .finish(Phase::PersistHelper, started, result.is_err(), 0)?;
+                        .finish(Phase::PersistHelper, started, result.is_err(), 0);
                     effects.extend(result.map_err(debug_error)?);
                 }
                 Effect::Send(message) => self.send(message)?,
@@ -272,7 +274,7 @@ impl<const TRACE: bool> Actor<TRACE> {
                         started,
                         result.is_err(),
                         0,
-                    )?;
+                    );
                     effects.extend(result?);
                 }
                 _ => return Err("unexpected read/configuration effect in framework run".into()),
@@ -284,7 +286,7 @@ impl<const TRACE: bool> Actor<TRACE> {
         let started = Recorder::<TRACE>::start();
         let result = self.send_inner(message);
         self.attribution
-            .finish(Phase::Send, started, result.is_err(), 1)?;
+            .finish(Phase::Send, started, result.is_err(), 1);
         result
     }
     fn send_inner(&self, message: Message) -> Result<(), Failure> {
@@ -308,14 +310,14 @@ impl<const TRACE: bool> Actor<TRACE> {
             started,
             results.is_err(),
             results.as_ref().map_or(0, Vec::len),
-        )?;
+        );
         let results = results.map_err(debug_error)?;
         if self.parts.slot == 0 {
             let started = Recorder::<TRACE>::start();
             let count = results.len();
             let result = self.deliver(results);
             self.attribution
-                .finish(Phase::Results, started, result.is_err(), count)?;
+                .finish(Phase::Results, started, result.is_err(), count);
             result?;
         }
         Ok(())
@@ -378,8 +380,29 @@ impl<const TRACE: bool> Actor<TRACE> {
         let started = Recorder::<TRACE>::start();
         let result = self.maintain_inner();
         self.attribution
-            .finish(Phase::Maintenance, started, result.is_err(), 0)?;
+            .finish(Phase::Maintenance, started, result.is_err(), 0);
         result
+    }
+    fn provider_snapshot(&self) -> Option<crate::attribution::ProviderSnapshot> {
+        Recorder::<TRACE>::provider_snapshot(
+            &self.parts.store.attribution,
+            &self.parts.snapshots.attribution,
+        )
+    }
+    fn finish_checkpoint(
+        &self,
+        phase: Phase,
+        started: Option<Instant>,
+        before: Option<crate::attribution::ProviderSnapshot>,
+        failed: bool,
+    ) {
+        self.attribution.finish(phase, started, failed, 0);
+        self.attribution.finish_scope(
+            phase,
+            before,
+            &self.parts.store.attribution,
+            &self.parts.snapshots.attribution,
+        );
     }
     fn maintain_inner(&mut self) -> Result<(), Failure> {
         if self.parts.settings.maintenance != Maintenance::DefaultRetention {
@@ -399,19 +422,38 @@ impl<const TRACE: bool> Actor<TRACE> {
             group: self.parts.application.group,
             applied: boundary,
         };
-        self.reserve(size_of::<SnapshotMetadata>() + 8)?;
+        let started = Recorder::<TRACE>::start();
+        let before = self.provider_snapshot();
+        let reserved = self.reserve(size_of::<SnapshotMetadata>() + 8);
+        self.finish_checkpoint(Phase::CheckpointReserve, started, before, reserved.is_err());
+        reserved?;
+        let started = Recorder::<TRACE>::start();
+        let before = self.provider_snapshot();
         let receipt =
-            checkpoint_application(&self.parts.core, &historical, &mut self.parts.snapshots)
-                .map_err(debug_error)?;
+            checkpoint_application(&self.parts.core, &historical, &mut self.parts.snapshots);
+        self.finish_checkpoint(Phase::CheckpointPublish, started, before, receipt.is_err());
+        let receipt = receipt.map_err(debug_error)?;
+        let started = Recorder::<TRACE>::start();
+        let before = self.provider_snapshot();
         let effects = compact_replica(
             &mut self.parts.core,
             &mut self.parts.store,
             &mut self.parts.snapshots,
             &self.parts.application,
             receipt.reference(),
-        )
-        .map_err(debug_error)?;
-        self.effects(effects)?;
+        );
+        self.finish_checkpoint(Phase::CheckpointCompact, started, before, effects.is_err());
+        let effects = effects.map_err(debug_error)?;
+        let started = Recorder::<TRACE>::start();
+        let before = self.provider_snapshot();
+        let delivered = self.effects(effects);
+        self.finish_checkpoint(
+            Phase::CheckpointEffects,
+            started,
+            before,
+            delivered.is_err(),
+        );
+        delivered?;
         self.last_snapshot_at = applied;
         self.parts.stats[self.parts.slot]
             .checkpoint_count

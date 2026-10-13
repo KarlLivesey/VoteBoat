@@ -12,7 +12,9 @@ pub struct BatchLimits {
     pub max_replication_entries: usize,
 }
 impl BatchLimits {
-    pub const MAX_PROPOSAL_ENTRIES: usize = 4096;
+    /// Opt-in original-entry ceiling; owned-byte and retained-history limits
+    /// remain independent. Existing default proposal batches contain at most64.
+    pub const MAX_PROPOSAL_ENTRIES: usize = 16384;
     /// Fixed bounded ordinary receive ceiling, independent of outbound batching.
     /// A default64-entry sender can therefore receive a larger peer's chunks.
     pub const MAX_REPLICATION_ENTRIES: usize = 1024;

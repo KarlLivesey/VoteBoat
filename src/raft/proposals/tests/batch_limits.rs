@@ -3,6 +3,8 @@
 //! Configured envelopes retain original order, exact tickets and peer scope.
 use super::*;
 use std::collections::VecDeque;
+#[path = "batch_limits/aggregate.rs"]
+mod aggregate;
 
 fn wide() -> BatchLimits {
     BatchLimits {
@@ -21,7 +23,7 @@ fn startup_limits_reject_invalid_settings_and_lock_on_the_first_refused_event() 
             ..wide()
         },
         BatchLimits {
-            max_proposal_entries: 4097,
+            max_proposal_entries: 16385,
             ..wide()
         },
         BatchLimits {

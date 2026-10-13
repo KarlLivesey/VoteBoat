@@ -1,0 +1,1241 @@
+--- a/benchmarks/matched/src/attribution.rs
++++ b/benchmarks/matched/src/attribution.rs
+@@ -3,7 +3,7 @@
+ //! Bounded elapsed intervals; inclusive and nested, never phase CPU attribution.
+ use crate::Failure;
+ use serde::Serialize;
+-use std::time::Instant;
++use std::{cell::Cell, time::Instant};
+ 
+ #[derive(Clone, Copy)]
+ pub(super) enum Phase {
+@@ -19,8 +19,29 @@
+     SnapshotMaintenance,
+     HostWait,
+     ActorLifetime,
+-}
+-const PHASES: usize = 12;
++    CheckpointReserve,
++    CheckpointPublish,
++    CheckpointCompact,
++    CheckpointEffects,
++    StoreState,
++    SnapshotBegin,
++    SnapshotWrite,
++    SnapshotSeal,
++    SnapshotPublish,
++    SnapshotAbort,
++    SnapshotLoad,
++    SnapshotLatest,
++    SnapshotPin,
++    SnapshotLoadPinned,
++    SnapshotReconcile,
++}
++const PHASES: usize = 27;
++const SCOPES: [Phase; 4] = [
++    Phase::CheckpointReserve,
++    Phase::CheckpointPublish,
++    Phase::CheckpointCompact,
++    Phase::CheckpointEffects,
++];
+ const NAMES: [&str; PHASES] = [
+     "host_admission",
+     "core_direct",
+@@ -34,7 +55,27 @@
+     "snapshot_helpers_inclusive",
+     "host_wait",
+     "actor_lifetime_inclusive",
++    "checkpoint_reserve_inclusive",
++    "checkpoint_publish_inclusive",
++    "checkpoint_compact_inclusive",
++    "checkpoint_effects_inclusive",
++    "store_state_clone_nested",
++    "snapshot_begin_nested",
++    "snapshot_write_chunk_nested",
++    "snapshot_seal_nested",
++    "snapshot_publish_nested",
++    "snapshot_abort_nested",
++    "snapshot_load_nested",
++    "snapshot_latest_reference_nested",
++    "snapshot_pin_for_log_nested",
++    "snapshot_load_pinned_nested",
++    "snapshot_reconcile_log_inclusive_nested",
+ ];
++fn provider_phase(index: usize) -> bool {
++    index == Phase::StoreAppend as usize
++        || index == Phase::StoreBarrier as usize
++        || index >= Phase::StoreState as usize
++}
+ #[derive(Clone, Copy, Default, Debug, Serialize, PartialEq, Eq)]
+ pub(super) struct Interval {
+     calls: u64,
+@@ -68,13 +109,47 @@
+         Ok(())
+     }
+ }
++/// Additive scoped counters deliberately omit maxima: maxima cannot be differenced.
++#[derive(Clone, Copy, Default, Debug, Serialize, PartialEq, Eq)]
++struct ScopedInterval {
++    calls: u64,
++    failures: u64,
++    total_elapsed_ns: u64,
++    items: u64,
++}
++impl ScopedInterval {
++    fn advance(self, before: Interval, after: Interval) -> Option<Self> {
++        Some(Self {
++            calls: self
++                .calls
++                .checked_add(after.calls.checked_sub(before.calls)?)?,
++            failures: self
++                .failures
++                .checked_add(after.failures.checked_sub(before.failures)?)?,
++            total_elapsed_ns: self.total_elapsed_ns.checked_add(
++                after
++                    .total_elapsed_ns
++                    .checked_sub(before.total_elapsed_ns)?,
++            )?,
++            items: self
++                .items
++                .checked_add(after.items.checked_sub(before.items)?)?,
++        })
++    }
++}
++pub(super) struct ProviderSnapshot([Interval; PHASES]);
++#[derive(Clone)]
+ pub(super) struct Recorder<const ENABLED: bool> {
+-    intervals: [Interval; PHASES],
++    intervals: [Cell<Interval>; PHASES],
++    scopes: [Cell<[ScopedInterval; PHASES]>; 4],
++    invalid: Cell<bool>,
+ }
+ impl<const ENABLED: bool> Default for Recorder<ENABLED> {
+     fn default() -> Self {
+         Self {
+-            intervals: [Interval::default(); PHASES],
++            intervals: std::array::from_fn(|_| Cell::new(Interval::default())),
++            scopes: std::array::from_fn(|_| Cell::new([ScopedInterval::default(); PHASES])),
++            invalid: Cell::new(false),
+         }
+     }
+ }
+@@ -86,43 +161,125 @@
+             None
+         }
+     }
+-    pub fn finish(
+-        &mut self,
++    /// Observation failure never substitutes for a provider/protocol outcome.
++    pub fn finish(&self, phase: Phase, started: Option<Instant>, failed: bool, items: usize) {
++        if ENABLED {
++            let measured = started
++                .and_then(|start| u64::try_from(start.elapsed().as_nanos()).ok())
++                .zip(u64::try_from(items).ok());
++            if let Some((elapsed, items)) = measured {
++                self.record(phase, elapsed, failed, items);
++            } else {
++                self.invalid.set(true);
++            }
++        }
++    }
++    fn record(&self, phase: Phase, elapsed: u64, failed: bool, items: u64) {
++        if ENABLED {
++            let cell = &self.intervals[phase as usize];
++            let mut interval = cell.get();
++            if interval.add(elapsed, failed, items).is_ok() {
++                cell.set(interval);
++            } else {
++                self.invalid.set(true);
++            }
++        }
++    }
++    pub fn provider_snapshot(store: &Self, snapshots: &Self) -> Option<ProviderSnapshot> {
++        if ENABLED {
++            Some(ProviderSnapshot(std::array::from_fn(|i| {
++                if i == Phase::StoreAppend as usize
++                    || i == Phase::StoreBarrier as usize
++                    || i == Phase::StoreState as usize
++                {
++                    store.intervals[i].get()
++                } else {
++                    snapshots.intervals[i].get()
++                }
++            })))
++        } else {
++            None
++        }
++    }
++    pub fn finish_scope(
++        &self,
+         phase: Phase,
+-        started: Option<Instant>,
+-        failed: bool,
+-        items: usize,
+-    ) -> Result<(), Failure> {
+-        if ENABLED {
+-            let elapsed = u64::try_from(
+-                started
+-                    .ok_or("missing attribution start")?
+-                    .elapsed()
+-                    .as_nanos(),
+-            )?;
+-            self.intervals[phase as usize].add(elapsed, failed, u64::try_from(items)?)?;
+-        }
+-        Ok(())
+-    }
+-    pub fn report(&self, slot: usize, store: &Self) -> Option<Attribution> {
+-        ENABLED.then(|| Attribution {
++        before: Option<ProviderSnapshot>,
++        store: &Self,
++        snapshots: &Self,
++    ) {
++        if ENABLED {
++            let scoped = SCOPES
++                .iter()
++                .position(|scope| *scope as usize == phase as usize);
++            if let (Some(slot), Some(before), Some(after)) =
++                (scoped, before, Self::provider_snapshot(store, snapshots))
++            {
++                let mut next = self.scopes[slot].get();
++                for (i, value) in next
++                    .iter_mut()
++                    .enumerate()
++                    .filter(|(i, _)| provider_phase(*i))
++                {
++                    let Some(delta) = value.advance(before.0[i], after.0[i]) else {
++                        self.invalid.set(true);
++                        return;
++                    };
++                    *value = delta;
++                }
++                self.scopes[slot].set(next);
++            } else {
++                self.invalid.set(true);
++            }
++        }
++    }
++    pub fn report(
++        &self,
++        slot: usize,
++        store: &Self,
++        snapshots: &Self,
++    ) -> Result<Option<Attribution>, Failure> {
++        if !ENABLED {
++            return Ok(None);
++        }
++        if self.invalid.get() || store.invalid.get() || snapshots.invalid.get() {
++            return Err("invalid attribution counters; provider outcomes were preserved".into());
++        }
++        let provider = Self::provider_snapshot(store, snapshots).unwrap();
++        Ok(Some(Attribution {
+             replica_slot: slot,
+-            scope: "whole_actor_lifetime_including_campaign_warmup_follower_drain_and_shutdown",
++            scope: "whole_actor_lifetime_including_campaign_warmup_follower_drain_and_shutdown;provider_maxima_whole_provider_lifetime_including_setup",
+             clock: "monotonic_elapsed_wall_intervals_not_cpu_or_critical_path",
+-            nesting: "store_append_and_barrier_nested_in_persist_or_maintenance;maintenance_tick_includes_effects_and_nested_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
+-            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;other=zero",
++            nesting: "checkpoint_intervals_nested_in_maintenance;provider_intervals_nested_in_helpers;reconcile_contains_load_pinned;effects_contain_persist_and_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
++            residual: "helper_elapsed_outside_known_provider_methods_is_unattributed_Eq_validation_application_restore_Core_staging_completion_and_marshalling;not_pure_Core;scoped_provider_sums_are_not_additive_when_nested",
++            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;snapshot_write=attempted_application_bytes;other=zero",
+             phases: NAMES.iter().enumerate().map(|(i, &phase)| PhaseReport {
+-                phase,
+-                interval: if i == Phase::StoreAppend as usize || i == Phase::StoreBarrier as usize { store.intervals[i] } else { self.intervals[i] },
++                phase, interval: if provider_phase(i) { provider.0[i] } else { self.intervals[i].get() },
+             }).collect(),
+-        })
+-    }
+-}
+-#[derive(Clone, Debug, Serialize)]
+-pub(super) struct PhaseReport {
++            checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
++                let values = self.scopes[slot].get();
++                ScopeReport { scope: NAMES[phase as usize], methods: NAMES.iter().enumerate()
++                    .filter(|(i, _)| provider_phase(*i)).map(|(i, &method)| MethodReport { method, interval: values[i] }).collect() }
++            }).collect(),
++        }))
++    }
++}
++#[derive(Clone, Debug, Serialize)]
++struct PhaseReport {
+     phase: &'static str,
+     #[serde(flatten)]
+     interval: Interval,
++}
++#[derive(Clone, Debug, Serialize)]
++struct MethodReport {
++    method: &'static str,
++    #[serde(flatten)]
++    interval: ScopedInterval,
++}
++#[derive(Clone, Debug, Serialize)]
++struct ScopeReport {
++    scope: &'static str,
++    methods: Vec<MethodReport>,
+ }
+ #[derive(Clone, Debug, Serialize)]
+ pub(super) struct Attribution {
+@@ -130,41 +287,10 @@
+     scope: &'static str,
+     clock: &'static str,
+     nesting: &'static str,
++    residual: &'static str,
+     item_units: &'static str,
+     phases: Vec<PhaseReport>,
+-}
+-
++    checkpoint_provider_scopes: Vec<ScopeReport>,
++}
+ #[cfg(test)]
+-mod tests {
+-    use super::*;
+-    #[test]
+-    fn disabled_recorder_reads_no_clock_and_emits_no_record() {
+-        let mut recorder = Recorder::<false>::default();
+-        assert!(Recorder::<false>::start().is_none());
+-        recorder
+-            .finish(Phase::Core, None, true, usize::MAX)
+-            .unwrap();
+-        assert_eq!(recorder.intervals, [Interval::default(); PHASES]);
+-        assert!(recorder.report(0, &recorder).is_none());
+-    }
+-    #[test]
+-    fn interval_accounting_is_checked_and_overflow_is_atomic() {
+-        let mut interval = Interval::default();
+-        interval.add(7, false, 4).unwrap();
+-        interval.add(3, true, 1).unwrap();
+-        assert_eq!(
+-            interval,
+-            Interval {
+-                calls: 2,
+-                failures: 1,
+-                total_elapsed_ns: 10,
+-                maximum_elapsed_ns: 7,
+-                items: 5
+-            }
+-        );
+-        interval.calls = u64::MAX;
+-        let before = interval;
+-        assert!(interval.add(1, false, 1).is_err());
+-        assert_eq!(interval, before);
+-    }
+-}
++mod tests;
+--- a/benchmarks/matched/src/snapshots.rs
++++ b/benchmarks/matched/src/snapshots.rs
+@@ -1,6 +1,7 @@
+ // SPDX-License-Identifier: RPL-1.5
+ // Copyright (c) 2026 Karl Livesey
+ //! Bounded volatile publication and two exact log anchors; no disk durability.
++use crate::attribution::{Phase, Recorder};
+ use std::collections::BTreeMap;
+ use voteboat::snapshot::*;
+ use voteboat::{contracts::StorageError, identity::*};
+@@ -13,7 +14,8 @@
+     Option<SealedSnapshot>,
+ );
+ #[derive(Clone)]
+-pub(super) struct MemorySnapshots {
++pub(super) struct MemorySnapshots<const TRACE: bool = false> {
++    pub attribution: Recorder<TRACE>,
+     pub identity: SnapshotIdentity,
+     pub binding: StoreBinding,
+     pub limits: SnapshotLimits,
+@@ -23,9 +25,10 @@
+     reference: Option<SnapshotRef>,
+     pub pins: BTreeMap<SnapshotGeneration, (SnapshotRef, Snapshot)>,
+ }
+-impl MemorySnapshots {
++impl<const TRACE: bool> MemorySnapshots<TRACE> {
+     pub fn new(binding: StoreBinding, group: GroupIdentity) -> Self {
+         Self {
++            attribution: Recorder::default(),
+             identity: SnapshotIdentity {
+                 store: binding.identity,
+                 group,
+@@ -50,7 +53,7 @@
+     }
+     !crc
+ }
+-impl SnapshotStore for MemorySnapshots {
++impl<const TRACE: bool> SnapshotStore for MemorySnapshots<TRACE> {
+     fn identity(&self) -> SnapshotIdentity {
+         self.identity
+     }
+@@ -61,32 +64,38 @@
+         self.limits
+     }
+     fn begin(&mut self, m: SnapshotMetadata, n: usize) -> Result<SnapshotTicket, StorageError> {
+-        m.validate()?;
+-        if m.bootstrap.group != self.identity.group {
+-            return Err(StorageError::WrongIdentity);
+-        }
+-        if self.pending.is_some()
+-            || self.pins.values().any(|(r, _)| Some(*r) != self.reference)
+-            || n == 0
+-            || n > self.limits.max_application_bytes
+-            || self
+-                .current
+-                .as_ref()
+-                .is_some_and(|s| !m.follows(&s.metadata))
+-        {
+-            return Err(StorageError::Rejected("stage limits or regression"));
+-        }
+-        self.generation = self
+-            .generation
+-            .checked_add(1)
+-            .ok_or(StorageError::Rejected("snapshot generation exhausted"))?;
+-        let ticket = SnapshotTicket {
+-            binding: self.binding,
+-            group: self.identity.group,
+-            generation: SnapshotGeneration::new(self.generation).unwrap(),
+-        };
+-        self.pending = Some((ticket, m, n, Vec::new(), None));
+-        Ok(ticket)
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            m.validate()?;
++            if m.bootstrap.group != self.identity.group {
++                return Err(StorageError::WrongIdentity);
++            }
++            if self.pending.is_some()
++                || self.pins.values().any(|(r, _)| Some(*r) != self.reference)
++                || n == 0
++                || n > self.limits.max_application_bytes
++                || self
++                    .current
++                    .as_ref()
++                    .is_some_and(|s| !m.follows(&s.metadata))
++            {
++                return Err(StorageError::Rejected("stage limits or regression"));
++            }
++            self.generation = self
++                .generation
++                .checked_add(1)
++                .ok_or(StorageError::Rejected("snapshot generation exhausted"))?;
++            let ticket = SnapshotTicket {
++                binding: self.binding,
++                group: self.identity.group,
++                generation: SnapshotGeneration::new(self.generation).unwrap(),
++            };
++            self.pending = Some((ticket, m, n, Vec::new(), None));
++            Ok(ticket)
++        })();
++        self.attribution
++            .finish(Phase::SnapshotBegin, started, result.is_err(), 0);
++        result
+     }
+     fn write_chunk(
+         &mut self,
+@@ -94,113 +103,165 @@
+         offset: usize,
+         bytes: &[u8],
+     ) -> Result<(), StorageError> {
+-        let p = self
+-            .pending
+-            .as_mut()
+-            .filter(|p| p.0 == ticket)
+-            .ok_or(StorageError::StaleTicket)?;
+-        if p.4.is_some()
+-            || offset != p.3.len()
+-            || bytes.is_empty()
+-            || bytes.len() > self.limits.max_chunk_bytes
+-            || bytes.len() > p.2.saturating_sub(p.3.len())
+-        {
+-            return Err(StorageError::Rejected("chunk limits"));
+-        }
+-        p.3.extend(bytes);
+-        Ok(())
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            let p = self
++                .pending
++                .as_mut()
++                .filter(|p| p.0 == ticket)
++                .ok_or(StorageError::StaleTicket)?;
++            if p.4.is_some()
++                || offset != p.3.len()
++                || bytes.is_empty()
++                || bytes.len() > self.limits.max_chunk_bytes
++                || bytes.len() > p.2.saturating_sub(p.3.len())
++            {
++                return Err(StorageError::Rejected("chunk limits"));
++            }
++            p.3.extend(bytes);
++            Ok(())
++        })();
++        self.attribution
++            .finish(Phase::SnapshotWrite, started, result.is_err(), bytes.len());
++        result
+     }
+     fn seal(&mut self, ticket: SnapshotTicket) -> Result<SealedSnapshot, StorageError> {
+-        let p = self
+-            .pending
+-            .as_mut()
+-            .filter(|p| p.0 == ticket)
+-            .ok_or(StorageError::StaleTicket)?;
+-        if p.4.is_some() || p.3.len() != p.2 {
+-            return Err(StorageError::Rejected("incomplete stage"));
+-        }
+-        let sealed = SealedSnapshot {
+-            ticket,
+-            // Include the contract's minimum snapshot envelope even when an
+-            // empty application's checkpoint payload is smaller than 48 bytes.
+-            file_bytes: 48 + p.2 as u64,
+-            checksum: checksum(&p.3),
+-        };
+-        p.4 = Some(sealed);
+-        Ok(sealed)
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            let p = self
++                .pending
++                .as_mut()
++                .filter(|p| p.0 == ticket)
++                .ok_or(StorageError::StaleTicket)?;
++            if p.4.is_some() || p.3.len() != p.2 {
++                return Err(StorageError::Rejected("incomplete stage"));
++            }
++            let sealed = SealedSnapshot {
++                ticket,
++                // Include the contract's minimum snapshot envelope even when an
++                // empty application's checkpoint payload is smaller than 48 bytes.
++                file_bytes: 48 + p.2 as u64,
++                checksum: checksum(&p.3),
++            };
++            p.4 = Some(sealed);
++            Ok(sealed)
++        })();
++        self.attribution
++            .finish(Phase::SnapshotSeal, started, result.is_err(), 0);
++        result
+     }
+     fn publish(&mut self, sealed: SealedSnapshot) -> Result<SnapshotReceipt, StorageError> {
+-        if self.pending.as_ref().is_none_or(|p| p.4 != Some(sealed)) {
+-            return Err(StorageError::StaleTicket);
+-        }
+-        let (_, metadata, _, application, _) = self.pending.take().unwrap();
+-        self.current = Some(Snapshot {
+-            metadata: metadata.clone(),
+-            application,
+-        });
+-        let receipt = SnapshotReceipt { sealed, metadata };
+-        self.reference = Some(receipt.reference());
+-        Ok(receipt)
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            if self.pending.as_ref().is_none_or(|p| p.4 != Some(sealed)) {
++                return Err(StorageError::StaleTicket);
++            }
++            let (_, metadata, _, application, _) = self.pending.take().unwrap();
++            self.current = Some(Snapshot {
++                metadata: metadata.clone(),
++                application,
++            });
++            let receipt = SnapshotReceipt { sealed, metadata };
++            self.reference = Some(receipt.reference());
++            Ok(receipt)
++        })();
++        self.attribution
++            .finish(Phase::SnapshotPublish, started, result.is_err(), 0);
++        result
+     }
+     fn abort(&mut self, ticket: SnapshotTicket) -> Result<(), StorageError> {
+-        if self.pending.as_ref().is_none_or(|p| p.0 != ticket) {
+-            return Err(StorageError::StaleTicket);
+-        }
+-        self.pending = None;
+-        Ok(())
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            if self.pending.as_ref().is_none_or(|p| p.0 != ticket) {
++                return Err(StorageError::StaleTicket);
++            }
++            self.pending = None;
++            Ok(())
++        })();
++        self.attribution
++            .finish(Phase::SnapshotAbort, started, result.is_err(), 0);
++        result
+     }
+     fn load(&mut self) -> Result<Option<Snapshot>, StorageError> {
+-        if let Some(reference) = self.reference {
+-            let image = self
+-                .current
+-                .as_ref()
+-                .ok_or(StorageError::Corrupt("missing volatile publication"))?;
+-            if !reference.matches(image) || checksum(&image.application) != reference.checksum {
+-                return Err(StorageError::Corrupt("volatile publication checksum"));
+-            }
+-        } else if self.current.is_some() {
+-            return Err(StorageError::Corrupt("unreferenced volatile publication"));
+-        }
+-        Ok(self.current.clone())
+-    }
+-}
+-impl SnapshotRetention for MemorySnapshots {
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            if let Some(reference) = self.reference {
++                let image = self
++                    .current
++                    .as_ref()
++                    .ok_or(StorageError::Corrupt("missing volatile publication"))?;
++                if !reference.matches(image) || checksum(&image.application) != reference.checksum {
++                    return Err(StorageError::Corrupt("volatile publication checksum"));
++                }
++            } else if self.current.is_some() {
++                return Err(StorageError::Corrupt("unreferenced volatile publication"));
++            }
++            Ok(self.current.clone())
++        })();
++        self.attribution
++            .finish(Phase::SnapshotLoad, started, result.is_err(), 0);
++        result
++    }
++}
++impl<const TRACE: bool> SnapshotRetention for MemorySnapshots<TRACE> {
+     fn latest_reference(&self) -> Result<Option<SnapshotRef>, StorageError> {
+-        Ok(self.reference)
++        let started = Recorder::<TRACE>::start();
++        let result: Result<_, StorageError> = Ok(self.reference);
++        self.attribution
++            .finish(Phase::SnapshotLatest, started, result.is_err(), 0);
++        result
+     }
+     fn pin_for_log(&mut self, r: SnapshotRef) -> Result<(), StorageError> {
+-        if let Some((old, _)) = self.pins.get(&r.generation) {
+-            return if *old == r {
+-                Ok(())
+-            } else {
+-                Err(StorageError::StaleTicket)
+-            };
+-        }
+-        if self.reference != Some(r) || self.pins.len() >= 2 {
+-            return Err(StorageError::StaleTicket);
+-        }
+-        self.pins
+-            .insert(r.generation, (r, self.current.clone().unwrap()));
+-        Ok(())
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            if let Some((old, _)) = self.pins.get(&r.generation) {
++                return if *old == r {
++                    Ok(())
++                } else {
++                    Err(StorageError::StaleTicket)
++                };
++            }
++            if self.reference != Some(r) || self.pins.len() >= 2 {
++                return Err(StorageError::StaleTicket);
++            }
++            self.pins
++                .insert(r.generation, (r, self.current.clone().unwrap()));
++            Ok(())
++        })();
++        self.attribution
++            .finish(Phase::SnapshotPin, started, result.is_err(), 0);
++        result
+     }
+     fn load_pinned(&mut self, r: SnapshotRef) -> Result<Snapshot, StorageError> {
+-        let (_, image) = self
+-            .pins
+-            .get(&r.generation)
+-            .filter(|(p, _)| *p == r)
+-            .ok_or(StorageError::StaleTicket)?;
+-        if !r.matches(image) || checksum(&image.application) != r.checksum {
+-            return Err(StorageError::Corrupt("volatile pinned image checksum"));
+-        }
+-        Ok(image.clone())
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            let (_, image) = self
++                .pins
++                .get(&r.generation)
++                .filter(|(p, _)| *p == r)
++                .ok_or(StorageError::StaleTicket)?;
++            if !r.matches(image) || checksum(&image.application) != r.checksum {
++                return Err(StorageError::Corrupt("volatile pinned image checksum"));
++            }
++            Ok(image.clone())
++        })();
++        self.attribution
++            .finish(Phase::SnapshotLoadPinned, started, result.is_err(), 0);
++        result
+     }
+     fn reconcile_log(&mut self, r: Option<SnapshotRef>) -> Result<(), StorageError> {
+-        if self.pending.is_some() {
+-            return Err(StorageError::Rejected("stage pending"));
+-        }
+-        self.current = r.map(|p| self.load_pinned(p)).transpose()?;
+-        self.reference = r;
+-        self.pins.retain(|_, (p, _)| Some(*p) == r);
+-        Ok(())
+-    }
+-}
++        let started = Recorder::<TRACE>::start();
++        let result = (|| {
++            if self.pending.is_some() {
++                return Err(StorageError::Rejected("stage pending"));
++            }
++            self.current = r.map(|p| self.load_pinned(p)).transpose()?;
++            self.reference = r;
++            self.pins.retain(|_, (p, _)| Some(*p) == r);
++            Ok(())
++        })();
++        self.attribution
++            .finish(Phase::SnapshotReconcile, started, result.is_err(), 0);
++        result
++    }
++}
+--- a/benchmarks/matched/src/store.rs
++++ b/benchmarks/matched/src/store.rs
+@@ -95,7 +95,17 @@
+         self.limits
+     }
+     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
+-        self.completed_state(group).cloned()
++        let started = Recorder::<TRACE>::start();
++        let result = self.completed_state(group).cloned();
++        // Disabled attribution does not even inspect the result's retained length.
++        let items = if TRACE {
++            result.as_ref().map_or(0, |state| state.entries.len())
++        } else {
++            0
++        };
++        self.attribution
++            .finish(Phase::StoreState, started, result.is_err(), items);
++        result
+     }
+     fn append_batch(
+         &mut self,
+@@ -104,16 +114,14 @@
+         let started = Recorder::<TRACE>::start();
+         let result = self.append(mutations);
+         self.attribution
+-            .finish(Phase::StoreAppend, started, result.is_err(), 0)
+-            .map_err(|_| StorageError::Rejected("attribution exhausted"))?;
++            .finish(Phase::StoreAppend, started, result.is_err(), 0);
+         result
+     }
+     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError> {
+         let started = Recorder::<TRACE>::start();
+         let result = self.complete(dependencies);
+         self.attribution
+-            .finish(Phase::StoreBarrier, started, result.is_err(), 0)
+-            .map_err(|_| StorageError::Rejected("attribution exhausted"))?;
++            .finish(Phase::StoreBarrier, started, result.is_err(), 0);
+         result
+     }
+     fn fetch_range(
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -15,7 +15,7 @@
+     pub slot: usize,
+     pub core: Raft,
+     pub store: MemoryStore<TRACE>,
+-    pub snapshots: MemorySnapshots,
++    pub snapshots: MemorySnapshots<TRACE>,
+     pub application: Noop,
+     pub receiver: mpsc::Receiver<Request>,
+     pub peer_receiver: mpsc::Receiver<Message>,
+@@ -55,11 +55,13 @@
+         let started = Recorder::<TRACE>::start();
+         let result = self.run_inner().await;
+         self.attribution
+-            .finish(Phase::ActorLifetime, started, result.is_err(), 0)?;
++            .finish(Phase::ActorLifetime, started, result.is_err(), 0);
+         result?;
+-        Ok(self
+-            .attribution
+-            .report(self.parts.slot, &self.parts.store.attribution))
++        self.attribution.report(
++            self.parts.slot,
++            &self.parts.store.attribution,
++            &self.parts.snapshots.attribution,
++        )
+     }
+     async fn run_inner(&mut self) -> Result<(), Failure> {
+         let mut tick = tokio::time::interval(Duration::from_millis(50));
+@@ -76,21 +78,21 @@
+                 tokio::select! {
+                     biased;
+                     _ = self.parts.stopped.changed() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                        self.attribution.finish(Phase::HostWait, started, false, 0);
+                         return Ok(());
+                     }
+                     message = self.parts.peer_receiver.recv(), if self.accepts_peer() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                        self.attribution.finish(Phase::HostWait, started, false, 0);
+                         let message = message.ok_or("peer actor input closed")?;
+                         self.last_contact = Instant::now();
+                         self.step(Event::Receive(message))?;
+                     }
+                     request = self.parts.receiver.recv(), if self.accepts_proposals() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                        self.attribution.finish(Phase::HostWait, started, false, 0);
+                         self.requests(request.ok_or("client actor input closed")?)?;
+                     }
+                     _ = tick.tick() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                        self.attribution.finish(Phase::HostWait, started, false, 0);
+                         self.tick()?;
+                     }
+                 }
+@@ -173,7 +175,7 @@
+         let started = Recorder::<TRACE>::start();
+         let result = self.parts.core.step(event);
+         self.attribution
+-            .finish(Phase::Core, started, result.is_err(), 0)?;
++            .finish(Phase::Core, started, result.is_err(), 0);
+         let effects = result.map_err(debug_error)?;
+         self.effects(effects)
+     }
+@@ -185,7 +187,7 @@
+             started,
+             proposals.is_err(),
+             proposals.as_ref().map_or(0, Vec::len),
+-        )?;
++        );
+         let mut proposals = proposals?;
+         let width = proposals.len();
+         let started = Recorder::<TRACE>::start();
+@@ -199,7 +201,7 @@
+             self.parts.core.propose_batch(proposals)
+         };
+         self.attribution
+-            .finish(Phase::Core, started, result.is_err(), width)?;
++            .finish(Phase::Core, started, result.is_err(), width);
+         let effects = result.map_err(debug_error)?;
+         self.parts.stats[self.parts.slot].record_proposals(width)?;
+         self.effects(effects)
+@@ -256,7 +258,7 @@
+                     let result =
+                         persist_effect(&mut self.parts.core, &mut self.parts.store, update);
+                     self.attribution
+-                        .finish(Phase::PersistHelper, started, result.is_err(), 0)?;
++                        .finish(Phase::PersistHelper, started, result.is_err(), 0);
+                     effects.extend(result.map_err(debug_error)?);
+                 }
+                 Effect::Send(message) => self.send(message)?,
+@@ -272,7 +274,7 @@
+                         started,
+                         result.is_err(),
+                         0,
+-                    )?;
++                    );
+                     effects.extend(result?);
+                 }
+                 _ => return Err("unexpected read/configuration effect in framework run".into()),
+@@ -284,7 +286,7 @@
+         let started = Recorder::<TRACE>::start();
+         let result = self.send_inner(message);
+         self.attribution
+-            .finish(Phase::Send, started, result.is_err(), 1)?;
++            .finish(Phase::Send, started, result.is_err(), 1);
+         result
+     }
+     fn send_inner(&self, message: Message) -> Result<(), Failure> {
+@@ -308,14 +310,14 @@
+             started,
+             results.is_err(),
+             results.as_ref().map_or(0, Vec::len),
+-        )?;
++        );
+         let results = results.map_err(debug_error)?;
+         if self.parts.slot == 0 {
+             let started = Recorder::<TRACE>::start();
+             let count = results.len();
+             let result = self.deliver(results);
+             self.attribution
+-                .finish(Phase::Results, started, result.is_err(), count)?;
++                .finish(Phase::Results, started, result.is_err(), count);
+             result?;
+         }
+         Ok(())
+@@ -378,8 +380,29 @@
+         let started = Recorder::<TRACE>::start();
+         let result = self.maintain_inner();
+         self.attribution
+-            .finish(Phase::Maintenance, started, result.is_err(), 0)?;
++            .finish(Phase::Maintenance, started, result.is_err(), 0);
+         result
++    }
++    fn provider_snapshot(&self) -> Option<crate::attribution::ProviderSnapshot> {
++        Recorder::<TRACE>::provider_snapshot(
++            &self.parts.store.attribution,
++            &self.parts.snapshots.attribution,
++        )
++    }
++    fn finish_checkpoint(
++        &self,
++        phase: Phase,
++        started: Option<Instant>,
++        before: Option<crate::attribution::ProviderSnapshot>,
++        failed: bool,
++    ) {
++        self.attribution.finish(phase, started, failed, 0);
++        self.attribution.finish_scope(
++            phase,
++            before,
++            &self.parts.store.attribution,
++            &self.parts.snapshots.attribution,
++        );
+     }
+     fn maintain_inner(&mut self) -> Result<(), Failure> {
+         if self.parts.settings.maintenance != Maintenance::DefaultRetention {
+@@ -399,19 +422,38 @@
+             group: self.parts.application.group,
+             applied: boundary,
+         };
+-        self.reserve(size_of::<SnapshotMetadata>() + 8)?;
++        let started = Recorder::<TRACE>::start();
++        let before = self.provider_snapshot();
++        let reserved = self.reserve(size_of::<SnapshotMetadata>() + 8);
++        self.finish_checkpoint(Phase::CheckpointReserve, started, before, reserved.is_err());
++        reserved?;
++        let started = Recorder::<TRACE>::start();
++        let before = self.provider_snapshot();
+         let receipt =
+-            checkpoint_application(&self.parts.core, &historical, &mut self.parts.snapshots)
+-                .map_err(debug_error)?;
++            checkpoint_application(&self.parts.core, &historical, &mut self.parts.snapshots);
++        self.finish_checkpoint(Phase::CheckpointPublish, started, before, receipt.is_err());
++        let receipt = receipt.map_err(debug_error)?;
++        let started = Recorder::<TRACE>::start();
++        let before = self.provider_snapshot();
+         let effects = compact_replica(
+             &mut self.parts.core,
+             &mut self.parts.store,
+             &mut self.parts.snapshots,
+             &self.parts.application,
+             receipt.reference(),
+-        )
+-        .map_err(debug_error)?;
+-        self.effects(effects)?;
++        );
++        self.finish_checkpoint(Phase::CheckpointCompact, started, before, effects.is_err());
++        let effects = effects.map_err(debug_error)?;
++        let started = Recorder::<TRACE>::start();
++        let before = self.provider_snapshot();
++        let delivered = self.effects(effects);
++        self.finish_checkpoint(
++            Phase::CheckpointEffects,
++            started,
++            before,
++            delivered.is_err(),
++        );
++        delivered?;
+         self.last_snapshot_at = applied;
+         self.parts.stats[self.parts.slot]
+             .checkpoint_count
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -109,3 +109,134 @@
+         );
+     }
+ }
++
++#[test]
++fn checkpoint_scopes_observe_actual_helpers_and_nested_retention() {
++    checked_checkpoint_scopes::<false>();
++    checked_checkpoint_scopes::<true>();
++}
++fn checked_checkpoint_scopes<const TRACE: bool>() {
++    let (mut actor, _sender) = ready_actor::<TRACE>(crate::Envelopes::UpstreamDefault);
++    for start in (1..=12_000).step_by(4) {
++        let mut proposals = Vec::new();
++        let mut replies = Vec::new();
++        let mut waits = Vec::new();
++        for original in start..start + 4 {
++            let operation = OperationId::new(original as u128).unwrap();
++            let (reply, wait) = oneshot::channel();
++            proposals.push(Proposal {
++                operation,
++                bytes: Vec::new(),
++            });
++            replies.push(reply);
++            waits.push((operation, wait));
++        }
++        actor.requests(Request { proposals, replies }).unwrap();
++        actor.maintain().unwrap();
++        for (expected, mut wait) in waits {
++            assert_eq!(wait.try_recv().unwrap(), expected);
++        }
++    }
++    assert_eq!(actor.parts.application.applied, 12_001);
++    assert_eq!(actor.parts.core.state().base_index(), 9001);
++    assert!(actor.pending.is_empty());
++    let report = actor
++        .attribution
++        .report(
++            0,
++            &actor.parts.store.attribution,
++            &actor.parts.snapshots.attribution,
++        )
++        .unwrap();
++    if !TRACE {
++        assert!(report.is_none());
++        return;
++    }
++    let value = serde_json::to_value(report.unwrap()).unwrap();
++    let phases = value["phases"].as_array().unwrap();
++    for name in [
++        "checkpoint_reserve_inclusive",
++        "checkpoint_publish_inclusive",
++        "checkpoint_compact_inclusive",
++        "checkpoint_effects_inclusive",
++    ] {
++        let phase = phases.iter().find(|v| v["phase"] == name).unwrap();
++        assert_eq!(phase["calls"], 2);
++        assert_eq!(phase["failures"], 0);
++    }
++    let methods = value["checkpoint_provider_scopes"][2]["methods"]
++        .as_array()
++        .unwrap();
++    let count = |name| {
++        methods.iter().find(|v| v["method"] == name).unwrap()["calls"]
++            .as_u64()
++            .unwrap()
++    };
++    assert_eq!(count("store_state_clone_nested"), 2);
++    assert_eq!(count("store_append_nested"), 2);
++    assert_eq!(count("store_barrier_nested"), 2);
++    assert_eq!(count("snapshot_pin_for_log_nested"), 2);
++    assert_eq!(count("snapshot_reconcile_log_inclusive_nested"), 2);
++    assert_eq!(count("snapshot_load_pinned_nested"), 4);
++}
++
++#[test]
++fn provider_failures_keep_original_outcomes_and_are_scoped() {
++    let (mut actor, _sender) = ready_actor::<true>(crate::Envelopes::UpstreamDefault);
++    let before = actor.provider_snapshot();
++    let reference = checkpoint_application(
++        &actor.parts.core,
++        &actor.parts.application,
++        &mut actor.parts.snapshots,
++    )
++    .unwrap()
++    .reference();
++    assert_eq!(
++        actor.parts.snapshots.load_pinned(reference),
++        Err(voteboat::contracts::StorageError::StaleTicket)
++    );
++    actor.parts.snapshots.pin_for_log(reference).unwrap();
++    actor
++        .parts
++        .snapshots
++        .pins
++        .get_mut(&reference.generation)
++        .unwrap()
++        .1
++        .application[0] ^= 1;
++    assert!(matches!(
++        actor.parts.snapshots.reconcile_log(Some(reference)),
++        Err(voteboat::contracts::StorageError::Corrupt(_))
++    ));
++    // Failed reconciliation preserves the provider's original pinned image/anchor state.
++    assert_eq!(actor.parts.snapshots.pins.len(), 1);
++    assert!(actor.parts.snapshots.current.is_some());
++    actor.attribution.finish_scope(
++        Phase::CheckpointCompact,
++        before,
++        &actor.parts.store.attribution,
++        &actor.parts.snapshots.attribution,
++    );
++    let report = serde_json::to_value(
++        actor
++            .attribution
++            .report(
++                0,
++                &actor.parts.store.attribution,
++                &actor.parts.snapshots.attribution,
++            )
++            .unwrap()
++            .unwrap(),
++    )
++    .unwrap();
++    let methods = report["checkpoint_provider_scopes"][2]["methods"]
++        .as_array()
++        .unwrap();
++    let failures = |name| {
++        methods.iter().find(|v| v["method"] == name).unwrap()["failures"]
++            .as_u64()
++            .unwrap()
++    };
++    assert_eq!(failures("snapshot_load_pinned_nested"), 2);
++    assert_eq!(failures("snapshot_reconcile_log_inclusive_nested"), 1);
++}
+--- a/benchmarks/matched/src/workload.rs
++++ b/benchmarks/matched/src/workload.rs
+@@ -241,7 +241,14 @@
+                 .contains("not_cpu_or_critical_path"));
+             assert!(value["nesting"].as_str().unwrap().contains("do_not_sum"));
+             let phases = value["phases"].as_array().unwrap();
+-            assert_eq!(phases.len(), 12);
++            assert_eq!(phases.len(), 27);
++            assert_eq!(
++                value["checkpoint_provider_scopes"]
++                    .as_array()
++                    .unwrap()
++                    .len(),
++                4
++            );
+             let get = |name| phases.iter().find(|p| p["phase"] == name).unwrap();
+             assert_eq!(get("actor_lifetime_inclusive")["calls"], 1);
+             assert!(get("core_direct")["calls"].as_u64().unwrap() > 0);
+--- /dev/null
++++ b/benchmarks/matched/src/attribution/tests.rs
+@@ -0,0 +1,118 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++#[test]
++fn disabled_recorder_reads_no_clock_cells_or_snapshots() {
++    let recorder = Recorder::<false>::default();
++    recorder.invalid.set(true); // Poisoned cells cannot affect the disabled path.
++    assert!(Recorder::<false>::start().is_none());
++    recorder.finish(Phase::Core, None, true, usize::MAX);
++    assert!(Recorder::<false>::provider_snapshot(&recorder, &recorder).is_none());
++    recorder.finish_scope(Phase::CheckpointCompact, None, &recorder, &recorder);
++    assert!(recorder.report(0, &recorder, &recorder).unwrap().is_none());
++    assert!(recorder
++        .intervals
++        .iter()
++        .all(|cell| cell.get() == Interval::default()));
++}
++#[test]
++fn interval_accounting_is_checked_and_overflow_is_atomic() {
++    let mut interval = Interval::default();
++    interval.add(7, false, 4).unwrap();
++    interval.add(3, true, 1).unwrap();
++    assert_eq!(
++        interval,
++        Interval {
++            calls: 2,
++            failures: 1,
++            total_elapsed_ns: 10,
++            maximum_elapsed_ns: 7,
++            items: 5
++        }
++    );
++    interval.calls = u64::MAX;
++    let before = interval;
++    assert!(interval.add(1, false, 1).is_err());
++    assert_eq!(interval, before);
++}
++#[test]
++fn scoped_provider_deltas_exclude_setup_and_do_not_invent_maxima() {
++    let actor = Recorder::<true>::default();
++    let store = Recorder::<true>::default();
++    let snapshots = Recorder::<true>::default();
++    store.record(Phase::StoreState, 99, false, 12);
++    let before = Recorder::provider_snapshot(&store, &snapshots);
++    store.record(Phase::StoreState, 7, false, 6);
++    snapshots.record(Phase::SnapshotLoadPinned, 3, false, 0);
++    snapshots.record(Phase::SnapshotReconcile, 5, false, 0);
++    actor.finish_scope(Phase::CheckpointCompact, before, &store, &snapshots);
++    let report =
++        serde_json::to_value(actor.report(0, &store, &snapshots).unwrap().unwrap()).unwrap();
++    let scope = &report["checkpoint_provider_scopes"][2]["methods"];
++    let state = scope
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|v| v["method"] == "store_state_clone_nested")
++        .unwrap();
++    assert_eq!(state["calls"], 1);
++    assert_eq!(state["total_elapsed_ns"], 7);
++    assert_eq!(state["items"], 6);
++    assert!(state.get("maximum_elapsed_ns").is_none());
++    assert!(report["nesting"]
++        .as_str()
++        .unwrap()
++        .contains("reconcile_contains_load_pinned"));
++    assert!(report["residual"]
++        .as_str()
++        .unwrap()
++        .contains("not_pure_Core"));
++}
++#[test]
++fn invalid_observation_does_not_interrupt_a_provider_and_is_rejected_at_report() {
++    let recorder = Recorder::<true>::default();
++    recorder.intervals[Phase::StoreAppend as usize].set(Interval {
++        calls: u64::MAX,
++        ..Interval::default()
++    });
++    recorder.finish(Phase::StoreAppend, Recorder::<true>::start(), false, 0);
++    assert!(recorder.invalid.get());
++    assert!(recorder.report(0, &recorder, &recorder).is_err());
++    let before = ScopedInterval::default();
++    assert!(before
++        .advance(
++            Interval {
++                calls: 1,
++                ..Interval::default()
++            },
++            Interval::default()
++        )
++        .is_none());
++}
++
++#[test]
++fn exhausted_real_snapshot_observer_preserves_successful_provider_outcome() {
++    use voteboat::{identity::*, snapshot::SnapshotRetention};
++    let group = GroupIdentity {
++        id: GroupId::new(1).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    };
++    let binding = StoreBinding {
++        identity: StoreIdentity {
++            id: StoreId::new(1).unwrap(),
++            incarnation: StoreIncarnation::new(1).unwrap(),
++        },
++        session: StoreSession::new(1).unwrap(),
++    };
++    let snapshots = crate::snapshots::MemorySnapshots::<true>::new(binding, group);
++    snapshots.attribution.intervals[Phase::SnapshotLatest as usize].set(Interval {
++        calls: u64::MAX,
++        ..Interval::default()
++    });
++    assert_eq!(snapshots.latest_reference(), Ok(None));
++    assert!(snapshots
++        .attribution
++        .report(0, &Recorder::default(), &snapshots.attribution)
++        .is_err());
++}
+--- a/benchmarks/matched/README.md
++++ b/benchmarks/matched/README.md
+@@ -65,3 +65,13 @@
+ [The Linux elapsed diagnostic](validation/performance/slice417-attribution/DIAGNOSTIC-LINUX.md)
+ passes nine exact cases and guards. It points first to inclusive maintenance and
+ persistence-helper work; off/on rates overlap across trials and qualify no floor.
++
++Checkpoint attribution also labels four inclusive actor boundaries (reservation,
++publication, compaction and returned effects), plus the actual volatile log state
++clone and snapshot provider calls. Fixed before/after provider counter snapshots
++report calls, failures, elapsed totals and item counts within each boundary.
++Maxima remain whole provider lifetime; scoped maxima are deliberately absent.
++Reconciliation includes its pinned-image load. Helper work outside these provider
++methods stays explicitly unattributed; these intervals are elapsed time, not CPU.
++Disabled mode reads no clocks or observer cells. Counter exhaustion preserves the
++provider outcome and invalidates only the final diagnostic report.
+--- a/benchmarks/matched/SCHEMA.md
++++ b/benchmarks/matched/SCHEMA.md
+@@ -115,3 +115,15 @@
+ descheduling prevent CPU or critical-path inference. No phase totals should be
+ summed as exclusive work. Existing original counts, request latencies and all
+ applied-frontier checks retain their independent meaning.
++
++Checkpoint detail uses fixed Cell-backed counters so the actual &self log-state
++clone is observed without changing its visibility or equality proof. Four actor
++boundaries retain the existing reserve/checkpoint/compact/effect calls; there is
++no copied helper algorithm or new production seam. Snapshot provider methods are
++observed directly, including nested reconcile/load-pinned. Checked additive
++before/after deltas assign provider calls/failures/elapsed/items to those scopes.
++Provider maxima cover their entire lifetime including setup and cannot be
++subtracted. No timing epoch or per-entry trace is introduced. Default false mode
++performs no observer clock, cell or snapshot reads. Invalid observations defer
++failure until successful owned shutdown; original provider/helper errors retain
++precedence. The unknown helper residual remains unattributed, not pure Core.

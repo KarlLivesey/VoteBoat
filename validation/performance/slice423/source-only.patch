@@ -1,0 +1,1062 @@
+--- /dev/null
++++ b/benchmarks/matched/src/envelopes.rs
+@@ -0,0 +1,160 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Fixed-workload request/original units and explicitly bounded host staging.
++use super::*;
++use std::mem::size_of;
++use voteboat::{
++    log::*,
++    raft::{BatchLimits, Effect, Proposal},
++};
++const MAX_HOST_EMPTY_ENVELOPE_BYTES: usize = 4 * 1024 * 1024;
++impl Envelopes {
++    pub fn request_capacity(self) -> usize {
++        match self {
++            Self::UpstreamDefault => API_REQUEST_BATCH_CAPACITY,
++            Self::Common64 => COMMON_ENTRY_BATCH_CAPACITY,
++        }
++    }
++    pub fn voteboat_limits(self, batch: usize) -> Result<BatchLimits, Failure> {
++        if !matches!(batch, 1 | 4) {
++            return Err("request batch must be1 or4".into());
++        }
++        let originals = self
++            .request_capacity()
++            .checked_mul(batch)
++            .ok_or("aggregate originals overflow")?;
++        BatchLimits {
++            max_proposal_entries: originals,
++            max_replication_entries: match self {
++                Self::UpstreamDefault => 1024,
++                Self::Common64 => COMMON_ENTRY_BATCH_CAPACITY,
++            },
++        }
++        .validate()
++        .map_err(|error| format!("{error:?}").into())
++    }
++}
++#[derive(Clone, Copy, Serialize)]
++pub(super) struct EmptyEnvelope {
++    original_capacity: usize,
++    proposal_input_bytes: usize,
++    proposal_and_staged_entries_bytes: usize,
++    update_and_mutation_metadata_bytes: usize,
++    complete_empty_envelope_bytes: usize,
++    selected_log_batch_bytes: usize,
++}
++impl EmptyEnvelope {
++    fn new(original_capacity: usize) -> Result<Self, Failure> {
++        let proposal_input_bytes = original_capacity
++            .checked_mul(size_of::<Proposal>())
++            .and_then(|bytes| bytes.checked_add(size_of::<Vec<Proposal>>()))
++            .ok_or("proposal input overflow")?;
++        let proposal_and_staged_entries_bytes = original_capacity
++            .checked_mul(size_of::<LogEntry>())
++            .and_then(|bytes| bytes.checked_add(proposal_input_bytes))
++            .ok_or("owned staging overflow")?;
++        // Header values include the Suffix/entry Vec descriptor. Payload capacity is zero
++        // in this declared workload; every actual Core call still checks raw capacity.
++        let update_and_mutation_metadata_bytes = size_of::<LogUpdate>()
++            .checked_add(size_of::<LogMutation>())
++            .and_then(|bytes| bytes.checked_add(size_of::<Vec<LogMutation>>()))
++            .and_then(|bytes| bytes.checked_add(size_of::<Effect>()))
++            .and_then(|bytes| bytes.checked_add(size_of::<Vec<Effect>>()))
++            .ok_or("update metadata overflow")?;
++        let complete_empty_envelope_bytes = proposal_and_staged_entries_bytes
++            .checked_add(update_and_mutation_metadata_bytes)
++            .ok_or("empty envelope overflow")?;
++        let selected_log_batch_bytes =
++            complete_empty_envelope_bytes.max(LogLimits::default().max_batch_bytes);
++        if selected_log_batch_bytes > MAX_HOST_EMPTY_ENVELOPE_BYTES {
++            return Err("empty envelope exceeds bounded4MiB host staging".into());
++        }
++        Ok(Self {
++            original_capacity,
++            proposal_input_bytes,
++            proposal_and_staged_entries_bytes,
++            update_and_mutation_metadata_bytes,
++            complete_empty_envelope_bytes,
++            selected_log_batch_bytes,
++        })
++    }
++}
++impl Settings {
++    pub fn empty_envelope(self) -> Result<EmptyEnvelope, Failure> {
++        EmptyEnvelope::new(
++            self.envelopes
++                .voteboat_limits(self.batch)?
++                .max_proposal_entries,
++        )
++    }
++    pub fn log_limits(self) -> Result<LogLimits, Failure> {
++        let envelope = self.empty_envelope()?;
++        Ok(LogLimits {
++            max_entries_per_group: self.retained_budget(),
++            max_batch_bytes: envelope.selected_log_batch_bytes,
++            ..LogLimits::default()
++        }
++        .validate()?)
++    }
++}
++#[derive(Serialize)]
++pub(super) struct CapacityContract {
++    legacy_capacity_fields: &'static str,
++    api_capacity_unit: &'static str,
++    api_capacity_semantics: &'static str,
++    api_merge_original_bound_for_fixed_request_batch: usize,
++    append_capacity_unit: &'static str,
++    append_capacity_semantics: &'static str,
++    replication_capacity_unit: &'static str,
++    common_profile_unit: &'static str,
++    #[serde(skip_serializing_if = "Option::is_none")]
++    voteboat_empty_owned_envelope: Option<EmptyEnvelope>,
++}
++impl CapacityContract {
++    pub fn new(
++        engine: &str,
++        settings: Settings,
++        capacities: (usize, usize, usize),
++    ) -> Result<Self, Failure> {
++        let openraft = engine == "openraft";
++        let bound = if openraft {
++            capacities
++                .0
++                .checked_mul(settings.batch)
++                .ok_or("api original bound overflow")?
++        } else {
++            capacities.0
++        };
++        Ok(Self {
++            legacy_capacity_fields:
++                "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
++            api_capacity_unit: if openraft {
++                "client_write_request_messages"
++            } else {
++                "original_entries"
++            },
++            api_capacity_semantics: if openraft {
++                "consecutive_request_merge_count_fixed_workload_original_bound"
++            } else {
++                "hard_original_and_allocated_element_count_ceiling"
++            },
++            api_merge_original_bound_for_fixed_request_batch: bound,
++            append_capacity_unit: "original_entries",
++            append_capacity_semantics: if openraft {
++                "additional_append_merge_threshold_does_not_split_first_command"
++            } else {
++                "hard_proposal_original_ceiling_owned_staging_still_checked"
++            },
++            replication_capacity_unit: "original_entries_per_ordinary_replication_rpc",
++            common_profile_unit:
++                "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
++            voteboat_empty_owned_envelope: if openraft {
++                None
++            } else {
++                Some(settings.empty_envelope()?)
++            },
++        })
++    }
++}
++#[cfg(test)]
++mod tests;
+--- /dev/null
++++ b/benchmarks/matched/src/envelopes/tests.rs
+@@ -0,0 +1,106 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++fn settings(envelopes: Envelopes, batch: usize) -> Settings {
++    Settings {
++        clients: 4096,
++        batch,
++        requested_operations: 16384,
++        operations: 16384,
++        warmup: 0,
++        maintenance: Maintenance::DefaultRetention,
++        envelopes,
++        attribution: false,
++    }
++}
++#[test]
++fn fixed_request_profiles_derive_equal_original_bounds_and_independent_replication() {
++    for envelopes in [Envelopes::UpstreamDefault, Envelopes::Common64] {
++        for batch in [1, 4] {
++            let s = settings(envelopes, batch);
++            let limits = envelopes.voteboat_limits(batch).unwrap();
++            assert_eq!(
++                limits.max_proposal_entries,
++                envelopes.request_capacity() * batch
++            );
++            assert_eq!(
++                limits.max_replication_entries,
++                if envelopes == Envelopes::UpstreamDefault {
++                    1024
++                } else {
++                    64
++                }
++            );
++            let v = CapacityContract::new(
++                "voteboat",
++                s,
++                (
++                    limits.max_proposal_entries,
++                    limits.max_proposal_entries,
++                    limits.max_replication_entries,
++                ),
++            )
++            .unwrap();
++            let o = CapacityContract::new(
++                "openraft",
++                s,
++                (
++                    envelopes.request_capacity(),
++                    envelopes.request_capacity(),
++                    limits.max_replication_entries,
++                ),
++            )
++            .unwrap();
++            assert_eq!(
++                v.api_merge_original_bound_for_fixed_request_batch,
++                o.api_merge_original_bound_for_fixed_request_batch
++            );
++            assert_eq!(o.api_capacity_unit, "client_write_request_messages");
++            assert_eq!(v.api_capacity_unit, "original_entries");
++            assert!(o.append_capacity_semantics.contains("does_not_split"));
++        }
++        for invalid in [0, 2, usize::MAX] {
++            assert!(envelopes.voteboat_limits(invalid).is_err());
++        }
++    }
++}
++#[test]
++fn empty_owned_budget_is_derived_before_launch_without_changing_native_defaults() {
++    let default = LogLimits::default();
++    for envelopes in [Envelopes::UpstreamDefault, Envelopes::Common64] {
++        for batch in [1, 4] {
++            let s = settings(envelopes, batch);
++            let limits = s.log_limits().unwrap();
++            let e = s.empty_envelope().unwrap();
++            assert_eq!(
++                e.proposal_input_bytes,
++                size_of::<Vec<Proposal>>() + e.original_capacity * size_of::<Proposal>()
++            );
++            assert_eq!(
++                e.proposal_and_staged_entries_bytes,
++                e.proposal_input_bytes + e.original_capacity * size_of::<LogEntry>()
++            );
++            assert_eq!(
++                e.complete_empty_envelope_bytes,
++                e.proposal_and_staged_entries_bytes + e.update_and_mutation_metadata_bytes
++            );
++            assert_eq!(
++                limits.max_batch_bytes,
++                default.max_batch_bytes.max(e.complete_empty_envelope_bytes)
++            );
++            assert!(limits.max_batch_bytes <= MAX_HOST_EMPTY_ENVELOPE_BYTES);
++            assert_eq!(limits.max_command_bytes, default.max_command_bytes);
++            assert_eq!(limits.control_reserve_bytes, default.control_reserve_bytes);
++            assert_eq!(limits.max_wal_bytes, default.max_wal_bytes);
++            assert_eq!(BatchLimits::default().max_proposal_entries, 64);
++        }
++    }
++    assert!(
++        settings(Envelopes::UpstreamDefault, 4)
++            .empty_envelope()
++            .unwrap()
++            .proposal_and_staged_entries_bytes
++            > default.max_batch_bytes
++    );
++    assert!(EmptyEnvelope::new(usize::MAX).is_err());
++}
+--- a/benchmarks/matched/src/main.rs
++++ b/benchmarks/matched/src/main.rs
+@@ -3,6 +3,7 @@
+ //! Standalone comparison-only runtime; no production Tokio/OpenRaft adapter.
+ mod application;
+ mod attribution;
++mod envelopes;
+ mod openraft_engine;
+ mod snapshots;
+ mod store;
+@@ -17,7 +18,8 @@
+ const UPSTREAM: &str = "e88bb40707f2e511d8ecc44d31edcb1d814a11a8";
+ const CHANNEL_CAPACITY: usize = 65_536;
+ const COMMON_ENTRY_BATCH_CAPACITY: usize = 64;
+-const MAX_PROPOSAL_ENTRIES: usize = 4096;
++const API_REQUEST_BATCH_CAPACITY: usize = 4096;
++const MAX_PROPOSAL_ENTRIES: usize = 16384;
+ const TIMEOUT: Duration = Duration::from_secs(400);
+ 
+ #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
+@@ -31,18 +33,6 @@
+ enum Envelopes {
+     UpstreamDefault,
+     Common64,
+-}
+-impl Envelopes {
+-    fn voteboat_limits(self) -> voteboat::raft::BatchLimits {
+-        let (max_proposal_entries, max_replication_entries) = match self {
+-            Self::UpstreamDefault => (MAX_PROPOSAL_ENTRIES, 1024),
+-            Self::Common64 => (COMMON_ENTRY_BATCH_CAPACITY, COMMON_ENTRY_BATCH_CAPACITY),
+-        };
+-        voteboat::raft::BatchLimits {
+-            max_proposal_entries,
+-            max_replication_entries,
+-        }
+-    }
+ }
+ #[derive(Clone, Copy, Debug, Serialize)]
+ struct Settings {
+--- a/benchmarks/matched/src/voteboat_engine.rs
++++ b/benchmarks/matched/src/voteboat_engine.rs
+@@ -61,11 +61,7 @@
+     async fn create<const TRACE: bool>(settings: Settings) -> Result<Self, Failure> {
+         let bootstrap = bootstrap()?;
+         let group = bootstrap.group;
+-        let limits = LogLimits {
+-            max_entries_per_group: settings.retained_budget(),
+-            ..LogLimits::default()
+-        }
+-        .validate()?;
++        let limits = settings.log_limits()?;
+         let frontiers = Arc::new(std::array::from_fn(|_| AtomicU64::new(0)));
+         let (senders, receivers): (Vec<_>, Vec<_>) =
+             (0..3).map(|_| mpsc::channel(CHANNEL_CAPACITY)).unzip();
+@@ -80,7 +76,7 @@
+         let paused_proposals = Arc::new(AtomicBool::new(false));
+         #[cfg(test)]
+         let proposals_pause_observed = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
+-        let batch_limits = settings.envelopes.voteboat_limits();
++        let batch_limits = settings.envelopes.voteboat_limits(settings.batch)?;
+         let mut parts = Vec::new();
+         for (slot, (receiver, peer_receiver)) in
+             receivers.into_iter().zip(peer_receivers).enumerate()
+@@ -267,7 +263,7 @@
+     use super::*;
+     fn preload_originals(cluster: &Cluster) -> Vec<oneshot::Receiver<OperationId>> {
+         let mut waits = Vec::new();
+-        for start in (1..=4096).step_by(4) {
++        for start in (1..=16384).step_by(4) {
+             let mut proposals = Vec::new();
+             let mut replies = Vec::new();
+             for original in start..start + 4 {
+@@ -299,10 +295,10 @@
+         .flat_map(|envelopes| [false, true].map(|attribution| (envelopes, attribution)))
+         {
+             let settings = Settings {
+-                clients: 1024,
++                clients: 4096,
+                 batch: 4,
+-                requested_operations: 4096,
+-                operations: 4096,
++                requested_operations: 16384,
++                operations: 16384,
+                 warmup: 0,
+                 maintenance: crate::Maintenance::DefaultRetention,
+                 envelopes,
+@@ -325,16 +321,23 @@
+                 for (offset, wait) in waits.into_iter().enumerate() {
+                     assert_eq!(wait.await.unwrap().get(), offset as u128 + 1);
+                 }
+-                cluster.verify(4096, 0).await.unwrap()
++                cluster.verify(16384, 0).await.unwrap()
+             })
+             .await;
+             let diagnostics = cluster.diagnostics();
+             cluster.shutdown().await.unwrap();
+-            assert_eq!(checked.unwrap(), vec![4097; 3]);
++            assert_eq!(checked.unwrap(), vec![16385; 3]);
+             let leader = serde_json::to_value(&diagnostics[0]).unwrap();
+-            assert_eq!(leader["proposed_originals"], 4096);
++            assert_eq!(leader["proposed_originals"], 16384);
+             let width = leader["maximum_proposal_width"].as_u64().unwrap() as usize;
+-            assert!(width <= settings.envelopes.voteboat_limits().max_proposal_entries);
++            assert!(
++                width
++                    <= settings
++                        .envelopes
++                        .voteboat_limits(settings.batch)
++                        .unwrap()
++                        .max_proposal_entries
++            );
+             for follower in &diagnostics[1..] {
+                 let follower = serde_json::to_value(follower).unwrap();
+                 assert_eq!(follower["proposed_originals"], 0);
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -14,16 +14,27 @@
+         identity: bootstrap.voter_stores[&node],
+         session: StoreSession::new(1).unwrap(),
+     };
+-    let limits = LogLimits::default();
++    let limits = Settings {
++        clients: 4096,
++        batch: 4,
++        requested_operations: 16384,
++        operations: 16384,
++        warmup: 0,
++        maintenance: Maintenance::DefaultRetention,
++        envelopes,
++        attribution: TRACE,
++    }
++    .log_limits()
++    .unwrap();
+     let store = MemoryStore::<TRACE>::new(binding, limits, bootstrap).unwrap();
+     let mut core = Raft::recover(node, binding, store.state(group).unwrap(), limits).unwrap();
+-    core.configure_batch_limits(envelopes.voteboat_limits())
++    core.configure_batch_limits(envelopes.voteboat_limits(4).unwrap())
+         .unwrap();
+     let settings = Settings {
+-        clients: 1024,
++        clients: 4096,
+         batch: 4,
+-        requested_operations: 4096,
+-        operations: 4096,
++        requested_operations: 16384,
++        operations: 16384,
+         warmup: 0,
+         maintenance: Maintenance::DefaultRetention,
+         envelopes,
+@@ -58,7 +69,7 @@
+ 
+ fn preload(sender: &mpsc::Sender<Request>) -> Vec<(OperationId, oneshot::Receiver<OperationId>)> {
+     let mut waits = Vec::new();
+-    for start in (1..=4096).step_by(4) {
++    for start in (1..=16384).step_by(4) {
+         let mut proposals = Vec::new();
+         let mut replies = Vec::new();
+         for original in start..start + 4 {
+@@ -95,16 +106,16 @@
+             assert_eq!(wait.try_recv().unwrap(), operation);
+         }
+         assert!(actor.pending.is_empty());
+-        assert_eq!(actor.parts.application.applied, 4097);
+-        assert_eq!(actor.parts.core.state().commit_index, 4097);
++        assert_eq!(actor.parts.application.applied, 16385);
++        assert_eq!(actor.parts.core.state().commit_index, 16385);
+         let diagnostics = serde_json::to_value(actor.parts.stats[0].read()).unwrap();
+-        let width = envelopes.voteboat_limits().max_proposal_entries;
++        let width = envelopes.voteboat_limits(4).unwrap().max_proposal_entries;
+         assert_eq!(diagnostics["maximum_proposal_width"], width);
+-        assert_eq!(diagnostics["proposed_originals"], 4096);
++        assert_eq!(diagnostics["proposed_originals"], 16384);
+         assert_eq!(
+             diagnostics["proposal_widths"],
+             serde_json::json!([
+-                { "original_entries": width, "batches": 4096 / width }
++                { "original_entries": width, "batches": 16384 / width }
+             ])
+         );
+     }
+--- a/benchmarks/matched/src/voteboat_engine/stats.rs
++++ b/benchmarks/matched/src/voteboat_engine/stats.rs
+@@ -4,10 +4,14 @@
+ use serde::Serialize;
+ use std::sync::atomic::{AtomicUsize, Ordering};
+ 
+-struct Widths([AtomicUsize; MAX_PROPOSAL_ENTRIES + 1]);
++struct Widths(Box<[AtomicUsize]>);
+ impl Default for Widths {
+     fn default() -> Self {
+-        Self(std::array::from_fn(|_| AtomicUsize::new(0)))
++        Self(
++            (0..=MAX_PROPOSAL_ENTRIES)
++                .map(|_| AtomicUsize::new(0))
++                .collect(),
++        )
+     }
+ }
+ 
+--- a/benchmarks/matched/src/workload.rs
++++ b/benchmarks/matched/src/workload.rs
+@@ -74,6 +74,7 @@
+     replication_entry_capacity: usize,
+     primary_upstream_envelopes_preserved: bool,
+     snapshot_model: &'static str,
++    capacity_contract: crate::envelopes::CapacityContract,
+     diagnostics: Option<Vec<voteboat_engine::Diagnostics>>,
+     upstream_internal_queues: &'static str,
+     completed_originals: usize,
+@@ -167,6 +168,7 @@
+         }
+     };
+     Ok(Report {
++        capacity_contract: crate::envelopes::CapacityContract::new(engine, settings, capacities)?,
+         engine,
+         comparison_gate: "pending_independent_validation_and_policy_review",
+         upstream_commit: UPSTREAM, settings, client_workers: 1, server_workers: 16,
+@@ -302,10 +304,17 @@
+                         assert_eq!(report.completed_originals, 128);
+                         assert_eq!(report.completed_requests, 128 / batch);
+                         assert_eq!(report.applied_frontiers, vec![133; 3]);
+-                        let limits = envelopes.voteboat_limits();
+-                        assert_eq!(report.api_entry_batch_capacity, limits.max_proposal_entries);
++                        let limits = envelopes.voteboat_limits(batch).unwrap();
++                        let api = if engine == "openraft" {
++                            envelopes.request_capacity()
++                        } else {
++                            limits.max_proposal_entries
++                        };
++                        assert_eq!(report.api_entry_batch_capacity, api);
++                        assert_eq!(report.append_entry_batch_capacity, api);
++                        let contract = serde_json::to_value(&report.capacity_contract).unwrap();
+                         assert_eq!(
+-                            report.append_entry_batch_capacity,
++                            contract["api_merge_original_bound_for_fixed_request_batch"],
+                             limits.max_proposal_entries
+                         );
+                         assert_eq!(
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -17,12 +17,14 @@
+       "native": "Deterministic Core count envelopes, with original LogStore/worker/transport/application ownership and provider byte budgets.",
+       "conformance": [
+         "src/raft/proposals/tests/batch_limits.rs",
++        "src/raft/proposals/tests/batch_limits/aggregate.rs",
++        "tests/log_store/batch_limits/aggregate.rs",
+         "src/raft/request_window_tests.rs",
+         "src/runtime/ready_batch/tests/routine.rs",
+         "tests/log_store/batch_limits.rs",
+         "benchmarks/matched/src/voteboat_engine.rs"
+       ],
+-      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima4096/1024. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate."
++      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate."
+     },
+     {
+       "design_id": "C10/C15",
+--- a/src/raft/batch_limits.rs
++++ b/src/raft/batch_limits.rs
+@@ -12,7 +12,9 @@
+     pub max_replication_entries: usize,
+ }
+ impl BatchLimits {
+-    pub const MAX_PROPOSAL_ENTRIES: usize = 4096;
++    /// Opt-in original-entry ceiling; owned-byte and retained-history limits
++    /// remain independent. Existing default proposal batches contain at most64.
++    pub const MAX_PROPOSAL_ENTRIES: usize = 16384;
+     /// Fixed bounded ordinary receive ceiling, independent of outbound batching.
+     /// A default64-entry sender can therefore receive a larger peer's chunks.
+     pub const MAX_REPLICATION_ENTRIES: usize = 1024;
+--- a/src/raft/proposals/tests/batch_limits.rs
++++ b/src/raft/proposals/tests/batch_limits.rs
+@@ -3,6 +3,8 @@
+ //! Configured envelopes retain original order, exact tickets and peer scope.
+ use super::*;
+ use std::collections::VecDeque;
++#[path = "batch_limits/aggregate.rs"]
++mod aggregate;
+ 
+ fn wide() -> BatchLimits {
+     BatchLimits {
+@@ -21,7 +23,7 @@
+             ..wide()
+         },
+         BatchLimits {
+-            max_proposal_entries: 4097,
++            max_proposal_entries: 16385,
+             ..wide()
+         },
+         BatchLimits {
+--- /dev/null
++++ b/src/raft/proposals/tests/batch_limits/aggregate.rs
+@@ -0,0 +1,161 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++#[path = "aggregate/flow.rs"]
++mod flow;
++fn aggregate_limits() -> BatchLimits {
++    BatchLimits {
++        max_proposal_entries: 16384,
++        ..wide()
++    }
++}
++fn aggregate_log_limits() -> LogLimits {
++    LogLimits {
++        max_entries_per_group: 65536,
++        max_batch_bytes: 4 * 1024 * 1024,
++        ..LogLimits::default()
++    }
++}
++fn empty(id: u128) -> Proposal {
++    Proposal {
++        operation: OperationId::new(id).unwrap(),
++        bytes: Vec::new(),
++    }
++}
++fn aggregate_replicas() -> BTreeMap<NodeId, Raft> {
++    let mut cores = replicas();
++    for core in cores.values_mut() {
++        core.limits = aggregate_log_limits();
++    }
++    cores
++        .get_mut(&node(1))
++        .unwrap()
++        .configure_batch_limits(aggregate_limits())
++        .unwrap();
++    cores
++}
++#[test]
++fn aggregate_ceiling_preserves_default_locked_and_fenced_error_precedence() {
++    assert_eq!(BatchLimits::default().max_proposal_entries, 64);
++    let mut core = leader();
++    core.configure_batch_limits(aggregate_limits()).unwrap();
++    assert_eq!(core.batch_limits(), aggregate_limits());
++    core.role = Role::Follower;
++    assert_eq!(core.propose_batch(Vec::new()), Err(RaftError::NotLeader));
++    let invalid = BatchLimits {
++        max_proposal_entries: 16385,
++        ..wide()
++    };
++    assert_eq!(core.configure_batch_limits(invalid), Err(RaftError::Busy));
++    core.storage_failed();
++    assert_eq!(core.configure_batch_limits(invalid), Err(RaftError::Fenced));
++}
++#[test]
++fn aggregate_count_does_not_override_allocated_staging_retained_or_command_budgets() {
++    for scenario in 0..6 {
++        let mut core = leader();
++        core.limits = aggregate_log_limits();
++        core.configure_batch_limits(aggregate_limits()).unwrap();
++        let mut input: Vec<_> = (1..=16384).map(empty).collect();
++        let error = match scenario {
++            0 => {
++                input.push(empty(16385));
++                "proposal count budget"
++            }
++            1 => {
++                input = Vec::with_capacity(16385);
++                input.push(empty(1));
++                "proposal allocation count budget"
++            }
++            2 => {
++                core.limits.max_batch_bytes = LogLimits::default().max_batch_bytes;
++                "proposal batch owned staging budget"
++            }
++            3 => {
++                core.limits.max_entries_per_group = 16384;
++                "proposal retained entry budget"
++            }
++            4 => {
++                input.last_mut().unwrap().bytes = vec![0; core.limits.max_command_bytes + 1];
++                "command byte budget"
++            }
++            _ => {
++                input.last_mut().unwrap().bytes = Vec::with_capacity(core.limits.max_batch_bytes);
++                "proposal batch owned staging budget"
++            }
++        };
++        let before = core.state().clone();
++        assert_eq!(
++            core.propose_batch(input),
++            Err(StorageError::Rejected(error).into())
++        );
++        assert_eq!(core.state(), &before);
++        assert!(!core.has_pending_dependency());
++    }
++}
++#[test]
++fn aggregate16384_originals_require_exact_durability_then_replicate_in1024_chunks() {
++    let mut cores = aggregate_replicas();
++    let source = cores.get_mut(&node(1)).unwrap();
++    let effects = source
++        .propose_batch((1..=16384).map(empty).collect())
++        .unwrap();
++    assert_eq!(effects.len(), 1);
++    assert!(
++        matches!(&effects[0], Effect::Persist(update) if update.suffix.as_ref().unwrap().entries.len() == 16384)
++    );
++    let exact = ticket(source);
++    assert_eq!(
++        source.complete(&DurableLog {
++            tickets: vec![exact]
++        }),
++        Err(RaftError::WrongCompletion)
++    );
++    assert!(source.replicate_admitted(exact).unwrap().is_empty());
++    assert_eq!(source.state().last_index(), 1);
++    assert_eq!(source.state().commit_index, 1);
++    let mut wrong = exact;
++    wrong.binding.session = StoreSession::new(2).unwrap();
++    assert_eq!(
++        source.complete(&DurableLog {
++            tickets: vec![wrong]
++        }),
++        Err(RaftError::WrongCompletion)
++    );
++    let effects = source
++        .complete(&DurableLog {
++            tickets: vec![exact],
++        })
++        .unwrap();
++    assert_eq!(source.state().last_index(), 16385);
++    assert_eq!(source.state().commit_index, 1);
++    reject_oversized_append(&mut cores, &effects);
++    let (applied, widths) = drive(&mut cores, effects);
++    assert!(widths.contains(&1024));
++    let originals: Vec<_> = (1..=16384).collect();
++    for id in [1, 2, 3] {
++        let core = &cores[&node(id)];
++        assert_eq!(core.state().commit_index, 16385);
++        assert_eq!(applied[&node(id)], originals);
++        Raft::recover(node(id), core.binding, core.state().clone(), core.limits).unwrap();
++    }
++    let state = cores[&node(1)].state().clone();
++    let mut restarted = Raft::recover(
++        node(1),
++        cores[&node(1)].binding,
++        state,
++        aggregate_log_limits(),
++    )
++    .unwrap();
++    assert_eq!(restarted.batch_limits(), BatchLimits::default());
++    restarted
++        .configure_batch_limits(aggregate_limits())
++        .unwrap();
++    assert_eq!(restarted.replay_committed().len(), 16385);
++    assert_eq!(
++        restarted.complete(&DurableLog {
++            tickets: vec![exact]
++        }),
++        Err(RaftError::WrongCompletion)
++    );
++}
+--- /dev/null
++++ b/src/raft/proposals/tests/batch_limits/aggregate/flow.rs
+@@ -0,0 +1,161 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use crate::application::{Counter, CounterOutcome, StateMachine};
++fn message(effects: &[Effect], peer: u64) -> Message {
++    effects
++        .iter()
++        .find_map(|effect| match effect {
++            Effect::Send(message) if message.to == node(peer) => Some(message.clone()),
++            _ => None,
++        })
++        .unwrap()
++}
++fn ack(core: &Raft, request: &Message) -> Message {
++    let Rpc::Append {
++        previous_index,
++        entries,
++        ..
++    } = &request.rpc
++    else {
++        panic!("append required")
++    };
++    Message {
++        group: request.group,
++        configuration: request.configuration,
++        from: request.to,
++        to: request.from,
++        sender: StoreBinding {
++            identity: core.membership().replica_store(request.to).unwrap(),
++            session: StoreSession::new(1).unwrap(),
++        },
++        term: request.term,
++        context: request.context,
++        rpc: Rpc::Appended {
++            success: true,
++            matching_index: entries.last().map_or(*previous_index, |entry| entry.index),
++        },
++    }
++}
++fn complete(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
++    assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
++    let exact = ticket(core);
++    core.admitted(exact).unwrap();
++    core.complete(&DurableLog {
++        tickets: vec![exact],
++    })
++    .unwrap()
++}
++fn apply_chunk(core: &mut Raft, request: Message, app: &mut Counter, end: u64) -> Message {
++    let Rpc::Append { entries, .. } = &request.rpc else {
++        panic!("append required")
++    };
++    assert_eq!(entries.len(), 1024);
++    assert_eq!(entries.last().unwrap().index, end);
++    let response = ack(core, &request);
++    let effects = core.step(Event::Receive(response.clone())).unwrap();
++    assert_eq!(core.state().commit_index, end - 1024);
++    let effects = complete(core, effects);
++    assert!(!effects
++        .iter()
++        .any(|effect| matches!(effect,Effect::Send(message) if message.to==node(3))));
++    let committed: Vec<_> = effects
++        .iter()
++        .flat_map(|effect| match effect {
++            Effect::Committed(entries) => entries.clone(),
++            _ => Vec::new(),
++        })
++        .collect();
++    let receipts = app.apply_batch(&committed).unwrap();
++    assert_eq!(receipts.len(), 1024);
++    for receipt in receipts {
++        assert_eq!(receipt.operation.get(), u128::from(receipt.index - 1));
++        assert_eq!(
++            receipt.outcome,
++            CounterOutcome::Value((receipt.index - 1) as i64)
++        );
++        assert!(!receipt.duplicate);
++    }
++    assert!(core.step(Event::Receive(response)).unwrap().is_empty());
++    message(&effects, 2)
++}
++#[test]
++fn aggregate_partial1024_quorum_prefixes_keep_all_results_delayed_peer_and_finite_notifications() {
++    let mut cores = aggregate_replicas();
++    let mut core = cores.remove(&node(1)).unwrap();
++    let mut app = Counter::new(16384).unwrap();
++    app.apply_batch(core.replay_committed()).unwrap();
++    let effects = core
++        .propose_batch(
++            (1..=16384)
++                .map(|id| Proposal {
++                    operation: OperationId::new(id).unwrap(),
++                    bytes: 1i64.to_le_bytes().to_vec(),
++                })
++                .collect(),
++        )
++        .unwrap();
++    let effects = complete(&mut core, effects);
++    let delayed = message(&effects, 3);
++    let mut request = message(&effects, 2);
++    let first_retry = message(&core.step(Event::Heartbeat).unwrap(), 3);
++    assert_eq!(first_retry, delayed);
++    for chunk in 1..=16 {
++        request = apply_chunk(&mut core, request, &mut app, chunk * 1024 + 1);
++        assert_eq!(core.requests[&node(3)].context, delayed.context);
++    }
++    let Rpc::Append {
++        previous_index,
++        entries,
++        leader_commit,
++        ..
++    } = &request.rpc
++    else {
++        panic!()
++    };
++    assert_eq!(*previous_index, 16385);
++    assert!(entries.is_empty());
++    assert_eq!(*leader_commit, 16385);
++    assert!(core
++        .step(Event::Receive(ack(&core, &request)))
++        .unwrap()
++        .is_empty());
++    let heartbeats = core.step(Event::Heartbeat).unwrap();
++    let idle_peer_probe = message(&heartbeats, 2);
++    let retry = message(&heartbeats, 3);
++    assert_eq!(retry.context, delayed.context);
++    let Rpc::Append {
++        entries,
++        leader_commit,
++        ..
++    } = &retry.rpc
++    else {
++        panic!()
++    };
++    assert_eq!(entries.len(), 1024);
++    assert_eq!(*leader_commit, 16385);
++    request = delayed;
++    for chunk in 1..=16 {
++        let Rpc::Append { entries, .. } = &request.rpc else {
++            panic!()
++        };
++        assert_eq!(entries.last().unwrap().index, chunk * 1024 + 1);
++        let effects = core.step(Event::Receive(ack(&core, &request))).unwrap();
++        assert!(!effects
++            .iter()
++            .any(|effect| matches!(effect, Effect::Committed(_) | Effect::Persist(_))));
++        if chunk == 16 {
++            assert!(effects.is_empty());
++        } else {
++            request = message(&effects, 3);
++        }
++    }
++    // The explicit heartbeat also starts a normal fresh empty probe for idle peer2.
++    // Complete that exact probe; it must not create another owed notification.
++    assert!(core
++        .step(Event::Receive(ack(&core, &idle_peer_probe)))
++        .unwrap()
++        .is_empty());
++    assert!(core.requests.is_empty());
++    assert_eq!(app.read_applied(16385), Ok(16384));
++}
+--- a/tests/log_store/batch_limits.rs
++++ b/tests/log_store/batch_limits.rs
+@@ -4,6 +4,8 @@
+ use super::*;
+ use std::collections::VecDeque;
+ use voteboat::raft::{persist_effect, BatchLimits, Effect, Event, Proposal, Raft};
++#[path = "batch_limits/aggregate.rs"]
++mod aggregate;
+ #[path = "batch_limits/ready_items.rs"]
+ mod ready_items;
+ 
+--- /dev/null
++++ b/tests/log_store/batch_limits/aggregate.rs
+@@ -0,0 +1,159 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::application::{Counter, CounterOutcome, StateMachine};
++const ORIGINALS: u128 = 16384;
++fn limits() -> LogLimits {
++    LogLimits {
++        max_entries_per_group: 65536,
++        max_batch_bytes: 4 * 1024 * 1024,
++        ..LogLimits::default()
++    }
++}
++fn batch_limits() -> BatchLimits {
++    BatchLimits {
++        max_proposal_entries: ORIGINALS as usize,
++        max_replication_entries: 1024,
++    }
++}
++fn setup_aggregate(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
++    let mut store = NativeLogStore::create(io, identity(1), limits()).unwrap();
++    append(&mut store, vec![LogMutation::Create(bootstrap(1, 1))]);
++    let mut core = Raft::recover(
++        node(1),
++        store.binding(),
++        store.state(group(1)).unwrap(),
++        store.limits(),
++    )
++    .unwrap();
++    core.configure_batch_limits(batch_limits()).unwrap();
++    let effects = core.step(Event::Campaign).unwrap();
++    settle(&mut core, &mut store, effects);
++    (store, core)
++}
++fn exact_persist(effects: Vec<Effect>) -> LogUpdate {
++    let [Effect::Persist(update)] = effects.as_slice() else {
++        panic!("one exact publication dependency")
++    };
++    update.clone()
++}
++fn replay_counter(core: &Raft) -> Counter {
++    let mut app = Counter::new(ORIGINALS as usize + 1).unwrap();
++    app.apply_batch(core.replay_committed()).unwrap();
++    app
++}
++fn retry_after_recovery(mut store: NativeLogStore<ModelIo>, retained: bool) {
++    let mut core = Raft::recover(
++        node(1),
++        store.binding(),
++        store.state(group(1)).unwrap(),
++        store.limits(),
++    )
++    .unwrap();
++    assert_eq!(core.batch_limits(), BatchLimits::default());
++    core.configure_batch_limits(batch_limits()).unwrap();
++    let mut app = replay_counter(&core);
++    let mut applied = app.applied_index();
++    let effects = core.step(Event::Campaign).unwrap();
++    settle(&mut core, &mut store, effects);
++    let replay = core.replay_committed();
++    app.apply_batch(&replay[replay.partition_point(|entry| entry.index <= applied)..])
++        .unwrap();
++    applied = app.applied_index();
++    let effects = core
++        .step(Event::Propose {
++            operation: voteboat::identity::OperationId::new(1).unwrap(),
++            bytes: 1i64.to_le_bytes().to_vec(),
++        })
++        .unwrap();
++    settle(&mut core, &mut store, effects);
++    let replay = core.replay_committed();
++    let receipts = app
++        .apply_batch(&replay[replay.partition_point(|entry| entry.index <= applied)..])
++        .unwrap();
++    assert_eq!(receipts.len(), 1);
++    assert_eq!(receipts[0].operation.get(), 1);
++    assert_eq!(receipts[0].duplicate, retained);
++    assert_eq!(receipts[0].outcome, CounterOutcome::Value(1));
++    assert_eq!(
++        app.read_applied(app.applied_index()),
++        Ok(if retained { ORIGINALS as i64 } else { 1 })
++    );
++}
++#[test]
++fn aggregate16384_model_power_loss_keeps_exact_frontiers_and_original_retry_once() {
++    for commit_phase in [false, true] {
++        for fault in [
++            Fault::Append(10),
++            Fault::Sync,
++            Fault::PublishBefore,
++            Fault::PublishAfter,
++        ] {
++            publication_cut(commit_phase, fault);
++        }
++    }
++}
++fn publication_cut(commit_phase: bool, fault: Fault) {
++    let io = ModelIo::default();
++    let (mut store, mut core) = setup_aggregate(io.clone());
++    let proposals = (1..=ORIGINALS)
++        .map(|id| Proposal {
++            operation: voteboat::identity::OperationId::new(id).unwrap(),
++            bytes: 1i64.to_le_bytes().to_vec(),
++        })
++        .collect();
++    let before_proposal = core.state().clone();
++    let mut update = exact_persist(core.propose_batch(proposals).unwrap());
++    assert_eq!(core.state(), &before_proposal);
++    if commit_phase {
++        update = exact_persist(persist_effect(&mut core, &mut store, update).unwrap());
++    }
++    let before = store.state(group(1)).unwrap();
++    let old_binding = store.binding();
++    let mut oracle = std::collections::BTreeMap::from([(group(1), before.clone())]);
++    apply_batch(
++        &mut oracle,
++        &[LogMutation::Update(update.clone())],
++        store.limits(),
++    )
++    .unwrap();
++    io.0.borrow_mut().fault = fault;
++    assert!(matches!(
++        persist_effect(&mut core, &mut store, update),
++        Err(voteboat::raft::RaftError::Storage(StorageError::Uncertain(
++            _
++        )))
++    ));
++    assert!(core.is_fenced());
++    assert_eq!(store.state(group(1)), Err(StorageError::Fenced));
++    drop(store);
++    io.0.borrow_mut().power_loss();
++    let store = NativeLogStore::recover(io, identity(1), limits()).unwrap();
++    let published = matches!(fault, Fault::PublishBefore | Fault::PublishAfter);
++    assert_eq!(
++        store.state(group(1)).unwrap(),
++        if published {
++            oracle.remove(&group(1)).unwrap()
++        } else {
++            before
++        }
++    );
++    assert_ne!(store.binding().session, old_binding.session);
++    let recovered_core = Raft::recover(
++        node(1),
++        store.binding(),
++        store.state(group(1)).unwrap(),
++        store.limits(),
++    )
++    .unwrap();
++    let app = replay_counter(&recovered_core);
++    assert_eq!(
++        app.read_applied(app.applied_index()),
++        Ok(if commit_phase && published {
++            ORIGINALS as i64
++        } else {
++            0
++        })
++    );
++    retry_after_recovery(store, commit_phase || published);
++}

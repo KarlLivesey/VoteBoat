@@ -74,6 +74,7 @@ pub(super) struct Report {
     replication_entry_capacity: usize,
     primary_upstream_envelopes_preserved: bool,
     snapshot_model: &'static str,
+    capacity_contract: crate::envelopes::CapacityContract,
     diagnostics: Option<Vec<voteboat_engine::Diagnostics>>,
     upstream_internal_queues: &'static str,
     completed_originals: usize,
@@ -167,6 +168,7 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
         }
     };
     Ok(Report {
+        capacity_contract: crate::envelopes::CapacityContract::new(engine, settings, capacities)?,
         engine,
         comparison_gate: "pending_independent_validation_and_policy_review",
         upstream_commit: UPSTREAM, settings, client_workers: 1, server_workers: 16,
@@ -241,7 +243,14 @@ mod tests {
                 .contains("not_cpu_or_critical_path"));
             assert!(value["nesting"].as_str().unwrap().contains("do_not_sum"));
             let phases = value["phases"].as_array().unwrap();
-            assert_eq!(phases.len(), 12);
+            assert_eq!(phases.len(), 27);
+            assert_eq!(
+                value["checkpoint_provider_scopes"]
+                    .as_array()
+                    .unwrap()
+                    .len(),
+                4
+            );
             let get = |name| phases.iter().find(|p| p["phase"] == name).unwrap();
             assert_eq!(get("actor_lifetime_inclusive")["calls"], 1);
             assert!(get("core_direct")["calls"].as_u64().unwrap() > 0);
@@ -302,10 +311,17 @@ mod tests {
                         assert_eq!(report.completed_originals, 128);
                         assert_eq!(report.completed_requests, 128 / batch);
                         assert_eq!(report.applied_frontiers, vec![133; 3]);
-                        let limits = envelopes.voteboat_limits();
-                        assert_eq!(report.api_entry_batch_capacity, limits.max_proposal_entries);
+                        let limits = envelopes.voteboat_limits(batch).unwrap();
+                        let api = if engine == "openraft" {
+                            envelopes.request_capacity()
+                        } else {
+                            limits.max_proposal_entries
+                        };
+                        assert_eq!(report.api_entry_batch_capacity, api);
+                        assert_eq!(report.append_entry_batch_capacity, api);
+                        let contract = serde_json::to_value(&report.capacity_contract).unwrap();
                         assert_eq!(
-                            report.append_entry_batch_capacity,
+                            contract["api_merge_original_bound_for_fixed_request_batch"],
                             limits.max_proposal_entries
                         );
                         assert_eq!(

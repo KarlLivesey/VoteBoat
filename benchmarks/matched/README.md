@@ -1,9 +1,11 @@
 # Concurrent framework comparison
 
-[Comparison conditions and capacity-unit correction](COMPARISON.md) are required
-before a like-for-like capacity claim. The existing4096/64 API configuration
-numbers count messages in OpenRaft and original entries in VoteBoat; batch4 does
-not yet have an equal original-entry envelope. Raw earlier records are preserved.
+[Comparison conditions and capacity units](COMPARISON.md) are required before a
+like-for-like capacity claim. Current primary API capacity is4096 requests:
+VoteBoat selects4096 originals for batch1 and16384 for batch4, with explicit
+bounded staging bytes. Earlier4096/64 original-versus-message labels remain
+preserved in historical raw evidence. Linux combined qualification passes;
+Mac qualification and fresh equivalent-envelope timing remain outstanding.
 
 Standalone benchmark workspace; comparison dependencies stay outside VoteBoat
 production. The frozen baseline passed Linux/macOS scoped checks and short
@@ -21,10 +23,10 @@ One three-voter group, empty business payloads, 1024 singleton warmups and equal
 closed-loop per-client requests. Every request awaits all its original applied
 results. Requested totals round down like pinned OpenRaft. Primary defaults retain
 OpenRaft payload1024/API4096/append4096. VoteBoat configures its public startup
-limits to 4096 original proposal entries and 1024 replication entries. Reports
+limits to4096*entries-per-request original proposals and1024 replication entries. Reports
 read back effective Core limits and record exact original-entry batch widths,
-including warmup. Optional `--envelopes common64` selects 64/64 for both engines
-and remains attribution only.
+including warmup. Optional `--envelopes common64` selects64 API requests,64*entries-per-request
+VoteBoat original proposals and independent replication64; it remains diagnostic.
 
 Default-retention snapshots every5000 entries, keeps1000 and requires1024 newly
 reclaimable entries. VoteBoat uses real public publication/pinning/compaction and
@@ -70,3 +72,13 @@ installation.
 [The Linux elapsed diagnostic](validation/performance/slice417-attribution/DIAGNOSTIC-LINUX.md)
 passes nine exact cases and guards. It points first to inclusive maintenance and
 persistence-helper work; off/on rates overlap across trials and qualify no floor.
+
+Checkpoint attribution also labels four inclusive actor boundaries (reservation,
+publication, compaction and returned effects), plus the actual volatile log state
+clone and snapshot provider calls. Fixed before/after provider counter snapshots
+report calls, failures, elapsed totals and item counts within each boundary.
+Maxima remain whole provider lifetime; scoped maxima are deliberately absent.
+Reconciliation includes its pinned-image load. Helper work outside these provider
+methods stays explicitly unattributed; these intervals are elapsed time, not CPU.
+Disabled mode reads no clocks or observer cells. Counter exhaustion preserves the
+provider outcome and invalidates only the final diagnostic report.

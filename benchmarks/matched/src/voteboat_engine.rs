@@ -61,11 +61,7 @@ impl Cluster {
     async fn create<const TRACE: bool>(settings: Settings) -> Result<Self, Failure> {
         let bootstrap = bootstrap()?;
         let group = bootstrap.group;
-        let limits = LogLimits {
-            max_entries_per_group: settings.retained_budget(),
-            ..LogLimits::default()
-        }
-        .validate()?;
+        let limits = settings.log_limits()?;
         let frontiers = Arc::new(std::array::from_fn(|_| AtomicU64::new(0)));
         let (senders, receivers): (Vec<_>, Vec<_>) =
             (0..3).map(|_| mpsc::channel(CHANNEL_CAPACITY)).unzip();
@@ -80,7 +76,7 @@ impl Cluster {
         let paused_proposals = Arc::new(AtomicBool::new(false));
         #[cfg(test)]
         let proposals_pause_observed = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
-        let batch_limits = settings.envelopes.voteboat_limits();
+        let batch_limits = settings.envelopes.voteboat_limits(settings.batch)?;
         let mut parts = Vec::new();
         for (slot, (receiver, peer_receiver)) in
             receivers.into_iter().zip(peer_receivers).enumerate()
@@ -267,7 +263,7 @@ mod tests {
     use super::*;
     fn preload_originals(cluster: &Cluster) -> Vec<oneshot::Receiver<OperationId>> {
         let mut waits = Vec::new();
-        for start in (1..=4096).step_by(4) {
+        for start in (1..=16384).step_by(4) {
             let mut proposals = Vec::new();
             let mut replies = Vec::new();
             for original in start..start + 4 {
@@ -299,10 +295,10 @@ mod tests {
         .flat_map(|envelopes| [false, true].map(|attribution| (envelopes, attribution)))
         {
             let settings = Settings {
-                clients: 1024,
+                clients: 4096,
                 batch: 4,
-                requested_operations: 4096,
-                operations: 4096,
+                requested_operations: 16384,
+                operations: 16384,
                 warmup: 0,
                 maintenance: crate::Maintenance::DefaultRetention,
                 envelopes,
@@ -325,16 +321,23 @@ mod tests {
                 for (offset, wait) in waits.into_iter().enumerate() {
                     assert_eq!(wait.await.unwrap().get(), offset as u128 + 1);
                 }
-                cluster.verify(4096, 0).await.unwrap()
+                cluster.verify(16384, 0).await.unwrap()
             })
             .await;
             let diagnostics = cluster.diagnostics();
             cluster.shutdown().await.unwrap();
-            assert_eq!(checked.unwrap(), vec![4097; 3]);
+            assert_eq!(checked.unwrap(), vec![16385; 3]);
             let leader = serde_json::to_value(&diagnostics[0]).unwrap();
-            assert_eq!(leader["proposed_originals"], 4096);
+            assert_eq!(leader["proposed_originals"], 16384);
             let width = leader["maximum_proposal_width"].as_u64().unwrap() as usize;
-            assert!(width <= settings.envelopes.voteboat_limits().max_proposal_entries);
+            assert!(
+                width
+                    <= settings
+                        .envelopes
+                        .voteboat_limits(settings.batch)
+                        .unwrap()
+                        .max_proposal_entries
+            );
             for follower in &diagnostics[1..] {
                 let follower = serde_json::to_value(follower).unwrap();
                 assert_eq!(follower["proposed_originals"], 0);

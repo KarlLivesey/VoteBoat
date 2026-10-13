@@ -1,0 +1,42 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice423-overlay/source)
+error[E0308]: mismatched types
+   --> tests/log_store/batch_limits/aggregate.rs:61:9
+    |
+ 60 |       app.apply_batch(
+    |           ----------- arguments to this method are incorrect
+ 61 | /         &replay
+ 62 | |             .into_iter()
+ 63 | |             .filter(|entry| entry.index > applied)
+ 64 | |             .collect::<Vec<_>>(),
+    | |________________________________^ expected `&[LogEntry]`, found `&Vec<&LogEntry>`
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+               found reference `&Vec<&voteboat::log::LogEntry>`
+note: method defined here
+   --> src/application.rs:139:8
+    |
+139 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+error[E0308]: mismatched types
+   --> tests/log_store/batch_limits/aggregate.rs:77:13
+    |
+ 76 |           .apply_batch(
+    |            ----------- arguments to this method are incorrect
+ 77 | /             &core
+ 78 | |                 .replay_committed()
+ 79 | |                 .into_iter()
+ 80 | |                 .filter(|entry| entry.index > applied)
+ 81 | |                 .collect::<Vec<_>>(),
+    | |____________________________________^ expected `&[LogEntry]`, found `&Vec<&LogEntry>`
+    |
+    = note: expected reference `&[voteboat::log::LogEntry]`
+               found reference `&Vec<&voteboat::log::LogEntry>`
+note: method defined here
+   --> src/application.rs:139:8
+    |
+139 |     fn apply_batch(&mut self, entries: &[LogEntry])
+    |        ^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (test "log_store") due to 2 previous errors

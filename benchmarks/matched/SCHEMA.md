@@ -115,3 +115,15 @@ labeled as nested. Intervals are monotonic elapsed wall time; actor overlap and
 descheduling prevent CPU or critical-path inference. No phase totals should be
 summed as exclusive work. Existing original counts, request latencies and all
 applied-frontier checks retain their independent meaning.
+
+Checkpoint detail uses fixed Cell-backed counters so the actual &self log-state
+clone is observed without changing its visibility or equality proof. Four actor
+boundaries retain the existing reserve/checkpoint/compact/effect calls; there is
+no copied helper algorithm or new production seam. Snapshot provider methods are
+observed directly, including nested reconcile/load-pinned. Checked additive
+before/after deltas assign provider calls/failures/elapsed/items to those scopes.
+Provider maxima cover their entire lifetime including setup and cannot be
+subtracted. No timing epoch or per-entry trace is introduced. Default false mode
+performs no observer clock, cell or snapshot reads. Invalid observations defer
+failure until successful owned shutdown; original provider/helper errors retain
+precedence. The unknown helper residual remains unattributed, not pure Core.

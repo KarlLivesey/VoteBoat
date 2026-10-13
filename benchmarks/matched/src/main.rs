@@ -3,6 +3,7 @@
 //! Standalone comparison-only runtime; no production Tokio/OpenRaft adapter.
 mod application;
 mod attribution;
+mod envelopes;
 mod openraft_engine;
 mod snapshots;
 mod store;
@@ -17,7 +18,8 @@ type Failure = Box<dyn Error + Send + Sync>;
 const UPSTREAM: &str = "e88bb40707f2e511d8ecc44d31edcb1d814a11a8";
 const CHANNEL_CAPACITY: usize = 65_536;
 const COMMON_ENTRY_BATCH_CAPACITY: usize = 64;
-const MAX_PROPOSAL_ENTRIES: usize = 4096;
+const API_REQUEST_BATCH_CAPACITY: usize = 4096;
+const MAX_PROPOSAL_ENTRIES: usize = 16384;
 const TIMEOUT: Duration = Duration::from_secs(400);
 
 #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
@@ -31,18 +33,6 @@ enum Maintenance {
 enum Envelopes {
     UpstreamDefault,
     Common64,
-}
-impl Envelopes {
-    fn voteboat_limits(self) -> voteboat::raft::BatchLimits {
-        let (max_proposal_entries, max_replication_entries) = match self {
-            Self::UpstreamDefault => (MAX_PROPOSAL_ENTRIES, 1024),
-            Self::Common64 => (COMMON_ENTRY_BATCH_CAPACITY, COMMON_ENTRY_BATCH_CAPACITY),
-        };
-        voteboat::raft::BatchLimits {
-            max_proposal_entries,
-            max_replication_entries,
-        }
-    }
 }
 #[derive(Clone, Copy, Debug, Serialize)]
 struct Settings {
