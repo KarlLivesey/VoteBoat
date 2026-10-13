@@ -1,0 +1,24 @@
+{
+  "commit": "c35e1f1a5b3a42c088769d5b992200a95dae35ce",
+  "source_inputs": 1336,
+  "source_guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1336
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1336
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "build": 0,
+    "collect": 0,
+    "source_terminal": 0
+  },
+  "artifacts": 3,
+  "timed_cases": 0,
+  "terminal": "failures=0 timed_cases=0"
+}

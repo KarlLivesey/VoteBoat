@@ -1,0 +1,6 @@
+Linux x86_64
+rustc 1.98.1 (48a229cea 2026-09-01)
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+CARGO_TARGET_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/overlap411/candidate-linux/build
+CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=true
+CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=true

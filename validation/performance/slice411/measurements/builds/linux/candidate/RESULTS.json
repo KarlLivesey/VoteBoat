@@ -1,0 +1,18 @@
+{
+  "scope": "Exact same frozen combined411/412 candidate as Mac1345-input qualification; Linux isolated assertedrelease build",
+  "inputs": 1345,
+  "guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1345
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1345
+    }
+  ],
+  "artifacts": 3,
+  "distinct_from_baseline": true,
+  "timed_cases": 0,
+  "terminal": "failures=0 timed_cases=0"
+}

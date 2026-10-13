@@ -22,5 +22,13 @@ failure after-state, original fencing, new sessions and stale old tickets.
 
 Initial fixture import/recovery assumptions and an invalid broad test-target
 command are retained separately. Corrected commands execute the actual targets;
-no product validator or lint threshold was weakened. Mac qualification is pending
-after its separate411/412 campaign. No measured413 gain is claimed yet.
+no product validator or lint threshold was weakened. [Mac affected qualification](mac/README.md)
+passes532 all-feature/338 core with four strict profiles and1349-input guards.
+No measured413 gain is claimed yet.
+
+The existing volatile staging example now accepts stable/joint/checkpoint
+histories and append-plus-commit updates. Its five controls verify complete
+full-validator final states, unchanged neighbors, exact tickets, new recovery
+sessions and rejection of old tickets. [Measurement schema](MEASUREMENT_SCHEMA.md)
+defines scope and both-host paired acceptance; no physical durability claim
+comes from simulated I/O.

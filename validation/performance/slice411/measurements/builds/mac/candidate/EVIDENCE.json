@@ -1,0 +1,27 @@
+{
+  "files": 22,
+  "sha256": {
+    "ARTIFACTS.json": "1a62aafc4842de4bf753d6794f9f0712969afc25ed739c76a5a9b71d1de158c8",
+    "RESULTS.json": "6fd5b24f6c7ece76b9e1fde073306ff0c90c3e0089f9b41eaf13712917e56525",
+    "SOURCE.json": "0b6e646c8567ee1e0b7502a06c1e0efcceb04e97866002f43537db39d13ff084",
+    "SOURCE_SHA256.txt": "988bad9c50aa3ef7d716e1bdd25766c9610088c58a24b83d1182f449e1842f19",
+    "build.sh": "6a36d7432a41970d2f482a47688cf74d687c1f690ca2ebbf2f3950bc09689d93",
+    "collect-artifacts.mjs": "5e81ee5ba63be7524206d2a6d80ae1bcd8fa92a2387929c569514991e205e817",
+    "measure.mjs": "b78ad0dcc63b153826ed83e3bdb8c5dd95e69941590c51aba19a3b61b21cc26d",
+    "results/build.command": "4d2c36a55063fa4f31590afb3e8ca1cc07f51393fc44b19220b3cf3cbf52cbe9",
+    "results/build.jsonl": "ae5277de08622ef0791912ded96ebd569c4804c66b7556d940721a0ba4f56ffb",
+    "results/build.log": "4a1c8e786af57d98ef59b33a78c45c597098376fe5926e67202c4adf78c99a48",
+    "results/collect.command": "de7195f42c4d387948e44562e5994bae0480f121793da236363ac7b710c46a1e",
+    "results/collect.log": "96d9b5611f068c21a3dbecaf50b8abc6c5ad4bf1f7c26e703d4883e834d53945",
+    "results/exits.txt": "d74adafc270e926eeb13d1887440d6b8105d14dc5c9247c5a34a5f147bb8ce3b",
+    "results/platform.command": "24def54581963c08a38fd2c68ee79b63605ba5d603acff805df9b268749ce3d7",
+    "results/platform.log": "0f003855567cd1a58de92636b5d4993c2f2d71a915839435090a8908e197da30",
+    "results/source_start.command": "6ca1f83a1896320608a59a42c97a156a944bc7109b970ce28567841145d70fd4",
+    "results/source_start.log": "5a55595c5dc384d65b0eed5f23c2973bf299bcc68190c08cfe9f7d3a7af6cccb",
+    "results/source_terminal.command": "6ca1f83a1896320608a59a42c97a156a944bc7109b970ce28567841145d70fd4",
+    "results/source_terminal.log": "5a55595c5dc384d65b0eed5f23c2973bf299bcc68190c08cfe9f7d3a7af6cccb",
+    "results/stage.txt": "770b1fadc4019d4de6b2fd32561beaa2c8cffa7837f43c85cbeff1e211c60702",
+    "results/terminal.txt": "a483fd9bdd0b5811aa52887bfade2501893b41ddda4517645a36aba7b9f7f1db",
+    "runner.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}

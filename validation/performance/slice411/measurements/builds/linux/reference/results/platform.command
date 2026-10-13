@@ -1,0 +1,1 @@
+bash -c uname\ -sm\;\ rustc\ +stable\ --version\;\ cargo\ +stable\ --version\;\ printf\ \"CARGO_TARGET_DIR=%s\\n\"\ \"\$CARGO_TARGET_DIR\"\;\ printf\ \"CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=%s\\n\"\ \"\$CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS\"\;\ printf\ \"CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=%s\\n\"\ \"\$CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS\" 

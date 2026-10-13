@@ -1,0 +1,214 @@
+{
+  "statistic": "median of three interleaved trials per variant; ratio of medians",
+  "validCases": 96,
+  "rows": [
+    {
+      "kind": "native",
+      "cell": "tcp/w1",
+      "reference": {
+        "ops": 11.666,
+        "p99_us": 98186.584
+      },
+      "candidate": {
+        "ops": 11.251,
+        "p99_us": 227418.75
+      },
+      "throughputRatio": 0.9644265386593519
+    },
+    {
+      "kind": "native",
+      "cell": "tcp/w32",
+      "reference": {
+        "ops": 56.45,
+        "p99_us": 1061554.791
+      },
+      "candidate": {
+        "ops": 55.521,
+        "p99_us": 1101984.334
+      },
+      "throughputRatio": 0.9835429583702391
+    },
+    {
+      "kind": "native",
+      "cell": "quic/w1",
+      "reference": {
+        "ops": 11.171,
+        "p99_us": 102062.084
+      },
+      "candidate": {
+        "ops": 11.458,
+        "p99_us": 96232.417
+      },
+      "throughputRatio": 1.0256915226926866
+    },
+    {
+      "kind": "native",
+      "cell": "quic/w32",
+      "reference": {
+        "ops": 48.423,
+        "p99_us": 1315932.167
+      },
+      "candidate": {
+        "ops": 50.45,
+        "p99_us": 1148204.958
+      },
+      "throughputRatio": 1.0418602730107593
+    },
+    {
+      "kind": "framework",
+      "cell": "c1/b1",
+      "reference": {
+        "ops": 3762.773267705276,
+        "p99_us": 605.583
+      },
+      "candidate": {
+        "ops": 128436.77735694735,
+        "p99_us": 12.833
+      },
+      "throughputRatio": 34.13354146508924
+    },
+    {
+      "kind": "framework",
+      "cell": "c1/b4",
+      "reference": {
+        "ops": 14831.443836295903,
+        "p99_us": 602.584
+      },
+      "candidate": {
+        "ops": 451989.55822462233,
+        "p99_us": 16.083
+      },
+      "throughputRatio": 30.475088144722733
+    },
+    {
+      "kind": "framework",
+      "cell": "c64/b1",
+      "reference": {
+        "ops": 16622.938820773226,
+        "p99_us": 7022.375
+      },
+      "candidate": {
+        "ops": 307294.3508892612,
+        "p99_us": 306.542
+      },
+      "throughputRatio": 18.486162657667002
+    },
+    {
+      "kind": "framework",
+      "cell": "c64/b4",
+      "reference": {
+        "ops": 58857.128487726724,
+        "p99_us": 8409.084
+      },
+      "candidate": {
+        "ops": 805280.406068936,
+        "p99_us": 525.084
+      },
+      "throughputRatio": 13.681951987121804
+    },
+    {
+      "kind": "framework",
+      "cell": "c256/b1",
+      "reference": {
+        "ops": 17703.592598020314,
+        "p99_us": 26397.667
+      },
+      "candidate": {
+        "ops": 272506.70172884077,
+        "p99_us": 1237.584
+      },
+      "throughputRatio": 15.392734566164473
+    },
+    {
+      "kind": "framework",
+      "cell": "c256/b4",
+      "reference": {
+        "ops": 58101.462579847714,
+        "p99_us": 31989.584
+      },
+      "candidate": {
+        "ops": 785048.7315741866,
+        "p99_us": 2165.833
+      },
+      "throughputRatio": 13.511686224685125
+    },
+    {
+      "kind": "framework",
+      "cell": "c512/b1",
+      "reference": {
+        "ops": 17767.21388131079,
+        "p99_us": 52627.666
+      },
+      "candidate": {
+        "ops": 275342.06133832614,
+        "p99_us": 3082.584
+      },
+      "throughputRatio": 15.497199683511244
+    },
+    {
+      "kind": "framework",
+      "cell": "c512/b4",
+      "reference": {
+        "ops": 58621.313367805145,
+        "p99_us": 57921.292
+      },
+      "candidate": {
+        "ops": 797777.9857488727,
+        "p99_us": 4403.292
+      },
+      "throughputRatio": 13.609009077353985
+    },
+    {
+      "kind": "framework",
+      "cell": "c1024/b1",
+      "reference": {
+        "ops": 17564.26598113428,
+        "p99_us": 101218.875
+      },
+      "candidate": {
+        "ops": 270366.0121143578,
+        "p99_us": 7101.958
+      },
+      "throughputRatio": 15.39295820302181
+    },
+    {
+      "kind": "framework",
+      "cell": "c1024/b4",
+      "reference": {
+        "ops": 56787.563509727224,
+        "p99_us": 107046.458
+      },
+      "candidate": {
+        "ops": 789693.4211944382,
+        "p99_us": 9144.292
+      },
+      "throughputRatio": 13.906097962085845
+    },
+    {
+      "kind": "framework",
+      "cell": "c4096/b1",
+      "reference": {
+        "ops": 18223.66618032443,
+        "p99_us": 358958.042
+      },
+      "candidate": {
+        "ops": 257963.2778945309,
+        "p99_us": 31391.75
+      },
+      "throughputRatio": 14.155399651308716
+    },
+    {
+      "kind": "framework",
+      "cell": "c4096/b4",
+      "reference": {
+        "ops": 53993.31745036502,
+        "p99_us": 302329.917
+      },
+      "candidate": {
+        "ops": 711054.5106782733,
+        "p99_us": 23001.917
+      },
+      "throughputRatio": 13.169305837373884
+    }
+  ]
+}

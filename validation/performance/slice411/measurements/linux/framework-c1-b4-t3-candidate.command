@@ -1,0 +1,1 @@
+["/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/overlap411/candidate-linux/artifacts/framework_benchmark","--clients","1","--operations","16384","--warmup","1024","--batch","4","--retained-entries","32768"]

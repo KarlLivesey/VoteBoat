@@ -1,0 +1,65 @@
+[
+  {
+    "target": "voteboat",
+    "compiler_source": "/private/tmp/voteboat-p9-baseline411-c35e1f1/repo/src/lib.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-baseline411-c35e1f1/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-baseline411-c35e1f1/artifacts/libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "de86ebc5040d7f10df71bbeeb529e077e9104b92eb60a31420c3e91b6cb210ee"
+  },
+  {
+    "target": "framework_benchmark",
+    "compiler_source": "/private/tmp/voteboat-p9-baseline411-c35e1f1/repo/examples/framework_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-baseline411-c35e1f1/build/release/examples/framework_benchmark",
+    "copy": "/tmp/voteboat-p9-baseline411-c35e1f1/artifacts/framework_benchmark",
+    "sha256": "438004b5b621d607637cf8a0a34db6e026f387ab15c1b20725ae913be5675ef3"
+  },
+  {
+    "target": "native_benchmark",
+    "compiler_source": "/private/tmp/voteboat-p9-baseline411-c35e1f1/repo/examples/native_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-baseline411-c35e1f1/build/release/examples/native_benchmark",
+    "copy": "/tmp/voteboat-p9-baseline411-c35e1f1/artifacts/native_benchmark",
+    "sha256": "3666efe5584451af7f232df03811bf04b142bab70235f52accdd05b539acf050"
+  }
+]

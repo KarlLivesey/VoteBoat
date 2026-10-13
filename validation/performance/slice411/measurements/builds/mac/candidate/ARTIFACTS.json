@@ -1,0 +1,65 @@
+[
+  {
+    "target": "voteboat",
+    "compiler_source": "/private/tmp/voteboat-p9-overlap411-owned412/release/repo/src/lib.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-overlap411-owned412/release/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-overlap411-owned412/release/artifacts/libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "1bb3af5bab685054189e749918b9166d29032798b72340b37b3cdf4ba7179b19"
+  },
+  {
+    "target": "framework_benchmark",
+    "compiler_source": "/private/tmp/voteboat-p9-overlap411-owned412/release/repo/examples/framework_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-overlap411-owned412/release/build/release/examples/framework_benchmark",
+    "copy": "/tmp/voteboat-p9-overlap411-owned412/release/artifacts/framework_benchmark",
+    "sha256": "816486423c595dd0d8b2c9fececc87bf166d458179ce8b774fc641115d6feaa6"
+  },
+  {
+    "target": "native_benchmark",
+    "compiler_source": "/private/tmp/voteboat-p9-overlap411-owned412/release/repo/examples/native_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-overlap411-owned412/release/build/release/examples/native_benchmark",
+    "copy": "/tmp/voteboat-p9-overlap411-owned412/release/artifacts/native_benchmark",
+    "sha256": "f4ff61cb9e5c0d58a7e98e587fd841b4df6de173ea4d8693b350e5988ebe2777"
+  }
+]

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{arguments, journal::*, workload, Workload};
+use super::{arguments, journal::*, workload, History, Workload};
 use std::{cell::RefCell, rc::Rc};
 use voteboat::native::log_store::JournalIo;
 
@@ -14,6 +14,8 @@ fn bounded_workload_rejects_zero_and_oversized_inputs() {
             history,
             iterations,
             append: false,
+            commit: false,
+            kind: History::Plain,
         }
         .validate()
         .is_err());
@@ -35,6 +37,8 @@ fn fixed_histories_and_all_unrelated_groups_survive_exact_native_recovery() {
             history: 4,
             iterations: 3,
             append: false,
+            commit: false,
+            kind: History::Plain,
         })
         .unwrap();
         assert_eq!(samples.len(), 3);
@@ -85,4 +89,31 @@ fn append_histories_preserve_exact_tickets_and_restart_with_unchanged_neighbors(
     }
     let bad = ["output.csv", "2", "4", "3", "unbounded"].map(str::to_owned);
     assert!(arguments(&bad).is_err());
+}
+
+#[test]
+fn configured_and_checkpoint_updates_match_full_validator_through_exact_recovery() {
+    for kind in ["plain", "stable", "joint", "checkpoint"] {
+        for mode in ["append", "append-commit"] {
+            let args = ["output.csv", "2", "4", "3", mode, kind].map(str::to_owned);
+            let (_, config) = arguments(&args).unwrap();
+            assert_eq!(config.kind.label(), kind);
+            assert_eq!(config.commit, mode == "append-commit");
+            let samples = workload::run(config).unwrap();
+            assert_eq!(samples.len(), 3);
+            for sample in samples {
+                assert_eq!(sample.io.appends, 1);
+                assert_eq!(sample.io.syncs, 1);
+                assert_eq!(sample.io.publications, 1);
+                assert_eq!(sample.io.manifest_bytes, 52);
+            }
+        }
+    }
+    for args in [
+        ["output.csv", "2", "2", "3", "append", "joint"],
+        ["output.csv", "2", "4", "3", "replace", "stable"],
+        ["output.csv", "2", "4", "3", "append", "unknown"],
+    ] {
+        assert!(arguments(&args.map(str::to_owned)).is_err());
+    }
 }

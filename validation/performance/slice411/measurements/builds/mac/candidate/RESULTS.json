@@ -1,0 +1,24 @@
+{
+  "inputs": 1345,
+  "guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1345
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1345
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "build": 0,
+    "collect": 0,
+    "source_terminal": 0
+  },
+  "artifacts": 3,
+  "distinct_from_baseline": true,
+  "timed_cases": 0,
+  "terminal": "failures=0 timed_cases=0"
+}

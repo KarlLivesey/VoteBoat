@@ -38,3 +38,8 @@ Final real TCP/QUIC service retry, leader replacement and native-file recovery
 pass2/0 (11.71s). [Mac qualification](mac/README.md) passes534/454 on exact1345
 inputs, with formatting/four strict profiles and source/compiler guards clean.
 No timed gain or minimum-floor comparison is claimed from functional checks.
+
+Both96-case paired campaigns are complete.
+[Linux and M2 Max measurements](measurements/README.md) preserve all raw trials,
+genuine independent builds and unchanged source/artifact guards. Durable gains
+differ sharply by platform; the modeled framework diagnostic remains unmatched.

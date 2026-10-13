@@ -1,0 +1,74 @@
+{
+  "beforeCopy": [
+    {
+      "root": "target/p9/overlap411/measure-linux",
+      "verifiedFiles": 823
+    },
+    {
+      "root": "target/p9/overlap411/measure-mac",
+      "verifiedFiles": 824
+    },
+    {
+      "root": "target/p9/overlap411/baseline",
+      "verifiedFiles": 24
+    },
+    {
+      "root": "target/p9/overlap411/baseline-mac",
+      "verifiedFiles": 25
+    },
+    {
+      "root": "target/p9/mac-recovery413",
+      "verifiedFiles": 45
+    }
+  ],
+  "builds": [
+    {
+      "host": "linux",
+      "variant": "reference",
+      "sourceRoot": "baseline",
+      "targets": 3,
+      "fresh": false,
+      "opt_level": "3",
+      "debug_assertions": true,
+      "overflow_checks": true
+    },
+    {
+      "host": "linux",
+      "variant": "candidate",
+      "sourceRoot": "candidate-linux",
+      "targets": 3,
+      "fresh": false,
+      "opt_level": "3",
+      "debug_assertions": true,
+      "overflow_checks": true
+    },
+    {
+      "host": "mac",
+      "variant": "reference",
+      "sourceRoot": "baseline-mac",
+      "targets": 3,
+      "fresh": false,
+      "opt_level": "3",
+      "debug_assertions": true,
+      "overflow_checks": true
+    },
+    {
+      "host": "mac",
+      "variant": "candidate",
+      "sourceRoot": "candidate-mac-release",
+      "targets": 3,
+      "fresh": false,
+      "opt_level": "3",
+      "debug_assertions": true,
+      "overflow_checks": true
+    }
+  ],
+  "campaigns": 2,
+  "casesPerCampaign": 96,
+  "qualification": {
+    "all": 532,
+    "core": 338,
+    "inputs": 1349
+  },
+  "destinationHashesVerified": true
+}

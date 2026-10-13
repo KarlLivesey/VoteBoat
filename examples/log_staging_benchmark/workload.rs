@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-use super::{checked, journal::*, Failure, Workload, WARMUP};
+use super::{checked, history, journal::*, Failure, History, Workload, WARMUP};
 use std::{cell::RefCell, collections::BTreeMap, rc::Rc, time::Instant};
 use voteboat::{
     contracts::{HardState, StorageError},
@@ -34,7 +34,7 @@ fn group(number: usize) -> GroupIdentity {
     }
 }
 
-fn entry(index: usize, operation: u128) -> LogEntry {
+pub(super) fn entry(index: usize, operation: u128) -> LogEntry {
     LogEntry {
         index: index as u64,
         term: 1,
@@ -49,6 +49,7 @@ fn limits(config: Workload) -> LogLimits {
     LogLimits {
         max_groups: config.unrelated + 1,
         max_entries_per_group: config.history
+            + config.kind.base()
             + if config.append {
                 config.iterations + WARMUP
             } else {
@@ -97,23 +98,28 @@ fn initialize(
     checked(store.barrier(&tickets))?;
     for number in 1..=config.unrelated + 1 {
         let mut initial = expected[&group(number)].clone();
-        initial.commit_index = config.history as u64 - 1;
+        initial.commit_index = (config.history + config.kind.base()) as u64 - 1;
         let mutation = update(
             &initial,
             Suffix {
                 from: 1,
-                entries: (1..=config.history)
-                    .map(|index| entry(index, index as u128))
-                    .collect(),
+                entries: history::entries(&initial, config)?,
             },
         );
         let mutations = vec![mutation];
         checked(apply_batch(&mut expected, &mutations, limits(config)))?;
         let tickets = checked(store.append_batch(mutations))?;
         checked(store.barrier(&tickets))?;
+        if config.kind == History::Checkpoint {
+            let mutations = vec![history::checkpoint(&expected[&group(number)])?];
+            checked(apply_batch(&mut expected, &mutations, limits(config)))?;
+            let tickets = checked(store.append_batch(mutations))?;
+            checked(store.barrier(&tickets))?;
+        }
         let state = checked(store.state(group(number)))?;
         if state.entries.len() != config.history
-            || state.commit_index != config.history as u64 - 1
+            || state.commit_index != (config.history + config.kind.base()) as u64 - 1
+            || state.base_index() != config.kind.base() as u64
             || state != expected[&group(number)]
         {
             return Err("initial retained shape mismatch".into());
@@ -123,7 +129,7 @@ fn initialize(
 }
 
 fn replacement(original: &GroupLog, config: Workload, step: usize) -> LogMutation {
-    let index = config.history + if config.append { step } else { 0 };
+    let index = config.history + config.kind.base() + if config.append { step } else { 0 };
     let mut mutation = update(
         original,
         Suffix {
@@ -135,6 +141,9 @@ fn replacement(original: &GroupLog, config: Workload, step: usize) -> LogMutatio
         unreachable!()
     };
     value.expected_revision = LogRevision::new(original.revision.get() + step as u64 - 1).unwrap();
+    if config.commit {
+        value.commit_index = index as u64;
+    }
     mutation
 }
 
@@ -241,7 +250,7 @@ pub(super) fn run(config: Workload) -> Result<Vec<Sample>, Failure> {
             || ticket.generation.get()
                 != original.generation.get() + if config.append { 0 } else { step as u64 }
             || ticket.last_index
-                != config.history as u64 + if config.append { step as u64 } else { 0 }
+                != original.last_index() + if config.append { step as u64 } else { 0 }
             || ticket.term != 1
         {
             return Err("original scoped transition ticket mismatch".into());
@@ -255,17 +264,12 @@ pub(super) fn run(config: Workload) -> Result<Vec<Sample>, Failure> {
         last_ticket = Some(ticket);
     }
     let steps = config.iterations + WARMUP;
-    let changed = expected.get_mut(&group(1)).unwrap();
-    changed.revision = LogRevision::new(changed.revision.get() + steps as u64).unwrap();
-    if config.append {
-        changed.entries.extend(
-            (1..=steps)
-                .map(|step| entry(config.history + step, config.history as u128 + step as u128)),
-        );
-    } else {
-        changed.generation = LogGeneration::new(changed.generation.get() + steps as u64).unwrap();
-        *changed.entries.last_mut().unwrap() =
-            entry(config.history, config.history as u128 + steps as u128);
+    // Full public validator is an independent oracle; exclude its history work
+    // from timed provider transitions and compare the complete final state.
+    let original = original.clone();
+    for step in 1..=steps {
+        let mutation = replacement(&original, config, step);
+        checked(apply_batch(&mut expected, &[mutation], limits(config)))?;
     }
     verify_states(&store, &expected)?;
     drop(store);

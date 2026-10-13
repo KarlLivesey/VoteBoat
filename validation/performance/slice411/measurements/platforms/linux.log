@@ -1,0 +1,10 @@
+Linux 7.2.9-2-cachyos x86_64 GNU/Linux
+CPU(s):                                  16
+On-line CPU(s) list:                     0-15
+Model name:                              AMD Ryzen 7 9800X3D 8-Core Processor
+Thread(s) per core:                      2
+Core(s) per socket:                      8
+CPU(s) scaling MHz:                      98%
+NUMA node0 CPU(s):                       0-15
+MemTotal:       63433900 kB
+btrfs /dev/nvme1n1p2[/@home]

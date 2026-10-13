@@ -21,16 +21,25 @@ records atomic validated state ownership and the modeled provider's removed
 history copy. Final affected all716/core547 and formatting/four strict profiles
 pass; real TCP/QUIC service retry/replacement/recovery2 also passes. Mac affected
 all534/core454, four strict configurations and1345-input source guards pass.
-The96-case paired Mac campaign is terminal; Linux timing follows local413 checks.
-Its measurement evidence remains separate from this functional qualification.
+Both96-case paired campaigns are terminal with exact source/artifact guards.
+Linux durable singleton throughput improves4.65–5.35x; window32 improves1.14–1.21x.
+M2 Max durable throughput remains approximately unchanged and TCP singleton p99
+regresses. Volatile modeled-provider gains are5.20–64.80x Linux and13.17–34.13x
+Mac; these are unmatched diagnostics, not an OpenRaft floor pass.
+[Raw measurements and build identity](../validation/performance/slice411/measurements/README.md).
 
 413 [configured/snapshot append and commit deltas](../validation/performance/slice413/README.md)
 now preserve validated membership and unchanged historical ballots without
 replaying/copying old history. Nonplain classification remains false; changed
 ballots/configuration/snapshots/rollback keep full validation. Linux broad840/595,
 real TCP/QUIC2 and formatting/four strict profiles pass, including actual modeled
-power loss and stale-session controls. Mac413 checks and its measurements are
-pending. Configured connection/resource scans remain a separate cost.
+power loss and stale-session controls. Mac413 scoped qualification passes532/338,
+formatting/four strict profiles and1349-input guards; its exact scope is recorded
+[separately](../validation/performance/slice413/mac/README.md). No timed413 gain is
+claimed. The existing volatile staging diagnostic now covers stable/joint/
+checkpoint histories and append-plus-commit with full-validator final-state and
+restart oracles; five diagnostic controls pass. Both-host paired timing follows.
+Configured connection/resource scans remain a separate cost.
 The current mini plan covers measured campaigns, then the prepared concurrent
 comparison, then bounded configured resource/connection summaries. Planned
 work remains separate from passing evidence; no minimum floor is achieved.

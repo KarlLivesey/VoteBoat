@@ -1,0 +1,27 @@
+{
+  "files": 22,
+  "sha256": {
+    "ARTIFACTS.json": "48d502b5151f8b83e3c1a532d133ad5ef901b7e2d58238a5b99aef552eefe168",
+    "COMMIT.txt": "268cba73fb83504990b084908eb3f1704003f7dd3dd599893c12dadf0b445cae",
+    "ORIGINAL_EVIDENCE.json": "aa104c4cb1124e0365ebd27053b2b97c9b9d71e1fd3b52fdd87a1df683ebda17",
+    "RESULTS.json": "671fb466487bf69617181c1016637cf2e516ecbac8fd7bbaa846cf91bc49b6b5",
+    "SOURCE.json": "684d9bf8413bd49163d4011b4cff26f34cea8f1c593a861dcd45fa83fcc79a41",
+    "SOURCE_SHA256.txt": "027d651cee3f09ed09bdb0aa398ba11a5ebbe2de9b3869cb68f357c30c1d1146",
+    "build.sh": "6a36d7432a41970d2f482a47688cf74d687c1f690ca2ebbf2f3950bc09689d93",
+    "collect-artifacts.mjs": "5e81ee5ba63be7524206d2a6d80ae1bcd8fa92a2387929c569514991e205e817",
+    "results/build.command": "4d2c36a55063fa4f31590afb3e8ca1cc07f51393fc44b19220b3cf3cbf52cbe9",
+    "results/build.jsonl": "6649dd7b9476796117ee6735ac4f2b40a56c81c15dcc8c6758b0a57d18316cff",
+    "results/build.log": "c9ad5eaee11fd78635e0cc98a7c9b0d9e98cfe389ef256ae05dba3b8d24b91eb",
+    "results/collect.command": "c4ef63723c9a8b02a2ddb277b73d33c3a01e62f0b05efc6f6c479822a3ccaa0d",
+    "results/collect.log": "96d9b5611f068c21a3dbecaf50b8abc6c5ad4bf1f7c26e703d4883e834d53945",
+    "results/exits.txt": "d74adafc270e926eeb13d1887440d6b8105d14dc5c9247c5a34a5f147bb8ce3b",
+    "results/platform.command": "24def54581963c08a38fd2c68ee79b63605ba5d603acff805df9b268749ce3d7",
+    "results/platform.log": "8d4e7559ecea5f6dec9e9d2fdbfda4df2e623bdf10ac1baf0f9b516f0454873d",
+    "results/source_start.command": "241890e3fc4f743a06f8bfedd6405cdd71b04da946a42253103b1f28ef166bd3",
+    "results/source_start.log": "44a08aa1520ac646de966396d66e73386c5f2c4e0aaef16d74e58e3cd57bfb36",
+    "results/source_terminal.command": "241890e3fc4f743a06f8bfedd6405cdd71b04da946a42253103b1f28ef166bd3",
+    "results/source_terminal.log": "44a08aa1520ac646de966396d66e73386c5f2c4e0aaef16d74e58e3cd57bfb36",
+    "results/stage.txt": "770b1fadc4019d4de6b2fd32561beaa2c8cffa7837f43c85cbeff1e211c60702",
+    "results/terminal.txt": "a483fd9bdd0b5811aa52887bfade2501893b41ddda4517645a36aba7b9f7f1db"
+  }
+}

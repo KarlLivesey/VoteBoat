@@ -1,0 +1,32 @@
+{
+  "commit": "c35e1f1a5b3a42c088769d5b992200a95dae35ce",
+  "platform": [
+    "Darwin arm64",
+    "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+    "CARGO_TARGET_DIR=/tmp/voteboat-p9-baseline411-c35e1f1/build",
+    "CARGO_PROFILE_RELEASE_DEBUG_ASSERTIONS=true",
+    "CARGO_PROFILE_RELEASE_OVERFLOW_CHECKS=true"
+  ],
+  "source_inputs": 1336,
+  "source_guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1336
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1336
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "build": 0,
+    "collect": 0,
+    "source_terminal": 0
+  },
+  "artifacts": 3,
+  "timed_cases": 0,
+  "terminal": "failures=0 timed_cases=0"
+}

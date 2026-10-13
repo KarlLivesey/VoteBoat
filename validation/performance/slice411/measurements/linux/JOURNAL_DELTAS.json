@@ -1,0 +1,773 @@
+{
+  "scope": "Measurement-stage physical I/O deltas only. Startup logical append/barrier columns unpopulated, not actual zeros. Averages sum elapsed durations/calls, not end-to-end critical-path attribution.",
+  "cases": [
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 1,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 12546.049625,
+          "avgPublish_us": 21336.984171875
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 11900.700254403131,
+          "avgPublish_us": 26764.829289628182
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 12479.228632093935,
+          "avgPublish_us": 27049.9611037182
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 1,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 1521.42546484375,
+          "avgPublish_us": 2417.0830546875
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 1481.4729315068494,
+          "avgPublish_us": 3009.370876712329
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 1618.579577299413,
+          "avgPublish_us": 3050.7748571428574
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 2,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 2396.477806640625,
+          "avgPublish_us": 4319.770623046875
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 2261.570906066536,
+          "avgPublish_us": 5479.058876712329
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 2694.6822152641876,
+          "avgPublish_us": 5390.337418786692
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 2,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 9829.326859375,
+          "avgPublish_us": 17084.78796875
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 9395.551064579256,
+          "avgPublish_us": 21629.251651663402
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 9871.306360078277,
+          "avgPublish_us": 21826.46672798434
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 3,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 11643.635759765624,
+          "avgPublish_us": 20722.964673828126
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 11455.722704500979,
+          "avgPublish_us": 25958.018837573385
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 12123.486735812134,
+          "avgPublish_us": 26121.433262230923
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 3,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 12451.339052734374,
+          "avgPublish_us": 21530.9045078125
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 11971.82117221135,
+          "avgPublish_us": 26149.196066536202
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 13826.36704892368,
+          "avgPublish_us": 26153.35371624266
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 1,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 255,
+          "sync": 255,
+          "publish": 255,
+          "avgSync_us": 11072.780760784313,
+          "avgPublish_us": 20640.74164705882
+        },
+        {
+          "replica": 2,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 13292.13275862069,
+          "avgPublish_us": 30957.162379310343
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 14888.6648,
+          "avgPublish_us": 31294.38986666667
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 1,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 254,
+          "sync": 254,
+          "publish": 254,
+          "avgSync_us": 9902.812125984252,
+          "avgPublish_us": 17086.979102362206
+        },
+        {
+          "replica": 2,
+          "ioAppend": 28,
+          "sync": 28,
+          "publish": 28,
+          "avgSync_us": 16916.948392857143,
+          "avgPublish_us": 26085.886964285713
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 18045.334600000002,
+          "avgPublish_us": 24560.147966666664
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 2,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 258,
+          "sync": 258,
+          "publish": 258,
+          "avgSync_us": 8673.610972868217,
+          "avgPublish_us": 16500.493162790695
+        },
+        {
+          "replica": 2,
+          "ioAppend": 33,
+          "sync": 33,
+          "publish": 33,
+          "avgSync_us": 11774.400030303032,
+          "avgPublish_us": 29776.12490909091
+        },
+        {
+          "replica": 3,
+          "ioAppend": 32,
+          "sync": 32,
+          "publish": 32,
+          "avgSync_us": 13004.9901875,
+          "avgPublish_us": 28717.8265
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 2,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 255,
+          "sync": 255,
+          "publish": 255,
+          "avgSync_us": 8994.891333333335,
+          "avgPublish_us": 16052.6548
+        },
+        {
+          "replica": 2,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 11342.59772413793,
+          "avgPublish_us": 27730.103068965516
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 13139.0529,
+          "avgPublish_us": 27692.9354
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 3,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 255,
+          "sync": 255,
+          "publish": 255,
+          "avgSync_us": 10664.255901960785,
+          "avgPublish_us": 20151.497470588238
+        },
+        {
+          "replica": 2,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 12191.541827586207,
+          "avgPublish_us": 25387.68127586207
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 14823.192333333334,
+          "avgPublish_us": 28330.368466666663
+        }
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 3,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 255,
+          "sync": 255,
+          "publish": 255,
+          "avgSync_us": 9425.612447058824,
+          "avgPublish_us": 17632.230925490196
+        },
+        {
+          "replica": 2,
+          "ioAppend": 31,
+          "sync": 31,
+          "publish": 31,
+          "avgSync_us": 13485.521032258066,
+          "avgPublish_us": 28742.277548387094
+        },
+        {
+          "replica": 3,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 14445.077,
+          "avgPublish_us": 29259.826896551724
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "trial": 1,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 4897.956701171875,
+          "avgPublish_us": 9655.03003125
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 4677.197614481409,
+          "avgPublish_us": 11610.46673776908
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 5057.070941291586,
+          "avgPublish_us": 11635.28852446184
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "trial": 1,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 1321.611123046875,
+          "avgPublish_us": 2448.719298828125
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 1508.383651663405,
+          "avgPublish_us": 3068.9341859099804
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 1635.5391604696672,
+          "avgPublish_us": 3213.755481409002
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "trial": 2,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 2107.06325390625,
+          "avgPublish_us": 4026.06812890625
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 2374.386508806262,
+          "avgPublish_us": 4980.093772994129
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 2674.5394187866927,
+          "avgPublish_us": 4946.294129158513
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "trial": 2,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 12680.612625,
+          "avgPublish_us": 21937.22954296875
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 12198.509767123287,
+          "avgPublish_us": 28880.90904109589
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 13135.346236790607,
+          "avgPublish_us": 28836.44862035225
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "trial": 3,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 12111.717716796875,
+          "avgPublish_us": 21973.458212890626
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 12626.178698630138,
+          "avgPublish_us": 28157.004906066537
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 13347.602058708415,
+          "avgPublish_us": 27990.96820547945
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "trial": 3,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 512,
+          "sync": 512,
+          "publish": 512,
+          "avgSync_us": 11289.3940625,
+          "avgPublish_us": 20927.871234375
+        },
+        {
+          "replica": 2,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 11695.404324853229,
+          "avgPublish_us": 25787.301160469666
+        },
+        {
+          "replica": 3,
+          "ioAppend": 511,
+          "sync": 511,
+          "publish": 511,
+          "avgSync_us": 13670.749814090019,
+          "avgPublish_us": 25689.522851272017
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "trial": 1,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 254,
+          "sync": 254,
+          "publish": 254,
+          "avgSync_us": 9466.443677165355,
+          "avgPublish_us": 18503.081677165355
+        },
+        {
+          "replica": 2,
+          "ioAppend": 28,
+          "sync": 28,
+          "publish": 28,
+          "avgSync_us": 14847.05675,
+          "avgPublish_us": 27659.33139285714
+        },
+        {
+          "replica": 3,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 15993.235689655172,
+          "avgPublish_us": 28379.73724137931
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "trial": 1,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 256,
+          "sync": 256,
+          "publish": 256,
+          "avgSync_us": 9995.91573828125,
+          "avgPublish_us": 18235.09107421875
+        },
+        {
+          "replica": 2,
+          "ioAppend": 31,
+          "sync": 31,
+          "publish": 31,
+          "avgSync_us": 12490.236645161289,
+          "avgPublish_us": 24120.912677419354
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 13457.843933333334,
+          "avgPublish_us": 24603.457300000002
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "trial": 2,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 256,
+          "sync": 256,
+          "publish": 256,
+          "avgSync_us": 10452.99464453125,
+          "avgPublish_us": 20707.83780078125
+        },
+        {
+          "replica": 2,
+          "ioAppend": 32,
+          "sync": 32,
+          "publish": 32,
+          "avgSync_us": 10660.05984375,
+          "avgPublish_us": 25496.5545
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 12506.1024,
+          "avgPublish_us": 25658.5117
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "trial": 2,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 255,
+          "sync": 255,
+          "publish": 255,
+          "avgSync_us": 12237.079709803922,
+          "avgPublish_us": 23501.58697647059
+        },
+        {
+          "replica": 2,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 15115.106551724139,
+          "avgPublish_us": 32538.71896551724
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 16351.169066666667,
+          "avgPublish_us": 32679.990033333335
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "trial": 3,
+      "variant": "reference",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 270,
+          "sync": 270,
+          "publish": 270,
+          "avgSync_us": 12199.055959259258,
+          "avgPublish_us": 23567.63502222222
+        },
+        {
+          "replica": 2,
+          "ioAppend": 29,
+          "sync": 29,
+          "publish": 29,
+          "avgSync_us": 11717.538344827586,
+          "avgPublish_us": 28912.90682758621
+        },
+        {
+          "replica": 3,
+          "ioAppend": 31,
+          "sync": 31,
+          "publish": 31,
+          "avgSync_us": 13970.475516129032,
+          "avgPublish_us": 28198.72380645161
+        }
+      ]
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "trial": 3,
+      "variant": "candidate",
+      "replicas": [
+        {
+          "replica": 1,
+          "ioAppend": 254,
+          "sync": 254,
+          "publish": 254,
+          "avgSync_us": 10158.916385826773,
+          "avgPublish_us": 19370.986181102362
+        },
+        {
+          "replica": 2,
+          "ioAppend": 28,
+          "sync": 28,
+          "publish": 28,
+          "avgSync_us": 12640.766321428571,
+          "avgPublish_us": 28055.762964285714
+        },
+        {
+          "replica": 3,
+          "ioAppend": 30,
+          "sync": 30,
+          "publish": 30,
+          "avgSync_us": 14997.358833333334,
+          "avgPublish_us": 27567.695399999997
+        }
+      ]
+    }
+  ]
+}

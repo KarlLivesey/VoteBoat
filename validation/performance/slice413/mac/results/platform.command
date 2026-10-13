@@ -1,0 +1,1 @@
+bash -c sysctl\ -n\ machdep.cpu.brand_string\;\ uname\ -sm\;\ rustc\ +stable\ --version\;\ cargo\ +stable\ --version\;\ printf\ \"CARGO_TARGET_DIR=%s\\n\"\ \"\$CARGO_TARGET_DIR\"\;\ printf\ \"PROTOC=%s\\n\"\ \"\$PROTOC\" 

@@ -1,0 +1,240 @@
+{
+  "scope": "Frozen configured-delta413 scoped Mac correctness qualification only; no timed413 measurement. Core selected effect-owner controls native-gated and execute0; not full840/595 suite claim.",
+  "inputs": 1349,
+  "runnerPid": 9859,
+  "exits": {
+    "platform": 0,
+    "source_start": 0,
+    "fmt": 0,
+    "clippy_all": 0,
+    "compile_identity": 0,
+    "clippy_default": 0,
+    "clippy_core": 0,
+    "clippy_native": 0,
+    "correctness_all": 0,
+    "owner_checkpoint_all": 0,
+    "owner_catchup_all": 0,
+    "source_after_all": 0,
+    "correctness_core": 0,
+    "owner_checkpoint_core": 0,
+    "owner_catchup_core": 0,
+    "source_terminal": 0
+  },
+  "tests": {
+    "correctness_all": {
+      "passed": 530,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "src/lib.rs",
+          "passed": 323,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/log_owned.rs",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/log_store.rs",
+          "passed": 13,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/member_recovery.rs",
+          "passed": 44,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/membership.rs",
+          "passed": 32,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/raft.rs",
+          "passed": 79,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/snapshot.rs",
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "examples/framework_benchmark.rs",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ]
+    },
+    "correctness_core": {
+      "passed": 338,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "src/lib.rs",
+          "passed": 255,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/log_owned.rs",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/log_store.rs",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/member_recovery.rs",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/membership.rs",
+          "passed": 18,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/raft.rs",
+          "passed": 29,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "tests/snapshot.rs",
+          "passed": 10,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        },
+        {
+          "target": "examples/framework_benchmark.rs",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0
+        }
+      ]
+    },
+    "owner_checkpoint_all": {
+      "passed": 1,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "tests/effect_owner.rs",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 197
+        }
+      ]
+    },
+    "owner_catchup_all": {
+      "passed": 1,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "tests/effect_owner.rs",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 197
+        }
+      ]
+    },
+    "owner_checkpoint_core": {
+      "passed": 0,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "tests/effect_owner.rs",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 190
+        }
+      ]
+    },
+    "owner_catchup_core": {
+      "passed": 0,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "tests/effect_owner.rs",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 190
+        }
+      ]
+    }
+  },
+  "sourceGuards": [
+    {
+      "label": "source_start",
+      "inputs": 1349,
+      "exit": 0
+    },
+    {
+      "label": "source_after_all",
+      "inputs": 1349,
+      "exit": 0
+    },
+    {
+      "label": "source_terminal",
+      "inputs": 1349,
+      "exit": 0
+    }
+  ],
+  "allFeaturePassed": 532,
+  "corePassed": 338
+}

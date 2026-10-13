@@ -1,0 +1,5 @@
+platform=0
+source_start=0
+build=0
+collect=0
+source_terminal=0
