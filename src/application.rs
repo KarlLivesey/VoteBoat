@@ -345,9 +345,11 @@ impl StateMachine for Counter {
         &mut self,
         entries: &[LogEntry],
     ) -> Result<Vec<Self::Receipt>, ApplicationError> {
-        // A bounded clone keeps a malformed/gapped batch from partly advancing
-        // the applied state. Checkpoints preserve both state and dedup outcomes.
-        let mut next = self.clone();
+        // Stage only novel operations and scalar changes. Historical retries
+        // remain immutable until every entry validates, including late errors.
+        let mut value = self.value;
+        let mut applied = self.applied;
+        let mut novel = BTreeMap::new();
         let mut receipts = Vec::with_capacity(
             entries
                 .iter()
@@ -355,7 +357,7 @@ impl StateMachine for Counter {
                 .count(),
         );
         for entry in entries {
-            if next.applied.checked_add(1) != Some(entry.index) {
+            if applied.checked_add(1) != Some(entry.index) {
                 return Err(ApplicationError::IndexGap);
             }
             if let EntryPayload::Command { operation, bytes } = &entry.payload {
@@ -363,30 +365,31 @@ impl StateMachine for Counter {
                     .as_slice()
                     .try_into()
                     .map_err(|_| ApplicationError::InvalidCommand)?;
-                let (outcome, duplicate) =
-                    if let Some((original, result)) = next.dedup.get(operation) {
-                        (
-                            if *original == delta {
-                                *result
-                            } else {
-                                CounterOutcome::OperationConflict
-                            },
-                            true,
-                        )
-                    } else {
-                        if next.dedup.len() >= next.max_operations {
-                            return Err(ApplicationError::DedupCapacity);
+                let (outcome, duplicate) = if let Some((original, result)) =
+                    novel.get(operation).or_else(|| self.dedup.get(operation))
+                {
+                    (
+                        if *original == delta {
+                            *result
+                        } else {
+                            CounterOutcome::OperationConflict
+                        },
+                        true,
+                    )
+                } else {
+                    if novel.len() >= self.remaining_operations() {
+                        return Err(ApplicationError::DedupCapacity);
+                    }
+                    let outcome = match value.checked_add(i64::from_le_bytes(delta)) {
+                        Some(updated) => {
+                            value = updated;
+                            CounterOutcome::Value(updated)
                         }
-                        let outcome = match next.value.checked_add(i64::from_le_bytes(delta)) {
-                            Some(value) => {
-                                next.value = value;
-                                CounterOutcome::Value(value)
-                            }
-                            None => CounterOutcome::Overflow,
-                        };
-                        next.dedup.insert(*operation, (delta, outcome));
-                        (outcome, false)
+                        None => CounterOutcome::Overflow,
                     };
+                    novel.insert(*operation, (delta, outcome));
+                    (outcome, false)
+                };
                 receipts.push(CounterReceipt {
                     index: entry.index,
                     operation: *operation,
@@ -394,9 +397,13 @@ impl StateMachine for Counter {
                     duplicate,
                 });
             }
-            next.applied = entry.index;
+            applied = entry.index;
         }
-        *self = next;
+        for (operation, retained) in novel {
+            self.dedup.insert(operation, retained);
+        }
+        self.value = value;
+        self.applied = applied;
         Ok(receipts)
     }
 }

@@ -19,7 +19,8 @@ silently routing many invocations through a singular admission/result record.
 Linux focused all-feature417/0: library282, native log12, provider29, Raft79,
 shared barriers8, framework7. Core-only259/0: library223, Raft29, framework7.
 Formatting and all four strict all-target Clippy configurations: zero. Mac frozen
-1319-input controls are running; no Mac pass is assumed.
+1319-input qualification is terminal442/0, with formatting, all four strict
+Clippy configurations and before/after source guards clean. [Mac records](mac/README.md).
 
 ## Three interleaved paired trials per cell
 

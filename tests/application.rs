@@ -176,6 +176,136 @@ fn invalid_batches_and_capacity_do_not_partly_advance_state() {
 }
 
 #[test]
+fn mixed_retry_sources_preserve_original_outcomes_at_exact_capacity() {
+    let mut counter = Counter::new(4).unwrap();
+    counter
+        .apply_batch(&[command(1, 1, i64::MAX), command(2, 2, 1), command(3, 3, -1)])
+        .unwrap();
+    let entries = [
+        command(4, 2, 1),
+        command(5, 4, 1),
+        command(6, 4, 2),
+        command(7, 4, 1),
+        command(8, 1, i64::MAX),
+        command(9, 3, -2),
+        LogEntry {
+            index: 10,
+            term: 1,
+            payload: EntryPayload::Noop,
+        },
+    ];
+    let receipts = counter.apply_batch(&entries).unwrap();
+    assert_eq!(
+        receipts
+            .iter()
+            .map(|receipt| (receipt.outcome, receipt.duplicate))
+            .collect::<Vec<_>>(),
+        [
+            (CounterOutcome::Overflow, true),
+            (CounterOutcome::Value(i64::MAX), false),
+            (CounterOutcome::OperationConflict, true),
+            (CounterOutcome::Value(i64::MAX), true),
+            (CounterOutcome::Value(i64::MAX), true),
+            (CounterOutcome::OperationConflict, true),
+        ]
+    );
+    assert_eq!(
+        receipts
+            .iter()
+            .map(|receipt| receipt.index)
+            .collect::<Vec<_>>(),
+        [4, 5, 6, 7, 8, 9]
+    );
+    assert_eq!(counter.read_applied(10), Ok(i64::MAX));
+    assert_eq!(counter.remaining_operations(), 0);
+    let image = counter.checkpoint(1024).unwrap();
+    let mut restored = Counter::new(4).unwrap();
+    restored.restore_checkpoint(1, 10, &image).unwrap();
+    let retries = restored
+        .apply_batch(&[command(11, 4, 1), command(12, 2, 1)])
+        .unwrap();
+    assert_eq!(retries[0].outcome, CounterOutcome::Value(i64::MAX));
+    assert_eq!(retries[1].outcome, CounterOutcome::Overflow);
+    assert!(retries.iter().all(|receipt| receipt.duplicate));
+    assert_eq!(restored.remaining_operations(), 0);
+    assert_eq!(restored.read_applied(12), Ok(i64::MAX));
+    assert!(restored.apply_batch(&[]).unwrap().is_empty());
+    assert_eq!(restored.applied_index(), 12);
+}
+
+#[test]
+fn late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel() {
+    let mut counter = Counter::new(130).unwrap();
+    counter
+        .apply_batch(
+            &(1..=128)
+                .map(|index| command(index, u128::from(index), 1))
+                .collect::<Vec<_>>(),
+        )
+        .unwrap();
+    let previous = counter.checkpoint(8192).unwrap();
+    let malformed = LogEntry {
+        index: 132,
+        term: 1,
+        payload: EntryPayload::Command {
+            operation: OperationId::new(130).unwrap(),
+            bytes: vec![1],
+        },
+    };
+    let failed = [
+        (
+            vec![
+                command(129, 129, 7),
+                command(130, 129, 7),
+                command(131, 1, 2),
+                malformed,
+            ],
+            ApplicationError::InvalidCommand,
+        ),
+        (
+            vec![command(129, 129, 7), command(131, 130, 2)],
+            ApplicationError::IndexGap,
+        ),
+        (
+            vec![
+                command(129, 129, 7),
+                command(130, 130, 2),
+                command(131, 131, 1),
+            ],
+            ApplicationError::DedupCapacity,
+        ),
+    ];
+    for (batch, expected_error) in failed {
+        assert_eq!(counter.apply_batch(&batch), Err(expected_error));
+        assert_eq!(counter.checkpoint(8192).unwrap(), previous);
+        assert_eq!(counter.read_applied(128), Ok(128));
+        assert_eq!(counter.applied_index(), 128);
+        assert_eq!(counter.remaining_operations(), 2);
+    }
+    let receipts = counter
+        .apply_batch(&[
+            command(129, 129, 7),
+            command(130, 129, 9),
+            command(131, 130, 2),
+        ])
+        .unwrap();
+    assert_eq!(receipts[0].outcome, CounterOutcome::Value(135));
+    assert!(!receipts[0].duplicate);
+    assert_eq!(receipts[1].outcome, CounterOutcome::OperationConflict);
+    assert!(receipts[1].duplicate);
+    assert_eq!(receipts[2].outcome, CounterOutcome::Value(137));
+    assert!(!receipts[2].duplicate);
+    assert_eq!(counter.remaining_operations(), 0);
+    let image = counter.checkpoint(8192).unwrap();
+    let mut restored = Counter::new(130).unwrap();
+    restored.restore_checkpoint(1, 131, &image).unwrap();
+    let historical = restored.apply_batch(&[command(132, 1, 1)]).unwrap();
+    assert_eq!(historical[0].outcome, CounterOutcome::Value(1));
+    assert!(historical[0].duplicate);
+    assert_eq!(restored.read_applied(132), Ok(137));
+}
+
+#[test]
 fn host_application_can_supply_its_own_receipt_type_through_the_public_seam() {
     struct HostApplication {
         inner: Counter,

@@ -32395,3 +32395,23 @@ remainingO(history) copying/scanning. These rates do not pass the OpenRaft curve
 or establish durable application capacity. Macro remains active; next native
 ready collection and explicit overlap, with validated delta/cached-state work
 addressing the concrete CPU ceiling. All feature/security semantics remain.
+
+Mac407 is terminal442/0 with formatting, all four strict Clippy configurations
+and1319-input source guards clean. Core batching and its evidence are committed
+and pushed asb83951b. [Mac records](../validation/performance/slice407/mac/README.md).
+
+### P9 Counter batch overlay408
+
+Schema: [batch-local overlay](../validation/performance/slice408/SCHEMA.md).
+Counter application now stages only novel operation IDs and projected scalars,
+reading permanent historical outcomes in place. Full validation precedes install;
+late malformed/gapped/capacity failure leaves a byte-identical checkpoint.
+Public APIs, retry/conflict/overflow outcomes and checkpoint format are unchanged.
+Linux application12/0 and provider application controls3/0 pass with all and
+no-default features; formatting/four strict Clippy configurations are zero.
+Actual TCP/QUIC retry, leader replacement and native-file recovery pass2/0
+(11.41s) with loopback sockets available; sandbox port-allocation refusal is
+retained separately in the evidence.
+No timed throughput claim or macOS408 pass is inferred from those checks.
+This advancesP9.1 by removing history-sized application copying; the linked
+native-batching/overlap/log-delta mini-plan continues.

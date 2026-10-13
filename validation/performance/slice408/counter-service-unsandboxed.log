@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-4ea2388b5d42bc7d)
+
+running 2 tests
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 11.41s
+

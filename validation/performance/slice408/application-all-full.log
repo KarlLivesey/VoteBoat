@@ -1,0 +1,19 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/application.rs (target/debug/deps/application-0417a00fedc9c51f)
+
+running 12 tests
+test conflicting_operation_content_never_changes_the_original_effect ... ok
+test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+test retries_return_the_original_result_without_reapplying ... ok
+test mixed_retry_sources_preserve_original_outcomes_at_exact_capacity ... ok
+test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+test late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel ... ok
+test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

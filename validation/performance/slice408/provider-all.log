@@ -1,0 +1,10 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-c9e5d94ff2b6e98a)
+
+running 3 tests
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s
+

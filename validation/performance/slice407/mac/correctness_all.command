@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --lib --test raft --test shared_barrier --test log_staging --test log_store --test log_reclaim --test striped_log_store --test provider_conformance --example framework_benchmark --example log_staging_benchmark 
