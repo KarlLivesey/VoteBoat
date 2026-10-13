@@ -11,6 +11,9 @@ Parent affected integrations416/core277 and real TCP/QUIC recovery/maintenance8
 pass; formatter/four strict root configurations and standalone checks are zero.
 [Exact419 ownership and validation](../validation/performance/slice419/README.md).
 Current-source Mac and performance qualification remain open.
+A corrective publication also includes an omitted, already-qualified codec test
+module; actual pushes now require committed build inputs so a local untracked
+module cannot mask an incomplete published source tree.
 
 418 implements plain matching-prefix compaction without copying surviving command
 payloads, with exact original field correlation, accounting and configured

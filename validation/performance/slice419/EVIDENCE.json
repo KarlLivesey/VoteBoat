@@ -1,8 +1,8 @@
 {
-  "scope": "419 ownership/state/crash/capacity/error/correlation/finalformatter/fourstrict; no throughput claim",
+  "scope": "419 ownership/state/crash/capacity/error/correlation/finalformatter/fourstrict plus actualpush input guard rejection; no throughput claim",
   "sha256": {
     "IMPLEMENTATION_MAP.md": "20da65231424eac1b1aa37e3af993367129d213c8c0a46a408ef089a503c080b",
-    "README.md": "b5b3fe8c80c10bc36648cec6f798e5dd910ff4f1385d02dd5cd5da314ba7f6a2",
+    "README.md": "8c7252cee21832ea9d365e5e66d01d7b8a8319cba5d91cbe0d0896a387ec173f",
     "SCHEMA.md": "b223547844bc06a36ef77cd38305afe2208ec2b06c27932f055d01710aa60d8a",
     "SOURCE.sha256": "d8dd64ad5579547325a428fce94e9e508935f27af8cb78b137bea05aa1a282be",
     "logs/all-lib-final.log": "96a87ab72fb422d9c75c06ac970cbb507f7e433ad91d7d32309fdc3a1c68acf1",
@@ -27,6 +27,8 @@
     "root/service-maintenance.log": "0111cbdf7f900b709fc7abe997fc4cf6826f58c06cd806df1f66cb5b88826692",
     "root/service-original-recovery.log": "72e6322b61a04a8ad0eb89793911d476169a266eeca56acb11698866dad894bc",
     "root/source-after.log": "70ede25afbdfb2843e294113c5fd32bdba5802b8ad8384c9ba7883ca2f0c1210",
-    "root/source-before.log": "70ede25afbdfb2843e294113c5fd32bdba5802b8ad8384c9ba7883ca2f0c1210"
+    "root/source-before.log": "70ede25afbdfb2843e294113c5fd32bdba5802b8ad8384c9ba7883ca2f0c1210",
+    "root/staged-input-guard.log": "4149d02a3782e4b68fe02ef664e72b5548693606c797419f327190f3f0c3dee8",
+    "root/untracked-input-guard.log": "aa599d6e99851e45cbe2580a146da940f78e09d80cc36c2881d8475834bda843"
   }
 }

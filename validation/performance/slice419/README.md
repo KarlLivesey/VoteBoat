@@ -72,6 +72,14 @@ refusal observing original capacity with no I/O, original mutation ticket order,
 and subset publication of moved payloads. Existing native uncertainty/power-loss,
 trimmed accepted compaction and complete snapshot proof controls ran unchanged.
 
+The first publication38a8b61 omitted the already-qualified native codec test
+module incoming_codec.rs from its Git tree. Its20-input local source guard included
+that file, so local tests were valid but a clean checkout would lack the module.
+The corrective publication tracks the unchanged test and makes the actual pre-push
+hook reject untracked or uncommitted compiled inputs. No source behavior changed.
+An attempted tracked-only419 export with1389 inputs is retained as unbuilt/incomplete;
+use the corrected1390-input export for qualification and timing.
+
 ## Preserved failures and focused fixes
 
 - `logs/strict-initial.log`: large-enum lint because PreparedOwnedLog retained an
