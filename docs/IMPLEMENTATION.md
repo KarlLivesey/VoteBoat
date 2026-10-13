@@ -34,7 +34,15 @@ actual TCP/QUIC service histories2, matched34, and off/on/OpenRaft CLI histories
 16384 originals/4096 requests each, all frontiers17409. The full enabled hook and
 provider metadata checker pass. All five new modules are committed; independent
 source review finds no blocking defect. GitHub main publication was verified.
-No performance gain is inferred before paired measurements.
+Linux426 paired timing is now terminal0 with all24 cases passing guards and exact
+original/frontier/observer checks. Bulk median rises1,241,106→1,282,790 PUTS/s,
+p9915.708→15.191ms, versus OpenRaft3,501,421/s and5.904ms. Singleton regresses
+110,076→94,903/s (p990.018→0.022ms); all slower trials remain. Exact comparison
+still takes372–380ms inclusive in leader traces, about97% of compaction. This
+identifies the remaining comparison interval, without isolating codegen or CPU
+cause. Mac checks/builds are underway, then paired timings; these1048576-original
+diagnostics do not qualify sustained floors. [Every Linux trial and scope](../validation/performance/comparison426/linux/README.md),
+[fresh asserted artifacts](../validation/performance/matched426-linux/README.md).
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |

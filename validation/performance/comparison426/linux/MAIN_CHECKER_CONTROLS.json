@@ -1,0 +1,69 @@
+{
+  "scope": "actual16384 CLI checker qualification and negative in-memory copies; no new benchmarks, no asserted release or sustained performance claim",
+  "actual": [
+    {
+      "mode": "off",
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice426/main/off.json",
+      "sha256": "40b67d68e91adbed277033b2d57bb1b389de09a9df4a77c538010ee9d81bd98e",
+      "completed_originals": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "result": "pass"
+    },
+    {
+      "mode": "on",
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice426/main/on.json",
+      "sha256": "dcb9f7d23bf72cc2b98667b615fb8412ffa7753ab7db54c53aa8d5603b188486",
+      "completed_originals": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "result": "pass"
+    },
+    {
+      "mode": "openraft",
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice426/main/openraft.json",
+      "sha256": "be3ebfd95ba1ef2633eeff9be5a3dcd6810c44926b7826338de6688efeec9d05",
+      "completed_originals": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "result": "pass"
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "missing_original",
+      "result": "correctly rejected",
+      "reason": "wrong original completion"
+    },
+    {
+      "control": "missing_frontier",
+      "result": "correctly rejected",
+      "reason": "wrong follower frontier"
+    },
+    {
+      "control": "missing_exact_phase",
+      "result": "correctly rejected",
+      "reason": "wrong phase count"
+    },
+    {
+      "control": "historical_gap_scope",
+      "result": "correctly rejected",
+      "reason": "historical gap scope reused"
+    },
+    {
+      "control": "unexpected_owned_compaction",
+      "result": "correctly rejected",
+      "reason": "borrowed compaction unexpectedly materializes state"
+    }
+  ],
+  "checker_sha256": "d7a12b2923e5621d69c85f2dd6d76d4f6b2bad2a39c14ac8243c0e87a487bb79"
+}

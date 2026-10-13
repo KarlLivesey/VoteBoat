@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/guard.py", line 3, in <module>
+    job=Path(sys.argv[1]).resolve();source=(job/'source').resolve();m=json.loads((job/'SOURCE.json').read_text());expected=m['sha256'];h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+                                                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/SOURCE.json'
