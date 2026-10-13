@@ -1,0 +1,23 @@
+{
+  "pair_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428/CONFIG_PAIR.linux.json",
+  "pair_config_sha256": "c490b67ed25e2a438a9d2ad443d2a2bdcb592ea74752427a1a6575c09201b262",
+  "runner": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428/phase-diagnostic.sh",
+  "runner_launch": "MATCHED_JOB=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428 bash /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428/phase-diagnostic.sh /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428/CONFIG_PAIR.linux.json <fresh-output-directory>",
+  "guard_final_status": 0,
+  "actual_cli_controls": 3,
+  "checker_negative_controls": 10,
+  "artifact_negative_controls": 6,
+  "planned_cases": 24,
+  "planned_originals_per_case": 1048576,
+  "warmups": 1024,
+  "shared_timeouts_secs": [
+    3600,
+    30
+  ],
+  "artifact_evidence_archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/matched428-linux",
+  "archive_regular_files": 110,
+  "archive_hashes_match": true,
+  "source_main_hashes_match": 1424,
+  "no_campaign_run": true,
+  "unpublished_evidence": "root review pending; no commit/push authorized yet"
+}

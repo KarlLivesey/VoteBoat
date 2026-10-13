@@ -1,0 +1,650 @@
+{
+  "bulk": {
+    "denominator": "recorded cycles:u sample periods, whole process including warmup/setup/latency sorting/shutdown; not leader-only elapsed or CPU duration",
+    "recorded_user_cycle_weight": 137435010786,
+    "raw_sample_events": 27485,
+    "threads": {
+      "env": 32806,
+      "voteboat-matche": 485806734,
+      "matched-server": 124887193326,
+      "matched-client": 12061977920
+    },
+    "at_most_two_recorded_frames_cycle_percentage": 99.4557921335164,
+    "empty_chain_flat_leaf_fallback_cycle_percentage": 25.409061852059946,
+    "flat_vs_chain_leaf_mismatch_cycle_percentage": 0.0,
+    "self_functions": [
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb1ae49e]",
+        "user_cycles": 60211037194,
+        "percentage": 43.81055223821722
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb1ae4a5]",
+        "user_cycles": 32015057918,
+        "percentage": 23.294688693153038
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+        "user_cycles": 4894755027,
+        "percentage": 3.561505179070871
+      },
+      {
+        "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+        "user_cycles": 4795899553,
+        "percentage": 3.489576291784699
+      },
+      {
+        "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+        "user_cycles": 3774837691,
+        "percentage": 2.7466346962185626
+      },
+      {
+        "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+        "user_cycles": 3698913621,
+        "percentage": 2.6913910799334655
+      },
+      {
+        "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+        "user_cycles": 1317943439,
+        "percentage": 0.9589575694450734
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove::<voteboat::identity::OperationId>",
+        "user_cycles": 1241814969,
+        "percentage": 0.9035652283198999
+      },
+      {
+        "function": "<voteboat::raft::Raft>::append_for",
+        "user_cycles": 1232156782,
+        "percentage": 0.8965377708003318
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0bc6f4]",
+        "user_cycles": 1178724977,
+        "percentage": 0.857659900675085
+      },
+      {
+        "function": "core::ptr::drop_glue::<voteboat::log::EntryPayload>",
+        "user_cycles": 1176708966,
+        "percentage": 0.8561930175363053
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0be099]",
+        "user_cycles": 1141490881,
+        "percentage": 0.8305677530577816
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "user_cycles": 904963896,
+        "percentage": 0.6584667842818588
+      },
+      {
+        "function": "tokio::runtime::task::waker::wake_by_ref",
+        "user_cycles": 814551300,
+        "percentage": 0.5926810754708911
+      },
+      {
+        "function": "<alloc::sync::Arc<tokio::sync::oneshot::Inner<voteboat::identity::OperationId>>>::drop_slow",
+        "user_cycles": 809746620,
+        "percentage": 0.5891851103798116
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0bc70d]",
+        "user_cycles": 752112494,
+        "percentage": 0.5472495615917796
+      },
+      {
+        "function": "voteboat_matched_framework::workload::client_loop::{closure#0}",
+        "user_cycles": 672817319,
+        "percentage": 0.48955307323229563
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0be0b3]",
+        "user_cycles": 645711407,
+        "percentage": 0.46983036076988927
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb1b7cef]",
+        "user_cycles": 636620705,
+        "percentage": 0.4632158147761067
+      },
+      {
+        "function": "<std::sys::sync::mutex::futex::Mutex>::lock_contended",
+        "user_cycles": 593158216,
+        "percentage": 0.4315917848062794
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+        "user_cycles": 526280548,
+        "percentage": 0.38293048109805966
+      },
+      {
+        "function": "malloc",
+        "user_cycles": 473376805,
+        "percentage": 0.3444368376680196
+      },
+      {
+        "function": "<tokio::sync::batch_semaphore::Acquire as core::future::future::Future>::poll",
+        "user_cycles": 427441644,
+        "percentage": 0.3110136504195203
+      },
+      {
+        "function": "core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>",
+        "user_cycles": 421383207,
+        "percentage": 0.30660543087971637
+      },
+      {
+        "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+        "user_cycles": 416309910,
+        "percentage": 0.302914015591148
+      },
+      {
+        "function": "tokio::runtime::task::raw::poll::<voteboat_matched_framework::workload::client_loop::{closure#0}, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+        "user_cycles": 400431659,
+        "percentage": 0.29136073603800416
+      },
+      {
+        "function": "<tokio::sync::mpsc::chan::Rx<voteboat_matched_framework::voteboat_engine::Request, tokio::sync::mpsc::bounded::Semaphore>>::try_recv::{closure#0}",
+        "user_cycles": 384292785,
+        "percentage": 0.27961782285474707
+      },
+      {
+        "function": "voteboat::log::validate_suffix_entries",
+        "user_cycles": 355986249,
+        "percentage": 0.25902151639825316
+      },
+      {
+        "function": "<voteboat::raft::Raft>::receive_append",
+        "user_cycles": 341509293,
+        "percentage": 0.2484878423968431
+      },
+      {
+        "function": "core::ptr::drop_glue::<voteboat::log::LogEntry>",
+        "user_cycles": 341195701,
+        "percentage": 0.24825966764122112
+      }
+    ],
+    "inclusive_recorded_functions": [
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb1ae49e]",
+        "user_cycles": 60257708480,
+        "percentage": 43.844511042260734
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb1ae4a5]",
+        "user_cycles": 32044013884,
+        "percentage": 23.315757535680426
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+        "user_cycles": 4894802811,
+        "percentage": 3.56153994750413
+      },
+      {
+        "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+        "user_cycles": 4801802263,
+        "percentage": 3.493871201768874
+      },
+      {
+        "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+        "user_cycles": 3774941011,
+        "percentage": 2.7467098735692312
+      },
+      {
+        "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+        "user_cycles": 3698913621,
+        "percentage": 2.6913910799334655
+      },
+      {
+        "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+        "user_cycles": 1318087865,
+        "percentage": 0.9590626562051165
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove::<voteboat::identity::OperationId>",
+        "user_cycles": 1241814969,
+        "percentage": 0.9035652283198999
+      },
+      {
+        "function": "<voteboat::raft::Raft>::append_for",
+        "user_cycles": 1232156782,
+        "percentage": 0.8965377708003318
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0bc6f4]",
+        "user_cycles": 1178724977,
+        "percentage": 0.857659900675085
+      },
+      {
+        "function": "core::ptr::drop_glue::<voteboat::log::EntryPayload>",
+        "user_cycles": 1176708966,
+        "percentage": 0.8561930175363053
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0be099]",
+        "user_cycles": 1141490881,
+        "percentage": 0.8305677530577816
+      },
+      {
+        "function": "clock_gettime",
+        "user_cycles": 970916111,
+        "percentage": 0.7064547129929019
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "user_cycles": 904963896,
+        "percentage": 0.6584667842818588
+      },
+      {
+        "function": "tokio::runtime::task::waker::wake_by_ref",
+        "user_cycles": 814551300,
+        "percentage": 0.5926810754708911
+      },
+      {
+        "function": "<alloc::sync::Arc<tokio::sync::oneshot::Inner<voteboat::identity::OperationId>>>::drop_slow",
+        "user_cycles": 809746620,
+        "percentage": 0.5891851103798116
+      },
+      {
+        "function": "realloc",
+        "user_cycles": 801124155,
+        "percentage": 0.5829112614160813
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0bc70d]",
+        "user_cycles": 752112494,
+        "percentage": 0.5472495615917796
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0be0a9]",
+        "user_cycles": 723466108,
+        "percentage": 0.526405974622077
+      },
+      {
+        "function": "voteboat_matched_framework::workload::client_loop::{closure#0}",
+        "user_cycles": 688369851,
+        "percentage": 0.5008693542228919
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb1b7cef]",
+        "user_cycles": 647639719,
+        "percentage": 0.47123343265744677
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7fb1fb0be0b3]",
+        "user_cycles": 645711407,
+        "percentage": 0.46983036076988927
+      },
+      {
+        "function": "<std::sys::sync::mutex::futex::Mutex>::lock_contended",
+        "user_cycles": 593158323,
+        "percentage": 0.43159186266125926
+      },
+      {
+        "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+        "user_cycles": 526280548,
+        "percentage": 0.38293048109805966
+      },
+      {
+        "function": "malloc",
+        "user_cycles": 473376805,
+        "percentage": 0.3444368376680196
+      },
+      {
+        "function": "<tokio::sync::batch_semaphore::Acquire as core::future::future::Future>::poll",
+        "user_cycles": 427441644,
+        "percentage": 0.3110136504195203
+      },
+      {
+        "function": "core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt>",
+        "user_cycles": 421383207,
+        "percentage": 0.30660543087971637
+      },
+      {
+        "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+        "user_cycles": 416309911,
+        "percentage": 0.30291401631876463
+      },
+      {
+        "function": "tokio::runtime::task::raw::poll::<voteboat_matched_framework::workload::client_loop::{closure#0}, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+        "user_cycles": 400431659,
+        "percentage": 0.29136073603800416
+      },
+      {
+        "function": "<tokio::sync::mpsc::chan::Rx<voteboat_matched_framework::voteboat_engine::Request, tokio::sync::mpsc::bounded::Semaphore>>::try_recv::{closure#0}",
+        "user_cycles": 384292785,
+        "percentage": 0.27961782285474707
+      }
+    ],
+    "completed_originals": 19988480,
+    "completed_requests": 4997120,
+    "profiled_diagnostic_originals_per_second": 1236961.3307133417,
+    "request_p99_ns": 15852268,
+    "lost_sample_count": 14,
+    "limitation": "DWARF caller unwinding is incomplete; no precise full-path or inline attribution claimed. Flat sampled leaf comes from perf -G. Unknown libc symbol addresses remain explicit."
+  },
+  "singleton": {
+    "denominator": "recorded cycles:u sample periods, whole process including warmup/setup/latency sorting/shutdown; not leader-only elapsed or CPU duration",
+    "recorded_user_cycle_weight": 74512718053,
+    "raw_sample_events": 18980,
+    "threads": {
+      "env": 30243,
+      "voteboat-matche": 39840024,
+      "matched-server": 69238550958,
+      "matched-client": 5234296828
+    },
+    "at_most_two_recorded_frames_cycle_percentage": 98.99354204007619,
+    "empty_chain_flat_leaf_fallback_cycle_percentage": 66.58309388702068,
+    "flat_vs_chain_leaf_mismatch_cycle_percentage": 0.0,
+    "self_functions": [
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fb7ad3]",
+        "user_cycles": 4001872689,
+        "percentage": 5.370724345545302
+      },
+      {
+        "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+        "user_cycles": 3977547536,
+        "percentage": 5.338078706471046
+      },
+      {
+        "function": "<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq",
+        "user_cycles": 2929175372,
+        "percentage": 3.9311079350460854
+      },
+      {
+        "function": "<tokio::sync::notify::NotifiedProject>::poll_notified",
+        "user_cycles": 2835600303,
+        "percentage": 3.805525254068804
+      },
+      {
+        "function": "<tokio::sync::mpsc::bounded::Sender<voteboat::raft::Message>>::try_send",
+        "user_cycles": 2346234054,
+        "percentage": 3.148769921842271
+      },
+      {
+        "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "user_cycles": 2118053996,
+        "percentage": 2.8425402419134054
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebc6f4]",
+        "user_cycles": 2091630473,
+        "percentage": 2.807078479558682
+      },
+      {
+        "function": "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+        "user_cycles": 1929161843,
+        "percentage": 2.589037003894839
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebe099]",
+        "user_cycles": 1857671003,
+        "percentage": 2.4930925237201267
+      },
+      {
+        "function": "<tokio::sync::task::atomic_waker::AtomicWaker>::register_by_ref",
+        "user_cycles": 1579170654,
+        "percentage": 2.119330357640094
+      },
+      {
+        "function": "<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal",
+        "user_cycles": 1505208412,
+        "percentage": 2.0200691255543295
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fb7bdd]",
+        "user_cycles": 1457010034,
+        "percentage": 1.9553843586321014
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fae49e]",
+        "user_cycles": 1415743405,
+        "percentage": 1.9000023646875943
+      },
+      {
+        "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "user_cycles": 1367433680,
+        "percentage": 1.8351681642150819
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebe0b3]",
+        "user_cycles": 1317527822,
+        "percentage": 1.7681918690214176
+      },
+      {
+        "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+        "user_cycles": 1316487381,
+        "percentage": 1.766795542290644
+      },
+      {
+        "function": "<voteboat::raft::Raft>::step",
+        "user_cycles": 1300593592,
+        "percentage": 1.7454652386655705
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fae4a5]",
+        "user_cycles": 1166615827,
+        "percentage": 1.565660007423431
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "user_cycles": 1162588935,
+        "percentage": 1.5602557058421416
+      },
+      {
+        "function": "malloc",
+        "user_cycles": 1083709580,
+        "percentage": 1.454395448612102
+      },
+      {
+        "function": "tokio::runtime::task::waker::clone_waker",
+        "user_cycles": 1026190144,
+        "percentage": 1.377201329939519
+      },
+      {
+        "function": "<tokio::sync::notify::NotifiedProject>::drop_notified",
+        "user_cycles": 970339226,
+        "percentage": 1.3022464504781712
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebc70d]",
+        "user_cycles": 964048942,
+        "percentage": 1.2938045573834571
+      },
+      {
+        "function": "realloc",
+        "user_cycles": 905602468,
+        "percentage": 1.2153663047908894
+      },
+      {
+        "function": "<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0}",
+        "user_cycles": 833581822,
+        "percentage": 1.1187107970039198
+      },
+      {
+        "function": "tokio::runtime::task::raw::poll::<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>>, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+        "user_cycles": 823916457,
+        "percentage": 1.1057393670889286
+      },
+      {
+        "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+        "user_cycles": 822171623,
+        "percentage": 1.103397707778153
+      },
+      {
+        "function": "<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>> as core::iter::traits::iterator::Iterator>::fold::<usize, core::iter::adapters::map::map_fold<(&voteboat::identity::NodeId, &voteboat::identity::StoreIdentity),",
+        "user_cycles": 766936881,
+        "percentage": 1.0292697690271975
+      },
+      {
+        "function": "<tokio::runtime::scheduler::multi_thread::worker::Core>::maintenance",
+        "user_cycles": 739073690,
+        "percentage": 0.9918758962386874
+      },
+      {
+        "function": "<voteboat::raft::Raft>::rollback_replicas",
+        "user_cycles": 731085405,
+        "percentage": 0.9811551961907868
+      }
+    ],
+    "inclusive_recorded_functions": [
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fb7ad3]",
+        "user_cycles": 4001872689,
+        "percentage": 5.370724345545302
+      },
+      {
+        "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+        "user_cycles": 3977599758,
+        "percentage": 5.338148791151037
+      },
+      {
+        "function": "<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq",
+        "user_cycles": 2929175372,
+        "percentage": 3.9311079350460854
+      },
+      {
+        "function": "<tokio::sync::notify::NotifiedProject>::poll_notified",
+        "user_cycles": 2835600303,
+        "percentage": 3.805525254068804
+      },
+      {
+        "function": "<tokio::sync::mpsc::bounded::Sender<voteboat::raft::Message>>::try_send",
+        "user_cycles": 2346234054,
+        "percentage": 3.148769921842271
+      },
+      {
+        "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "user_cycles": 2118053996,
+        "percentage": 2.8425402419134054
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebc6f4]",
+        "user_cycles": 2091630473,
+        "percentage": 2.807078479558682
+      },
+      {
+        "function": "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+        "user_cycles": 1929239897,
+        "percentage": 2.589141756482101
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebe099]",
+        "user_cycles": 1857671003,
+        "percentage": 2.4930925237201267
+      },
+      {
+        "function": "<tokio::sync::task::atomic_waker::AtomicWaker>::register_by_ref",
+        "user_cycles": 1579170654,
+        "percentage": 2.119330357640094
+      },
+      {
+        "function": "<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal",
+        "user_cycles": 1505208464,
+        "percentage": 2.0200691953410734
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fb7bdd]",
+        "user_cycles": 1457010034,
+        "percentage": 1.9553843586321014
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fae49e]",
+        "user_cycles": 1415743405,
+        "percentage": 1.9000023646875943
+      },
+      {
+        "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+        "user_cycles": 1367511734,
+        "percentage": 1.8352729168023443
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebe0b3]",
+        "user_cycles": 1317527822,
+        "percentage": 1.7681918690214176
+      },
+      {
+        "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+        "user_cycles": 1316487381,
+        "percentage": 1.766795542290644
+      },
+      {
+        "function": "<voteboat::raft::Raft>::step",
+        "user_cycles": 1300593592,
+        "percentage": 1.7454652386655705
+      },
+      {
+        "function": "clock_gettime",
+        "user_cycles": 1291172397,
+        "percentage": 1.7328214977765335
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07fae4a5]",
+        "user_cycles": 1166615827,
+        "percentage": 1.565660007423431
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "user_cycles": 1162588935,
+        "percentage": 1.5602557058421416
+      },
+      {
+        "function": "malloc",
+        "user_cycles": 1083709580,
+        "percentage": 1.454395448612102
+      },
+      {
+        "function": "realloc",
+        "user_cycles": 1076630012,
+        "percentage": 1.444894294735304
+      },
+      {
+        "function": "tokio::runtime::task::waker::clone_waker",
+        "user_cycles": 1026190144,
+        "percentage": 1.377201329939519
+      },
+      {
+        "function": "<tokio::sync::notify::NotifiedProject>::drop_notified",
+        "user_cycles": 970339226,
+        "percentage": 1.3022464504781712
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f7e07ebc70d]",
+        "user_cycles": 964048942,
+        "percentage": 1.2938045573834571
+      },
+      {
+        "function": "<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0}",
+        "user_cycles": 833581822,
+        "percentage": 1.1187107970039198
+      },
+      {
+        "function": "tokio::runtime::task::raw::poll::<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>>, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+        "user_cycles": 823916457,
+        "percentage": 1.1057393670889286
+      },
+      {
+        "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+        "user_cycles": 822171623,
+        "percentage": 1.103397707778153
+      },
+      {
+        "function": "<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>> as core::iter::traits::iterator::Iterator>::fold::<usize, core::iter::adapters::map::map_fold<(&voteboat::identity::NodeId, &voteboat::identity::StoreIdentity),",
+        "user_cycles": 766936881,
+        "percentage": 1.0292697690271975
+      },
+      {
+        "function": "<tokio::runtime::scheduler::multi_thread::worker::Core>::maintenance",
+        "user_cycles": 739123716,
+        "percentage": 0.9919430337707855
+      }
+    ],
+    "completed_originals": 1048576,
+    "completed_requests": 1048576,
+    "profiled_diagnostic_originals_per_second": 89166.72740243771,
+    "request_p99_ns": 23755,
+    "lost_sample_count": "see perf report/header; not inferred",
+    "limitation": "DWARF caller unwinding is incomplete; no precise full-path or inline attribution claimed. Flat sampled leaf comes from perf -G. Unknown libc symbol addresses remain explicit."
+  }
+}

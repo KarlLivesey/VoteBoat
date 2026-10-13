@@ -1,0 +1,27 @@
+{
+  "scope": "Read-only current-own-process dynamic IFUNC lookup; no other process attach or profiler recording",
+  "libc_sha256": "911cf3db7875760dc893b464ae89bddd4f697a377c710ffc13b84f67cbe1237b",
+  "libc_build_id": "141aba5f5a65e949c59aedb6fd3b267fcad54abf",
+  "resolved_own_process_offsets": {
+    "bcmp": "0x1ae480",
+    "memcmp": "0x1ae480",
+    "memmove": "0x1b7ac0",
+    "memcpy": "0x1b7ac0"
+  },
+  "profile_api_native_names_remain_unmodified": "fun_1ae480 and fun_1b7ac0 are synthetic FDE function-boundary labels; no semantic alias substituted in summaries",
+  "compiled_slice_eq_callsite": {
+    "instruction": "0x363f5f callq *0x3aae58",
+    "elf_relocation": "0x3aae58 R_X86_64_GLOB_DAT bcmp@GLIBC_2.2.5",
+    "raw_example": {
+      "timestamp": "98290.301125",
+      "tid": 2008478,
+      "sample_libc_offset": "0x1ae49e",
+      "argument_registers": {
+        "RDX": 0,
+        "RSI": 1,
+        "RDI": 1
+      }
+    },
+    "interpretation": "The selected saved sample executes the zero-length byte-comparison path. This example does not prove every libc sample has zero length."
+  }
+}

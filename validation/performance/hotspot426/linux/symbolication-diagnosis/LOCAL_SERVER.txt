@@ -1,0 +1,1 @@
+Samply0.13.1 localhost127.0.0.1:38471 started with --no-open and DEBUGINFOD_URLS empty; no browser opened. Initial sandbox bind failed Operation not permitted; escalated localhost bind succeeded. Direct JSON API only. Original live session15730.

@@ -1,0 +1,90 @@
+[
+  {
+    "args": [
+      "/usr/bin/python3",
+      "target/p9/hotspot426/mac/samply-collapse.py",
+      "target/p9/hotspot426/mac/recordings/bulk-profile.json.gz",
+      "target/p9/hotspot426/mac/recordings/bulk-profile.json.syms.json",
+      "target/p9/hotspot426/mac/bulk-analysis"
+    ],
+    "exit": 0
+  },
+  {
+    "args": [
+      "perl",
+      "target/p9/hotspot-tools/flamegraph/flamegraph.pl",
+      "--title",
+      "Mac426 bulk: observed thread CPU deltas",
+      "--subtitle",
+      "All application threads; launch-to-exit; representative inline/source chains",
+      "--countname",
+      "thread CPU microseconds",
+      "--width",
+      "1600",
+      "--hash",
+      "target/p9/hotspot426/mac/bulk-analysis/cpu.folded"
+    ],
+    "exit": 0
+  },
+  {
+    "args": [
+      "perl",
+      "target/p9/hotspot-tools/flamegraph/flamegraph.pl",
+      "--title",
+      "Mac426 bulk: wall sample weights including waits",
+      "--subtitle",
+      "All application threads; launch-to-exit; representative inline/source chains",
+      "--countname",
+      "wall sample weights",
+      "--width",
+      "1600",
+      "--hash",
+      "target/p9/hotspot426/mac/bulk-analysis/wall-sample-weights.folded"
+    ],
+    "exit": 0
+  },
+  {
+    "args": [
+      "/usr/bin/python3",
+      "target/p9/hotspot426/mac/samply-collapse.py",
+      "target/p9/hotspot426/mac/recordings/singleton/singleton-profile.json.gz",
+      "target/p9/hotspot426/mac/recordings/singleton/singleton-profile.json.syms.json",
+      "target/p9/hotspot426/mac/singleton-analysis"
+    ],
+    "exit": 0
+  },
+  {
+    "args": [
+      "perl",
+      "target/p9/hotspot-tools/flamegraph/flamegraph.pl",
+      "--title",
+      "Mac426 singleton: observed thread CPU deltas",
+      "--subtitle",
+      "All application threads; launch-to-exit; representative inline/source chains",
+      "--countname",
+      "thread CPU microseconds",
+      "--width",
+      "1600",
+      "--hash",
+      "target/p9/hotspot426/mac/singleton-analysis/cpu.folded"
+    ],
+    "exit": 0
+  },
+  {
+    "args": [
+      "perl",
+      "target/p9/hotspot-tools/flamegraph/flamegraph.pl",
+      "--title",
+      "Mac426 singleton: wall sample weights including waits",
+      "--subtitle",
+      "All application threads; launch-to-exit; representative inline/source chains",
+      "--countname",
+      "wall sample weights",
+      "--width",
+      "1600",
+      "--hash",
+      "target/p9/hotspot426/mac/singleton-analysis/wall-sample-weights.folded"
+    ],
+    "exit": 0
+  }
+]

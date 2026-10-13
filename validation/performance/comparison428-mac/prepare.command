@@ -1,0 +1,1 @@
+/usr/bin/python3 prepare-pair.py --baseline-config BASELINE_CONFIG.mac.json --baseline-job /tmp/voteboat-mac426-799f2cf-VRN5Xr --candidate-job /tmp/voteboat-mac428-a46da2b-xGe40Y --output CONFIG_PAIR.mac.json

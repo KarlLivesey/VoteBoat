@@ -1,0 +1,36 @@
+{
+  "scope": "Read-only tool availability and installed help/manual; no recording, install, permission change, build, test or benchmark",
+  "linux": {
+    "command_v_perf": "not found on PATH",
+    "perf_version_stderr": "zsh:1: command not found: perf",
+    "perf_event_paranoid": 2,
+    "host": "Linux x86_64",
+    "permissions_verified": false
+  },
+  "mac": {
+    "sample": "/usr/bin/sample",
+    "xcrun": "/usr/bin/xcrun",
+    "xctrace": "/Applications/Xcode-beta.app/Contents/Developer/usr/bin/xctrace",
+    "ssh": "karllivesey@192.168.192.76",
+    "commands": [
+      "command -v sample",
+      "command -v xcrun",
+      "xcrun --find xctrace",
+      "MANPAGER=cat man sample | col -b",
+      "xcrun xctrace help record"
+    ],
+    "permissions_verified": false,
+    "recording_started": false
+  },
+  "help_sha256": {
+    "mac-sample-man.txt": "6af34a8b3219e9687f2ba81dd604c831ba63704e5418f0f85343c432ebe709fb",
+    "mac-xctrace-record-help.txt": "5034932d6e8d6fd2ed50fca9194565b58728893a6ab6dfd00d954cf1a28aafad",
+    "mac-xctrace-record-help.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "future_diagnostics": {
+    "linux": "perf candidate unavailable through current PATH; no installation attempted",
+    "mac_sample": "Exact own benchmark PID; all-thread call stacks with default1ms suspension sampling; includes waiting stacks and perturbs process, so separate diagnostic run",
+    "mac_xctrace": "Time Profiler --launch own benchmark executable, bounded --time-limit, unique --output and recorded stdout; actual permissions/template viability not yet qualified"
+  },
+  "acceptance": "Profiling diagnosis must run separately from guarded unprofiled capacity measurements; no CPU/allocator hotspot claim established"
+}

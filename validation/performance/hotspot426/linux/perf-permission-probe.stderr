@@ -1,0 +1,2 @@
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.103 MB target/p9/profile426/linux/perf-permission-probe.data (6 samples) ]

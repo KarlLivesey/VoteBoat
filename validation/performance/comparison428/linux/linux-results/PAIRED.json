@@ -1,0 +1,248 @@
+[
+  {
+    "clients": 4096,
+    "batch": 4,
+    "trial": 1,
+    "variants": {
+      "baseline": {
+        "PUTS_per_second": 1293306.298361933,
+        "p99_ms": 14.929187
+      },
+      "candidate": {
+        "PUTS_per_second": 2176095.8255166016,
+        "p99_ms": 9.357436
+      },
+      "on": {
+        "PUTS_per_second": 2119325.9093395127,
+        "p99_ms": 9.289288
+      },
+      "openraft": {
+        "PUTS_per_second": 3294974.8754772027,
+        "p99_ms": 7.064837
+      }
+    },
+    "ratios": {
+      "off428_over_off426": {
+        "value": 1.6825834902936652,
+        "regression": false
+      },
+      "on428_over_off426": {
+        "value": 1.638688307652869,
+        "regression": false
+      },
+      "on428_over_off428": {
+        "value": 0.9739120329576425,
+        "regression": true
+      },
+      "off428_over_openraft": {
+        "value": 0.6604286550747805,
+        "regression": true
+      }
+    }
+  },
+  {
+    "clients": 4096,
+    "batch": 4,
+    "trial": 2,
+    "variants": {
+      "baseline": {
+        "PUTS_per_second": 1268666.622566809,
+        "p99_ms": 15.521
+      },
+      "candidate": {
+        "PUTS_per_second": 1976497.4112569108,
+        "p99_ms": 11.978161
+      },
+      "on": {
+        "PUTS_per_second": 1926464.339041027,
+        "p99_ms": 11.595252
+      },
+      "openraft": {
+        "PUTS_per_second": 3191202.59226291,
+        "p99_ms": 7.021036
+      }
+    },
+    "ratios": {
+      "off428_over_off426": {
+        "value": 1.5579328533590604,
+        "regression": false
+      },
+      "on428_over_off426": {
+        "value": 1.5184953279083986,
+        "regression": false
+      },
+      "on428_over_off428": {
+        "value": 0.9746859915267654,
+        "regression": true
+      },
+      "off428_over_openraft": {
+        "value": 0.6193581742660088,
+        "regression": true
+      }
+    }
+  },
+  {
+    "clients": 4096,
+    "batch": 4,
+    "trial": 3,
+    "variants": {
+      "baseline": {
+        "PUTS_per_second": 1237433.0974997706,
+        "p99_ms": 16.171672
+      },
+      "candidate": {
+        "PUTS_per_second": 1828616.222398291,
+        "p99_ms": 12.54142
+      },
+      "on": {
+        "PUTS_per_second": 1918952.4281280783,
+        "p99_ms": 10.76407
+      },
+      "openraft": {
+        "PUTS_per_second": 2893451.310591947,
+        "p99_ms": 8.700962
+      }
+    },
+    "ratios": {
+      "off428_over_off426": {
+        "value": 1.4777495656880393,
+        "regression": false
+      },
+      "on428_over_off426": {
+        "value": 1.5507524665416783,
+        "regression": false
+      },
+      "on428_over_off428": {
+        "value": 1.049401402340896,
+        "regression": false
+      },
+      "off428_over_openraft": {
+        "value": 0.6319844456011219,
+        "regression": true
+      }
+    }
+  },
+  {
+    "clients": 1,
+    "batch": 1,
+    "trial": 1,
+    "variants": {
+      "baseline": {
+        "PUTS_per_second": 101890.42011847257,
+        "p99_ms": 0.018405
+      },
+      "candidate": {
+        "PUTS_per_second": 107168.86518652296,
+        "p99_ms": 0.017663
+      },
+      "on": {
+        "PUTS_per_second": 79035.50583532461,
+        "p99_ms": 0.023033
+      },
+      "openraft": {
+        "PUTS_per_second": 18170.259435060074,
+        "p99_ms": 0.15923
+      }
+    },
+    "ratios": {
+      "off428_over_off426": {
+        "value": 1.0518051163388364,
+        "regression": false
+      },
+      "on428_over_off426": {
+        "value": 0.7756912351860605,
+        "regression": true
+      },
+      "on428_over_off428": {
+        "value": 0.7374857025663806,
+        "regression": true
+      },
+      "off428_over_openraft": {
+        "value": 5.898037150737504,
+        "regression": false
+      }
+    }
+  },
+  {
+    "clients": 1,
+    "batch": 1,
+    "trial": 2,
+    "variants": {
+      "baseline": {
+        "PUTS_per_second": 96056.60742688681,
+        "p99_ms": 0.019577
+      },
+      "candidate": {
+        "PUTS_per_second": 96169.490579976,
+        "p99_ms": 0.021831
+      },
+      "on": {
+        "PUTS_per_second": 87105.91590345104,
+        "p99_ms": 0.020329
+      },
+      "openraft": {
+        "PUTS_per_second": 21549.13786499116,
+        "p99_ms": 0.12261
+      }
+    },
+    "ratios": {
+      "off428_over_off426": {
+        "value": 1.00117517322455,
+        "regression": false
+      },
+      "on428_over_off426": {
+        "value": 0.9068185753879704,
+        "regression": true
+      },
+      "on428_over_off428": {
+        "value": 0.9057541573542228,
+        "regression": true
+      },
+      "off428_over_openraft": {
+        "value": 4.462799912576245,
+        "regression": false
+      }
+    }
+  },
+  {
+    "clients": 1,
+    "batch": 1,
+    "trial": 3,
+    "variants": {
+      "baseline": {
+        "PUTS_per_second": 100026.39973266459,
+        "p99_ms": 0.018876
+      },
+      "candidate": {
+        "PUTS_per_second": 101833.29776753626,
+        "p99_ms": 0.018715
+      },
+      "on": {
+        "PUTS_per_second": 85263.68847740105,
+        "p99_ms": 0.02133
+      },
+      "openraft": {
+        "PUTS_per_second": 20180.939850597304,
+        "p99_ms": 0.125306
+      }
+    },
+    "ratios": {
+      "off428_over_off426": {
+        "value": 1.0180642114451872,
+        "regression": false
+      },
+      "on428_over_off426": {
+        "value": 0.8524118503243236,
+        "regression": true
+      },
+      "on428_over_off428": {
+        "value": 0.8372869223192585,
+        "regression": true
+      },
+      "off428_over_openraft": {
+        "value": 5.0460136406641265,
+        "regression": false
+      }
+    }
+  }
+]

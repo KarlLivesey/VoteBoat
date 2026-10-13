@@ -1,0 +1,292 @@
+{
+  "bulk": {
+    "unit": "Saved Samply on-CPU sample weight(count), not perf cycles or CPU microseconds",
+    "denominator": 27479,
+    "self_native_top5": [
+      {
+        "function": "fun_1ae480",
+        "sample_weight": 17908,
+        "percent_of_selected_sample_weight": 65.16976600312967
+      },
+      {
+        "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+        "sample_weight": 959,
+        "percent_of_selected_sample_weight": 3.489937770661232
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+        "sample_weight": 957,
+        "percent_of_selected_sample_weight": 3.4826594854252337
+      },
+      {
+        "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+        "sample_weight": 738,
+        "percent_of_selected_sample_weight": 2.685687252083409
+      },
+      {
+        "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+        "sample_weight": 721,
+        "percent_of_selected_sample_weight": 2.6238218275774225
+      }
+    ],
+    "subsets": {
+      "entry_eq": {
+        "sample_weight": 17282,
+        "percent_of_all_selected_samples": 62.89166272426216
+      },
+      "compaction": {
+        "sample_weight": 11514,
+        "percent_of_all_selected_samples": 41.901088103642785
+      },
+      "matches_state": {
+        "sample_weight": 12026,
+        "percent_of_all_selected_samples": 43.76432912405837
+      },
+      "entry_eq_and_compaction": {
+        "sample_weight": 11105,
+        "percent_of_all_selected_samples": 40.41267877288111
+      },
+      "entry_eq_without_compaction": {
+        "sample_weight": 6177,
+        "percent_of_all_selected_samples": 22.478983951381053
+      },
+      "matches_state_and_compaction": {
+        "sample_weight": 11107,
+        "percent_of_all_selected_samples": 40.419957058117106
+      },
+      "matches_state_without_compaction": {
+        "sample_weight": 919,
+        "percent_of_all_selected_samples": 3.3443720659412643
+      },
+      "compaction_without_entry_eq": {
+        "sample_weight": 409,
+        "percent_of_all_selected_samples": 1.4884093307616726
+      },
+      "clone_related": {
+        "sample_weight": 1069,
+        "percent_of_all_selected_samples": 3.890243458641144
+      },
+      "allocation_deallocation_related": {
+        "sample_weight": 1147,
+        "percent_of_all_selected_samples": 4.174096582845082
+      },
+      "clone_without_compaction": {
+        "sample_weight": 1062,
+        "percent_of_all_selected_samples": 3.86476946031515
+      }
+    },
+    "entry_eq_without_compaction_top5": [
+      {
+        "root_to_eq_parent": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+          "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+        ],
+        "sample_weight": 3527,
+        "percent_of_all_selected_samples": 12.835256013683177,
+        "percent_of_entry_eq_without_compaction": 57.09891533106686
+      },
+      {
+        "root_to_eq_parent": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+          "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+        ],
+        "sample_weight": 1730,
+        "percent_of_all_selected_samples": 6.295716729138615,
+        "percent_of_entry_eq_without_compaction": 28.0071231989639
+      },
+      {
+        "root_to_eq_parent": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::snapshot",
+          "voteboat::snapshot::stage_snapshot_effect::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>",
+          "voteboat::snapshot::stage_snapshot_effect::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>::{closure#0}",
+          "voteboat::snapshot::verify_log::<voteboat_matched_framework::store::MemoryStore>",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::matches_state",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::matches_state::{closure#0}",
+          "<&voteboat::log::GroupLog as core::cmp::PartialEq>::eq"
+        ],
+        "sample_weight": 855,
+        "percent_of_all_selected_samples": 3.1114669383893157,
+        "percent_of_entry_eq_without_compaction": 13.841670713938806
+      },
+      {
+        "root_to_eq_parent": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::snapshot",
+          "voteboat::snapshot::finish_snapshot_install::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>",
+          "voteboat::snapshot::finish_snapshot_install::<voteboat_matched_framework::application::Noop, voteboat_matched_framework::store::MemoryStore, voteboat_matched_framework::snapshots::MemorySnapshots>::{closure#0}",
+          "voteboat::snapshot::verify_log::<voteboat_matched_framework::store::MemoryStore>",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::matches_state",
+          "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::matches_state::{closure#0}",
+          "<&voteboat::log::GroupLog as core::cmp::PartialEq>::eq"
+        ],
+        "sample_weight": 64,
+        "percent_of_all_selected_samples": 0.23290512755194875,
+        "percent_of_entry_eq_without_compaction": 1.0361016674761212
+      },
+      {
+        "root_to_eq_parent": [
+          "[no project caller symbol]"
+        ],
+        "sample_weight": 1,
+        "percent_of_all_selected_samples": 0.0036391426179991993,
+        "percent_of_entry_eq_without_compaction": 0.016189088554314394
+      }
+    ],
+    "matches_update_outside_compaction": {
+      "sample_weight": 5257,
+      "percent_of_selected_samples": 19.13097274282179
+    },
+    "limits": [
+      "Launch-to-exit scope includes warmup, verification, sorting and cleanup, not only throughput timer.",
+      "Inclusive shares overlap; native and inline representations are separate views and must not be added.",
+      "Sample-frequency normalization differs from raw perf-period cycle weighting; no cross-host CPU-rate comparison.",
+      "Unresolved frames are retained. Four lost chunks reported by perf for bulk remain a capture limitation.",
+      "Thread labels do not identify leader/follower ownership; no leader-specific CPU attribution.",
+      "No browser used. All symbol queries used localhost Samply API with current frozen ELF plus original packed DWP."
+    ]
+  },
+  "singleton": {
+    "unit": "Saved Samply on-CPU sample weight(count), not perf cycles or CPU microseconds",
+    "denominator": 18974,
+    "self_native_top5": [
+      {
+        "function": "fun_1b7ac0",
+        "sample_weight": 2615,
+        "percent_of_selected_sample_weight": 13.782017497628333
+      },
+      {
+        "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+        "sample_weight": 1002,
+        "percent_of_selected_sample_weight": 5.280910719932539
+      },
+      {
+        "function": "fun_be060",
+        "sample_weight": 841,
+        "percent_of_selected_sample_weight": 4.4323811531569515
+      },
+      {
+        "function": "fun_bc6d0",
+        "sample_weight": 758,
+        "percent_of_selected_sample_weight": 3.9949404448192265
+      },
+      {
+        "function": "<tokio::sync::notify::NotifiedProject>::poll_notified",
+        "sample_weight": 707,
+        "percent_of_selected_sample_weight": 3.726151575840624
+      }
+    ],
+    "subsets": {
+      "entry_eq": {
+        "sample_weight": 628,
+        "percent_of_all_selected_samples": 3.309792347422789
+      },
+      "compaction": {
+        "sample_weight": 455,
+        "percent_of_all_selected_samples": 2.39801834088753
+      },
+      "matches_state": {
+        "sample_weight": 438,
+        "percent_of_all_selected_samples": 2.3084220512279963
+      },
+      "entry_eq_and_compaction": {
+        "sample_weight": 438,
+        "percent_of_all_selected_samples": 2.3084220512279963
+      },
+      "entry_eq_without_compaction": {
+        "sample_weight": 190,
+        "percent_of_all_selected_samples": 1.0013702961947928
+      },
+      "matches_state_and_compaction": {
+        "sample_weight": 438,
+        "percent_of_all_selected_samples": 2.3084220512279963
+      },
+      "matches_state_without_compaction": {
+        "sample_weight": 0,
+        "percent_of_all_selected_samples": 0.0
+      },
+      "compaction_without_entry_eq": {
+        "sample_weight": 17,
+        "percent_of_all_selected_samples": 0.0895962896595341
+      },
+      "clone_related": {
+        "sample_weight": 628,
+        "percent_of_all_selected_samples": 3.309792347422789
+      },
+      "allocation_deallocation_related": {
+        "sample_weight": 1310,
+        "percent_of_all_selected_samples": 6.904184673764099
+      },
+      "clone_without_compaction": {
+        "sample_weight": 628,
+        "percent_of_all_selected_samples": 3.309792347422789
+      }
+    },
+    "entry_eq_without_compaction_top5": [
+      {
+        "root_to_eq_parent": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+          "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+        ],
+        "sample_weight": 131,
+        "percent_of_all_selected_samples": 0.6904184673764098,
+        "percent_of_entry_eq_without_compaction": 68.94736842105263
+      },
+      {
+        "root_to_eq_parent": [
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+          "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+          "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+          "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+          "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+        ],
+        "sample_weight": 59,
+        "percent_of_all_selected_samples": 0.31095182881838307,
+        "percent_of_entry_eq_without_compaction": 31.05263157894737
+      }
+    ],
+    "matches_update_outside_compaction": {
+      "sample_weight": 190,
+      "percent_of_selected_samples": 1.0013702961947928
+    },
+    "limits": [
+      "Launch-to-exit scope includes warmup, verification, sorting and cleanup, not only throughput timer.",
+      "Inclusive shares overlap; native and inline representations are separate views and must not be added.",
+      "Sample-frequency normalization differs from raw perf-period cycle weighting; no cross-host CPU-rate comparison.",
+      "Unresolved frames are retained. Four lost chunks reported by perf for bulk remain a capture limitation.",
+      "Thread labels do not identify leader/follower ownership; no leader-specific CPU attribution.",
+      "No browser used. All symbol queries used localhost Samply API with current frozen ELF plus original packed DWP."
+    ]
+  }
+}

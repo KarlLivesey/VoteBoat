@@ -1,0 +1,1 @@
+/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply record --save-only --rate 1000 --output /tmp/voteboat-samply0131-IDCfdm/owntrue-profile.json.gz -- /tmp/voteboat-samply0131-IDCfdm/owntrue 

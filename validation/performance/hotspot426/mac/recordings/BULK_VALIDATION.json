@@ -1,0 +1,126 @@
+{
+  "scope": "Separate Samply diagnostic, not unprofiled capacity/acceptance",
+  "original_runner_pid": 82462,
+  "terminal": 0,
+  "exact_controls": true,
+  "completed_originals": 19988480,
+  "completed_requests": 4997120,
+  "frontiers": [
+    19989505,
+    19989505,
+    19989505
+  ],
+  "profiled_puts_per_second": 3088075.7520866315,
+  "profiled_request_p99_ms": 6.037041,
+  "checkpoint_counts": [
+    3848,
+    3846,
+    3846
+  ],
+  "profile_threads": [
+    {
+      "name": "voteboat-matched-framework",
+      "samples": 135
+    },
+    {
+      "name": "matched-client",
+      "samples": 6479
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 5455
+    },
+    {
+      "name": "matched-server",
+      "samples": 4961
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 5579
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 4938
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    }
+  ],
+  "symbols_libraries": [
+    {
+      "name": "dyld",
+      "symbols": 1,
+      "with_inline_source_frames": 0
+    },
+    {
+      "name": "voteboat-matched-framework",
+      "symbols": 234,
+      "with_inline_source_frames": 232
+    },
+    {
+      "name": "libsystem_pthread.dylib",
+      "symbols": 11,
+      "with_inline_source_frames": 0
+    },
+    {
+      "name": "libsystem_kernel.dylib",
+      "symbols": 13,
+      "with_inline_source_frames": 0
+    },
+    {
+      "name": "libsystem_platform.dylib",
+      "symbols": 3,
+      "with_inline_source_frames": 0
+    }
+  ],
+  "raw_sha256": {
+    "bulk.stdout.json": "be2543c6e4aede193cf113625d8d3bc6bcc951e3d23f14aa25353990583dcd00",
+    "bulk-profile.json.gz": "ac818fdd9f7e34727c6eefe2538f3d1e2c80996b1a75dd8f9036b4d861781806",
+    "bulk-profile.json.syms.json": "c6e3e96b87a21e1bbea17dc3fc241034b1729ca57443ea270a10b133a8c8bda1"
+  }
+}

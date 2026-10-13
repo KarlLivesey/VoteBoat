@@ -1,0 +1,106 @@
+{
+  "sha": "41fee1f99f9276008b7cd112fca19dc3ea84ac32",
+  "node_id": "C_kwDOAC2nytoAKDQxZmVlMWY5OWY5Mjc2MDA4YjdjZDExMmZjYTE5ZGMzZWE4NGFjMzI",
+  "commit": {
+    "author": {
+      "name": "Brendan Gregg",
+      "email": "brendan.d.gregg@gmail.com",
+      "date": "2024-10-20T21:48:45Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com",
+      "date": "2024-10-20T21:48:45Z"
+    },
+    "message": "Merge pull request #264 from hassec/fix_search_null\n\nfix: search should not treat null object as 'null' search term",
+    "tree": {
+      "sha": "85d36fd0ea17a61bec8edb1bea8d76bfaa3bb280",
+      "url": "https://api.github.com/repos/brendangregg/FlameGraph/git/trees/85d36fd0ea17a61bec8edb1bea8d76bfaa3bb280"
+    },
+    "url": "https://api.github.com/repos/brendangregg/FlameGraph/git/commits/41fee1f99f9276008b7cd112fca19dc3ea84ac32",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJnFXq9CRC1aQ7uu5UhlAAAEzsQAEbBQWwVMFCqM5khXcigah9N\nx/DY/v2QIM+lETEkIAJMiA3Nt5bokB0it8xeu/KVviNxjOvJT9sZ1ziAB8V7vN5U\nJMO7u3j6sKKXyqHMPYj+6o6aBAARbc227WAapphl8DiSwDqAylDqiymIHS3bxkxS\nj96LmUO2tdiPIP8zL3xzB02VNDy/nNGYUSdoWkcpT0+sCcDepoVxIlgdus/X2Y/A\n0iZ3FpUPCVooin6JO2DdLUuLJAUDRkwllNDaOyboHPRyXcZ2nP0Doai7APFeAVhh\nSWflsWaslbymn2at+EMYiYt2Rr0N8VPCnk/mfFfb6P0P0Yux+8YeqZdDumFVHBxg\n9RXheT5rn9gQCEZJjJfx2z5sM8Up4Vvm7+rfVTS8AXYYUn7hUjjMEsPBikucE/68\nvSE2/wHLqczBRh3LEUGny0hv7lehSY7XaFs57Wa3EnIjD96eXSnJVa24ONQCkIic\neM3QOwNeFTQSGq57zgvK+KLB4t4Oc29PUUbVbDPj6Nj8saC/N0HmzvzcdNV3LB8w\n+CA1wAzkkkBZdzGfBh6GgGEg7Vr7Mfw7qANAbFcXnt2xj9E8XnLzQXllE/tNOzPU\nKVhMwn4V9onA9AgwQvf4JfR289kQTAcO8CEvGJVx9OCnYkhlM53ZPE5mFFNJ/Bhk\nNuQC3HusmctnPhyPSrcY\n=sDJT\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 85d36fd0ea17a61bec8edb1bea8d76bfaa3bb280\nparent cd9ee4c4449775a2f867acf31c84b7fe4b132ad5\nparent c62c88db5de7f768f5a7b105c0793298d1c9cd04\nauthor Brendan Gregg <brendan.d.gregg@gmail.com> 1729460925 +1100\ncommitter GitHub <noreply@github.com> 1729460925 +1100\n\nMerge pull request #264 from hassec/fix_search_null\n\nfix: search should not treat null object as 'null' search term",
+      "verified_at": "2024-11-06T16:20:41Z"
+    }
+  },
+  "url": "https://api.github.com/repos/brendangregg/FlameGraph/commits/41fee1f99f9276008b7cd112fca19dc3ea84ac32",
+  "html_url": "https://github.com/brendangregg/FlameGraph/commit/41fee1f99f9276008b7cd112fca19dc3ea84ac32",
+  "comments_url": "https://api.github.com/repos/brendangregg/FlameGraph/commits/41fee1f99f9276008b7cd112fca19dc3ea84ac32/comments",
+  "author": {
+    "login": "brendangregg",
+    "id": 1101211,
+    "node_id": "MDQ6VXNlcjExMDEyMTE=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/1101211?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/brendangregg",
+    "html_url": "https://github.com/brendangregg",
+    "followers_url": "https://api.github.com/users/brendangregg/followers",
+    "following_url": "https://api.github.com/users/brendangregg/following{/other_user}",
+    "gists_url": "https://api.github.com/users/brendangregg/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/brendangregg/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/brendangregg/subscriptions",
+    "organizations_url": "https://api.github.com/users/brendangregg/orgs",
+    "repos_url": "https://api.github.com/users/brendangregg/repos",
+    "events_url": "https://api.github.com/users/brendangregg/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/brendangregg/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 19864447,
+    "node_id": "MDQ6VXNlcjE5ODY0NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/19864447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "cd9ee4c4449775a2f867acf31c84b7fe4b132ad5",
+      "url": "https://api.github.com/repos/brendangregg/FlameGraph/commits/cd9ee4c4449775a2f867acf31c84b7fe4b132ad5",
+      "html_url": "https://github.com/brendangregg/FlameGraph/commit/cd9ee4c4449775a2f867acf31c84b7fe4b132ad5"
+    },
+    {
+      "sha": "c62c88db5de7f768f5a7b105c0793298d1c9cd04",
+      "url": "https://api.github.com/repos/brendangregg/FlameGraph/commits/c62c88db5de7f768f5a7b105c0793298d1c9cd04",
+      "html_url": "https://github.com/brendangregg/FlameGraph/commit/c62c88db5de7f768f5a7b105c0793298d1c9cd04"
+    }
+  ],
+  "stats": {
+    "total": 1,
+    "additions": 1,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "ad35f6f77516c7005e8d267127869d4d55bd899e",
+      "filename": "flamegraph.pl",
+      "status": "modified",
+      "additions": 1,
+      "deletions": 0,
+      "changes": 1,
+      "blob_url": "https://github.com/brendangregg/FlameGraph/blob/41fee1f99f9276008b7cd112fca19dc3ea84ac32/flamegraph.pl",
+      "raw_url": "https://github.com/brendangregg/FlameGraph/raw/41fee1f99f9276008b7cd112fca19dc3ea84ac32/flamegraph.pl",
+      "contents_url": "https://api.github.com/repos/brendangregg/FlameGraph/contents/flamegraph.pl?ref=41fee1f99f9276008b7cd112fca19dc3ea84ac32",
+      "patch": "@@ -1117,6 +1117,7 @@ sub flow {\n \t}\n \tfunction search(term) {\n \t\tif (term) currentSearchTerm = term;\n+\t\tif (currentSearchTerm === null) return;\n \n \t\tvar re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');\n \t\tvar el = document.getElementById(\"frames\").children;"
+    }
+  ]
+}

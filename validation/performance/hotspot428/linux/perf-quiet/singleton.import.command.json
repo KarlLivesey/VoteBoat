@@ -1,0 +1,11 @@
+[
+  "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+  "import",
+  "--save-only",
+  "--no-open",
+  "--symbol-dir",
+  "target/p9/matched428-linux/target-matched-release/release",
+  "--output",
+  "target/p9/profile428/linux/perf-quiet/singleton.json.gz",
+  "target/p9/profile428/linux/perf-quiet/singleton.data"
+]

@@ -1,0 +1,44 @@
+{
+  "inspection": "Read exported JSON, symbol tables and perf records directly. No browser is to be used unless the user explicitly instructs it.",
+  "scope": "Published426, separate CPU diagnostics; no428 improvement or sustained acceptance claim. Whole process, not leader-only.",
+  "linux": {
+    "raw_profile_json": "linux/perf-quiet/bulk.json.gz",
+    "summary_json": "linux/perf-quiet/CPU_SUMMARY.json",
+    "recorded_user_cycle_weight": 137435010786,
+    "comparison_instruction_self_percentage": 67.10524093137026,
+    "recorded_callsite": "LogEntry slice equality; unresolved libc PCs correspond to comparison instructions at DSO offsets0x1ae49e/0x1ae4a5",
+    "caller_unwinding_limit": "Superseded for raw JSON: complete physical stacks are present. perf/libdw text export applies wrong0x1000 load bias; direct Samply stackTable and proper symbolication are the analysis source.",
+    "at_most_two_frames_cycle_percentage": 99.4557921335164,
+    "kernel_settings": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    },
+    "raw_stack_validation_json": "linux/perf-quiet/JSON_STACK_VALIDATION.json",
+    "at_most_two_frames_cycle_percentage_note": "This old metric describes perf/libdw text export only, not raw Samply capture.",
+    "corrected_summary_json": "linux/bulk-symbolicated/SUMMARY.json",
+    "corrected_subsets_json": "linux/bulk-symbolicated/SUBSETS.json",
+    "corrected_sample_weight": 27479,
+    "corrected_shares": {
+      "entry_slice_eq_inclusive_percent": 62.89166272426216,
+      "checkpoint_entry_slice_eq_percent": 40.41267877288111,
+      "matches_state_inclusive_percent": 43.76432912405837,
+      "owned_next_suffix_eq_percent": 19.13097274282179
+    }
+  },
+  "mac": {
+    "raw_profile_json": "mac/recordings/bulk-profile.json.gz",
+    "symbol_sidecar_json": "mac/recordings/bulk-profile.json.syms.json",
+    "summary_json": "mac/READOUT.json",
+    "observed_thread_cpu_delta_us": 11713949,
+    "completion_map_insert_remove_self_percentage": 19.32140903123276,
+    "findings": [
+      "Bulk completion bookkeeping is a measured hotspot: concrete BTreeMap<OperationId, oneshot::Sender<OperationId>>::insert/remove physical functions account for19.32% of observed CPU-delta weight. Frozen799f2cf actor source binds this map to per-original replies at lines38/242/329. This is matched host-adapter bookkeeping, not a production consensus-engine CPU share.",
+      "Bulk _platform_memmove is7.53%, LogEntry::clone2.71%, SlicePartialEq<LogEntry>::equal_same_length1.03%. Native physical symbols identify these operations; they do not establish an allocator cause or prove all copies originate in one subsystem.",
+      "Singleton71.0% and bulk33.3% of observed deltas are attached to a currently sampled __psynch_cvwait stack. CPU occurred earlier in the sampling interval, possibly during short task bursts. This is NOT CPU consumed while blocked and cannot identify a precise blocking instruction hotspot.",
+      "Sidecar native-symbol resolution covers94.60%/97.22% of leaf CPU-delta weight. Inline/source chains are rendered, but0.13.1 coalesces them by native symbol start address, so individual inline line costs remain representative.",
+      "Use these graphs to select further bounded measurements; they are not sustained unprofiled floor acceptance, leader/follower CPU attribution or additive inclusive CPU phases."
+    ]
+  },
+  "next": "428 paired results and exported profile already identify reduced checkpoint scanning and remaining direct equality;429 targets exact empty-byte call avoidance. No browser or image analysis."
+}

@@ -1,0 +1,1859 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" width="1200" height="270" onload="init(evt)" viewBox="0 0 1200 270" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
+<!-- NOTES:  -->
+<defs>
+	<linearGradient id="background" y1="0" y2="1" x1="0" x2="0" >
+		<stop stop-color="#eeeeee" offset="5%" />
+		<stop stop-color="#eeeeb0" offset="95%" />
+	</linearGradient>
+</defs>
+<style type="text/css">
+	text { font-family:Verdana; font-size:12px; fill:rgb(0,0,0); }
+	#search, #ignorecase { opacity:0.1; cursor:pointer; }
+	#search:hover, #search.show, #ignorecase:hover, #ignorecase.show { opacity:1; }
+	#subtitle { text-anchor:middle; font-color:rgb(160,160,160); }
+	#title { text-anchor:middle; font-size:17px}
+	#unzoom { cursor:pointer; }
+	#frames > *:hover { stroke:black; stroke-width:0.5; cursor:pointer; }
+	.hide { display:none; }
+	.parent { opacity:0.5; }
+</style>
+<script type="text/ecmascript">
+<![CDATA[
+	"use strict";
+	var details, searchbtn, unzoombtn, matchedtxt, svg, searching, currentSearchTerm, ignorecase, ignorecaseBtn;
+	function init(evt) {
+		details = document.getElementById("details").firstChild;
+		searchbtn = document.getElementById("search");
+		ignorecaseBtn = document.getElementById("ignorecase");
+		unzoombtn = document.getElementById("unzoom");
+		matchedtxt = document.getElementById("matched");
+		svg = document.getElementsByTagName("svg")[0];
+		searching = 0;
+		currentSearchTerm = null;
+
+		// use GET parameters to restore a flamegraphs state.
+		var params = get_params();
+		if (params.x && params.y)
+			zoom(find_group(document.querySelector('[x="' + params.x + '"][y="' + params.y + '"]')));
+                if (params.s) search(params.s);
+	}
+
+	// event listeners
+	window.addEventListener("click", function(e) {
+		var target = find_group(e.target);
+		if (target) {
+			if (target.nodeName == "a") {
+				if (e.ctrlKey === false) return;
+				e.preventDefault();
+			}
+			if (target.classList.contains("parent")) unzoom(true);
+			zoom(target);
+			if (!document.querySelector('.parent')) {
+				// we have basically done a clearzoom so clear the url
+				var params = get_params();
+				if (params.x) delete params.x;
+				if (params.y) delete params.y;
+				history.replaceState(null, null, parse_params(params));
+				unzoombtn.classList.add("hide");
+				return;
+			}
+
+			// set parameters for zoom state
+			var el = target.querySelector("rect");
+			if (el && el.attributes && el.attributes.y && el.attributes._orig_x) {
+				var params = get_params()
+				params.x = el.attributes._orig_x.value;
+				params.y = el.attributes.y.value;
+				history.replaceState(null, null, parse_params(params));
+			}
+		}
+		else if (e.target.id == "unzoom") clearzoom();
+		else if (e.target.id == "search") search_prompt();
+		else if (e.target.id == "ignorecase") toggle_ignorecase();
+	}, false)
+
+	// mouse-over for info
+	// show
+	window.addEventListener("mouseover", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = "Function: " + g_to_text(target);
+	}, false)
+
+	// clear
+	window.addEventListener("mouseout", function(e) {
+		var target = find_group(e.target);
+		if (target) details.nodeValue = ' ';
+	}, false)
+
+	// ctrl-F for search
+	// ctrl-I to toggle case-sensitive search
+	window.addEventListener("keydown",function (e) {
+		if (e.keyCode === 114 || (e.ctrlKey && e.keyCode === 70)) {
+			e.preventDefault();
+			search_prompt();
+		}
+		else if (e.ctrlKey && e.keyCode === 73) {
+			e.preventDefault();
+			toggle_ignorecase();
+		}
+	}, false)
+
+	// functions
+	function get_params() {
+		var params = {};
+		var paramsarr = window.location.search.substr(1).split('&');
+		for (var i = 0; i < paramsarr.length; ++i) {
+			var tmp = paramsarr[i].split("=");
+			if (!tmp[0] || !tmp[1]) continue;
+			params[tmp[0]]  = decodeURIComponent(tmp[1]);
+		}
+		return params;
+	}
+	function parse_params(params) {
+		var uri = "?";
+		for (var key in params) {
+			uri += key + '=' + encodeURIComponent(params[key]) + '&';
+		}
+		if (uri.slice(-1) == "&")
+			uri = uri.substring(0, uri.length - 1);
+		if (uri == '?')
+			uri = window.location.href.split('?')[0];
+		return uri;
+	}
+	function find_child(node, selector) {
+		var children = node.querySelectorAll(selector);
+		if (children.length) return children[0];
+	}
+	function find_group(node) {
+		var parent = node.parentElement;
+		if (!parent) return;
+		if (parent.id == "frames") return node;
+		return find_group(parent);
+	}
+	function orig_save(e, attr, val) {
+		if (e.attributes["_orig_" + attr] != undefined) return;
+		if (e.attributes[attr] == undefined) return;
+		if (val == undefined) val = e.attributes[attr].value;
+		e.setAttribute("_orig_" + attr, val);
+	}
+	function orig_load(e, attr) {
+		if (e.attributes["_orig_"+attr] == undefined) return;
+		e.attributes[attr].value = e.attributes["_orig_" + attr].value;
+		e.removeAttribute("_orig_"+attr);
+	}
+	function g_to_text(e) {
+		var text = find_child(e, "title").firstChild.nodeValue;
+		return (text)
+	}
+	function g_to_func(e) {
+		var func = g_to_text(e);
+		// if there's any manipulation we want to do to the function
+		// name before it's searched, do it here before returning.
+		return (func);
+	}
+	function update_text(e) {
+		var r = find_child(e, "rect");
+		var t = find_child(e, "text");
+		var w = parseFloat(r.attributes.width.value) -3;
+		var txt = find_child(e, "title").textContent.replace(/\([^(]*\)$/,"");
+		t.attributes.x.value = parseFloat(r.attributes.x.value) + 3;
+
+		// Smaller than this size won't fit anything
+		if (w < 2 * 12 * 0.59) {
+			t.textContent = "";
+			return;
+		}
+
+		t.textContent = txt;
+		var sl = t.getSubStringLength(0, txt.length);
+		// check if only whitespace or if we can fit the entire string into width w
+		if (/^ *$/.test(txt) || sl < w)
+			return;
+
+		// this isn't perfect, but gives a good starting point
+		// and avoids calling getSubStringLength too often
+		var start = Math.floor((w/sl) * txt.length);
+		for (var x = start; x > 0; x = x-2) {
+			if (t.getSubStringLength(0, x + 2) <= w) {
+				t.textContent = txt.substring(0, x) + "..";
+				return;
+			}
+		}
+		t.textContent = "";
+	}
+
+	// zoom
+	function zoom_reset(e) {
+		if (e.attributes != undefined) {
+			orig_load(e, "x");
+			orig_load(e, "width");
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_reset(c[i]);
+		}
+	}
+	function zoom_child(e, x, ratio) {
+		if (e.attributes != undefined) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = (parseFloat(e.attributes.x.value) - x - 10) * ratio + 10;
+				if (e.tagName == "text")
+					e.attributes.x.value = find_child(e.parentNode, "rect[x]").attributes.x.value + 3;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseFloat(e.attributes.width.value) * ratio;
+			}
+		}
+
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_child(c[i], x - 10, ratio);
+		}
+	}
+	function zoom_parent(e) {
+		if (e.attributes) {
+			if (e.attributes.x != undefined) {
+				orig_save(e, "x");
+				e.attributes.x.value = 10;
+			}
+			if (e.attributes.width != undefined) {
+				orig_save(e, "width");
+				e.attributes.width.value = parseInt(svg.width.baseVal.value) - (10 * 2);
+			}
+		}
+		if (e.childNodes == undefined) return;
+		for (var i = 0, c = e.childNodes; i < c.length; i++) {
+			zoom_parent(c[i]);
+		}
+	}
+	function zoom(node) {
+		var attr = find_child(node, "rect").attributes;
+		var width = parseFloat(attr.width.value);
+		var xmin = parseFloat(attr.x.value);
+		var xmax = parseFloat(xmin + width);
+		var ymin = parseFloat(attr.y.value);
+		var ratio = (svg.width.baseVal.value - 2 * 10) / width;
+
+		// XXX: Workaround for JavaScript float issues (fix me)
+		var fudge = 0.0001;
+
+		unzoombtn.classList.remove("hide");
+
+		var el = document.getElementById("frames").children;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var a = find_child(e, "rect").attributes;
+			var ex = parseFloat(a.x.value);
+			var ew = parseFloat(a.width.value);
+			var upstack;
+			// Is it an ancestor
+			if (0 == 0) {
+				upstack = parseFloat(a.y.value) > ymin;
+			} else {
+				upstack = parseFloat(a.y.value) < ymin;
+			}
+			if (upstack) {
+				// Direct ancestor
+				if (ex <= xmin && (ex+ew+fudge) >= xmax) {
+					e.classList.add("parent");
+					zoom_parent(e);
+					update_text(e);
+				}
+				// not in current path
+				else
+					e.classList.add("hide");
+			}
+			// Children maybe
+			else {
+				// no common path
+				if (ex < xmin || ex + fudge >= xmax) {
+					e.classList.add("hide");
+				}
+				else {
+					zoom_child(e, xmin, ratio);
+					update_text(e);
+				}
+			}
+		}
+		search();
+	}
+	function unzoom(dont_update_text) {
+		unzoombtn.classList.add("hide");
+		var el = document.getElementById("frames").children;
+		for(var i = 0; i < el.length; i++) {
+			el[i].classList.remove("parent");
+			el[i].classList.remove("hide");
+			zoom_reset(el[i]);
+			if(!dont_update_text) update_text(el[i]);
+		}
+		search();
+	}
+	function clearzoom() {
+		unzoom();
+
+		// remove zoom state
+		var params = get_params();
+		if (params.x) delete params.x;
+		if (params.y) delete params.y;
+		history.replaceState(null, null, parse_params(params));
+	}
+
+	// search
+	function toggle_ignorecase() {
+		ignorecase = !ignorecase;
+		if (ignorecase) {
+			ignorecaseBtn.classList.add("show");
+		} else {
+			ignorecaseBtn.classList.remove("show");
+		}
+		reset_search();
+		search();
+	}
+	function reset_search() {
+		var el = document.querySelectorAll("#frames rect");
+		for (var i = 0; i < el.length; i++) {
+			orig_load(el[i], "fill")
+		}
+		var params = get_params();
+		delete params.s;
+		history.replaceState(null, null, parse_params(params));
+	}
+	function search_prompt() {
+		if (!searching) {
+			var term = prompt("Enter a search term (regexp " +
+			    "allowed, eg: ^ext4_)"
+			    + (ignorecase ? ", ignoring case" : "")
+			    + "\nPress Ctrl-i to toggle case sensitivity", "");
+			if (term != null) search(term);
+		} else {
+			reset_search();
+			searching = 0;
+			currentSearchTerm = null;
+			searchbtn.classList.remove("show");
+			searchbtn.firstChild.nodeValue = "Search"
+			matchedtxt.classList.add("hide");
+			matchedtxt.firstChild.nodeValue = ""
+		}
+	}
+	function search(term) {
+		if (term) currentSearchTerm = term;
+		if (currentSearchTerm === null) return;
+
+		var re = new RegExp(currentSearchTerm, ignorecase ? 'i' : '');
+		var el = document.getElementById("frames").children;
+		var matches = new Object();
+		var maxwidth = 0;
+		for (var i = 0; i < el.length; i++) {
+			var e = el[i];
+			var func = g_to_func(e);
+			var rect = find_child(e, "rect");
+			if (func == null || rect == null)
+				continue;
+
+			// Save max width. Only works as we have a root frame
+			var w = parseFloat(rect.attributes.width.value);
+			if (w > maxwidth)
+				maxwidth = w;
+
+			if (func.match(re)) {
+				// highlight
+				var x = parseFloat(rect.attributes.x.value);
+				orig_save(rect, "fill");
+				rect.attributes.fill.value = "rgb(230,0,230)";
+
+				// remember matches
+				if (matches[x] == undefined) {
+					matches[x] = w;
+				} else {
+					if (w > matches[x]) {
+						// overwrite with parent
+						matches[x] = w;
+					}
+				}
+				searching = 1;
+			}
+		}
+		if (!searching)
+			return;
+		var params = get_params();
+		params.s = currentSearchTerm;
+		history.replaceState(null, null, parse_params(params));
+
+		searchbtn.classList.add("show");
+		searchbtn.firstChild.nodeValue = "Reset Search";
+
+		// calculate percent matched, excluding vertical overlap
+		var count = 0;
+		var lastx = -1;
+		var lastw = 0;
+		var keys = Array();
+		for (k in matches) {
+			if (matches.hasOwnProperty(k))
+				keys.push(k);
+		}
+		// sort the matched frames by their x location
+		// ascending, then width descending
+		keys.sort(function(a, b){
+			return a - b;
+		});
+		// Step through frames saving only the biggest bottom-up frames
+		// thanks to the sort order. This relies on the tree property
+		// where children are always smaller than their parents.
+		var fudge = 0.0001;	// JavaScript floating point
+		for (var k in keys) {
+			var x = parseFloat(keys[k]);
+			var w = matches[keys[k]];
+			if (x >= lastx + lastw - fudge) {
+				count += w;
+				lastx = x;
+				lastw = w;
+			}
+		}
+		// display matched percent
+		matchedtxt.classList.remove("hide");
+		var pct = 100 * count / maxwidth;
+		if (pct != 100) pct = pct.toFixed(1)
+		matchedtxt.firstChild.nodeValue = "Matched: " + pct + "%";
+	}
+]]>
+</script>
+<rect x="0.0" y="0" width="1200.0" height="270.0" fill="url(#background)"  />
+<text id="title" x="600.00" y="24" >Linux 426 singleton: sampled user CPU cycles</text>
+<text id="subtitle" x="600.00" y="48" >Whole process. Caller unwinding incomplete; unknown symbols remain explicit.</text>
+<text id="details" x="10.00" y="253" > </text>
+<text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
+<text id="search" x="1090.00" y="24" >Search</text>
+<text id="ignorecase" x="1174.00" y="24" >ic</text>
+<text id="matched" x="1090.00" y="253" > </text>
+<g id="frames">
+<g >
+<title>&lt;tokio::sync::oneshot::Sender&lt;voteboat::identity::OperationId&gt;&gt;::send (356,574,331 sampled user CPU cycles, 0.48%)</title><rect x="368.4" y="157" width="5.7" height="15.0" fill="rgb(251,190,51)" rx="2" ry="2" />
+<text  x="371.43" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::raw_vec::RawVec&lt;voteboat::raft::Effect&gt;&gt;::grow_one (17,642,403 sampled user CPU cycles, 0.02%)</title><rect x="111.4" y="157" width="0.3" height="15.0" fill="rgb(251,184,50)" rx="2" ry="2" />
+<text  x="114.42" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe761] (36,427,179 sampled user CPU cycles, 0.05%)</title><rect x="1033.4" y="141" width="0.6" height="15.0" fill="rgb(240,180,38)" rx="2" ry="2" />
+<text  x="1036.39" y="151.5" ></text>
+</g>
+<g >
+<title>__floattidf (59,532,730 sampled user CPU cycles, 0.08%)</title><rect x="966.5" y="157" width="0.9" height="15.0" fill="rgb(244,135,43)" rx="2" ry="2" />
+<text  x="969.47" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae480] (16,940,432 sampled user CPU cycles, 0.02%)</title><rect x="757.2" y="157" width="0.3" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="760.22" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c28] (11,269,184 sampled user CPU cycles, 0.02%)</title><rect x="915.0" y="157" width="0.2" height="15.0" fill="rgb(247,180,46)" rx="2" ry="2" />
+<text  x="918.04" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae757] (18,849,167 sampled user CPU cycles, 0.03%)</title><rect x="800.1" y="157" width="0.3" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="803.07" y="167.5" ></text>
+</g>
+<g >
+<title>voteboat::log::validate_ballot_fields (145,266,643 sampled user CPU cycles, 0.19%)</title><rect x="1148.6" y="157" width="2.3" height="15.0" fill="rgb(245,135,44)" rx="2" ry="2" />
+<text  x="1151.61" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c2f] (7,214,155 sampled user CPU cycles, 0.01%)</title><rect x="915.2" y="157" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="918.22" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::task::atomic_waker::AtomicWaker&gt;::register_by_ref (1,579,031,465 sampled user CPU cycles, 2.12%)</title><rect x="374.1" y="157" width="25.0" height="15.0" fill="rgb(245,190,44)" rx="2" ry="2" />
+<text  x="377.08" y="167.5" >&lt;..</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cad] (82,808,360 sampled user CPU cycles, 0.11%)</title><rect x="937.4" y="157" width="1.3" height="15.0" fill="rgb(247,180,47)" rx="2" ry="2" />
+<text  x="940.39" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c0c] (12,724,588 sampled user CPU cycles, 0.02%)</title><rect x="914.4" y="157" width="0.2" height="15.0" fill="rgb(249,180,49)" rx="2" ry="2" />
+<text  x="917.38" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4cdee0] (13,102,273 sampled user CPU cycles, 0.02%)</title><rect x="1037.7" y="109" width="0.3" height="15.0" fill="rgb(241,180,40)" rx="2" ry="2" />
+<text  x="1040.74" y="119.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::complete (561,112,647 sampled user CPU cycles, 0.75%)</title><rect x="531.6" y="157" width="8.9" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="534.62" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb400ef6] (34,261,146 sampled user CPU cycles, 0.05%)</title><rect x="1037.2" y="109" width="0.5" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="1040.20" y="119.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::Driver&gt;::park_internal (48,433,378 sampled user CPU cycles, 0.07%)</title><rect x="236.0" y="157" width="0.8" height="15.0" fill="rgb(229,190,27)" rx="2" ry="2" />
+<text  x="239.02" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::owned::OwnedLogState&gt;::apply_batch (1,367,433,680 sampled user CPU cycles, 1.84%)</title><rect x="420.9" y="157" width="21.7" height="15.0" fill="rgb(242,179,41)" rx="2" ry="2" />
+<text  x="423.93" y="167.5" >&lt;..</text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb20008f] (6,538,639 sampled user CPU cycles, 0.01%)</title><rect x="1035.4" y="141" width="0.1" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="1038.35" y="151.5" ></text>
+</g>
+<g >
+<title>voteboat::log::transition::compact::retained_after (23,179,789 sampled user CPU cycles, 0.03%)</title><rect x="1141.7" y="157" width="0.4" height="15.0" fill="rgb(240,135,38)" rx="2" ry="2" />
+<text  x="1144.69" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::authenticated_message_source (277,044,342 sampled user CPU cycles, 0.37%)</title><rect x="523.1" y="157" width="4.4" height="15.0" fill="rgb(249,179,48)" rx="2" ry="2" />
+<text  x="526.12" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::raw_vec::RawVecInner&gt;::finish_grow (322,114,735 sampled user CPU cycles, 0.43%)</title><rect x="111.9" y="157" width="5.1" height="15.0" fill="rgb(234,184,31)" rx="2" ry="2" />
+<text  x="114.87" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::pal::unix::time::Timespec&gt;::now (70,882,850 sampled user CPU cycles, 0.10%)</title><rect x="162.6" y="157" width="1.1" height="15.0" fill="rgb(236,179,35)" rx="2" ry="2" />
+<text  x="165.59" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::receive_append (564,192,865 sampled user CPU cycles, 0.76%)</title><rect x="556.8" y="157" width="8.9" height="15.0" fill="rgb(251,179,51)" rx="2" ry="2" />
+<text  x="559.78" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f250c] (18,624,113 sampled user CPU cycles, 0.02%)</title><rect x="1039.0" y="77" width="0.3" height="15.0" fill="rgb(249,180,49)" rx="2" ry="2" />
+<text  x="1042.04" y="87.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::vec::Vec&lt;voteboat::raft::Effect&gt; as alloc::vec::spec_extend::SpecExtend&lt;voteboat::raft::Effect, alloc::vec::into_iter::IntoIter&lt;voteboat::raft::Effect&gt;&gt;&gt;::spec_extend (272,998,530 sampled user CPU cycles, 0.37%)</title><rect x="118.5" y="157" width="4.4" height="15.0" fill="rgb(251,184,51)" rx="2" ry="2" />
+<text  x="121.54" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cdb] (73,299,279 sampled user CPU cycles, 0.10%)</title><rect x="954.5" y="157" width="1.1" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="957.47" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::finish_step (143,513,524 sampled user CPU cycles, 0.19%)</title><rect x="540.5" y="157" width="2.3" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="543.51" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7aee] (20,637,742 sampled user CPU cycles, 0.03%)</title><rect x="875.2" y="157" width="0.3" height="15.0" fill="rgb(244,180,42)" rx="2" ry="2" />
+<text  x="878.16" y="167.5" ></text>
+</g>
+<g >
+<title>core::slice::sort::unstable::quicksort::quicksort::&lt;u64, &lt;u64 as core::cmp::PartialOrd&gt;::lt&gt; (33,812,808 sampled user CPU cycles, 0.05%)</title><rect x="1189.5" y="157" width="0.5" height="15.0" fill="rgb(244,133,43)" rx="2" ry="2" />
+<text  x="1192.46" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d94] (9,330,176 sampled user CPU cycles, 0.01%)</title><rect x="966.2" y="157" width="0.1" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="969.18" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd17a] (18,924,064 sampled user CPU cycles, 0.03%)</title><rect x="738.1" y="141" width="0.3" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="741.12" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::peers (91,632,092 sampled user CPU cycles, 0.12%)</title><rect x="545.5" y="157" width="1.5" height="15.0" fill="rgb(238,179,36)" rx="2" ry="2" />
+<text  x="548.53" y="167.5" ></text>
+</g>
+<g >
+<title>voteboat::quorum::frontier (293,555,014 sampled user CPU cycles, 0.39%)</title><rect x="1154.2" y="157" width="4.6" height="15.0" fill="rgb(239,135,38)" rx="2" ry="2" />
+<text  x="1157.17" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::handle::Handle&gt;::process_at_time (253,311,976 sampled user CPU cycles, 0.34%)</title><rect x="236.8" y="157" width="4.0" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="239.79" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a146] (14,629,787 sampled user CPU cycles, 0.02%)</title><rect x="707.1" y="109" width="0.2" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="710.10" y="119.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::persist (148,203,176 sampled user CPU cycles, 0.20%)</title><rect x="547.0" y="157" width="2.3" height="15.0" fill="rgb(232,179,30)" rx="2" ry="2" />
+<text  x="549.98" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::worker::Core&gt;::maintenance (153,771,978 sampled user CPU cycles, 0.21%)</title><rect x="26.9" y="157" width="2.4" height="15.0" fill="rgb(251,190,51)" rx="2" ry="2" />
+<text  x="29.86" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::raw_vec::RawVec&lt;voteboat::identity::OperationId&gt;&gt;::grow_one (21,881,458 sampled user CPU cycles, 0.03%)</title><rect x="110.8" y="157" width="0.3" height="15.0" fill="rgb(251,184,50)" rx="2" ry="2" />
+<text  x="113.76" y="167.5" ></text>
+</g>
+<g >
+<title>core::slice::sort::shared::smallsort::insertion_sort_shift_left::&lt;u64, &lt;[u64]&gt;::sort_unstable_by&lt;voteboat::quorum::frontier::{closure#1}&gt;::{closure#0}&gt; (99,654,540 sampled user CPU cycles, 0.13%)</title><rect x="997.6" y="157" width="1.6" height="15.0" fill="rgb(247,133,46)" rx="2" ry="2" />
+<text  x="1000.64" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe089] (37,971,214 sampled user CPU cycles, 0.05%)</title><rect x="708.5" y="157" width="0.6" height="15.0" fill="rgb(241,180,40)" rx="2" ry="2" />
+<text  x="711.49" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe664] (65,997,506 sampled user CPU cycles, 0.09%)</title><rect x="1032.2" y="141" width="1.1" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="1035.22" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ba8] (114,938,956 sampled user CPU cycles, 0.15%)</title><rect x="880.4" y="157" width="1.9" height="15.0" fill="rgb(247,180,47)" rx="2" ry="2" />
+<text  x="883.45" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::sync::condvar::futex::Condvar&gt;::wait_optional_timeout (103,807,759 sampled user CPU cycles, 0.14%)</title><rect x="165.5" y="157" width="1.6" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="168.45" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::receive_inner (136,594,131 sampled user CPU cycles, 0.18%)</title><rect x="572.6" y="157" width="2.2" height="15.0" fill="rgb(244,179,43)" rx="2" ry="2" />
+<text  x="575.60" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd175] (6,489,812 sampled user CPU cycles, 0.01%)</title><rect x="738.0" y="141" width="0.1" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="741.01" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c53] (23,259,218 sampled user CPU cycles, 0.03%)</title><rect x="925.9" y="157" width="0.4" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="928.89" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::snapshot::SnapshotRef as core::cmp::PartialEq&gt;::eq (73,818,912 sampled user CPU cycles, 0.10%)</title><rect x="614.0" y="157" width="1.2" height="15.0" fill="rgb(240,179,39)" rx="2" ry="2" />
+<text  x="616.98" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::voteboat_engine::stats::Stats&gt;::record_proposals (157,586,061 sampled user CPU cycles, 0.21%)</title><rect x="654.9" y="157" width="2.5" height="15.0" fill="rgb(235,179,33)" rx="2" ry="2" />
+<text  x="657.90" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;alloc::vec::Vec&lt;voteboat::log::LogTicket&gt;&gt; (98,289,453 sampled user CPU cycles, 0.13%)</title><rect x="991.7" y="157" width="1.5" height="15.0" fill="rgb(238,133,36)" rx="2" ry="2" />
+<text  x="994.65" y="167.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::clone_waker (931,172,960 sampled user CPU cycles, 1.25%)</title><rect x="1108.3" y="157" width="14.7" height="15.0" fill="rgb(238,141,36)" rx="2" ry="2" />
+<text  x="1111.28" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f1ff6] (42,937,191 sampled user CPU cycles, 0.06%)</title><rect x="73.8" y="109" width="0.7" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="76.83" y="119.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cfd] (48,937,364 sampled user CPU cycles, 0.07%)</title><rect x="959.2" y="157" width="0.8" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="962.18" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::pal::unix::time::Timespec&gt;::sub_timespec (110,005,157 sampled user CPU cycles, 0.15%)</title><rect x="163.7" y="157" width="1.8" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="166.71" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc93b] (7,358,538 sampled user CPU cycles, 0.01%)</title><rect x="735.8" y="141" width="0.1" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="738.81" y="151.5" ></text>
+</g>
+<g >
+<title>cfree (37,847,700 sampled user CPU cycles, 0.05%)</title><rect x="62.4" y="157" width="0.6" height="15.0" fill="rgb(246,123,46)" rx="2" ry="2" />
+<text  x="65.35" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe0b3] (229,136,184 sampled user CPU cycles, 0.31%)</title><rect x="57.6" y="157" width="3.6" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="60.60" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::worker::Context&gt;::run_task (25,017,490 sampled user CPU cycles, 0.03%)</title><rect x="26.5" y="157" width="0.4" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="29.46" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2aea] (13,236,291 sampled user CPU cycles, 0.02%)</title><rect x="1042.0" y="93" width="0.2" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="1045.04" y="103.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;::schedule_task (42,604,277 sampled user CPU cycles, 0.06%)</title><rect x="180.5" y="157" width="0.7" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="183.49" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb20012f] (96,450,547 sampled user CPU cycles, 0.13%)</title><rect x="73.2" y="141" width="1.5" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="76.16" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::stats::Stats&gt;::end_processing_scheduled_tasks (75,742,842 sampled user CPU cycles, 0.10%)</title><rect x="22.5" y="157" width="1.2" height="15.0" fill="rgb(232,190,30)" rx="2" ry="2" />
+<text  x="25.51" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe070] (10,666,245 sampled user CPU cycles, 0.01%)</title><rect x="708.0" y="157" width="0.1" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="710.98" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::worker::Context&gt;::park_internal (1,331,443,207 sampled user CPU cycles, 1.79%)</title><rect x="201.6" y="157" width="21.1" height="15.0" fill="rgb(229,190,27)" rx="2" ry="2" />
+<text  x="204.65" y="167.5" ></text>
+</g>
+<g >
+<title>[recorded stack boundary (69,238,550,958 sampled user CPU cycles, 92.92%)</title><rect x="92.9" y="189" width="1096.5" height="15.0" fill="rgb(248,185,47)" rx="2" ry="2" />
+<text  x="95.89" y="199.5" >[recorded stack boundary</text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;::push_remote_task (172,522,223 sampled user CPU cycles, 0.23%)</title><rect x="177.8" y="157" width="2.7" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="180.76" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::remember_granted_vote (13,753,333 sampled user CPU cycles, 0.02%)</title><rect x="574.8" y="157" width="0.2" height="15.0" fill="rgb(244,179,43)" rx="2" ry="2" />
+<text  x="577.76" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::time::sleep::Sleep as core::future::future::Future&gt;::poll (24,693,830 sampled user CPU cycles, 0.03%)</title><rect x="405.5" y="157" width="0.3" height="15.0" fill="rgb(229,190,26)" rx="2" ry="2" />
+<text  x="408.45" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::park::Unparker&gt;::unpark (432,668,059 sampled user CPU cycles, 0.58%)</title><rect x="191.8" y="157" width="6.9" height="15.0" fill="rgb(237,190,35)" rx="2" ry="2" />
+<text  x="194.84" y="167.5" ></text>
+</g>
+<g >
+<title>[recorded stack boundary (39,840,024 sampled user CPU cycles, 0.05%)</title><rect x="1189.4" y="189" width="0.6" height="15.0" fill="rgb(248,185,47)" rx="2" ry="2" />
+<text  x="1192.37" y="199.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;alloc::vec::drain::Drain&lt;voteboat::log::LogEntry&gt;&gt; (6,366,568 sampled user CPU cycles, 0.01%)</title><rect x="993.3" y="157" width="0.1" height="15.0" fill="rgb(243,133,41)" rx="2" ry="2" />
+<text  x="996.27" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::IntoIter&lt;voteboat::identity::NodeId, voteboat::raft::Replication&gt;&gt;::dying_next (93,060,718 sampled user CPU cycles, 0.12%)</title><rect x="99.5" y="157" width="1.5" height="15.0" fill="rgb(230,184,27)" rx="2" ry="2" />
+<text  x="102.53" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::broadcast_ready_peers (130,313,531 sampled user CPU cycles, 0.17%)</title><rect x="527.5" y="157" width="2.1" height="15.0" fill="rgb(238,179,36)" rx="2" ry="2" />
+<text  x="530.51" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;&lt;tokio::sync::mpsc::bounded::Sender&lt;voteboat_matched_framework::voteboat_engine::Request&gt;&gt;::send::{closure#0}&gt; (8,922,915 sampled user CPU cycles, 0.01%)</title><rect x="69.4" y="157" width="0.2" height="15.0" fill="rgb(247,133,46)" rx="2" ry="2" />
+<text  x="72.41" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::park::Unparker&gt;::unpark (27,748,506 sampled user CPU cycles, 0.04%)</title><rect x="22.1" y="157" width="0.4" height="15.0" fill="rgb(237,190,35)" rx="2" ry="2" />
+<text  x="25.07" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::stats::Stats&gt;::end_processing_scheduled_tasks (153,637,146 sampled user CPU cycles, 0.21%)</title><rect x="199.2" y="157" width="2.4" height="15.0" fill="rgb(232,190,30)" rx="2" ry="2" />
+<text  x="202.21" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4cdc56] (13,363,768 sampled user CPU cycles, 0.02%)</title><rect x="73.5" y="109" width="0.2" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="76.50" y="119.5" ></text>
+</g>
+<g >
+<title>voteboat-matche (39,840,024 sampled user CPU cycles, 0.05%)</title><rect x="1189.4" y="205" width="0.6" height="15.0" fill="rgb(245,135,44)" rx="2" ry="2" />
+<text  x="1192.37" y="215.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb200080] (10,725,507 sampled user CPU cycles, 0.01%)</title><rect x="1034.9" y="141" width="0.2" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="1037.92" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::worker::Core&gt;::maintenance (585,299,500 sampled user CPU cycles, 0.79%)</title><rect x="226.8" y="157" width="9.2" height="15.0" fill="rgb(251,190,51)" rx="2" ry="2" />
+<text  x="229.75" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2dc1] (12,183,892 sampled user CPU cycles, 0.02%)</title><rect x="1039.7" y="77" width="0.2" height="15.0" fill="rgb(242,180,40)" rx="2" ry="2" />
+<text  x="1042.74" y="87.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7b13] (7,709,365 sampled user CPU cycles, 0.01%)</title><rect x="875.5" y="157" width="0.1" height="15.0" fill="rgb(241,180,40)" rx="2" ry="2" />
+<text  x="878.48" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe776] (60,201,480 sampled user CPU cycles, 0.08%)</title><rect x="1034.0" y="141" width="0.9" height="15.0" fill="rgb(233,180,31)" rx="2" ry="2" />
+<text  x="1036.97" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae49e] (1,415,743,405 sampled user CPU cycles, 1.90%)</title><rect x="757.7" y="157" width="22.4" height="15.0" fill="rgb(241,180,39)" rx="2" ry="2" />
+<text  x="760.73" y="167.5" >[..</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ccd] (307,559,757 sampled user CPU cycles, 0.41%)</title><rect x="948.2" y="157" width="4.9" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="951.24" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::is_empty_alias (54,023,357 sampled user CPU cycles, 0.07%)</title><rect x="542.8" y="157" width="0.8" height="15.0" fill="rgb(230,179,27)" rx="2" ry="2" />
+<text  x="545.78" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2282] (14,611,762 sampled user CPU cycles, 0.02%)</title><rect x="1040.0" y="93" width="0.2" height="15.0" fill="rgb(237,180,35)" rx="2" ry="2" />
+<text  x="1042.99" y="103.5" ></text>
+</g>
+<g >
+<title>voteboat::outbound::message_cost (152,498,681 sampled user CPU cycles, 0.20%)</title><rect x="1151.8" y="157" width="2.4" height="15.0" fill="rgb(236,135,35)" rx="2" ry="2" />
+<text  x="1154.75" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::admitted (20,334,096 sampled user CPU cycles, 0.03%)</title><rect x="515.5" y="157" width="0.3" height="15.0" fill="rgb(247,179,46)" rx="2" ry="2" />
+<text  x="518.48" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7acb] (11,501,353 sampled user CPU cycles, 0.02%)</title><rect x="811.2" y="157" width="0.2" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="814.19" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::NodeId, u64&gt;&gt;::get::&lt;voteboat::identity::NodeId&gt; (6,746,426 sampled user CPU cycles, 0.01%)</title><rect x="93.5" y="157" width="0.1" height="15.0" fill="rgb(249,184,49)" rx="2" ry="2" />
+<text  x="96.48" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ca5] (36,801,844 sampled user CPU cycles, 0.05%)</title><rect x="936.8" y="157" width="0.6" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="939.81" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::Driver&gt;::park_internal (113,132,221 sampled user CPU cycles, 0.15%)</title><rect x="29.3" y="157" width="1.8" height="15.0" fill="rgb(229,190,27)" rx="2" ry="2" />
+<text  x="32.29" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb201670] (6,726,580 sampled user CPU cycles, 0.01%)</title><rect x="1043.0" y="141" width="0.2" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="1046.05" y="151.5" ></text>
+</g>
+<g >
+<title>voteboat::log::validate_suffix_entries (53,164,574 sampled user CPU cycles, 0.07%)</title><rect x="1150.9" y="157" width="0.9" height="15.0" fill="rgb(237,135,36)" rx="2" ry="2" />
+<text  x="1153.91" y="167.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::clone_waker (95,017,184 sampled user CPU cycles, 0.13%)</title><rect x="87.9" y="157" width="1.5" height="15.0" fill="rgb(238,141,36)" rx="2" ry="2" />
+<text  x="90.86" y="167.5" ></text>
+</g>
+<g >
+<title>malloc (1,065,193,722 sampled user CPU cycles, 1.43%)</title><rect x="999.2" y="157" width="16.9" height="15.0" fill="rgb(238,112,36)" rx="2" ry="2" />
+<text  x="1002.22" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb400486] (7,330,327 sampled user CPU cycles, 0.01%)</title><rect x="1037.0" y="109" width="0.1" height="15.0" fill="rgb(233,180,31)" rx="2" ry="2" />
+<text  x="1040.01" y="119.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d10] (52,511,625 sampled user CPU cycles, 0.07%)</title><rect x="960.0" y="157" width="0.9" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="963.03" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::local_voter (6,880,849 sampled user CPU cycles, 0.01%)</title><rect x="543.6" y="157" width="0.1" height="15.0" fill="rgb(240,179,38)" rx="2" ry="2" />
+<text  x="546.64" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f1ff6] (27,007,755 sampled user CPU cycles, 0.04%)</title><rect x="1040.4" y="109" width="0.4" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="1043.39" y="119.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc548] (7,668,541 sampled user CPU cycles, 0.01%)</title><rect x="691.3" y="141" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="694.31" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d17] (11,789,780 sampled user CPU cycles, 0.02%)</title><rect x="960.9" y="157" width="0.2" height="15.0" fill="rgb(249,180,48)" rx="2" ry="2" />
+<text  x="963.86" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0d4] (17,022,735 sampled user CPU cycles, 0.02%)</title><rect x="1032.6" y="125" width="0.3" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="1035.60" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb200084] (16,362,526 sampled user CPU cycles, 0.02%)</title><rect x="1035.1" y="141" width="0.3" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="1038.09" y="151.5" ></text>
+</g>
+<g >
+<title>__vdso_clock_gettime (801,862,172 sampled user CPU cycles, 1.08%)</title><rect x="975.2" y="141" width="12.7" height="15.0" fill="rgb(236,122,34)" rx="2" ry="2" />
+<text  x="978.18" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe06b] (22,324,596 sampled user CPU cycles, 0.03%)</title><rect x="53.1" y="157" width="0.3" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="56.06" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc7b3] (28,275,936 sampled user CPU cycles, 0.04%)</title><rect x="706.9" y="157" width="0.4" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="709.88" y="167.5" ></text>
+</g>
+<g >
+<title> callers may be missing] (5,234,296,828 sampled user CPU cycles, 7.02%)</title><rect x="10.0" y="173" width="82.9" height="15.0" fill="rgb(243,210,42)" rx="2" ry="2" />
+<text  x="13.00" y="183.5" > callers ..</text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::workload::Client&gt;::write::{closure#0} (822,162,593 sampled user CPU cycles, 1.10%)</title><rect x="39.4" y="157" width="13.0" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="42.40" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc527] (7,509,946 sampled user CPU cycles, 0.01%)</title><rect x="1034.5" y="125" width="0.1" height="15.0" fill="rgb(248,180,47)" rx="2" ry="2" />
+<text  x="1037.45" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f1fc5] (7,266,281 sampled user CPU cycles, 0.01%)</title><rect x="1040.2" y="109" width="0.1" height="15.0" fill="rgb(237,180,36)" rx="2" ry="2" />
+<text  x="1043.22" y="119.5" ></text>
+</g>
+<g >
+<title>matched-client (5,234,296,828 sampled user CPU cycles, 7.02%)</title><rect x="10.0" y="205" width="82.9" height="15.0" fill="rgb(241,86,39)" rx="2" ry="2" />
+<text  x="13.00" y="215.5" >matched-c..</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c3f] (17,004,000 sampled user CPU cycles, 0.02%)</title><rect x="924.9" y="157" width="0.2" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="927.87" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::LogEntry as &lt;[_]&gt;::to_vec_in::ConvertVec&gt;::to_vec::&lt;alloc::alloc::Global&gt; (512,232,965 sampled user CPU cycles, 0.69%)</title><rect x="405.9" y="157" width="8.1" height="15.0" fill="rgb(240,179,39)" rx="2" ry="2" />
+<text  x="408.92" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb200080] (22,131,472 sampled user CPU cycles, 0.03%)</title><rect x="72.3" y="141" width="0.4" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="75.33" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore&gt;::barrier (181,554,324 sampled user CPU cycles, 0.24%)</title><rect x="616.4" y="157" width="2.8" height="15.0" fill="rgb(239,179,38)" rx="2" ry="2" />
+<text  x="619.37" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;core::iter::adapters::zip::Zip&lt;alloc::vec::into_iter::IntoIter&lt;voteboat::raft::proposals::Proposal&gt;, alloc::vec::into_iter::IntoIter&lt;tokio::sync::oneshot::Sender&lt;voteboat::identity::OperationId&gt;&gt;&gt;&gt; (64,156,595 sampled user CPU cycles, 0.09%)</title><rect x="993.5" y="157" width="1.0" height="15.0" fill="rgb(242,133,41)" rx="2" ry="2" />
+<text  x="996.47" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb2015f4] (11,992,767 sampled user CPU cycles, 0.02%)</title><rect x="1042.8" y="141" width="0.2" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="1045.79" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7b93] (85,427,063 sampled user CPU cycles, 0.11%)</title><rect x="877.7" y="157" width="1.3" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="880.67" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c2f] (8,661,131 sampled user CPU cycles, 0.01%)</title><rect x="1033.7" y="125" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="1036.71" y="135.5" ></text>
+</g>
+<g >
+<title>cfree (399,523,551 sampled user CPU cycles, 0.54%)</title><rect x="967.5" y="157" width="6.4" height="15.0" fill="rgb(246,123,46)" rx="2" ry="2" />
+<text  x="970.52" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd546] (22,347,208 sampled user CPU cycles, 0.03%)</title><rect x="738.6" y="141" width="0.3" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="741.56" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::receive_appended (434,799,220 sampled user CPU cycles, 0.58%)</title><rect x="565.7" y="157" width="6.9" height="15.0" fill="rgb(250,179,49)" rx="2" ry="2" />
+<text  x="568.71" y="167.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::drop_waker (46,025,954 sampled user CPU cycles, 0.06%)</title><rect x="89.4" y="157" width="0.7" height="15.0" fill="rgb(238,141,36)" rx="2" ry="2" />
+<text  x="92.37" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d1e] (16,317,587 sampled user CPU cycles, 0.02%)</title><rect x="961.1" y="157" width="0.2" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="964.05" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d2a] (7,829,631 sampled user CPU cycles, 0.01%)</title><rect x="965.3" y="157" width="0.2" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="968.35" y="167.5" ></text>
+</g>
+<g >
+<title>syscall (524,473,074 sampled user CPU cycles, 0.70%)</title><rect x="1034.9" y="157" width="8.3" height="15.0" fill="rgb(230,167,28)" rx="2" ry="2" />
+<text  x="1037.92" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d72] (20,190,195 sampled user CPU cycles, 0.03%)</title><rect x="965.7" y="157" width="0.3" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="968.67" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::node::Handle&lt;alloc::collections::btree::node::NodeRef&lt;alloc::collections::btree::node::marker::Mut, voteboat::identity::OperationId, tokio::sync::oneshot::Sender&lt;voteboat::identity::OperationId&gt;, alloc::collections::btree::node::marker::Leaf&gt;, alloc::collections::btree::node::marker::KV&gt;&gt;::remove_leaf_kv::&lt;&lt;alloc::collections::btree::map::entry::OccupiedEntry&lt;voteboat::identity::OperationId, tokio::sync::oneshot::Sender&lt;voteboat::identity::OperationId&gt;&gt;&gt;::remove_kv::{closure#0}, alloc::alloc::Global&gt; (27,624,825 sampled user CPU cycles, 0.04%)</title><rect x="109.0" y="157" width="0.4" height="15.0" fill="rgb(240,184,39)" rx="2" ry="2" />
+<text  x="111.99" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe060] (8,535,634 sampled user CPU cycles, 0.01%)</title><rect x="707.3" y="157" width="0.2" height="15.0" fill="rgb(241,180,39)" rx="2" ry="2" />
+<text  x="710.33" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb520d9c] (33,501,832 sampled user CPU cycles, 0.04%)</title><rect x="73.9" y="93" width="0.5" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="76.88" y="103.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;core::option::Option&lt;voteboat::raft::Pending&gt;&gt; (10,062,214 sampled user CPU cycles, 0.01%)</title><rect x="994.5" y="157" width="0.1" height="15.0" fill="rgb(238,133,37)" rx="2" ry="2" />
+<text  x="997.49" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;voteboat::log::LogEntry&gt; (72,084,316 sampled user CPU cycles, 0.10%)</title><rect x="995.4" y="157" width="1.1" height="15.0" fill="rgb(247,133,46)" rx="2" ry="2" />
+<text  x="998.40" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::idle::Idle&gt;::worker_to_notify (40,986,084 sampled user CPU cycles, 0.06%)</title><rect x="21.4" y="157" width="0.7" height="15.0" fill="rgb(243,190,42)" rx="2" ry="2" />
+<text  x="24.42" y="167.5" ></text>
+</g>
+<g >
+<title>__lll_lock_wake_private (6,973,148 sampled user CPU cycles, 0.01%)</title><rect x="967.4" y="157" width="0.1" height="15.0" fill="rgb(245,154,45)" rx="2" ry="2" />
+<text  x="970.41" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::sync::condvar::futex::Condvar&gt;::wait_optional_timeout (213,772,512 sampled user CPU cycles, 0.29%)</title><rect x="11.8" y="157" width="3.4" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="14.81" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebcaeb] (6,374,508 sampled user CPU cycles, 0.01%)</title><rect x="736.4" y="141" width="0.1" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="739.37" y="151.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::wake_by_ref (109,971,031 sampled user CPU cycles, 0.15%)</title><rect x="1130.8" y="157" width="1.8" height="15.0" fill="rgb(245,141,44)" rx="2" ry="2" />
+<text  x="1133.81" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2b05] (15,594,688 sampled user CPU cycles, 0.02%)</title><rect x="1042.2" y="93" width="0.3" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="1045.25" y="103.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::raw::poll::&lt;core::pin::Pin&lt;alloc::boxed::Box&lt;&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&gt;::run::{closure#0}&gt;&gt;, alloc::sync::Arc&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;&gt; (823,916,457 sampled user CPU cycles, 1.11%)</title><rect x="1095.2" y="157" width="13.1" height="15.0" fill="rgb(240,141,38)" rx="2" ry="2" />
+<text  x="1098.23" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe0a9] (252,475,383 sampled user CPU cycles, 0.34%)</title><rect x="735.6" y="157" width="4.0" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="738.59" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f20ec] (14,629,787 sampled user CPU cycles, 0.02%)</title><rect x="707.1" y="93" width="0.2" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="710.10" y="103.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb200087] (6,967,713 sampled user CPU cycles, 0.01%)</title><rect x="72.8" y="141" width="0.1" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="75.78" y="151.5" ></text>
+</g>
+<g >
+<title>syscall (164,236,545 sampled user CPU cycles, 0.22%)</title><rect x="72.1" y="157" width="2.6" height="15.0" fill="rgb(230,167,28)" rx="2" ry="2" />
+<text  x="75.09" y="167.5" ></text>
+</g>
+<g >
+<title>malloc (18,515,858 sampled user CPU cycles, 0.02%)</title><rect x="70.0" y="157" width="0.3" height="15.0" fill="rgb(238,112,36)" rx="2" ry="2" />
+<text  x="72.97" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0de] (8,672,512 sampled user CPU cycles, 0.01%)</title><rect x="1032.9" y="125" width="0.1" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="1035.87" y="135.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::retirement_commit (79,417,301 sampled user CPU cycles, 0.11%)</title><rect x="580.5" y="157" width="1.2" height="15.0" fill="rgb(237,179,35)" rx="2" ry="2" />
+<text  x="583.49" y="167.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::raw::poll::&lt;voteboat_matched_framework::workload::client_loop::{closure#0}, alloc::sync::Arc&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;&gt; (138,246,783 sampled user CPU cycles, 0.19%)</title><rect x="85.7" y="157" width="2.2" height="15.0" fill="rgb(240,141,38)" rx="2" ry="2" />
+<text  x="88.68" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;voteboat::raft::RaftError&gt; (65,419,028 sampled user CPU cycles, 0.09%)</title><rect x="996.5" y="157" width="1.1" height="15.0" fill="rgb(245,133,44)" rx="2" ry="2" />
+<text  x="999.54" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7b8b] (123,327,885 sampled user CPU cycles, 0.17%)</title><rect x="875.7" y="157" width="2.0" height="15.0" fill="rgb(233,180,31)" rx="2" ry="2" />
+<text  x="878.72" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::queue::Local&lt;alloc::sync::Arc&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;&gt;&gt;::push_back_or_overflow::&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt; (32,608,512 sampled user CPU cycles, 0.04%)</title><rect x="198.7" y="157" width="0.5" height="15.0" fill="rgb(249,190,48)" rx="2" ry="2" />
+<text  x="201.70" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb2015f0] (11,924,258 sampled user CPU cycles, 0.02%)</title><rect x="1042.6" y="141" width="0.2" height="15.0" fill="rgb(241,180,39)" rx="2" ry="2" />
+<text  x="1045.60" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::step (1,300,437,915 sampled user CPU cycles, 1.75%)</title><rect x="593.3" y="157" width="20.6" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="596.32" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c4f] (31,103,028 sampled user CPU cycles, 0.04%)</title><rect x="925.4" y="157" width="0.5" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="928.40" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cf6] (28,571,842 sampled user CPU cycles, 0.04%)</title><rect x="958.7" y="157" width="0.5" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="961.73" y="167.5" ></text>
+</g>
+<g >
+<title> callers may be missing] (69,238,550,958 sampled user CPU cycles, 92.92%)</title><rect x="92.9" y="173" width="1096.5" height="15.0" fill="rgb(243,210,42)" rx="2" ry="2" />
+<text  x="95.89" y="183.5" > callers may be missing]</text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::NodeId, voteboat::raft::Replication&gt;&gt;::insert (83,238,000 sampled user CPU cycles, 0.11%)</title><rect x="94.4" y="157" width="1.4" height="15.0" fill="rgb(236,184,34)" rx="2" ry="2" />
+<text  x="97.43" y="167.5" ></text>
+</g>
+<g >
+<title>voteboat_matched_framework::workload::client_loop::{closure#0} (124,775,402 sampled user CPU cycles, 0.17%)</title><rect x="90.9" y="157" width="2.0" height="15.0" fill="rgb(234,135,32)" rx="2" ry="2" />
+<text  x="93.92" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::transition::incoming::PreparedOwnedLog&gt;::install (603,804,262 sampled user CPU cycles, 0.81%)</title><rect x="444.7" y="157" width="9.5" height="15.0" fill="rgb(230,179,28)" rx="2" ry="2" />
+<text  x="447.66" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::transition::view::LogView&gt;::term_at (94,286,431 sampled user CPU cycles, 0.13%)</title><rect x="500.6" y="157" width="1.5" height="15.0" fill="rgb(226,179,24)" rx="2" ry="2" />
+<text  x="503.61" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::vec_deque::VecDeque&lt;voteboat::raft::Effect&gt; as alloc::collections::vec_deque::spec_extend::SpecExtend&lt;voteboat::raft::Effect, alloc::vec::into_iter::IntoIter&lt;voteboat::raft::Effect&gt;&gt;&gt;::spec_extend (84,122,855 sampled user CPU cycles, 0.11%)</title><rect x="109.4" y="157" width="1.4" height="15.0" fill="rgb(251,184,51)" rx="2" ry="2" />
+<text  x="112.42" y="167.5" ></text>
+</g>
+<g >
+<title>voteboat::log::transition::append_summary (254,548,109 sampled user CPU cycles, 0.34%)</title><rect x="1137.7" y="157" width="4.0" height="15.0" fill="rgb(248,135,47)" rx="2" ry="2" />
+<text  x="1140.66" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::application::Noop as voteboat::application::StateMachine&gt;::apply_batch (76,930,276 sampled user CPU cycles, 0.10%)</title><rect x="615.2" y="157" width="1.2" height="15.0" fill="rgb(242,179,41)" rx="2" ry="2" />
+<text  x="618.15" y="167.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::wake_by_val (51,631,080 sampled user CPU cycles, 0.07%)</title><rect x="90.1" y="157" width="0.8" height="15.0" fill="rgb(224,141,21)" rx="2" ry="2" />
+<text  x="93.10" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::GroupIdentity, voteboat::log::owned::Group&gt;&gt;::get::&lt;voteboat::identity::GroupIdentity&gt; (34,221,473 sampled user CPU cycles, 0.05%)</title><rect x="92.9" y="157" width="0.6" height="15.0" fill="rgb(245,184,45)" rx="2" ry="2" />
+<text  x="95.94" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe0aa] (16,494,774 sampled user CPU cycles, 0.02%)</title><rect x="739.6" y="157" width="0.2" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="742.59" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&gt;::requests (7,370,015 sampled user CPU cycles, 0.01%)</title><rect x="653.6" y="157" width="0.1" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="656.56" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq&lt;voteboat::log::LogEntry&gt;&gt;::equal_same_length (11,272,038 sampled user CPU cycles, 0.02%)</title><rect x="416.1" y="157" width="0.2" height="15.0" fill="rgb(236,179,34)" rx="2" ry="2" />
+<text  x="419.14" y="167.5" ></text>
+</g>
+<g >
+<title>pow (115,398,671 sampled user CPU cycles, 0.15%)</title><rect x="70.3" y="157" width="1.8" height="15.0" fill="rgb(235,173,33)" rx="2" ry="2" />
+<text  x="73.26" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe060] (8,410,920 sampled user CPU cycles, 0.01%)</title><rect x="52.6" y="157" width="0.1" height="15.0" fill="rgb(241,180,39)" rx="2" ry="2" />
+<text  x="55.57" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bfc] (76,602,759 sampled user CPU cycles, 0.10%)</title><rect x="912.7" y="157" width="1.2" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="915.65" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c96] (210,262,092 sampled user CPU cycles, 0.28%)</title><rect x="933.4" y="157" width="3.3" height="15.0" fill="rgb(232,180,30)" rx="2" ry="2" />
+<text  x="936.41" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a0d2] (21,429,739 sampled user CPU cycles, 0.03%)</title><rect x="1035.8" y="125" width="0.4" height="15.0" fill="rgb(240,180,38)" rx="2" ry="2" />
+<text  x="1038.82" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c8e] (372,239,939 sampled user CPU cycles, 0.50%)</title><rect x="927.5" y="157" width="5.9" height="15.0" fill="rgb(241,180,40)" rx="2" ry="2" />
+<text  x="930.52" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f227c] (33,751,671 sampled user CPU cycles, 0.05%)</title><rect x="1039.5" y="93" width="0.5" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="1042.45" y="103.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::sync::mutex::futex::Mutex&gt;::lock_contended (57,725,702 sampled user CPU cycles, 0.08%)</title><rect x="167.1" y="157" width="0.9" height="15.0" fill="rgb(250,179,49)" rx="2" ry="2" />
+<text  x="170.10" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe085] (8,344,262 sampled user CPU cycles, 0.01%)</title><rect x="708.4" y="157" width="0.1" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="711.35" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::transition::incoming::OwnedNextLog&gt;::prepare_install (75,443,215 sampled user CPU cycles, 0.10%)</title><rect x="443.5" y="157" width="1.2" height="15.0" fill="rgb(230,179,28)" rx="2" ry="2" />
+<text  x="446.47" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc6e9] (7,649,116 sampled user CPU cycles, 0.01%)</title><rect x="657.8" y="157" width="0.1" height="15.0" fill="rgb(244,180,42)" rx="2" ry="2" />
+<text  x="660.82" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a105] (16,359,861 sampled user CPU cycles, 0.02%)</title><rect x="73.5" y="125" width="0.2" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="76.45" y="135.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::LogUpdate as core::clone::Clone&gt;::clone (291,668,460 sampled user CPU cycles, 0.39%)</title><rect x="416.3" y="157" width="4.6" height="15.0" fill="rgb(251,179,50)" rx="2" ry="2" />
+<text  x="419.32" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ac0] (471,000,365 sampled user CPU cycles, 0.63%)</title><rect x="800.4" y="157" width="7.4" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="803.37" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::worker::Context&gt;::park_internal (173,765,257 sampled user CPU cycles, 0.23%)</title><rect x="23.7" y="157" width="2.8" height="15.0" fill="rgb(229,190,27)" rx="2" ry="2" />
+<text  x="26.71" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq&gt;::eq (2,929,175,372 sampled user CPU cycles, 3.93%)</title><rect x="454.2" y="157" width="46.4" height="15.0" fill="rgb(240,179,39)" rx="2" ry="2" />
+<text  x="457.22" y="167.5" >&lt;vot..</text>
+</g>
+<g >
+<title>matched-server (69,238,550,958 sampled user CPU cycles, 92.92%)</title><rect x="92.9" y="205" width="1096.5" height="15.0" fill="rgb(238,86,37)" rx="2" ry="2" />
+<text  x="95.89" y="215.5" >matched-server</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebcb65] (17,672,302 sampled user CPU cycles, 0.02%)</title><rect x="56.3" y="141" width="0.3" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="59.33" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::list::Tx&lt;voteboat::raft::Message&gt;&gt;::find_block (57,924,536 sampled user CPU cycles, 0.08%)</title><rect x="307.2" y="157" width="1.0" height="15.0" fill="rgb(240,190,39)" rx="2" ry="2" />
+<text  x="310.24" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc70d] (964,048,942 sampled user CPU cycles, 1.29%)</title><rect x="691.6" y="157" width="15.3" height="15.0" fill="rgb(248,180,48)" rx="2" ry="2" />
+<text  x="694.62" y="167.5" ></text>
+</g>
+<g >
+<title>clock_gettime (405,271,318 sampled user CPU cycles, 0.54%)</title><rect x="63.0" y="157" width="6.4" height="15.0" fill="rgb(236,102,34)" rx="2" ry="2" />
+<text  x="65.95" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c04] (32,589,543 sampled user CPU cycles, 0.04%)</title><rect x="913.9" y="157" width="0.5" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="916.86" y="167.5" ></text>
+</g>
+<g >
+<title>__floattidf (59,521,919 sampled user CPU cycles, 0.08%)</title><rect x="61.4" y="157" width="1.0" height="15.0" fill="rgb(244,135,43)" rx="2" ry="2" />
+<text  x="64.41" y="167.5" ></text>
+</g>
+<g >
+<title>pow (113,148,579 sampled user CPU cycles, 0.15%)</title><rect x="1016.1" y="157" width="1.8" height="15.0" fill="rgb(235,173,33)" rx="2" ry="2" />
+<text  x="1019.09" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::pal::unix::time::Timespec&gt;::now (18,775,050 sampled user CPU cycles, 0.03%)</title><rect x="10.5" y="157" width="0.3" height="15.0" fill="rgb(236,179,35)" rx="2" ry="2" />
+<text  x="13.47" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb520dc0] (6,902,062 sampled user CPU cycles, 0.01%)</title><rect x="1040.7" y="93" width="0.1" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="1043.71" y="103.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebaf23] (8,516,872 sampled user CPU cycles, 0.01%)</title><rect x="739.0" y="125" width="0.2" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="742.05" y="135.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::list::Rx&lt;voteboat_matched_framework::voteboat_engine::Request&gt;&gt;::pop (31,478,693 sampled user CPU cycles, 0.04%)</title><rect x="306.7" y="157" width="0.5" height="15.0" fill="rgb(247,190,46)" rx="2" ry="2" />
+<text  x="309.74" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::node::Handle&lt;alloc::collections::btree::node::NodeRef&lt;alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf&gt;, alloc::collections::btree::node::marker::KV&gt;&gt;::remove_leaf_kv::&lt;&lt;alloc::collections::btree::map::entry::OccupiedEntry&lt;voteboat::identity::NodeId, voteboat::raft::Replication&gt;&gt;::remove_kv::{closure#0}, alloc::alloc::Global&gt; (114,350,575 sampled user CPU cycles, 0.15%)</title><rect x="107.2" y="157" width="1.8" height="15.0" fill="rgb(240,184,39)" rx="2" ry="2" />
+<text  x="110.18" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc544] (10,455,890 sampled user CPU cycles, 0.01%)</title><rect x="1034.6" y="125" width="0.1" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="1037.57" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2abe] (14,629,787 sampled user CPU cycles, 0.02%)</title><rect x="707.1" y="77" width="0.2" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="710.10" y="87.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::membership::Membership&gt;::voter_store (281,801,669 sampled user CPU cycles, 0.38%)</title><rect x="511.0" y="157" width="4.5" height="15.0" fill="rgb(246,179,45)" rx="2" ry="2" />
+<text  x="514.01" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&lt;true&gt;&gt;::reserve (31,018,058 sampled user CPU cycles, 0.04%)</title><rect x="619.5" y="157" width="0.5" height="15.0" fill="rgb(240,179,38)" rx="2" ry="2" />
+<text  x="622.53" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe079] (7,343,984 sampled user CPU cycles, 0.01%)</title><rect x="708.1" y="157" width="0.2" height="15.0" fill="rgb(242,180,41)" rx="2" ry="2" />
+<text  x="711.14" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc6f4] (2,091,630,473 sampled user CPU cycles, 2.81%)</title><rect x="657.9" y="157" width="33.2" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="660.94" y="167.5" >[u..</text>
+</g>
+<g >
+<title>&lt;tokio::runtime::park::Inner&gt;::unpark (309,461,690 sampled user CPU cycles, 0.42%)</title><rect x="171.9" y="157" width="4.9" height="15.0" fill="rgb(237,190,35)" rx="2" ry="2" />
+<text  x="174.93" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::log::LogEntry as core::clone::Clone&gt;::clone (132,748,120 sampled user CPU cycles, 0.18%)</title><rect x="414.0" y="157" width="2.1" height="15.0" fill="rgb(251,179,50)" rx="2" ry="2" />
+<text  x="417.03" y="167.5" ></text>
+</g>
+<g >
+<title>clock_gettime (885,898,177 sampled user CPU cycles, 1.19%)</title><rect x="973.9" y="157" width="14.0" height="15.0" fill="rgb(236,102,34)" rx="2" ry="2" />
+<text  x="976.85" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c6c] (6,848,169 sampled user CPU cycles, 0.01%)</title><rect x="927.2" y="157" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="930.16" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::bounded::Sender&lt;voteboat::raft::Message&gt;&gt;::try_send (2,346,234,054 sampled user CPU cycles, 3.15%)</title><rect x="267.4" y="157" width="37.2" height="15.0" fill="rgb(251,190,51)" rx="2" ry="2" />
+<text  x="270.42" y="167.5" >&lt;to..</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe099] (184,196,188 sampled user CPU cycles, 0.25%)</title><rect x="53.4" y="157" width="2.9" height="15.0" fill="rgb(241,180,39)" rx="2" ry="2" />
+<text  x="56.41" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ce2] (18,110,279 sampled user CPU cycles, 0.02%)</title><rect x="955.6" y="157" width="0.3" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="958.63" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::maybe_commit (112,358,535 sampled user CPU cycles, 0.15%)</title><rect x="543.7" y="157" width="1.8" height="15.0" fill="rgb(237,179,35)" rx="2" ry="2" />
+<text  x="546.75" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c47] (16,505,345 sampled user CPU cycles, 0.02%)</title><rect x="925.1" y="157" width="0.3" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="928.14" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;core::pin::Pin&lt;alloc::boxed::Box&lt;&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&gt;::run::{closure#0}&gt;&gt; as core::future::future::Future&gt;::poll (1,316,487,381 sampled user CPU cycles, 1.77%)</title><rect x="141.7" y="157" width="20.8" height="15.0" fill="rgb(229,220,26)" rx="2" ry="2" />
+<text  x="144.68" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ad3] (4,001,794,635 sampled user CPU cycles, 5.37%)</title><rect x="811.4" y="157" width="63.3" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="814.37" y="167.5" >[unres..</text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::OperationId, tokio::sync::oneshot::Sender&lt;voteboat::identity::OperationId&gt;&gt;&gt;::remove::&lt;voteboat::identity::OperationId&gt; (72,698,959 sampled user CPU cycles, 0.10%)</title><rect x="97.0" y="157" width="1.1" height="15.0" fill="rgb(249,184,49)" rx="2" ry="2" />
+<text  x="99.98" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::NodeId, u64&gt;&gt;::insert (53,354,542 sampled user CPU cycles, 0.07%)</title><rect x="93.6" y="157" width="0.8" height="15.0" fill="rgb(236,184,34)" rx="2" ry="2" />
+<text  x="96.59" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae748] (7,809,772 sampled user CPU cycles, 0.01%)</title><rect x="799.9" y="157" width="0.2" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="802.95" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::NodeId, voteboat::raft::Replication&gt;&gt;::remove::&lt;voteboat::identity::NodeId&gt; (57,613,631 sampled user CPU cycles, 0.08%)</title><rect x="95.8" y="157" width="0.9" height="15.0" fill="rgb(249,184,49)" rx="2" ry="2" />
+<text  x="98.75" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb520e21] (15,847,137 sampled user CPU cycles, 0.02%)</title><rect x="1040.4" y="77" width="0.2" height="15.0" fill="rgb(242,180,41)" rx="2" ry="2" />
+<text  x="1043.39" y="87.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::vec::Vec&lt;voteboat::log::LogEntry&gt; as alloc::vec::spec_extend::SpecExtend&lt;voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter&lt;voteboat::log::LogEntry&gt;&gt;&gt;::spec_extend (99,144,187 sampled user CPU cycles, 0.13%)</title><rect x="117.0" y="157" width="1.5" height="15.0" fill="rgb(251,184,51)" rx="2" ry="2" />
+<text  x="119.97" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&gt;::effects (2,118,053,996 sampled user CPU cycles, 2.84%)</title><rect x="620.0" y="157" width="33.6" height="15.0" fill="rgb(237,179,35)" rx="2" ry="2" />
+<text  x="623.02" y="167.5" >&lt;v..</text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::bounded::Receiver&lt;voteboat_matched_framework::voteboat_engine::Request&gt;&gt;::recv::{closure#0} (144,290,457 sampled user CPU cycles, 0.19%)</title><rect x="265.1" y="157" width="2.3" height="15.0" fill="rgb(234,190,32)" rx="2" ry="2" />
+<text  x="268.14" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bed] (119,308,833 sampled user CPU cycles, 0.16%)</title><rect x="909.0" y="157" width="1.9" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="911.98" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb520e19] (10,339,241 sampled user CPU cycles, 0.01%)</title><rect x="73.9" y="77" width="0.1" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="76.88" y="87.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::wake_by_val (322,646,217 sampled user CPU cycles, 0.43%)</title><rect x="1132.6" y="157" width="5.1" height="15.0" fill="rgb(224,141,21)" rx="2" ry="2" />
+<text  x="1135.55" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::wheel::level::Level&gt;::next_expiration (75,677,997 sampled user CPU cycles, 0.10%)</title><rect x="36.3" y="157" width="1.1" height="15.0" fill="rgb(247,190,46)" rx="2" ry="2" />
+<text  x="39.25" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c37] (602,359,974 sampled user CPU cycles, 0.81%)</title><rect x="915.3" y="157" width="9.6" height="15.0" fill="rgb(247,180,46)" rx="2" ry="2" />
+<text  x="918.33" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::bounded::Receiver&lt;voteboat::raft::Message&gt;&gt;::recv::{closure#0} (833,581,822 sampled user CPU cycles, 1.12%)</title><rect x="251.9" y="157" width="13.2" height="15.0" fill="rgb(234,190,32)" rx="2" ry="2" />
+<text  x="254.90" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe0a9] (80,001,416 sampled user CPU cycles, 0.11%)</title><rect x="56.3" y="157" width="1.3" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="59.33" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::watch::Receiver&lt;bool&gt;&gt;::changed::{closure#0} (402,044,886 sampled user CPU cycles, 0.54%)</title><rect x="399.1" y="157" width="6.4" height="15.0" fill="rgb(234,190,32)" rx="2" ry="2" />
+<text  x="402.08" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae4a5] (1,166,615,827 sampled user CPU cycles, 1.57%)</title><rect x="780.1" y="157" width="18.5" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="783.15" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe064] (22,452,104 sampled user CPU cycles, 0.03%)</title><rect x="52.7" y="157" width="0.4" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="55.70" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;core::iter::adapters::chain::Chain&lt;core::iter::adapters::chain::Chain&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;, alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;&gt;, core::iter::adapters::filter::Filter&lt;core::iter::adapters::flatten::FlatMap&lt;core::option::Iter&lt;voteboat::membership::JointConfiguration&gt;, core::iter::adapters::chain::Chain&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;, alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#0}&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#1}&gt;&gt; as core::iter::traits::iterator::Iterator&gt;::fold::&lt;usize, core::iter::adapters::map::map_fold&lt;(&amp;voteboat::identity::NodeId, &amp;voteboat::identity::StoreIdentity), (766,936,881 sampled user CPU cycles, 1.03%)</title><rect x="123.0" y="157" width="12.1" height="15.0" fill="rgb(238,220,36)" rx="2" ry="2" />
+<text  x="125.99" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd5ee] (6,401,245 sampled user CPU cycles, 0.01%)</title><rect x="1033.2" y="125" width="0.1" height="15.0" fill="rgb(244,180,42)" rx="2" ry="2" />
+<text  x="1036.16" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a146] (350,461,787 sampled user CPU cycles, 0.47%)</title><rect x="1037.0" y="125" width="5.6" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="1040.01" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae4d3] (7,551,626 sampled user CPU cycles, 0.01%)</title><rect x="799.8" y="157" width="0.1" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="802.83" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2519] (7,615,905 sampled user CPU cycles, 0.01%)</title><rect x="1039.3" y="77" width="0.2" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="1042.33" y="87.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0e4] (16,622,058 sampled user CPU cycles, 0.02%)</title><rect x="737.6" y="141" width="0.3" height="15.0" fill="rgb(237,180,35)" rx="2" ry="2" />
+<text  x="740.63" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt; as core::iter::traits::iterator::Iterator&gt;::next (384,958,429 sampled user CPU cycles, 0.52%)</title><rect x="101.1" y="157" width="6.1" height="15.0" fill="rgb(230,184,27)" rx="2" ry="2" />
+<text  x="104.08" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0aa] (14,056,145 sampled user CPU cycles, 0.02%)</title><rect x="736.9" y="141" width="0.2" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="739.88" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::wheel::Wheel&gt;::next_expiration (47,623,459 sampled user CPU cycles, 0.06%)</title><rect x="240.8" y="157" width="0.8" height="15.0" fill="rgb(247,190,46)" rx="2" ry="2" />
+<text  x="243.80" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a146] (57,948,682 sampled user CPU cycles, 0.08%)</title><rect x="73.8" y="125" width="0.9" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="76.77" y="135.5" ></text>
+</g>
+<g >
+<title>&lt;std::sys::pal::unix::time::Timespec&gt;::sub_timespec (66,235,433 sampled user CPU cycles, 0.09%)</title><rect x="10.8" y="157" width="1.0" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="13.76" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2d86] (6,921,019 sampled user CPU cycles, 0.01%)</title><rect x="1039.5" y="77" width="0.1" height="15.0" fill="rgb(233,180,31)" rx="2" ry="2" />
+<text  x="1042.51" y="87.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc8294ec] (14,629,787 sampled user CPU cycles, 0.02%)</title><rect x="707.1" y="61" width="0.2" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="710.10" y="71.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb20012f] (434,431,636 sampled user CPU cycles, 0.58%)</title><rect x="1035.7" y="141" width="6.9" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="1038.68" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::membership::Membership&gt;::replica_store (100,660,631 sampled user CPU cycles, 0.14%)</title><rect x="509.4" y="157" width="1.6" height="15.0" fill="rgb(246,179,45)" rx="2" ry="2" />
+<text  x="512.42" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::vec::Vec&lt;voteboat::raft::Effect&gt;&gt;::push_mut (7,983,054 sampled user CPU cycles, 0.01%)</title><rect x="122.9" y="157" width="0.1" height="15.0" fill="rgb(236,184,34)" rx="2" ry="2" />
+<text  x="125.87" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f21f5] (48,816,508 sampled user CPU cycles, 0.07%)</title><rect x="1038.7" y="93" width="0.8" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="1041.68" y="103.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::task::waker::drop_waker (491,817,070 sampled user CPU cycles, 0.66%)</title><rect x="1123.0" y="157" width="7.8" height="15.0" fill="rgb(238,141,36)" rx="2" ry="2" />
+<text  x="1126.02" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::notify::NotifiedProject&gt;::drop_notified (970,339,226 sampled user CPU cycles, 1.30%)</title><rect x="308.2" y="157" width="15.3" height="15.0" fill="rgb(246,190,45)" rx="2" ry="2" />
+<text  x="311.16" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a146] (6,973,148 sampled user CPU cycles, 0.01%)</title><rect x="967.4" y="125" width="0.1" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="970.41" y="135.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::BTreeMap&lt;voteboat::identity::OperationId, tokio::sync::oneshot::Sender&lt;voteboat::identity::OperationId&gt;&gt;&gt;::insert (17,135,774 sampled user CPU cycles, 0.02%)</title><rect x="96.7" y="157" width="0.3" height="15.0" fill="rgb(236,184,34)" rx="2" ry="2" />
+<text  x="99.71" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe06b] (13,549,493 sampled user CPU cycles, 0.02%)</title><rect x="707.8" y="157" width="0.2" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="710.76" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::list::Rx&lt;voteboat::raft::Message&gt;&gt;::pop (117,414,211 sampled user CPU cycles, 0.16%)</title><rect x="304.9" y="157" width="1.8" height="15.0" fill="rgb(247,190,46)" rx="2" ry="2" />
+<text  x="307.89" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ada] (26,060,707 sampled user CPU cycles, 0.03%)</title><rect x="874.7" y="157" width="0.5" height="15.0" fill="rgb(237,180,35)" rx="2" ry="2" />
+<text  x="877.74" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae4c6] (14,671,059 sampled user CPU cycles, 0.02%)</title><rect x="798.7" y="157" width="0.2" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="801.69" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::append_for (462,256,695 sampled user CPU cycles, 0.62%)</title><rect x="515.8" y="157" width="7.3" height="15.0" fill="rgb(242,179,41)" rx="2" ry="2" />
+<text  x="518.80" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c66] (56,710,773 sampled user CPU cycles, 0.08%)</title><rect x="926.3" y="157" width="0.9" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="929.26" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::wheel::level::Level&gt;::next_expiration (60,688,697 sampled user CPU cycles, 0.08%)</title><rect x="241.6" y="157" width="0.9" height="15.0" fill="rgb(247,190,46)" rx="2" ry="2" />
+<text  x="244.56" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a0de] (21,293,003 sampled user CPU cycles, 0.03%)</title><rect x="1036.2" y="125" width="0.3" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="1039.16" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0d4] (7,293,949 sampled user CPU cycles, 0.01%)</title><rect x="737.3" y="141" width="0.1" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="740.31" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bc7] (114,664,482 sampled user CPU cycles, 0.15%)</title><rect x="883.8" y="157" width="1.8" height="15.0" fill="rgb(247,180,46)" rx="2" ry="2" />
+<text  x="886.75" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::clear_replication_requests (129,625,430 sampled user CPU cycles, 0.17%)</title><rect x="529.6" y="157" width="2.0" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="532.57" y="167.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::scheduler::multi_thread::worker::run (693,752,367 sampled user CPU cycles, 0.93%)</title><rect x="74.7" y="157" width="11.0" height="15.0" fill="rgb(243,141,41)" rx="2" ry="2" />
+<text  x="77.69" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe1d7] (8,038,945 sampled user CPU cycles, 0.01%)</title><rect x="61.2" y="157" width="0.2" height="15.0" fill="rgb(246,180,46)" rx="2" ry="2" />
+<text  x="64.23" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0c0] (7,984,190 sampled user CPU cycles, 0.01%)</title><rect x="737.1" y="141" width="0.1" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="740.10" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ce8] (11,065,755 sampled user CPU cycles, 0.01%)</title><rect x="955.9" y="157" width="0.2" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="958.92" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::raw_vec::RawVec&lt;voteboat::log::LogEntry&gt;&gt;::grow_one (19,848,251 sampled user CPU cycles, 0.03%)</title><rect x="111.1" y="157" width="0.3" height="15.0" fill="rgb(251,184,50)" rx="2" ry="2" />
+<text  x="114.10" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb200084] (6,363,559 sampled user CPU cycles, 0.01%)</title><rect x="72.7" y="141" width="0.1" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="75.68" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::wheel::Wheel&gt;::next_expiration (42,434,824 sampled user CPU cycles, 0.06%)</title><rect x="35.6" y="157" width="0.7" height="15.0" fill="rgb(247,190,46)" rx="2" ry="2" />
+<text  x="38.58" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;alloc::vec::Vec&lt;voteboat::log::LogEntry&gt;&gt; (127,981,877 sampled user CPU cycles, 0.17%)</title><rect x="989.6" y="157" width="2.1" height="15.0" fill="rgb(243,133,41)" rx="2" ry="2" />
+<text  x="992.63" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe744] (8,401,379 sampled user CPU cycles, 0.01%)</title><rect x="1033.3" y="141" width="0.1" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="1036.26" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc85e] (7,038,480 sampled user CPU cycles, 0.01%)</title><rect x="735.6" y="141" width="0.1" height="15.0" fill="rgb(244,180,42)" rx="2" ry="2" />
+<text  x="738.59" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::idle::Idle&gt;::worker_to_notify (674,054,151 sampled user CPU cycles, 0.90%)</title><rect x="181.2" y="157" width="10.6" height="15.0" fill="rgb(243,190,42)" rx="2" ry="2" />
+<text  x="184.17" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d24] (254,910,119 sampled user CPU cycles, 0.34%)</title><rect x="961.3" y="157" width="4.0" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="964.31" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::rollback_replicas (731,085,405 sampled user CPU cycles, 0.98%)</title><rect x="581.7" y="157" width="11.6" height="15.0" fill="rgb(234,179,32)" rx="2" ry="2" />
+<text  x="584.75" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;alloc::collections::vec_deque::VecDeque&lt;voteboat::raft::Effect&gt;&gt; (105,867,858 sampled user CPU cycles, 0.14%)</title><rect x="988.0" y="157" width="1.6" height="15.0" fill="rgb(238,133,36)" rx="2" ry="2" />
+<text  x="990.95" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ba0] (89,883,655 sampled user CPU cycles, 0.12%)</title><rect x="879.0" y="157" width="1.4" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="882.02" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::collections::btree::map::IntoIter&lt;voteboat::identity::GroupIdentity, voteboat::log::owned::Plan&gt;&gt;::dying_next (87,856,955 sampled user CPU cycles, 0.12%)</title><rect x="98.1" y="157" width="1.4" height="15.0" fill="rgb(230,184,27)" rx="2" ry="2" />
+<text  x="101.14" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f1fc0] (100,060,517 sampled user CPU cycles, 0.13%)</title><rect x="1038.6" y="109" width="1.6" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="1041.63" y="119.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebcb69] (16,965,051 sampled user CPU cycles, 0.02%)</title><rect x="56.6" y="141" width="0.3" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="59.61" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cef] (166,380,562 sampled user CPU cycles, 0.22%)</title><rect x="956.1" y="157" width="2.6" height="15.0" fill="rgb(242,180,41)" rx="2" ry="2" />
+<text  x="959.09" y="167.5" ></text>
+</g>
+<g >
+<title>[recorded stack boundary (5,234,296,828 sampled user CPU cycles, 7.02%)</title><rect x="10.0" y="189" width="82.9" height="15.0" fill="rgb(248,185,47)" rx="2" ry="2" />
+<text  x="13.00" y="199.5" >[recorded..</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe099] (1,673,349,799 sampled user CPU cycles, 2.25%)</title><rect x="709.1" y="157" width="26.5" height="15.0" fill="rgb(241,180,39)" rx="2" ry="2" />
+<text  x="712.09" y="167.5" >[..</text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb20012f] (14,629,787 sampled user CPU cycles, 0.02%)</title><rect x="707.1" y="125" width="0.2" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="710.10" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc5fa] (8,095,401 sampled user CPU cycles, 0.01%)</title><rect x="1034.8" y="125" width="0.1" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="1037.80" y="135.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::park::Inner&gt;::park_timeout (327,888,520 sampled user CPU cycles, 0.44%)</title><rect x="15.2" y="157" width="5.2" height="15.0" fill="rgb(234,190,32)" rx="2" ry="2" />
+<text  x="18.20" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::raw_vec::RawVecInner&lt;_&gt;&gt;::reserve::do_reserve_and_handle::&lt;alloc::alloc::Global&gt; (11,108,704 sampled user CPU cycles, 0.01%)</title><rect x="111.7" y="157" width="0.2" height="15.0" fill="rgb(240,184,39)" rx="2" ry="2" />
+<text  x="114.70" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;voteboat::log::EntryPayload&gt; (47,429,180 sampled user CPU cycles, 0.06%)</title><rect x="994.6" y="157" width="0.8" height="15.0" fill="rgb(249,133,49)" rx="2" ry="2" />
+<text  x="997.65" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::retire_replication (9,462,044 sampled user CPU cycles, 0.01%)</title><rect x="580.3" y="157" width="0.2" height="15.0" fill="rgb(247,179,46)" rx="2" ry="2" />
+<text  x="583.34" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f1eb5] (6,810,785 sampled user CPU cycles, 0.01%)</title><rect x="1038.1" y="109" width="0.1" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="1041.06" y="119.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c21] (16,372,117 sampled user CPU cycles, 0.02%)</title><rect x="914.8" y="157" width="0.2" height="15.0" fill="rgb(242,180,41)" rx="2" ry="2" />
+<text  x="917.78" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::notify::NotifiedProject&gt;::poll_notified (2,835,600,303 sampled user CPU cycles, 3.81%)</title><rect x="323.5" y="157" width="44.9" height="15.0" fill="rgb(246,190,45)" rx="2" ry="2" />
+<text  x="326.53" y="167.5" >&lt;tok..</text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c1a] (12,345,711 sampled user CPU cycles, 0.02%)</title><rect x="914.6" y="157" width="0.2" height="15.0" fill="rgb(239,180,37)" rx="2" ry="2" />
+<text  x="917.58" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;::push_remote_task (60,685,184 sampled user CPU cycles, 0.08%)</title><rect x="20.4" y="157" width="1.0" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="23.39" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::worker::Context&gt;::run_task (254,103,144 sampled user CPU cycles, 0.34%)</title><rect x="222.7" y="157" width="4.1" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="225.73" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;core::iter::adapters::filter::Filter&lt;core::iter::adapters::map::Map&lt;core::iter::adapters::map::Map&lt;core::iter::adapters::chain::Chain&lt;core::iter::adapters::chain::Chain&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;, alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;&gt;, core::iter::adapters::filter::Filter&lt;core::iter::adapters::flatten::FlatMap&lt;core::option::Iter&lt;voteboat::membership::JointConfiguration&gt;, core::iter::adapters::chain::Chain&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;, alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#0}&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#1}&gt;&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#2}&gt;, &lt;voteboat::raft::Raft&gt;::peers::{closure#0}&gt;, &lt;voteboat::raft::Raft&gt;::peers::{closure#1}&gt; as core::iter::traits::iterator::Iterator&gt;::next (295,983,694 sampled user CPU cycles, 0.40%)</title><rect x="135.1" y="157" width="4.7" height="15.0" fill="rgb(230,220,27)" rx="2" ry="2" />
+<text  x="138.14" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&gt;::step (77,478,333 sampled user CPU cycles, 0.10%)</title><rect x="653.7" y="157" width="1.2" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="656.68" y="167.5" ></text>
+</g>
+<g >
+<title>voteboat::log::transition::validate_append_metadata (413,602,714 sampled user CPU cycles, 0.56%)</title><rect x="1142.1" y="157" width="6.5" height="15.0" fill="rgb(235,135,33)" rx="2" ry="2" />
+<text  x="1145.06" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bdd] (1,448,203,056 sampled user CPU cycles, 1.94%)</title><rect x="886.0" y="157" width="23.0" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="889.05" y="167.5" >[..</text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb520e21] (19,787,517 sampled user CPU cycles, 0.03%)</title><rect x="74.0" y="77" width="0.4" height="15.0" fill="rgb(242,180,41)" rx="2" ry="2" />
+<text  x="77.05" y="87.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::batch_semaphore::Semaphore&gt;::add_permits_locked (592,330,587 sampled user CPU cycles, 0.79%)</title><rect x="242.5" y="157" width="9.4" height="15.0" fill="rgb(245,190,44)" rx="2" ry="2" />
+<text  x="245.52" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb20008f] (12,107,904 sampled user CPU cycles, 0.02%)</title><rect x="72.9" y="141" width="0.2" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="75.89" y="151.5" ></text>
+</g>
+<g >
+<title>tokio::runtime::scheduler::multi_thread::worker::run (3,283,549,000 sampled user CPU cycles, 4.41%)</title><rect x="1043.2" y="157" width="52.0" height="15.0" fill="rgb(243,141,41)" rx="2" ry="2" />
+<text  x="1046.23" y="167.5" >tokio..</text>
+</g>
+<g >
+<title>&lt;voteboat::log::transition::incoming::OwnedNextLog&gt;::matches_update (53,562,448 sampled user CPU cycles, 0.07%)</title><rect x="442.6" y="157" width="0.9" height="15.0" fill="rgb(245,179,45)" rx="2" ry="2" />
+<text  x="445.62" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bb0] (93,992,507 sampled user CPU cycles, 0.13%)</title><rect x="882.3" y="157" width="1.5" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="885.27" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc6d4] (12,308,866 sampled user CPU cycles, 0.02%)</title><rect x="657.6" y="157" width="0.2" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="660.56" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe064] (18,658,720 sampled user CPU cycles, 0.03%)</title><rect x="707.5" y="157" width="0.3" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="710.47" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2abe] (38,944,946 sampled user CPU cycles, 0.05%)</title><rect x="1041.4" y="93" width="0.6" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="1044.42" y="103.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d6b] (6,999,577 sampled user CPU cycles, 0.01%)</title><rect x="965.6" y="157" width="0.1" height="15.0" fill="rgb(234,180,32)" rx="2" ry="2" />
+<text  x="968.56" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae4cd] (57,110,511 sampled user CPU cycles, 0.08%)</title><rect x="798.9" y="157" width="0.9" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="801.92" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cd4] (85,517,339 sampled user CPU cycles, 0.11%)</title><rect x="953.1" y="157" width="1.4" height="15.0" fill="rgb(238,180,36)" rx="2" ry="2" />
+<text  x="956.11" y="167.5" ></text>
+</g>
+<g >
+<title>__lll_lock_wait_private (28,275,936 sampled user CPU cycles, 0.04%)</title><rect x="706.9" y="141" width="0.4" height="15.0" fill="rgb(245,154,45)" rx="2" ry="2" />
+<text  x="709.88" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebe0b3] (1,088,052,958 sampled user CPU cycles, 1.46%)</title><rect x="739.8" y="157" width="17.3" height="15.0" fill="rgb(240,180,39)" rx="2" ry="2" />
+<text  x="742.85" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd5f7] (7,245,512 sampled user CPU cycles, 0.01%)</title><rect x="739.4" y="141" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="742.42" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb520d9c] (20,105,693 sampled user CPU cycles, 0.03%)</title><rect x="1040.4" y="93" width="0.3" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="1043.39" y="103.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::park::Inner&gt;::park_timeout (247,353,517 sampled user CPU cycles, 0.33%)</title><rect x="168.0" y="157" width="3.9" height="15.0" fill="rgb(234,190,32)" rx="2" ry="2" />
+<text  x="171.01" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fae484] (9,453,093 sampled user CPU cycles, 0.01%)</title><rect x="757.5" y="157" width="0.1" height="15.0" fill="rgb(235,180,33)" rx="2" ry="2" />
+<text  x="760.49" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::time::handle::Handle&gt;::process_at_time (283,773,523 sampled user CPU cycles, 0.38%)</title><rect x="31.1" y="157" width="4.5" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="34.09" y="167.5" ></text>
+</g>
+<g >
+<title>__vdso_clock_gettime (360,726,763 sampled user CPU cycles, 0.48%)</title><rect x="63.7" y="141" width="5.7" height="15.0" fill="rgb(236,122,34)" rx="2" ry="2" />
+<text  x="66.66" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bdd] (8,806,978 sampled user CPU cycles, 0.01%)</title><rect x="1033.5" y="125" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="1036.46" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd579] (17,342,691 sampled user CPU cycles, 0.02%)</title><rect x="739.0" y="141" width="0.3" height="15.0" fill="rgb(242,180,41)" rx="2" ry="2" />
+<text  x="742.05" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7cc6] (599,691,359 sampled user CPU cycles, 0.80%)</title><rect x="938.7" y="157" width="9.5" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="941.75" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;alloc::vec::into_iter::IntoIter&lt;(voteboat::identity::OperationId, tokio::sync::oneshot::Receiver&lt;voteboat::identity::OperationId&gt;)&gt;&gt; (14,538,557 sampled user CPU cycles, 0.02%)</title><rect x="69.7" y="157" width="0.3" height="15.0" fill="rgb(240,133,38)" rx="2" ry="2" />
+<text  x="72.74" y="167.5" ></text>
+</g>
+<g >
+<title>__lll_lock_wait_private (8,038,945 sampled user CPU cycles, 0.01%)</title><rect x="61.2" y="141" width="0.2" height="15.0" fill="rgb(245,154,45)" rx="2" ry="2" />
+<text  x="64.23" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::runtime::scheduler::multi_thread::handle::Handle&gt;::next_remote_task (58,873,939 sampled user CPU cycles, 0.08%)</title><rect x="176.8" y="157" width="1.0" height="15.0" fill="rgb(236,190,34)" rx="2" ry="2" />
+<text  x="179.83" y="167.5" ></text>
+</g>
+<g >
+<title> callers may be missing] (39,840,024 sampled user CPU cycles, 0.05%)</title><rect x="1189.4" y="173" width="0.6" height="15.0" fill="rgb(243,210,42)" rx="2" ry="2" />
+<text  x="1192.37" y="183.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc9c3] (10,055,300 sampled user CPU cycles, 0.01%)</title><rect x="736.0" y="141" width="0.1" height="15.0" fill="rgb(240,180,38)" rx="2" ry="2" />
+<text  x="738.97" y="151.5" ></text>
+</g>
+<g >
+<title>voteboat::raft::persist_effect::&lt;voteboat_matched_framework::store::MemoryStore&gt; (1,929,239,897 sampled user CPU cycles, 2.59%)</title><rect x="1158.8" y="157" width="30.6" height="15.0" fill="rgb(245,135,44)" rx="2" ry="2" />
+<text  x="1161.82" y="167.5" >vo..</text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::list::Tx&lt;voteboat_matched_framework::voteboat_engine::Request&gt;&gt;::find_block (8,260,641 sampled user CPU cycles, 0.01%)</title><rect x="39.3" y="157" width="0.1" height="15.0" fill="rgb(240,190,39)" rx="2" ry="2" />
+<text  x="42.27" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc8294ec] (34,732,108 sampled user CPU cycles, 0.05%)</title><rect x="1041.4" y="77" width="0.6" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="1044.42" y="87.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a0d2] (11,236,375 sampled user CPU cycles, 0.02%)</title><rect x="73.3" y="125" width="0.2" height="15.0" fill="rgb(240,180,38)" rx="2" ry="2" />
+<text  x="76.28" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7da1] (8,814,646 sampled user CPU cycles, 0.01%)</title><rect x="966.3" y="157" width="0.2" height="15.0" fill="rgb(243,180,42)" rx="2" ry="2" />
+<text  x="969.33" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::mpsc::chan::Rx&lt;voteboat_matched_framework::voteboat_engine::Request, tokio::sync::mpsc::bounded::Semaphore&gt;&gt;::try_recv::{closure#0} (16,135,277 sampled user CPU cycles, 0.02%)</title><rect x="304.6" y="157" width="0.2" height="15.0" fill="rgb(234,190,32)" rx="2" ry="2" />
+<text  x="307.58" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f2487] (8,706,174 sampled user CPU cycles, 0.01%)</title><rect x="1038.8" y="77" width="0.1" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="1041.75" y="87.5" ></text>
+</g>
+<g >
+<title>&lt;alloc::sync::Arc&lt;tokio::sync::oneshot::Inner&lt;voteboat::identity::OperationId&gt;&gt;&gt;::drop_slow (29,500,493 sampled user CPU cycles, 0.04%)</title><rect x="10.0" y="157" width="0.5" height="15.0" fill="rgb(238,184,36)" rx="2" ry="2" />
+<text  x="13.00" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::membership::Membership&gt;::is_voter (461,981,029 sampled user CPU cycles, 0.62%)</title><rect x="502.1" y="157" width="7.3" height="15.0" fill="rgb(240,179,38)" rx="2" ry="2" />
+<text  x="505.10" y="167.5" ></text>
+</g>
+<g >
+<title>core::ptr::drop_glue::&lt;&lt;voteboat_matched_framework::voteboat_engine::Client&gt;::write::{closure#0}&gt; (11,445,195 sampled user CPU cycles, 0.02%)</title><rect x="69.6" y="157" width="0.1" height="15.0" fill="rgb(247,133,46)" rx="2" ry="2" />
+<text  x="72.56" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbc82a105] (32,237,786 sampled user CPU cycles, 0.04%)</title><rect x="1036.5" y="125" width="0.5" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="1039.50" y="135.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bcd] (30,041,939 sampled user CPU cycles, 0.04%)</title><rect x="885.6" y="157" width="0.4" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="888.57" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebd0de] (10,040,083 sampled user CPU cycles, 0.01%)</title><rect x="737.5" y="141" width="0.1" height="15.0" fill="rgb(244,180,43)" rx="2" ry="2" />
+<text  x="740.47" y="151.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat_matched_framework::voteboat_engine::actor::Actor&lt;true&gt;&gt;::include (17,813,851 sampled user CPU cycles, 0.02%)</title><rect x="619.2" y="157" width="0.3" height="15.0" fill="rgb(245,179,44)" rx="2" ry="2" />
+<text  x="622.24" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7bf4] (112,513,521 sampled user CPU cycles, 0.15%)</title><rect x="910.9" y="157" width="1.8" height="15.0" fill="rgb(236,180,34)" rx="2" ry="2" />
+<text  x="913.87" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::reserve_effects (338,473,652 sampled user CPU cycles, 0.45%)</title><rect x="575.0" y="157" width="5.3" height="15.0" fill="rgb(237,179,35)" rx="2" ry="2" />
+<text  x="577.98" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;core::iter::adapters::map::Map&lt;core::iter::adapters::chain::Chain&lt;core::iter::adapters::chain::Chain&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;, alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;&gt;, core::iter::adapters::filter::Filter&lt;core::iter::adapters::flatten::FlatMap&lt;core::option::Iter&lt;voteboat::membership::JointConfiguration&gt;, core::iter::adapters::chain::Chain&lt;alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;, alloc::collections::btree::map::Iter&lt;voteboat::identity::NodeId, voteboat::identity::StoreIdentity&gt;&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#0}&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#1}&gt;&gt;, &lt;voteboat::membership::Membership&gt;::replicas::{closure#2}&gt; as core::iter::traits::iterator::Iterator&gt;::size_hint (116,817,055 sampled user CPU cycles, 0.16%)</title><rect x="139.8" y="157" width="1.9" height="15.0" fill="rgb(238,220,36)" rx="2" ry="2" />
+<text  x="142.83" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07ebc703] (34,556,677 sampled user CPU cycles, 0.05%)</title><rect x="691.1" y="157" width="0.5" height="15.0" fill="rgb(242,180,40)" rx="2" ry="2" />
+<text  x="694.07" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb4f20ec] (87,066,426 sampled user CPU cycles, 0.12%)</title><rect x="1041.2" y="109" width="1.4" height="15.0" fill="rgb(246,180,45)" rx="2" ry="2" />
+<text  x="1044.18" y="119.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7ac4] (212,261,000 sampled user CPU cycles, 0.28%)</title><rect x="807.8" y="157" width="3.4" height="15.0" fill="rgb(238,180,37)" rx="2" ry="2" />
+<text  x="810.83" y="167.5" ></text>
+</g>
+<g >
+<title>&lt;voteboat::raft::Raft&gt;::persist_update (470,681,919 sampled user CPU cycles, 0.63%)</title><rect x="549.3" y="157" width="7.5" height="15.0" fill="rgb(245,179,45)" rx="2" ry="2" />
+<text  x="552.32" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved [unknown]+ip=ffffffffbb20012f] (6,973,148 sampled user CPU cycles, 0.01%)</title><rect x="967.4" y="141" width="0.1" height="15.0" fill="rgb(245,180,44)" rx="2" ry="2" />
+<text  x="970.41" y="151.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7d86] (12,255,418 sampled user CPU cycles, 0.02%)</title><rect x="966.0" y="157" width="0.2" height="15.0" fill="rgb(233,180,31)" rx="2" ry="2" />
+<text  x="968.99" y="167.5" ></text>
+</g>
+<g >
+<title>[unresolved libc.so.6+ip=7f7e07fb7c80] (12,876,850 sampled user CPU cycles, 0.02%)</title><rect x="927.3" y="157" width="0.2" height="15.0" fill="rgb(239,180,38)" rx="2" ry="2" />
+<text  x="930.31" y="167.5" ></text>
+</g>
+<g >
+<title>realloc (1,076,361,353 sampled user CPU cycles, 1.44%)</title><rect x="1017.9" y="157" width="17.0" height="15.0" fill="rgb(238,184,36)" rx="2" ry="2" />
+<text  x="1020.88" y="167.5" ></text>
+</g>
+<g >
+<title>all (74,512,718,053 sampled user CPU cycles, 100%)</title><rect x="10.0" y="221" width="1180.0" height="15.0" fill="rgb(255,230,55)" rx="2" ry="2" />
+<text  x="13.00" y="231.5" ></text>
+</g>
+<g >
+<title>&lt;tokio::sync::batch_semaphore::Acquire as core::future::future::Future&gt;::poll (115,141,191 sampled user CPU cycles, 0.15%)</title><rect x="37.4" y="157" width="1.9" height="15.0" fill="rgb(229,190,26)" rx="2" ry="2" />
+<text  x="40.45" y="167.5" ></text>
+</g>
+</g>
+</svg>

@@ -1,0 +1,2 @@
+samply0.13.1 presymbolicate does not pass CLI symbol_dir to its SymbolManager. Before recording an adjacent dSYM symlink points only to UUID-matched originalbundle; no binary/source bytes changed.
+/tmp/voteboat-mac426-799f2cf-VRN5Xr/target-matched-release/release/voteboat-matched-framework.dSYM

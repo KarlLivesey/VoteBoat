@@ -1,0 +1,598 @@
+env;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20ee80];[unresolved [unknown]+ip=ffffffffbb201280] 1
+env;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20ee87];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20fb34] 1
+env;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20ee87];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20fb34];[unresolved [unknown]+ip=ffffffffbb201280] 1
+env;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20ee87];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20fb5a];[unresolved [unknown]+ip=ffffffffbb201280] 14
+env;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20ee87];[unresolved ld-linux-x86-64.so.2+ip=7efd3f2100ff];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20e88e];[unresolved ld-linux-x86-64.so.2+ip=7efd3f202398] 29544
+env;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7efd3f20ee87];[unresolved ld-linux-x86-64.so.2+ip=7efd3f210135] 682
+matched-client;[recorded stack boundary; callers may be missing];<alloc::sync::Arc<tokio::sync::oneshot::Inner<voteboat::identity::OperationId>>>::drop_slow 29500493
+matched-client;[recorded stack boundary; callers may be missing];<std::sys::pal::unix::time::Timespec>::now 18775050
+matched-client;[recorded stack boundary; callers may be missing];<std::sys::pal::unix::time::Timespec>::sub_timespec 66235433
+matched-client;[recorded stack boundary; callers may be missing];<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout 213772512
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::park::Inner>::park_timeout 327888520
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::handle::Handle>::push_remote_task 60685184
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::handle::Handle>::schedule_task 4427888
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::idle::Idle>::worker_to_notify 40986084
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::park::Unparker>::unpark 27748506
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::stats::Stats>::end_processing_scheduled_tasks 75742842
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal 173765257
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Context>::run_task 25017490
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Core>::maintenance 153771978
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::time::Driver>::park_internal 113132221
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::time::handle::Handle>::process_at_time 283773523
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::time::wheel::Wheel>::next_expiration 42434824
+matched-client;[recorded stack boundary; callers may be missing];<tokio::runtime::time::wheel::level::Level>::next_expiration 75677997
+matched-client;[recorded stack boundary; callers may be missing];<tokio::sync::batch_semaphore::Acquire as core::future::future::Future>::poll 115141191
+matched-client;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::list::Tx<voteboat_matched_framework::voteboat_engine::Request>>::find_block 8260641
+matched-client;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::workload::Client>::write::{closure#0} 822162593
+matched-client;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb2000ab] 3551786
+matched-client;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb2000b4] 5712701
+matched-client;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb201710] 37
+matched-client;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb20171f];[unresolved [unknown]+ip=ffffffffbc82c834] 1539
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe060] 8410920
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe064] 22452104
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe06b] 22324596
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe099] 184196188
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcb65] 17672302
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcb69] 16965051
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcb75] 3458652
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcbc4] 2742428
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcbdf] 3761906
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcbf1] 5663125
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcbf7] 5528928
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcc43] 2827030
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcc5a] 5475357
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0aa] 5311732
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd546] 3426897
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd579];[unresolved libc.so.6+ip=7f7e07ebaf23] 3215587
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd5b0] 3952421
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0b3] 229136184
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe1d7];__lll_lock_wait_private 8038945
+matched-client;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe1ec];__lll_lock_wake_private;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f2496] 3567285
+matched-client;[recorded stack boundary; callers may be missing];__floattidf 59521919
+matched-client;[recorded stack boundary; callers may be missing];cfree 37847700
+matched-client;[recorded stack boundary; callers may be missing];clock_gettime 44544555
+matched-client;[recorded stack boundary; callers may be missing];clock_gettime;__vdso_clock_gettime 360726763
+matched-client;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<<tokio::sync::mpsc::bounded::Sender<openraft::core::notification::Notification<bench_minimal::store::TypeConfig>>>::reserve_inner::{closure#0}> 2855452
+matched-client;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<<tokio::sync::mpsc::bounded::Sender<voteboat_matched_framework::voteboat_engine::Request>>::send::{closure#0}> 8922915
+matched-client;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<<voteboat_matched_framework::voteboat_engine::Client>::write::{closure#0}> 11445195
+matched-client;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::vec::into_iter::IntoIter<(voteboat::identity::OperationId, tokio::sync::oneshot::Receiver<voteboat::identity::OperationId>)>> 14538557
+matched-client;[recorded stack boundary; callers may be missing];malloc 18515858
+matched-client;[recorded stack boundary; callers may be missing];pow 115398671
+matched-client;[recorded stack boundary; callers may be missing];syscall 14957715
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200080] 22131472
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200084] 6363559
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200087] 6967713
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20008f] 12107904
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb2000ca] 5257635
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0a5] 4342559
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0c2] 2853086
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0d2] 11236375
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105] 2996093
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdc56] 13363768
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a117] 3709984
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb400ef6] 3821028
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520d8f] 3177217
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520d9c];[unresolved [unknown]+ip=ffffffffbb520e19] 10339241
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520d9c];[unresolved [unknown]+ip=ffffffffbb520e21] 19787517
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520d9c];[unresolved [unknown]+ip=ffffffffbb520e27] 3375074
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520dc0] 6258142
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f2003] 3458652
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f2018] 5142077
+matched-client;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2abe];[unresolved [unknown]+ip=ffffffffbc8294ec] 2589734
+matched-client;[recorded stack boundary; callers may be missing];tokio::runtime::scheduler::multi_thread::worker::run 693752367
+matched-client;[recorded stack boundary; callers may be missing];tokio::runtime::task::raw::poll::<voteboat_matched_framework::workload::client_loop::{closure#0}, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>> 138246783
+matched-client;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::clone_waker 95017184
+matched-client;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::drop_waker 46025954
+matched-client;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::wake_by_val 51631080
+matched-client;[recorded stack boundary; callers may be missing];voteboat_matched_framework::workload::client_loop::{closure#0} 124775402
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<_, _, _> as core::clone::Clone>::clone::clone_subtree::<voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::alloc::Global> 3020287
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::log::owned::Group>>::get::<voteboat::identity::GroupIdentity> 34221473
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, u64>>::get::<voteboat::identity::NodeId> 6746426
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, u64>>::insert 53354542
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::insert 83238000
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove::<voteboat::identity::NodeId> 57613631
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::NodeId, voteboat::raft::admitted_replication::EmptyAppendAlias>>::remove::<voteboat::identity::NodeId> 3120814
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert 17135774
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove::<voteboat::identity::OperationId> 72698959
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::IntoIter<voteboat::identity::GroupIdentity, voteboat::log::owned::Plan>>::dying_next 87856955
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::IntoIter<voteboat::identity::NodeId, voteboat::raft::Replication>>::dying_next 93060718
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, alloc::collections::btree::set_val::SetValZST> as core::iter::traits::iterator::Iterator>::next 4937901
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity> as core::iter::traits::iterator::Iterator>::next 384958429
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::NodeId, voteboat::raft::Replication, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::NodeId, voteboat::raft::Replication>>::remove_kv::{closure#0}, alloc::alloc::Global> 114350575
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove_kv::{closure#0}, alloc::alloc::Global> 27624825
+matched-server;[recorded stack boundary; callers may be missing];<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect> as alloc::collections::vec_deque::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend 84122855
+matched-server;[recorded stack boundary; callers may be missing];<alloc::raw_vec::RawVec<voteboat::identity::OperationId>>::grow_one 21881458
+matched-server;[recorded stack boundary; callers may be missing];<alloc::raw_vec::RawVec<voteboat::log::LogEntry>>::grow_one 19848251
+matched-server;[recorded stack boundary; callers may be missing];<alloc::raw_vec::RawVec<voteboat::raft::Effect>>::grow_one 17642403
+matched-server;[recorded stack boundary; callers may be missing];<alloc::raw_vec::RawVecInner<_>>::reserve::do_reserve_and_handle::<alloc::alloc::Global> 11108704
+matched-server;[recorded stack boundary; callers may be missing];<alloc::raw_vec::RawVecInner>::finish_grow 321846076
+matched-server;[recorded stack boundary; callers may be missing];<alloc::raw_vec::RawVecInner>::finish_grow;realloc 268659
+matched-server;[recorded stack boundary; callers may be missing];<alloc::vec::Vec<voteboat::log::LogEntry> as alloc::vec::spec_extend::SpecExtend<voteboat::log::LogEntry, alloc::vec::into_iter::IntoIter<voteboat::log::LogEntry>>>::spec_extend 99144187
+matched-server;[recorded stack boundary; callers may be missing];<alloc::vec::Vec<voteboat::raft::Effect> as alloc::vec::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend 272998530
+matched-server;[recorded stack boundary; callers may be missing];<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut 7843144
+matched-server;[recorded stack boundary; callers may be missing];<alloc::vec::Vec<voteboat::raft::Effect>>::push_mut;<alloc::raw_vec::RawVecInner>::finish_grow;[unresolved libc.so.6+ip=7f7e07ebe0b3] 139910
+matched-server;[recorded stack boundary; callers may be missing];<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>> as core::iter::traits::iterator::Iterator>::fold::<usize, core::iter::adapters::map::map_fold<(&voteboat::identity::NodeId, &voteboat::identity::StoreIdentity), 766936881
+matched-server;[recorded stack boundary; callers may be missing];<core::iter::adapters::filter::Filter<core::iter::adapters::map::Map<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}>, <voteboat::raft::Raft>::peers::{closure#0}>, <voteboat::raft::Raft>::peers::{closure#1}> as core::iter::traits::iterator::Iterator>::next 295983694
+matched-server;[recorded stack boundary; callers may be missing];<core::iter::adapters::map::Map<core::iter::adapters::chain::Chain<core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, core::iter::adapters::filter::Filter<core::iter::adapters::flatten::FlatMap<core::option::Iter<voteboat::membership::JointConfiguration>, core::iter::adapters::chain::Chain<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>, <voteboat::membership::Membership>::replicas::{closure#0}>, <voteboat::membership::Membership>::replicas::{closure#1}>>, <voteboat::membership::Membership>::replicas::{closure#2}> as core::iter::traits::iterator::Iterator>::size_hint 116817055
+matched-server;[recorded stack boundary; callers may be missing];<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll 1316487381
+matched-server;[recorded stack boundary; callers may be missing];<core::slice::iter::Iter<voteboat::log::LogEntry> as core::iter::traits::iterator::Iterator>::nth 4140142
+matched-server;[recorded stack boundary; callers may be missing];<std::sys::pal::unix::time::Timespec>::now 70882850
+matched-server;[recorded stack boundary; callers may be missing];<std::sys::pal::unix::time::Timespec>::sub_timespec 110005157
+matched-server;[recorded stack boundary; callers may be missing];<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout 103807759
+matched-server;[recorded stack boundary; callers may be missing];<std::sys::sync::mutex::futex::Mutex>::lock_contended 57725702
+matched-server;[recorded stack boundary; callers may be missing];<std::thread::spawnhook::SpawnHooks as core::ops::drop::Drop>::drop 17801
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::metrics::worker::WorkerMetrics>::set_thread_id 5365
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::park::Inner>::park_timeout 247353517
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::park::Inner>::unpark 309461690
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::handle::Handle>::next_remote_task 58873939
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::handle::Handle>::push_remote_task 172522223
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::handle::Handle>::schedule_task 42604277
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::idle::Idle>::worker_to_notify 674054151
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::park::Unparker>::unpark 432668059
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::queue::Local<alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>>::push_back_or_overflow::<tokio::runtime::scheduler::multi_thread::handle::Handle> 32608512
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::stats::Stats>::end_processing_scheduled_tasks 153637146
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal 1331443155
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal;[unresolved [unknown]+ip=ffffffffbb201710] 52
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Context>::run_task 254103144
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::scheduler::multi_thread::worker::Core>::maintenance 585299500
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::time::Driver>::park_internal 48430631
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::time::Driver>::park_internal;<std::sys::pal::unix::time::Timespec>::now 2041
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::time::Driver>::park_internal;<std::sys::pal::unix::time::Timespec>::now;clock_gettime 706
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::time::handle::Handle>::process_at_time 253311976
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::time::wheel::Wheel>::next_expiration 47623459
+matched-server;[recorded stack boundary; callers may be missing];<tokio::runtime::time::wheel::level::Level>::next_expiration 60688697
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::batch_semaphore::Semaphore>::add_permits_locked 592330587
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0} 833581822
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::bounded::Receiver<voteboat_matched_framework::voteboat_engine::Request>>::len 2423073
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::bounded::Receiver<voteboat_matched_framework::voteboat_engine::Request>>::recv::{closure#0} 144290457
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::bounded::Sender<voteboat::raft::Message>>::try_send 2346234054
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::chan::Rx<voteboat_matched_framework::voteboat_engine::Request, tokio::sync::mpsc::bounded::Semaphore>>::try_recv::{closure#0} 16135277
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::list::Rx<voteboat::raft::Message>>::len 3323549
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::list::Rx<voteboat::raft::Message>>::pop 117414211
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::list::Rx<voteboat_matched_framework::voteboat_engine::Request>>::pop 31478693
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::list::Tx<voteboat::raft::Message>>::find_block 57924536
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::notify::NotifiedProject>::drop_notified 970339226
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::notify::NotifiedProject>::poll_notified 2835600303
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send 356574331
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::task::atomic_waker::AtomicWaker>::register_by_ref 1579031465
+matched-server;[recorded stack boundary; callers may be missing];<tokio::sync::watch::Receiver<bool>>::changed::{closure#0} 402044886
+matched-server;[recorded stack boundary; callers may be missing];<tokio::time::sleep::Sleep as core::future::future::Future>::poll 24693830
+matched-server;[recorded stack boundary; callers may be missing];<tokio::util::linked_list::LinkedList<tokio::sync::notify::Waiter>>::remove 5058810
+matched-server;[recorded stack boundary; callers may be missing];<tokio::util::rand::RngSeed>::new;std::sys::random::linux::hashmap_random_keys;std::sys::random::linux::getrandom;[unresolved libc.so.6+ip=7f7e07e48aad];[unresolved [vdso]+ip=7f7e081ce86d] 3740
+matched-server;[recorded stack boundary; callers may be missing];<tokio::util::rand::RngSeed>::new;std::sys::random::linux::hashmap_random_keys;std::sys::random::linux::getrandom;[unresolved libc.so.6+ip=7f7e07e48aad];[unresolved [vdso]+ip=7f7e081ce8d6] 4030
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global> 512232965
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::LogEntry as core::clone::Clone>::clone 132748120
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length 11272038
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::LogUpdate as core::clone::Clone>::clone 291668460
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::owned::OwnedLogState>::apply_batch 1367433680
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::transition::NextLog>::plan 1842737
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::transition::incoming::OwnedNextLog>::matches_update 53562448
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install 75443215
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::transition::incoming::PreparedOwnedLog>::install 603804262
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq 2929175372
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::log::transition::view::LogView>::term_at 94286431
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::membership::Membership>::is_voter 461981029
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::membership::Membership>::replica_store 100660631
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::membership::Membership>::voter_store 281801669
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::admitted 20334096
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::append_for 462256695
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::authenticated_message_source 277044342
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::broadcast_ready_peers 130313531
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::clear_replication_requests 129625430
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::complete 561112647
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::finish_step 143513524
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::is_empty_alias 54023357
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::local_voter 6880849
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::maybe_commit 112358535
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::peers 91632092
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::persist 148203176
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::persist_update 470681919
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::receive_append 564192865
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::receive_appended 434799220
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::receive_inner 136594131
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::remember_granted_vote 13753333
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::reserve_effects 338473652
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::retire_replication 9462044
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::retirement_commit 79417301
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::rollback_replicas 731085405
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::raft::Raft>::step 1300437915
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::snapshot::SnapshotMetadata>::validate 4071468
+matched-server;[recorded stack boundary; callers may be missing];<voteboat::snapshot::SnapshotRef as core::cmp::PartialEq>::eq 73818912
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::application::Noop as voteboat::application::StateMachine>::apply_batch 76930276
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::barrier 181554324
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include 17813851
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::reserve 31018058
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects 2118053996
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests 7370015
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::voteboat_engine::actor::Actor>::step 77478333
+matched-server;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::voteboat_engine::stats::Stats>::record_proposals 157586061
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=1];<voteboat::raft::Raft>::step 155677
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=559f00000011];tokio::runtime::scheduler::multi_thread::worker::run 240697
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=559f00000015];tokio::runtime::scheduler::multi_thread::worker::run 3045
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=559f0000007d];tokio::runtime::scheduler::multi_thread::worker::run 2341
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=6d00007265767264];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0},;<std::sys::sync::mutex::futex::Mutex>::lock_contended 20915
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=6d00007265767264];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0},;<std::sys::sync::mutex::futex::Mutex>::lock_contended;[unresolved [unknown]+ip=ffffffffbb200087] 1
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=6d00007265767264];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0},;<std::sys::sync::mutex::futex::Mutex>::lock_contended;[unresolved [unknown]+ip=ffffffffbb201710] 2
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=6d00007265767264];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0},;<std::sys::sync::mutex::futex::Mutex>::lock_contended;syscall 56
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=7];<voteboat::raft::Raft>::receive_append 111565
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=7];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0}, 112
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=7];tokio::runtime::task::raw::poll::<tokio::runtime::blocking::task::BlockingTask<<tokio::runtime::scheduler::multi_thread::worker::Launch>::launch::{closure#0}>, tokio::runtime::blocking::schedule::BlockingSchedule>;tokio::runtime::scheduler::multi_thread::worker::run 2282
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=7];tokio::runtime::task::raw::poll::<tokio::runtime::blocking::task::BlockingTask<<tokio::runtime::scheduler::multi_thread::worker::Launch>::launch::{closure#0}>, tokio::runtime::blocking::schedule::BlockingSchedule>;tokio::runtime::scheduler::multi_thread::worker::run;<tokio::runtime::scheduler::multi_thread::worker::Core>::maintenance;<std::sys::sync::mutex::futex::Mutex>::lock_contended 50026
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=80000000000000fe];<voteboat::raft::Raft>::remember_granted_vote 134754
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb2000ad] 3594025
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb2000b4] 2134695
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb2015f0] 1
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb20160a];[unresolved [unknown]+ip=ffffffffbc82fcae] 3640658
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb201670] 1
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb201710] 46
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=1];<tokio::runtime::park::Inner>::park_timeout 25
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=1];<tokio::runtime::park::Inner>::park_timeout;<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout 2
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=1];<tokio::runtime::park::Inner>::park_timeout;<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout;[unresolved [unknown]+ip=ffffffffbb201710] 1
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000003];<tokio::runtime::park::Inner>::park_timeout 35
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000003];<tokio::runtime::park::Inner>::park_timeout;<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout 2
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000011];<tokio::runtime::park::Inner>::park_timeout 37
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000011];<tokio::runtime::park::Inner>::park_timeout;<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout 2
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000011];<tokio::runtime::scheduler::multi_thread::worker::Core>::maintenance 2212
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000015];<tokio::runtime::park::Inner>::park_timeout 2
+matched-server;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffffffffff];[unresolved [unknown]+ip=559f00000015];<tokio::runtime::park::Inner>::park_timeout;<std::sys::sync::condvar::futex::Condvar>::wait_optional_timeout 1
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc6d4] 12308866
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc6d8] 4399121
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc6e9] 7649116
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc6f4] 2091630473
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc4f8] 3668116
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc523] 4067153
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc527] 4232517
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc544] 3343830
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc548] 7668541
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc5a6] 2293139
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc5fa];[unresolved libc.so.6+ip=7f7e07ebaf14] 5886153
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc703];[unresolved libc.so.6+ip=7f7e07ebc5fb] 3397228
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc70d] 964048942
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc7b3];__lll_lock_wait_private 13646149
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebc7b3];__lll_lock_wait_private;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2abe];[unresolved [unknown]+ip=ffffffffbc8294ec] 14629787
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe060] 8535634
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe064] 18658720
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe06b] 13549493
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe070] 10666245
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe079] 7343984
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe080] 5910264
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe085] 8344262
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe089] 37971214
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe099] 1673349799
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc85e] 7038480
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc885] 3824009
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc932] 2949991
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc93b] 7358538
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc9a1] 3021775
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc9c3] 10055300
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc9d3] 2763051
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc9d7] 4622084
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebc9e1] 3844527
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcae5] 3812782
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcaeb] 6374508
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcb69] 3598447
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcc5a] 6097924
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcc63] 5508903
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcc72] 2806345
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebcde6] 3819738
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd093] 4208946
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0aa] 14056145
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0c0] 7984190
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0c5] 4894565
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0d4] 7293949
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0d6] 2988018
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0de] 10040083
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0e4] 16622058
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd0ef] 4123018
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd110] 3482982
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd175] 6489812
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd17a] 18924064
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd1ac] 3902834
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd52c] 5001718
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd546] 22347208
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd54a] 5267722
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd570] 3459055
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd579];[unresolved libc.so.6+ip=7f7e07ebaf23] 8516872
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd579];[unresolved libc.so.6+ip=7f7e07ebaf3d] 1914318
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd579];[unresolved libc.so.6+ip=7f7e07ebaf45] 3094679
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd579];[unresolved libc.so.6+ip=7f7e07ebaf4c] 3816822
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd57a] 2215364
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd5a5] 3637178
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd5f7] 7245512
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0a9];[unresolved libc.so.6+ip=7f7e07ebd641] 3451869
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0aa] 16494774
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0b3] 1088052958
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0b6] 4464001
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe1d7];__lll_lock_wait_private 4514376
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start;[unresolved libc.so.6+ip=7f7e07ebfcb0] 2688
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start;[unresolved libc.so.6+ip=7f7e07ebfce3];[unresolved libc.so.6+ip=7f7e07ebe0f6];[unresolved libc.so.6+ip=7f7e07ebbc52];[unresolved libc.so.6+ip=7f7e07ebb6a0];__mprotect;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4ce02d] 2481
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start;[unresolved libc.so.6+ip=7f7e07ebfce3];[unresolved libc.so.6+ip=7f7e07ebe0f6];[unresolved libc.so.6+ip=7f7e07ebbc52];[unresolved libc.so.6+ip=7f7e07ebb718];[unresolved [unknown]+ip=ffffffffbb2012a6];[unresolved [unknown]+ip=ffffffffbc830416];[unresolved [unknown]+ip=ffffffffbb4eb793] 2017
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start;[unresolved libc.so.6+ip=7f7e07ebfce3];[unresolved libc.so.6+ip=7f7e07ebe0f6];[unresolved libc.so.6+ip=7f7e07ebbf7a] 2174
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start;std::sys::pal::unix::stack_overflow::imp::make_handler;std::sys::pal::unix::stack_overflow::thread_info::set_current_info 5600
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae480] 16940432
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae484] 9453093
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae48f] 2788012
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae498] 2822909
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae49e] 1415743405
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae4a5] 1166615827
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae4a9];[unresolved [unknown]+ip=ffffffffbb2015f4] 4384367
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae4c6] 14671059
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae4cd] 57110511
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae4d3] 7551626
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae748] 7809772
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fae757] 18849167
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ac0] 471000365
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ac4] 212261000
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7acb] 11501353
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ad3] 4001794635
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ada] 26060707
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7aee] 20637742
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7b13] 7709365
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7b18] 3860436
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7b23] 3083280
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7b8b] 123327885
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7b93] 85427063
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ba0] 89883655
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ba8] 114938956
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bb0] 93992507
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bc7] 114664482
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bcd] 30041939
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bdd] 1448203056
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bed] 119308833
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bf4] 112513521
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7bfc] 76602759
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c04] 32589543
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c0c] 12724588
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c1a] 12345711
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c21] 16372117
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c28] 11269184
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c2f] 7214155
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c37] 602359974
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c3f] 17004000
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c47] 16505345
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c4f] 31103028
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c53] 23259218
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c66] 56710773
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c6c] 6848169
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c73] 2941281
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c80] 12876850
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c8e] 372239939
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c96] 210262092
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7c99] 4044734
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ca5] 36801844
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cad] 82808360
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cb3] 2919077
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cc6] 599691359
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ccd] 307559757
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cd4] 85517339
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cdb] 73299279
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ce2] 18110279
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7ce8] 11065755
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cef] 166380562
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cf6] 28571842
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7cfd] 48937364
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d04] 5007015
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d10] 52511625
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d17] 11789780
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d1e] 16317587
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d24] 254910119
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d2a] 7829631
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d43] 5514586
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d6b] 6999577
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d72] 20190195
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d86] 12255418
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7d94] 9330176
+matched-server;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07fb7da1] 8814646
+matched-server;[recorded stack boundary; callers may be missing];[unresolved voteboat-matched-framework+ip=559fadc63e67];<tokio::runtime::scheduler::multi_thread::idle::Idle>::worker_to_notify 135044
+matched-server;[recorded stack boundary; callers may be missing];__floattidf 59532730
+matched-server;[recorded stack boundary; callers may be missing];__lll_lock_wake_private;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1e92] 3990344
+matched-server;[recorded stack boundary; callers may be missing];__lll_lock_wake_private;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fb3] 2982804
+matched-server;[recorded stack boundary; callers may be missing];cfree 399523551
+matched-server;[recorded stack boundary; callers may be missing];clock_gettime 84036005
+matched-server;[recorded stack boundary; callers may be missing];clock_gettime;__vdso_clock_gettime 801862172
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<[tokio::sync::oneshot::Sender<voteboat::identity::OperationId>]> 4400521
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect>> 105867858
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::vec::Vec<voteboat::log::LogEntry>> 127981877
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::vec::Vec<voteboat::log::LogTicket>> 98289453
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::vec::Vec<voteboat::raft::proposals::Proposal>> 3843224
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>> 6366568
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<alloc::vec::into_iter::IntoIter<voteboat::log::LogMutation>> 6212280
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<core::iter::adapters::zip::Zip<alloc::vec::into_iter::IntoIter<voteboat::raft::proposals::Proposal>, alloc::vec::into_iter::IntoIter<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>> 64156595
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<core::option::Option<voteboat::raft::Pending>> 10062214
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<voteboat::log::EntryPayload> 47429180
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<voteboat::log::LogEntry> 72084316
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<voteboat::raft::RaftError> 65419028
+matched-server;[recorded stack boundary; callers may be missing];core::ptr::drop_glue::<voteboat::raft::Rpc> 4151788
+matched-server;[recorded stack boundary; callers may be missing];core::slice::sort::shared::smallsort::insertion_sort_shift_left::<u64, <[u64]>::sort_unstable_by<voteboat::quorum::frontier::{closure#1}>::{closure#0}> 99654540
+matched-server;[recorded stack boundary; callers may be missing];malloc 1065193722
+matched-server;[recorded stack boundary; callers may be missing];pow 113148579
+matched-server;[recorded stack boundary; callers may be missing];realloc 905333809
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebc9da] 2683011
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebcaeb] 4405059
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebcaf0] 5669449
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd093] 5442155
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd09d] 6279155
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd0d4] 17022735
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd0de] 8672512
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd113] 2203726
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd546] 4082244
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd579];[unresolved libc.so.6+ip=7f7e07ebaf14] 3136215
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe664];[unresolved libc.so.6+ip=7f7e07ebd5ee] 6401245
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe744] 8401379
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7ac0] 108236
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7bc7] 4354410
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7bdd] 8806978
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7bf4] 2678366
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7c1a] 4175451
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7c2f] 8661131
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7c37] 4637926
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe761];[unresolved libc.so.6+ip=7f7e07fb7c47] 3004681
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc43e] 3831022
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc44d] 5689879
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc4e3] 3886047
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc4ea] 2619106
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc512] 4298261
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc515] 3830106
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc523] 6149905
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc527] 7509946
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc544] 10455890
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc5b1] 3835917
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc5fa];[unresolved libc.so.6+ip=7f7e07ebaf31] 3680731
+matched-server;[recorded stack boundary; callers may be missing];realloc;[unresolved libc.so.6+ip=7f7e07ebe776];[unresolved libc.so.6+ip=7f7e07ebc5fa];[unresolved libc.so.6+ip=7f7e07ebaf7a] 4414670
+matched-server;[recorded stack boundary; callers may be missing];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0}, 26478
+matched-server;[recorded stack boundary; callers may be missing];std::sys::backtrace::__rust_begin_short_backtrace::<<tokio::runtime::blocking::pool::Spawner>::spawn_thread::{closure#0},;syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a117] 58
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200080] 10725507
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200084] 16362526
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20008f] 6538639
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb2000ca] 4566341
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb2000ce] 4740025
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200111] 4496749
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0a0] 3735569
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0a8] 5273752
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0d2] 21429739
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a0de] 21293003
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105] 2647419
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdc50] 3616516
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdc56] 5971725
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdc6d] 2892834
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdc70] 4685261
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdcb0] 2675627
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdcbd] 5008548
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a105];[unresolved [unknown]+ip=ffffffffbb4cdcbf] 4739856
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb400486] 7330327
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb400498] 5057307
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb400ef6] 34261146
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4cdee0] 13102273
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1e84] 3271470
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1e97] 3752354
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1eb5] 6810785
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1edc] 4228753
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ef0] 3337391
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ef6] 3469593
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1f17] 5180011
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1f2a] 3492881
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1f43] 5033746
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1f66] 4424216
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f219f] 2880576
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f247f] 4699151
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f2487] 8706174
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f2496] 5708285
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f24b7] 3462880
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f250c] 18624113
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f21f5];[unresolved [unknown]+ip=ffffffffbb4f2519] 7615905
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2d7e] 3916947
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2d86];[unresolved [unknown]+ip=ffffffffbb4be131] 2177982
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2d86];[unresolved [unknown]+ip=ffffffffbb4be137] 4743037
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2d8c] 3987990
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2db2] 3572141
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2dc1] 12183892
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f227c];[unresolved [unknown]+ip=ffffffffbb4f2f74] 3169682
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc0];[unresolved [unknown]+ip=ffffffffbb4f2282] 14611762
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fc5] 7266281
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1fe4] 3635006
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520d9c];[unresolved [unknown]+ip=ffffffffbb520e21] 15847137
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520d9c];[unresolved [unknown]+ip=ffffffffbb520e34] 4258556
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f1ff6];[unresolved [unknown]+ip=ffffffffbb520dc0] 6902062
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f2003] 3910212
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f2018] 3727527
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f2025] 5505816
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20cd] 5344161
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20e4] 4185833
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f29ff] 4568125
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2a46] 2935348
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2a6f];[unresolved [unknown]+ip=ffffffffbb4f3119] 3622948
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2a90] 4359753
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2abe];[unresolved [unknown]+ip=ffffffffbc8294ec] 34732108
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2abe];[unresolved [unknown]+ip=ffffffffbc8294ee] 4212838
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2aea];[unresolved [unknown]+ip=ffffffffbb4f2496] 3067178
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2aea];[unresolved [unknown]+ip=ffffffffbb4f24b7] 5182106
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2aea];[unresolved [unknown]+ip=ffffffffbb4f2525] 4987007
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2b05];[unresolved [unknown]+ip=ffffffffbb4f2db2] 6192054
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2b05];[unresolved [unknown]+ip=ffffffffbb4f2dc1] 5813183
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2b05];[unresolved [unknown]+ip=ffffffffbb4f2dee] 3589451
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb4f20ec];[unresolved [unknown]+ip=ffffffffbb4f2b18];[unresolved [unknown]+ip=ffffffffbb4f2cdc] 3804327
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb200250] 2739935
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb2015f0] 11924258
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb2015f4] 11992767
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb20163f];[unresolved [unknown]+ip=ffffffffbc82c834] 4411524
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb201670] 6726580
+matched-server;[recorded stack boundary; callers may be missing];syscall;[unresolved [unknown]+ip=ffffffffbb201d35] 4816587
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::scheduler::multi_thread::worker::run 3283546804
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::scheduler::multi_thread::worker::run;<std::sys::pal::unix::time::Timespec>::now;clock_gettime 2196
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::task::raw::poll::<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>>, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>> 823916457
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::clone_waker 931172960
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::drop_waker 491817070
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::wake_by_ref 109971031
+matched-server;[recorded stack boundary; callers may be missing];tokio::runtime::task::waker::wake_by_val 322646217
+matched-server;[recorded stack boundary; callers may be missing];voteboat::log::transition::append_summary 254548109
+matched-server;[recorded stack boundary; callers may be missing];voteboat::log::transition::compact::retained_after 23179789
+matched-server;[recorded stack boundary; callers may be missing];voteboat::log::transition::validate_append_metadata 413602714
+matched-server;[recorded stack boundary; callers may be missing];voteboat::log::validate_ballot_fields 145266643
+matched-server;[recorded stack boundary; callers may be missing];voteboat::log::validate_suffix_entries 53164574
+matched-server;[recorded stack boundary; callers may be missing];voteboat::outbound::message_cost 152498681
+matched-server;[recorded stack boundary; callers may be missing];voteboat::quorum::frontier 293555014
+matched-server;[recorded stack boundary; callers may be missing];voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore> 1929161843
+matched-server;[recorded stack boundary; callers may be missing];voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>;<voteboat::log::owned::OwnedLogState>::apply_batch;[unresolved libc.so.6+ip=7f7e07fb7ad3] 78054
+voteboat-matche;[recorded stack boundary; callers may be missing];<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::workload::Cluster>::new::{closure#0}>> as core::future::future::Future>::poll 2453
+voteboat-matche;[recorded stack boundary; callers may be missing];<core::pin::Pin<alloc::boxed::Box<voteboat_matched_framework::main::{closure#0}>> as core::future::future::Future>::poll 6669
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::runtime::blocking::pool::BlockingPool>::shutdown 1300
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::runtime::blocking::pool::Spawner>::spawn_task;<std::sys::thread::unix::Thread>::new;pthread_create 1
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::runtime::blocking::pool::Spawner>::spawn_task;<std::sys::thread::unix::Thread>::new;pthread_create;_dl_allocate_tls;[unresolved libc.so.6+ip=7f7e07ebe37b] 36
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::runtime::blocking::pool::Spawner>::spawn_task;<std::sys::thread::unix::Thread>::new;pthread_create;_dl_allocate_tls;__libc_calloc 2
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::runtime::blocking::pool::Spawner>::spawn_task;<std::sys::thread::unix::Thread>::new;pthread_create;_dl_allocate_tls;pthread_mutex_lock 1952
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::runtime::park::Inner>::park 388887
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::sync::mpsc::list::Tx<voteboat_matched_framework::voteboat_engine::Request>>::find_block 76964
+voteboat-matche;[recorded stack boundary; callers may be missing];<tokio::sync::task::atomic_waker::AtomicWaker>::register_by_ref 139189
+voteboat-matche;[recorded stack boundary; callers may be missing];<voteboat_matched_framework::workload::Client>::write::{closure#0} 6298
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=fffff];<tokio::runtime::park::Inner>::park 36157
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=fffff];<tokio::runtime::park::Inner>::park;[unresolved [unknown]+ip=ffffffffbb2015f0] 58
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=fffff];<tokio::runtime::park::Inner>::park;[unresolved [unknown]+ip=ffffffffbb201710] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb201280] 16
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved [unknown]+ip=ffffffffbb20171f];[unresolved [unknown]+ip=ffffffffbc82c834] 2678
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f7e80];[unresolved [unknown]+ip=ffffffffbb201280] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f7e87];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f8b34] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f7e87];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f8b34];[unresolved [unknown]+ip=ffffffffbb201280] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f7e87];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f8b5a];[unresolved [unknown]+ip=ffffffffbb201280] 21
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f7e87];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f90ff];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f789f];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f1358];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f0afd];[unresolved ld-linux-x86-64.so.2+ip=7f7e081ee016] 41913
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f7e87];[unresolved ld-linux-x86-64.so.2+ip=7f7e081f9135] 1000
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe099] 125016
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07ebe0b3] 198770
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c050] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacbd6] 3
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacbf6];__ctype_init 3
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacc07] 6
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacc62] 45
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacccb] 707
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacd06];[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb5200a1];[unresolved [unknown]+ip=ffffffffbb520e00] 1886
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f1c4] 49
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f1d4] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f1e8] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e754a8] 2
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e754c8];[unresolved libc.so.6+ip=7f7e07fb8844] 717
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e754c8];[unresolved libc.so.6+ip=7f7e07fb885c] 21
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e754c8];strchrnul@plt 19
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e754e3];[unresolved libc.so.6+ip=7f7e07e6b5a6] 37
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e754e3];[unresolved libc.so.6+ip=7f7e07e6b605] 12
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75501] 898
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e7551d] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75eef] 968
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75f75];[unresolved libc.so.6+ip=7f7e07e69704] 850
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75f75];[unresolved libc.so.6+ip=7f7e07e69810] 45
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75f75];[unresolved libc.so.6+ip=7f7e07e69826] 2
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75f76] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e75f7b] 2031
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e764ab] 1
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacec7];snprintf;[unresolved libc.so.6+ip=7f7e07e9f21d];[unresolved libc.so.6+ip=7f7e07e76c11];[unresolved libc.so.6+ip=7f7e07e6b5a5];[unresolved libc.so.6+ip=7f7e07fb7af9] 41
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start 2581
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacef0];<std::sys::thread::unix::Thread>::new::thread_start;pthread_setname_np;prctl;[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb40055b] 1495
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacf47];snprintf;[unresolved libc.so.6+ip=7f7e07e9f234];[unresolved libc.so.6+ip=7f7e07e757b7];[unresolved libc.so.6+ip=7f7e07e69826];[unresolved [unknown]+ip=ffffffffbb200080] 27
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacf47];snprintf;[unresolved libc.so.6+ip=7f7e07e9f234];[unresolved libc.so.6+ip=7f7e07e757b7];[unresolved libc.so.6+ip=7f7e07e6b5a5];[unresolved libc.so.6+ip=7f7e07fb7af9];[unresolved [unknown]+ip=ffffffffbb200080] 38
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacf66];[unresolved [unknown]+ip=ffffffffbb2000db] 33
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacf66];[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb6cbbe1] 49
+voteboat-matche;[recorded stack boundary; callers may be missing];[unresolved libc.so.6+ip=7f7e07f4c05b];[unresolved libc.so.6+ip=7f7e07eacf66];[unresolved [unknown]+ip=ffffffffbb20012f];[unresolved [unknown]+ip=ffffffffbc82a146];[unresolved [unknown]+ip=ffffffffbb6cbc5c] 51
+voteboat-matche;[recorded stack boundary; callers may be missing];__munmap;[unresolved [unknown]+ip=ffffffffbb201280] 78006
+voteboat-matche;[recorded stack boundary; callers may be missing];core::slice::sort::shared::pivot::median3_rec::<u64, <u64 as core::cmp::PartialOrd>::lt> 4782451
+voteboat-matche;[recorded stack boundary; callers may be missing];core::slice::sort::unstable::quicksort::quicksort::<u64, <u64 as core::cmp::PartialOrd>::lt> 33812808
+voteboat-matche;[recorded stack boundary; callers may be missing];voteboat_matched_framework::voteboat_engine::bootstrap 118232
+voteboat-matche;[recorded stack boundary; callers may be missing];voteboat_matched_framework::workload::run::{closure#0} 3789
+voteboat-matche;[recorded stack boundary; callers may be missing];voteboat_matched_framework::workload::run::{closure#0};<voteboat_matched_framework::workload::Client>::write::{closure#0} 2732

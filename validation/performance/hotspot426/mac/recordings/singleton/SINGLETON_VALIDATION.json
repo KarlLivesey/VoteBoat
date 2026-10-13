@@ -1,0 +1,126 @@
+{
+  "scope": "Separate Samply diagnostic, not unprofiled capacity/acceptance",
+  "original_runner_pid": 85642,
+  "terminal": 0,
+  "exact_controls": true,
+  "completed_originals": 1048576,
+  "completed_requests": 1048576,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "profiled_puts_per_second": 57078.046883316965,
+  "profiled_request_p99_ms": 0.037334,
+  "checkpoint_counts": [
+    209,
+    209,
+    209
+  ],
+  "profile_threads": [
+    {
+      "name": "voteboat-matched-framework",
+      "samples": 36
+    },
+    {
+      "name": "matched-client",
+      "samples": 18374
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 17177
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 8204
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 9890
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    },
+    {
+      "name": "matched-server",
+      "samples": 17104
+    },
+    {
+      "name": "matched-server",
+      "samples": 16340
+    },
+    {
+      "name": "matched-server",
+      "samples": 2
+    }
+  ],
+  "symbols_libraries": [
+    {
+      "name": "dyld",
+      "symbols": 1,
+      "with_inline_source_frames": 0
+    },
+    {
+      "name": "voteboat-matched-framework",
+      "symbols": 181,
+      "with_inline_source_frames": 180
+    },
+    {
+      "name": "libsystem_pthread.dylib",
+      "symbols": 12,
+      "with_inline_source_frames": 0
+    },
+    {
+      "name": "libsystem_kernel.dylib",
+      "symbols": 8,
+      "with_inline_source_frames": 0
+    },
+    {
+      "name": "libsystem_platform.dylib",
+      "symbols": 2,
+      "with_inline_source_frames": 0
+    }
+  ],
+  "raw_sha256": {
+    "singleton.stdout.json": "cba80280fcb0d80398b5076ea99339dd39e0b3c16df6c23c4f9066aa58564a6c",
+    "singleton-profile.json.gz": "b285ea7e8409b161896bb66e9ea7e6229b94964aee163907c2aeb76e8d02782e",
+    "singleton-profile.json.syms.json": "fa6c1a0dde1be139f6488314da2c94b54d03757f9930e3055fd7eb3c0125ca17"
+  }
+}

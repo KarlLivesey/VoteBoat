@@ -1,0 +1,6 @@
+{
+  "root [fixture.rs:1]": "root [fixture.rs:1]",
+  "leaf [fixture.rs:2]": "leaf [fixture.rs:2]",
+  "inner\u2237fixture [fixture.rs:3]": "inner;fixture [fixture.rs:3]",
+  "[null stack]": "[null stack]"
+}

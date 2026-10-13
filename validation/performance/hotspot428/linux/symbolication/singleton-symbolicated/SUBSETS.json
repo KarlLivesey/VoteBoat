@@ -1,0 +1,297 @@
+{
+  "denominator": 19203,
+  "unit": "saved Samply application-thread sample weights",
+  "predicates": {
+    "entry_eq": "<voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length present in native/per-address-inline stack",
+    "compaction": "function starts voteboat::snapshot::compact_replica::<",
+    "matches_state": "<voteboat_matched_framework::store::MemoryStore as voteboat::log::LogStore>::matches_state or its closure present",
+    "entry_direct_eq": "LogEntry PartialEq::eq or ::ne exact native/per-RVA inline context; includes direct loop comparisons",
+    "entry_eq_any": "union of entry_eq SliceEq and entry_direct_eq contexts",
+    "checkpoint_provider": "MemoryStore LogStore matches_checkpoint_state native/per-RVA inline context",
+    "checkpoint_protected_comparison": "CheckpointComparison compare/compare_inner context",
+    "owned_next_matches_update": "OwnedNextLog matches_update context",
+    "suffix_eq": "Suffix PartialEq exact context",
+    "clone_related": "clone/to_vec function context present; not clone-call count",
+    "allocation_deallocation_related": "alloc::alloc/Global allocation, rust allocation shim or malloc/calloc/realloc/free context; not allocation count"
+  },
+  "subsets": {
+    "entry_eq": {
+      "sample_weight": 181,
+      "percent_of_all_selected_samples": 0.9425610581679946
+    },
+    "compaction": {
+      "sample_weight": 351,
+      "percent_of_all_selected_samples": 1.8278394000937352
+    },
+    "matches_state": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_eq_and_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "entry_eq_without_compaction": {
+      "sample_weight": 181,
+      "percent_of_all_selected_samples": 0.9425610581679946
+    },
+    "matches_state_and_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "matches_state_without_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "compaction_without_entry_eq": {
+      "sample_weight": 351,
+      "percent_of_all_selected_samples": 1.8278394000937352
+    },
+    "clone_related": {
+      "sample_weight": 595,
+      "percent_of_all_selected_samples": 3.0984741967400926
+    },
+    "allocation_deallocation_related": {
+      "sample_weight": 1344,
+      "percent_of_all_selected_samples": 6.998906420871739
+    },
+    "clone_without_compaction": {
+      "sample_weight": 595,
+      "percent_of_all_selected_samples": 3.0984741967400926
+    },
+    "entry_direct_eq": {
+      "sample_weight": 504,
+      "percent_of_all_selected_samples": 2.624589907826902
+    },
+    "entry_eq_any": {
+      "sample_weight": 505,
+      "percent_of_all_selected_samples": 2.629797427485289
+    },
+    "checkpoint_and_entry_direct_eq": {
+      "sample_weight": 324,
+      "percent_of_all_selected_samples": 1.6872363693172943
+    },
+    "checkpoint_without_entry_direct_eq": {
+      "sample_weight": 1,
+      "percent_of_all_selected_samples": 0.0052075196583867105
+    },
+    "entry_eq_any_without_compaction": {
+      "sample_weight": 181,
+      "percent_of_all_selected_samples": 0.9425610581679946
+    },
+    "entry_eq_any_and_compaction": {
+      "sample_weight": 324,
+      "percent_of_all_selected_samples": 1.6872363693172943
+    },
+    "checkpoint_provider": {
+      "sample_weight": 325,
+      "percent_of_all_selected_samples": 1.692443888975681
+    },
+    "checkpoint_protected_comparison": {
+      "sample_weight": 324,
+      "percent_of_all_selected_samples": 1.6872363693172943
+    },
+    "checkpoint_and_entry_eq": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "checkpoint_without_entry_eq": {
+      "sample_weight": 325,
+      "percent_of_all_selected_samples": 1.692443888975681
+    },
+    "checkpoint_and_compaction": {
+      "sample_weight": 325,
+      "percent_of_all_selected_samples": 1.692443888975681
+    },
+    "checkpoint_without_compaction": {
+      "sample_weight": 0,
+      "percent_of_all_selected_samples": 0.0
+    },
+    "owned_next_matches_update": {
+      "sample_weight": 188,
+      "percent_of_all_selected_samples": 0.9790136957767016
+    },
+    "suffix_eq": {
+      "sample_weight": 181,
+      "percent_of_all_selected_samples": 0.9425610581679946
+    },
+    "owned_next_and_entry_eq": {
+      "sample_weight": 181,
+      "percent_of_all_selected_samples": 0.9425610581679946
+    },
+    "owned_next_without_entry_eq": {
+      "sample_weight": 7,
+      "percent_of_all_selected_samples": 0.03645263760870697
+    },
+    "owned_next_and_suffix_eq": {
+      "sample_weight": 181,
+      "percent_of_all_selected_samples": 0.9425610581679946
+    },
+    "owned_next_without_compaction": {
+      "sample_weight": 188,
+      "percent_of_all_selected_samples": 0.9790136957767016
+    }
+  },
+  "entry_eq_outside_compaction_top5_project_ancestries": [
+    {
+      "root_to_eq_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+        "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+      ],
+      "sample_weight": 124,
+      "percent_of_all_selected_samples": 0.6457324376399521,
+      "percent_of_entry_eq_without_compaction": 68.50828729281768
+    },
+    {
+      "root_to_eq_parent": [
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::run_inner::{closure#0}",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+        "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}",
+        "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>::{closure#0}::{closure#0}",
+        "<voteboat::log::transition::incoming::OwnedNextLog>::matches_update",
+        "<voteboat::log::Suffix as core::cmp::PartialEq>::eq"
+      ],
+      "sample_weight": 57,
+      "percent_of_all_selected_samples": 0.2968286205280425,
+      "percent_of_entry_eq_without_compaction": 31.49171270718232
+    }
+  ],
+  "synthetic_FDE_boundary_leaf_names": [
+    {
+      "function": "fun_1b7ac0",
+      "sample_weight": 2637,
+      "percent": 13.732229339165755
+    },
+    {
+      "function": "fun_be060",
+      "sample_weight": 834,
+      "percent": 4.343071395094516
+    },
+    {
+      "function": "fun_bc6d0",
+      "sample_weight": 762,
+      "percent": 3.9681299796906733
+    },
+    {
+      "function": "fun_1ae480",
+      "sample_weight": 583,
+      "percent": 3.0359839608394523
+    },
+    {
+      "function": "fun_bc7d0",
+      "sample_weight": 119,
+      "percent": 0.6196948393480185
+    },
+    {
+      "function": "fun_bc430",
+      "sample_weight": 17,
+      "percent": 0.08852783419257408
+    },
+    {
+      "function": "fun_acb60",
+      "sample_weight": 14,
+      "percent": 0.07290527521741394
+    },
+    {
+      "function": "fun_baf10",
+      "sample_weight": 14,
+      "percent": 0.07290527521741394
+    },
+    {
+      "function": "fun_75450",
+      "sample_weight": 7,
+      "percent": 0.03645263760870697
+    },
+    {
+      "function": "fun_be580",
+      "sample_weight": 6,
+      "percent": 0.031245117950320263
+    },
+    {
+      "function": "fun_1b8840",
+      "sample_weight": 5,
+      "percent": 0.026037598291933552
+    },
+    {
+      "function": "fun_9f1c0",
+      "sample_weight": 4,
+      "percent": 0.020830078633546842
+    },
+    {
+      "function": "fun_69700",
+      "sample_weight": 4,
+      "percent": 0.020830078633546842
+    },
+    {
+      "function": "fun_bb880",
+      "sample_weight": 4,
+      "percent": 0.020830078633546842
+    },
+    {
+      "function": "fun_6b550",
+      "sample_weight": 2,
+      "percent": 0.010415039316773421
+    },
+    {
+      "function": "fun_241d0",
+      "sample_weight": 1,
+      "percent": 0.0052075196583867105
+    }
+  ],
+  "clone_related_native_self": [
+    {
+      "function": "tokio::runtime::task::waker::clone_waker",
+      "sample_weight": 245,
+      "percent": 1.275842316304744
+    },
+    {
+      "function": "<voteboat::log::LogEntry as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>",
+      "sample_weight": 114,
+      "percent": 0.593657241056085
+    },
+    {
+      "function": "<voteboat::log::LogUpdate as core::clone::Clone>::clone",
+      "sample_weight": 67,
+      "percent": 0.3489038171119096
+    },
+    {
+      "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+      "sample_weight": 16,
+      "percent": 0.08332031453418737
+    },
+    {
+      "function": "<alloc::collections::btree::map::BTreeMap<_, _, _> as core::clone::Clone>::clone::clone_subtree::<voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::alloc::Global>",
+      "sample_weight": 1,
+      "percent": 0.0052075196583867105
+    }
+  ],
+  "allocation_related_native_self": [
+    {
+      "function": "malloc",
+      "sample_weight": 299,
+      "percent": 1.5570483778576265
+    },
+    {
+      "function": "realloc",
+      "sample_weight": 200,
+      "percent": 1.041503931677342
+    }
+  ],
+  "limitations": [
+    "Subset intersections are explicit; matches_state and compaction overlap and must not be summed.",
+    "fun_<hex> names identify FDE boundaries, not known semantic symbols; raw names remain unchanged.",
+    "Source/inline locations are per-address API results rather than coalesced sidecar chains.",
+    "Allocation/clone contexts are sampled stacks, not actual call counts or allocated bytes.",
+    "Capture loss and launch-to-exit scope from SUMMARY.json remain applicable."
+  ]
+}

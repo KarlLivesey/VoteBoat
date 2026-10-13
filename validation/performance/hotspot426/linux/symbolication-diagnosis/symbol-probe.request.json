@@ -1,0 +1,44 @@
+{
+  "memoryMap": [
+    [
+      "ld-linux-x86-64.so.2",
+      "00A0E86ACD40EBC36DD52BB535248C680"
+    ],
+    [
+      "libc.so.6",
+      "5FBA1A14655A49E9C59AEDB6FD3B267F0"
+    ],
+    [
+      "voteboat-matched-framework",
+      "992570B42B73DC99007B627CF8F405240"
+    ],
+    [
+      "[vdso]",
+      "6C6E64B3FD25AD79FA9A37D2EFBE1B5B0"
+    ],
+    [
+      "libm.so.6",
+      "FB9B02B9F014A93CD62466AC4F680D310"
+    ]
+  ],
+  "stacks": [
+    [
+      [
+        2,
+        3555172
+      ],
+      [
+        2,
+        3678885
+      ],
+      [
+        2,
+        2140343
+      ],
+      [
+        1,
+        1762462
+      ]
+    ]
+  ]
+}

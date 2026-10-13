@@ -1,0 +1,70 @@
+{
+  "scope": "actual16384 original/frontier/observer CLI guards and in-memory rejection controls; no performance/timing claim",
+  "actual": [
+    {
+      "mode": "off",
+      "fixture": "off.json",
+      "original": "/private/tmp/voteboat-mac428-a46da2b-xGe40Y/logs/cli-off.log",
+      "sha256": "96023e2d9ae51a631094546faecf8ce903c889f86da7a459020c21cc1930eade",
+      "result": "pass"
+    },
+    {
+      "mode": "on",
+      "fixture": "on.json",
+      "original": "/private/tmp/voteboat-mac428-a46da2b-xGe40Y/logs/cli-on.log",
+      "sha256": "84db36ea527c2e147dc01504bc54be431961ea58bf4387fad7464308ea9ff655",
+      "result": "pass"
+    },
+    {
+      "mode": "openraft",
+      "fixture": "openraft.json",
+      "original": "/private/tmp/voteboat-mac428-a46da2b-xGe40Y/logs/cli-openraft.log",
+      "sha256": "078eb80e03e66ff437708a6b9974a4616749fb024eeae14db59dc833f77cb4b0",
+      "result": "pass"
+    }
+  ],
+  "cli_negative": [
+    {
+      "control": "missing_original",
+      "result": "correctly rejected",
+      "reason": "wrong original completion"
+    },
+    {
+      "control": "missing_frontier",
+      "result": "correctly rejected",
+      "reason": "wrong follower frontier"
+    },
+    {
+      "control": "missing_protected_phase",
+      "result": "correctly rejected",
+      "reason": "wrong phase count"
+    },
+    {
+      "control": "historical_gap_scope",
+      "result": "correctly rejected",
+      "reason": "historical gap scope reused"
+    }
+  ],
+  "artifact_negative": [
+    {
+      "control": "missing_dsym_file",
+      "result": "correctly rejected",
+      "reason": "changed dSYM inventory: original"
+    },
+    {
+      "control": "changed_dsym_hash",
+      "result": "correctly rejected",
+      "reason": "changed dSYM file: original/Contents/Info.plist"
+    },
+    {
+      "control": "reused_root_compilation",
+      "result": "correctly rejected",
+      "reason": "reused compiler record: voteboat"
+    },
+    {
+      "control": "missing_build_input",
+      "result": "correctly rejected",
+      "reason": "source inventory differs"
+    }
+  ]
+}

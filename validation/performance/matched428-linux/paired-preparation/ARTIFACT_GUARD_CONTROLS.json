@@ -1,0 +1,32 @@
+[
+  {
+    "control": "unpublished_commit",
+    "result": "correctly rejected",
+    "reason": "wrong published source"
+  },
+  {
+    "control": "missing_build_rs",
+    "result": "correctly rejected",
+    "reason": "source inventory differs"
+  },
+  {
+    "control": "reused_root_library",
+    "result": "correctly rejected",
+    "reason": "reused compiler record: voteboat"
+  },
+  {
+    "control": "assertions_disabled",
+    "result": "correctly rejected",
+    "reason": "wrong actual compiler profile: voteboat"
+  },
+  {
+    "control": "wrong_dwp_hash",
+    "result": "correctly rejected",
+    "reason": "changed packed DWP: original"
+  },
+  {
+    "control": "changed_oracle_receipt",
+    "result": "correctly rejected",
+    "reason": "changed release oracle proof"
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "original_handle": 60660,
+  "exit": 0,
+  "stage": "DONE",
+  "checked_cases": 24,
+  "failures": [],
+  "raw_results": "linux-results/RESULTS.json",
+  "paired_details": "linux-results/PAIRED.json",
+  "no_run_repeated": true
+}

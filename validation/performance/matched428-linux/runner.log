@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/guard.py", line 42, in <module>
+    assert 'check-cfg=cfg(voteboat_checkpoint_debug_oracle)' in (job/'logs/matched-release.stderr').read_text()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

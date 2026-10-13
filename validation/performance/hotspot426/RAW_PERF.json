@@ -1,0 +1,144 @@
+{
+  "linux/perf/bulk.data.zst": {
+    "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile426/linux/perf/bulk.data",
+    "original_sha256": "e735475e9f1779e13a77943db57d052037df1f6f4668b0af900cd4394ad4d0be",
+    "original_bytes": 459207332,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf/singleton.data.zst": {
+    "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile426/linux/perf/singleton.data",
+    "original_sha256": "14a09487e22346e5a847cdc7622b57df2aec31e6f552ba0001f167ed96c26de0",
+    "original_bytes": 322340948,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-permission-probe.data.zst": {
+    "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile426/linux/perf-permission-probe.data",
+    "original_sha256": "d3c423b076c33409714b94d69bab2f14a43f104a2dbe8957d3e4f9ab2fc1f921",
+    "original_bytes": 126076,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/bulk.data.zst": {
+    "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile426/linux/perf-quiet/bulk.data",
+    "original_sha256": "62b4b472a0009f49c65ada3bfee94183bd92d1a233824e993c59f6c5b89544e7",
+    "original_bytes": 457236340,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/singleton.data.zst": {
+    "original_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile426/linux/perf-quiet/singleton.data",
+    "original_sha256": "60e5b18c265e0d90118956c158836ed14ad0ab07adc7bb96c1719ccc9e5c7a62",
+    "original_bytes": 315363756,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "mac/bulk-analysis/cpu.folded.zst": {
+    "original_path": "validation/performance/hotspot426/mac/bulk-analysis/cpu.folded",
+    "original_sha256": "6f6a8db8aa11b0ef6ef6c653400ee170e025af074ecd44687f267232c51e9df5",
+    "original_bytes": 12453938,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "mac/bulk-analysis/wall-sample-weights.folded.zst": {
+    "original_path": "validation/performance/hotspot426/mac/bulk-analysis/wall-sample-weights.folded",
+    "original_sha256": "74157fbfea30314a587f656fa7d299a41cd877d1406ab2d8936a5c4b53c9872a",
+    "original_bytes": 12450621,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "mac/singleton-analysis/cpu.folded.zst": {
+    "original_path": "validation/performance/hotspot426/mac/singleton-analysis/cpu.folded",
+    "original_sha256": "e32f310f2cb3807dd69a0e08ecf5abe44dcab3159c12616da3d019469e19c4a5",
+    "original_bytes": 28346009,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "mac/singleton-analysis/wall-sample-weights.folded.zst": {
+    "original_path": "validation/performance/hotspot426/mac/singleton-analysis/wall-sample-weights.folded",
+    "original_sha256": "64c770df6b02f13c89c04ec87942c5e7dc8dde6c97fd98011e57f753f245876d",
+    "original_bytes": 28338442,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/bulk-symbolicated/full-inline.folded.zst": {
+    "original_path": "validation/performance/hotspot426/linux/bulk-symbolicated/full-inline.folded",
+    "original_sha256": "acb2d975350a1a4912e671f7cc029d2e4c92c2acdda22683cd7f59526793884a",
+    "original_bytes": 26588131,
+    "compressed_sha256": "004290a196455f025c7867f2ab1706f168ab6a136e1f22dc908ea71c57444b0e",
+    "compressed_bytes": 138809,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/bulk.flat.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/bulk.flat.txt",
+    "original_sha256": "e66822761992391ed6b178f0d0ffbbaca46aeec48450dea878a3ec2e59a771d2",
+    "original_bytes": 4329882,
+    "compressed_sha256": "4bb9a0cfdab95523eaa052bbabf56f633ac17edd8475b0e1dfcc7cdeb64372f0",
+    "compressed_bytes": 390738,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/bulk.inline.stacks.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/bulk.inline.stacks.txt",
+    "original_sha256": "f4b207c38bece16c52fc5bf61077b149c9a3043de7a8fe5e721743ad90741549",
+    "original_bytes": 2860684,
+    "compressed_sha256": "0eef9828618c348ec7bf68aefbea386566270adf065c1ad3f9dc85c2dbbf78e0",
+    "compressed_bytes": 352548,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/bulk.ip.stacks.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/bulk.ip.stacks.txt",
+    "original_sha256": "62e4bdc40905bc3b26ff0b227260e72a0b63682f1e44f30c8bb7f87cd069b9b9",
+    "original_bytes": 2852671,
+    "compressed_sha256": "e4d7ff430ed9ecb0f205e08bc7a27a52ddbb2da99484cbd81c8a1ea410fc121e",
+    "compressed_bytes": 351566,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/bulk.stacks.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/bulk.stacks.txt",
+    "original_sha256": "f4b207c38bece16c52fc5bf61077b149c9a3043de7a8fe5e721743ad90741549",
+    "original_bytes": 2860684,
+    "compressed_sha256": "0eef9828618c348ec7bf68aefbea386566270adf065c1ad3f9dc85c2dbbf78e0",
+    "compressed_bytes": 352548,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/singleton.flat.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/singleton.flat.txt",
+    "original_sha256": "91557cc83c2ff04fd5943eddfeb630e14fff6b78fbdffb617eef0e44531b411c",
+    "original_bytes": 4501427,
+    "compressed_sha256": "8f1d9f818caf2d2d9d017cae80f63dc61f317131aaa063c3972714c8c71cf7e5",
+    "compressed_bytes": 307077,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/singleton.ip.stacks.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/singleton.ip.stacks.txt",
+    "original_sha256": "0a99547f8aa55e2c92ef2f037f5a3ed16ea6a570a8dac0e5dfdbe5ed98df61f9",
+    "original_bytes": 1569478,
+    "compressed_sha256": "f3293c911d30140ba579a2562a7ab673d9933b9d3f0867e1b309537ed51fd4eb",
+    "compressed_bytes": 230769,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/perf-quiet/singleton.stacks.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/perf-quiet/singleton.stacks.txt",
+    "original_sha256": "a1b169381f8f5a1efc06fff3a08cdc731107bb29641228c78fd8a540ca26256b",
+    "original_bytes": 1578842,
+    "compressed_sha256": "91e3f412bac1491ec07510a0c8752f464767c06504e8035494b0c1181669ecf3",
+    "compressed_bytes": 231664,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/singleton-symbolicated/full-inline.folded.zst": {
+    "original_path": "validation/performance/hotspot426/linux/singleton-symbolicated/full-inline.folded",
+    "original_sha256": "14821aa1c8618d6a450751352f60c31d0be8fb120bf69a7f84928161ab4cc411",
+    "original_bytes": 47777636,
+    "compressed_sha256": "4e9a8a5aca4ace41889e24c2526a20949eb7d25c5ad30bc9469db7fe1830da67",
+    "compressed_bytes": 209924,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/symbolication-diagnosis/bulk-regs-mmaps.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/symbolication-diagnosis/bulk-regs-mmaps.txt",
+    "original_sha256": "c0493487d81b424109554f1add20c3e4a3b5cd6363b0def6e1b95b416f650e46",
+    "original_bytes": 11660493,
+    "compressed_sha256": "9cc527776fac4e08ed21395c7dfb4a5dd8c5edf2e1c8ef9272385a4da0213f43",
+    "compressed_bytes": 1107335,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  },
+  "linux/symbolication-diagnosis/eh-frame.txt.zst": {
+    "original_path": "validation/performance/hotspot426/linux/symbolication-diagnosis/eh-frame.txt",
+    "original_sha256": "37a4b761d9a637351da1f44a4e7b2303dca662e80eb9becc2b19a42650a63e25",
+    "original_bytes": 6112349,
+    "compressed_sha256": "3995e8c4e707a80613d3c2ef87d6ef53bf48f81ba20ce2f1a1d475c9b948e49d",
+    "compressed_bytes": 510091,
+    "compression": "lossless zstd level3; independently decompressed SHA256 matches"
+  }
+}

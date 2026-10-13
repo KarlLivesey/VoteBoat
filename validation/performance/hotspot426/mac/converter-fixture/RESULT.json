@@ -1,0 +1,13 @@
+{
+  "scope": "Hand-constructed converter fixture only; no benchmark/profile recording",
+  "passed": [
+    "root-to-leaf physical+inline order",
+    "exactCPUweight conservation",
+    "nullstackweight retained",
+    "zero/nullCPUdeltas distinguished",
+    "nativephysical self/inclusive totals",
+    "folded delimiter escaped with original preserved"
+  ],
+  "cpu_expected_us": 30,
+  "wall_expected_weight": 5
+}

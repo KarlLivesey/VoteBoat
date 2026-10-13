@@ -1,0 +1,2 @@
+matched-client tid=7;[null stack] 1
+matched-client tid=7;root [fixture.rs:1];leaf [fixture.rs:2];inner∷fixture [fixture.rs:3] 4

@@ -1,0 +1,72 @@
+Record a profile and display it
+
+Usage: samply record [OPTIONS] [COMMAND]...
+
+Arguments:
+  [COMMAND]...  Profile the execution of this command
+
+Options:
+  -r, --rate <RATE>
+          Sampling rate, in Hz [default: 1000]
+  -d, --duration <DURATION>
+          Limit the recorded time to the specified number of seconds
+      --iteration-count <ITERATION_COUNT>
+          How many times to run the profiled command [default: 1]
+      --profile-name <PROFILE_NAME>
+          Set a custom name for the recorded profile. By default it is either the command that was run or the process pid
+      --main-thread-only
+          Only include the main thread of each process in order to reduce profile size, only respected on Windows and macOS
+      --reuse-threads
+          Merge non-overlapping threads of the same name
+      --fold-recursive-prefix
+          Fold repeated frames at the base of the stack
+      --unlink-aux-files
+          If a process produces jitdump or marker files, unlink them after opening. This ensures that the files will not be left in /tmp, but it will also be impossible to look at JIT disassembly, and line numbers will be missing for JIT frames
+      --per-cpu-threads
+          Create a separate thread for each CPU. Not supported on macOS
+      --jit-markers
+          Emit a JitFunctionAdd markers when a JIT function is added
+      --cswitch-markers
+          Emit context switch markers
+      --include-args[=<INCLUDE_ARGS>]
+          Include up to <INCLUDE_ARGS> command line arguments in the process name. This can help differentiate processes if the same executable is used for different types of programs. And in --reuse-threads mode it allows more control over which processes are matched up [default: 0]
+      --unstable-presymbolicate
+          Emit .syms.json sidecar file containing gathered symbol info for all frames referenced by this profile. With this file along with the profile, samply can load the profile and provide symbols to the front end without needing debug files to be available. (Unstable: will probably change to include the full information in the profile.json, instead of a sidecar file.)
+  -s, --save-only
+          Do not run a local server after recording
+  -o, --output <OUTPUT>
+          Output filename [default: profile.json.gz]
+  -n, --no-open
+          Do not open the profiler UI
+      --address <ADDRESS>
+          The address to use for the local web server [default: 127.0.0.1]
+  -P, --port <PORT>
+          The port to use for the local web server [default: 3000+]
+  -v, --verbose
+          Print debugging output
+      --symbol-dir <SYMBOL_DIR>
+          Extra directories containing symbol files
+      --windows-symbol-server <WINDOWS_SYMBOL_SERVER>
+          Additional URLs of symbol servers serving PDB / DLL / EXE files
+      --windows-symbol-cache <WINDOWS_SYMBOL_CACHE>
+          Overrides the default cache directory for Windows symbol files which were downloaded from a symbol server
+      --breakpad-symbol-server <BREAKPAD_SYMBOL_SERVER>
+          Additional URLs of symbol servers serving Breakpad .sym files
+      --breakpad-symbol-dir <BREAKPAD_SYMBOL_DIR>
+          Additional local directories containing Breakpad .sym files
+      --breakpad-symbol-cache <BREAKPAD_SYMBOL_CACHE>
+          Overrides the default cache directory for Breakpad symbol files
+      --simpleperf-binary-cache <SIMPLEPERF_BINARY_CACHE>
+          Extra directory containing symbol files, with the directory structure used by simpleperf's scripts
+  -p, --pid <PID>
+          Process ID of existing process to attach to
+  -a, --all
+          Profile entire system (all processes). Not supported on macOS
+      --coreclr[=<FLAG>...]
+          Enable CoreCLR event capture [possible values: enabled]
+      --gfx
+          Enable Graphics-related event capture
+      --browsers
+          Enable browser-related event capture (JavaScript stacks and trace events)
+  -h, --help
+          Print help

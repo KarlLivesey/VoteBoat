@@ -1,0 +1,521 @@
+{
+  "created_utc": "2026-10-13T22:02:59.239437+00:00",
+  "commit": "799f2cf300a50e004e74d07b6a9237f59003892b",
+  "source_inventory": {
+    "path": "target/p9/matched426-linux/SOURCE.json",
+    "sha256": "646f3c4d75aff5dfbaf2c678788a0429e31743fd2012a3e78f1c015f089c82c0"
+  },
+  "artifacts": {
+    "target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework": "e36086ec99160d70010dc2f4b46f04161fd0de410fc2460ffb9b708bea1d9b9c",
+    "target/p9/matched426-linux/target-matched-release/release/voteboat-matched-framework.dwp": "ab55402e299451fa90c9e0a6e418e893c610d036cd01bec0c42856f830ce040f",
+    "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply": "0ca59d520059aa2ee4db1860c732089829e75740ee75314e84d2b0ab8c90873e"
+  },
+  "original_inputs": {
+    "target/p9/profile426/linux/perf-quiet/bulk.data": "62b4b472a0009f49c65ada3bfee94183bd92d1a233824e993c59f6c5b89544e7",
+    "target/p9/profile426/linux/perf-quiet/bulk.json.gz": "8c4b8adde157f4912740a21e36d88f19d43c72df65bbba87d4f1502691957c9f",
+    "target/p9/profile426/linux/perf-quiet/singleton.data": "60e5b18c265e0d90118956c158836ed14ad0ab07adc7bb96c1719ccc9e5c7a62",
+    "target/p9/profile426/linux/perf-quiet/singleton.json.gz": "a142b9ad58d78708592e4c46863e0da0d50b85b716e2810c01c29acf5715a4ca"
+  },
+  "commands": {
+    "local_symbol_server": [
+      "env",
+      "DEBUGINFOD_URLS=",
+      "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+      "load",
+      "--no-open",
+      "--port",
+      "38471",
+      "--symbol-dir",
+      "target/p9/matched426-linux/target-matched-release/release",
+      "target/p9/profile426/linux/perf-quiet/bulk.json.gz"
+    ],
+    "symbolication": [
+      {
+        "argv": [
+          "python3",
+          "target/p9/profile426/linux/unwind-diagnosis/symbolize-full-json.py",
+          "target/p9/profile426/linux/perf-quiet/bulk.json.gz",
+          "http://127.0.0.1:38471/34jfb7dwhrfyjk5krw77zd1xpmzbsigy1g90avm/symbolicate/v5",
+          "target/p9/profile426/linux/unwind-diagnosis/bulk-symbolicated"
+        ],
+        "exit": 0
+      },
+      {
+        "argv": [
+          "python3",
+          "target/p9/profile426/linux/unwind-diagnosis/symbolize-full-json.py",
+          "target/p9/profile426/linux/perf-quiet/singleton.json.gz",
+          "http://127.0.0.1:38471/34jfb7dwhrfyjk5krw77zd1xpmzbsigy1g90avm/symbolicate/v5",
+          "target/p9/profile426/linux/unwind-diagnosis/singleton-symbolicated"
+        ],
+        "exit": 0
+      }
+    ],
+    "subset_analysis": {
+      "argv": [
+        "python3",
+        "target/p9/profile426/linux/unwind-diagnosis/subsets.py"
+      ],
+      "exit": 0
+    }
+  },
+  "server_terminal": {
+    "original_session": 15730,
+    "pid": 2410469,
+    "stop_signal": "SIGINT",
+    "exit": 0,
+    "browser_opened": false
+  },
+  "diagnosis": {
+    "cause": "perf/libdw offline load-bias difference picks wrong FDE; raw capture and Samply Framehop full stacks are usable",
+    "executable_segment_file_offset": "0xd2c90",
+    "executable_segment_virtual_address": "0xd3c90",
+    "example_runtime_ip": "0x561e59baef64",
+    "correct_load_bias": "0x561e5984b000",
+    "correct_RVA": "0x363f64",
+    "correct_FDE": [
+      "0x363dc0",
+      "0x363fdc"
+    ],
+    "correct_CFA": "RSP+64",
+    "perf_libdw_RVA": "0x362f64",
+    "wrong_FDE": [
+      "0x362f40",
+      "0x3634e1"
+    ],
+    "wrong_CFA": "RSP+560",
+    "sample_regs_user": "0xff0fff",
+    "user_stack_bytes": 16384,
+    "recapture_required": false
+  },
+  "coverage_and_conservation": {
+    "bulk": {
+      "denominator": 27479,
+      "totals": {
+        "samples": 27479,
+        "sample_weight": 27479,
+        "null_stack_sample_weight": 0,
+        "unresolved_leaf_sample_weight": 111,
+        "any_unresolved_stack_sample_weight": 111
+      },
+      "semantic_symbol_name_coverage": {
+        "unresolved_leaf_sample_weight": 111,
+        "synthetic_FDE_boundary_leaf_sample_weight": 19500,
+        "synthetic_names_are_not_known_semantic_functions": true
+      },
+      "conservation_assertions_pass": true,
+      "physical_depth_sample_weights": {
+        "1": 5,
+        "2": 36,
+        "3": 25,
+        "4": 21,
+        "5": 40,
+        "6": 58,
+        "7": 309,
+        "8": 344,
+        "9": 261,
+        "10": 415,
+        "11": 1146,
+        "12": 12131,
+        "13": 2619,
+        "14": 2048,
+        "15": 1939,
+        "16": 5789,
+        "17": 139,
+        "18": 66,
+        "19": 34,
+        "20": 18,
+        "21": 31,
+        "22": 3,
+        "23": 1,
+        "25": 1
+      },
+      "per_thread": [
+        {
+          "name": "voteboat-matche",
+          "tid": "2008466.2",
+          "samples": 180,
+          "sample_weight": 180,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 3,
+          "any_unresolved_stack_sample_weight": 3
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008467",
+          "samples": 28,
+          "sample_weight": 28,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 4,
+          "any_unresolved_stack_sample_weight": 4
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008468",
+          "samples": 12,
+          "sample_weight": 12,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008469",
+          "samples": 16,
+          "sample_weight": 16,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 3,
+          "any_unresolved_stack_sample_weight": 3
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008470",
+          "samples": 20,
+          "sample_weight": 20,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 1,
+          "any_unresolved_stack_sample_weight": 1
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008471",
+          "samples": 3913,
+          "sample_weight": 3913,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 10,
+          "any_unresolved_stack_sample_weight": 10
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008472",
+          "samples": 3412,
+          "sample_weight": 3412,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 22,
+          "any_unresolved_stack_sample_weight": 22
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008473",
+          "samples": 10,
+          "sample_weight": 10,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 1,
+          "any_unresolved_stack_sample_weight": 1
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008474",
+          "samples": 15,
+          "sample_weight": 15,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 1,
+          "any_unresolved_stack_sample_weight": 1
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008475",
+          "samples": 16,
+          "sample_weight": 16,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008476",
+          "samples": 5248,
+          "sample_weight": 5248,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 18,
+          "any_unresolved_stack_sample_weight": 18
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008477",
+          "samples": 15,
+          "sample_weight": 15,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 3,
+          "any_unresolved_stack_sample_weight": 3
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008478",
+          "samples": 6118,
+          "sample_weight": 6118,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 14,
+          "any_unresolved_stack_sample_weight": 14
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008479",
+          "samples": 11,
+          "sample_weight": 11,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008480",
+          "samples": 6,
+          "sample_weight": 6,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008481",
+          "samples": 11,
+          "sample_weight": 11,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2008482",
+          "samples": 6029,
+          "sample_weight": 6029,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 16,
+          "any_unresolved_stack_sample_weight": 16
+        },
+        {
+          "name": "matched-client",
+          "tid": "2008483",
+          "samples": 2419,
+          "sample_weight": 2419,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 5,
+          "any_unresolved_stack_sample_weight": 5
+        }
+      ]
+    },
+    "singleton": {
+      "denominator": 18974,
+      "totals": {
+        "samples": 18974,
+        "sample_weight": 18974,
+        "null_stack_sample_weight": 0,
+        "unresolved_leaf_sample_weight": 232,
+        "any_unresolved_stack_sample_weight": 232
+      },
+      "semantic_symbol_name_coverage": {
+        "unresolved_leaf_sample_weight": 232,
+        "synthetic_FDE_boundary_leaf_sample_weight": 5040,
+        "synthetic_names_are_not_known_semantic_functions": true
+      },
+      "conservation_assertions_pass": true,
+      "physical_depth_sample_weights": {
+        "1": 5,
+        "2": 37,
+        "3": 22,
+        "4": 15,
+        "5": 31,
+        "6": 69,
+        "7": 1014,
+        "8": 885,
+        "9": 984,
+        "10": 953,
+        "11": 1329,
+        "12": 3102,
+        "13": 3288,
+        "14": 2141,
+        "15": 2333,
+        "16": 1505,
+        "17": 530,
+        "18": 661,
+        "19": 53,
+        "20": 12,
+        "21": 4,
+        "22": 1
+      },
+      "per_thread": [
+        {
+          "name": "voteboat-matche",
+          "tid": "2014906.2",
+          "samples": 96,
+          "sample_weight": 96,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 7,
+          "any_unresolved_stack_sample_weight": 7
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014907",
+          "samples": 15,
+          "sample_weight": 15,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014908",
+          "samples": 6,
+          "sample_weight": 6,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 1,
+          "any_unresolved_stack_sample_weight": 1
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014909",
+          "samples": 10,
+          "sample_weight": 10,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014910",
+          "samples": 3635,
+          "sample_weight": 3635,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 24,
+          "any_unresolved_stack_sample_weight": 24
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014911",
+          "samples": 15,
+          "sample_weight": 15,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014912",
+          "samples": 16,
+          "sample_weight": 16,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014913",
+          "samples": 3794,
+          "sample_weight": 3794,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 36,
+          "any_unresolved_stack_sample_weight": 36
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014914",
+          "samples": 3254,
+          "sample_weight": 3254,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 40,
+          "any_unresolved_stack_sample_weight": 40
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014915",
+          "samples": 16,
+          "sample_weight": 16,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 1,
+          "any_unresolved_stack_sample_weight": 1
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014916",
+          "samples": 5,
+          "sample_weight": 5,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014917",
+          "samples": 16,
+          "sample_weight": 16,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 4,
+          "any_unresolved_stack_sample_weight": 4
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014918",
+          "samples": 5,
+          "sample_weight": 5,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014919",
+          "samples": 5,
+          "sample_weight": 5,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 2,
+          "any_unresolved_stack_sample_weight": 2
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014920",
+          "samples": 2893,
+          "sample_weight": 2893,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 17,
+          "any_unresolved_stack_sample_weight": 17
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014921",
+          "samples": 3812,
+          "sample_weight": 3812,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 39,
+          "any_unresolved_stack_sample_weight": 39
+        },
+        {
+          "name": "matched-server",
+          "tid": "2014922",
+          "samples": 11,
+          "sample_weight": 11,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 3,
+          "any_unresolved_stack_sample_weight": 3
+        },
+        {
+          "name": "matched-client",
+          "tid": "2014923",
+          "samples": 1370,
+          "sample_weight": 1370,
+          "null_stack_sample_weight": 0,
+          "unresolved_leaf_sample_weight": 46,
+          "any_unresolved_stack_sample_weight": 46
+        }
+      ]
+    }
+  },
+  "failures_preserved": [
+    "Initial sandbox localhost bind Operation not permitted; escalated bind succeeded.",
+    "Initial sandbox curl localhost refused; escalated JSON request succeeded.",
+    "Two read-only diagnostic Python SyntaxErrors, no source/output mutation performed.",
+    "Initial piped llvm-dwarfdump Broken pipe; complete eh-frame dump later retained.",
+    "Samply0.13.1 import unstable-presymbolicate emitted no .syms; local API succeeded.",
+    "Perf bulk export reports four lost chunks; no lost data invented."
+  ],
+  "summary_annotation": "After subset analysis, added semantic_symbol_name_coverage from unresolved_leaf_sample_weight and sum of synthetic_FDE_boundary_leaf_names; no raw response changes.",
+  "limitations": [
+    "Weights are saved Samply sample counts, not raw perf period cycles or CPU microseconds.",
+    "Inclusive scopes overlap and must not be summed.",
+    "Launch-to-exit profile includes warmup, verification and cleanup.",
+    "fun_<hex> is synthetic FDE-boundary name, not semantic function name.",
+    "Clone/allocation contexts are samples, not calls or byte counts.",
+    "Thread names do not establish leader/follower CPU ownership.",
+    "Source/compiler/profiles unchanged; no browser, new capture, build or kernel change."
+  ]
+}

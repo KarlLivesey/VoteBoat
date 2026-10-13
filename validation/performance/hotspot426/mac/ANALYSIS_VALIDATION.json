@@ -1,0 +1,29 @@
+{
+  "bulk": {
+    "independent_raw_cpu_sum_us": 11713949,
+    "folded_cpu_sum_us": 11713949,
+    "native_self_sum_us": 11713949,
+    "svg_xml_valid": true,
+    "svg_has_no_external_href": true,
+    "raw_input_sha256_unchanged": true
+  },
+  "singleton": {
+    "independent_raw_cpu_sum_us": 34830105,
+    "folded_cpu_sum_us": 34830105,
+    "native_self_sum_us": 34830105,
+    "svg_xml_valid": true,
+    "svg_has_no_external_href": true,
+    "raw_input_sha256_unchanged": true
+  },
+  "source_context": {
+    "commit": "799f2cf300a50e004e74d07b6a9237f59003892b",
+    "file": "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "compiled_source_sha256": "4e1370087145dde5bf834dcc0d6e3e2cec2ae776f2d663b6165907214c6b01e4",
+    "current_source_sha256": "4e1370087145dde5bf834dcc0d6e3e2cec2ae776f2d663b6165907214c6b01e4",
+    "current_source_identical": true,
+    "frozen_excerpt": "actor426-source.rs",
+    "pending_reply_map_declaration_line": 38,
+    "insert_line": 242,
+    "remove_line": 329
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "created_utc": "2026-10-13T22:19:03.908312+00:00",
+  "prep": {
+    "commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+    "frozen_source_inventory": "target/p9/matched428-linux/SOURCE.json",
+    "inventory_sha256": "2c424ad046599875562197327f0d324e44c4695e4db513f6141d73d7333dbec7",
+    "source_items_verified": 1424,
+    "artifacts_verified": 4,
+    "binary_sha256": "85f997d4a969f762c636933dea62aa56fe1864c330c6d21562bfd575dbc9b730",
+    "dwp": "target/p9/matched428-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "dwp_sha256": "5a2c79a9bba8b9ce27e4a3da9a4de79c377ff153d567875e6c9c910a64fcf3fd",
+    "dwp_sidecar": "target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "runner_sha256": "73a0853a59c45e2f6554bc9194c62c1e3d829d508837e08080b70fe24bdd37fd",
+    "compiler_log": "target/p9/matched428-linux/logs/rustc.txt",
+    "guards_passed": true,
+    "prep_failures": [
+      "Initial link creation FileExistsError; existing sidecar unchanged.",
+      "Existing DWP is a regular copy rather than symlink; byte SHA equality succeeds."
+    ]
+  },
+  "recording": {
+    "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework",
+    "binary_sha256": "85f997d4a969f762c636933dea62aa56fe1864c330c6d21562bfd575dbc9b730",
+    "perf": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+    "perf_version": "perf version 7.2.10-1",
+    "settings_before": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    },
+    "scope": "CPU-sampling diagnostic; not unprofiled capacity or acceptance",
+    "events": "cycles:u",
+    "frequency": 1000,
+    "call_graph": "dwarf,16384",
+    "mmap_pages": 128,
+    "cases": [
+      {
+        "name": "bulk",
+        "start_unix": 1791929795.6036634,
+        "end_unix": 1791929806.7353015,
+        "exit": 0,
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+          "record",
+          "-e",
+          "cycles:u",
+          "-F",
+          "1000",
+          "--call-graph",
+          "dwarf,16384",
+          "-m",
+          "128",
+          "-o",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile428/linux/perf-quiet/bulk.data",
+          "--",
+          "/usr/bin/env",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework",
+          "--engine",
+          "voteboat",
+          "--clients",
+          "4096",
+          "--batch",
+          "4",
+          "--operations",
+          "20000000",
+          "--warmup",
+          "1024",
+          "--maintenance",
+          "default-retention",
+          "--envelopes",
+          "upstream-default",
+          "--attribution",
+          "false",
+          "--campaign-timeout-secs",
+          "3600"
+        ]
+      },
+      {
+        "name": "singleton",
+        "start_unix": 1791929806.7354515,
+        "end_unix": 1791929818.5279326,
+        "exit": 0,
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+          "record",
+          "-e",
+          "cycles:u",
+          "-F",
+          "1000",
+          "--call-graph",
+          "dwarf,16384",
+          "-m",
+          "128",
+          "-o",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile428/linux/perf-quiet/singleton.data",
+          "--",
+          "/usr/bin/env",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework",
+          "--engine",
+          "voteboat",
+          "--clients",
+          "1",
+          "--batch",
+          "1",
+          "--operations",
+          "1048576",
+          "--warmup",
+          "1024",
+          "--maintenance",
+          "default-retention",
+          "--envelopes",
+          "upstream-default",
+          "--attribution",
+          "false",
+          "--campaign-timeout-secs",
+          "3600"
+        ]
+      }
+    ],
+    "settings_after": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    }
+  },
+  "original_live_recording_session": 75091,
+  "recording_terminal_exit": 0,
+  "symbolication_session": 91651,
+  "symbolication_terminal_exit": 0,
+  "localhost_server": {
+    "pid": 2919962,
+    "original_session": 25682,
+    "terminal_exit": 0,
+    "browser_opened": false,
+    "external_symbolication": false,
+    "stop_signal": "SIGINT"
+  },
+  "commands": {
+    "imports": [
+      [
+        "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+        "import",
+        "--save-only",
+        "--no-open",
+        "--symbol-dir",
+        "target/p9/matched428-linux/target-matched-release/release",
+        "--output",
+        "target/p9/profile428/linux/perf-quiet/bulk.json.gz",
+        "target/p9/profile428/linux/perf-quiet/bulk.data"
+      ],
+      [
+        "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+        "import",
+        "--save-only",
+        "--no-open",
+        "--symbol-dir",
+        "target/p9/matched428-linux/target-matched-release/release",
+        "--output",
+        "target/p9/profile428/linux/perf-quiet/singleton.json.gz",
+        "target/p9/profile428/linux/perf-quiet/singleton.data"
+      ]
+    ],
+    "symbolication": [
+      [
+        "python3",
+        "target/p9/profile428/linux/symbolication/symbolize-full-json.py",
+        "target/p9/profile428/linux/perf-quiet/bulk.json.gz",
+        "http://127.0.0.1:38472/3395qnazx1kxcpqskx1f6ddq74xncqigqs8svr8/symbolicate/v5",
+        "target/p9/profile428/linux/symbolication/bulk-symbolicated"
+      ],
+      [
+        "python3",
+        "target/p9/profile428/linux/symbolication/symbolize-full-json.py",
+        "target/p9/profile428/linux/perf-quiet/singleton.json.gz",
+        "http://127.0.0.1:38472/3395qnazx1kxcpqskx1f6ddq74xncqigqs8svr8/symbolicate/v5",
+        "target/p9/profile428/linux/symbolication/singleton-symbolicated"
+      ]
+    ],
+    "subsets": [
+      "python3",
+      "target/p9/profile428/linux/symbolication/subsets.py"
+    ]
+  },
+  "inputs": {
+    "target/p9/profile428/linux/perf-quiet/bulk.data": "01e8b084b288793de331a31ba00144088f39accfae0870dc8d36ad36459adaed",
+    "target/p9/profile428/linux/perf-quiet/bulk.json.gz": "98ce40308f73c59b66cad78e63c5d9198422d6be4dd1b5fcf1a81ac5a56dc922",
+    "target/p9/profile428/linux/perf-quiet/singleton.data": "6aa93a41720bace1fead43bc7d49195d39a8bc03ee5de737fd20655878eb8752",
+    "target/p9/profile428/linux/perf-quiet/singleton.json.gz": "f0fd055c09f6130b6d3055a06093445362047819dadc7213ebe48bfc04faa400"
+  },
+  "limitations": [
+    "Perf bulk capture reports4lost chunks.",
+    "Potential overlap at start with another agent archive/hash0.1s and docs/diffcheck0.2s; agent did not receiveSTART, no absolute timestamps recorded, quiet window cannot be fully certified. Kept as diagnostics, no retry.",
+    "Saved Samply sample-count weights, not perf period cycles or CPUmicroseconds.",
+    "Launch-to-exit scope includes warmup, verification/sorting/cleanup; not capacity acceptance.",
+    "Inclusive native/per-RVA inline scopes overlap; do not sum.",
+    "Native fun_<hex> names are synthetic FDE boundaries, retained unchanged.",
+    "Thread names do not identify leader/follower ownership.",
+    "Clone/allocator sample contexts are not call counts or allocated bytes.",
+    "No browser, new SVG, kernel changes, builds, frame flags or additional cases."
+  ],
+  "summary_annotation": "semantic_symbol_name_coverage copied from unresolved leaf totals and summed synthetic FDE boundary leaf names after subset analysis."
+}

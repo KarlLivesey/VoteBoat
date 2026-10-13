@@ -58,15 +58,45 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: qualify published protected-prefix428 | Qualify exact ownership-backed verification on both hosts before performance comparison | Published736eb9a and [main/isolated proof](../validation/performance/slice428/main/README.md); exact426 baseline; include new build.rs | Mac affected/strict/actual CLI checks; fresh asserted artifacts prove actual release gate and fresh root/executable/upstream with exact original/copy/source hashes; preserve every failure | P9.0/P9.1/P9.3 |
-| Next: measure published protected-prefix implementation | Establish actual useful-rate/latency effect and remaining cost | Published428, immutable426 and fresh asserted artifacts including build.rs; qualified Mac source; identical within-host profiles/workload | Three rotating singleton/bulk diagnostic pairs on Linux/M2 Max; all originals/frontiers and actual comparison-work evidence, every regression; sampling/flamegraphs are separate diagnostics; sustained20M/full seven-cell qualification remains distinct | P9.0/P9.1/P9.3 |
-| Following: bounded durable batching/overlap under mixed load | Amortize barriers and preserve cold-neighbor progress | Both native42136 campaigns, exact publication/ticket ownership, bounded fairness schema | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
+| Current: exact empty-payload comparison429 | Remove the largest remaining sampled waste without removing equality validation | Published428; exported Linux profile identifies repeated zero-byte comparison calls; independent equality oracle and existing conformance histories | Exhaustive field/variant equality, empty/nonempty/configuration mismatches; affected tests, actual services and zero root/four-strict/matched checks; publish checked source | P9.1 |
+| Next: qualify and measure429 on both hosts | Establish useful-rate/latency change and reprofile the remaining largest drain | Published429, immutable428 baseline, fresh asserted artifacts with within-host compiler/profile parity; Mac affected/strict qualification | Repeated rotating bulk/singleton pairs, every original/frontier/bound and all regressions; exported sample data separately diagnostic; full sustained seven-cell acceptance remains required | P9.0/P9.1/P9.3 |
+| Following: reduce the next measured limiting stage | Decide whether work can be omitted, shared or reordered before wider pipelining | Both-host429 measurements and compact profile data; existing ownership/composition contracts; native421 barrier/fairness evidence for durable work | A bounded schema and exact partial-progress/restart tests, checked publication and both-host measurements; no default batching change without sustained/mixed fairness evidence | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
 both hosts, real durable applications, offered-load/headroom, fairness/skew,
 placement/shared barriers, active maintenance and P8 composition remain required.
 P9 stays active; P10 is excluded.
+
+### Slice429 schema — measured exact comparison work
+
+Linux428 exported stack data identifies `OwnedNextLog::matches_update` at24.31%
+and protected checkpoint comparison at22.15% of selected on-CPU sample weight.
+Direct entry equality appears in52.65%; the stripped libc comparison leaf is
+52.62%. These inclusive scopes overlap. Independent callsite/relocation/register
+evidence identifies a zero-length byte comparison; empty payloads still pay its
+call cost. The profile reports four lost bulk chunks and possible0.3s startup
+archive overlap, so it is diagnostic, separate from the clean unprofiled pairs.
+
+Data/API shape: retain `LogEntry` and `EntryPayload`, all fields and public Eq
+semantics. Replace only the derived entry comparator with an exhaustive exact
+implementation: index, term, payload variant and operation identity precede byte
+work; both-empty command bytes compare true without a libc call. Other byte
+pairs and configuration records use full equality. Manual PartialEq no longer supplies Rust's derived structural-match marker for
+constant entry patterns; interfaces may change, but this source-compatibility
+tradeoff is recorded. Equality truth values and public fields stay exact. No pointer/digest shortcut,
+new allocation, storage-format change or comparison-frequency change is involved.
+
+Ownership/transitions/failure: immutable borrows, no retained proof or mutation,
+no new error/cleanup path. Restart/codec representation and every persistence,
+checkpoint and public arbitrary-state validation remain unchanged. Reordering
+cheap rejections cannot remove the successful-path suffix comparison under the
+current mutable public update contract; removing that proof requires a separate
+immutable intent design and is deferred. Acceptance uses an independent derived
+payload tuple oracle across all variants and differing fields, existing native/
+provider/codec/recovery histories and actual network services, then fresh asserted
+both-host measurements. Mac may gain less or regress; retain every result. Held427
+is an unqualified earlier experiment, not validation of429.
 
 User priority now selects protected-prefix verification. The macro plan is reviewed
 and remains active; no acceptance family closes. [428 schema](../validation/performance/slice428-plan/SCHEMA.md)
@@ -80,8 +110,7 @@ The marker is never a durability/quorum token, digest or metadata-only shortcut.
 Public raw GroupLog cannot manufacture it. The isolated API/ownership implementation is checked and frozen, and its30 changed
 paths are now promoted to main with all1,424 selected input hashes matching.
 Publication through the enabled hook is complete as736eb9a; original push16454
-terminated0 and exact GitHub main publication was verified. No428 performance
-gain is claimed.
+terminated0 and exact GitHub main publication was verified. 428 performance results are recorded below; no sustained acceptance is claimed.
 
 [Isolated428 evidence](../validation/performance/slice428/isolated/README.md)
 records1,424 selected inputs,30 changed paths and six new modules/build inputs.
@@ -99,23 +128,87 @@ separate Native/private/matched evidence, with metadata checker0.
 New build.rs enables the redundant full-Eq reference in Cargo nonrelease profiles
 and all unit tests; actual dev Cargo JSON/root rustc cfg proof is archived. The
 asserted release performance profile keeps normal assertions/overflow checks,
-but its actual oracle-gate/fresh artifact proof remains pending. Include build.rs
-in future source exports and artifact guards. No428 PUTS/s or latency gain has
-been measured; Mac qualification and fresh release artifact proof remain open.
+and Linux actual oracle-gate/fresh artifact proof now passes; [Mac proof](../validation/performance/mac428/README.md) now passes. Include build.rs
+in future source exports and artifact guards. Both-host short paired results are recorded below; full sustained performance acceptance remains open.
 [Main promotion proof](../validation/performance/slice428/main/README.md) records
 matching source hashes, independent review and metadata checker0. Warmed-cache
 configured rollback/nonmatching snapshot histories were not explicitly run;
 generic Full reset and existing configured/snapshot histories do not establish
 those narrower cases.
 
-The user also requests actual samply sampling and flamegraphs for the current
-Linux comparison cost. Profile the immutable published426 executable with exact
-workload/artifact identity in a quiet window; preserve sampler startup failures,
-raw captures and flamegraph provenance. Restore any explicitly authorized
-transient host policy after recording. Sampling supports a cost hypothesis and
-cannot replace matched completed PUTS/s/p99, sustained capacity or the full
-performance acceptance. It is a diagnostic direction, not a new prerequisite for
-the checked source publication or a claim of CPU/allocator causality.
+[Fresh Linux428 artifacts](../validation/performance/matched428-linux/README.md)
+now prove1,424 exact committed inputs versus426's1,418: exactly six new428
+files, including build.rs. Root/executable/pinned upstream libraries and root
+build script are fresh:false; opt3/debug2/assertions/overflow/thinLTO/codegen1/
+packed symbols and the compiler/locks/config match426. Actual PROFILErelease
+omits the redundant full-reference cfg while ordinary assertions and overflow
+remain on. The initial guard text-location failure and focused no-rebuild repair
+are preserved. Three small off/on/OpenRaft controls each complete16,384 originals,
+4,096 requests and frontiers17409; ON29 phases/four scopes/15 methods are exact.
+Their1,384,800/1,416,816/1,790,503 PUTS/s and p998.968/7.826/4.660ms are functional
+controls, not paired/sustained evidence. A guarded24-case Linux426/428 runner is
+prepared; actual-output checker and10 observer/workload plus6 artifact negatives
+pass. Linux and Mac paired timing are terminal; both-host results follow.
+
+[Linux428 paired results](../validation/performance/comparison428/linux/README.md)
+are terminal0/DONE, all24 cases. Bulk426 OFF/428 OFF/ON/OpenRaft medians are
+1,268,667/1,976,497/1,926,464/3,191,203 completed PUTS/s, p99
+15.521/11.978/10.764/7.065ms. Every OFF pair improves1.6826/1.5579/1.4777.
+Singleton medians100,026/101,833/85,264/20,181 PUTS/s, p99
+0.018876/0.018715/0.021330/0.125306ms; OFF pairs1.0518/1.0012/1.0181 improve,
+but ON regresses all three against both OFF variants. Every slower trial remains.
+Leader protected verification is89.204/93.168/92.552ms inclusive in204 calls,
+within compaction101.416/108.033/106.798ms; compact rawEq/clone calls are zero,
+reconcile0.149/0.174/0.175ms. Logical retained-entry units are not actual
+compares/skips; suffix correlation is unseparated. No CPU/allocator cause is
+inferred. Exported428 CPU data now selects exact zero-byte comparison avoidance;
+Mac results remain separate below. Bulk remains below matched OpenRaft
+and8,422,500; all sustained/full-curve/durable/headroom/fairness/composition
+acceptance stays open.
+
+[Mac428 qualification](../validation/performance/mac428/README.md) passes on
+1,427 exact inputs, all affected/actual service/standalone checks, zero four strict
+profiles and fresh asserted artifact guards. Original collector failure is kept;
+canonical-path collector-only retry passes without rebuilding. [Mac428 pairs](../validation/performance/comparison428-mac/README.md)
+complete24 exact cases:426 OFF/428 OFF/ON/OpenRaft bulk medians
+2,899,216/2,950,267/2,889,514/2,121,622 PUTS/s, p99
+6.180/6.165/6.284/10.000ms; singleton54,559/53,868/50,308/10,004,
+p990.033042/0.034750/0.033667/0.136375ms. OFF bulk trial changes
+-9.102%/+0.277%/+1.761%, singleton+3.186%/-0.744%/-1.827%. This establishes
+no repeatable Mac gain. Every observer and latency regression is retained.
+
+[Exported428 Linux profile](../validation/performance/hotspot428/linux/README.md)
+identifies remaining direct equality52.65% of selected sample weight: persistence
+suffix validation24.31%, protected checkpoint comparison22.15%, and libc
+comparison leaf52.62%, with overlapping inclusive scopes. These are whole-process
+on-CPU samples, not leader wall time. Four lost bulk chunks and possible0.3s
+startup archival overlap are disclosed. Profiled bulk1,864,430 PUTS/s/p9913.932ms
+and singleton91,729/p990.022142ms are diagnostic only. Independent zero-byte
+call evidence selects429: skip that byte call when both payloads are empty,
+retain exact remaining fields and nonempty equality. Cheap check reordering alone
+would not eliminate successful-path work. Shared immutable intent/payload design
+is deferred until measurements justify its wider ownership/API change.
+
+[Actual426 CPU profiles](../validation/performance/hotspot426/README.md) preserve
+Linux user-only perf with final host paranoid2/kptr2/mlock516 unchanged and clean
+original42542. Two libc comparison instructions account for43.81% and23.29% of
+sampled user cycles; an observed caller is LogEntry Eq. The perf/libdw text decoder uses an incorrect load offset and produces shallow
+callers. Direct Samply JSON validation finds complete physical stacks: only0.156%
+of bulk samples have at most two frames (maximum25); no recapture is needed.
+These whole-process measurements are not leader CPU or elapsed wall fractions. Mac sampled completion-map insert/remove is19.32% of
+observed CPU delta, memmove7.53% and Eq1.03%; CPU-delta-on-wait sampling biases
+remain, and blocked time is not CPU work. Profiled bulk diagnostics are Linux
+1,236,961 PUTS/s/p9915.852ms and Mac3,088,076/p996.037ms, separate from unprofiled
+comparisons and sustained floors. Samples refine hypotheses without replacing
+capacity acceptance or establishing allocator causality.
+
+The user requires a repeated profile/inspect/reduce/measure loop, reading compact
+text/JSON and symbols directly. Never use a browser or inspect images unless the
+user explicitly instructs it. Leave kernel protections unchanged: working Linux
+user-only perf recordings need no policy adjustment. Exported CPU data supports
+cost selection; it does not replace matched completed PUTS/s/p99 or full P9
+acceptance. Existing failed samplers and obsolete image/text outputs remain raw
+historical evidence, with corrected analysis identified.
 
 The per-entry empty-byte427 experiment is [held unpromoted](../validation/performance/slice427-held/README.md),
 with fmt/compile/351 library passes and21 socket-permission failures recorded;

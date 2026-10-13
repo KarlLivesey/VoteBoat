@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/tmp/voteboat-mac428-a46da2b-xGe40Y/collect.py", line 90, in <module>
+    assert len(dev_script)==1 and dev_script[0]['cfgs']==['voteboat_checkpoint_debug_oracle'],dev_script
+AssertionError: []

@@ -1,0 +1,91 @@
+{
+  "commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+  "history": {
+    "original_remote_pid": 96361,
+    "original_terminal_status": 1,
+    "original_failure": "collector compared literal /private/tmp dev package identity against /tmp standalone release; source and compiled paths canonically identical",
+    "focused_fix": "canonical dev source manifest/package mapping; reuse identical existing copied artifacts",
+    "retry_scope": "collector guards only; no repeated tests/checks/builds"
+  },
+  "guarded_inputs": 1427,
+  "scope": "Full428 scoped library/cache/core/log/provider/raft/snapshot, real TCP/QUIC retry/replacement/native recovery, formatting four strict profiles, matched35 and functional off/on/OpenRaft maintenance histories; no timing or floor claim",
+  "controls": [
+    {
+      "name": "off",
+      "engine": "voteboat",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "on",
+      "engine": "voteboat",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "openraft",
+      "engine": "openraft",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": null,
+      "performance_claim": false
+    }
+  ],
+  "test_counts": {
+    "affected_all": [
+      386,
+      19,
+      32,
+      79,
+      27
+    ],
+    "affected_core": [
+      306,
+      0,
+      17,
+      29,
+      12
+    ],
+    "services": [
+      2
+    ],
+    "matched_tests": [
+      35
+    ]
+  },
+  "four_artifacts_fresh_false": true,
+  "profile": "opt3/debug2/assertions/overflow/thinLTO/codegen1",
+  "source_unchanged": true,
+  "source_permissions_preserved": true,
+  "dev_oracle_actual_cfg": true,
+  "asserted_release_oracle_cfg_absent": true,
+  "symbol_artifacts": "SYMBOL_ARTIFACTS.json",
+  "clippy_config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521"
+}

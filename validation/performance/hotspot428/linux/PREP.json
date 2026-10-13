@@ -1,0 +1,18 @@
+{
+  "commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+  "frozen_source_inventory": "target/p9/matched428-linux/SOURCE.json",
+  "inventory_sha256": "2c424ad046599875562197327f0d324e44c4695e4db513f6141d73d7333dbec7",
+  "source_items_verified": 1424,
+  "artifacts_verified": 4,
+  "binary_sha256": "85f997d4a969f762c636933dea62aa56fe1864c330c6d21562bfd575dbc9b730",
+  "dwp": "target/p9/matched428-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+  "dwp_sha256": "5a2c79a9bba8b9ce27e4a3da9a4de79c377ff153d567875e6c9c910a64fcf3fd",
+  "dwp_sidecar": "target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework.dwp",
+  "runner_sha256": "73a0853a59c45e2f6554bc9194c62c1e3d829d508837e08080b70fe24bdd37fd",
+  "compiler_log": "target/p9/matched428-linux/logs/rustc.txt",
+  "guards_passed": true,
+  "prep_failures": [
+    "Initial link creation FileExistsError; existing sidecar unchanged.",
+    "Existing DWP is a regular copy rather than symlink; byte SHA equality succeeds."
+  ]
+}

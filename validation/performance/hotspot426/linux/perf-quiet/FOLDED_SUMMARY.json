@@ -1,0 +1,316 @@
+{
+  "bulk": {
+    "folded_sample_count": 137435010786,
+    "self": [
+      {
+        "function": "[libc.so.6 <7fb1fb1ae49e>]",
+        "samples": 60211037194,
+        "percentage": 43.81055223821722
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1ae4a5>]",
+        "samples": 32015057918,
+        "percentage": 23.294688693153038
+      },
+      {
+        "function": "matched-server",
+        "samples": 25569697338,
+        "percentage": 18.60493712029067
+      },
+      {
+        "function": "matched-client",
+        "samples": 8890891831,
+        "percentage": 6.469160791091292
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0bc6f4>]",
+        "samples": 1178724977,
+        "percentage": 0.857659900675085
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0be099>]",
+        "samples": 1141490881,
+        "percentage": 0.8305677530577816
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "samples": 904963896,
+        "percentage": 0.6584667842818588
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0bc70d>]",
+        "samples": 752112494,
+        "percentage": 0.5472495615917796
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0be0b3>]",
+        "samples": 645711407,
+        "percentage": 0.46983036076988927
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1b7cef>]",
+        "samples": 636620705,
+        "percentage": 0.4632158147761067
+      },
+      {
+        "function": "malloc",
+        "samples": 473376805,
+        "percentage": 0.3444368376680196
+      },
+      {
+        "function": "voteboat-matche",
+        "samples": 460357728,
+        "percentage": 0.3349639406779855
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1b7ac0>]",
+        "samples": 316842721,
+        "percentage": 0.23054003429545014
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1b7ad3>]",
+        "samples": 303261196,
+        "percentage": 0.22065789078461812
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1b7cc6>]",
+        "samples": 294562896,
+        "percentage": 0.21432886301341642
+      }
+    ],
+    "inclusive": [
+      {
+        "function": "matched-server",
+        "samples": 124887193326,
+        "percentage": 90.86999929040046
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1ae49e>]",
+        "samples": 60257708480,
+        "percentage": 43.844511042260734
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1ae4a5>]",
+        "samples": 32044013884,
+        "percentage": 23.315757535680426
+      },
+      {
+        "function": "matched-client",
+        "samples": 12061977920,
+        "percentage": 8.77649577863511
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0bc6f4>]",
+        "samples": 1178724977,
+        "percentage": 0.857659900675085
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0be099>]",
+        "samples": 1141490881,
+        "percentage": 0.8305677530577816
+      },
+      {
+        "function": "clock_gettime",
+        "samples": 970916111,
+        "percentage": 0.7064547129929019
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "samples": 904963896,
+        "percentage": 0.6584667842818588
+      },
+      {
+        "function": "realloc",
+        "samples": 801124155,
+        "percentage": 0.5829112614160813
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0bc70d>]",
+        "samples": 752112494,
+        "percentage": 0.5472495615917796
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0be0a9>]",
+        "samples": 723466108,
+        "percentage": 0.526405974622077
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb1b7cef>]",
+        "samples": 647639719,
+        "percentage": 0.47123343265744677
+      },
+      {
+        "function": "[libc.so.6 <7fb1fb0be0b3>]",
+        "samples": 645711407,
+        "percentage": 0.46983036076988927
+      },
+      {
+        "function": "voteboat-matche",
+        "samples": 485806734,
+        "percentage": 0.3534810607731166
+      },
+      {
+        "function": "malloc",
+        "samples": 473376805,
+        "percentage": 0.3444368376680196
+      }
+    ]
+  },
+  "singleton": {
+    "folded_sample_count": 74512718053,
+    "self": [
+      {
+        "function": "matched-server",
+        "samples": 45648170044,
+        "percentage": 61.262253259277166
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fb7ad3>]",
+        "samples": 4001872689,
+        "percentage": 5.370724345545302
+      },
+      {
+        "function": "matched-client",
+        "samples": 3925633035,
+        "percentage": 5.268406706366213
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebc6f4>]",
+        "samples": 2091630473,
+        "percentage": 2.807078479558682
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebe099>]",
+        "samples": 1857671003,
+        "percentage": 2.4930925237201267
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fb7bdd>]",
+        "samples": 1457010034,
+        "percentage": 1.9553843586321014
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fae49e>]",
+        "samples": 1415743405,
+        "percentage": 1.9000023646875943
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebe0b3>]",
+        "samples": 1317527822,
+        "percentage": 1.7681918690214176
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fae4a5>]",
+        "samples": 1166615827,
+        "percentage": 1.565660007423431
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "samples": 1162588935,
+        "percentage": 1.5602557058421416
+      },
+      {
+        "function": "malloc",
+        "samples": 1083709580,
+        "percentage": 1.454395448612102
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebc70d>]",
+        "samples": 964048942,
+        "percentage": 1.2938045573834571
+      },
+      {
+        "function": "realloc",
+        "samples": 905602468,
+        "percentage": 1.2153663047908894
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fb7c37>]",
+        "samples": 606997900,
+        "percentage": 0.8146232158223643
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fb7cc6>]",
+        "samples": 599691359,
+        "percentage": 0.8048174522011756
+      }
+    ],
+    "inclusive": [
+      {
+        "function": "matched-server",
+        "samples": 69238550958,
+        "percentage": 92.92178941687706
+      },
+      {
+        "function": "matched-client",
+        "samples": 5234296828,
+        "percentage": 7.024702580674762
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fb7ad3>]",
+        "samples": 4001872689,
+        "percentage": 5.370724345545302
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebc6f4>]",
+        "samples": 2091630473,
+        "percentage": 2.807078479558682
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebe099>]",
+        "samples": 1857671003,
+        "percentage": 2.4930925237201267
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fb7bdd>]",
+        "samples": 1457010034,
+        "percentage": 1.9553843586321014
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fae49e>]",
+        "samples": 1415743405,
+        "percentage": 1.9000023646875943
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebe0b3>]",
+        "samples": 1317527822,
+        "percentage": 1.7681918690214176
+      },
+      {
+        "function": "clock_gettime",
+        "samples": 1291172397,
+        "percentage": 1.7328214977765335
+      },
+      {
+        "function": "[libc.so.6 <7f7e07fae4a5>]",
+        "samples": 1166615827,
+        "percentage": 1.565660007423431
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "samples": 1162588935,
+        "percentage": 1.5602557058421416
+      },
+      {
+        "function": "malloc",
+        "samples": 1083709580,
+        "percentage": 1.454395448612102
+      },
+      {
+        "function": "realloc",
+        "samples": 1076630012,
+        "percentage": 1.444894294735304
+      },
+      {
+        "function": "[libc.so.6 <7f7e07ebc70d>]",
+        "samples": 964048942,
+        "percentage": 1.2938045573834571
+      },
+      {
+        "function": "syscall",
+        "samples": 688709733,
+        "percentage": 0.9242848080110687
+      }
+    ]
+  }
+}

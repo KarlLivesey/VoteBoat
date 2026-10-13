@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428/prepare-pair.py", line 11, in <module>
+    spec.loader.exec_module(guard)
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 755, in exec_module
+  File "<frozen importlib._bootstrap_external>", line 893, in get_code
+  File "<frozen importlib._bootstrap_external>", line 823, in source_to_code
+  File "<frozen importlib._bootstrap>", line 491, in _call_with_frames_removed
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison428/artifact-guard.py", line 97
+    need(any('-C lto=thin' in line and '-C codegen-units=1','-C split-debuginfo=packed' in line for line in bin_lines),
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+SyntaxError: Generator expression must be parenthesized

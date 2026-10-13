@@ -1,0 +1,63 @@
+matched-server 2008472 98290.300155:    4938719 cycles:u: 
+	    561e59b8b83f <voteboat_matched_framework::application::Noop as voteboat::application::StateMachine>::apply_batch+0xbf (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008478 98290.301125:    5198741 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008478 98290.302077:    4902005 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008478 98290.302926:    3962555 cycles:u: 
+	    561e599d6df1 <voteboat::membership::Membership>::is_voter+0x1 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008472 98290.303200:    4993562 cycles:u: 
+	    561e59b7f94e <tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send+0x6e (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008478 98290.303797:    5142884 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e599f9c60 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0xf0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-client 2008483 98290.304467:    4860925 cycles:u: 
+	    561e599a78cb tokio::runtime::scheduler::multi_thread::worker::run+0x7eb (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008472 98290.305002:    5703168 cycles:u: 
+	    7fb1fb1ae4a5 [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008472 98290.306053:    5430113 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008476 98290.306747:    4094882 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e599d00d2 <voteboat::raft::Raft>::receive_append+0x922 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008478 98290.307007:    4012788 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008472 98290.307106:    5384910 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e599f9c60 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0xf0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+	          1722c0 [unknown] ([unknown])
+	c4ffffffffb83676 [unknown] ([unknown])
+
+matched-server 2008476 98290.307200:    5623962 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008472 98290.307465:    5234529 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e599f9c60 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0xf0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+	          1722c0 [unknown] ([unknown])
+	c4ffffffffb83676 [unknown] ([unknown])
+
+matched-server 2008476 98290.308275:    5511640 cycles:u: 
+	    561e599a67d0 tokio::runtime::task::waker::wake_by_ref+0x90 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+
+matched-server 2008476 98290.309194:    4501742 cycles:u: 
+	    7fb1fb1ae49e [unknown] (/usr/lib/libc.so.6)
+	    561e59baef64 <voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length+0x1a4 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/voteboat-matched-framework)
+

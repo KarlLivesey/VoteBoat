@@ -1,0 +1,25 @@
+{
+  "scope": "All committed production/harness source modules, fixtures under tests, locks, Cargo config, hooks, build.rs and contract inventories verified. Documentation-only parent plans omitted from candidate; .gitignore added as noncompiled provenance. No claim every inventory file compiled.",
+  "baseline_inputs": 1422,
+  "candidate_inputs": 1427,
+  "added": [
+    ".gitignore",
+    "build.rs",
+    "src/log/comparison.rs",
+    "src/log/comparison/tests.rs",
+    "src/log/owned/tests/checkpoint.rs",
+    "src/native/log_store/accepted/tests/checkpoint.rs",
+    "src/raft/checkpoint_tests.rs"
+  ],
+  "removed": [
+    "docs/IMPLEMENTATION.md",
+    "docs/P9.md"
+  ],
+  "essential_committed_selected_files": 1420,
+  "missing_essential": [],
+  "all_essential_candidate_commit_sha256_match": true,
+  "compiler_rustc_sha256_equal": true,
+  "compiler_version_sha256_equal": true,
+  "remote_final_guard_exit": 0,
+  "prepared_archive_sha256": "f83a15a97f8ade0161d4bbb1c184379310fe8700d693874d907c6e40b4f10ccc"
+}

@@ -1,0 +1,98 @@
+{
+  "profile": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot426/mac/converter-fixture/fixture.json.gz",
+  "symbols": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot426/mac/converter-fixture/fixture.syms.json",
+  "input_sha256": {
+    "fixture.json.gz": "250d7d060db2589139b7ee033a9caacfd7d773cf2e5d2640b8a5c06d6ec3b7dc",
+    "fixture.syms.json": "f88d04281811d58d51de2a4303b87e886eeb332a0bb5becbffa94c9646fdfe35"
+  },
+  "cpu_unit": "threadCPUDelta microseconds attributed to sampled stack",
+  "cpu_denominator_us": 30,
+  "wall_unit": "Samply sample weights, includes off-CPU waits",
+  "totals": {
+    "samples": 4,
+    "cpu_us": 30,
+    "wall_sample_weight": 5,
+    "positive_cpu_samples": 2,
+    "null_stack_cpu_us": 20,
+    "unresolved_leaf_cpu_us": 0,
+    "any_unresolved_stack_cpu_us": 20,
+    "malformed_stack_cpu_us": 0,
+    "zero_cpu_delta_samples": 1,
+    "null_cpu_delta_samples": 1
+  },
+  "threads": [
+    {
+      "name": "matched-client",
+      "tid": "7",
+      "pid": "3",
+      "samples": 4,
+      "cpu_us": 30,
+      "wall_sample_weight": 5,
+      "positive_cpu_samples": 2,
+      "null_stack_cpu_us": 20,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 20,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1,
+      "null_cpu_delta_samples": 1
+    }
+  ],
+  "excluded_threads": [],
+  "self_native_functions": [
+    {
+      "function": "[null stack]",
+      "cpu_us": 20,
+      "percent_of_observed_selected_thread_cpu": 66.66666666666667
+    },
+    {
+      "function": "leaf",
+      "cpu_us": 10,
+      "percent_of_observed_selected_thread_cpu": 33.333333333333336
+    }
+  ],
+  "inclusive_native_functions": [
+    {
+      "function": "[null stack]",
+      "cpu_us": 20,
+      "percent_of_observed_selected_thread_cpu": 66.66666666666667
+    },
+    {
+      "function": "root",
+      "cpu_us": 10,
+      "percent_of_observed_selected_thread_cpu": 33.333333333333336
+    },
+    {
+      "function": "leaf",
+      "cpu_us": 10,
+      "percent_of_observed_selected_thread_cpu": 33.333333333333336
+    }
+  ],
+  "representative_source_frames": [
+    {
+      "file": "fixture.rs",
+      "function": "root",
+      "line": 1,
+      "inclusive_cpu_us_nonadditive": 10
+    },
+    {
+      "file": "fixture.rs",
+      "function": "leaf",
+      "line": 2,
+      "inclusive_cpu_us_nonadditive": 10
+    },
+    {
+      "file": "fixture.rs",
+      "function": "inner;fixture",
+      "line": 3,
+      "inclusive_cpu_us_nonadditive": 10
+    }
+  ],
+  "limits": [
+    "Launch-to-exit profile includes setup, warmup, follower verification, latency sorting and shutdown; not the throughput timer boundary.",
+    "CPU deltas are interval observations assigned to sampled stacks, not instruction-level cost or elapsed wall percentages.",
+    "Samply 0.13.1 sidecar coalesces inline/source chains by native symbol start address; inline lines are representative, not per-RVA precise.",
+    "Sampled stack unwinder truncation not explicitly marked in these files cannot be quantified; null/malformed/unresolved observations are retained and counted.",
+    "matched-server thread names do not identify leader/follower ownership; no leader-specific CPU claim.",
+    "Inclusive function shares overlap and must not be summed; self native-function shares sum to the observed CPU denominator."
+  ]
+}

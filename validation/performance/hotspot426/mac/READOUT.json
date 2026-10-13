@@ -1,0 +1,225 @@
+{
+  "scope": "Offline source-backed analysis of existing Mac426 Samply recordings; no new recordings/builds/source edits",
+  "metrics": "Whole launch-to-exit observations. CPU delta weights are prior-interval thread CPU microseconds assigned to the current sampled stack. Shares are of summed selected-thread deltas, not elapsed wall or leader CPU.",
+  "cells": {
+    "bulk": {
+      "cpu_denominator_us": 11713949,
+      "threads": 18,
+      "role_cpu_deltas_us": {
+        "matched-client": 2745234,
+        "matched-server": 8851132,
+        "voteboat-matched-framework": 117583
+      },
+      "unresolved_leaf_percent": 5.399374711295055,
+      "any_unresolved_stack_percent": 7.992206556473825,
+      "null_stack_cpu_us": 0,
+      "malformed_stack_cpu_us": 0,
+      "parked_condvar_current_stack_delta_percent": 33.28270423577907,
+      "pending_completion_map_insert_remove": [
+        {
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+          "cpu_us": 1295765,
+          "percent_of_observed_selected_thread_cpu": 11.06172649377251
+        },
+        {
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove::<voteboat::identity::OperationId>",
+          "cpu_us": 967535,
+          "percent_of_observed_selected_thread_cpu": 8.259682537460254
+        }
+      ],
+      "pending_completion_map_insert_remove_combined_self_percent": 19.32140903123276,
+      "top_15_native_self": [
+        {
+          "function": "__psynch_cvwait",
+          "cpu_us": 3898719,
+          "percent_of_observed_selected_thread_cpu": 33.28270423577907
+        },
+        {
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+          "cpu_us": 1295765,
+          "percent_of_observed_selected_thread_cpu": 11.06172649377251
+        },
+        {
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove::<voteboat::identity::OperationId>",
+          "cpu_us": 967535,
+          "percent_of_observed_selected_thread_cpu": 8.259682537460254
+        },
+        {
+          "function": "_platform_memmove",
+          "cpu_us": 882171,
+          "percent_of_observed_selected_thread_cpu": 7.530944517514973
+        },
+        {
+          "function": "__psynch_mutexwait",
+          "cpu_us": 729491,
+          "percent_of_observed_selected_thread_cpu": 6.227541198958609
+        },
+        {
+          "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+          "cpu_us": 317549,
+          "percent_of_observed_selected_thread_cpu": 2.7108620670962456
+        },
+        {
+          "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+          "cpu_us": 190782,
+          "percent_of_observed_selected_thread_cpu": 1.6286736437046123
+        },
+        {
+          "function": "core::ptr::drop_glue::<voteboat::log::EntryPayload>",
+          "cpu_us": 181155,
+          "percent_of_observed_selected_thread_cpu": 1.5464895740966602
+        },
+        {
+          "function": "mach_absolute_time",
+          "cpu_us": 158997,
+          "percent_of_observed_selected_thread_cpu": 1.3573304783894824
+        },
+        {
+          "function": "<alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove_kv::{closure#0}, alloc::alloc::Global>",
+          "cpu_us": 155916,
+          "percent_of_observed_selected_thread_cpu": 1.3310285028558686
+        },
+        {
+          "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+          "cpu_us": 138893,
+          "percent_of_observed_selected_thread_cpu": 1.1857060330380471
+        },
+        {
+          "function": "_platform_memcmp",
+          "cpu_us": 129388,
+          "percent_of_observed_selected_thread_cpu": 1.1045634567813125
+        },
+        {
+          "function": "<voteboat::log::LogEntry as core::slice::cmp::SlicePartialEq<voteboat::log::LogEntry>>::equal_same_length",
+          "cpu_us": 121278,
+          "percent_of_observed_selected_thread_cpu": 1.035329759417597
+        },
+        {
+          "function": "<voteboat::raft::Raft>::append_for",
+          "cpu_us": 115811,
+          "percent_of_observed_selected_thread_cpu": 0.9886589057200096
+        },
+        {
+          "function": "__psynch_cvsignal",
+          "cpu_us": 115232,
+          "percent_of_observed_selected_thread_cpu": 0.9837160807171006
+        }
+      ],
+      "cpu_svg": "target/p9/hotspot426/mac/bulk-analysis/cpu.svg",
+      "wall_svg": "target/p9/hotspot426/mac/bulk-analysis/wall.svg"
+    },
+    "singleton": {
+      "cpu_denominator_us": 34830105,
+      "threads": 18,
+      "role_cpu_deltas_us": {
+        "matched-client": 4491658,
+        "matched-server": 30308716,
+        "voteboat-matched-framework": 29731
+      },
+      "unresolved_leaf_percent": 2.7830837719266133,
+      "any_unresolved_stack_percent": 5.404057782771542,
+      "null_stack_cpu_us": 0,
+      "malformed_stack_cpu_us": 0,
+      "parked_condvar_current_stack_delta_percent": 70.95357019451994,
+      "pending_completion_map_insert_remove": [
+        {
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::remove::<voteboat::identity::OperationId>",
+          "cpu_us": 5178,
+          "percent_of_observed_selected_thread_cpu": 0.014866449584346644
+        },
+        {
+          "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>>::insert",
+          "cpu_us": 5100,
+          "percent_of_observed_selected_thread_cpu": 0.014642505384350694
+        }
+      ],
+      "pending_completion_map_insert_remove_combined_self_percent": 0.029508954968697338,
+      "top_15_native_self": [
+        {
+          "function": "__psynch_cvwait",
+          "cpu_us": 24713203,
+          "percent_of_observed_selected_thread_cpu": 70.95357019451994
+        },
+        {
+          "function": "__psynch_cvsignal",
+          "cpu_us": 2258042,
+          "percent_of_observed_selected_thread_cpu": 6.483018067272551
+        },
+        {
+          "function": "mach_absolute_time",
+          "cpu_us": 897652,
+          "percent_of_observed_selected_thread_cpu": 2.5772302437790526
+        },
+        {
+          "function": "_platform_memmove",
+          "cpu_us": 893826,
+          "percent_of_observed_selected_thread_cpu": 2.5662454936613024
+        },
+        {
+          "function": "<tokio::sync::notify::NotifiedProject>::poll_notified",
+          "cpu_us": 321491,
+          "percent_of_observed_selected_thread_cpu": 0.923026215396135
+        },
+        {
+          "function": "<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq",
+          "cpu_us": 232058,
+          "percent_of_observed_selected_thread_cpu": 0.6662569636238536
+        },
+        {
+          "function": "tokio::runtime::scheduler::multi_thread::worker::run",
+          "cpu_us": 222286,
+          "percent_of_observed_selected_thread_cpu": 0.6382007748756428
+        },
+        {
+          "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+          "cpu_us": 205754,
+          "percent_of_observed_selected_thread_cpu": 0.5907360887944495
+        },
+        {
+          "function": "<voteboat::raft::Raft>::persist_update",
+          "cpu_us": 204173,
+          "percent_of_observed_selected_thread_cpu": 0.5861969121253008
+        },
+        {
+          "function": "<voteboat::raft::Raft>::step",
+          "cpu_us": 154780,
+          "percent_of_observed_selected_thread_cpu": 0.4443856830176079
+        },
+        {
+          "function": "<tokio::runtime::scheduler::multi_thread::worker::Context>::park_internal",
+          "cpu_us": 149133,
+          "percent_of_observed_selected_thread_cpu": 0.4281726971537984
+        },
+        {
+          "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+          "cpu_us": 123987,
+          "percent_of_observed_selected_thread_cpu": 0.3559765323704881
+        },
+        {
+          "function": "<tokio::sync::notify::NotifiedProject>::drop_notified",
+          "cpu_us": 119024,
+          "percent_of_observed_selected_thread_cpu": 0.3417273648758739
+        },
+        {
+          "function": "<alloc::vec::Vec<voteboat::raft::Effect> as alloc::vec::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend",
+          "cpu_us": 106404,
+          "percent_of_observed_selected_thread_cpu": 0.30549434174832374
+        },
+        {
+          "function": "<tokio::sync::mpsc::list::Rx<voteboat::raft::Message>>::pop",
+          "cpu_us": 103313,
+          "percent_of_observed_selected_thread_cpu": 0.2966198350536124
+        }
+      ],
+      "cpu_svg": "target/p9/hotspot426/mac/singleton-analysis/cpu.svg",
+      "wall_svg": "target/p9/hotspot426/mac/singleton-analysis/wall.svg"
+    }
+  },
+  "findings": [
+    "Bulk completion bookkeeping is a measured hotspot: concrete BTreeMap<OperationId, oneshot::Sender<OperationId>>::insert/remove physical functions account for19.32% of observed CPU-delta weight. Frozen799f2cf actor source binds this map to per-original replies at lines38/242/329. This is matched host-adapter bookkeeping, not a production consensus-engine CPU share.",
+    "Bulk _platform_memmove is7.53%, LogEntry::clone2.71%, SlicePartialEq<LogEntry>::equal_same_length1.03%. Native physical symbols identify these operations; they do not establish an allocator cause or prove all copies originate in one subsystem.",
+    "Singleton71.0% and bulk33.3% of observed deltas are attached to a currently sampled __psynch_cvwait stack. CPU occurred earlier in the sampling interval, possibly during short task bursts. This is NOT CPU consumed while blocked and cannot identify a precise blocking instruction hotspot.",
+    "Sidecar native-symbol resolution covers94.60%/97.22% of leaf CPU-delta weight. Inline/source chains are rendered, but0.13.1 coalesces them by native symbol start address, so individual inline line costs remain representative.",
+    "Use these graphs to select further bounded measurements; they are not sustained unprofiled floor acceptance, leader/follower CPU attribution or additive inclusive CPU phases."
+  ]
+}
