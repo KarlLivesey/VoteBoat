@@ -1,0 +1,562 @@
+--- a/benchmarks/matched/src/attribution.rs
++++ b/benchmarks/matched/src/attribution.rs
+@@ -1,7 +1,9 @@
+ // SPDX-License-Identifier: RPL-1.5
+ // Copyright (c) 2026 Karl Livesey
+ //! Bounded elapsed intervals; inclusive and nested, never phase CPU attribution.
++mod gaps;
+ use crate::Failure;
++use gaps::{Boundaries, GapReport, Gaps};
+ use serde::Serialize;
+ use std::{cell::Cell, time::Instant};
+ 
+@@ -143,6 +145,8 @@
+     intervals: [Cell<Interval>; PHASES],
+     scopes: [Cell<[ScopedInterval; PHASES]>; 4],
+     invalid: Cell<bool>,
++    boundaries: Boundaries,
++    compact_gaps: Gaps,
+ }
+ impl<const ENABLED: bool> Default for Recorder<ENABLED> {
+     fn default() -> Self {
+@@ -150,6 +154,8 @@
+             intervals: std::array::from_fn(|_| Cell::new(Interval::default())),
+             scopes: std::array::from_fn(|_| Cell::new([ScopedInterval::default(); PHASES])),
+             invalid: Cell::new(false),
++            boundaries: Boundaries::default(),
++            compact_gaps: Gaps::default(),
+         }
+     }
+ }
+@@ -164,26 +170,40 @@
+     /// Observation failure never substitutes for a provider/protocol outcome.
+     pub fn finish(&self, phase: Phase, started: Option<Instant>, failed: bool, items: usize) {
+         if ENABLED {
+-            let measured = started
+-                .and_then(|start| u64::try_from(start.elapsed().as_nanos()).ok())
+-                .zip(u64::try_from(items).ok());
+-            if let Some((elapsed, items)) = measured {
+-                self.record(phase, elapsed, failed, items);
++            if let Some(start) = started {
++                // Reuse the same one end-clock observation as the old elapsed() call.
++                self.observe(phase, start, Instant::now(), failed, items);
+             } else {
+                 self.invalid.set(true);
+             }
+         }
+     }
+-    fn record(&self, phase: Phase, elapsed: u64, failed: bool, items: u64) {
++    fn observe(&self, phase: Phase, start: Instant, end: Instant, failed: bool, items: usize) {
++        if ENABLED {
++            let measured = end
++                .checked_duration_since(start)
++                .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
++                .zip(u64::try_from(items).ok());
++            if let Some((elapsed, items)) = measured {
++                if let Some(call) = self.record(phase, elapsed, failed, items) {
++                    self.boundaries.record(phase, call, start, end);
++                }
++            } else {
++                self.invalid.set(true);
++            }
++        }
++    }
++    fn record(&self, phase: Phase, elapsed: u64, failed: bool, items: u64) -> Option<u64> {
+         if ENABLED {
+             let cell = &self.intervals[phase as usize];
+             let mut interval = cell.get();
+             if interval.add(elapsed, failed, items).is_ok() {
+                 cell.set(interval);
+-            } else {
+-                self.invalid.set(true);
++                return Some(interval.calls);
+             }
+-        }
++            self.invalid.set(true);
++        }
++        None
+     }
+     pub fn provider_snapshot(store: &Self, snapshots: &Self) -> Option<ProviderSnapshot> {
+         if ENABLED {
+@@ -251,11 +271,13 @@
+             scope: "whole_actor_lifetime_including_campaign_warmup_follower_drain_and_shutdown;provider_maxima_whole_provider_lifetime_including_setup",
+             clock: "monotonic_elapsed_wall_intervals_not_cpu_or_critical_path",
+             nesting: "checkpoint_intervals_nested_in_maintenance;provider_intervals_nested_in_helpers;reconcile_contains_load_pinned;effects_contain_persist_and_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
+-            residual: "helper_elapsed_outside_known_provider_methods_is_unattributed_Eq_validation_application_restore_Core_staging_completion_and_marshalling;not_pure_Core;scoped_provider_sums_are_not_additive_when_nested",
++            residual: "helper_elapsed_outside_known_provider_methods_and_reported_compact_gaps_remains_unattributed;gap_labels_are_inclusive_not_pure_Core_or_Eq;scoped_provider_sums_are_not_additive_when_nested",
+             item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;snapshot_write=attempted_application_bytes;other=zero",
+             phases: NAMES.iter().enumerate().map(|(i, &phase)| PhaseReport {
+                 phase, interval: if provider_phase(i) { provider.0[i] } else { self.intervals[i].get() },
+             }).collect(),
++            checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_includes_full_Eq_temporary_destruction_and_guards;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
++            checkpoint_compact_gaps: self.compact_gaps.report(),
+             checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
+                 let values = self.scopes[slot].get();
+                 ScopeReport { scope: NAMES[phase as usize], methods: NAMES.iter().enumerate()
+@@ -291,6 +313,8 @@
+     item_units: &'static str,
+     phases: Vec<PhaseReport>,
+     checkpoint_provider_scopes: Vec<ScopeReport>,
++    checkpoint_compact_gap_scope: &'static str,
++    checkpoint_compact_gaps: [GapReport; 3],
+ }
+ #[cfg(test)]
+ mod tests;
+--- a/benchmarks/matched/src/attribution/tests.rs
++++ b/benchmarks/matched/src/attribution/tests.rs
+@@ -41,11 +41,11 @@
+     let actor = Recorder::<true>::default();
+     let store = Recorder::<true>::default();
+     let snapshots = Recorder::<true>::default();
+-    store.record(Phase::StoreState, 99, false, 12);
++    let _ = store.record(Phase::StoreState, 99, false, 12);
+     let before = Recorder::provider_snapshot(&store, &snapshots);
+-    store.record(Phase::StoreState, 7, false, 6);
+-    snapshots.record(Phase::SnapshotLoadPinned, 3, false, 0);
+-    snapshots.record(Phase::SnapshotReconcile, 5, false, 0);
++    let _ = store.record(Phase::StoreState, 7, false, 6);
++    let _ = snapshots.record(Phase::SnapshotLoadPinned, 3, false, 0);
++    let _ = snapshots.record(Phase::SnapshotReconcile, 5, false, 0);
+     actor.finish_scope(Phase::CheckpointCompact, before, &store, &snapshots);
+     let report =
+         serde_json::to_value(actor.report(0, &store, &snapshots).unwrap().unwrap()).unwrap();
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -397,6 +397,14 @@
+         failed: bool,
+     ) {
+         self.attribution.finish(phase, started, failed, 0);
++        if matches!(phase, Phase::CheckpointCompact) {
++            self.attribution.finish_compact_gaps(
++                before.as_ref(),
++                &self.parts.store.attribution,
++                &self.parts.snapshots.attribution,
++                failed,
++            );
++        }
+         self.attribution.finish_scope(
+             phase,
+             before,
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -166,6 +166,16 @@
+         return;
+     }
+     let value = serde_json::to_value(report.unwrap()).unwrap();
++    let gaps = value["checkpoint_compact_gaps"].as_array().unwrap();
++    assert_eq!(gaps.len(), 3);
++    for gap in gaps {
++        assert_eq!(gap["calls"], 2);
++        assert_eq!(gap["failures"], 0);
++        assert!(
++            gap["total_elapsed_ns"].as_u64().unwrap()
++                >= gap["maximum_elapsed_ns"].as_u64().unwrap()
++        );
++    }
+     let phases = value["phases"].as_array().unwrap();
+     for name in [
+         "checkpoint_reserve_inclusive",
+@@ -253,3 +263,58 @@
+     assert_eq!(failures("snapshot_load_pinned_nested"), 2);
+     assert_eq!(failures("snapshot_reconcile_log_inclusive_nested"), 1);
+ }
++
++#[test]
++fn partial_compact_helper_error_keeps_original_failure_without_gap_success() {
++    let (mut actor, _sender) = ready_actor::<true>(crate::Envelopes::UpstreamDefault);
++    let reference = checkpoint_application(
++        &actor.parts.core,
++        &actor.parts.application,
++        &mut actor.parts.snapshots,
++    )
++    .unwrap()
++    .reference();
++    actor.parts.snapshots.pin_for_log(reference).unwrap();
++    actor
++        .parts
++        .snapshots
++        .pins
++        .get_mut(&reference.generation)
++        .unwrap()
++        .1
++        .application[0] ^= 1;
++    let revision = actor.parts.core.state().revision;
++    let before = actor.provider_snapshot();
++    let started = Recorder::<true>::start();
++    let result = compact_replica(
++        &mut actor.parts.core,
++        &mut actor.parts.store,
++        &mut actor.parts.snapshots,
++        &actor.parts.application,
++        reference,
++    );
++    actor.finish_checkpoint(Phase::CheckpointCompact, started, before, result.is_err());
++    assert!(matches!(
++        result,
++        Err(CheckpointError::Storage(
++            voteboat::contracts::StorageError::Corrupt(_)
++        ))
++    ));
++    assert_eq!(actor.parts.core.state().revision, revision);
++    assert_eq!(actor.parts.snapshots.pins.len(), 1);
++    let report = serde_json::to_value(
++        actor
++            .attribution
++            .report(
++                0,
++                &actor.parts.store.attribution,
++                &actor.parts.snapshots.attribution,
++            )
++            .unwrap()
++            .unwrap(),
++    )
++    .unwrap();
++    for gap in report["checkpoint_compact_gaps"].as_array().unwrap() {
++        assert_eq!(gap["calls"], 0);
++    }
++}
+--- /dev/null
++++ b/benchmarks/matched/src/attribution/gaps.rs
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Fixed last-call boundaries, correlated to one unchanged compact helper invocation.
++use super::*;
++
++const BOUNDARIES: usize = 6;
++const METHODS: [Phase; BOUNDARIES] = [
++    Phase::StoreState,
++    Phase::SnapshotPin,
++    Phase::SnapshotPin,
++    Phase::StoreAppend,
++    Phase::StoreBarrier,
++    Phase::SnapshotReconcile,
++];
++const GAP_NAMES: [&str; 3] = ["state_to_pin", "pin_to_append", "barrier_to_reconcile"];
++#[derive(Clone, Copy)]
++struct Stamp {
++    call: u64,
++    at: Instant,
++}
++#[derive(Clone, Default)]
++pub(super) struct Boundaries([Cell<Option<Stamp>>; BOUNDARIES]);
++impl Boundaries {
++    pub(super) fn record(&self, phase: Phase, call: u64, start: Instant, end: Instant) {
++        match phase {
++            Phase::StoreState => self.0[0].set(Some(Stamp { call, at: end })),
++            Phase::SnapshotPin => {
++                self.0[1].set(Some(Stamp { call, at: start }));
++                self.0[2].set(Some(Stamp { call, at: end }));
++            }
++            Phase::StoreAppend => self.0[3].set(Some(Stamp { call, at: start })),
++            Phase::StoreBarrier => self.0[4].set(Some(Stamp { call, at: end })),
++            Phase::SnapshotReconcile => self.0[5].set(Some(Stamp { call, at: start })),
++            _ => (),
++        }
++    }
++}
++#[derive(Clone, Default)]
++pub(super) struct Gaps([Cell<Interval>; 3]);
++#[derive(Clone, Debug, Serialize)]
++pub(super) struct GapReport {
++    gap: &'static str,
++    #[serde(flatten)]
++    interval: Interval,
++}
++impl Gaps {
++    /// All three counters advance together, only for a checked complete observation.
++    fn advance(&self, stamps: [Stamp; BOUNDARIES]) -> Option<()> {
++        let mut next = std::array::from_fn::<_, 3, _>(|i| self.0[i].get());
++        for (i, pair) in stamps.as_chunks::<2>().0.iter().enumerate() {
++            let elapsed =
++                u64::try_from(pair[1].at.checked_duration_since(pair[0].at)?.as_nanos()).ok()?;
++            next[i].add(elapsed, false, 0).ok()?;
++        }
++        for (cell, interval) in self.0.iter().zip(next) {
++            cell.set(interval);
++        }
++        Some(())
++    }
++    pub(super) fn report(&self) -> [GapReport; 3] {
++        std::array::from_fn(|i| GapReport {
++            gap: GAP_NAMES[i],
++            interval: self.0[i].get(),
++        })
++    }
++}
++impl<const ENABLED: bool> Recorder<ENABLED> {
++    pub(crate) fn finish_compact_gaps(
++        &self,
++        before: Option<&ProviderSnapshot>,
++        store: &Self,
++        snapshots: &Self,
++        failed: bool,
++    ) {
++        if !ENABLED || failed {
++            return;
++        }
++        let Some(before) = before else {
++            self.invalid.set(true);
++            return;
++        };
++        let Some(after) = Self::provider_snapshot(store, snapshots) else {
++            self.invalid.set(true);
++            return;
++        };
++        let mut stamps = [None; BOUNDARIES];
++        for (i, phase) in METHODS.iter().enumerate() {
++            let index = *phase as usize;
++            let next = after.0[index];
++            if before.0[index].calls.checked_add(1) != Some(next.calls)
++                || before.0[index].failures != next.failures
++            {
++                self.invalid.set(true);
++                return;
++            }
++            let provider = if matches!(
++                phase,
++                Phase::StoreState | Phase::StoreAppend | Phase::StoreBarrier
++            ) {
++                store
++            } else {
++                snapshots
++            };
++            let Some(stamp) = provider.boundaries.0[i]
++                .get()
++                .filter(|stamp| stamp.call == next.calls)
++            else {
++                self.invalid.set(true);
++                return;
++            };
++            stamps[i] = Some(stamp);
++        }
++        let stamps = stamps.map(Option::unwrap);
++        if stamps.windows(2).any(|pair| pair[0].at > pair[1].at)
++            || self.compact_gaps.advance(stamps).is_none()
++        {
++            self.invalid.set(true);
++        }
++    }
++}
++#[cfg(test)]
++mod tests;
+--- /dev/null
++++ b/benchmarks/matched/src/attribution/gaps/tests.rs
+@@ -0,0 +1,217 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::time::Duration;
++
++struct Fixture {
++    actor: Recorder<true>,
++    store: Recorder<true>,
++    snapshots: Recorder<true>,
++    base: Instant,
++}
++impl Fixture {
++    fn new() -> Self {
++        Self {
++            actor: Recorder::default(),
++            store: Recorder::default(),
++            snapshots: Recorder::default(),
++            base: Instant::now(),
++        }
++    }
++    fn before(&self) -> Option<ProviderSnapshot> {
++        Recorder::provider_snapshot(&self.store, &self.snapshots)
++    }
++    fn methods(&self, offset: u64, state_to_pin: u64) {
++        let at = |n| self.base + Duration::from_nanos(offset + n);
++        self.store
++            .observe(Phase::StoreState, at(0), at(1), false, 0);
++        self.snapshots.observe(
++            Phase::SnapshotPin,
++            at(1 + state_to_pin),
++            at(3 + state_to_pin),
++            false,
++            0,
++        );
++        self.store.observe(
++            Phase::StoreAppend,
++            at(6 + state_to_pin),
++            at(7 + state_to_pin),
++            false,
++            0,
++        );
++        self.store.observe(
++            Phase::StoreBarrier,
++            at(9 + state_to_pin),
++            at(11 + state_to_pin),
++            false,
++            0,
++        );
++        self.snapshots.observe(
++            Phase::SnapshotReconcile,
++            at(14 + state_to_pin),
++            at(17 + state_to_pin),
++            false,
++            0,
++        );
++    }
++    fn finish(&self, before: Option<&ProviderSnapshot>, failed: bool) {
++        self.actor
++            .finish_compact_gaps(before, &self.store, &self.snapshots, failed);
++    }
++    fn counts(&self) -> [Interval; 3] {
++        std::array::from_fn(|i| self.actor.compact_gaps.0[i].get())
++    }
++}
++#[test]
++fn complete_ordinals_produce_exact_gaps_and_actual_whole_gap_maxima() {
++    let fixture = Fixture::new();
++    for (offset, gap) in [(0, 7), (100, 2)] {
++        let before = fixture.before();
++        fixture.methods(offset, gap);
++        fixture.finish(before.as_ref(), false);
++    }
++    let intervals = fixture.counts();
++    assert_eq!(
++        intervals[0],
++        Interval {
++            calls: 2,
++            failures: 0,
++            total_elapsed_ns: 9,
++            maximum_elapsed_ns: 7,
++            items: 0
++        }
++    );
++    for interval in &intervals[1..] {
++        assert_eq!(
++            *interval,
++            Interval {
++                calls: 2,
++                failures: 0,
++                total_elapsed_ns: 6,
++                maximum_elapsed_ns: 3,
++                items: 0
++            }
++        );
++    }
++    let value = serde_json::to_value(
++        fixture
++            .actor
++            .report(0, &fixture.store, &fixture.snapshots)
++            .unwrap()
++            .unwrap(),
++    )
++    .unwrap();
++    assert_eq!(
++        value["checkpoint_compact_gaps"].as_array().unwrap().len(),
++        3
++    );
++    assert!(value["checkpoint_compact_gap_scope"]
++        .as_str()
++        .unwrap()
++        .contains("nested_pinned_load"));
++}
++#[test]
++fn missing_stale_and_backward_marks_invalidate_only_the_final_diagnostics() {
++    for fault in 0..3 {
++        let fixture = Fixture::new();
++        let before = fixture.before();
++        fixture.methods(0, 7);
++        let mark = fixture.snapshots.boundaries.0[1].get().unwrap();
++        fixture.snapshots.boundaries.0[1].set(match fault {
++            0 => None,
++            1 => Some(Stamp {
++                call: mark.call - 1,
++                ..mark
++            }),
++            _ => Some(Stamp {
++                at: fixture.base,
++                ..mark
++            }),
++        });
++        fixture.finish(before.as_ref(), false);
++        assert_eq!(fixture.counts(), [Interval::default(); 3]);
++        assert!(fixture
++            .actor
++            .report(0, &fixture.store, &fixture.snapshots)
++            .is_err());
++    }
++}
++#[test]
++fn missing_prefix_extra_calls_or_failed_methods_cannot_certify_a_successful_helper() {
++    for fault in 0..3 {
++        let fixture = Fixture::new();
++        let before = fixture.before();
++        fixture.methods(0, 7);
++        if fault == 1 {
++            let _ = fixture.store.record(Phase::StoreState, 1, false, 0);
++        } else if fault == 2 {
++            let cell = &fixture.store.intervals[Phase::StoreState as usize];
++            cell.set(Interval {
++                failures: 1,
++                ..cell.get()
++            });
++        }
++        fixture.finish(if fault == 0 { None } else { before.as_ref() }, false);
++        assert_eq!(fixture.counts(), [Interval::default(); 3]);
++        assert!(fixture.actor.invalid.get());
++    }
++}
++#[test]
++fn overflow_is_checked_before_any_gap_counter_advances() {
++    let fixture = Fixture::new();
++    let before = fixture.before();
++    fixture.methods(0, 7);
++    fixture.actor.compact_gaps.0[2].set(Interval {
++        calls: u64::MAX,
++        ..Interval::default()
++    });
++    let old = fixture.counts();
++    fixture.finish(before.as_ref(), false);
++    assert_eq!(fixture.counts(), old);
++    assert!(fixture
++        .actor
++        .report(0, &fixture.store, &fixture.snapshots)
++        .is_err());
++}
++#[test]
++fn partial_helper_error_does_not_read_or_fabricate_a_completed_gap() {
++    let fixture = Fixture::new();
++    fixture.finish(None, true);
++    assert!(!fixture.actor.invalid.get());
++    assert_eq!(fixture.counts(), [Interval::default(); 3]);
++}
++#[test]
++fn disabled_mode_ignores_poisoned_marks_counters_and_missing_clock_inputs() {
++    let actor = Recorder::<false>::default();
++    let store = Recorder::<false>::default();
++    let snapshots = Recorder::<false>::default();
++    store.invalid.set(true);
++    snapshots.invalid.set(true);
++    actor.invalid.set(true);
++    let poisoned = Stamp {
++        call: u64::MAX,
++        at: Instant::now(),
++    };
++    for cell in store.boundaries.0.iter().chain(&snapshots.boundaries.0) {
++        cell.set(Some(poisoned));
++    }
++    for slot in &actor.compact_gaps.0 {
++        slot.set(Interval {
++            calls: u64::MAX,
++            ..Interval::default()
++        });
++    }
++    store.intervals[Phase::StoreState as usize].set(Interval {
++        calls: u64::MAX,
++        ..Interval::default()
++    });
++    actor.finish_compact_gaps(None, &store, &snapshots, false);
++    store.finish(Phase::StoreState, None, true, usize::MAX);
++    assert!(Recorder::<false>::start().is_none());
++    assert!(actor.report(0, &store, &snapshots).unwrap().is_none());
++    assert!(actor
++        .compact_gaps
++        .0
++        .iter()
++        .all(|slot| slot.get().calls == u64::MAX));
++}

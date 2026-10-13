@@ -166,6 +166,16 @@ fn checked_checkpoint_scopes<const TRACE: bool>() {
         return;
     }
     let value = serde_json::to_value(report.unwrap()).unwrap();
+    let gaps = value["checkpoint_compact_gaps"].as_array().unwrap();
+    assert_eq!(gaps.len(), 3);
+    for gap in gaps {
+        assert_eq!(gap["calls"], 2);
+        assert_eq!(gap["failures"], 0);
+        assert!(
+            gap["total_elapsed_ns"].as_u64().unwrap()
+                >= gap["maximum_elapsed_ns"].as_u64().unwrap()
+        );
+    }
     let phases = value["phases"].as_array().unwrap();
     for name in [
         "checkpoint_reserve_inclusive",
@@ -252,4 +262,59 @@ fn provider_failures_keep_original_outcomes_and_are_scoped() {
     };
     assert_eq!(failures("snapshot_load_pinned_nested"), 2);
     assert_eq!(failures("snapshot_reconcile_log_inclusive_nested"), 1);
+}
+
+#[test]
+fn partial_compact_helper_error_keeps_original_failure_without_gap_success() {
+    let (mut actor, _sender) = ready_actor::<true>(crate::Envelopes::UpstreamDefault);
+    let reference = checkpoint_application(
+        &actor.parts.core,
+        &actor.parts.application,
+        &mut actor.parts.snapshots,
+    )
+    .unwrap()
+    .reference();
+    actor.parts.snapshots.pin_for_log(reference).unwrap();
+    actor
+        .parts
+        .snapshots
+        .pins
+        .get_mut(&reference.generation)
+        .unwrap()
+        .1
+        .application[0] ^= 1;
+    let revision = actor.parts.core.state().revision;
+    let before = actor.provider_snapshot();
+    let started = Recorder::<true>::start();
+    let result = compact_replica(
+        &mut actor.parts.core,
+        &mut actor.parts.store,
+        &mut actor.parts.snapshots,
+        &actor.parts.application,
+        reference,
+    );
+    actor.finish_checkpoint(Phase::CheckpointCompact, started, before, result.is_err());
+    assert!(matches!(
+        result,
+        Err(CheckpointError::Storage(
+            voteboat::contracts::StorageError::Corrupt(_)
+        ))
+    ));
+    assert_eq!(actor.parts.core.state().revision, revision);
+    assert_eq!(actor.parts.snapshots.pins.len(), 1);
+    let report = serde_json::to_value(
+        actor
+            .attribution
+            .report(
+                0,
+                &actor.parts.store.attribution,
+                &actor.parts.snapshots.attribution,
+            )
+            .unwrap()
+            .unwrap(),
+    )
+    .unwrap();
+    for gap in report["checkpoint_compact_gaps"].as_array().unwrap() {
+        assert_eq!(gap["calls"], 0);
+    }
 }

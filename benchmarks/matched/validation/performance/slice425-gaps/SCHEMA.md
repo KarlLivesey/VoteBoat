@@ -1,8 +1,9 @@
 # Bounded checkpoint interstitial attribution
 
 Schema reviewed and authorized after native15132 completed all36 cases and
-source/artifact guards. Isolated implementation is active; main promotion and
-new measurement remain pending. The acceptance criteria below remain required.
+source/artifact guards. Isolated implementation is qualified and the six-path overlay is promoted. Main
+qualification passes 32 controls, three actual CLI histories and the complete
+strict hook. Fresh release measurement remains pending. The acceptance criteria below remain required.
 
 ## Evidence and actual call path
 

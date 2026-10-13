@@ -4,8 +4,8 @@
 like-for-like capacity claim. Current primary API capacity is4096 requests:
 VoteBoat selects4096 originals for batch1 and16384 for batch4, with explicit
 bounded staging bytes. Earlier4096/64 original-versus-message labels remain
-preserved in historical raw evidence. Linux combined qualification passes;
-Mac qualification and fresh equivalent-envelope timing remain outstanding.
+preserved in historical raw evidence. Linux and Mac combined qualification and short equivalent-envelope timings
+pass; sustained throughput acceptance remains outstanding.
 
 Standalone benchmark workspace; comparison dependencies stay outside VoteBoat
 production. The frozen baseline passed Linux/macOS scoped checks and short
@@ -82,6 +82,13 @@ Reconciliation includes its pinned-image load. Helper work outside these provide
 methods stays explicitly unattributed; these intervals are elapsed time, not CPU.
 Disabled mode reads no clocks or observer cells. Counter exhaustion preserves the
 provider outcome and invalidates only the final diagnostic report.
+
+The compact observer additionally reports three fixed gaps: `state_to_pin`,
+`pin_to_append` and `barrier_to_reconcile`. Existing provider clock observations
+and exact method ordinals delimit each successful helper call. These inclusive
+wall intervals include nested work; they do not isolate CPU or a single function.
+Failed helpers retain their original errors and certify no successful gaps.
+[Schema and controls](validation/performance/slice425-gaps/SCHEMA.md).
 
 The unified runner's finite campaign guard defaults to 3600 seconds; use
 `--campaign-timeout-secs 1..7200` to select a recorded budget for either engine.

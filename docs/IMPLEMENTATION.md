@@ -2,6 +2,25 @@
 
 ## Active P9 plan — 13 October 2026
 
+Slice425 promotes the reviewed six-path benchmark observer. Its isolated 32
+controls, strict Clippy, formatting and actual off/on 12,000-original maintenance
+histories pass. Main qualification passes all 32 controls, three 16,384-original CLI histories
+and the complete strict hook. Fresh release measurement remains pending. No production helper, provider contract, security or durability semantics
+change. [Main qualification](../benchmarks/matched/validation/performance/slice425-gaps/main/README.md)
+records the exact scope. The three gaps reuse existing clocks and certify exact per-call ordinals;
+failed helpers retain their original error and pin ownership. [Schema and isolated
+evidence](../benchmarks/matched/validation/performance/slice425-gaps/isolated/REPORT.md).
+
+Current mini plan: qualify and measure these three gaps (P9.0/P9.1/P9.3), depending
+on the existing observer and exact helper contracts; require zero lint diagnostics,
+exact originals/frontiers, a fresh guarded artifact and off/on trials. Next: publish
+native421's supported-host policy evidence (P9.1/P9.3), depending on both terminal
+36-case campaigns; verify every original/recovery/retry, width and physical counter
+and retain all tails before broader fairness work. Following: optimize the measured
+compaction or pipeline stage (P9.1/P9.2/P9.3), depending on the gaps and a reviewed
+ownership/failure schema; require unchanged full equality/durability proofs and
+paired useful throughput. No P9 macro milestone closes from these short runs.
+
 Linux native421's same-artifact visit-policy comparison passes all36 cases,
 source/artifact guards, original results, recovery and representative retries.
 With32 writes in flight, TCP/TLS medians rise1,399→2,685 durable PUTS/s for visit
@@ -13,7 +32,11 @@ The corrected short Mac framework comparison passes allnine cases: VoteBoat
 3,180,633 PUTS/s versus OpenRaft2,488,992, p995.678/8.381ms. This is about28%
 ahead within the shared driver, below the8,422,500 healthy minimum and not a
 sustained qualification. [All Mac trials](../validation/performance/comparison424/mac/README.md).
-Mac native421 policy timing is active on the same frozen native artifact.
+Mac native421 policy timing is terminal: all 36 cases pass on the same frozen
+native artifact. With 32 writes in flight, TCP medians rise 284→454 durable PUTS/s
+and QUIC 268→450 for visit size 16→32. Singleton regressions and slow tails
+remain recorded. All 306 archived file hashes pass root review. [Mac durable
+trials and scope](../validation/performance/native421-quantum/mac/README.md).
 
 The corrected Linux diagnostic on41ee217 passes all nine original-result,
 frontier, capacity-unit, source/artifact/compiler and provider checks. Median
@@ -25,7 +48,7 @@ validation/planning and Core completion/broadcast inside the unchanged helper;
 it is not labeled pure CPU time and does not justify removing proofs.
 [All trials and scope](../validation/performance/comparison424/linux/README.md).
 Fresh Linux/Mac41 library and executable artifacts are qualified. Mac422/423
-broader checks and the Mac424 standalone delta are terminal. Linux native421 policy results are recorded above; the Mac campaign follows. The reference Cargo.lock has
+broader checks and the Mac424 standalone delta are terminal. Linux native421 policy results are recorded above; the Mac campaign is terminal. The reference Cargo.lock has
 196 package records, with unchanged SHA3ef72b; the shared driver's150 records
 include149 dependencies excluding its root package. The earlier149 reference label
 is corrected from the actual lock without changing dependencies.

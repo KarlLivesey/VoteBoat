@@ -30,7 +30,8 @@ Current422/423 selects a bounded VoteBoat original envelope of4096*batch for the
 primary profile and64*batch for common64, while preserving upstream settings.
 Explicit empty-payload staging-byte accounting and effective readback qualify on
 Linux with exact original results, partial1024-entry acknowledgements and crash
-controls. Mac qualification and fresh release measurements remain outstanding.
+controls. Mac qualification and short fresh release measurements now pass. Sustained
+capacity and the complete minimum curve remain outstanding.
 The legacy JSON field remains for historical continuity; capacity_contract records
 requests versus originals, hard versus soft limits and source-derived bounds.
 A separately tuned common profile is diagnostic and cannot replace the published

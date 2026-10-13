@@ -41,11 +41,11 @@ fn scoped_provider_deltas_exclude_setup_and_do_not_invent_maxima() {
     let actor = Recorder::<true>::default();
     let store = Recorder::<true>::default();
     let snapshots = Recorder::<true>::default();
-    store.record(Phase::StoreState, 99, false, 12);
+    let _ = store.record(Phase::StoreState, 99, false, 12);
     let before = Recorder::provider_snapshot(&store, &snapshots);
-    store.record(Phase::StoreState, 7, false, 6);
-    snapshots.record(Phase::SnapshotLoadPinned, 3, false, 0);
-    snapshots.record(Phase::SnapshotReconcile, 5, false, 0);
+    let _ = store.record(Phase::StoreState, 7, false, 6);
+    let _ = snapshots.record(Phase::SnapshotLoadPinned, 3, false, 0);
+    let _ = snapshots.record(Phase::SnapshotReconcile, 5, false, 0);
     actor.finish_scope(Phase::CheckpointCompact, before, &store, &snapshots);
     let report =
         serde_json::to_value(actor.report(0, &store, &snapshots).unwrap().unwrap()).unwrap();

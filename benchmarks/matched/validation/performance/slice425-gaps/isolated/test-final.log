@@ -1,0 +1,40 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/compact-gaps/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.64s
+     Running unittests src/main.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/compact-gaps/checks/debug/deps/voteboat_matched_framework-8a4b62ebd16d1178)
+
+running 32 tests
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test attribution::gaps::tests::disabled_mode_ignores_poisoned_marks_counters_and_missing_clock_inputs ... ok
+test attribution::tests::disabled_recorder_reads_no_clock_cells_or_snapshots ... ok
+test attribution::gaps::tests::overflow_is_checked_before_any_gap_counter_advances ... ok
+test attribution::gaps::tests::missing_stale_and_backward_marks_invalidate_only_the_final_diagnostics ... ok
+test attribution::gaps::tests::missing_prefix_extra_calls_or_failed_methods_cannot_certify_a_successful_helper ... ok
+test attribution::gaps::tests::partial_helper_error_does_not_read_or_fabricate_a_completed_gap ... ok
+test attribution::tests::interval_accounting_is_checked_and_overflow_is_atomic ... ok
+test budget_tests::campaign_cli_default_and_finite_bounds_are_validated ... ok
+test attribution::tests::invalid_observation_does_not_interrupt_a_provider_and_is_rejected_at_report ... ok
+test envelopes::tests::empty_owned_budget_is_derived_before_launch_without_changing_native_defaults ... ok
+test attribution::tests::exhausted_real_snapshot_observer_preserves_successful_provider_outcome ... ok
+test envelopes::tests::fixed_request_profiles_derive_equal_original_bounds_and_independent_replication ... ok
+test guard::tests::original_failure_type_and_cleanup_only_failure_are_preserved ... ok
+test attribution::gaps::tests::complete_ordinals_produce_exact_gaps_and_actual_whole_gap_maxima ... ok
+test attribution::tests::scoped_provider_deltas_exclude_setup_and_do_not_invent_maxima ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test guard::tests::zero_budget_ready_result_succeeds_without_waiting ... ok
+test workload::aggregation_tests::post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts ... ok
+test workload::tests::unavailable_upstream_attribution_is_rejected_explicitly ... ok
+test guard::tests::cleanup_expiry_is_finite_and_does_not_substitute_a_success_report ... ok
+test guard::tests::timed_out_owned_clients_are_canceled_and_cleanup_still_runs ... ok
+test voteboat_engine::actor::tests::provider_failures_keep_original_outcomes_and_are_scoped ... ok
+test voteboat_engine::actor::tests::partial_compact_helper_error_keeps_original_failure_without_gap_success ... ok
+test voteboat_engine::cancellation_tests::canceled_cluster_shutdown_keeps_handles_owned_and_drop_aborts_every_actor ... ok
+test voteboat_engine::actor::tests::checkpoint_scopes_observe_actual_helpers_and_nested_retention ... ok
+test voteboat_engine::actor::tests::preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+
+test result: ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.63s
+

@@ -397,6 +397,14 @@ impl<const TRACE: bool> Actor<TRACE> {
         failed: bool,
     ) {
         self.attribution.finish(phase, started, failed, 0);
+        if matches!(phase, Phase::CheckpointCompact) {
+            self.attribution.finish_compact_gaps(
+                before.as_ref(),
+                &self.parts.store.attribution,
+                &self.parts.snapshots.attribution,
+                failed,
+            );
+        }
         self.attribution.finish_scope(
             phase,
             before,

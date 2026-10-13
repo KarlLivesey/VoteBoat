@@ -1,0 +1,41 @@
+{
+  "kind": "functional_debug_controls_no_performance_claim",
+  "controls": [
+    {
+      "mode": "off",
+      "completed_originals": 12000,
+      "completed_requests": 3000,
+      "applied_frontiers": [
+        12001,
+        12001,
+        12001
+      ],
+      "checkpoint_counts": [
+        2,
+        2,
+        2
+      ],
+      "gap_calls_per_replica": null
+    },
+    {
+      "mode": "on",
+      "completed_originals": 12000,
+      "completed_requests": 3000,
+      "applied_frontiers": [
+        12001,
+        12001,
+        12001
+      ],
+      "checkpoint_counts": [
+        2,
+        2,
+        2
+      ],
+      "gap_calls_per_replica": [
+        2,
+        2,
+        2
+      ]
+    }
+  ]
+}

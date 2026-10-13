@@ -1,0 +1,13 @@
+stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units
+before_measurement,1,0,0,0,0,0,0,0,0,0,0,0,132,192841623,133,731516538,133,2402194289,,
+before_measurement,2,0,0,0,0,0,0,0,0,0,0,0,101,143721497,102,781142249,102,1934012796,,
+before_measurement,3,0,0,0,0,0,0,0,0,0,0,0,100,56433627,101,936193085,101,2240961294,,
+after_measurement,1,0,0,0,0,0,0,0,0,0,0,0,644,801419198,645,3518663738,645,10559524663,,
+after_measurement,2,0,0,0,0,0,0,0,0,0,0,0,485,351234627,486,4110445241,486,9899561429,,
+after_measurement,3,0,0,0,0,0,0,0,0,0,0,0,483,305404335,484,4145705883,484,9829394205,,
+after_create_join,1,0,0,0,0,0,0,0,0,0,0,0,644,801419198,645,3518663738,645,10559524663,,
+after_create_join,2,0,0,0,0,0,0,0,0,0,0,0,486,351330043,487,4118789158,487,9919635429,,
+after_create_join,3,0,0,0,0,0,0,0,0,0,0,0,484,305422252,485,4150122883,485,9848763122,,
+after_recover_join,1,0,0,0,0,0,0,0,0,0,0,0,7,8372998,8,46773086,8,119179959,,
+after_recover_join,2,0,0,0,0,0,0,0,0,0,0,0,7,4591960,8,52070710,8,170419208,,
+after_recover_join,3,0,0,0,0,0,0,0,0,0,0,0,7,9607250,8,55582751,8,156340248,,

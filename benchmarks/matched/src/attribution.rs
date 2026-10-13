@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Bounded elapsed intervals; inclusive and nested, never phase CPU attribution.
+mod gaps;
 use crate::Failure;
+use gaps::{Boundaries, GapReport, Gaps};
 use serde::Serialize;
 use std::{cell::Cell, time::Instant};
 
@@ -143,6 +145,8 @@ pub(super) struct Recorder<const ENABLED: bool> {
     intervals: [Cell<Interval>; PHASES],
     scopes: [Cell<[ScopedInterval; PHASES]>; 4],
     invalid: Cell<bool>,
+    boundaries: Boundaries,
+    compact_gaps: Gaps,
 }
 impl<const ENABLED: bool> Default for Recorder<ENABLED> {
     fn default() -> Self {
@@ -150,6 +154,8 @@ impl<const ENABLED: bool> Default for Recorder<ENABLED> {
             intervals: std::array::from_fn(|_| Cell::new(Interval::default())),
             scopes: std::array::from_fn(|_| Cell::new([ScopedInterval::default(); PHASES])),
             invalid: Cell::new(false),
+            boundaries: Boundaries::default(),
+            compact_gaps: Gaps::default(),
         }
     }
 }
@@ -164,26 +170,40 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
     /// Observation failure never substitutes for a provider/protocol outcome.
     pub fn finish(&self, phase: Phase, started: Option<Instant>, failed: bool, items: usize) {
         if ENABLED {
-            let measured = started
-                .and_then(|start| u64::try_from(start.elapsed().as_nanos()).ok())
-                .zip(u64::try_from(items).ok());
-            if let Some((elapsed, items)) = measured {
-                self.record(phase, elapsed, failed, items);
+            if let Some(start) = started {
+                // Reuse the same one end-clock observation as the old elapsed() call.
+                self.observe(phase, start, Instant::now(), failed, items);
             } else {
                 self.invalid.set(true);
             }
         }
     }
-    fn record(&self, phase: Phase, elapsed: u64, failed: bool, items: u64) {
+    fn observe(&self, phase: Phase, start: Instant, end: Instant, failed: bool, items: usize) {
+        if ENABLED {
+            let measured = end
+                .checked_duration_since(start)
+                .and_then(|duration| u64::try_from(duration.as_nanos()).ok())
+                .zip(u64::try_from(items).ok());
+            if let Some((elapsed, items)) = measured {
+                if let Some(call) = self.record(phase, elapsed, failed, items) {
+                    self.boundaries.record(phase, call, start, end);
+                }
+            } else {
+                self.invalid.set(true);
+            }
+        }
+    }
+    fn record(&self, phase: Phase, elapsed: u64, failed: bool, items: u64) -> Option<u64> {
         if ENABLED {
             let cell = &self.intervals[phase as usize];
             let mut interval = cell.get();
             if interval.add(elapsed, failed, items).is_ok() {
                 cell.set(interval);
-            } else {
-                self.invalid.set(true);
+                return Some(interval.calls);
             }
+            self.invalid.set(true);
         }
+        None
     }
     pub fn provider_snapshot(store: &Self, snapshots: &Self) -> Option<ProviderSnapshot> {
         if ENABLED {
@@ -251,11 +271,13 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
             scope: "whole_actor_lifetime_including_campaign_warmup_follower_drain_and_shutdown;provider_maxima_whole_provider_lifetime_including_setup",
             clock: "monotonic_elapsed_wall_intervals_not_cpu_or_critical_path",
             nesting: "checkpoint_intervals_nested_in_maintenance;provider_intervals_nested_in_helpers;reconcile_contains_load_pinned;effects_contain_persist_and_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
-            residual: "helper_elapsed_outside_known_provider_methods_is_unattributed_Eq_validation_application_restore_Core_staging_completion_and_marshalling;not_pure_Core;scoped_provider_sums_are_not_additive_when_nested",
+            residual: "helper_elapsed_outside_known_provider_methods_and_reported_compact_gaps_remains_unattributed;gap_labels_are_inclusive_not_pure_Core_or_Eq;scoped_provider_sums_are_not_additive_when_nested",
             item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;snapshot_write=attempted_application_bytes;other=zero",
             phases: NAMES.iter().enumerate().map(|(i, &phase)| PhaseReport {
                 phase, interval: if provider_phase(i) { provider.0[i] } else { self.intervals[i].get() },
             }).collect(),
+            checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_includes_full_Eq_temporary_destruction_and_guards;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
+            checkpoint_compact_gaps: self.compact_gaps.report(),
             checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
                 let values = self.scopes[slot].get();
                 ScopeReport { scope: NAMES[phase as usize], methods: NAMES.iter().enumerate()
@@ -291,6 +313,8 @@ pub(super) struct Attribution {
     item_units: &'static str,
     phases: Vec<PhaseReport>,
     checkpoint_provider_scopes: Vec<ScopeReport>,
+    checkpoint_compact_gap_scope: &'static str,
+    checkpoint_compact_gaps: [GapReport; 3],
 }
 #[cfg(test)]
 mod tests;

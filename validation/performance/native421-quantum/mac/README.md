@@ -1,0 +1,18 @@
+M2 Max same-artifact ready-quantum diagnostic completed once: original runner89252 / PID6215, exit0. All36 cases passed exact original/value/index histories, reopen320, duplicate first/last receipt retries, worker joins, weighted batch widths, physical journal deltas and source/artifact guards. Requested quantum16/32/64 was the only changed setting on frozen1091610 native executableb816f5e… and library1f1a45….
+
+| Protocol / window | q16 writes/s / p99 ms | q32 writes/s / p99 ms | q64 writes/s / p99 ms |
+| --- | ---: | ---: | ---: |
+| TCP/TLS /32 | 283.9 /144.92 | 453.9 /74.82 | 446.4 /75.53 |
+| QUIC /32 | 268.1 /149.21 | 450.2 /76.79 | 438.1 /78.76 |
+| TCP/TLS /1 | 13.36 /81.66 | 13.31 /83.76 | 11.54 /310.56 |
+| QUIC /1 | 13.35 /89.43 | 12.88 /234.33 | 11.88 /94.25 |
+
+Rates/p99 are medians of three rotating trials. Median paired q32/q16 ratios were1.640× TCPwindow32 and1.653× QUICwindow32; q64/q16 were1.576× and1.634×. Singleton paired ratios were0.992×/0.967× forq32,0.863×/0.932× forq64 (TCP/QUIC respectively). Every trial remains in SUMMARY/RESULTS; paired ratios differ from ratios of absolute medians. No default promotion follows this short diagnostic; mixed-load/fairness and macro review remain prerequisites.
+
+All window32 q16 cases used sixteen width16 visits,32 leader WAL-sync/publication calls. Every q32/q64 case used eight width32 visits,16 leader sync/publication calls. Window32 cannot demonstrate64-wide input; selected policy is not a guaranteed batch width. All singleton cases used256 width1 visits,512 leader sync/publication calls. Full per-case/per-replica counters, physical elapsed durations and publication primitives are retained; widths/counts alone do not establish exclusive throughput causes. Regressions/tails remain, including q16 QUICwindow32 trial93.58/s with920.66ms p99, q64 TCPsingleton393.87ms p99 andq32 QUICsingleton333.27ms p99.
+
+Each case measured256 eight-byte Counter originals after64 warmup, one group/three replicas on one M2 Max host/device, real TCP/TLS or QUIC, windows32/1, Coreproposal64, ready-byte1MiB/time2ms, original synchronous durability and election/heartbeat settings. Recovery/retries and worker cleanup stayed intact. This is bounded within-host evidence, not sustained maintenance/headroom/hot-cold acceptance, a durable minimum or a published OpenRaft floor. Do not normalize Linux/Mac absolute rates into software speedups.
+
+Reviewed driver bytes are unchanged (SHA256 `8898515d8937288d00e05070fc6a12f7c1801645f03618d31873ed1c596ad508`); exact input contains1,396 source hashes and actual root-library/executable compiler records fresh:false, opt3/debug0/assertions/overflow. Native default LTO/codegen were checked from actual invocations, separately from the matched framework thin/debug2 profile. HOST/source/compiler/artifact/helper preflight passed before timing; all transfers were terminal and no builds/services/checks/copies overlapped Mac timings. Complete artifact/compiler proofs remain under mac421 qualification.
+
+All304 selected original raw/provenance records and their hash manifest are retained. Every case includes publication.csv, journal.csv, samples.csv, proposal-batches.csv and summary.txt, plus command/stdout/stderr. SUMMARY retains all numerical trials and per-case barriers. Binaries/WAL state directories/builds/source checkouts are excluded as requested; those generated states remain unpublished remotely. `EVIDENCE.json` verifies all publication files. Local independent validation rechecked every original CSV history, weighted width and physical delta. No failed case, restart, shortened work or faster-trial selection occurred.
