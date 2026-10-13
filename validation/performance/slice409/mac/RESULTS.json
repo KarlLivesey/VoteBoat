@@ -1,0 +1,197 @@
+{
+  "parent_commit": "6c404559a796bf97956dbe50cc8e25e40e7c1cee",
+  "scope": "Frozen working-tree delta409; includes uncommitted/untracked source files; macOS correctness only; no benchmark",
+  "platform": [
+    "Darwin arm64",
+    "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+    "CARGO_TARGET_DIR=/tmp/voteboat-p9-batch407/build",
+    "PROTOC=/tmp/voteboat-macos-CzK1if/reference-tools296/bin/protoc"
+  ],
+  "remote": "/tmp/voteboat-p9-delta409",
+  "build_cache": "/tmp/voteboat-p9-batch407/build",
+  "configurations_sequential": true,
+  "source_inputs": 1328,
+  "source_guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1328,
+      "status": 0
+    },
+    {
+      "name": "source_after_all",
+      "matching_inputs": 1328,
+      "status": 0
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1328,
+      "status": 0
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "fmt": 0,
+    "clippy_all": 0,
+    "clippy_default": 0,
+    "clippy_core": 0,
+    "clippy_native": 0,
+    "correctness_all": 0,
+    "source_after_all": 0,
+    "correctness_core": 0,
+    "source_terminal": 0
+  },
+  "tests": {
+    "all_features": {
+      "passed": 470,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "src/lib.rs",
+          "passed": 297,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/application.rs",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/log_reclaim.rs",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/log_staging.rs",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/log_store.rs",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/provider_conformance.rs",
+          "passed": 29,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/raft.rs",
+          "passed": 79,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/shared_barrier.rs",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/striped_log_store.rs",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "examples/framework_benchmark.rs",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "examples/log_staging_benchmark.rs",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ]
+    },
+    "core_only": {
+      "passed": 296,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "src/lib.rs",
+          "passed": 232,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/application.rs",
+          "passed": 12,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/log_staging.rs",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/provider_conformance.rs",
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/raft.rs",
+          "passed": 29,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "examples/framework_benchmark.rs",
+          "passed": 7,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered_out": 0
+        }
+      ]
+    }
+  },
+  "performance_claim": false,
+  "terminal": "failures=0"
+}

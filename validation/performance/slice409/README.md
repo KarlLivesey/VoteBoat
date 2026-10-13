@@ -11,7 +11,8 @@ configurations: zero. Shared oracle includes504 finite differential cases;
 allocation controls preserve old payload pointers and normalize new capacity.
 Native controls cover multiple unsynchronized appends, metadata, subset/old
 tickets, all-written promotion, rejected batches, and I/O/publication fencing.
-Mac1328-input qualification is running; no terminal pass is assumed.
+Mac1328-input qualification passes all470/core296, fmt/four strict0 and three
+complete source guards. [Mac records](mac/README.md).
 
 ## Three interleaved paired trials per cell
 

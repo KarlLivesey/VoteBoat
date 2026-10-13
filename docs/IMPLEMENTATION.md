@@ -32433,7 +32433,8 @@ canonical durable state remains unchanged until exact completion/publication.
 Versioned summaries avoid allocation/configuration scans on those paths.
 Complex/configured histories retain full validation. Linux all470/core296 and
 real TCP/QUIC recovery2 pass; formatting/four strict configurations are zero.
-Mac frozen1328-input checks are running. No terminal result is assumed.
+Mac frozen1328-input all470/core296 pass, fmt/four strict0 and three source
+guards match every input. [Mac records](../validation/performance/slice409/mac/README.md).
 
 Three paired trials/cell show11.79–109.18x shorter ordinary native volatile
 staging time with initial histories256/4096 and0/8 unrelated groups. Fixed
@@ -32442,3 +32443,4 @@ Source/artifact guards match across96 cases; no durable or minimum-floor win.
 Next native ready batching and bounded overlap still advanceP9.1. The remaining
 modeled-store/configured-history costs require owned cached state rather than
 discarding validation. Macro acceptance and the complete P9 goal remain active.
+Production and96-case evidence are committed/pushed ase105f84.

@@ -1,0 +1,11 @@
+platform=0
+source_start=0
+fmt=0
+clippy_all=0
+clippy_default=0
+clippy_core=0
+clippy_native=0
+correctness_all=0
+source_after_all=0
+correctness_core=0
+source_terminal=0
