@@ -1,0 +1,8 @@
+{
+  "commit": "ccee8eca1fbc8e2584f148e4e69ef34a614aa2bc",
+  "scope": "two exact supplemental documents copied after completed build; omitted from original1407 build guard; no runtime compiler inputs altered",
+  "sha256": {
+    "benchmarks/matched/README.md": "fc96b3b34e71d84c0e7dcf9b4d338a90d3b25cda23e7523049826ba23a01c059",
+    "benchmarks/matched/SCHEMA.md": "aec48881c1fbfd7604bfb05b31405eb72a0302f968dc646980ed6256953ff485"
+  }
+}

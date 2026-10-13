@@ -1,0 +1,193 @@
+{
+  "off": {
+    "originals_per_trial": 1048576,
+    "requests_per_trial": 262144,
+    "frontiers": [
+      1049601,
+      1049601,
+      1049601
+    ],
+    "rates_per_second": [
+      3398174.5655265837,
+      2668504.3579918146,
+      2583001.9731029687
+    ],
+    "median_rate_per_second": 2668504.3579918146,
+    "median_request_p99_ns": 6649709
+  },
+  "on": {
+    "originals_per_trial": 1048576,
+    "requests_per_trial": 262144,
+    "frontiers": [
+      1049601,
+      1049601,
+      1049601
+    ],
+    "rates_per_second": [
+      3388551.1556322644,
+      2719962.713816796,
+      2717654.888919832
+    ],
+    "median_rate_per_second": 2719962.713816796,
+    "median_request_p99_ns": 6702042,
+    "leaders": [
+      {
+        "checkpoint_count": 204,
+        "inclusive_compact": {
+          "phase": "checkpoint_compact_inclusive",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 31822745,
+          "maximum_elapsed_ns": 257833,
+          "items": 0
+        },
+        "state_construction": {
+          "phase": "store_state_clone_nested",
+          "calls": 205,
+          "failures": 0,
+          "total_elapsed_ns": 6396887,
+          "maximum_elapsed_ns": 56875,
+          "items": 2543813
+        },
+        "gaps": [
+          {
+            "gap": "state_to_pin",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 13257833,
+            "maximum_elapsed_ns": 111583,
+            "items": 0
+          },
+          {
+            "gap": "pin_to_append",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 1046455,
+            "maximum_elapsed_ns": 17042,
+            "items": 0
+          },
+          {
+            "gap": "barrier_to_reconcile",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 5828081,
+            "maximum_elapsed_ns": 44833,
+            "items": 0
+          }
+        ],
+        "state_to_pin_fraction_of_compact": 0.41661500288551473
+      },
+      {
+        "checkpoint_count": 204,
+        "inclusive_compact": {
+          "phase": "checkpoint_compact_inclusive",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 40363291,
+          "maximum_elapsed_ns": 389333,
+          "items": 0
+        },
+        "state_construction": {
+          "phase": "store_state_clone_nested",
+          "calls": 205,
+          "failures": 0,
+          "total_elapsed_ns": 8169127,
+          "maximum_elapsed_ns": 152083,
+          "items": 2550161
+        },
+        "gaps": [
+          {
+            "gap": "state_to_pin",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 16763374,
+            "maximum_elapsed_ns": 139958,
+            "items": 0
+          },
+          {
+            "gap": "pin_to_append",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 1289246,
+            "maximum_elapsed_ns": 9500,
+            "items": 0
+          },
+          {
+            "gap": "barrier_to_reconcile",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 7428795,
+            "maximum_elapsed_ns": 61541,
+            "items": 0
+          }
+        ],
+        "state_to_pin_fraction_of_compact": 0.41531236885515604
+      },
+      {
+        "checkpoint_count": 204,
+        "inclusive_compact": {
+          "phase": "checkpoint_compact_inclusive",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 42263161,
+          "maximum_elapsed_ns": 316750,
+          "items": 0
+        },
+        "state_construction": {
+          "phase": "store_state_clone_nested",
+          "calls": 205,
+          "failures": 0,
+          "total_elapsed_ns": 8704421,
+          "maximum_elapsed_ns": 117833,
+          "items": 2725477
+        },
+        "gaps": [
+          {
+            "gap": "state_to_pin",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 17759501,
+            "maximum_elapsed_ns": 142542,
+            "items": 0
+          },
+          {
+            "gap": "pin_to_append",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 1272661,
+            "maximum_elapsed_ns": 29916,
+            "items": 0
+          },
+          {
+            "gap": "barrier_to_reconcile",
+            "calls": 204,
+            "failures": 0,
+            "total_elapsed_ns": 7552741,
+            "maximum_elapsed_ns": 58167,
+            "items": 0
+          }
+        ],
+        "state_to_pin_fraction_of_compact": 0.4202123215535156
+      }
+    ]
+  },
+  "openraft": {
+    "originals_per_trial": 1048576,
+    "requests_per_trial": 262144,
+    "frontiers": [
+      1049601,
+      1049601,
+      1049601
+    ],
+    "rates_per_second": [
+      2273825.1834730622,
+      2165088.5065636463,
+      2002772.1973582702
+    ],
+    "median_rate_per_second": 2165088.5065636463,
+    "median_request_p99_ns": 9416000
+  },
+  "scope": "nine short rotating trials, one same frozen asserted425binary, everyoriginal and defaultmaintenance; diagnostic only/no sustained-floor, CPU, allocatorcause or optimizationgainclaim",
+  "off_to_openraft_median_ratio": 1.2325151373267287,
+  "on_to_off_median_ratio": 1.0192835944490293
+}

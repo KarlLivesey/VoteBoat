@@ -1,0 +1,168 @@
+[
+  {
+    "target": "voteboat",
+    "original": "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libvoteboat-4b47685b5555f27a.rlib",
+    "copy": "/tmp/voteboat-mac425-ccee8ec/artifacts/matched/libvoteboat-4b47685b5555f27a.rlib",
+    "sha256": "725a2a7c90decc6e9d4a8b648589771d4d3bb61de0f6a62ea2b49e63498370be",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac425-ccee8ec/source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac425-ccee8ec/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/tmp/voteboat-mac425-ccee8ec/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libvoteboat-4b47685b5555f27a.rlib",
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libvoteboat-4b47685b5555f27a.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "target": "voteboat-matched-framework",
+    "original": "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/voteboat-matched-framework",
+    "copy": "/tmp/voteboat-mac425-ccee8ec/artifacts/matched/voteboat-matched-framework",
+    "sha256": "9656bf5f2e452c0790eb08585171fdf2b22ccffe4443637258fdd04d423c95e7",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac425-ccee8ec/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac425-ccee8ec/source/benchmarks/matched/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-matched-framework",
+        "src_path": "/tmp/voteboat-mac425-ccee8ec/source/benchmarks/matched/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/voteboat-matched-framework",
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/voteboat-matched-framework.dSYM"
+      ],
+      "executable": "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/voteboat-matched-framework",
+      "fresh": false
+    }
+  },
+  {
+    "target": "openraft",
+    "original": "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libopenraft-84eb1ae217ec5cb8.rlib",
+    "copy": "/tmp/voteboat-mac425-ccee8ec/artifacts/matched/libopenraft-84eb1ae217ec5cb8.rlib",
+    "sha256": "798b7e5c6cae1b907838a55e30bf386f87e82767e684bfa6cb25543a4f30a850",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "git+https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#0.10.0-alpha.37",
+      "manifest_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/openraft/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "openraft",
+        "src_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/openraft/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "clap",
+        "default",
+        "runtime-stats",
+        "serde",
+        "tokio-rt",
+        "type-alias"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libopenraft-84eb1ae217ec5cb8.rlib",
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libopenraft-84eb1ae217ec5cb8.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "target": "bench_minimal",
+    "original": "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libbench_minimal-9267f967f5d155f0.rlib",
+    "copy": "/tmp/voteboat-mac425-ccee8ec/artifacts/matched/libbench_minimal-9267f967f5d155f0.rlib",
+    "sha256": "23187c1999b830132ebef3a5aa08e9b301a5b1f6868dbe83153323c3c5f0495b",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "git+https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#bench-minimal@0.1.0",
+      "manifest_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/benchmarks/minimal/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "bench_minimal",
+        "src_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/benchmarks/minimal/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libbench_minimal-9267f967f5d155f0.rlib",
+        "/tmp/voteboat-mac425-ccee8ec/target-matched-release/release/deps/libbench_minimal-9267f967f5d155f0.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  }
+]

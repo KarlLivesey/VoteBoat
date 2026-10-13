@@ -1,0 +1,157 @@
+{
+  "source_commit": "ccee8eca1fbc8e2584f148e4e69ef34a614aa2bc",
+  "original_runner": 43210,
+  "exit": 0,
+  "scope": "short volatile matched equal-work diagnostic; not sustained or minimum qualification",
+  "medians": {
+    "off": {
+      "completed_originals_per_second": 1196642.7702842518,
+      "request_p99_ns": 16351813
+    },
+    "on": {
+      "completed_originals_per_second": 1118406.8128050673,
+      "request_p99_ns": 19673517
+    },
+    "openraft": {
+      "completed_originals_per_second": 2857665.1924581267,
+      "request_p99_ns": 8702941
+    }
+  },
+  "leader_gaps_by_trial": [
+    {
+      "trial": 1,
+      "compact": {
+        "phase": "checkpoint_compact_inclusive",
+        "calls": 204,
+        "failures": 0,
+        "total_elapsed_ns": 411957576,
+        "maximum_elapsed_ns": 3019386,
+        "items": 0
+      },
+      "state_clone": {
+        "phase": "store_state_clone_nested",
+        "calls": 205,
+        "failures": 0,
+        "total_elapsed_ns": 13336371,
+        "maximum_elapsed_ns": 300174,
+        "items": 4322829
+      },
+      "gaps": [
+        {
+          "gap": "state_to_pin",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 385324108,
+          "maximum_elapsed_ns": 2888090,
+          "items": 0
+        },
+        {
+          "gap": "pin_to_append",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 915579,
+          "maximum_elapsed_ns": 8285,
+          "items": 0
+        },
+        {
+          "gap": "barrier_to_reconcile",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 6917561,
+          "maximum_elapsed_ns": 58009,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "compact": {
+        "phase": "checkpoint_compact_inclusive",
+        "calls": 204,
+        "failures": 0,
+        "total_elapsed_ns": 426018612,
+        "maximum_elapsed_ns": 2520309,
+        "items": 0
+      },
+      "state_clone": {
+        "phase": "store_state_clone_nested",
+        "calls": 205,
+        "failures": 0,
+        "total_elapsed_ns": 16431763,
+        "maximum_elapsed_ns": 341150,
+        "items": 4337625
+      },
+      "gaps": [
+        {
+          "gap": "state_to_pin",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 395457523,
+          "maximum_elapsed_ns": 2434168,
+          "items": 0
+        },
+        {
+          "gap": "pin_to_append",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 993062,
+          "maximum_elapsed_ns": 7574,
+          "items": 0
+        },
+        {
+          "gap": "barrier_to_reconcile",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 7183481,
+          "maximum_elapsed_ns": 65373,
+          "items": 0
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "compact": {
+        "phase": "checkpoint_compact_inclusive",
+        "calls": 204,
+        "failures": 0,
+        "total_elapsed_ns": 443974666,
+        "maximum_elapsed_ns": 3335278,
+        "items": 0
+      },
+      "state_clone": {
+        "phase": "store_state_clone_nested",
+        "calls": 205,
+        "failures": 0,
+        "total_elapsed_ns": 17483318,
+        "maximum_elapsed_ns": 490730,
+        "items": 4330897
+      },
+      "gaps": [
+        {
+          "gap": "state_to_pin",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 411072836,
+          "maximum_elapsed_ns": 3107140,
+          "items": 0
+        },
+        {
+          "gap": "pin_to_append",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 1123617,
+          "maximum_elapsed_ns": 8646,
+          "items": 0
+        },
+        {
+          "gap": "barrier_to_reconcile",
+          "calls": 204,
+          "failures": 0,
+          "total_elapsed_ns": 7704394,
+          "maximum_elapsed_ns": 58941,
+          "items": 0
+        }
+      ]
+    }
+  ]
+}

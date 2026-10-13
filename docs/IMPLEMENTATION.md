@@ -2,24 +2,42 @@
 
 ## Active P9 plan — 13 October 2026
 
-Slice425 promotes the reviewed six-path benchmark observer. Its isolated 32
-controls, strict Clippy, formatting and actual off/on 12,000-original maintenance
-histories pass. Main qualification passes all 32 controls, three 16,384-original CLI histories
-and the complete strict hook. Fresh release measurement remains pending. No production helper, provider contract, security or durability semantics
-change. [Main qualification](../benchmarks/matched/validation/performance/slice425-gaps/main/README.md)
-records the exact scope. The three gaps reuse existing clocks and certify exact per-call ordinals;
-failed helpers retain their original error and pin ownership. [Schema and isolated
-evidence](../benchmarks/matched/validation/performance/slice425-gaps/isolated/REPORT.md).
+Slice425 is published and qualified on main: 32 controls, three actual
+16,384-original CLI histories and the complete strict hook pass. Linux's fresh
+asserted nine-case diagnostic also passes every original/frontier, source,
+artifact, compiler, width and provider/gap check. Off medians are 1,196,643 PUTS/s
+versus OpenRaft 2,857,665; on is 1,118,407, with all regressions retained. This
+short volatile result is below the sustained minimum. [Linux gaps and raw trials](../validation/performance/comparison425/linux/README.md).
 
-Current mini plan: qualify and measure these three gaps (P9.0/P9.1/P9.3), depending
-on the existing observer and exact helper contracts; require zero lint diagnostics,
-exact originals/frontiers, a fresh guarded artifact and off/on trials. Next: publish
-native421's supported-host policy evidence (P9.1/P9.3), depending on both terminal
-36-case campaigns; verify every original/recovery/retry, width and physical counter
-and retain all tails before broader fairness work. Following: optimize the measured
-compaction or pipeline stage (P9.1/P9.2/P9.3), depending on the gaps and a reviewed
-ownership/failure schema; require unchanged full equality/durability proofs and
-paired useful throughput. No P9 macro milestone closes from these short runs.
+Across three instrumented leader runs, state_to_pin accounts for about 93% of
+compaction elapsed time: 385 / 395 / 411 ms. That gap includes full comparison
+and temporary clone destruction; it does not identify their individual shares.
+Planning and completion gaps are much smaller. Mac's matching nine cases also
+pass: off median 2,668,504 versus OpenRaft 2,165,089 PUTS/s, p99 6.650/9.416 ms;
+on is 2,719,963. Mac state_to_pin is about 42% of compaction, not Linux's 93%.
+Every trial remains recorded; no allocator cause or cross-host speedup is inferred.
+[Mac measurements](../validation/performance/comparison425/mac/REPORT.md) and
+[Mac qualification](../validation/performance/mac425/REPORT.md) retain the exact scope.
+The next bounded optimization
+adds an exact borrowed durable-state predicate with a full-comparison default,
+preserving every field, binding, fenced/missing error and durable visibility.
+Native/memory providers can avoid materialization and temporary cleanup; full
+comparison remains. No metadata/digest shortcut is planned. A separately named
+observer phase will distinguish exact comparison from historical clone timing.
+Main production is unchanged while this isolated schema/implementation proceeds.
+[425 schema](../benchmarks/matched/validation/performance/slice425-gaps/SCHEMA.md),
+[main checks](../benchmarks/matched/validation/performance/slice425-gaps/main/README.md).
+
+Current mini plan: exact borrowed state verification (P9.1/P9.3), depending on
+425's measured gap and existing LogStore/helper contracts; require full equality,
+error/durable-visibility conformance, unchanged helper order, strict checks and
+paired useful throughput. Next: paired supported-host comparison (P9.0/P9.1),
+depending on qualified 426 and fresh artifacts; require every original/frontier,
+all regressions and observer scopes, and equal workloads on Linux/M2 Max.
+Following: improve bounded durable batching/overlap (P9.1/P9.2/P9.3), depending on
+both terminal native36 campaigns and a reviewed failure/ownership schema; require
+physical barrier evidence, mixed/cold-neighbor fairness and crash/retry controls
+before changing defaults. No P9 macro milestone closes from these short runs.
 
 Linux native421's same-artifact visit-policy comparison passes all36 cases,
 source/artifact guards, original results, recovery and representative retries.
@@ -47,7 +65,7 @@ inclusive, with state cloning11.678ms and store append4.868ms. The next three-ga
 validation/planning and Core completion/broadcast inside the unchanged helper;
 it is not labeled pure CPU time and does not justify removing proofs.
 [All trials and scope](../validation/performance/comparison424/linux/README.md).
-Fresh Linux/Mac41 library and executable artifacts are qualified. Mac422/423
+Fresh Linux/Mac425 library and executable artifacts are qualified. Mac422/423
 broader checks and the Mac424 standalone delta are terminal. Linux native421 policy results are recorded above; the Mac campaign is terminal. The reference Cargo.lock has
 196 package records, with unchanged SHA3ef72b; the shared driver's150 records
 include149 dependencies excluding its root package. The earlier149 reference label

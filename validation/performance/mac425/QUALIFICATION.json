@@ -1,0 +1,43 @@
+{
+  "commit": "ccee8eca1fbc8e2584f148e4e69ef34a614aa2bc",
+  "guarded_inputs": 1407,
+  "scope": "benchmark425 six-path delta; exact production unchanged from41; standalone32/fmt/strict and functional debug histories only; no production suite repeated or timing claims",
+  "controls": [
+    {
+      "name": "cli-false",
+      "originals": 12000,
+      "requests": 3000,
+      "frontiers": [
+        12001,
+        12001,
+        12001
+      ],
+      "checkpoint_counts": [
+        2,
+        2,
+        2
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "cli-true",
+      "originals": 12000,
+      "requests": 3000,
+      "frontiers": [
+        12001,
+        12001,
+        12001
+      ],
+      "checkpoint_counts": [
+        2,
+        2,
+        2
+      ],
+      "performance_claim": false
+    }
+  ],
+  "four_artifacts_fresh_false": true,
+  "profile": "opt3/debug2/assertions/overflow/thinLTO/codegen1",
+  "source_unchanged": true,
+  "clippy_config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521"
+}

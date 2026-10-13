@@ -3,7 +3,8 @@
 Schema reviewed and authorized after native15132 completed all36 cases and
 source/artifact guards. Isolated implementation is qualified and the six-path overlay is promoted. Main
 qualification passes 32 controls, three actual CLI histories and the complete
-strict hook. Fresh release measurement remains pending. The acceptance criteria below remain required.
+strict hook. Fresh Linux release measurement passes all nine cases; matched Mac timing also passes all nine cases. State_to_pin accounts for about 93% of Linux whole compaction, so the
+separately reviewed 426 predicate is the next bounded optimization. The acceptance criteria below remain required.
 
 ## Evidence and actual call path
 
