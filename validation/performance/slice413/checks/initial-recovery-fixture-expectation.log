@@ -1,0 +1,31 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.40s
+     Running unittests src/lib.rs (target/p9/configured413/checks/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 8 tests
+test log::transition::tests::configured::configured_delta_preserves_old_payload_and_checkpoint_allocations ... ok
+test log::transition::tests::configured::changed_ballots_use_accepted_electorate_and_full_fallback ... ok
+test log::transition::tests::configured::configured_replacement_configuration_and_snapshot_keep_full_fallback ... ok
+test native::log_store::accepted::tests::configured::configured_multiple_accepted_deltas_subset_publication_and_full_fallback_recover ... ok
+test log::transition::tests::configured::configured_limits_stale_versions_and_exhaustion_keep_original_refusals ... ok
+test native::log_store::accepted::tests::configured::configured_delta_uncertainty_fences_and_recovers_only_published_prefix ... FAILED
+test log::transition::tests::configured::configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback ... ok
+test log::transition::tests::configured::stable_joint_final_and_compacted_histories_match_original_validator ... ok
+
+failures:
+
+---- native::log_store::accepted::tests::configured::configured_delta_uncertainty_fences_and_recovers_only_published_prefix stdout ----
+
+thread 'native::log_store::accepted::tests::configured::configured_delta_uncertainty_fences_and_recovers_only_published_prefix' (312) panicked at src/native/log_store/accepted/tests/configured.rs:167:9:
+assertion `left == right` failed
+  left: GroupLog { bootstrap: Bootstrap { group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, configuration: ConfigurationId(1), policy: Policy { tree: Voter(NodeId(1)), voters: {NodeId(1)} }, voter_stores: {NodeId(1): StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }} }, revision: LogRevision(3), generation: LogGeneration(1), hard_state: HardState { term: 1, voted_for: None }, ballot_origin: None, commit_index: 1, snapshot: None, snapshot_membership: None, entries: [LogEntry { index: 1, term: 1, payload: Configuration(ConfigurationRecord { operation: OperationId(100), expected: ConfigurationId(1), change: Learners(Configuration { id: ConfigurationId(2), policy: Policy { tree: Voter(NodeId(1)), voters: {NodeId(1)} }, voter_stores: {NodeId(1): StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }}, learners: {NodeId(2): StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }} }) }) }, LogEntry { index: 2, term: 1, payload: Command { operation: OperationId(2), bytes: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] } }] }
+ right: GroupLog { bootstrap: Bootstrap { group: GroupIdentity { id: GroupId(1), incarnation: GroupIncarnation(1) }, configuration: ConfigurationId(1), policy: Policy { tree: Voter(NodeId(1)), voters: {NodeId(1)} }, voter_stores: {NodeId(1): StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }} }, revision: LogRevision(2), generation: LogGeneration(1), hard_state: HardState { term: 1, voted_for: None }, ballot_origin: None, commit_index: 1, snapshot: None, snapshot_membership: None, entries: [LogEntry { index: 1, term: 1, payload: Configuration(ConfigurationRecord { operation: OperationId(100), expected: ConfigurationId(1), change: Learners(Configuration { id: ConfigurationId(2), policy: Policy { tree: Voter(NodeId(1)), voters: {NodeId(1)} }, voter_stores: {NodeId(1): StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }}, learners: {NodeId(2): StoreIdentity { id: StoreId(2), incarnation: StoreIncarnation(1) }} }) }) }] }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::log_store::accepted::tests::configured::configured_delta_uncertainty_fences_and_recovers_only_published_prefix
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 315 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

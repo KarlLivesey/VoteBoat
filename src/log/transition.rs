@@ -100,7 +100,10 @@ impl NextLog {
         if !summary.matches_metadata(&view.metadata()) {
             return Err(StorageError::Rejected("stale log summary"));
         }
-        let plain = summary.is_plain()
+        // Validated configured histories keep their accepted membership when
+        // only commands/commit metadata change. A new ballot still needs the
+        // full electorate validator; identical promises retain their origin.
+        let delta = (summary.is_plain() || update.hard_state == view.metadata().hard_state)
             && update.snapshot.is_none()
             && update.snapshot_membership.is_none()
             && update.suffix.as_ref().is_none_or(|suffix| {
@@ -110,8 +113,8 @@ impl NextLog {
                         .iter()
                         .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
             });
-        if plain {
-            return plan_plain(view, summary, update, limits).map(Self::Delta);
+        if delta {
+            return plan_append_metadata(view, summary, update, limits).map(Self::Delta);
         }
         let mut next = view.materialize();
         apply_update(&mut next, update, limits)?;
@@ -229,7 +232,7 @@ impl PlainDelta {
         Ok(())
     }
 }
-fn plan_plain(
+fn plan_append_metadata(
     view: LogView<'_>,
     summary: &LogSummary,
     update: &LogUpdate,
@@ -316,7 +319,7 @@ fn plan_plain(
         append,
         summary: LogSummary {
             metadata: next,
-            plain: true,
+            plain: summary.plain,
             retained,
         },
     })

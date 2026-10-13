@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
+mod configured;
 mod fixture;
 use fixture::*;
 

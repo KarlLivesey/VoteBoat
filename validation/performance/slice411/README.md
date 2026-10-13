@@ -35,5 +35,6 @@ refused21 loopback socket bindings before fixtures ran; the same frozen source
 passes with loopback available. Neither refusal is hidden by skipping a test.
 
 Final real TCP/QUIC service retry, leader replacement and native-file recovery
-pass2/0 (11.71s). Mac qualification is running on the exact1345-input snapshot.
+pass2/0 (11.71s). [Mac qualification](mac/README.md) passes534/454 on exact1345
+inputs, with formatting/four strict profiles and source/compiler guards clean.
 No timed gain or minimum-floor comparison is claimed from functional checks.

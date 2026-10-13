@@ -1,0 +1,17 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.81s
+     Running unittests src/lib.rs (target/p9/configured413/checks/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 8 tests
+test log::transition::tests::configured::configured_limits_stale_versions_and_exhaustion_keep_original_refusals ... ok
+test log::transition::tests::configured::configured_delta_preserves_old_payload_and_checkpoint_allocations ... ok
+test log::transition::tests::configured::changed_ballots_use_accepted_electorate_and_full_fallback ... ok
+test log::transition::tests::configured::configured_replacement_configuration_and_snapshot_keep_full_fallback ... ok
+test log::transition::tests::configured::configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback ... ok
+test raft::membership_tests::configured_deltas::configured_final_commit_delta_retires_only_after_original_completion ... ok
+test raft::membership_tests::configured_deltas::configured_pending_append_and_compacted_joint_commit_keep_connections_and_membership ... ok
+test log::transition::tests::configured::stable_joint_final_and_compacted_histories_match_original_validator ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 247 filtered out; finished in 0.00s
+

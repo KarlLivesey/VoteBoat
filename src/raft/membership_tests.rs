@@ -18,6 +18,8 @@
 use super::*;
 #[path = "source_tests.rs"]
 mod authenticated_sources;
+#[path = "configured_delta_tests.rs"]
+mod configured_deltas;
 #[path = "leadership_membership_tests.rs"]
 mod leadership;
 #[cfg(feature = "native")]

@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.01s
+     Running unittests src/lib.rs (target/p9/configured413/checks/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 2 tests
+test raft::membership_tests::configured_deltas::configured_final_commit_delta_retires_only_after_original_completion ... ok
+test raft::membership_tests::configured_deltas::configured_pending_append_and_compacted_joint_commit_keep_connections_and_membership ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 321 filtered out; finished in 0.00s
+

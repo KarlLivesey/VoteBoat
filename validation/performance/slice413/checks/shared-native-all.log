@@ -1,0 +1,16 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running unittests src/lib.rs (target/p9/configured413/checks/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 8 tests
+test log::transition::tests::configured::configured_limits_stale_versions_and_exhaustion_keep_original_refusals ... ok
+test log::transition::tests::configured::configured_delta_preserves_old_payload_and_checkpoint_allocations ... ok
+test log::transition::tests::configured::configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback ... ok
+test log::transition::tests::configured::configured_replacement_configuration_and_snapshot_keep_full_fallback ... ok
+test log::transition::tests::configured::changed_ballots_use_accepted_electorate_and_full_fallback ... ok
+test native::log_store::accepted::tests::configured::configured_multiple_accepted_deltas_subset_publication_and_full_fallback_recover ... ok
+test native::log_store::accepted::tests::configured::configured_delta_uncertainty_fences_and_recovers_complete_transition ... ok
+test log::transition::tests::configured::stable_joint_final_and_compacted_histories_match_original_validator ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 315 filtered out; finished in 0.00s
+

@@ -19,12 +19,21 @@ defines the exact ticket, additional output reservation, original held leases,
 terminal continuation and serialized fallback. [412 evidence](../validation/performance/slice412/README.md)
 records atomic validated state ownership and the modeled provider's removed
 history copy. Final affected all716/core547 and formatting/four strict profiles
-pass; real TCP/QUIC service retry/replacement/recovery2 also passes. Mac checks
-and paired Linux/M2 Max timing remain separately tracked.
-Configured-Core caching is still pending;412 does not implement it. The current
-mini plan now prioritizes paired measurement, then configured/snapshot steady
-state deltas, then the matched concurrent framework comparison. These planned
-steps are separate from the passing functional evidence.
+pass; real TCP/QUIC service retry/replacement/recovery2 also passes. Mac affected
+all534/core454, four strict configurations and1345-input source guards pass.
+The96-case paired Mac campaign is terminal; Linux timing follows local413 checks.
+Its measurement evidence remains separate from this functional qualification.
+
+413 [configured/snapshot append and commit deltas](../validation/performance/slice413/README.md)
+now preserve validated membership and unchanged historical ballots without
+replaying/copying old history. Nonplain classification remains false; changed
+ballots/configuration/snapshots/rollback keep full validation. Linux broad840/595,
+real TCP/QUIC2 and formatting/four strict profiles pass, including actual modeled
+power loss and stale-session controls. Mac413 checks and its measurements are
+pending. Configured connection/resource scans remain a separate cost.
+The current mini plan covers measured campaigns, then the prepared concurrent
+comparison, then bounded configured resource/connection summaries. Planned
+work remains separate from passing evidence; no minimum floor is achieved.
 
 The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance

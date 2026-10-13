@@ -1,0 +1,112 @@
+{
+  "scope": "Frozen combined411ordinary-append physical-owner overlap +412OwnedLogState/provider; Mac correctness/build qualification only before timedcampaign",
+  "parent": "c35e1f1a5b3a42c088769d5b992200a95dae35ce",
+  "source_inputs": 1345,
+  "source_guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1345,
+      "status": 0
+    },
+    {
+      "name": "source_after_all",
+      "matching_inputs": 1345,
+      "status": 0
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1345,
+      "status": 0
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "fmt": 0,
+    "clippy_all": 0,
+    "compile_identity": 0,
+    "clippy_default": 0,
+    "clippy_core": 0,
+    "clippy_native": 0,
+    "correctness_all": 0,
+    "source_after_all": 0,
+    "correctness_core": 0,
+    "source_terminal": 0
+  },
+  "tests": {
+    "all_features": {
+      "passed": 534,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "src/lib.rs",
+          "passed": 313,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/effect_owner.rs",
+          "passed": 198,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/log_owned.rs",
+          "passed": 5,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/worker.rs",
+          "passed": 9,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "examples/framework_benchmark.rs",
+          "passed": 9,
+          "failed": 0,
+          "filtered_out": 0
+        }
+      ]
+    },
+    "core": {
+      "passed": 454,
+      "failed": 0,
+      "targets": [
+        {
+          "target": "src/lib.rs",
+          "passed": 247,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/effect_owner.rs",
+          "passed": 190,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/log_owned.rs",
+          "passed": 5,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "tests/worker.rs",
+          "passed": 3,
+          "failed": 0,
+          "filtered_out": 0
+        },
+        {
+          "target": "examples/framework_benchmark.rs",
+          "passed": 9,
+          "failed": 0,
+          "filtered_out": 0
+        }
+      ]
+    }
+  },
+  "timed_cases": 0,
+  "terminal": "failures=0"
+}

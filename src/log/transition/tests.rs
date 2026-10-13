@@ -16,6 +16,7 @@
 use super::*;
 use crate::quorum::{Limits, Tree};
 
+mod configured;
 mod oracle;
 mod overlay;
 

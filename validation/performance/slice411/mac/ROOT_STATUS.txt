@@ -1,0 +1,25 @@
+ M docs/IMPLEMENTATION.md
+ M docs/component-contracts.json
+ M examples/framework_benchmark/store.rs
+ M examples/framework_benchmark/tests.rs
+ M src/log.rs
+ M src/log/transition.rs
+ M src/raft.rs
+ M src/raft/batched_repair.rs
+ M src/raft/membership_tests.rs
+ M src/raft/receive.rs
+ M src/raft/request_window/replication.rs
+ M src/runtime/effects.rs
+ M src/runtime/effects/ready.rs
+ M src/worker.rs
+ M tests/effect_owner.rs
+?? examples/framework_benchmark/tests/
+?? src/log/owned.rs
+?? src/log/owned/
+?? src/raft/admitted_replication.rs
+?? src/raft/admitted_replication/
+?? src/runtime/effects/overlap.rs
+?? tests/log_owned.rs
+?? tests/persistence_overlap/
+?? validation/performance/slice411/
+?? validation/performance/slice412/
