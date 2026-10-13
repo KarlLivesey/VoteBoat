@@ -13,6 +13,9 @@ cache histories through configured rollback/nonmatching snapshot installation
 remain unrun; generic same-core Full/fresh-owner controls and existing histories
 cover those paths without claiming those narrower cases.
 
-The complete source publication through the enabled pre-push hook is pending.
+The complete source is published as736eb9a56f5fbc3c3b6480c829b58dd146b90956.
+[Publication receipt](PUBLICATION.json) records original push16454 terminal0,
+all normal hook checks zero and the exact GitHub main ref. All1,424 selected
+source hashes still match after the hook. push.log preserves actual raw output.
 Mac qualification, actual asserted release gate/fresh artifact proof and paired
 performance measurements remain pending. No428 throughput/latency gain is claimed.

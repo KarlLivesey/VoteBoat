@@ -1,0 +1,20 @@
+{
+  "source_commit": "736eb9a56f5fbc3c3b6480c829b58dd146b90956",
+  "original_push_handle": 16454,
+  "terminal_exit": 0,
+  "stage": "DONE",
+  "remote_main": "736eb9a56f5fbc3c3b6480c829b58dd146b90956",
+  "hook_path": ".githooks",
+  "hook_sha256": "e3e9d01c12837936819f7c6f5b4b8840af19e9cded729381599df0f0fc17ee92",
+  "hook_checks": "root fmt + default/all/core/native strict all-target Clippy, standalone fmt + strict all-target Clippy; zero diagnostics",
+  "all_selected_source_hashes_match": 1424,
+  "source_manifest_sha256": "baf59a918e3b69ce704a532008fe9014d7b084ec7c2830dbf2870af45b55ca22",
+  "source_scope_checks": "isolated exact-source reuse; no unaffected functional suites rerun",
+  "pending": [
+    "Mac428 qualification",
+    "actual asserted release gate/fresh root/executable/upstream artifact proof",
+    "paired426/428 Linux/Mac measurements",
+    "all sustained healthy-margin/durable/fairness/headroom/composition acceptance"
+  ],
+  "performance_gain_claim": false
+}

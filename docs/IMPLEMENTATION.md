@@ -58,8 +58,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: review and publish checked protected-prefix428 | Avoid rescanning exactly verified immutable retained entries, the largest measured Linux checkpoint interval | [Isolated checked source/schema](../validation/performance/slice428/isolated/README.md), exact426 baseline; final review and complete source promotion pending | Match promoted production hashes, retain raw full Eq/default fallback and all exact oracle/native/error controls; enabled strict hook and metadata checker before publication; Mac qualification and release artifact proof remain explicit | P9.1/P9.3 |
-| Next: qualify and measure published protected-prefix implementation | Establish actual useful-rate/latency effect and remaining cost | Published428, immutable426 and fresh asserted artifacts including build.rs; Mac tests; identical within-host profiles/workload | Three rotating singleton/bulk diagnostic pairs on Linux/M2 Max; all originals/frontiers and actual comparison-work evidence, every regression; sampling/flamegraphs are separate diagnostics; sustained20M/full seven-cell qualification remains distinct | P9.0/P9.1/P9.3 |
+| Current: qualify published protected-prefix428 | Qualify exact ownership-backed verification on both hosts before performance comparison | Published736eb9a and [main/isolated proof](../validation/performance/slice428/main/README.md); exact426 baseline; include new build.rs | Mac affected/strict/actual CLI checks; fresh asserted artifacts prove actual release gate and fresh root/executable/upstream with exact original/copy/source hashes; preserve every failure | P9.0/P9.1/P9.3 |
+| Next: measure published protected-prefix implementation | Establish actual useful-rate/latency effect and remaining cost | Published428, immutable426 and fresh asserted artifacts including build.rs; qualified Mac source; identical within-host profiles/workload | Three rotating singleton/bulk diagnostic pairs on Linux/M2 Max; all originals/frontiers and actual comparison-work evidence, every regression; sampling/flamegraphs are separate diagnostics; sustained20M/full seven-cell qualification remains distinct | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize barriers and preserve cold-neighbor progress | Both native42136 campaigns, exact publication/ticket ownership, bounded fairness schema | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -79,7 +79,9 @@ all204 scans. Rewrite/install/rollback/unknown paths and fresh recovery invalida
 The marker is never a durability/quorum token, digest or metadata-only shortcut.
 Public raw GroupLog cannot manufacture it. The isolated API/ownership implementation is checked and frozen, and its30 changed
 paths are now promoted to main with all1,424 selected input hashes matching.
-Publication through the enabled hook is pending; no428 performance gain is claimed.
+Publication through the enabled hook is complete as736eb9a; original push16454
+terminated0 and exact GitHub main publication was verified. No428 performance
+gain is claimed.
 
 [Isolated428 evidence](../validation/performance/slice428/isolated/README.md)
 records1,424 selected inputs,30 changed paths and six new modules/build inputs.
@@ -99,7 +101,7 @@ and all unit tests; actual dev Cargo JSON/root rustc cfg proof is archived. The
 asserted release performance profile keeps normal assertions/overflow checks,
 but its actual oracle-gate/fresh artifact proof remains pending. Include build.rs
 in future source exports and artifact guards. No428 PUTS/s or latency gain has
-been measured; Mac qualification and main publication remain open.
+been measured; Mac qualification and fresh release artifact proof remain open.
 [Main promotion proof](../validation/performance/slice428/main/README.md) records
 matching source hashes, independent review and metadata checker0. Warmed-cache
 configured rollback/nonmatching snapshot histories were not explicitly run;
