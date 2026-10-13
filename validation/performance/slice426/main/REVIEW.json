@@ -1,0 +1,28 @@
+{
+  "published_source_commit": "799f2cf300a50e004e74d07b6a9237f59003892b",
+  "original_main_handle": 23100,
+  "terminal_status": 0,
+  "terminal_stage": "DONE",
+  "checked_selected_source_inputs": 1415,
+  "selected_source_unchanged": true,
+  "provider_ledger_metadata_sha256": "2afa29879c871ccaf6967d80c9a609f069b5e470d13cc1ee68aea7a3ddad2169",
+  "reused_isolated_checks": "all log19/provider31/snapshot26; core provider16/snapshot11; matched34; fmt/four strict/standalone, exact1415 selected inputs unchanged",
+  "main_services_passed": 2,
+  "main_matched_passed": 34,
+  "actual_cli_cases": [
+    "off",
+    "on",
+    "openraft"
+  ],
+  "cli_originals_each": 16384,
+  "cli_requests_each": 4096,
+  "cli_frontiers_each": [
+    17409,
+    17409,
+    17409
+  ],
+  "observer_shape": "28 phases/four scopes/14 methods; comparison logical entries; state_to_pin begins after comparison",
+  "enabled_full_hook": "terminal0; formatter/four strict root and standalone; saved hook.log",
+  "performance_claim": false,
+  "review": "independent read-only review c977747..799f2cf found no blocking defect; full GroupLog equality, durable-only comparison, provider error order and binding-first short circuit retained"
+}

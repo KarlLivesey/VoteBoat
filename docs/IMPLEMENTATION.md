@@ -18,26 +18,35 @@ on is 2,719,963. Mac state_to_pin is about 42% of compaction, not Linux's 93%.
 Every trial remains recorded; no allocator cause or cross-host speedup is inferred.
 [Mac measurements](../validation/performance/comparison425/mac/REPORT.md) and
 [Mac qualification](../validation/performance/mac425/REPORT.md) retain the exact scope.
-The next bounded optimization
-adds an exact borrowed durable-state predicate with a full-comparison default,
-preserving every field, binding, fenced/missing error and durable visibility.
-Native/memory providers can avoid materialization and temporary cleanup; full
-comparison remains. No metadata/digest shortcut is planned. A separately named
-observer phase will distinguish exact comparison from historical clone timing.
-Main production is unchanged while this isolated schema/implementation proceeds.
-[425 schema](../benchmarks/matched/validation/performance/slice425-gaps/SCHEMA.md),
-[main checks](../benchmarks/matched/validation/performance/slice425-gaps/main/README.md).
+Slice426 is now implemented and published at799f2cf: object-safe
+`LogStore::matches_state` defaults to full state equality; native and matched
+memory overrides compare borrowed verified durable state. All original fields,
+operation IDs, payload bytes, provider errors and binding-first helper order
+remain exact. ObservedLog forwards the contract. The new comparison phase is
+separate from clone timing; `state_to_pin` begins after exact comparison and is
+not the425 scope. Equal-state items are logical retained entries; false/error
+items are zero, never a physical traversal count.
 
-Current mini plan: exact borrowed state verification (P9.1/P9.3), depending on
-425's measured gap and existing LogStore/helper contracts; require full equality,
-error/durable-visibility conformance, unchanged helper order, strict checks and
-paired useful throughput. Next: paired supported-host comparison (P9.0/P9.1),
-depending on qualified 426 and fresh artifacts; require every original/frontier,
-all regressions and observer scopes, and equal workloads on Linux/M2 Max.
-Following: improve bounded durable batching/overlap (P9.1/P9.2/P9.3), depending on
-both terminal native36 campaigns and a reviewed failure/ownership schema; require
-physical barrier evidence, mixed/cold-neighbor fairness and crash/retry controls
-before changing defaults. No P9 macro milestone closes from these short runs.
+[Main426 review and raw checks](../validation/performance/slice426/main/README.md)
+verify1415 unchanged selected source hashes, reusing isolated all log19/provider31/
+snapshot26, core provider16/snapshot11, matched34 and strict checks. Main adds
+actual TCP/QUIC service histories2, matched34, and off/on/OpenRaft CLI histories:
+16384 originals/4096 requests each, all frontiers17409. The full enabled hook and
+provider metadata checker pass. All five new modules are committed; independent
+source review finds no blocking defect. GitHub main publication was verified.
+No performance gain is inferred before paired measurements.
+
+| Deliverable | Purpose | Dependencies | Completion checks | Advances |
+| --- | --- | --- | --- | --- |
+| Current: qualify and measure426 on both hosts | Establish actual useful-rate/latency effect of removing provider materialization | Published426; immutable425; fresh asserted root/library/executable/upstream artifacts; exact within-host compiler/settings | Mac affected/core/service/strict/CLI controls; three rotating trials per singleton/bulk cell with1048576 originals; all frontiers, scopes, bounds and regressions retained | P9.0/P9.1/P9.3 |
+| Next: optimize the remaining measured limiting stage | Increase one-group sustained useful throughput without dropping outcomes | Terminal paired426 evidence and reviewed data/API/ownership/restart schema | Exact originals, provider/quorum/fence/retry/cleanup controls, zero strict diagnostics and both-host useful PUTS/s/p99; choose the measured stage before adding helpers | P9.1/P9.3 |
+| Following: qualify bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Both native42136 campaigns; exact publication/ticket ownership; bounded fairness schema | Sustained/mixed/hot-cold/skew evidence, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
+
+The macro plan is reviewed and unchanged: no milestone closes from borrowed
+comparison or short diagnostics. All seven one-group healthy-margin cells on
+both hosts, real durable applications, offered-load/headroom, fairness/skew,
+placement/shared barriers, active maintenance and P8 composition remain required.
+P9 stays active; P10 is excluded.
 
 Linux native421's same-artifact visit-policy comparison passes all36 cases,
 source/artifact guards, original results, recovery and representative retries.

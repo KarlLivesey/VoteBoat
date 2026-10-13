@@ -1,0 +1,6 @@
+{
+  "file": "docs/provider-conformance.json",
+  "before_sha256": "35995b8554e0e584b77a864ce5f35c7ae7a1e53f9e0d6ac1c9c540095a8c82a9",
+  "after_sha256": "2afa29879c871ccaf6967d80c9a609f069b5e470d13cc1ee68aea7a3ddad2169",
+  "purpose": "Complete existing nine-operation LogStore conformance ledger for newly added matches_state; no production change"
+}
