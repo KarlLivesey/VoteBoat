@@ -1,0 +1,19 @@
+---- native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport stdout ----
+
+thread 'native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport' (3199556) panicked at tests/effect_owner.rs:2352:9:
+effect-owner cluster did not drain: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 732, 678), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 300, 300), (EffectOwnerUsage { active_visits: 18, reserved_bytes: 103614722, leased: 15, persistence_requests: 3 }, WorkerUsage { requests: 3, units: 3, bytes: 2960 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 4, image_bytes: 409600 }), Some(SnapshotWorkUsage { requests: 4, bytes: 427105 }), 378, 405)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups stdout ----
+
+thread 'native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups' (3226422) panicked at tests/support/native_node.rs:229:5:
+facade progress timed out: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (2, 2)), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (2, 2)), (EffectOwnerUsage { active_visits: 15, reserved_bytes: 74016388, leased: 14, persistence_requests: 1 }, WorkerUsage { requests: 1, units: 1, bytes: 944 }, Some((SnapshotRouterUsage { requests: 4, image_bytes: 409600 }, SnapshotWorkUsage { requests: 4, bytes: 430468 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 10, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (0, 0))]
+
+
+failures:
+    native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport
+    native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups
+
+test result: FAILED. 201 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 325.80s
+
+error: test failed, to rerun pass `--test effect_owner`

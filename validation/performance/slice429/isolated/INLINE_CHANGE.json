@@ -1,0 +1,11 @@
+{
+  "pre_inline_source_manifest_sha256": "bce1c6865fcfdc4b95e9e1192f815f84041519c640e7ff41f25805b0c8e86d3f",
+  "before_log_rs_sha256": "63ac5c5b03e5a8db4f5dea5031d3ebc1aa0af2b49bf011574b7bd2e1e3142dd7",
+  "after_log_rs_sha256": "010a22ad36acb15acf6b0e9fe1e5bcf342fb512658df6016ab6fae3a3027eec3",
+  "only_change": "#[inline] attribute on manual LogEntry::eq",
+  "equality_body_byte_identical_after_removing_attribute": true,
+  "purpose": "public cross-crate embedding codegen hint, ordinary non-LTO builds as well as frameworkThinLTO",
+  "original_derived_attribute_proof": "optimized immutable426 bitcode lacks standalone Eq definition; no claim its annotation was directly recovered",
+  "pre_inline_checks": "library386+owner201 with two deadline failures, exact quietcontrols2 pass; not claimed exact final source",
+  "post_inline_checks": "focused log/checkpoint/accepted library controls, all unrun integration/core/service/strict/matched stages"
+}

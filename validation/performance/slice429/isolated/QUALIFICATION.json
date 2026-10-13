@@ -1,0 +1,217 @@
+{
+  "base_commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+  "isolated_final_source": true,
+  "source_manifest_sha256": "654f64678b9e07ab5e034c544e48cefc85235af3a79a76d9662931bf1bcfb57b",
+  "patch_sha256": "ff376b5f27d028fb89deafd885ec75ef7789918d697146880a29b77c6923ffba",
+  "source_files": 1425,
+  "changed_paths": [
+    "src/log.rs",
+    "tests/provider_conformance/log_store.rs",
+    "tests/provider_conformance/log_store/entry_equality.rs"
+  ],
+  "new_files": [
+    "tests/provider_conformance/log_store/entry_equality.rs"
+  ],
+  "original_broad_handle": 21041,
+  "original_broad_exit": 101,
+  "pre_inline_scope": {
+    "source_manifest_sha256": "bce1c6865fcfdc4b95e9e1192f815f84041519c640e7ff41f25805b0c8e86d3f",
+    "all_feature_library": "386passed/0failed223.17s",
+    "all_feature_effect_owner": "201passed/2startupdeadlinefailures325.80s",
+    "original_raw_log": "pre-inline/affected-all.log",
+    "exact_final_file_hash_claim": false
+  },
+  "quiet_focus_handle": 60187,
+  "quiet_focus_exit": 0,
+  "quiet_focus": {
+    "hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport -- --exact --nocapture --test-threads=1",
+      "log": "focused-hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport.log",
+      "log_sha256": "02046e3c7115a2748929a7c1a9266d7502d4ce2b730ca26a9455b106207502ee",
+      "test_results": [
+        "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 57.06s"
+      ],
+      "original_deadline_secs": 10,
+      "source": "pre-inline unchanged source; no limits/timeouts altered"
+    },
+    "owning_native_facade_checkpoints_restarts_and_retries_hundred_groups": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups -- --exact --nocapture --test-threads=1",
+      "log": "focused-owning_native_facade_checkpoints_restarts_and_retries_hundred_groups.log",
+      "log_sha256": "8f873b7ad91303dfff80911b90715b221f860ec215efa86a2a05d5ce32798998",
+      "test_results": [
+        "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 77.43s"
+      ],
+      "original_deadline_secs": 15,
+      "source": "pre-inline unchanged source; no limits/timeouts altered"
+    }
+  },
+  "inline_change": "INLINE_CHANGE.json; only inline hint, Eq body byte-identical after removing attribute",
+  "final_scoped_handle": 67406,
+  "final_scoped_exit": 0,
+  "final_scoped_stage": "DONE",
+  "final_scopes": {
+    "fmt-final-before": {
+      "status": 0,
+      "command": "cargo +stable fmt --all -- --check",
+      "log": "fmt-final-before.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "test_results": []
+    },
+    "final-log-lib": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --lib log:: -- --test-threads=1",
+      "log": "final-log-lib.log",
+      "log_sha256": "b75f0b222aa005e1cb3b2d8803493b0ea41ae75cfe994e0bad4943b80f733f74",
+      "test_results": [
+        "ok. 37 passed; 0 failed; 0 ignored; 0 measured; 349 filtered out; finished in 0.01s"
+      ]
+    },
+    "final-raft-checkpoint-lib": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --lib raft::checkpoint_tests:: -- --test-threads=1",
+      "log": "final-raft-checkpoint-lib.log",
+      "log_sha256": "6781559a92085c90df2594c0c389b64bf71d9501976ff423c2713f0f7024515a",
+      "test_results": [
+        "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 384 filtered out; finished in 0.00s"
+      ]
+    },
+    "final-native-accepted-lib": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --lib native::log_store::accepted::tests:: -- --test-threads=1",
+      "log": "final-native-accepted-lib.log",
+      "log_sha256": "34ab3e004916477d2637ec377c890f9177a7dcf84feb8e1d5ca33237b4bffc2d",
+      "test_results": [
+        "ok. 18 passed; 0 failed; 0 ignored; 0 measured; 368 filtered out; finished in 0.00s"
+      ]
+    },
+    "remaining-all": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test log_store --test provider_conformance --test snapshot --test raft -- --test-threads=1",
+      "log": "remaining-all.log",
+      "log_sha256": "ed7624edb406fee97b6be658ad648f3972d1de5237eb1d4c5cbde0829054f6dc",
+      "test_results": [
+        "ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.70s",
+        "ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.57s",
+        "ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.53s",
+        "ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.68s"
+      ]
+    },
+    "affected-core": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --no-default-features --lib --test log_store --test provider_conformance --test snapshot --test raft --test effect_owner -- --test-threads=1",
+      "log": "affected-core.log",
+      "log_sha256": "74066a6d9cee56c1cce5f81b9e3caa51ae4deb1da30ce9a5a672e230ee1b26f5",
+      "test_results": [
+        "ok. 306 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s",
+        "ok. 195 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s",
+        "ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    "actual-services": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test counter_service three_ -- --test-threads=1",
+      "log": "actual-services.log",
+      "log_sha256": "13dc48f1e105d550ae85b46f3171ccbf20a5f0412ecaebe476f6ceb797ddb338",
+      "test_results": [
+        "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 18.79s"
+      ]
+    },
+    "fmt-final": {
+      "status": 0,
+      "command": "cargo +stable fmt --all -- --check",
+      "log": "fmt-final.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "test_results": []
+    },
+    "clippy-all": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings",
+      "log": "clippy-all.log",
+      "log_sha256": "0125d62e593cf958d668536dc3acb908c21117bc9a71fb2eeae7c04841df6edc",
+      "test_results": []
+    },
+    "clippy-default": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings",
+      "log": "clippy-default.log",
+      "log_sha256": "13987b61dbc38a03a0dc17abe454afb9aab372d34579c5f32f171c134220338a",
+      "test_results": []
+    },
+    "clippy-core": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings",
+      "log": "clippy-core.log",
+      "log_sha256": "896f34327970416bf3ebf5a648bba30b34140f4b863e76da4ba333e8b2580469",
+      "test_results": []
+    },
+    "clippy-native": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings",
+      "log": "clippy-native.log",
+      "log_sha256": "2a13c738c77b55b2d0e7ab189baf0129ec5e6a1ab6d977aca9c93724101ea9b9",
+      "test_results": []
+    },
+    "matched-tests": {
+      "status": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline -- --test-threads=1",
+      "log": "matched-tests.log",
+      "log_sha256": "d0d32d04bb021381f6e6cc4bef89c136c757cc8d5180105973ae7ee6c833ac19",
+      "test_results": [
+        "ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.52s"
+      ]
+    },
+    "matched-fmt": {
+      "status": 0,
+      "command": "cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml --all -- --check",
+      "log": "matched-fmt.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "test_results": []
+    },
+    "matched-clippy": {
+      "status": 0,
+      "command": "cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings",
+      "log": "matched-clippy.log",
+      "log_sha256": "71e99309ba3d288500cd00945c3dcfc26c81dd81f17d27c389d6b03096c9c794",
+      "test_results": []
+    },
+    "source-after": {
+      "status": 0,
+      "command": "sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/source.sha256",
+      "log": "source-after.log",
+      "log_sha256": "baae98a40491b032051697e23ca39e65873b9437a556154a919a695e755fdb5b",
+      "test_results": []
+    }
+  },
+  "final_source_coverage": {
+    "all_feature_targeted_library_log": 37,
+    "all_feature_targeted_library_checkpoint": 2,
+    "all_feature_targeted_library_native_accepted": 18,
+    "all_feature_log_store": 19,
+    "all_feature_provider": 35,
+    "all_feature_raft": 79,
+    "all_feature_snapshot": 27,
+    "core_library": 306,
+    "core_effect_owner": 195,
+    "core_log_store_native_gated": 0,
+    "core_provider": 20,
+    "core_raft": 29,
+    "core_snapshot": 12,
+    "actual_tcp_quic_services": 2,
+    "matched": 35
+  },
+  "semantic_body_reuse": "Pre-inline broad library/owner evidence is preserved separately and not claimed as a whole final-source run. The equality body is identical; final focused and unrun scopes validate final source/codegen.",
+  "failures_kept": [
+    "initial rustfmt1, corrected by ordinary formatter",
+    "two original native startup deadlines, exact quiet reruns passed57.06s/77.43s; no Eq oracle/provider error observed; no cause asserted"
+  ],
+  "public_source_compatibility": "Manual PartialEq loses compiler-derived structural const-pattern marker; ordinary Eq truth table/data/API fields/on-disk shape unchanged. User permits interfaces changes.",
+  "held427": "source/test ideas consulted, no incomplete427checks reused as429qualification",
+  "performance": "no429 benchmark/profile/fresh-release artifact build or gain claim",
+  "main_source_edit_by_agent": false,
+  "publication": "root handles promotion/commit/push"
+}

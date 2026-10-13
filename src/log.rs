@@ -38,11 +38,67 @@ pub enum EntryPayload {
         bytes: Vec<u8>,
     },
 }
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq)]
 pub struct LogEntry {
     pub index: u64,
     pub term: u64,
     pub payload: EntryPayload,
+}
+impl PartialEq for LogEntry {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        let Self {
+            index,
+            term,
+            payload,
+        } = self;
+        let Self {
+            index: other_index,
+            term: other_term,
+            payload: other_payload,
+        } = other;
+        index == other_index
+            && term == other_term
+            && match (payload, other_payload) {
+                (EntryPayload::Noop, EntryPayload::Noop) => true,
+                (EntryPayload::Configuration(record), EntryPayload::Configuration(other)) => {
+                    record == other
+                }
+                (
+                    EntryPayload::Command { operation, bytes },
+                    EntryPayload::Command {
+                        operation: other_operation,
+                        bytes: other_bytes,
+                    },
+                ) => {
+                    operation == other_operation
+                        && ((bytes.is_empty() && other_bytes.is_empty()) || bytes == other_bytes)
+                }
+                (
+                    EntryPayload::Noop,
+                    EntryPayload::Configuration(_)
+                    | EntryPayload::Command {
+                        operation: _,
+                        bytes: _,
+                    },
+                )
+                | (
+                    EntryPayload::Configuration(_),
+                    EntryPayload::Noop
+                    | EntryPayload::Command {
+                        operation: _,
+                        bytes: _,
+                    },
+                )
+                | (
+                    EntryPayload::Command {
+                        operation: _,
+                        bytes: _,
+                    },
+                    EntryPayload::Noop | EntryPayload::Configuration(_),
+                ) => false,
+            }
+    }
 }
 impl LogEntry {
     /// Owned payload allocation accounting, excluding the inline LogEntry.

@@ -58,15 +58,29 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: exact empty-payload comparison429 | Remove the largest remaining sampled waste without removing equality validation | Published428; exported Linux profile identifies repeated zero-byte comparison calls; independent equality oracle and existing conformance histories | Exhaustive field/variant equality, empty/nonempty/configuration mismatches; affected tests, actual services and zero root/four-strict/matched checks; publish checked source | P9.1 |
-| Next: qualify and measure429 on both hosts | Establish useful-rate/latency change and reprofile the remaining largest drain | Published429, immutable428 baseline, fresh asserted artifacts with within-host compiler/profile parity; Mac affected/strict qualification | Repeated rotating bulk/singleton pairs, every original/frontier/bound and all regressions; exported sample data separately diagnostic; full sustained seven-cell acceptance remains required | P9.0/P9.1/P9.3 |
-| Following: reduce the next measured limiting stage | Decide whether work can be omitted, shared or reordered before wider pipelining | Both-host429 measurements and compact profile data; existing ownership/composition contracts; native421 barrier/fairness evidence for durable work | A bounded schema and exact partial-progress/restart tests, checked publication and both-host measurements; no default batching change without sustained/mixed fairness evidence | P9.1/P9.2/P9.3 |
+| Current: qualify and measure429 on both hosts | Verify actual useful-rate/latency effect of avoiding zero-byte calls | Checked429 source and enabled publication hook; immutable428 baseline; fresh asserted artifacts and Mac affected/strict qualification | Rotating bulk/singleton pairs, every original/frontier/bound and all regressions; fresh optimized code/profile confirms call avoidance; sustained20M/full curve remains separate | P9.0/P9.1/P9.3 |
+| Next: reduce the next measured limiting stage | Decide whether work can be omitted, shared or reordered before wider pipelining | Both-host429 measurements, compact profile data and ownership/composition contracts | Bounded schema, exact partial-progress/restart checks, checked publication and both-host measurements | P9.1/P9.3 |
+| Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence, exact ticket/publication contracts and bounded fairness schema; finish the current measured framework stage first | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
 both hosts, real durable applications, offered-load/headroom, fairness/skew,
 placement/shared barriers, active maintenance and P8 composition remain required.
 P9 stays active; P10 is excluded.
+
+429 is checked and exactly promoted: all1,425 selected source hashes match;
+three changed paths include the new independent equality-oracle module. [Scoped
+qualification](../validation/performance/slice429/README.md) separates pre-inline
+library386/owner201 plus two failed progress controls from final source. Both exact
+quiet controls pass57.06/77.43s without changing10s/15s progress limits; no cause
+is established. Only `#[inline]` was then added, with byte-identical equality body.
+Final source passes log library37/checkpoint2/native accepted18, all-feature
+log19/provider35/Raft79/snapshot27, core library306/owner195/provider20/Raft29/
+snapshot12, actual TCP/QUIC services2 and matched35. Root fmt/four strict and
+standalone fmt/strict are zero. The pre-inline broad checks are not relabeled as
+exact-final-source coverage. Every failure/raw log remains. No429 performance gain
+has been measured yet; fresh asserted artifacts, Mac qualification and paired
+measurements are next. All macro acceptance remains active and unmet.
 
 ### Slice429 schema — measured exact comparison work
 

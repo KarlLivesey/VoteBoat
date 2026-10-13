@@ -1,0 +1,11 @@
+{
+  "base_main_commit": "d25eadff0c106783a31917ddd7ea8eac5d200dcc",
+  "verified_inputs": 1425,
+  "changed_files": [
+    "src/log.rs",
+    "tests/provider_conformance/log_store.rs",
+    "tests/provider_conformance/log_store/entry_equality.rs"
+  ],
+  "all_selected_hashes_match": true,
+  "final_source_manifest_sha256": "654f64678b9e07ab5e034c544e48cefc85235af3a79a76d9662931bf1bcfb57b"
+}

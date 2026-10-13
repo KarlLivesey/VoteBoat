@@ -1,0 +1,7 @@
+{
+  "immutable426_rlib": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched426-linux/artifacts/matched/libvoteboat-4cad878219bea1ba.rlib",
+  "member": "voteboat-4cad878219bea1ba.voteboat.5ba33001ff6ccea1-cgu.0.rcgu.o",
+  "llvm_dis_version": "LLVM (http://llvm.org/):\n  LLVM version 23.1.1\n  Optimized build.\n",
+  "compiler_flag_origin": "existing426 compiler bitcode; no rebuild",
+  "functions": []
+}

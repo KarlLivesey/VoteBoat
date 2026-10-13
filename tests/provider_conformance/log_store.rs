@@ -5,6 +5,8 @@ use super::support::*;
 use voteboat::{identity::*, log::*};
 #[path = "log_store/default_errors.rs"]
 mod default_errors;
+#[path = "log_store/entry_equality.rs"]
+mod entry_equality;
 #[path = "log_store/matches.rs"]
 mod matches;
 
