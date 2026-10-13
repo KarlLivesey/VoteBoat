@@ -347,3 +347,28 @@ fn configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback(
     assert!(planned(&installed, &ballot).full().is_some());
     compare(&installed, ballot, LogLimits::default());
 }
+
+#[test]
+fn configured_matching_checkpoint_retains_full_membership_validator() {
+    for state in histories() {
+        let index = state.commit_index;
+        let mut change = proposal(&state, index, None);
+        change.snapshot_membership = state.checkpoint_membership(index).unwrap();
+        change.snapshot = Some(SnapshotRef {
+            store: store(1),
+            group: group(),
+            configuration: change
+                .snapshot_membership
+                .as_ref()
+                .map_or(state.bootstrap.configuration, |base| base.id()),
+            generation: SnapshotGeneration::new(1).unwrap(),
+            index,
+            term: state.term_at(index).unwrap(),
+            application_schema: 1,
+            file_bytes: 100,
+            checksum: 7,
+        });
+        assert!(planned(&state, &change).full().is_some());
+        compare(&state, change, LogLimits::default());
+    }
+}

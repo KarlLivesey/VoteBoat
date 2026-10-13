@@ -1,0 +1,54 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.21s
+     Running tests/log_store.rs (target/p9/slice418-checks/debug/deps/log_store-855dfb50313f8bca)
+
+running 15 tests
+test staging::replacement_invalidates_only_its_own_generation_and_keeps_other_group_tickets ... ok
+test restart_recovers_policy_identity_hard_state_suffix_and_commit ... ok
+test user_commands_leave_control_reserve_and_admission_is_bounded ... ok
+test public_store_conformance_runs_against_native_and_host ... ok
+test compacted_log_ranges_and_committed_prefix_protection_with_native_and_host ... ok
+test failed_sync_or_publication_fences_without_acknowledging_the_transition ... ok
+test valid_checksums_cannot_hide_unbounded_policy_or_command_lengths ... ok
+test suffix_fence_invalidates_uncompleted_old_generation ... ok
+test staging::subset_barrier_promotes_all_written_groups_and_returns_only_requested_tickets ... ok
+test configured::configured_delta_power_loss_respects_each_durability_phase_and_old_session_refusal ... ok
+test compact::compaction_uncertainty_and_power_loss_preserve_exact_sync_frontier ... ok
+test staging::uncertain_multi_group_append_or_barrier_fences_and_recovers_atomic_batch ... ok
+test every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix ... ok
+test codec_roundtrips_rejects_every_single_bit_mutation_and_unbounded_lengths ... ok
+test batch_limits::large_batch_and_commit_publication_cuts_recover_without_premature_original_results ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/snapshot.rs (target/p9/slice418-checks/debug/deps/snapshot-432c2ab451e6d618)
+
+running 25 tests
+test durable_pin_switch_conformance_with_host_provider ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test native::bounded_codec_rejects_oversize_lengths_even_with_valid_checksums ... ok
+test native::native_files_restore_checkpoint_plus_tail_and_exclude_concurrent_writers ... ok
+test native::codec::substituted_file_decode_preserves_previous_root_after_fenced_close_and_reopen ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test native::staged_corruption_is_detected_against_submitted_bytes_before_sealing ... ok
+test native::downstream_snapshot_codec_is_used_and_incompatible_version_is_rejected ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test native::codec::transparent_host_codec_reopens_real_checkpoint_and_preserves_retry_and_pin ... ok
+test native::pins_survive_restart_and_legacy_manifest_upgrade ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+test native::native_snapshot_conformance_and_restart_session_fencing ... ok
+test native::codec::changed_or_truncated_decode_fences_before_sync_and_preserves_pinned_retry_checkpoint ... ok
+test native::native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test buffered_compaction_schedules_survive_native_file_reopen_and_original_retry ... ok
+test native::native_snapshot_catchup_history_and_actual_files ... ok
+test native::corruption_truncation_missing_data_and_identity_mismatch_fail_closed ... ok
+test native::interrupted_chunks_seals_and_publication_recover_old_or_complete_new ... ok
+test native::snapshot_log_failure_and_lost_application_completion_recover_without_false_ack ... ok
+
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+

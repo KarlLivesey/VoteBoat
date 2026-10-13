@@ -1,0 +1,18 @@
+{
+  "scope": "Authoritative original process observations from tool records; created after timing for archive metadata",
+  "matched": {
+    "ssh_exec_session": 26127,
+    "observed_remote_bash_pid": 52520,
+    "exit": 0,
+    "cases": 18
+  },
+  "native": {
+    "ssh_exec_session": 27441,
+    "observed_remote_node_pid": 55792,
+    "exit": 0,
+    "cases": 24
+  },
+  "same_host_sequential": true,
+  "no_build_test_or_bulk_copy_between_or_during_timing": true,
+  "no_reruns": true
+}

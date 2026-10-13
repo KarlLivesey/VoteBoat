@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Consensus log transitions and the host-replaceable storage contract.
 use super::*;
+mod compact;
 use crate::{
     contracts::HardState,
     quorum::{Limits, Tree},

@@ -280,7 +280,6 @@ pub fn checkpoint_application<A: CheckpointStateMachine, S: SnapshotStore>(
     }
     let metadata = SnapshotMetadata {
         membership: raft
-            .state()
             .checkpoint_membership(index)
             .map_err(|_| CheckpointError::InvalidBoundary)?,
         bootstrap: raft.state().bootstrap.clone(),
@@ -664,7 +663,6 @@ pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
         || snapshot.metadata.bootstrap != raft.state().bootstrap
         || snapshot.metadata.membership
             != raft
-                .state()
                 .checkpoint_membership(reference.index)
                 .map_err(|_| CheckpointError::InvalidBoundary)?
     {

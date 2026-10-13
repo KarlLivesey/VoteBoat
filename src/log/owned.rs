@@ -36,8 +36,9 @@ enum Plan {
 /// This helper owns its canonical groups and private versioned validation
 /// summaries. It starts empty: groups enter through explicit validated Create
 /// mutations. Read-only lookup cannot invalidate its caches. Plain appends and
-/// metadata changes retain unchanged entry allocations; configuration history,
-/// snapshots and replacement use the same full validator as [`apply_batch`].
+/// metadata changes and eligible plain matching-prefix compaction retain unchanged
+/// entry allocations. Configuration history, other snapshots and replacement use
+/// the same full validator as [`apply_batch`].
 ///
 /// This is logical validation, not a storage provider or durability token.
 /// The host still owns store identity, snapshot pins, I/O, uncertain-write

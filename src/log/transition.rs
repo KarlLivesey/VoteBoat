@@ -17,7 +17,9 @@
 use super::*;
 use std::mem::size_of;
 
+mod compact;
 mod view;
+pub(crate) use compact::CompactDelta;
 pub(crate) use view::{LogMetadata, LogView};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -25,6 +27,7 @@ pub(crate) struct LogSummary {
     metadata: LogMetadata,
     plain: bool,
     retained: Option<usize>,
+    clone_stable: bool,
 }
 impl LogSummary {
     /// Caller has validated this canonical state and exclusively owns its mutations.
@@ -54,6 +57,11 @@ impl LogSummary {
                     .iter()
                     .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_))),
             retained,
+            clone_stable: state.entries.iter().all(|entry| match &entry.payload {
+                EntryPayload::Command { bytes, .. } => bytes.capacity() == bytes.len(),
+                EntryPayload::Noop => true,
+                EntryPayload::Configuration(_) => false,
+            }),
         }
     }
     pub(crate) fn matches(&self, state: &GroupLog) -> bool {
@@ -77,6 +85,7 @@ pub(crate) struct PlainDelta {
 }
 pub(crate) enum NextLog {
     Delta(PlainDelta),
+    Compact(CompactDelta),
     Full {
         predecessor: LogMetadata,
         next: Box<GroupLog>,
@@ -99,6 +108,9 @@ impl NextLog {
         }
         if !summary.matches_metadata(&view.metadata()) {
             return Err(StorageError::Rejected("stale log summary"));
+        }
+        if compact::eligible(view, summary, update) {
+            return compact::plan(view, summary, update, limits).map(Self::Compact);
         }
         // Validated configured histories keep their accepted membership when
         // only commands/commit metadata change. A new ballot still needs the
@@ -127,12 +139,13 @@ impl NextLog {
     pub(crate) fn metadata(&self) -> LogMetadata {
         match self {
             Self::Delta(delta) => delta.metadata(),
+            Self::Compact(delta) => delta.metadata(),
             Self::Full { next, .. } => LogMetadata::from_log(next),
         }
     }
     pub(crate) fn full(&self) -> Option<&GroupLog> {
         match self {
-            Self::Delta(_) => None,
+            Self::Delta(_) | Self::Compact(_) => None,
             Self::Full { next, .. } => Some(next),
         }
     }
@@ -144,6 +157,16 @@ impl NextLog {
     ) -> Option<u64> {
         match self {
             Self::Full { next, .. } => next.term_at(index),
+            Self::Compact(delta) => {
+                let metadata = delta.metadata();
+                if index == metadata.base_index {
+                    Some(metadata.base_term)
+                } else if index < metadata.base_index {
+                    None
+                } else {
+                    current.term_at(index)
+                }
+            }
             Self::Delta(delta) => {
                 if let Some(suffix) = &delta.append {
                     if index >= suffix.from {
@@ -185,6 +208,9 @@ impl NextLog {
             Self::Delta(delta) => {
                 delta.check_install(LogMetadata::from_log(current), update)?;
             }
+            Self::Compact(delta) => {
+                delta.check_install(LogMetadata::from_log(current), update)?;
+            }
         }
         Ok(PreparedLog(self))
     }
@@ -204,6 +230,7 @@ impl PreparedLog {
                 metadata.install_header(current);
                 delta.summary
             }
+            NextLog::Compact(delta) => delta.install(current),
         }
     }
 }
@@ -321,6 +348,7 @@ fn plan_append_metadata(
             metadata: next,
             plain: summary.plain,
             retained,
+            clone_stable: summary.clone_stable,
         },
     })
 }

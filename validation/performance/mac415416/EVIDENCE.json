@@ -1,7 +1,7 @@
 {
-  "scope": "Mac frozen8a5840d affected415/416 qualification and held paired-driver preparation; no timing",
+  "scope": "Mac frozen8a5840d affected415/416 qualification and paired-driver preparation; final measurements linked separately",
   "sha256": {
-    "README.md": "78d0abda2c32c626cd8be74944d697801c059f35963131dc773a144f49f1a2a7",
+    "README.md": "9c1b78cb31b92fbf9e65dcef02bd19b494724f0ebaa33e4156e76eb090832348",
     "SCHEMA.md": "ebd1b61547622924172c084515f3577e2467e344af05576c8a8cfe568ee8d1f0",
     "measurement-preparation/MEASUREMENT_PLAN.md": "3fe8321b7e7b14f619b540c5b85417d70626678202bb4a79df37f866f5f71261",
     "measurement-preparation/native-paired.mjs": "21e7ae0497fb992503a4f1977f1e443cbc06137443f2c084844885f7418a0dca",

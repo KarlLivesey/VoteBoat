@@ -2,6 +2,16 @@
 
 ## Active P9 plan — 13 October 2026
 
+418 implements plain matching-prefix compaction without copying surviving command
+payloads, with exact original field correlation, accounting and configured
+fallback. Native accepted trimming remains deferred until publication. Full
+snapshot pin/load/state equality/application restore proofs remain. Parent affected
+all-feature/core integrations pass 416/277, real TCP/QUIC recovery and maintenance
+8, and the full formatter/four strict profiles/standalone hook passes with zero
+diagnostics. [418 schema, crash controls and actual validation](../validation/performance/slice418/README.md).
+Current-source Mac qualification and paired throughput/attribution are next;
+functional controls establish no throughput gain or margin pass.
+
 The terminal 417 Linux diagnostic verifies nine rotating 1,048,576-original cases
 and all three applied frontiers, with immutable source/artifact guards. Baseline,
 attribution-off and attribution-on medians are 861,766 / 857,111 / 872,289
@@ -17,9 +27,15 @@ guards, zero formatter/four strict root/standalone diagnostics, both-feature Cor
 and owner checks, executable 52, actual TCP/QUIC retry/replacement/recovery 2,
 maintenance/reclaim 6 and native recovery 40. Fresh profile-specific immutable
 artifacts are verified. [Exact Mac scope](../validation/performance/mac415416/README.md).
-Paired Mac timing is terminal and its separate raw archive is being collected;
-qualification controls are not throughput measurements. Benchmarks exercise
-Core415 directly; wrapper416 is covered by actual owner/executable controls.
+Paired Mac timing is terminal with all 18 framework and 24 native cases and exact
+guards passing. Window32 native TCP/QUIC paired medians improve 8.7%/8.3%, but
+the minimal framework batch cell regresses 13%: 2,301,590→2,009,315 originals/s,
+against upstream 1,952,202/s. Its p99 rises 7.66→10.65 ms. A native QUIC trial at
+100.62 writes/s and 1,136 ms p99 is retained. This scheduling/device-sensitive
+change does not establish sustained capacity or the healthy margin.
+[All trials and exact completion scope](../validation/performance/mac415416-paired/README.md).
+Benchmarks exercise Core415 directly; wrapper416 is covered by actual
+owner/executable controls.
 
 417 adds opt-in, bounded elapsed phase attribution to the standalone comparison.
 Eleven controls and four actual off/on CLI cases retain every original result,
@@ -62,8 +78,10 @@ real TCP/QUIC retry/recovery and checkpoint/reclaim controls 8. Formatter, all f
 strict root profiles and standalone matched checks pass with zero diagnostics.
 [Schema and actual validation](../validation/performance/slice416/SCHEMA.md).
 The mini plan now prioritizes plain matching-prefix compaction deltas (418),
-owned normalized incoming transitions (419), then a coordinated bounded same-group
-persistence pipeline. Configured resource summaries remain subsequent work. No macro
+owned normalized incoming transitions (419), then a validated native ready quantum
+that can amortize the currently capped 16-wide visits. A coordinated bounded
+same-group persistence pipeline and configured resource summaries remain subsequent
+work. No macro
 milestone or healthy-margin requirement is closed by these changes.
 
 Linux's 24-case native batching comparison verifies every original Applied result,

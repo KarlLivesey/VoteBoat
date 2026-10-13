@@ -6,6 +6,7 @@ use crate::quorum::{Limits, Policy, Tree};
 
 #[path = "tests/batch_limits.rs"]
 mod batch_limit_tests;
+mod compact;
 
 fn node(value: u64) -> NodeId {
     NodeId::new(value).unwrap()

@@ -138,7 +138,7 @@ fn checked_index_and_revision_exhaustion_matches_fallback_without_arithmetic_pan
 }
 
 #[test]
-fn configuration_and_snapshot_and_replacement_transitions_keep_full_fallback() {
+fn configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact() {
     use crate::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
     let state = current();
     let configuration = Configuration::new(
@@ -194,7 +194,11 @@ fn configuration_and_snapshot_and_replacement_transitions_keep_full_fallback() {
             LogLimits::default(),
         )
         .unwrap();
-        assert!(plan.full().is_some());
+        if proposal.snapshot.is_some() {
+            assert!(matches!(plan, NextLog::Compact(_)));
+        } else {
+            assert!(plan.full().is_some());
+        }
         compare(&state, proposal, LogLimits::default());
     }
 }

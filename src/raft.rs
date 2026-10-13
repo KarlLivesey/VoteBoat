@@ -1672,7 +1672,6 @@ impl Raft {
         self.persist_update(
             LogUpdate {
                 snapshot_membership: self
-                    .durable
                     .checkpoint_membership(reference.index)
                     .map_err(|_| RaftError::InvalidRecovery)?,
                 group: self.durable.bootstrap.group,
@@ -1685,6 +1684,21 @@ impl Raft {
             After::Compact,
             None,
         )
+    }
+    /// Only the exclusive validated owner can replace plain membership replay.
+    pub(crate) fn checkpoint_membership(
+        &self,
+        index: u64,
+    ) -> Result<Option<Box<crate::membership::Membership>>, crate::membership::MembershipError>
+    {
+        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
+            if index < self.durable.base_index() || index > self.durable.last_index() {
+                return Err(crate::membership::MembershipError::InvalidHistory);
+            }
+            Ok(None)
+        } else {
+            self.durable.checkpoint_membership(index)
+        }
     }
     pub(crate) fn checkpoint_matches(&self, context: RequestContext) -> bool {
         !self.fenced && self.checkpoint_requested == Some(context)

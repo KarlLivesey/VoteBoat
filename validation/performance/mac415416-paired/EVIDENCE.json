@@ -1,0 +1,28 @@
+{
+  "scope": "M2 Max frozen414 to8a Core415 matched18 and native24 original cases; not wrapper416 or publishedfloor qualification",
+  "sha256": {
+    "MEASUREMENT_PLAN.md": "3fe8321b7e7b14f619b540c5b85417d70626678202bb4a79df37f866f5f71261",
+    "README.md": "e96cb1d2b9d0f240e2e4ad7627508bad11eb4ea410292b17a0123cfb602a058b",
+    "RUN_HANDLES.json": "82e847b811c2b31719a6e8d352107cd9c8cab9ec854e2951db2660a5c8b85995",
+    "analyze-matched.py": "6f36bb0fc3a9a1832793880910ce3a2ee25b0f60866f5e0caabcf99130ed7943",
+    "analyze-native.py": "15861c87955bcea1bb4f0f05f93aa00c0bc86fd8a6aa447ce68e7b9c8d8befb2",
+    "identity-and-drivers/FRAMEWORK_IDENTITY.json": "3eac0f6c8e8287c97dc3dcd52ec1d4eb89ff86a0721b74762a8418e313727658",
+    "identity-and-drivers/MEASUREMENT_FILES.json": "604a3962bd42a187b19355abcf29e45cddc5f62d88722d99bfe5d16dd1056111",
+    "identity-and-drivers/native-candidate/ARTIFACTS.json": "23159a81ab35d003001e926aabb866a18819d29bf680c6fe480413e6a4f7acab",
+    "identity-and-drivers/native-candidate/SOURCE.json": "333d6764cb3c52ee36a5b2c8bde38df022c4dd31679d844f5d644615a8bf1c86",
+    "identity-and-drivers/native-paired.mjs": "21e7ae0497fb992503a4f1977f1e443cbc06137443f2c084844885f7418a0dca",
+    "identity-and-drivers/native-reference/ARTIFACTS.json": "8a010d677dfd82390b0aec04f9b3827b9f23b38a68ead48d4404b1bf60cd07dd",
+    "identity-and-drivers/native-reference/SOURCE.json": "8aea93133fdf4fbe17840cf21ac85bf65d371d7f40b5624efb4fb249ed5b1386",
+    "identity-and-drivers/paired-framework-check.py": "92a228ca43d8378dfb6bbe9fbcc897538a25ff4025a4423d3625aafb8d59c952",
+    "identity-and-drivers/paired-framework.sh": "204887c42f416effb5efc8e457049e989dca633dee4714a50ef7b0b229f56ce1",
+    "identity-and-drivers/prepare-measurements.py": "4c77f0e733fc824ad147aad529257959c92fc19a609b098b0622145fe2fd83db",
+    "matched/RESULTS.json": "6e93f756514651506e396ad2aa5e9d27701b0ffc4d6d4e1b19cf621b81df58de",
+    "matched/raw-files.json": "b6d0134824a64c1f3db5ff6ee43fe104e9aad319f6220265e63fe6128bf92b13",
+    "matched/raw.tgz": "e3c74a50aa154f789070b93e865fe885a4377c2cd1592632fd898c223b80ba14",
+    "matched/summary.json": "527669738b639facdddaf4f5b83e0fe2997c6b81046a4c81bdc6dcaa57f5b028",
+    "native/RESULTS.json": "b74a7246d66e0cd1dc03950097a494c8dff1ad115ec9ce24f7252bec8f5a467d",
+    "native/raw-files.json": "36df5f72ad876ec56ef723e13dde14bae4b74b19ecc0982a550e0a718629ccf5",
+    "native/raw.tgz": "bf668d845073b9ef2977d8a53eb47393ab9392bc9f30a2547dd5369ae195d4df",
+    "native/summary.json": "c9a3507bb07a2b3d86b30c01eadd0c759d6a3c6f6c4d982474d1e29812f82904"
+  }
+}

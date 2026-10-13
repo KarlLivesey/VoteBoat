@@ -2,7 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 //! Private admitted overlays. Their metadata is never durable voter evidence.
 use super::*;
-use crate::log::transition::{LogMetadata, LogSummary, LogView, NextLog, PlainDelta};
+use crate::log::transition::{CompactDelta, LogMetadata, LogSummary, LogView, NextLog, PlainDelta};
 
 #[derive(Default)]
 pub(super) struct Accepted {
@@ -18,6 +18,7 @@ struct Plain {
     metadata: LogMetadata,
     summary: LogSummary,
     tail: Vec<LogEntry>,
+    removed: usize,
 }
 struct Full {
     state: GroupLog,
@@ -69,7 +70,7 @@ impl Accepted {
                     return Err(StorageError::Rejected("stale log summary"));
                 }
                 Ok((
-                    LogView::overlay(base, &plain.tail, plain.metadata),
+                    LogView::trimmed_overlay(base, &plain.tail, plain.metadata, plain.removed),
                     plain.summary,
                 ))
             }
@@ -213,6 +214,10 @@ impl Accepted {
                 delta.check_install(current, &update)?;
                 self.install_delta(group, delta, update)?;
             }
+            NextLog::Compact(delta) => {
+                delta.check_install(current, &update)?;
+                self.install_compact(durable, group, delta, update)?;
+            }
         }
         Ok(())
     }
@@ -242,6 +247,43 @@ impl Accepted {
                         metadata,
                         summary: delta.summary,
                         tail: delta.append.map_or_else(Vec::new, |suffix| suffix.entries),
+                        removed: 0,
+                    })),
+                );
+            }
+        }
+        Ok(())
+    }
+    fn install_compact(
+        &mut self,
+        durable: &BTreeMap<GroupIdentity, GroupLog>,
+        group: GroupIdentity,
+        delta: CompactDelta,
+        update: LogUpdate,
+    ) -> Result<(), StorageError> {
+        let metadata = delta.metadata();
+        match self.overlays.get_mut(&group) {
+            Some(Overlay::Full(full)) => {
+                full.summary = NextLog::Compact(delta).install(&mut full.state, update)?;
+            }
+            Some(Overlay::Plain(plain)) => {
+                let durable_removed = delta
+                    .removed
+                    .min(durable[&group].entries.len() - plain.removed);
+                plain.removed += durable_removed;
+                plain.tail.drain(..delta.removed - durable_removed);
+                plain.metadata = metadata;
+                plain.summary = delta.summary;
+            }
+            None => {
+                self.overlays.insert(
+                    group,
+                    Overlay::Plain(Box::new(Plain {
+                        base: LogMetadata::from_log(&durable[&group]),
+                        metadata,
+                        summary: delta.summary,
+                        tail: Vec::new(),
+                        removed: delta.removed,
                     })),
                 );
             }
@@ -259,7 +301,11 @@ impl Accepted {
             }
             if let Overlay::Plain(plain) = overlay {
                 let base = &durable[&group];
-                if base.entries.len().checked_add(plain.tail.len())
+                if base
+                    .entries
+                    .len()
+                    .checked_sub(plain.removed)
+                    .and_then(|left| left.checked_add(plain.tail.len()))
                     != Some(plain.metadata.entries_len)
                 {
                     return Err(StorageError::Rejected("accepted tail length mismatch"));
@@ -281,6 +327,7 @@ impl Accepted {
                 }
                 Overlay::Plain(plain) => {
                     let state = durable.get_mut(&group).unwrap();
+                    state.entries.drain(..plain.removed);
                     state.entries.extend(plain.tail);
                     plain.metadata.install_header(state);
                     if LogMetadata::from_log(state) != plain.metadata {

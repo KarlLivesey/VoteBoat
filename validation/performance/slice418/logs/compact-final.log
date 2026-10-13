@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.00s
+     Running unittests src/lib.rs (target/p9/slice418-checks/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 19 tests
+test log::transition::tests::compact::slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice ... ok
+test log::transition::tests::compact::compaction_preserves_surviving_payloads_origin_and_exact_charge ... ok
+test log::transition::tests::compact::trimmed_overlay_terms_materialization_and_configured_fallback_are_exact ... ok
+test log::transition::tests::compact::compact_plan_rejects_stale_summary_predecessor_and_altered_reference ... ok
+test log::owned::tests::compact::compaction_batch_is_atomic_and_retains_surviving_payload_allocation ... ok
+test log::transition::tests::oracle::configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact ... ok
+test native::log_store::accepted::tests::compact::invalid_later_unit_does_not_trim_or_write_the_earlier_compaction ... ok
+test raft::proposals::tests::compact::compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge ... ok
+test native::log_store::accepted::tests::compact::trimmed_accepted_view_materializes_exact_configuration_and_replacement_fallback ... ok
+test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+test log::transition::tests::compact::snapshot_boundary_ballot_commit_and_overflow_errors_match_full_oracle ... ok
+test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+test native::log_store::accepted::tests::compact::deferred_trim_composes_with_accepted_tail_and_subset_publication ... ok
+test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+test raft::membership_tests::configured_deltas::configured_pending_append_and_compacted_joint_commit_keep_connections_and_membership ... ok
+test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+test log::transition::tests::configured::stable_joint_final_and_compacted_histories_match_original_validator ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 337 filtered out; finished in 0.00s
+

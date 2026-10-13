@@ -1,0 +1,26 @@
+{
+  "scope": "418 local source/correctness/fault/formatter/four strict profiles; no throughput claim",
+  "sha256": {
+    "README.md": "7718aaf156e2b37628aff917c0b5edc2ec45dff4d7e080317d3da4f399c2d976",
+    "SCHEMA.md": "e1401ccdc0dca823710ad918d1b979df65cdde2dbea6b4d19a9b1f0b8cbd15dd",
+    "SOURCE.sha256": "91927475e69badbfb617128a23c40c36816904f910b9f12b41c5f117ff6f91c2",
+    "logs/all-lib-qualified.log": "8e8ee2a381f2961f9ec2fc1acfc45e67c5222f915139edb21910559b5de31862",
+    "logs/all-lib-sandbox.log": "9de9d4bce93c08cf7933e2659c4bf0203ee97750e3487f6306bd5c11d9c874df",
+    "logs/compact-final.log": "76fb0d57e75af0349fa7440db6ff7eb69ca6627f7c611d1eaf655d6d59831538",
+    "logs/core-lib.log": "396721d77266c426e8d74a976c716c668d7d0476ec15cd5cec11010656f0cffd",
+    "logs/fmt-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/storage-snapshot.log": "df301b7453e5a7d407e096619ab331aca39c14d3fa3e4bf2e6e765236db33570",
+    "logs/strict-all-test-targets.log": "1ca3eff48c7a1a01ac93c8a0fc9ed592df76e08c496d5c5101bf9dc7a464300c",
+    "logs/strict-core.log": "37ab82644185e64a8f5bddeb56d97e53840ff071fb27f8de4bccd37cd44c5caf",
+    "logs/strict-initial.log": "9c2e66a01d6eee2f740aa8151e0b547e77c5df5400b10024848ed62289f5380a",
+    "logs/strict-scoped-qualified.log": "271ee009e1e0c947920566c9c92c7414b9ac97419c665c056bce2fe070424289",
+    "logs/transition-initial.log": "841b2da9de4d4afa1ef7beff333527d2913dc066051d733df1bd5edcfd1f038c",
+    "root/COMMANDS.md": "879dbe175f82df1b7a3f14b4efa8bce617355c61cc13b310731eda0c7eca582f",
+    "root/all-integrations.log": "e9f603b51a4bce4b4e23645e3987c3edce4c48cf669c750e0c294fcb900b1d6c",
+    "root/core-integrations.log": "bf01f3ac81fa9fced2837e6dbd2b0d15c0cd627f8dc79314ed225976a3ba101c",
+    "root/pre-push.log": "9adf277f0ba0e6459a37d625f414995806b26abc4ec4dd6b6c1f0e09ac88684c",
+    "root/service-maintenance.log": "f2732d93fd685551acebec84c9897a05f30cf5bbe02691f94e3c2116e0aa690e",
+    "root/service-original-recovery.log": "25baaba0416d381c27cc671becc6120870934876fd7762c8ea98677a454ffaa4",
+    "root/source-final.log": "da5cea125731fc1ce3e59fc4b926304354b34f35653b0d6dae494a27edd68674"
+  }
+}

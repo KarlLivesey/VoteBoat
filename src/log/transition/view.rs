@@ -55,6 +55,7 @@ impl LogMetadata {
         state.hard_state = self.hard_state;
         state.ballot_origin = self.ballot_origin;
         state.commit_index = self.commit_index;
+        state.snapshot = self.snapshot;
     }
 }
 
@@ -63,6 +64,7 @@ pub(crate) struct LogView<'a> {
     base: &'a GroupLog,
     tail: &'a [LogEntry],
     metadata: LogMetadata,
+    removed: usize,
 }
 impl<'a> LogView<'a> {
     pub(crate) fn new(base: &'a GroupLog) -> Self {
@@ -70,16 +72,27 @@ impl<'a> LogView<'a> {
             base,
             tail: &[],
             metadata: LogMetadata::from_log(base),
+            removed: 0,
         }
     }
     /// Prefix/tail were admitted by this owner; metadata describes their exact
     /// accepted version. This is not an unchecked public storage admission API.
-    #[cfg(any(feature = "native", test))]
+    #[cfg(test)]
     pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+        Self::trimmed_overlay(base, tail, metadata, 0)
+    }
+    #[cfg(any(feature = "native", test))]
+    pub(crate) fn trimmed_overlay(
+        base: &'a GroupLog,
+        tail: &'a [LogEntry],
+        metadata: LogMetadata,
+        removed: usize,
+    ) -> Self {
         Self {
             base,
             tail,
             metadata,
+            removed,
         }
     }
     pub(crate) fn metadata(self) -> LogMetadata {
@@ -89,21 +102,28 @@ impl<'a> LogView<'a> {
         &self.base.bootstrap
     }
     pub(crate) fn term_at(self, index: u64) -> Option<u64> {
+        if index == self.metadata.base_index {
+            return Some(self.metadata.base_term);
+        }
+        if index < self.metadata.base_index {
+            return None;
+        }
         if index > self.base.last_index() {
             return self
                 .tail
-                .get(
-                    usize::try_from(index.checked_sub(self.base.last_index())?.checked_sub(1)?)
-                        .ok()?,
-                )
+                .get(usize::try_from(index.checked_sub(self.tail.first()?.index)?).ok()?)
                 .map(|entry| entry.term);
         }
         self.base.term_at(index)
     }
     pub(crate) fn materialize(self) -> GroupLog {
         let mut current = self.base.clone();
+        current.entries.drain(..self.removed);
         current.entries.extend(self.tail.iter().cloned());
         self.metadata.install_header(&mut current);
         current
+    }
+    pub(crate) fn entries(self) -> impl Iterator<Item = &'a LogEntry> {
+        self.base.entries[self.removed..].iter().chain(self.tail)
     }
 }
