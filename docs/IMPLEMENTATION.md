@@ -61,7 +61,12 @@ Every unified replica reaches applied frontier132097. Default maintenance runs
 throughout, including actual follower snapshot installations.
 [Linux pilot](../benchmarks/matched/validation/pilot-linux131072/REPORT.md).
 These131072-original short cases do not establish sustained capacity or the
-complete minimum curve. Mac timing and full curves remain pending.
+complete minimum curve. The Mac primary pilot also passes18/18 cases and guards:
+VoteBoat61951/1227169 writes/s versus untouched upstream10791/2176842 at the
+same singleton/concurrent cells. All unified frontiers are132097, checkpoints
+remain active and no Mac replica installs a snapshot. The concurrency gap thus
+persists without Linux's snapshot-install churn. Full curves remain pending.
+[M2 Max pilot](../benchmarks/matched/validation/pilot-mac131072/REPORT.md).
 The push hook now explicitly checks that workspace's formatter and strict lint.
 
 The [native batch observer](../validation/performance/native-batching/README.md)

@@ -42,7 +42,10 @@ The [Linux primary pilot](pilot-linux131072/REPORT.md) completes18/18 short case
 with exact original counts, maintenance and source/artifact guards. VoteBoat
 completes115487 writes/s at1/batch1 and731407/s at4096/batch4; untouched upstream
 completes22818/s and3170394/s respectively. These short medians establish the
-high-concurrency gap, not a minimum-floor pass. Mac pilot timing is pending.
+high-concurrency gap, not a minimum-floor pass. The
+[Mac primary pilot](pilot-mac131072/REPORT.md) also passes18/18 cases and guards:
+VoteBoat61951/1227169 writes/s versus untouched upstream10791/2176842 in the
+same cells. Default maintenance remains active, without snapshot installations.
 
 This does not qualify full20-million-operation cells, sustained memory/debt,
 all fault cases, generic application histories or performance victory. Historical

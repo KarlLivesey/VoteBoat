@@ -31,6 +31,7 @@ are byte-identical to the original compiled 230e037 source export. Immutable
 source hashes and original compiler paths remain recorded; future baseline
 guards must use that preserved source rather than the changing working tree.
 
-The Linux short primary pilot is archived separately in
-`validation/pilot-linux131072`. Mac timing and the full comparison curve are
-pending coordination.
+The Linux and Mac short primary pilots are archived separately in
+`validation/pilot-linux131072` and `validation/pilot-mac131072`. Both passed all
+18 exact cases and source/artifact guards. The full comparison curve and
+sustained-capacity qualification remain pending.
