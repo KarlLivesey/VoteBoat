@@ -2,7 +2,10 @@
 // Copyright (c) 2026 Karl Livesey
 //! Private admitted overlays. Their metadata is never durable voter evidence.
 use super::*;
-use crate::log::transition::{CompactDelta, LogMetadata, LogSummary, LogView, NextLog, PlainDelta};
+use crate::log::transition::{
+    CompactDelta, LogMetadata, LogSummary, LogView, NextLog, OwnedAppend, OwnedChange,
+    OwnedNextLog, PlainDelta,
+};
 
 #[derive(Default)]
 pub(super) struct Accepted {
@@ -26,7 +29,7 @@ struct Full {
 }
 pub(super) enum Plan {
     Create(Box<GroupLog>),
-    Update(Box<NextLog>),
+    Update(Box<OwnedNextLog>),
 }
 impl Plan {
     pub(super) fn metadata(&self) -> LogMetadata {
@@ -100,7 +103,7 @@ impl Accepted {
     pub(super) fn plan_batch(
         &self,
         durable: &BTreeMap<GroupIdentity, GroupLog>,
-        mutations: &[LogMutation],
+        mutations: Vec<LogMutation>,
         limits: LogLimits,
     ) -> Result<BTreeMap<GroupIdentity, Plan>, StorageError> {
         let limits = limits.validate()?;
@@ -109,7 +112,7 @@ impl Accepted {
         }
         let mut plans = BTreeMap::new();
         for mutation in mutations {
-            let group = mutation_group(mutation);
+            let group = mutation_group(&mutation);
             if plans.contains_key(&group) {
                 return Err(StorageError::Rejected(
                     "one atomic unit per group per batch",
@@ -117,11 +120,13 @@ impl Accepted {
             }
             let plan = match mutation {
                 LogMutation::Create(bootstrap) => {
-                    self.plan_create(durable, &plans, bootstrap, limits)?
+                    self.plan_create(durable, &plans, &bootstrap, limits)?
                 }
                 LogMutation::Update(update) => {
                     let (view, summary) = self.view(durable, group)?;
-                    Plan::Update(Box::new(NextLog::plan(view, &summary, update, limits)?))
+                    Plan::Update(Box::new(OwnedNextLog::plan_owned(
+                        view, &summary, update, limits,
+                    )?))
                 }
             };
             plans.insert(group, plan);
@@ -168,20 +173,60 @@ impl Accepted {
     pub(super) fn install(
         &mut self,
         durable: &BTreeMap<GroupIdentity, GroupLog>,
-        mut plans: BTreeMap<GroupIdentity, Plan>,
-        mutations: Vec<LogMutation>,
+        plans: BTreeMap<GroupIdentity, Plan>,
     ) -> Result<(), StorageError> {
-        for mutation in mutations {
-            let group = mutation_group(&mutation);
-            let plan = plans
-                .remove(&group)
-                .ok_or(StorageError::Rejected("missing accepted plan"))?;
-            match (plan, mutation) {
-                (Plan::Create(state), LogMutation::Create(_)) => self.put_full(group, *state),
-                (Plan::Update(next), LogMutation::Update(update)) => {
-                    self.install_update(durable, group, *next, update)?
+        for (group, plan) in plans {
+            match plan {
+                Plan::Create(state) => self.put_full(group, *state),
+                Plan::Update(next) => {
+                    let current = self.view(durable, group)?.0.metadata();
+                    match next.into_change() {
+                        OwnedChange::Append(append) => {
+                            append.check_install(current)?;
+                            self.install_owned_append(group, append)?;
+                        }
+                        OwnedChange::Other { next, update } => {
+                            self.install_update(durable, group, next, update)?
+                        }
+                    }
                 }
-                _ => return Err(StorageError::Rejected("accepted plan kind mismatch")),
+            }
+        }
+        Ok(())
+    }
+    fn install_owned_append(
+        &mut self,
+        group: GroupIdentity,
+        append: OwnedAppend,
+    ) -> Result<(), StorageError> {
+        let metadata = append.metadata();
+        let summary = append.summary();
+        let base = append.predecessor();
+        match self.overlays.get_mut(&group) {
+            Some(Overlay::Full(full)) => {
+                append.check_install(LogMetadata::from_log(&full.state))?;
+                full.summary = append.install(&mut full.state);
+            }
+            Some(Overlay::Plain(plain)) => {
+                if let Some(suffix) = append.into_suffix() {
+                    plain.tail.extend(suffix.entries);
+                }
+                plain.metadata = metadata;
+                plain.summary = summary;
+            }
+            None => {
+                self.overlays.insert(
+                    group,
+                    Overlay::Plain(Box::new(Plain {
+                        base,
+                        metadata,
+                        summary,
+                        tail: append
+                            .into_suffix()
+                            .map_or_else(Vec::new, |suffix| suffix.entries),
+                        removed: 0,
+                    })),
+                );
             }
         }
         Ok(())

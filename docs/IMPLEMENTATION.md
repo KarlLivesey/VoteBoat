@@ -2,6 +2,16 @@
 
 ## Active P9 plan — 13 October 2026
 
+419 removes the ordinary append plan's duplicate incoming suffix. Core retains
+one normalized sealed Pending copy and emits the original raw provider effect;
+owned/native storage validates first, then moves normalized incoming allocations
+into accepted/canonical state. Full external content correlation, input capacity
+behavior, codec/error order, atomic batches and snapshot/fencing contracts remain.
+Parent affected integrations416/core277 and real TCP/QUIC recovery/maintenance8
+pass; formatter/four strict root configurations and standalone checks are zero.
+[Exact419 ownership and validation](../validation/performance/slice419/README.md).
+Current-source Mac and performance qualification remain open.
+
 418 implements plain matching-prefix compaction without copying surviving command
 payloads, with exact original field correlation, accounting and configured
 fallback. Native accepted trimming remains deferred until publication. Full
@@ -9,8 +19,15 @@ snapshot pin/load/state equality/application restore proofs remain. Parent affec
 all-feature/core integrations pass 416/277, real TCP/QUIC recovery and maintenance
 8, and the full formatter/four strict profiles/standalone hook passes with zero
 diagnostics. [418 schema, crash controls and actual validation](../validation/performance/slice418/README.md).
-Current-source Mac qualification and paired throughput/attribution are next;
-functional controls establish no throughput gain or margin pass.
+The nine-case Linux paired diagnostic is terminal with exact originals/frontiers
+and immutable source/executable guards: off medians improve 885,239→937,467
+originals/s (5.90%; within-trial median ratio1.0433), p99 21.893→21.025 ms.
+All slower baseline/candidate-on trials remain recorded. This short volatile
+comparison establishes no sustained margin. [Exact diagnostic](../validation/performance/slice418/linux-diagnostic/README.md).
+Current-source Mac qualification is terminal with exact1384 source/compiler/artifact
+guards, approved scoped state/crash tests, real services8 and zero formatter/four
+strict/standalone diagnostics. [Mac418 scope](../validation/performance/mac418/README.md).
+Mac paired throughput and both-host sustained acceptance remain open.
 
 The terminal 417 Linux diagnostic verifies nine rotating 1,048,576-original cases
 and all three applied frontiers, with immutable source/artifact guards. Baseline,

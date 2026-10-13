@@ -1,0 +1,13 @@
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/src/native/log_store/accepted/tests.rs:2:
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+ mod compact;
+-mod incoming;
+-mod incoming_codec;
+ mod configured;
+ mod fixture;
++mod incoming;
++mod incoming_codec;
+ use fixture::*;
+ 
+ fn payload_pointer(entry: &LogEntry) -> *const u8 {

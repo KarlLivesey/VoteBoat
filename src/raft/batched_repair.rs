@@ -244,9 +244,7 @@ impl Raft {
         };
         if let Some(pending) = &mut self.pending {
             if let Some(reply) = &mut pending.reply {
-                convert(reply, &|index| {
-                    pending.next.term_at(&self.durable, &pending.update, index)
-                });
+                convert(reply, &|index| pending.next.term_at(&self.durable, index));
             }
         }
         for effect in &mut effects {

@@ -290,9 +290,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                 "codec encoded length outside budget",
             ));
         }
-        let next = self
-            .accepted
-            .plan_batch(&self.durable, &mutations, self.limits)?;
+        let groups: Vec<_> = mutations.iter().map(accepted::mutation_group).collect();
         let control = mutations.iter().all(|m| match m {
             LogMutation::Create(_) => true,
             LogMutation::Update(u) => u.suffix.as_ref().is_none_or(|s| {
@@ -301,6 +299,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                     .all(|e| matches!(e.payload, EntryPayload::Noop))
             }),
         });
+        let next = self
+            .accepted
+            .plan_batch(&self.durable, mutations, self.limits)?;
         let ceiling = if control {
             self.limits.max_wal_bytes
         } else {
@@ -309,13 +310,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         if bytes.len() > ceiling.saturating_sub(self.length) {
             return Err(StorageError::Rejected("WAL capacity/control reserve"));
         }
-        let tickets: Vec<_> = mutations
+        let tickets: Vec<_> = groups
             .iter()
-            .map(|m| {
-                let g = match m {
-                    LogMutation::Create(b) => b.group,
-                    LogMutation::Update(u) => u.group,
-                };
+            .map(|&g| {
                 let state = next[&g].metadata();
                 LogTicket {
                     binding: self.binding,
@@ -336,7 +333,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             next.get(&t.group)
                 .is_none_or(|plan| plan.metadata().generation == t.generation)
         });
-        if let Err(error) = self.accepted.install(&self.durable, next, mutations) {
+        if let Err(error) = self.accepted.install(&self.durable, next) {
             self.fenced = true;
             return Err(StorageError::Uncertain(format!(
                 "accepted install invariant: {error:?}"

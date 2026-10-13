@@ -108,19 +108,19 @@ impl Raft {
             || !self.local_voter()
             || self.transfer.is_some()
             || !self.log_summary.is_plain()
-            || !matches!(pending.next, NextLog::Delta(_))
+            || !pending.next.is_append()
             || pending.membership.is_some()
             || !matches!(pending.after, After::LeaderAppend)
             || self.durable.last_index() != self.durable.commit_index
             || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
-            || pending.update.hard_state != self.durable.hard_state
+            || pending.next.update().hard_state != self.durable.hard_state
             || next.ballot_origin != self.durable.ballot_origin
             || next.generation != self.durable.generation
-            || pending.update.commit_index != self.durable.commit_index
+            || pending.next.update().commit_index != self.durable.commit_index
         {
             return None;
         }
-        let suffix = pending.update.suffix.as_ref()?;
+        let suffix = pending.next.update().suffix.as_ref()?;
         if self.durable.last_index().checked_add(1) != Some(suffix.from)
             || suffix.entries.is_empty()
             || suffix.entries.len() > self.batch_limits.max_replication_entries
@@ -195,13 +195,7 @@ impl Raft {
         {
             return None;
         }
-        let NextLog::Delta(delta) = &pending.next else {
-            return None;
-        };
-        let suffix = delta.append.as_ref()?;
-        suffix
-            .entries
-            .get(usize::try_from(index.checked_sub(suffix.from)?).ok()?)
+        pending.next.entry_at(index)
     }
     pub(super) fn is_empty_alias(&self, message: &Message) -> bool {
         self.empty_append_aliases

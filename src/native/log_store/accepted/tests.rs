@@ -4,6 +4,8 @@ use super::*;
 mod compact;
 mod configured;
 mod fixture;
+mod incoming;
+mod incoming_codec;
 use fixture::*;
 
 fn payload_pointer(entry: &LogEntry) -> *const u8 {

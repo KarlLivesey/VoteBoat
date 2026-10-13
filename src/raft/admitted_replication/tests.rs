@@ -238,9 +238,19 @@ fn bulk_snapshot_unknown_peer_and_changed_ballot_keep_original_serialized_path()
             core.progress.insert(node(2), 0);
             core.progress.insert(node(3), 0);
         }
-        let ticket = prepare(&mut core);
+        let mut ticket = prepare(&mut core);
         if reason == 3 {
-            core.pending.as_mut().unwrap().update.hard_state.term += 1;
+            let mut update = core.pending.as_ref().unwrap().next.update().clone();
+            update.hard_state.term += 1;
+            let replacement = OwnedNextLog::plan_copy(
+                LogView::new(core.state()),
+                &core.log_summary,
+                &update,
+                core.limits,
+            )
+            .unwrap();
+            ticket.term = replacement.metadata().hard_state.term;
+            core.pending.as_mut().unwrap().next = replacement;
         }
         assert!(core.admitted_replication_reservation().is_none());
         assert!(core.replicate_admitted(ticket).unwrap().is_empty());

@@ -1,7 +1,10 @@
 # Slice 419 proposal: one owned incoming update per internal transition
 
-Status: schema and read-only implementation map only. Slice 418 production stays
-frozen. Implementation requires the parent task's explicit source release.
+Status: implementation released after slice 418 publication at `32217ae`. The
+reviewed ownership path is implemented and locally checked; actual scope and
+preserved initial failures are in README.md. Parent full qualification/publication
+is still separate from this local evidence. The original implementation map
+records the pre-edit review and remains useful alongside the actual source.
 
 Purpose: remove redundant incoming suffix clones on the ordinary command path,
 while keeping original effects, exact provider behavior and all maintenance. No Arc,
@@ -43,8 +46,11 @@ cannot be substituted by an unchecked caller-provided metadata descriptor.
 
 Exact update correlation remains full field/content equality, not a digest or just
 header equality. Exhaustive LogUpdate destructuring prevents future fields escaping
-checks. Pure append metadata checks must still include full suffix content; sealing
-binds the admitted plan to the owned original input. Full fallback retains the old
+checks. External correlation still includes full suffix content; private immutable
+construction binds admission to the exact owned input. Core does not compare a
+fresh clone against its own source again: clone plus sealing already establishes
+that relationship. Full/exhaustive provider-boundary checks remain in
+validate_persist_effect, admit_effect and persist_effect. Full fallback retains the old
 validator and error order; retained-history/configuration/snapshot materialization
 on that rare path is outside the ordinary-append gain claimed here. Compact retains
 slice 418 eligibility, capacity flag, deferred trim and exact SnapshotRef checking.

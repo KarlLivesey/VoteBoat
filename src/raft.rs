@@ -15,7 +15,7 @@
 //! Deterministic static-configuration Raft. Host drives elections and delivery.
 //! Every persistence-dependent send/application notification waits for its exact
 //! store/group/revision/generation ticket. No transport or clock is constructed.
-use crate::log::transition::{LogSummary, LogView, NextLog};
+use crate::log::transition::{LogSummary, LogView, OwnedNextLog};
 use crate::{
     contracts::{HardState, StorageError},
     identity::*,
@@ -294,8 +294,7 @@ enum After {
     SnapshotInstall(SnapshotRef),
 }
 struct Pending {
-    update: LogUpdate,
-    next: NextLog,
+    next: OwnedNextLog,
     membership: Option<Membership>,
     ticket: Option<LogTicket>,
     after: After,
@@ -1054,14 +1053,18 @@ impl Raft {
         if self
             .pending
             .as_ref()
-            .is_none_or(|p| &p.update != update || p.ticket.is_some())
+            .is_none_or(|p| !p.next.matches_update(update) || p.ticket.is_some())
         {
             return Err(RaftError::WrongCompletion);
         }
         Ok(())
     }
     pub fn admit_effect(&mut self, update: &LogUpdate, ticket: LogTicket) -> Result<(), RaftError> {
-        if self.pending.as_ref().is_none_or(|p| &p.update != update) {
+        if self
+            .pending
+            .as_ref()
+            .is_none_or(|p| !p.next.matches_update(update))
+        {
             return Err(RaftError::WrongCompletion);
         }
         self.admitted(ticket)
@@ -1102,7 +1105,7 @@ impl Raft {
             .membership
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
-        self.log_summary = match p.next.install(&mut self.durable, p.update) {
+        self.log_summary = match p.next.install(&mut self.durable) {
             Ok(summary) => summary,
             Err(error) => {
                 self.storage_failed();
@@ -1253,7 +1256,7 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
-        let next = NextLog::plan(
+        let next = OwnedNextLog::plan_copy(
             LogView::new(&self.durable),
             &self.log_summary,
             &update,
@@ -1285,7 +1288,6 @@ impl Raft {
             self.clear_reads();
         }
         self.pending = Some(Pending {
-            update: update.clone(),
             next,
             membership,
             ticket: None,
@@ -1859,7 +1861,11 @@ pub fn persist_effect<S: LogStore>(
         if store.binding() != raft.binding {
             return Err(RaftError::WrongIdentity);
         }
-        if raft.pending.as_ref().is_none_or(|p| p.update != update) {
+        if raft
+            .pending
+            .as_ref()
+            .is_none_or(|p| !p.next.matches_update(&update))
+        {
             return Err(RaftError::WrongCompletion);
         }
         let tickets = store.append_batch(vec![LogMutation::Update(update)])?;

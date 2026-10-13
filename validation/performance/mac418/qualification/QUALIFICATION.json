@@ -1,0 +1,144 @@
+{
+  "commit": "32217aebe6d425f8658fbe8b0a111bfaf4aaca09",
+  "source_inputs": 1384,
+  "source_unchanged": true,
+  "clippy_config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521",
+  "scope": "Focused frozen32217ae Mac417/418 compact/log/native/snapshot/Core qualification; no unrelated full Mac suite or timings",
+  "test_counts": {
+    "lib_log_all": [
+      22
+    ],
+    "lib_accepted_all": [
+      11
+    ],
+    "lib_raft_all": [
+      110
+    ],
+    "integration_all": [
+      15,
+      79,
+      25
+    ],
+    "lib_log_core": [
+      22
+    ],
+    "lib_raft_core": [
+      91
+    ],
+    "integration_core": [
+      0,
+      29,
+      10
+    ],
+    "native_original_recovery": [
+      2
+    ],
+    "native_maintenance": [
+      6
+    ],
+    "matched_tests": [
+      11
+    ]
+  },
+  "cli_original_controls": [
+    {
+      "engine": "voteboat",
+      "profile": "upstream-default",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        4096,
+        4096,
+        1024
+      ]
+    },
+    {
+      "engine": "openraft",
+      "profile": "upstream-default",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        4096,
+        4096,
+        1024
+      ]
+    },
+    {
+      "engine": "voteboat",
+      "profile": "common64",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        64,
+        64,
+        64
+      ]
+    },
+    {
+      "engine": "openraft",
+      "profile": "common64",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        64,
+        64,
+        64
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "matched",
+      "target": "voteboat",
+      "original": "/tmp/voteboat-mac418-32217ae/target-matched-release/release/deps/libvoteboat-fea54269ae814a39.rlib",
+      "copy": "/tmp/voteboat-mac418-32217ae/artifacts/matched/libvoteboat-fea54269ae814a39.rlib",
+      "sha256": "6278a4a2802db21c76c7424aba1e6db90fd41983e165fec3cc0ce6d85214819e"
+    },
+    {
+      "kind": "matched",
+      "target": "voteboat-matched-framework",
+      "original": "/tmp/voteboat-mac418-32217ae/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/tmp/voteboat-mac418-32217ae/artifacts/matched/voteboat-matched-framework",
+      "sha256": "15e1c8fc48f991e3534e9836788ac2e0ca1034d63bbd5320b4a6e1b32ec449bc"
+    },
+    {
+      "kind": "native",
+      "target": "voteboat",
+      "original": "/tmp/voteboat-mac418-32217ae/target-native-release/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+      "copy": "/tmp/voteboat-mac418-32217ae/artifacts/native/libvoteboat-ca76d170795d1aa6.rlib",
+      "sha256": "2df751f6bae2c8af3aac89ca0cde11d4af4a07d7f32352a0a9d728a70442f045"
+    },
+    {
+      "kind": "native",
+      "target": "native_benchmark",
+      "original": "/tmp/voteboat-mac418-32217ae/target-native-release/release/examples/native_benchmark",
+      "copy": "/tmp/voteboat-mac418-32217ae/artifacts/native/native_benchmark",
+      "sha256": "6365206c642c7c524400d9dc56d48930ad559710939cd4b892d077c3a720b63a"
+    }
+  ],
+  "profiles": {
+    "matched": "opt3/assertions/overflow/thinLTO/codegen1",
+    "native": "opt3/assertions/overflow/defaultLTO/defaultCodegen"
+  },
+  "fresh_root_library_and_executable_each": true
+}

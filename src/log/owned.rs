@@ -15,7 +15,7 @@
 //! Consensus log transitions and the host-replaceable storage contract.
 //! Opaque exclusive ownership for reusable atomic log validation.
 use super::{
-    transition::{LogSummary, LogView, NextLog, PreparedLog},
+    transition::{LogSummary, LogView, OwnedNextLog, PreparedOwnedLog},
     *,
 };
 
@@ -28,7 +28,7 @@ struct Group {
 }
 enum Plan {
     Create(Group),
-    Update(PreparedLog),
+    Update(PreparedOwnedLog),
 }
 
 /// Bounded transactional log state for host-supplied storage implementations.
@@ -75,7 +75,7 @@ impl OwnedLogState {
     /// the whole batch, then install under this exclusive owner without callbacks.
     /// Exact error conditions and full-fallback rules follow [`apply_batch`].
     pub fn apply_batch(&mut self, mutations: Vec<LogMutation>) -> Result<(), StorageError> {
-        let plans = self.plan(&mutations)?;
+        let plans = self.plan(mutations)?;
         // Preflight includes every fallible validation/correlation. Unique group
         // units cannot change another unit's predecessor during this commit.
         for (id, plan) in plans {
@@ -93,7 +93,7 @@ impl OwnedLogState {
     }
     fn plan(
         &self,
-        mutations: &[LogMutation],
+        mutations: Vec<LogMutation>,
     ) -> Result<BTreeMap<GroupIdentity, Plan>, StorageError> {
         if mutations.is_empty() || mutations.len() > self.limits.max_batch_units {
             return Err(StorageError::Rejected("batch unit limit"));
@@ -101,7 +101,7 @@ impl OwnedLogState {
         let mut plans = BTreeMap::new();
         let mut created = 0;
         for mutation in mutations {
-            let id = match mutation {
+            let id = match &mutation {
                 LogMutation::Create(bootstrap) => bootstrap.group,
                 LogMutation::Update(update) => update.group,
             };
@@ -123,7 +123,7 @@ impl OwnedLogState {
                             "existing group identity or group limit",
                         ));
                     }
-                    let state = stage_create(bootstrap)?;
+                    let state = stage_create(&bootstrap)?;
                     created += 1;
                     let summary = LogSummary::from_validated(&state);
                     Plan::Create(Group { state, summary })
@@ -133,13 +133,13 @@ impl OwnedLogState {
                         .groups
                         .get(&id)
                         .ok_or(StorageError::Rejected("group not bootstrapped"))?;
-                    let next = NextLog::plan(
+                    let next = OwnedNextLog::plan_owned(
                         LogView::new(&group.state),
                         &group.summary,
                         update,
                         self.limits,
                     )?;
-                    Plan::Update(next.prepare_install(&group.state, update)?)
+                    Plan::Update(next.prepare_install(&group.state)?)
                 }
             };
             plans.insert(id, plan);

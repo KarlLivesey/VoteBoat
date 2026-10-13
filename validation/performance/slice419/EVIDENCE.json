@@ -1,0 +1,32 @@
+{
+  "scope": "419 ownership/state/crash/capacity/error/correlation/finalformatter/fourstrict; no throughput claim",
+  "sha256": {
+    "IMPLEMENTATION_MAP.md": "20da65231424eac1b1aa37e3af993367129d213c8c0a46a408ef089a503c080b",
+    "README.md": "b5b3fe8c80c10bc36648cec6f798e5dd910ff4f1385d02dd5cd5da314ba7f6a2",
+    "SCHEMA.md": "b223547844bc06a36ef77cd38305afe2208ec2b06c27932f055d01710aa60d8a",
+    "SOURCE.sha256": "d8dd64ad5579547325a428fce94e9e508935f27af8cb78b137bea05aa1a282be",
+    "logs/all-lib-final.log": "96a87ab72fb422d9c75c06ac970cbb507f7e433ad91d7d32309fdc3a1c68acf1",
+    "logs/changed-ballot-initial.log": "fcf18b530311317638b6e1a08ae8e71d2876de284d3b0ac8988f1f8422bfe979",
+    "logs/core-incoming-reviewed.log": "00a643e2e5177d4094212de3125b1d3f8fc864a639dfbc7abd46bfa9697d055f",
+    "logs/core-lib.log": "32b7d17728f50da089d66c0ec691b40de92b2e701d1d56da33cd8900fc0dff7a",
+    "logs/fmt-final.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/fmt-initial.log": "a8464596018acd1709caf6c2257a617266fbc9e1af275ad637203e29a879f7b6",
+    "logs/fmt-reviewed.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "logs/incoming-first.log": "4f52ff8ebc14085d17613fa7f8546bdb199325745862b6d141a1e4ac8c4d941a",
+    "logs/incoming-reviewed.log": "d414d61ca03169ebeaca76e791c68288019fbd8257731b444bfe3d459ea417c4",
+    "logs/storage-qualified.log": "6b30afd1b2f1763f7852fa11a4c3b6d3b0634c2370b2d89d6a0c9bde9ff1499f",
+    "logs/strict-all-test-targets-reviewed.log": "85bd6d53cffc5796a47e7ba72948444b3292778465a1b0f4280f737621b8b184",
+    "logs/strict-all-test-targets.log": "2a64188eb03f5e3b0880c64f9bd4ab1abd873c56475ab39a153973df04a8371e",
+    "logs/strict-core-test-targets-reviewed.log": "d089510f320a12a6c6d0267a7cab52ae4f6f42f3b6823395fdaeaf786dd29e3b",
+    "logs/strict-core-test-targets.log": "c2ac5f6b681ed2ddcc8a2a630d511ff9ce939eb60a018a7583f9a08b501a603a",
+    "logs/strict-initial.log": "42df8a7541b7a95162dab818efddd16afdbb0656957dabfa3d9578e0ac3af89b",
+    "root/COMMANDS.md": "d9e82fbf4fcbf753918f53d6923f8b965e34e2f12333208b33e30f6c437eba7e",
+    "root/all-integrations.log": "eca04024461d3777e7d701856114c22bca817488af65888835af881bdb5174db",
+    "root/core-integrations.log": "7a00901b0290b90623208e547a811d98fc6bc719c6d9a508ecf526706d51a05b",
+    "root/pre-push.log": "a23b298ed7630f415ee8ea8880679511c4c2b4a25a120e75dee5120679f440a0",
+    "root/service-maintenance.log": "0111cbdf7f900b709fc7abe997fc4cf6826f58c06cd806df1f66cb5b88826692",
+    "root/service-original-recovery.log": "72e6322b61a04a8ad0eb89793911d476169a266eeca56acb11698866dad894bc",
+    "root/source-after.log": "70ede25afbdfb2843e294113c5fd32bdba5802b8ad8384c9ba7883ca2f0c1210",
+    "root/source-before.log": "70ede25afbdfb2843e294113c5fd32bdba5802b8ad8384c9ba7883ca2f0c1210"
+  }
+}

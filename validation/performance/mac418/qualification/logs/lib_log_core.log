@@ -1,0 +1,65 @@
+   Compiling memchr v2.8.3
+   Compiling libc v0.2.190
+   Compiling bytes v1.12.1
+   Compiling protobuf v2.28.0
+   Compiling proc-macro2 v1.0.107
+   Compiling aho-corasick v1.1.5
+   Compiling unicode-ident v1.0.26
+   Compiling regex-syntax v0.8.11
+   Compiling quote v1.0.47
+   Compiling regex-automata v0.4.18
+   Compiling zerocopy v0.8.62
+   Compiling cfg-if v1.0.5
+   Compiling getrandom v0.2.17
+   Compiling protobuf-codegen v2.28.0
+   Compiling regex v1.13.1
+   Compiling bitflags v1.3.2
+   Compiling protobuf-build v0.14.1
+   Compiling syn v2.0.119
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling cc v1.6.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling raft-proto v0.7.0
+   Compiling rand_core v0.6.4
+   Compiling slog v2.7.0
+   Compiling thiserror v1.0.69
+   Compiling ring v0.17.14
+   Compiling rand_chacha v0.3.1
+   Compiling thiserror-impl v1.0.69
+   Compiling byteorder v1.5.0
+   Compiling fxhash v0.2.1
+   Compiling rand v0.8.8
+   Compiling getset v0.1.7
+   Compiling untrusted v0.9.0
+   Compiling raft v0.7.0
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac418-32217ae/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 23.38s
+     Running unittests src/lib.rs (/tmp/voteboat-mac418-32217ae/target-core-checks/debug/deps/voteboat-b4df062d1c8e545b)
+
+running 22 tests
+test log::owned::tests::compact::compaction_batch_is_atomic_and_retains_surviving_payload_allocation ... ok
+test log::owned::tests::revision_exhaustion_after_an_earlier_valid_unit_has_no_partial_progress ... ok
+test log::owned::tests::stale_later_private_summary_is_refused_before_any_canonical_install ... ok
+test log::transition::tests::compact::compact_plan_rejects_stale_summary_predecessor_and_altered_reference ... ok
+test log::transition::tests::compact::compaction_preserves_surviving_payloads_origin_and_exact_charge ... ok
+test log::transition::tests::compact::slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice ... ok
+test log::transition::tests::compact::snapshot_boundary_ballot_commit_and_overflow_errors_match_full_oracle ... ok
+test log::transition::tests::compact::trimmed_overlay_terms_materialization_and_configured_fallback_are_exact ... ok
+test log::transition::tests::configured::changed_ballots_use_accepted_electorate_and_full_fallback ... ok
+test log::transition::tests::configured::configured_delta_preserves_old_payload_and_checkpoint_allocations ... ok
+test log::transition::tests::configured::configured_limits_stale_versions_and_exhaustion_keep_original_refusals ... ok
+test log::transition::tests::configured::configured_matching_checkpoint_retains_full_membership_validator ... ok
+test log::transition::tests::configured::configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback ... ok
+test log::transition::tests::configured::configured_replacement_configuration_and_snapshot_keep_full_fallback ... ok
+test log::transition::tests::configured::stable_joint_final_and_compacted_histories_match_original_validator ... ok
+test log::transition::tests::oracle::checked_index_and_revision_exhaustion_matches_fallback_without_arithmetic_panic ... ok
+test log::transition::tests::oracle::configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact ... ok
+test log::transition::tests::oracle::finite_plain_ballot_commit_suffix_and_budget_cases_match_original_validator ... ok
+test log::transition::tests::oracle::retained_historical_ballot_origin_and_new_votes_match_original_validator ... ok
+test log::transition::tests::overlay::virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates ... ok
+test log::transition::tests::plain_install_keeps_old_payloads_and_normalizes_only_new_allocations ... ok
+test log::transition::tests::stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 262 filtered out; finished in 0.03s
+

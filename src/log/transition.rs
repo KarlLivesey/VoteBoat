@@ -18,8 +18,12 @@ use super::*;
 use std::mem::size_of;
 
 mod compact;
+mod incoming;
 mod view;
 pub(crate) use compact::CompactDelta;
+#[cfg(feature = "native")]
+pub(crate) use incoming::{OwnedAppend, OwnedChange};
+pub(crate) use incoming::{OwnedNextLog, PreparedOwnedLog};
 pub(crate) use view::{LogMetadata, LogView};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -115,17 +119,7 @@ impl NextLog {
         // Validated configured histories keep their accepted membership when
         // only commands/commit metadata change. A new ballot still needs the
         // full electorate validator; identical promises retain their origin.
-        let delta = (summary.is_plain() || update.hard_state == view.metadata().hard_state)
-            && update.snapshot.is_none()
-            && update.snapshot_membership.is_none()
-            && update.suffix.as_ref().is_none_or(|suffix| {
-                view.metadata().last_index.checked_add(1) == Some(suffix.from)
-                    && !suffix
-                        .entries
-                        .iter()
-                        .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
-            });
-        if delta {
+        if append_eligible(view, summary, update) {
             return plan_append_metadata(view, summary, update, limits).map(Self::Delta);
         }
         let mut next = view.materialize();
@@ -180,6 +174,7 @@ impl NextLog {
             }
         }
     }
+    #[cfg(any(feature = "native", test))]
     pub(crate) fn install(
         self,
         current: &mut GroupLog,
@@ -265,6 +260,31 @@ fn plan_append_metadata(
     update: &LogUpdate,
     limits: LogLimits,
 ) -> Result<PlainDelta, StorageError> {
+    let next = validate_append_metadata(view, update, limits)?;
+    let append = update.suffix.clone();
+    Ok(PlainDelta {
+        predecessor: view.metadata(),
+        summary: append_summary(summary, next, append.as_ref()),
+        append,
+    })
+}
+fn append_eligible(view: LogView<'_>, summary: &LogSummary, update: &LogUpdate) -> bool {
+    (summary.is_plain() || update.hard_state == view.metadata().hard_state)
+        && update.snapshot.is_none()
+        && update.snapshot_membership.is_none()
+        && update.suffix.as_ref().is_none_or(|suffix| {
+            view.metadata().last_index.checked_add(1) == Some(suffix.from)
+                && !suffix
+                    .entries
+                    .iter()
+                    .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_)))
+        })
+}
+fn validate_append_metadata(
+    view: LogView<'_>,
+    update: &LogUpdate,
+    limits: LogLimits,
+) -> Result<LogMetadata, StorageError> {
     let current = view.metadata();
     if update.expected_revision != current.revision
         || !update.hard_state.follows(current.hard_state)
@@ -326,10 +346,10 @@ fn plan_append_metadata(
     next.hard_state = update.hard_state;
     next.ballot_origin = ballot_origin;
     next.commit_index = update.commit_index;
-    // Clone only incoming entries: preserve the old validator's payload capacity
-    // normalization without copying any retained prefix.
-    let append = update.suffix.clone();
-    let extra = append.as_ref().map_or(Some(0), |suffix| {
+    Ok(next)
+}
+fn append_summary(summary: &LogSummary, next: LogMetadata, append: Option<&Suffix>) -> LogSummary {
+    let extra = append.map_or(Some(0), |suffix| {
         suffix
             .entries
             .len()
@@ -341,16 +361,12 @@ fn plan_append_metadata(
             })
     });
     let retained = summary.retained.and_then(|bytes| bytes.checked_add(extra?));
-    Ok(PlainDelta {
-        predecessor: current,
-        append,
-        summary: LogSummary {
-            metadata: next,
-            plain: summary.plain,
-            retained,
-            clone_stable: summary.clone_stable,
-        },
-    })
+    LogSummary {
+        metadata: next,
+        plain: summary.plain,
+        retained,
+        clone_stable: summary.clone_stable,
+    }
 }
 
 #[cfg(test)]

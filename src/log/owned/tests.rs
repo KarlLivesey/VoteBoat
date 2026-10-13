@@ -15,6 +15,7 @@
 //! Consensus log transitions and the host-replaceable storage contract.
 use super::*;
 mod compact;
+mod incoming;
 use crate::{
     contracts::HardState,
     quorum::{Limits, Tree},

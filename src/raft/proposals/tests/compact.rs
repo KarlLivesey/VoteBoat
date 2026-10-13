@@ -26,22 +26,14 @@ fn compact_pending_and_durable_keep_exact_terms_pointers_membership_and_charge()
     };
     // This internal fixture supplies the host's already verified/pinned reference.
     core.begin_compact(reference).unwrap();
-    assert!(matches!(
-        core.pending.as_ref().unwrap().next,
-        NextLog::Compact(_)
-    ));
+    assert!(!core.pending.as_ref().unwrap().next.is_append());
+    assert!(core.pending.as_ref().unwrap().next.full().is_none());
     assert_eq!(core.state(), &before);
     assert_eq!(core.connection_replicas(3).unwrap(), peers);
     let pending = core.pending.as_ref().unwrap();
-    assert_eq!(pending.next.term_at(core.state(), &pending.update, 2), None);
-    assert_eq!(
-        pending.next.term_at(core.state(), &pending.update, 3),
-        Some(1)
-    );
-    assert_eq!(
-        pending.next.term_at(core.state(), &pending.update, 4),
-        Some(1)
-    );
+    assert_eq!(pending.next.term_at(core.state(), 2), None);
+    assert_eq!(pending.next.term_at(core.state(), 3), Some(1));
+    assert_eq!(pending.next.term_at(core.state(), 4), Some(1));
     complete_exact(&mut core);
     assert_eq!(payload_pointers(&core), pointers[2..]);
     assert_eq!(core.membership() as *const Membership, membership);

@@ -1,0 +1,17 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.54s
+     Running unittests src/lib.rs (target/p9/slice419-checks/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 9 tests
+test log::transition::tests::incoming::owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_payload_changes ... ok
+test log::transition::tests::incoming::copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation ... ok
+test log::owned::tests::incoming::owned_input_moves_new_payload_after_whole_batch_admission ... ok
+test log::owned::tests::incoming::invalid_later_owned_unit_never_installs_an_earlier_moved_append ... ok
+test log::transition::tests::incoming::owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge ... ok
+test log::transition::tests::incoming::owned_preparation_rejects_stale_predecessor_without_installation ... ok
+test raft::proposals::tests::incoming::persist_effect_preserves_original_capacity_and_pending_has_one_exact_normalized_suffix ... ok
+test log::transition::tests::incoming::owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compact_updates ... ok
+test logical_voter::application::tests::snapshots::incoming_ahead_snapshot_must_be_pinned_before_install ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 283 filtered out; finished in 0.00s
+
