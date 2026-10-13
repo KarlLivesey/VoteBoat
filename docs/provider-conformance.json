@@ -2286,6 +2286,41 @@
         },
         {
           "names": [
+            "matches_state"
+          ],
+          "obligation": "Compare the full exact GroupLog against the same verified durable view as state(). Default providers retain state() gates and error precedence; missing/fenced/provider errors remain errors. Native borrowing must not expose accepted pending transitions or certify durability. Allocation capacity is not equality. Snapshot helpers preserve binding-first refusal before comparison or snapshot/application work.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/log_store/matches.rs",
+              "symbol": "exact"
+            },
+            {
+              "file": "tests/provider_conformance/log_store/matches.rs",
+              "symbol": "default_is_object_safe_and_preserves_complete_snapshot_and_configuration_equality"
+            },
+            {
+              "file": "tests/provider_conformance/log_store/default_errors.rs",
+              "symbol": "default_comparison_never_turns_provider_errors_into_a_mismatch"
+            },
+            {
+              "file": "tests/log_store/matches.rs",
+              "symbol": "borrowed_equality_reads_durable_not_pending_and_survives_subset_barrier_reopen"
+            },
+            {
+              "file": "tests/log_store/matches.rs",
+              "symbol": "equality_fencing_precedes_missing_and_recovery_retains_exact_crash_state"
+            },
+            {
+              "file": "tests/snapshot/log_match.rs",
+              "symbol": "binding_precedes_comparison_and_comparison_errors_precede_snapshot_work"
+            }
+          ],
+          "remaining": [
+            "Generated combinations and future backend overrides require their own exact comparison and durable-visibility conformance; selected tests do not certify arbitrary providers."
+          ]
+        },
+        {
+          "names": [
             "append_batch"
           ],
           "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait.",
@@ -4143,7 +4178,7 @@
             }
           ],
           "remaining": [
-            "Frozen C368 and C370 Linux TCP/QUIC qualify committed and uncommitted Unknown target-only same-store cold resolution, original whole recovery refusal against fresh owners, genuine new-election replication of the surviving WAL entry, and actual original provider closure. Inspection observes Applying→Resolving before recovery/resume, rather than exposing the private Unknown enum. The uncommitted fault keeps the original aborted domain and terminal network/worker observations owned until fresh correlated enrollment truth. Successful same-live-owner resume, arbitrary providers/failures, repeated replacement receipt closure and current Mac remain outside this bounded review. Metadata references are not execution certification."
+            "Frozen C368 and C370 Linux TCP/QUIC qualify committed and uncommitted Unknown target-only same-store cold resolution, original whole recovery refusal against fresh owners, genuine new-election replication of the surviving WAL entry, and actual original provider closure. Inspection observes Applying\u2192Resolving before recovery/resume, rather than exposing the private Unknown enum. The uncommitted fault keeps the original aborted domain and terminal network/worker observations owned until fresh correlated enrollment truth. Successful same-live-owner resume, arbitrary providers/failures, repeated replacement receipt closure and current Mac remain outside this bounded review. Metadata references are not execution certification."
           ]
         }
       ]

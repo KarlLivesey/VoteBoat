@@ -1,0 +1,22 @@
+{
+  "source_and_overlay_verified": {
+    "source.sha256": 1415,
+    "overlay.sha256": 21
+  },
+  "final_statuses": {
+    "affected-final-all.status": "0",
+    "affected-final-core.status": "0",
+    "clippy-final-all.status": "0",
+    "clippy-final-core.status": "0",
+    "clippy-final-default.status": "0",
+    "clippy-final-native.status": "0",
+    "fmt-final.status": "0",
+    "matched-final-clippy.status": "0",
+    "matched-final-fmt.status": "0",
+    "matched-final-tests.status": "0"
+  },
+  "original_final_handle": 36592,
+  "main_edits": false,
+  "remote_work": false,
+  "performance_runs": false
+}

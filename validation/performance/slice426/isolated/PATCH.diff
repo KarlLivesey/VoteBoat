@@ -1,0 +1,947 @@
+--- a/benchmarks/matched/README.md
++++ b/benchmarks/matched/README.md
+@@ -75,7 +75,10 @@
+ 
+ Checkpoint attribution also labels four inclusive actor boundaries (reservation,
+ publication, compaction and returned effects), plus the actual volatile log state
+-clone and snapshot provider calls. Fixed before/after provider counter snapshots
++clone, exact durable-state comparison and snapshot provider calls. The comparison
++uses full `GroupLog` equality without materializing a copy. Its item count is
++retained entries in successfully equal states; unequal/error calls count zero,
++not partial or physical traversal. The old clone phase remains separately named. Fixed before/after provider counter snapshots
+ report calls, failures, elapsed totals and item counts within each boundary.
+ Maxima remain whole provider lifetime; scoped maxima are deliberately absent.
+ Reconciliation includes its pinned-image load. Helper work outside these provider
+@@ -87,6 +90,9 @@
+ `pin_to_append` and `barrier_to_reconcile`. Existing provider clock observations
+ and exact method ordinals delimit each successful helper call. These inclusive
+ wall intervals include nested work; they do not isolate CPU or a single function.
++With the comparison seam, `state_to_pin` begins after exact comparison; it excludes
++the prior full Eq and must not be compared as the old clone-to-pin scope. Reports
++now contain 28 phases and 14 provider methods per checkpoint scope.
+ Failed helpers retain their original errors and certify no successful gaps.
+ [Schema and controls](validation/performance/slice425-gaps/SCHEMA.md).
+ 
+--- a/benchmarks/matched/SCHEMA.md
++++ b/benchmarks/matched/SCHEMA.md
+@@ -139,3 +139,12 @@
+ retain the campaign as the primary Error source. These are real bounded Tokio
+ deadlines, not a paused clock. Setup checks and untouched upstream remain unchanged;
+ external process teardown still needs a finite runner watchdog.
++
++Exact-state comparison: `LogStore::matches_state` uses full derived durable
++`GroupLog` equality. The memory provider first applies its completed-state gate;
++accepted pending transitions remain unavailable. Attribution keeps the original
++clone phase and adds `store_matches_state_exact_nested` (28 phases,14 provider
++methods). Equal calls count retained entries as logical units; false/error calls
++count zero, without claiming partial or physical traversal. Compact ordinals use
++the new method, so `state_to_pin` begins after comparison and excludes prior Eq.
++These changed observer scopes require fresh evidence, not renamed old timings.
+--- a/benchmarks/matched/src/attribution.rs
++++ b/benchmarks/matched/src/attribution.rs
+@@ -36,8 +36,9 @@
+     SnapshotPin,
+     SnapshotLoadPinned,
+     SnapshotReconcile,
+-}
+-const PHASES: usize = 27;
++    StoreMatchesState,
++}
++const PHASES: usize = 28;
+ const SCOPES: [Phase; 4] = [
+     Phase::CheckpointReserve,
+     Phase::CheckpointPublish,
+@@ -72,6 +73,7 @@
+     "snapshot_pin_for_log_nested",
+     "snapshot_load_pinned_nested",
+     "snapshot_reconcile_log_inclusive_nested",
++    "store_matches_state_exact_nested",
+ ];
+ fn provider_phase(index: usize) -> bool {
+     index == Phase::StoreAppend as usize
+@@ -211,6 +213,7 @@
+                 if i == Phase::StoreAppend as usize
+                     || i == Phase::StoreBarrier as usize
+                     || i == Phase::StoreState as usize
++                    || i == Phase::StoreMatchesState as usize
+                 {
+                     store.intervals[i].get()
+                 } else {
+@@ -272,11 +275,11 @@
+             clock: "monotonic_elapsed_wall_intervals_not_cpu_or_critical_path",
+             nesting: "checkpoint_intervals_nested_in_maintenance;provider_intervals_nested_in_helpers;reconcile_contains_load_pinned;effects_contain_persist_and_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
+             residual: "helper_elapsed_outside_known_provider_methods_and_reported_compact_gaps_remains_unattributed;gap_labels_are_inclusive_not_pure_Core_or_Eq;scoped_provider_sums_are_not_additive_when_nested",
+-            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;snapshot_write=attempted_application_bytes;other=zero",
++            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;store_matches_state=retained_entries_in_successfully_equal_state_false_or_error_zero_not_physical_traversal;snapshot_write=attempted_application_bytes;other=zero",
+             phases: NAMES.iter().enumerate().map(|(i, &phase)| PhaseReport {
+                 phase, interval: if provider_phase(i) { provider.0[i] } else { self.intervals[i].get() },
+             }).collect(),
+-            checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_includes_full_Eq_temporary_destruction_and_guards;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
++            checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_starts_after_exact_comparison_and_includes_guards_excludes_prior_Eq;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
+             checkpoint_compact_gaps: self.compact_gaps.report(),
+             checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
+                 let values = self.scopes[slot].get();
+--- a/benchmarks/matched/src/attribution/gaps.rs
++++ b/benchmarks/matched/src/attribution/gaps.rs
+@@ -5,7 +5,7 @@
+ 
+ const BOUNDARIES: usize = 6;
+ const METHODS: [Phase; BOUNDARIES] = [
+-    Phase::StoreState,
++    Phase::StoreMatchesState,
+     Phase::SnapshotPin,
+     Phase::SnapshotPin,
+     Phase::StoreAppend,
+@@ -23,7 +23,7 @@
+ impl Boundaries {
+     pub(super) fn record(&self, phase: Phase, call: u64, start: Instant, end: Instant) {
+         match phase {
+-            Phase::StoreState => self.0[0].set(Some(Stamp { call, at: end })),
++            Phase::StoreMatchesState => self.0[0].set(Some(Stamp { call, at: end })),
+             Phase::SnapshotPin => {
+                 self.0[1].set(Some(Stamp { call, at: start }));
+                 self.0[2].set(Some(Stamp { call, at: end }));
+@@ -95,7 +95,7 @@
+             }
+             let provider = if matches!(
+                 phase,
+-                Phase::StoreState | Phase::StoreAppend | Phase::StoreBarrier
++                Phase::StoreMatchesState | Phase::StoreAppend | Phase::StoreBarrier
+             ) {
+                 store
+             } else {
+--- a/benchmarks/matched/src/attribution/gaps/tests.rs
++++ b/benchmarks/matched/src/attribution/gaps/tests.rs
+@@ -24,7 +24,7 @@
+     fn methods(&self, offset: u64, state_to_pin: u64) {
+         let at = |n| self.base + Duration::from_nanos(offset + n);
+         self.store
+-            .observe(Phase::StoreState, at(0), at(1), false, 0);
++            .observe(Phase::StoreMatchesState, at(0), at(1), false, 0);
+         self.snapshots.observe(
+             Phase::SnapshotPin,
+             at(1 + state_to_pin),
+@@ -143,9 +143,9 @@
+         let before = fixture.before();
+         fixture.methods(0, 7);
+         if fault == 1 {
+-            let _ = fixture.store.record(Phase::StoreState, 1, false, 0);
++            let _ = fixture.store.record(Phase::StoreMatchesState, 1, false, 0);
+         } else if fault == 2 {
+-            let cell = &fixture.store.intervals[Phase::StoreState as usize];
++            let cell = &fixture.store.intervals[Phase::StoreMatchesState as usize];
+             cell.set(Interval {
+                 failures: 1,
+                 ..cell.get()
+@@ -201,12 +201,12 @@
+             ..Interval::default()
+         });
+     }
+-    store.intervals[Phase::StoreState as usize].set(Interval {
++    store.intervals[Phase::StoreMatchesState as usize].set(Interval {
+         calls: u64::MAX,
+         ..Interval::default()
+     });
+     actor.finish_compact_gaps(None, &store, &snapshots, false);
+-    store.finish(Phase::StoreState, None, true, usize::MAX);
++    store.finish(Phase::StoreMatchesState, None, true, usize::MAX);
+     assert!(Recorder::<false>::start().is_none());
+     assert!(actor.report(0, &store, &snapshots).unwrap().is_none());
+     assert!(actor
+--- a/benchmarks/matched/src/store.rs
++++ b/benchmarks/matched/src/store.rs
+@@ -107,6 +107,23 @@
+             .finish(Phase::StoreState, started, result.is_err(), items);
+         result
+     }
++    fn matches_state(
++        &self,
++        group: GroupIdentity,
++        expected: &GroupLog,
++    ) -> Result<bool, StorageError> {
++        let started = Recorder::<TRACE>::start();
++        let result = self.completed_state(group).map(|state| state == expected);
++        // Equal-state logical units, not partial/physical traversal counts.
++        let items = if TRACE && matches!(result, Ok(true)) {
++            expected.entries.len()
++        } else {
++            0
++        };
++        self.attribution
++            .finish(Phase::StoreMatchesState, started, result.is_err(), items);
++        result
++    }
+     fn append_batch(
+         &mut self,
+         mutations: Vec<LogMutation>,
+@@ -162,3 +179,6 @@
+         Ok(result)
+     }
+ }
++
++#[cfg(test)]
++mod tests;
+--- /dev/null
++++ b/benchmarks/matched/src/store/tests.rs
+@@ -0,0 +1,114 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::quorum::{Limits, Policy, Tree};
++fn store<const TRACE: bool>() -> MemoryStore<TRACE> {
++    let binding = StoreBinding {
++        identity: StoreIdentity {
++            id: StoreId::new(1).unwrap(),
++            incarnation: StoreIncarnation::new(1).unwrap(),
++        },
++        session: StoreSession::new(1).unwrap(),
++    };
++    let bootstrap = Bootstrap {
++        group: GroupIdentity {
++            id: GroupId::new(1).unwrap(),
++            incarnation: GroupIncarnation::new(1).unwrap(),
++        },
++        configuration: ConfigurationId::new(1).unwrap(),
++        policy: Policy::new(Tree::Voter(NodeId::new(1).unwrap()), Limits::default()).unwrap(),
++        voter_stores: [(NodeId::new(1).unwrap(), binding.identity)].into(),
++    };
++    MemoryStore::new(binding, LogLimits::default(), bootstrap).unwrap()
++}
++#[test]
++fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() {
++    let mut store = store::<true>();
++    let group = GroupIdentity {
++        id: GroupId::new(1).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    };
++    let before = store.state(group).unwrap();
++    let tickets = store
++        .append_batch(vec![LogMutation::Update(LogUpdate {
++            group,
++            expected_revision: before.revision,
++            hard_state: voteboat::contracts::HardState {
++                term: 1,
++                voted_for: None,
++            },
++            commit_index: 0,
++            suffix: Some(Suffix {
++                from: 1,
++                entries: vec![LogEntry {
++                    index: 1,
++                    term: 1,
++                    payload: EntryPayload::Command {
++                        operation: OperationId::new(1).unwrap(),
++                        bytes: vec![7],
++                    },
++                }],
++            }),
++            snapshot: None,
++            snapshot_membership: None,
++        })])
++        .unwrap();
++    let mut missing = group;
++    missing.id = GroupId::new(99).unwrap();
++    for group in [group, missing] {
++        let error = StorageError::Rejected("volatile transition not completed");
++        assert_eq!(store.state(group), Err(error.clone()));
++        assert_eq!(store.matches_state(group, &before), Err(error));
++    }
++    store.barrier(&tickets).unwrap();
++    let actual = store.state(group).unwrap();
++    assert_eq!(store.matches_state(group, &actual), Ok(true));
++    assert_eq!(store.matches_state(group, &before), Ok(false));
++    let mut bytes = actual.clone();
++    let EntryPayload::Command { bytes: payload, .. } = &mut bytes.entries[0].payload else {
++        unreachable!()
++    };
++    payload[0] ^= 1;
++    assert_eq!(store.matches_state(group, &bytes), Ok(false));
++    assert_eq!(
++        store.matches_state(missing, &actual),
++        Err(StorageError::Rejected("unknown group"))
++    );
++    let report = serde_json::to_value(
++        store
++            .attribution
++            .report(0, &store.attribution, &Recorder::default())
++            .unwrap()
++            .unwrap(),
++    )
++    .unwrap();
++    let phases = report["phases"].as_array().unwrap();
++    assert_eq!(phases.len(), 28);
++    let comparison = phases
++        .iter()
++        .find(|p| p["phase"] == "store_matches_state_exact_nested")
++        .unwrap();
++    assert_eq!(comparison["calls"], 6);
++    assert_eq!(comparison["failures"], 3);
++    assert_eq!(comparison["items"], 1);
++    assert!(report["checkpoint_provider_scopes"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .all(|s| s["methods"].as_array().unwrap().len() == 14));
++}
++#[test]
++fn disabled_comparison_preserves_equality_without_touching_observer_cells() {
++    let store = store::<false>();
++    let group = GroupIdentity {
++        id: GroupId::new(1).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    };
++    let actual = store.state(group).unwrap();
++    assert_eq!(store.matches_state(group, &actual), Ok(true));
++    assert!(store
++        .attribution
++        .report(0, &store.attribution, &Recorder::default())
++        .unwrap()
++        .is_none());
++}
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -195,7 +195,8 @@
+             .as_u64()
+             .unwrap()
+     };
+-    assert_eq!(count("store_state_clone_nested"), 2);
++    assert_eq!(count("store_state_clone_nested"), 0);
++    assert_eq!(count("store_matches_state_exact_nested"), 2);
+     assert_eq!(count("store_append_nested"), 2);
+     assert_eq!(count("store_barrier_nested"), 2);
+     assert_eq!(count("snapshot_pin_for_log_nested"), 2);
+--- a/benchmarks/matched/src/workload.rs
++++ b/benchmarks/matched/src/workload.rs
+@@ -270,7 +270,7 @@
+                 .contains("not_cpu_or_critical_path"));
+             assert!(value["nesting"].as_str().unwrap().contains("do_not_sum"));
+             let phases = value["phases"].as_array().unwrap();
+-            assert_eq!(phases.len(), 27);
++            assert_eq!(phases.len(), 28);
+             assert_eq!(
+                 value["checkpoint_provider_scopes"]
+                     .as_array()
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -322,6 +322,7 @@
+         "binding",
+         "limits",
+         "state",
++        "matches_state",
+         "append_batch",
+         "barrier",
+         "reclaim",
+@@ -343,11 +344,15 @@
+         "tests/member_recovery.rs",
+         "examples/benchmark/observe.rs",
+         "tests/provider_conformance.rs",
++        "tests/provider_conformance/log_store/matches.rs",
++        "tests/provider_conformance/log_store/default_errors.rs",
++        "tests/log_store/matches.rs",
++        "tests/snapshot/log_match.rs",
+         "tests/provider_conformance/log_store.rs",
+         "tests/log_owned.rs",
+         "examples/framework_benchmark/tests/owned_store.rs"
+       ],
+-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; direct committed-voter witness queries now authorize exact promoted-store replication, while public configuration activation remains gated. General retention policies remain pending. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token. Slice201a adds shared host/core-only, native model and native file cases for all ticket domain fields, cross-store refusal, accepted suffix replacement, bounded ranges and optional reclamation. docs/provider-conformance.json links all eight operations to selected assertions and explicit remaining scope; metadata validation is not runtime certification. Slice412 adds public OwnedLogState, an opaque exclusive canonical-log validation helper for host stores. Empty validated-limit construction, atomic owned batch application, immutable group lookup and consuming export reuse private versioned delta/full validation; there are no mutable cache/state getters, unchecked imports or durability tokens. Every unit plans and correlates before any installation. The framework modeled volatile store uses this helper while preserving its pending visibility and exact-ticket barrier; native durability and configured-history validation remain unchanged."
++      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; direct committed-voter witness queries now authorize exact promoted-store replication, while public configuration activation remains gated. General retention policies remain pending. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token. Slice201a adds shared host/core-only, native model and native file cases for all ticket domain fields, cross-store refusal, accepted suffix replacement, bounded ranges and optional reclamation. docs/provider-conformance.json links all eight operations to selected assertions and explicit remaining scope; metadata validation is not runtime certification. Slice412 adds public OwnedLogState, an opaque exclusive canonical-log validation helper for host stores. Empty validated-limit construction, atomic owned batch application, immutable group lookup and consuming export reuse private versioned delta/full validation; there are no mutable cache/state getters, unchecked imports or durability tokens. Every unit plans and correlates before any installation. The framework modeled volatile store uses this helper while preserving its pending visibility and exact-ticket barrier; native durability and configured-history validation remain unchanged. Slice426 adds object-safe matches_state with default full owned-state equality and borrowed native durable equality. Missing/fenced/provider errors match state; pending accepted data cannot replace the durable view. Snapshot verification preserves binding-first short-circuit and uses full equality, never a summary or durability token. Matched volatile comparison retains its completed-state gate and separately named observer scope."
+     },
+     {
+       "design_id": "C04",
+--- a/examples/benchmark/observe.rs
++++ b/examples/benchmark/observe.rs
+@@ -137,6 +137,13 @@
+     }
+     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
+         self.inner.state(group)
++    }
++    fn matches_state(
++        &self,
++        group: GroupIdentity,
++        expected: &GroupLog,
++    ) -> Result<bool, StorageError> {
++        self.inner.matches_state(group, expected)
+     }
+     fn append_batch(
+         &mut self,
+--- a/src/log.rs
++++ b/src/log.rs
+@@ -276,6 +276,17 @@
+     fn limits(&self) -> LogLimits;
+     /// Verified durable state only; missing is an error, never empty success.
+     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError>;
++    /// Exact equality against the same verified durable view exposed by `state`.
++    /// Missing groups and provider errors remain errors, never a false match.
++    /// Providers may compare borrowed state without materializing an owned copy.
++    /// A match is a predicate, not a durability completion or quorum token.
++    fn matches_state(
++        &self,
++        group: GroupIdentity,
++        expected: &GroupLog,
++    ) -> Result<bool, StorageError> {
++        Ok(self.state(group)? == *expected)
++    }
+     fn append_batch(&mut self, mutations: Vec<LogMutation>)
+         -> Result<Vec<LogTicket>, StorageError>;
+     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;
+--- a/src/native/log_store.rs
++++ b/src/native/log_store.rs
+@@ -262,6 +262,20 @@
+             .cloned()
+             .ok_or(StorageError::Rejected("group not durably bootstrapped"))
+     }
++    fn matches_state(
++        &self,
++        group: GroupIdentity,
++        expected: &GroupLog,
++    ) -> Result<bool, StorageError> {
++        if self.fenced {
++            return Err(StorageError::Fenced);
++        }
++        let state = self
++            .durable
++            .get(&group)
++            .ok_or(StorageError::Rejected("group not durably bootstrapped"))?;
++        Ok(state == expected)
++    }
+     fn append_batch(
+         &mut self,
+         mutations: Vec<LogMutation>,
+--- a/src/snapshot.rs
++++ b/src/snapshot.rs
+@@ -403,7 +403,7 @@
+ 
+ fn verify_log<L: LogStore>(raft: &Raft, log: &L) -> Result<(), CheckpointError> {
+     if log.binding() != raft.storage_binding()
+-        || log.state(raft.state().bootstrap.group)? != *raft.state()
++        || !log.matches_state(raft.state().bootstrap.group, raft.state())?
+     {
+         return Err(CheckpointError::InvalidBinding);
+     }
+--- a/tests/log_store.rs
++++ b/tests/log_store.rs
+@@ -19,6 +19,8 @@
+ mod compact;
+ #[path = "log_store/configured.rs"]
+ mod configured;
++#[path = "log_store/matches.rs"]
++mod matches;
+ #[path = "log_store/staging.rs"]
+ mod staging;
+ mod support;
+@@ -67,6 +69,10 @@
+     append(&mut store, vec![LogMutation::Update(compact)]);
+     let base = store.state(group(1)).unwrap();
+     assert_eq!(base.entries, vec![entry(3, 1, 3), entry(4, 1, 4)]);
++    assert_eq!(store.matches_state(group(1), &base), Ok(true));
++    let mut mismatched = base.clone();
++    mismatched.snapshot.as_mut().unwrap().checksum ^= 1;
++    assert_eq!(store.matches_state(group(1), &mismatched), Ok(false));
+     assert_eq!(base.term_at(2), Some(1));
+     assert_eq!(base.term_at(1), None);
+     assert_eq!(
+--- /dev/null
++++ b/tests/log_store/matches.rs
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::collections::BTreeMap;
++
++#[test]
++fn borrowed_equality_reads_durable_not_pending_and_survives_subset_barrier_reopen() {
++    let io = ModelIo::default();
++    let mut store = NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
++    let create = store
++        .append_batch(vec![LogMutation::Create(bootstrap(1, 3))])
++        .unwrap();
++    let mut expected = BTreeMap::new();
++    apply_batch(
++        &mut expected,
++        &[LogMutation::Create(bootstrap(1, 3))],
++        store.limits(),
++    )
++    .unwrap();
++    assert_eq!(
++        store.matches_state(group(1), &expected[&group(1)]),
++        Err(StorageError::Rejected("group not durably bootstrapped"))
++    );
++    store.barrier(&create).unwrap();
++    append(&mut store, vec![LogMutation::Create(bootstrap(2, 3))]);
++    let old = [
++        store.state(group(1)).unwrap(),
++        store.state(group(2)).unwrap(),
++    ];
++    let mut expected = old
++        .iter()
++        .map(|s| (s.bootstrap.group, s.clone()))
++        .collect::<BTreeMap<_, _>>();
++    let mutations = old
++        .iter()
++        .map(|s| {
++            update(
++                s,
++                1,
++                0,
++                Some(Suffix {
++                    from: 1,
++                    entries: vec![entry(1, 1, 7)],
++                }),
++            )
++        })
++        .collect::<Vec<_>>();
++    apply_batch(&mut expected, &mutations, store.limits()).unwrap();
++    let tickets = store.append_batch(mutations).unwrap();
++    for state in &old {
++        assert_eq!(store.matches_state(state.bootstrap.group, state), Ok(true));
++        assert_eq!(
++            store.matches_state(state.bootstrap.group, &expected[&state.bootstrap.group]),
++            Ok(false)
++        );
++    }
++    // Native subset barriers flush all written groups but return only requested evidence.
++    assert_eq!(store.barrier(&tickets[..1]).unwrap().tickets, tickets[..1]);
++    for (&group, state) in &expected {
++        assert_eq!(store.matches_state(group, state), Ok(true));
++    }
++    store.barrier(&tickets[1..]).unwrap();
++    drop(store);
++    io.0.borrow_mut().power_loss();
++    let recovered = NativeLogStore::recover(io, identity(1), LogLimits::default()).unwrap();
++    for (&group, state) in &expected {
++        assert_eq!(recovered.matches_state(group, state), Ok(true));
++    }
++}
++#[test]
++fn equality_fencing_precedes_missing_and_recovery_retains_exact_crash_state() {
++    for fault in [
++        Fault::Append(10),
++        Fault::Sync,
++        Fault::PublishBefore,
++        Fault::PublishAfter,
++    ] {
++        let io = ModelIo::default();
++        let mut store =
++            NativeLogStore::create(io.clone(), identity(1), LogLimits::default()).unwrap();
++        append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
++        let old = store.state(group(1)).unwrap();
++        io.0.borrow_mut().fault = fault;
++        let transition = update(
++            &old,
++            1,
++            0,
++            Some(Suffix {
++                from: 1,
++                entries: vec![entry(1, 1, 7)],
++            }),
++        );
++        let mut next = BTreeMap::from([(group(1), old.clone())]);
++        apply_batch(&mut next, std::slice::from_ref(&transition), store.limits()).unwrap();
++        match store.append_batch(vec![transition]) {
++            Err(StorageError::Uncertain(_)) => (),
++            Ok(tickets) => assert!(matches!(
++                store.barrier(&tickets),
++                Err(StorageError::Uncertain(_))
++            )),
++            other => panic!("unexpected {other:?}"),
++        }
++        for group in [group(1), group(99)] {
++            assert_eq!(store.matches_state(group, &old), Err(StorageError::Fenced));
++            assert_eq!(store.state(group), Err(StorageError::Fenced));
++        }
++        drop(store);
++        io.0.borrow_mut().power_loss();
++        let recovered = NativeLogStore::recover(io, identity(1), LogLimits::default()).unwrap();
++        let actual = recovered.state(group(1)).unwrap();
++        assert!(actual == old || actual == next[&group(1)]);
++        assert_eq!(recovered.matches_state(group(1), &old), Ok(actual == old));
++        assert_eq!(
++            recovered.matches_state(group(1), &next[&group(1)]),
++            Ok(actual == next[&group(1)])
++        );
++        assert_eq!(
++            recovered.matches_state(group(99), &old),
++            Err(StorageError::Rejected("group not durably bootstrapped"))
++        );
++    }
++}
+--- a/tests/provider_conformance/log_store.rs
++++ b/tests/provider_conformance/log_store.rs
+@@ -3,6 +3,10 @@
+ //! Reusable cases: providers are supplied by callers through the public seam.
+ use super::support::*;
+ use voteboat::{identity::*, log::*};
++#[path = "log_store/default_errors.rs"]
++mod default_errors;
++#[path = "log_store/matches.rs"]
++mod matches;
+ 
+ pub fn cross_store(first: &mut impl LogStore, second: &mut impl LogStore) {
+     assert_ne!(first.binding(), second.binding());
+@@ -85,6 +89,7 @@
+         )],
+     );
+     let original = store.state(group(1)).unwrap();
++    matches::exact(store, &original);
+     let waiting = store
+         .append_batch(vec![update(
+             &original,
+@@ -97,6 +102,7 @@
+         )])
+         .unwrap();
+     assert_eq!(store.state(group(1)).unwrap(), original);
++    assert_eq!(store.matches_state(group(1), &original), Ok(true));
+     let mut replacement = update(
+         &original,
+         2,
+@@ -114,6 +120,7 @@
+     assert_ne!(current[0].generation, waiting[0].generation);
+     assert!(store.barrier(&waiting).is_err());
+     assert_eq!(store.state(group(1)).unwrap(), original);
++    assert_eq!(store.matches_state(group(1), &original), Ok(true));
+     assert_eq!(store.barrier(&current).unwrap().tickets, current);
+     let state = store.state(group(1)).unwrap();
+     assert_eq!(state.commit_index, 1);
+--- /dev/null
++++ b/tests/provider_conformance/log_store/default_errors.rs
+@@ -0,0 +1,62 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::contracts::StorageError;
++struct Faulted {
++    inner: HostLogStore,
++    error: StorageError,
++}
++impl LogStore for Faulted {
++    fn binding(&self) -> StoreBinding {
++        self.inner.binding()
++    }
++    fn limits(&self) -> LogLimits {
++        self.inner.limits()
++    }
++    fn state(&self, _: GroupIdentity) -> Result<GroupLog, StorageError> {
++        Err(self.error.clone())
++    }
++    fn append_batch(
++        &mut self,
++        mutations: Vec<LogMutation>,
++    ) -> Result<Vec<LogTicket>, StorageError> {
++        self.inner.append_batch(mutations)
++    }
++    fn barrier(&mut self, tickets: &[LogTicket]) -> Result<DurableLog, StorageError> {
++        self.inner.barrier(tickets)
++    }
++    fn fetch_range(
++        &self,
++        group: GroupIdentity,
++        generation: LogGeneration,
++        from: u64,
++        count: usize,
++        bytes: usize,
++    ) -> Result<Vec<LogEntry>, StorageError> {
++        self.inner
++            .fetch_range(group, generation, from, count, bytes)
++    }
++}
++#[test]
++fn default_comparison_never_turns_provider_errors_into_a_mismatch() {
++    let mut inner = HostLogStore::new(1);
++    append(&mut inner, vec![LogMutation::Create(bootstrap(1, 3))]);
++    let expected = inner.state(group(1)).unwrap();
++    for error in [
++        StorageError::Fenced,
++        StorageError::WrongIdentity,
++        StorageError::StaleTicket,
++        StorageError::Rejected("missing"),
++        StorageError::Corrupt("state"),
++        StorageError::Uncertain("sync".into()),
++    ] {
++        let faulted = Faulted {
++            inner: HostLogStore::new(1),
++            error: error.clone(),
++        };
++        let object: &dyn LogStore = &faulted;
++        for group in [group(1), group(99)] {
++            assert_eq!(object.matches_state(group, &expected), Err(error.clone()));
++        }
++    }
++}
+--- /dev/null
++++ b/tests/provider_conformance/log_store/matches.rs
+@@ -0,0 +1,161 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use voteboat::{contracts::StorageError, membership::*, snapshot::SnapshotRef};
++
++pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
++    let actual_group = state.bootstrap.group;
++    assert_eq!(store.matches_state(actual_group, state), Ok(true));
++    let mut capacity = state.clone();
++    capacity.entries.reserve(100);
++    for entry in &mut capacity.entries {
++        if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
++            bytes.reserve(100);
++        }
++    }
++    assert_eq!(store.matches_state(actual_group, &capacity), Ok(true));
++    let changes: &[fn(&mut GroupLog)] = &[
++        |s| s.bootstrap.group.id = GroupId::new(99).unwrap(),
++        |s| s.bootstrap.group.incarnation = GroupIncarnation::new(99).unwrap(),
++        |s| s.bootstrap.configuration = ConfigurationId::new(99).unwrap(),
++        |s| s.bootstrap.policy = bootstrap(1, 1).policy,
++        |s| {
++            s.bootstrap.voter_stores.insert(node(1), identity(99));
++        },
++        |s| s.revision = LogRevision::new(99).unwrap(),
++        |s| s.generation = LogGeneration::new(99).unwrap(),
++        |s| s.hard_state.term += 1,
++        |s| s.hard_state.voted_for = Some(node(2)),
++        |s| {
++            s.ballot_origin = Some(BallotOrigin {
++                configuration: ConfigurationId::new(99).unwrap(),
++                candidate_store: identity(2),
++            })
++        },
++        |s| s.commit_index += 1,
++        |s| s.snapshot = Some(reference(s)),
++        |s| {
++            s.snapshot_membership =
++                Some(Box::new(Membership::replay(&s.bootstrap, &[], 0).unwrap()))
++        },
++        |s| s.entries.pop().map(|_| ()).unwrap(),
++        |s| s.entries[0].index += 1,
++        |s| s.entries[0].term += 1,
++        |s| s.entries[0].payload = EntryPayload::Noop,
++        |s| {
++            if let EntryPayload::Command { operation, .. } = &mut s.entries[0].payload {
++                *operation = OperationId::new(99).unwrap();
++            }
++        },
++        |s| {
++            if let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload {
++                bytes[0] ^= 1;
++            }
++        },
++        |s| s.entries.swap(0, 1),
++    ];
++    for (index, change) in changes.iter().enumerate() {
++        let mut different = state.clone();
++        change(&mut different);
++        assert_ne!(different, *state, "invalid test mutation {index}");
++        assert_eq!(
++            store.matches_state(actual_group, &different),
++            Ok(false),
++            "mutation {index}"
++        );
++    }
++    let missing = group(99);
++    assert_eq!(
++        store.matches_state(missing, state),
++        store.state(missing).map(|s| s == *state)
++    );
++}
++fn reference(state: &GroupLog) -> SnapshotRef {
++    SnapshotRef {
++        store: identity(1),
++        group: state.bootstrap.group,
++        generation: SnapshotGeneration::new(1).unwrap(),
++        configuration: state.bootstrap.configuration,
++        index: 1,
++        term: 1,
++        application_schema: 1,
++        file_bytes: 100,
++        checksum: 7,
++    }
++}
++
++#[test]
++fn default_is_object_safe_and_preserves_complete_snapshot_and_configuration_equality() {
++    let mut store = HostLogStore::new(1);
++    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
++    let mut state = store.state(group(1)).unwrap();
++    state.entries = vec![entry(1, 1, 7), entry(2, 1, 8)];
++    state.snapshot = Some(reference(&state));
++    state.snapshot_membership = Some(Box::new(
++        Membership::replay(&state.bootstrap, &[], 0).unwrap(),
++    ));
++    state.entries.push(LogEntry {
++        index: 3,
++        term: 1,
++        payload: EntryPayload::Configuration(Box::new(ConfigurationRecord {
++            operation: OperationId::new(3).unwrap(),
++            expected: ConfigurationId::new(1).unwrap(),
++            change: ConfigurationChange::Final {
++                id: ConfigurationId::new(2).unwrap(),
++            },
++        })),
++    });
++    store.durable.insert(group(1), state.clone());
++    let object: &dyn LogStore = &store;
++    assert_eq!(object.matches_state(group(1), &state), Ok(true));
++    snapshot_fields(object, &state);
++    configuration_fields(object, &state);
++}
++fn snapshot_fields(store: &dyn LogStore, state: &GroupLog) {
++    let changes: &[fn(&mut SnapshotRef)] = &[
++        |r| r.store.id = StoreId::new(99).unwrap(),
++        |r| r.store.incarnation = StoreIncarnation::new(99).unwrap(),
++        |r| r.group.id = GroupId::new(99).unwrap(),
++        |r| r.group.incarnation = GroupIncarnation::new(99).unwrap(),
++        |r| r.generation = SnapshotGeneration::new(99).unwrap(),
++        |r| r.configuration = ConfigurationId::new(99).unwrap(),
++        |r| r.index += 1,
++        |r| r.term += 1,
++        |r| r.application_schema += 1,
++        |r| r.file_bytes += 1,
++        |r| r.checksum ^= 1,
++    ];
++    for change in changes {
++        let mut altered = state.clone();
++        change(altered.snapshot.as_mut().unwrap());
++        assert_eq!(store.matches_state(group(1), &altered), Ok(false));
++    }
++    let mut altered = state.clone();
++    altered.snapshot_membership = Some(Box::new(
++        Membership::replay(&bootstrap(1, 1), &[], 0).unwrap(),
++    ));
++    assert_eq!(store.matches_state(group(1), &altered), Ok(false));
++}
++fn configuration_fields(store: &dyn LogStore, state: &GroupLog) {
++    let changes: &[fn(&mut ConfigurationRecord)] = &[
++        |r| r.operation = OperationId::new(99).unwrap(),
++        |r| r.expected = ConfigurationId::new(99).unwrap(),
++        |r| {
++            r.change = ConfigurationChange::Final {
++                id: ConfigurationId::new(99).unwrap(),
++            }
++        },
++    ];
++    for change in changes {
++        let mut altered = state.clone();
++        let EntryPayload::Configuration(record) = &mut altered.entries[2].payload else {
++            unreachable!()
++        };
++        change(record);
++        assert_eq!(store.matches_state(group(1), &altered), Ok(false));
++    }
++    assert_eq!(
++        store.matches_state(group(99), state),
++        Err(StorageError::Rejected("unknown group"))
++    );
++}
+--- a/tests/snapshot.rs
++++ b/tests/snapshot.rs
+@@ -12,6 +12,8 @@
+ // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, QUIET
+ // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
+ // rights and limitations under the RPL.
++#[path = "snapshot/log_match.rs"]
++mod log_match;
+ #[path = "snapshot/refusal.rs"]
+ mod snapshot_refusal;
+ mod support;
+--- /dev/null
++++ b/tests/snapshot/log_match.rs
+@@ -0,0 +1,100 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::cell::Cell;
++use voteboat::raft::Effect;
++
++struct Probe {
++    binding: StoreBinding,
++    result: Result<bool, StorageError>,
++    comparisons: Cell<u32>,
++    states: Cell<u32>,
++}
++impl LogStore for Probe {
++    fn binding(&self) -> StoreBinding {
++        self.binding
++    }
++    fn limits(&self) -> LogLimits {
++        LogLimits::default()
++    }
++    fn state(&self, _: GroupIdentity) -> Result<GroupLog, StorageError> {
++        self.states.set(self.states.get() + 1);
++        Err(StorageError::Fenced)
++    }
++    fn matches_state(&self, _: GroupIdentity, _: &GroupLog) -> Result<bool, StorageError> {
++        self.comparisons.set(self.comparisons.get() + 1);
++        self.result.clone()
++    }
++    fn append_batch(&mut self, _: Vec<LogMutation>) -> Result<Vec<LogTicket>, StorageError> {
++        panic!("rejected verification must not append")
++    }
++    fn barrier(&mut self, _: &[LogTicket]) -> Result<DurableLog, StorageError> {
++        panic!("rejected verification must not publish")
++    }
++    fn fetch_range(
++        &self,
++        _: GroupIdentity,
++        _: LogGeneration,
++        _: u64,
++        _: usize,
++        _: usize,
++    ) -> Result<Vec<LogEntry>, StorageError> {
++        panic!("verification must not fetch")
++    }
++}
++fn attempt(raft: &mut Raft, probe: &mut Probe) -> Result<Vec<Effect>, CheckpointError> {
++    let mut snapshots = HostSnapshots::new();
++    // A later failure makes successful comparison observable without pinning data.
++    snapshots.identity.store = identity(99);
++    let application = Counter::new(20).unwrap();
++    let reference = SnapshotRef {
++        store: identity(1),
++        group: group(1),
++        generation: SnapshotGeneration::new(1).unwrap(),
++        configuration: ConfigurationId::new(1).unwrap(),
++        index: 1,
++        term: 1,
++        application_schema: 1,
++        file_bytes: 100,
++        checksum: 7,
++    };
++    let result = compact_replica(raft, probe, &mut snapshots, &application, reference);
++    assert!(snapshots.pins.is_empty());
++    assert!(snapshots.current.is_none());
++    assert_eq!(application.applied_index(), 0);
++    result
++}
++#[test]
++fn binding_precedes_comparison_and_comparison_errors_precede_snapshot_work() {
++    for result in [
++        Ok(true),
++        Ok(false),
++        Err(StorageError::Fenced),
++        Err(StorageError::Rejected("missing")),
++        Err(StorageError::Corrupt("comparison")),
++    ] {
++        let mut raft = committed_core();
++        let before = raft.state().clone();
++        let mut probe = Probe {
++            binding: raft.storage_binding(),
++            result: result.clone(),
++            comparisons: Cell::new(0),
++            states: Cell::new(0),
++        };
++        probe.binding.session = StoreSession::new(99).unwrap();
++        assert_eq!(
++            attempt(&mut raft, &mut probe),
++            Err(CheckpointError::InvalidBinding)
++        );
++        assert_eq!(probe.comparisons.get(), 0);
++        probe.binding = raft.storage_binding();
++        let expected = match result {
++            Err(error) => CheckpointError::Storage(error),
++            Ok(_) => CheckpointError::InvalidBinding,
++        };
++        assert_eq!(attempt(&mut raft, &mut probe), Err(expected));
++        assert_eq!(probe.comparisons.get(), 1);
++        assert_eq!(probe.states.get(), 0);
++        assert_eq!(*raft.state(), before);
++    }
++}

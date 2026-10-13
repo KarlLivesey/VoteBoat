@@ -270,7 +270,7 @@ mod tests {
                 .contains("not_cpu_or_critical_path"));
             assert!(value["nesting"].as_str().unwrap().contains("do_not_sum"));
             let phases = value["phases"].as_array().unwrap();
-            assert_eq!(phases.len(), 27);
+            assert_eq!(phases.len(), 28);
             assert_eq!(
                 value["checkpoint_provider_scopes"]
                     .as_array()

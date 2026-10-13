@@ -195,7 +195,8 @@ fn checked_checkpoint_scopes<const TRACE: bool>() {
             .as_u64()
             .unwrap()
     };
-    assert_eq!(count("store_state_clone_nested"), 2);
+    assert_eq!(count("store_state_clone_nested"), 0);
+    assert_eq!(count("store_matches_state_exact_nested"), 2);
     assert_eq!(count("store_append_nested"), 2);
     assert_eq!(count("store_barrier_nested"), 2);
     assert_eq!(count("snapshot_pin_for_log_nested"), 2);

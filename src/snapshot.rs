@@ -403,7 +403,7 @@ fn restore_application_from<A: CheckpointStateMachine>(
 
 fn verify_log<L: LogStore>(raft: &Raft, log: &L) -> Result<(), CheckpointError> {
     if log.binding() != raft.storage_binding()
-        || log.state(raft.state().bootstrap.group)? != *raft.state()
+        || !log.matches_state(raft.state().bootstrap.group, raft.state())?
     {
         return Err(CheckpointError::InvalidBinding);
     }

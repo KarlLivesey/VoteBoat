@@ -138,6 +138,13 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
         self.inner.state(group)
     }
+    fn matches_state(
+        &self,
+        group: GroupIdentity,
+        expected: &GroupLog,
+    ) -> Result<bool, StorageError> {
+        self.inner.matches_state(group, expected)
+    }
     fn append_batch(
         &mut self,
         mutations: Vec<LogMutation>,

@@ -1,0 +1,90 @@
+{
+  "base_commit": "ccee8eca1fbc8e2584f148e4e69ef34a614aa2bc",
+  "before_after_sha256": {
+    "benchmarks/matched/README.md": {
+      "before": "fc96b3b34e71d84c0e7dcf9b4d338a90d3b25cda23e7523049826ba23a01c059",
+      "after": "589c7d3eacfda37ccfafd01403f558e799695bb3e4abfa9bc55ae0b217446dea"
+    },
+    "benchmarks/matched/SCHEMA.md": {
+      "before": "aec48881c1fbfd7604bfb05b31405eb72a0302f968dc646980ed6256953ff485",
+      "after": "d46b18389385318b064197a922bc4150a137d0620f18df17ca3a436a47db2a53"
+    },
+    "benchmarks/matched/src/attribution.rs": {
+      "before": "072748cc88e35dcd90cae05ff37c403e7285daa0df885528f5788a3a7fe9b7aa",
+      "after": "b787f90528e5ef0e53bdbda70986ecb58bbbe907ec0ff8d8365dd93966332565"
+    },
+    "benchmarks/matched/src/attribution/gaps.rs": {
+      "before": "86977a1e21893244124804e1272352ffc2a9d02ba26f6faba4c93936e06bf3a9",
+      "after": "50e419e6bcecf802b2a70a8e279c67f6bd85a3b1ba7bea1345e2028c92b4fd78"
+    },
+    "benchmarks/matched/src/attribution/gaps/tests.rs": {
+      "before": "a884726100aeb685108c60361b3b60d68b553786c03988c9b9cbea6ae1ca6fe0",
+      "after": "de81d3cd06bd21846f905a63fbe25ac2faa17f5be29bb345df1e6040d7a04a71"
+    },
+    "benchmarks/matched/src/store.rs": {
+      "before": "c32b56d7aceda723f0728402fdca9e2eb749ba403a438a9643375a7427744225",
+      "after": "c5bd9b98abd84cba01a9989271e06ee0c20de25b75d94d5b896e1c3fa781b834"
+    },
+    "benchmarks/matched/src/store/tests.rs": {
+      "before": null,
+      "after": "6c8001360650b3d23416590d98363bf32e613586e236f5f8fff2f969246c6f01"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs": {
+      "before": "bb74b081b6e440b7efd37dcb1bc098455be22c10683b311d5ca22fa6eb33a344",
+      "after": "2999dc8a6e969fb8a1cfee3c643ff1338ca23e0020ecb0e31bd865c3ec7ff6bf"
+    },
+    "benchmarks/matched/src/workload.rs": {
+      "before": "6df8d72b8808f12d01fc916bdc01fb8d70c0259b8021cdac46c88b1ce4407344",
+      "after": "ffff7adb86d821c5feab580912d52595db5691e6845d4b861d4291794ede0d6c"
+    },
+    "docs/component-contracts.json": {
+      "before": "41796cc5388d6f54c71bd26c12e10d13974f1e000b4705f2e881cbec5a4ec720",
+      "after": "da5624178cc3cb3d53e68831d74369a894d5403cb4fa0d6bd5083ca75a4f2cfb"
+    },
+    "examples/benchmark/observe.rs": {
+      "before": "2e5ad70d82ad98f42f8b01db64808836f59ca4638f269f7c86a64cd9f6c2fb07",
+      "after": "99c2de219b044b8871a9c705d820a898612758799c160eb691344038091548ab"
+    },
+    "src/log.rs": {
+      "before": "5e32dd0de4ce79cb117beec7677741681981751c3287b212735e335d4df5cbd8",
+      "after": "ce709b3a56117f7eab60b887871e89eab4f06622d8dc6d7e8e5ac65f7cba34bb"
+    },
+    "src/native/log_store.rs": {
+      "before": "68dff3aa6d6ca15a4a0dfe47137ac29290d330b09018ab24f5d19e97f96dc8cd",
+      "after": "4c70820cd30ced2fd6338c9076a232044942a3fea80f82399fd63e1d9e043f74"
+    },
+    "src/snapshot.rs": {
+      "before": "0ad56a8ef94d19b98025391fbd72f355c08bad71831fdfa71c02b1f605069b71",
+      "after": "54018238283a79ff3290e08b9c8db579b21fab1b2153c872bbb40a84a9136047"
+    },
+    "tests/log_store.rs": {
+      "before": "251afdff61b685fff495063d14a65b53a3461b5aa8f56a67d6af64f6c1c5544f",
+      "after": "597e8f73a263d11d726ba23bf9ab7bba775796e1efb4f7cd66dd14aeb51128cd"
+    },
+    "tests/log_store/matches.rs": {
+      "before": null,
+      "after": "dad72f6995b1f14a30ee888f0d210aeea86258b3d1c6d36fd0995fc05256ebe7"
+    },
+    "tests/provider_conformance/log_store.rs": {
+      "before": "e86a53125c99692cbb6508f5900cf4a21ed89f6f19aceced8db6ce9db23fbb94",
+      "after": "5fef919bcb40515e2c8dffd82a124d1bdd244350fabcaf72ae5060b0f296d43c"
+    },
+    "tests/provider_conformance/log_store/default_errors.rs": {
+      "before": null,
+      "after": "0edd9d31c1c1b26a7a3c8b80e50adc04afa6a68e2adc5388513c075a07da0c88"
+    },
+    "tests/provider_conformance/log_store/matches.rs": {
+      "before": null,
+      "after": "ac0fa3109d85417b65ac77df3f3b9587dccc66da20d8b33b5bbf93ee569de2a1"
+    },
+    "tests/snapshot.rs": {
+      "before": "5bdf0c91427f473d9622fac5699786b71db489e14c7dd9f94acf13479fd079fc",
+      "after": "0a3c88fe5a8f4e2b35d5b7658465248a4da91a71f145e91e5ad756da45cf7e35"
+    },
+    "tests/snapshot/log_match.rs": {
+      "before": null,
+      "after": "5b35045c0779702919864f0958b9e28a7bbe9bdce42a141b7babfbd8733b2cca"
+    }
+  },
+  "exact_overlay_sha256": "ff1d718b911a9ea2ae4a4b8954b2c2205458cc5e35ede34ce8233ca23a700c79"
+}

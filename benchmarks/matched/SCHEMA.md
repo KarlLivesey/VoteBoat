@@ -139,3 +139,12 @@ slot order; canceled cleanup leaves them owned for Drop to abort. Both failures
 retain the campaign as the primary Error source. These are real bounded Tokio
 deadlines, not a paused clock. Setup checks and untouched upstream remain unchanged;
 external process teardown still needs a finite runner watchdog.
+
+Exact-state comparison: `LogStore::matches_state` uses full derived durable
+`GroupLog` equality. The memory provider first applies its completed-state gate;
+accepted pending transitions remain unavailable. Attribution keeps the original
+clone phase and adds `store_matches_state_exact_nested` (28 phases,14 provider
+methods). Equal calls count retained entries as logical units; false/error calls
+count zero, without claiming partial or physical traversal. Compact ordinals use
+the new method, so `state_to_pin` begins after comparison and excludes prior Eq.
+These changed observer scopes require fresh evidence, not renamed old timings.

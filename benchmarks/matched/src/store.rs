@@ -107,6 +107,23 @@ impl<const TRACE: bool> LogStore for MemoryStore<TRACE> {
             .finish(Phase::StoreState, started, result.is_err(), items);
         result
     }
+    fn matches_state(
+        &self,
+        group: GroupIdentity,
+        expected: &GroupLog,
+    ) -> Result<bool, StorageError> {
+        let started = Recorder::<TRACE>::start();
+        let result = self.completed_state(group).map(|state| state == expected);
+        // Equal-state logical units, not partial/physical traversal counts.
+        let items = if TRACE && matches!(result, Ok(true)) {
+            expected.entries.len()
+        } else {
+            0
+        };
+        self.attribution
+            .finish(Phase::StoreMatchesState, started, result.is_err(), items);
+        result
+    }
     fn append_batch(
         &mut self,
         mutations: Vec<LogMutation>,
@@ -162,3 +179,6 @@ impl<const TRACE: bool> LogStore for MemoryStore<TRACE> {
         Ok(result)
     }
 }
+
+#[cfg(test)]
+mod tests;

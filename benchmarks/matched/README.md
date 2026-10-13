@@ -75,7 +75,10 @@ persistence-helper work; off/on rates overlap across trials and qualify no floor
 
 Checkpoint attribution also labels four inclusive actor boundaries (reservation,
 publication, compaction and returned effects), plus the actual volatile log state
-clone and snapshot provider calls. Fixed before/after provider counter snapshots
+clone, exact durable-state comparison and snapshot provider calls. The comparison
+uses full `GroupLog` equality without materializing a copy. Its item count is
+retained entries in successfully equal states; unequal/error calls count zero,
+not partial or physical traversal. The old clone phase remains separately named. Fixed before/after provider counter snapshots
 report calls, failures, elapsed totals and item counts within each boundary.
 Maxima remain whole provider lifetime; scoped maxima are deliberately absent.
 Reconciliation includes its pinned-image load. Helper work outside these provider
@@ -87,6 +90,9 @@ The compact observer additionally reports three fixed gaps: `state_to_pin`,
 `pin_to_append` and `barrier_to_reconcile`. Existing provider clock observations
 and exact method ordinals delimit each successful helper call. These inclusive
 wall intervals include nested work; they do not isolate CPU or a single function.
+With the comparison seam, `state_to_pin` begins after exact comparison; it excludes
+the prior full Eq and must not be compared as the old clone-to-pin scope. Reports
+now contain 28 phases and 14 provider methods per checkpoint scope.
 Failed helpers retain their original errors and certify no successful gaps.
 [Schema and controls](validation/performance/slice425-gaps/SCHEMA.md).
 

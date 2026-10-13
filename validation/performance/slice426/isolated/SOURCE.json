@@ -1,0 +1,38 @@
+{
+  "base_commit": "ccee8eca1fbc8e2584f148e4e69ef34a614aa2bc",
+  "selected_original_files": 1410,
+  "source_files": 1415,
+  "new_files": [
+    "benchmarks/matched/src/store/tests.rs",
+    "tests/log_store/matches.rs",
+    "tests/provider_conformance/log_store/default_errors.rs",
+    "tests/provider_conformance/log_store/matches.rs",
+    "tests/snapshot/log_match.rs"
+  ],
+  "changed_files": [
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "benchmarks/matched/src/attribution.rs",
+    "benchmarks/matched/src/attribution/gaps.rs",
+    "benchmarks/matched/src/attribution/gaps/tests.rs",
+    "benchmarks/matched/src/store.rs",
+    "benchmarks/matched/src/store/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/workload.rs",
+    "docs/component-contracts.json",
+    "examples/benchmark/observe.rs",
+    "src/log.rs",
+    "src/native/log_store.rs",
+    "src/snapshot.rs",
+    "tests/log_store.rs",
+    "tests/log_store/matches.rs",
+    "tests/provider_conformance/log_store.rs",
+    "tests/provider_conformance/log_store/default_errors.rs",
+    "tests/provider_conformance/log_store/matches.rs",
+    "tests/snapshot.rs",
+    "tests/snapshot/log_match.rs"
+  ],
+  "full_map_sha256": "f7602b0c9bc8c2279954f6c3a9fe0b99222d325edb099153b0f99a41db603299",
+  "overlay_map_sha256": "ff1d718b911a9ea2ae4a4b8954b2c2205458cc5e35ede34ce8233ca23a700c79",
+  "scope": "isolated code/test/Cargo/config and focused contract/observer docs; no binary/target or historical validation"
+}

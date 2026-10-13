@@ -5,7 +5,7 @@ use super::*;
 
 const BOUNDARIES: usize = 6;
 const METHODS: [Phase; BOUNDARIES] = [
-    Phase::StoreState,
+    Phase::StoreMatchesState,
     Phase::SnapshotPin,
     Phase::SnapshotPin,
     Phase::StoreAppend,
@@ -23,7 +23,7 @@ pub(super) struct Boundaries([Cell<Option<Stamp>>; BOUNDARIES]);
 impl Boundaries {
     pub(super) fn record(&self, phase: Phase, call: u64, start: Instant, end: Instant) {
         match phase {
-            Phase::StoreState => self.0[0].set(Some(Stamp { call, at: end })),
+            Phase::StoreMatchesState => self.0[0].set(Some(Stamp { call, at: end })),
             Phase::SnapshotPin => {
                 self.0[1].set(Some(Stamp { call, at: start }));
                 self.0[2].set(Some(Stamp { call, at: end }));
@@ -95,7 +95,7 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
             }
             let provider = if matches!(
                 phase,
-                Phase::StoreState | Phase::StoreAppend | Phase::StoreBarrier
+                Phase::StoreMatchesState | Phase::StoreAppend | Phase::StoreBarrier
             ) {
                 store
             } else {

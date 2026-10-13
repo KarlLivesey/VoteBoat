@@ -276,6 +276,17 @@ pub trait LogStore {
     fn limits(&self) -> LogLimits;
     /// Verified durable state only; missing is an error, never empty success.
     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError>;
+    /// Exact equality against the same verified durable view exposed by `state`.
+    /// Missing groups and provider errors remain errors, never a false match.
+    /// Providers may compare borrowed state without materializing an owned copy.
+    /// A match is a predicate, not a durability completion or quorum token.
+    fn matches_state(
+        &self,
+        group: GroupIdentity,
+        expected: &GroupLog,
+    ) -> Result<bool, StorageError> {
+        Ok(self.state(group)? == *expected)
+    }
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;
     fn barrier(&mut self, dependencies: &[LogTicket]) -> Result<DurableLog, StorageError>;

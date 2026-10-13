@@ -262,6 +262,20 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             .cloned()
             .ok_or(StorageError::Rejected("group not durably bootstrapped"))
     }
+    fn matches_state(
+        &self,
+        group: GroupIdentity,
+        expected: &GroupLog,
+    ) -> Result<bool, StorageError> {
+        if self.fenced {
+            return Err(StorageError::Fenced);
+        }
+        let state = self
+            .durable
+            .get(&group)
+            .ok_or(StorageError::Rejected("group not durably bootstrapped"))?;
+        Ok(state == expected)
+    }
     fn append_batch(
         &mut self,
         mutations: Vec<LogMutation>,

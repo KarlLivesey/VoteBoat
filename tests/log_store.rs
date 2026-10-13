@@ -19,6 +19,8 @@ mod batch_limits;
 mod compact;
 #[path = "log_store/configured.rs"]
 mod configured;
+#[path = "log_store/matches.rs"]
+mod matches;
 #[path = "log_store/staging.rs"]
 mod staging;
 mod support;
@@ -67,6 +69,10 @@ fn compacted_log_conformance<S: LogStore>(mut store: S) {
     append(&mut store, vec![LogMutation::Update(compact)]);
     let base = store.state(group(1)).unwrap();
     assert_eq!(base.entries, vec![entry(3, 1, 3), entry(4, 1, 4)]);
+    assert_eq!(store.matches_state(group(1), &base), Ok(true));
+    let mut mismatched = base.clone();
+    mismatched.snapshot.as_mut().unwrap().checksum ^= 1;
+    assert_eq!(store.matches_state(group(1), &mismatched), Ok(false));
     assert_eq!(base.term_at(2), Some(1));
     assert_eq!(base.term_at(1), None);
     assert_eq!(

@@ -36,8 +36,9 @@ pub(super) enum Phase {
     SnapshotPin,
     SnapshotLoadPinned,
     SnapshotReconcile,
+    StoreMatchesState,
 }
-const PHASES: usize = 27;
+const PHASES: usize = 28;
 const SCOPES: [Phase; 4] = [
     Phase::CheckpointReserve,
     Phase::CheckpointPublish,
@@ -72,6 +73,7 @@ const NAMES: [&str; PHASES] = [
     "snapshot_pin_for_log_nested",
     "snapshot_load_pinned_nested",
     "snapshot_reconcile_log_inclusive_nested",
+    "store_matches_state_exact_nested",
 ];
 fn provider_phase(index: usize) -> bool {
     index == Phase::StoreAppend as usize
@@ -211,6 +213,7 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
                 if i == Phase::StoreAppend as usize
                     || i == Phase::StoreBarrier as usize
                     || i == Phase::StoreState as usize
+                    || i == Phase::StoreMatchesState as usize
                 {
                     store.intervals[i].get()
                 } else {
@@ -272,11 +275,11 @@ impl<const ENABLED: bool> Recorder<ENABLED> {
             clock: "monotonic_elapsed_wall_intervals_not_cpu_or_critical_path",
             nesting: "checkpoint_intervals_nested_in_maintenance;provider_intervals_nested_in_helpers;reconcile_contains_load_pinned;effects_contain_persist_and_snapshot_helpers;actor_lifetime_includes_all;replicas_overlap;do_not_sum",
             residual: "helper_elapsed_outside_known_provider_methods_and_reported_compact_gaps_remains_unattributed;gap_labels_are_inclusive_not_pure_Core_or_Eq;scoped_provider_sums_are_not_additive_when_nested",
-            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;snapshot_write=attempted_application_bytes;other=zero",
+            item_units: "host_admission_core_proposals_application_results=original_commands;send=messages;store_state=cloned_retained_entries;store_matches_state=retained_entries_in_successfully_equal_state_false_or_error_zero_not_physical_traversal;snapshot_write=attempted_application_bytes;other=zero",
             phases: NAMES.iter().enumerate().map(|(i, &phase)| PhaseReport {
                 phase, interval: if provider_phase(i) { provider.0[i] } else { self.intervals[i].get() },
             }).collect(),
-            checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_includes_full_Eq_temporary_destruction_and_guards;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
+            checkpoint_compact_gap_scope: "whole_successful_checkpoint_compact_observations_including_warmup_and_drain;state_to_pin_starts_after_exact_comparison_and_includes_guards_excludes_prior_Eq;pin_to_append_includes_nested_pinned_load_verification_restore_and_planning;barrier_to_reconcile_includes_Core_completion_install_broadcast_and_return_cleanup;elapsed_not_CPU_or_pure_Core;do_not_add_nested_provider_intervals",
             checkpoint_compact_gaps: self.compact_gaps.report(),
             checkpoint_provider_scopes: SCOPES.iter().enumerate().map(|(slot, &phase)| {
                 let values = self.scopes[slot].get();

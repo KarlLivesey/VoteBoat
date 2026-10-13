@@ -3,6 +3,10 @@
 //! Reusable cases: providers are supplied by callers through the public seam.
 use super::support::*;
 use voteboat::{identity::*, log::*};
+#[path = "log_store/default_errors.rs"]
+mod default_errors;
+#[path = "log_store/matches.rs"]
+mod matches;
 
 pub fn cross_store(first: &mut impl LogStore, second: &mut impl LogStore) {
     assert_ne!(first.binding(), second.binding());
@@ -85,6 +89,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
         )],
     );
     let original = store.state(group(1)).unwrap();
+    matches::exact(store, &original);
     let waiting = store
         .append_batch(vec![update(
             &original,
@@ -97,6 +102,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
         )])
         .unwrap();
     assert_eq!(store.state(group(1)).unwrap(), original);
+    assert_eq!(store.matches_state(group(1), &original), Ok(true));
     let mut replacement = update(
         &original,
         2,
@@ -114,6 +120,7 @@ fn suffix_and_ranges(store: &mut impl LogStore, one_entry_bytes: usize) {
     assert_ne!(current[0].generation, waiting[0].generation);
     assert!(store.barrier(&waiting).is_err());
     assert_eq!(store.state(group(1)).unwrap(), original);
+    assert_eq!(store.matches_state(group(1), &original), Ok(true));
     assert_eq!(store.barrier(&current).unwrap().tickets, current);
     let state = store.state(group(1)).unwrap();
     assert_eq!(state.commit_index, 1);
