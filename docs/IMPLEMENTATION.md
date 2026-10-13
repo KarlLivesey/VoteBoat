@@ -2,6 +2,51 @@
 
 ## Active P9 plan — 13 October 2026
 
+419 Linux paired diagnostic is terminal with all nine original-result, frontier,
+weighted-histogram, source and library/executable guards passing. Off medians rise
+977,881→1,247,186 originals/s, with all three pairs improving (paired median
++32.0%); request p99 falls19.377→15.927ms. Maintenance remains406ms of inclusive
+elapsed leader work. [Exact trials and scope](../validation/performance/slice419/linux-diagnostic/README.md).
+These short volatile results remain below the sustained healthy-margin bar.
+Mac419 scoped source/correctness/formatter/four strict/fresh-artifact qualification
+and all51 paired cases are terminal. Mac bulk medians2,556,825→2,780,973/s
+(paired+8.6%); singleton regresses2.8%, and real native runs show no consistent
+durable gain. Every regression and slow tail is retained.
+[Mac419 exact scope](../validation/performance/mac419-paired/README.md). 421's explicit
+native visit quantum is source-frozen after focused controls; root broader startup,
+member, runtime, owner and maintenance398 controls, real services8, actual TCP/QUIC
+startup/shared flags8 and full formatter/four strict/standalone hook pass.
+Its publication is next; Mac qualification and paired native throughput remain open.
+422's finer checkpoint observation stays in an isolated exact419 overlay until
+qualified, preserving the existing helper algorithms and every verification check.
+
+The user's like-for-like request exposed a capacity-unit mismatch: upstream's4096
+API capacity counts requests, whereas VoteBoat's4096 counts originals. At batch4,
+upstream can collect16384 originals; its append setting is a merge threshold and
+does not split that first batch. The old common64 profile has the same mismatch.
+Both engines do create per-original completion channels. Same-engine before/after
+results stay valid; no cross-engine capacity win is accepted from legacy labels.
+[Verified source audit](../benchmarks/matched/validation/performance/parity-audit/REVIEW.md)
+and [comparison contract](../benchmarks/matched/COMPARISON.md) define the correction.
+Next qualify a bounded opt-in16384-original Core/harness envelope with explicit
+staging bytes while preserving native defaults and unchanged upstream reference;
+then apply qualified helper attribution and measure remaining maintenance work.
+
+Mac418 paired primary18 and diagnostic9 are terminal with exact originals,
+frontiers, policies and source/library/executable guards. Bulk primary medians rise
+2,284,088→2,649,074 originals/s (paired+16.0%), p99 9.733→7.434ms; singleton
+regresses65,616→63,968/s (paired−1.2%). The separate1,048,576-original TRACE-off
+comparison improves2,574,462→2,805,667/s (paired+10.8%). These volatile short runs
+remain below the healthy minimum and establish no sustained acceptance.
+[Every Mac trial, regression and proof](../validation/performance/mac418-paired/README.md).
+
+The isolated420 queue-lookahead adapter passes20 controls but is not promoted:
+all three Linux off/baseline pairs regress, median ratio0.9543, despite slightly
+larger batches. Main retains the existing host scheduling. [Rejected experiment
+and full evidence](../validation/performance/slice420/README.md). The next measured
+lead is finer attribution within checkpoint helpers; broader collection alone did
+not pay for its added work. The linked mini plan reflects that result.
+
 419 removes the ordinary append plan's duplicate incoming suffix. Core retains
 one normalized sealed Pending copy and emits the original raw provider effect;
 owned/native storage validates first, then moves normalized incoming allocations
@@ -10,7 +55,11 @@ behavior, codec/error order, atomic batches and snapshot/fencing contracts remai
 Parent affected integrations416/core277 and real TCP/QUIC recovery/maintenance8
 pass; formatter/four strict root configurations and standalone checks are zero.
 [Exact419 ownership and validation](../validation/performance/slice419/README.md).
-Current-source Mac and performance qualification remain open.
+Current-source Mac qualification passes on exact1390 inputs, scoped incoming/log/
+accepted/Raft controls, real services8, formatter/four strict and standalone checks.
+[Mac419 scope and fresh artifacts](../validation/performance/mac419/README.md).
+Linux short throughput is measured above; Mac paired and both-host sustained
+performance acceptance remain open.
 A corrective publication also includes an omitted, already-qualified codec test
 module; actual pushes now require committed build inputs so a local untracked
 module cannot mask an incomplete published source tree.
@@ -30,7 +79,8 @@ comparison establishes no sustained margin. [Exact diagnostic](../validation/per
 Current-source Mac qualification is terminal with exact1384 source/compiler/artifact
 guards, approved scoped state/crash tests, real services8 and zero formatter/four
 strict/standalone diagnostics. [Mac418 scope](../validation/performance/mac418/README.md).
-Mac paired throughput and both-host sustained acceptance remain open.
+The paired Mac results above complete this short comparison; both-host sustained
+acceptance remains open.
 
 The terminal 417 Linux diagnostic verifies nine rotating 1,048,576-original cases
 and all three applied frontiers, with immutable source/artifact guards. Baseline,

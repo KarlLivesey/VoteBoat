@@ -1,0 +1,69 @@
+{
+  "scope": "focused Linux correctness and lint qualification; no timing claim; native socket tests escalation qualified",
+  "runs": [
+    {
+      "runner": 84766,
+      "exit": 101,
+      "scope": "initial helper passed; initial test-only module/field compile errors",
+      "logs": [
+        "initial.log",
+        "controls-initial.log",
+        "cli-initial.log"
+      ]
+    },
+    {
+      "runner": 78708,
+      "exit": 101,
+      "scope": "initial qualified integration test API errors; CLI2 passed; length lint errors",
+      "logs": [
+        "controls-qualified.log",
+        "cli-qualified.log",
+        "strict-initial.log"
+      ]
+    },
+    {
+      "runner": 88322,
+      "exit": 101,
+      "scope": "fixture provider capacity and helper generic type errors",
+      "logs": [
+        "controls-final.log",
+        "cli-final.log",
+        "strict-final.log"
+      ]
+    },
+    {
+      "runner": 38441,
+      "exit": 0,
+      "commands": [
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable test --locked --offline --all-features --test startup --test runtime --test effect_owner --test log_store ready_ -- --nocapture",
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable test --locked --offline --all-features --example native_benchmark ready_items -- --nocapture",
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings"
+      ],
+      "logs": [
+        "controls-final2.log",
+        "cli-final2.log",
+        "strict-final2.log"
+      ],
+      "results": "Owner16/runtime3/startup3/logstore1 zero; CLI2 zero; strict zero"
+    },
+    {
+      "runner": 58471,
+      "exit": 0,
+      "commands": [
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable test --locked --offline --all-features --example native_benchmark ready_items -- --nocapture",
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable test --locked --offline --all-features --lib ready_ -- --nocapture",
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable test --locked --offline --no-default-features --test runtime --test effect_owner ready_ -- --nocapture",
+        "cargo +stable fmt --all -- --check",
+        "CARGO_TARGET_DIR=target/p9/slice421-checks cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings"
+      ],
+      "logs": [
+        "cli-qualified3.log",
+        "lib-ready.log",
+        "core-ready.log",
+        "fmt.log",
+        "strict-qualified.log"
+      ],
+      "results": "CLI3/lib17/coreOwner16/runtime3 zero; formatter/strict zero"
+    }
+  ]
+}

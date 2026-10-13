@@ -105,6 +105,7 @@ impl Cluster {
             tls: tls(id).with_wire_version(8).unwrap(),
             entropy_seed: id * 17,
             limits: NodeLimits::default(),
+            ready_visit_items: 16,
         }
     }
     pub fn now(&self) -> MonoTime {

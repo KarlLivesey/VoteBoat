@@ -1,0 +1,219 @@
+{
+  "primary": [
+    {
+      "clients": 1,
+      "batch": 1,
+      "variants": {
+        "baseline": {
+          "writes_per_second": [
+            66426.45634557506,
+            64541.598173861974,
+            63815.395987865115
+          ],
+          "median_writes_per_second": 64541.598173861974,
+          "p99_ms": [
+            0.028459,
+            0.028875,
+            0.030875
+          ],
+          "median_p99_ms": 0.028875,
+          "leader_checkpoints": [
+            26,
+            26,
+            26
+          ]
+        },
+        "candidate": {
+          "writes_per_second": [
+            64534.41910392747,
+            56189.72232019395,
+            63587.85877083784
+          ],
+          "median_writes_per_second": 63587.85877083784,
+          "p99_ms": [
+            0.028417,
+            0.033792,
+            0.030125
+          ],
+          "median_p99_ms": 0.030125,
+          "leader_checkpoints": [
+            26,
+            26,
+            26
+          ],
+          "paired_vs_baseline_ratios": [
+            0.9715168120394001,
+            0.8705970089062597,
+            0.9964344463666646
+          ],
+          "median_paired_ratio": 0.9715168120394001
+        },
+        "untouched": {
+          "writes_per_second": [
+            11082.61481207249,
+            11277.194607373563,
+            11370.990594383611
+          ],
+          "median_writes_per_second": 11277.194607373563,
+          "p99_ms": [
+            0.127541,
+            0.122875,
+            0.121792
+          ],
+          "median_p99_ms": 0.122875,
+          "leader_checkpoints": [
+            null,
+            null,
+            null
+          ]
+        }
+      }
+    },
+    {
+      "clients": 4096,
+      "batch": 4,
+      "variants": {
+        "baseline": {
+          "writes_per_second": [
+            2363229.6098649977,
+            2933845.6222216245,
+            2556824.7931479933
+          ],
+          "median_writes_per_second": 2556824.7931479933,
+          "p99_ms": [
+            8.503875,
+            6.748041,
+            7.485417
+          ],
+          "median_p99_ms": 7.485417,
+          "leader_checkpoints": [
+            25,
+            25,
+            25
+          ]
+        },
+        "candidate": {
+          "writes_per_second": [
+            2566041.323304566,
+            3008607.6726427716,
+            2780972.7841610834
+          ],
+          "median_writes_per_second": 2780972.7841610834,
+          "p99_ms": [
+            7.198417,
+            6.452708,
+            6.922333
+          ],
+          "median_p99_ms": 6.922333,
+          "leader_checkpoints": [
+            25,
+            25,
+            25
+          ],
+          "paired_vs_baseline_ratios": [
+            1.0858197242421799,
+            1.0254826122597869,
+            1.0876665431334136
+          ],
+          "median_paired_ratio": 1.0858197242421799
+        },
+        "untouched": {
+          "writes_per_second": [
+            2208611.8032634957,
+            2505464.16824198,
+            2174772.5193121564
+          ],
+          "median_writes_per_second": 2208611.8032634957,
+          "p99_ms": [
+            8.776209,
+            7.250625,
+            8.895792
+          ],
+          "median_p99_ms": 8.776209,
+          "leader_checkpoints": [
+            null,
+            null,
+            null
+          ]
+        }
+      }
+    }
+  ],
+  "phase": [
+    {
+      "clients": 4096,
+      "batch": 4,
+      "variants": {
+        "baseline": {
+          "writes_per_second": [
+            3060978.3108842587,
+            2999863.0405012723,
+            2950645.6940573333
+          ],
+          "median_writes_per_second": 2999863.0405012723,
+          "p99_ms": [
+            6.137917,
+            6.1885,
+            6.1705
+          ],
+          "median_p99_ms": 6.1705,
+          "leader_checkpoints": [
+            204,
+            204,
+            204
+          ]
+        },
+        "off": {
+          "writes_per_second": [
+            3260515.254669452,
+            3406990.043560141,
+            3327802.039651031
+          ],
+          "median_writes_per_second": 3327802.039651031,
+          "p99_ms": [
+            5.599833,
+            5.5985,
+            5.498083
+          ],
+          "median_p99_ms": 5.5985,
+          "leader_checkpoints": [
+            205,
+            204,
+            204
+          ],
+          "paired_vs_baseline_ratios": [
+            1.0651873105652783,
+            1.1357151968480663,
+            1.1278216311613758
+          ],
+          "median_paired_ratio": 1.1278216311613758
+        },
+        "on": {
+          "writes_per_second": [
+            3408610.2555565047,
+            3380092.184244384,
+            3197514.948915114
+          ],
+          "median_writes_per_second": 3380092.184244384,
+          "p99_ms": [
+            5.576625,
+            5.588208,
+            7.115792
+          ],
+          "median_p99_ms": 5.588208,
+          "leader_checkpoints": [
+            205,
+            204,
+            205
+          ],
+          "paired_vs_baseline_ratios": [
+            1.1135689016273433,
+            1.1267488343999785,
+            1.0836661803736658
+          ],
+          "median_paired_ratio": 1.1135689016273433
+        }
+      }
+    }
+  ]
+}

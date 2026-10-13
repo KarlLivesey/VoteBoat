@@ -4,8 +4,19 @@
 use super::*;
 use std::collections::VecDeque;
 use voteboat::raft::{persist_effect, BatchLimits, Effect, Event, Proposal, Raft};
+#[path = "batch_limits/ready_items.rs"]
+mod ready_items;
 
 fn setup(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
+    setup_with_batch_limits(
+        io,
+        BatchLimits {
+            max_proposal_entries: 4096,
+            max_replication_entries: 1024,
+        },
+    )
+}
+fn setup_with_batch_limits(io: ModelIo, limits: BatchLimits) -> (NativeLogStore<ModelIo>, Raft) {
     let mut store = NativeLogStore::create(io, identity(1), LogLimits::default()).unwrap();
     append(&mut store, vec![LogMutation::Create(bootstrap(1, 1))]);
     let mut core = Raft::recover(
@@ -15,11 +26,7 @@ fn setup(io: ModelIo) -> (NativeLogStore<ModelIo>, Raft) {
         store.limits(),
     )
     .unwrap();
-    core.configure_batch_limits(BatchLimits {
-        max_proposal_entries: 4096,
-        max_replication_entries: 1024,
-    })
-    .unwrap();
+    core.configure_batch_limits(limits).unwrap();
     let effects = core.step(Event::Campaign).unwrap();
     settle(&mut core, &mut store, effects);
     let effects = core

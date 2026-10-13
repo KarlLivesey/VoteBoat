@@ -1,0 +1,50 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.35s
+     Running tests/effect_owner.rs (target/p9/slice421-checks/debug/deps/effect_owner-4f003f5204247ed2)
+
+running 16 tests
+test peer_driver::receive_fairness::saturated_data_message_credit_rotates_between_ready_peers ... ok
+test read_invocations::lagging_ready_read_retries_and_cancelled_wait_does_not_execute_query ... ok
+test peer_driver::receive_fairness::saturated_background_receive_credit_rotates_between_ready_peers ... ok
+test client_admission::ready_batch::wrapper::checks::written_failure_keeps_every_wrapped_original_unknown ... ok
+test client_admission::ready_batch::wrapper::plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds ... ok
+test client_admission::ready_batch::ready_native_admissions_share_persist_but_keep_every_original_result ... ok
+test read_invocations::cancellation_before_read_step_keeps_capacity_and_cancels_ready_without_catchup ... ok
+test client_admission::ready_batch::wrapper::checks::retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome ... ok
+test client_admission::ready_batch::per_poll_original_step_budget_does_not_expand_with_batch_size ... ok
+test client_admission::ready_batch::wrapper::checks::maintenance_wrapper_keeps_actual_capability_and_singleton_data_order ... ok
+test client_admission::ready_batch::failure_after_written_leaves_all_batched_results_unknown_and_releases_on_observation ... ok
+test client_admission::ready_batch::budget::tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving ... ok
+test client_admission::ready_batch::canceling_one_batched_observation_does_not_cancel_other_commands ... ok
+test client_admission::ready_batch::context::default_host_context_is_rechecked_after_original_singleton_durability ... ok
+test client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton ... ok
+test client_admission::ready_batch::every_native_quantum_preserves_unknown_after_written_for_all_selected_originals ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 187 filtered out; finished in 0.01s
+
+     Running tests/log_store.rs (target/p9/slice421-checks/debug/deps/log_store-855dfb50313f8bca)
+
+running 1 test
+test batch_limits::ready_items::every_ready_quantum_preserves_exact_power_loss_frontier_for_proposal_and_commit ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.01s
+
+     Running tests/runtime.rs (target/p9/slice421-checks/debug/deps/runtime-788a8e30dac3bf63)
+
+running 3 tests
+
+thread 'ready_quantum::every_native_quantum_keeps_control_data_background_and_group_fairness' (2657269) panicked at tests/runtime/ready_quantum.rs:22:10:
+called `Result::unwrap()` on an `Err` value: SchedulerContract
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test host_ready_deadline_clock_and_entropy_contracts ... ok
+test ready_quantum::every_native_quantum_keeps_control_data_background_and_group_fairness ... FAILED
+test leader_contact_invalidates_an_election_already_queued_for_dispatch ... ok
+
+failures:
+
+failures:
+    ready_quantum::every_native_quantum_keeps_control_data_background_and_group_fairness
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 52 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test runtime`

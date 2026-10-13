@@ -1,5 +1,10 @@
 # Concurrent framework comparison
 
+[Comparison conditions and capacity-unit correction](COMPARISON.md) are required
+before a like-for-like capacity claim. The existing4096/64 API configuration
+numbers count messages in OpenRaft and original entries in VoteBoat; batch4 does
+not yet have an equal original-entry envelope. Raw earlier records are preserved.
+
 Standalone benchmark workspace; comparison dependencies stay outside VoteBoat
 production. The frozen baseline passed Linux/macOS scoped checks and short
 primary diagnostics. The startup batch-limits update passes eight Linux tests,

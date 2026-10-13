@@ -1,0 +1,112 @@
+[
+  {
+    "kind": "native",
+    "target": "voteboat",
+    "original": "/tmp/voteboat-mac419-7511e5e/target-native-release/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-mac419-7511e5e/artifacts/native/libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "d6c600f97cefa08f1b9d74c11e4cbf10faddbd923e04631e25f8e031f2feacca",
+    "compiler_fresh": false,
+    "compiler_source": "/tmp/voteboat-mac419-7511e5e/source/src/lib.rs",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac419-7511e5e/source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac419-7511e5e/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/tmp/voteboat-mac419-7511e5e/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac419-7511e5e/target-native-release/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+        "/tmp/voteboat-mac419-7511e5e/target-native-release/release/deps/libvoteboat-ca76d170795d1aa6.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "kind": "native",
+    "target": "native_benchmark",
+    "original": "/tmp/voteboat-mac419-7511e5e/target-native-release/release/examples/native_benchmark",
+    "copy": "/tmp/voteboat-mac419-7511e5e/artifacts/native/native_benchmark",
+    "sha256": "20ced0fedb257298fdf604646acd745cb5c7da10409dda1dd8ed7fce5bc65b8c",
+    "compiler_fresh": false,
+    "compiler_source": "/tmp/voteboat-mac419-7511e5e/source/examples/native_benchmark.rs",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac419-7511e5e/source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac419-7511e5e/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_benchmark",
+        "src_path": "/tmp/voteboat-mac419-7511e5e/source/examples/native_benchmark.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac419-7511e5e/target-native-release/release/examples/native_benchmark"
+      ],
+      "executable": "/tmp/voteboat-mac419-7511e5e/target-native-release/release/examples/native_benchmark",
+      "fresh": false
+    }
+  }
+]

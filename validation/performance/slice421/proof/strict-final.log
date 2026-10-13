@@ -1,0 +1,21 @@
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0107]: missing generics for enum `voteboat::connect::ConnectDirection`
+   --> examples/benchmark/shared.rs:540:23
+    |
+540 | ) -> BTreeMap<NodeId, ConnectDirection> {
+    |                       ^^^^^^^^^^^^^^^^ expected 1 generic argument
+    |
+note: enum defined here, with 1 generic parameter: `E`
+   --> src/connect.rs:22:10
+    |
+ 22 | pub enum ConnectDirection<E> {
+    |          ^^^^^^^^^^^^^^^^ -
+help: add missing generic argument
+    |
+540 | ) -> BTreeMap<NodeId, ConnectDirection<E>> {
+    |                                       +++
+
+For more information about this error, try `rustc --explain E0107`.
+error: could not compile `voteboat` (example "native_benchmark") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (example "native_benchmark" test) due to 1 previous error

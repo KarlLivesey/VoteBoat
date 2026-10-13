@@ -66,6 +66,8 @@ mod failure;
 mod observe;
 #[path = "benchmark/offered.rs"]
 mod offered;
+#[path = "benchmark/ready_items.rs"]
+mod ready_items;
 const WARMUP: usize = 64;
 fn checked<T, E: std::fmt::Debug>(v: Result<T, E>) -> Result<T, Failure> {
     v.map_err(|e| format!("{e:?}").into())
@@ -118,7 +120,7 @@ fn open(
     capacity: usize,
     clock: &Instant,
 ) -> Result<Vec<Replica>, Failure> {
-    open_recorded(root, mode, protocol, capacity, clock, false).map(|(nodes, _)| nodes)
+    open_recorded(root, mode, protocol, capacity, clock, false, 16).map(|(nodes, _)| nodes)
 }
 fn open_recorded(
     root: &Path,
@@ -127,6 +129,7 @@ fn open_recorded(
     capacity: usize,
     clock: &Instant,
     record: bool,
+    ready_visit_items: usize,
 ) -> Result<(Vec<Replica>, Vec<observe::Trace>), Failure> {
     let reservations = (0..3)
         .map(|_| {
@@ -182,6 +185,7 @@ fn open_recorded(
             tls: tls(n),
             entropy_seed: n + 17,
             limits: NodeLimits::default(),
+            ready_visit_items,
         };
         let timers = TimerConfig {
             heartbeat_ms: 50,
@@ -696,9 +700,14 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
 }
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+    let selected_ready_items = ready_items::extract(&mut args)?;
     if args.first().is_some_and(|arg| arg == "--lanes") {
+        if selected_ready_items.is_some() {
+            return Err("--ready-items is unsupported with --lanes".into());
+        }
         return lanes::run(&args[1..]);
     }
+    let ready_visit_items = selected_ready_items.unwrap_or(16);
     let journal_timings = args.last().is_some_and(|arg| arg == "--journal-timings");
     if journal_timings {
         args.pop();
@@ -708,7 +717,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..32) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -779,14 +788,43 @@ fn main() -> Result<(), Failure> {
         shared,
         offered_rate,
         maintenance,
+        ready_visit_items,
     };
-    if shared {
-        run(config, &clock, |mode| {
-            shared::open(root, mode, protocol, capacity, &clock, groups)
+    run_selected(config, &clock, capacity, journal_timings)
+}
+fn run_selected(
+    config: RunConfig<'_>,
+    clock: &Instant,
+    capacity: usize,
+    journal_timings: bool,
+) -> Result<(), Failure> {
+    let root = config.root;
+    let protocol = config.protocol;
+    let groups = config.groups;
+    let ready_visit_items = config.ready_visit_items;
+    if config.shared {
+        run(config, clock, |mode| {
+            shared::open(
+                root,
+                mode,
+                protocol,
+                capacity,
+                clock,
+                groups,
+                ready_visit_items,
+            )
         })
     } else {
-        run(config, &clock, |mode| {
-            open_recorded(root, mode, protocol, capacity, &clock, journal_timings)
+        run(config, clock, |mode| {
+            open_recorded(
+                root,
+                mode,
+                protocol,
+                capacity,
+                clock,
+                journal_timings,
+                ready_visit_items,
+            )
         })
     }
 }
@@ -799,6 +837,7 @@ struct RunConfig<'a> {
     shared: bool,
     offered_rate: Option<usize>,
     maintenance: Option<offered::MaintenanceConfig>,
+    ready_visit_items: usize,
 }
 fn run<L: LogStore + Send + 'static>(
     config: RunConfig<'_>,
@@ -817,6 +856,7 @@ fn run<L: LogStore + Send + 'static>(
         shared,
         offered_rate: _,
         maintenance: _,
+        ready_visit_items: _,
     } = config;
     let capacity = count + WARMUP;
     std::fs::create_dir(root)?;
@@ -1044,7 +1084,8 @@ fn report_run(
     } else {
         ""
     };
-    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic}\n",
+    let ready_settings = ready_items::settings(config.ready_visit_items);
+    let summary = format!("protocol={protocol:?} replicas=3 groups={groups} assembly={} leader_placement={} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms={election_ms} election_spread_ms={election_ms} payload_bytes=8 warmup={WARMUP} operations={count} window={window} max_inflight={} elapsed_s={:.6} applied_ops_s={:.3} p50_us={:.3} p95_us={:.3} p99_us={:.3} max_us={:.3} recovered_value={capacity} recovery_retries={recovery_retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3} persistence_batches={} worker_events={} application_deliveries={}{diagnostic} {ready_settings}\n",
         if shared { "shared" } else { "startup" }, placement, measured.max_inflight, measured.elapsed.as_secs_f64(), count as f64 / measured.elapsed.as_secs_f64(), percentile(50), percentile(95), percentile(99), *latency.last().unwrap() as f64 / 1000., measured.polls.rounds, measured.polls.host_ns as f64 / 1e6, measured.polls.max_host_ns as f64 / 1e6, measured.polls.persistence_batches, measured.polls.worker_events, measured.polls.application_deliveries);
     let mut output = exclusive(&root.join("summary.txt"))?;
     output.write_all(summary.as_bytes())?;

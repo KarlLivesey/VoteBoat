@@ -180,6 +180,7 @@ fn startup(root: &str, tls: &Path, mode: NativeOpenMode) -> Result<NativeStartup
         peers: BTreeMap::new(),
         entropy_seed: 17,
         limits: NodeLimits::default(),
+        ready_visit_items: 16,
         tls: check(NativeTlsConfig::new(TlsCredentials {
             roots: vec![material(&tls.join("ca.der"))?],
             certificate_chain: vec![material(&tls.join("node1.der"))?],

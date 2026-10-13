@@ -349,6 +349,7 @@ fn startup(
         .unwrap(),
         entropy_seed: 60 + local,
         limits: NodeLimits::default(),
+        ready_visit_items: 16,
     };
     (
         NativeMemberStartup {

@@ -38,6 +38,7 @@ pub(super) fn open(
     capacity: usize,
     clock: &Instant,
     groups: usize,
+    ready_visit_items: usize,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
     open_partition(
         root,
@@ -49,6 +50,7 @@ pub(super) fn open(
             offset: 0,
             groups,
             lane: 1,
+            ready_visit_items,
         },
     )
 }
@@ -58,6 +60,7 @@ pub(super) struct Partition {
     pub offset: usize,
     pub groups: usize,
     pub lane: u64,
+    pub ready_visit_items: usize,
 }
 
 pub(super) fn open_partition(
@@ -69,6 +72,7 @@ pub(super) fn open_partition(
     partition: Partition,
 ) -> Result<(Vec<Replica<SharedLog>>, Vec<Trace>), Failure> {
     if partition.groups == 0
+        || !(1..=64).contains(&partition.ready_visit_items)
         || partition.groups > 32
         || partition.lane == 0
         || partition.lane > 4
@@ -121,6 +125,7 @@ pub(super) fn open_partition(
             bootstraps: &bootstraps,
             addresses: &addresses,
             lane: partition.lane,
+            ready_visit_items: partition.ready_visit_items,
         };
         let (replica, trace) = match setup.open_replica(n) {
             Ok(opened) => opened,
@@ -238,12 +243,13 @@ fn recover_groups(
         snapshots,
     })
 }
-fn timed_shard(
+pub(super) fn timed_shard(
     cores: Vec<voteboat::raft::Raft>,
     owner_id: RuntimeOwner,
     n: u64,
     groups: usize,
     clock: &Instant,
+    ready_visit_items: usize,
 ) -> Result<
     (
         MonoTime,
@@ -255,6 +261,7 @@ fn timed_shard(
         owner_id,
         ShardLimits {
             max_groups: groups,
+            visit_items: ready_visit_items,
             ..ShardLimits::default()
         },
         checked(FairScheduler::new(groups))?,
@@ -399,6 +406,7 @@ struct ClusterSetup<'a> {
     bootstraps: &'a [Bootstrap],
     addresses: &'a BTreeMap<u64, std::net::SocketAddr>,
     lane: u64,
+    ready_visit_items: usize,
 }
 impl ClusterSetup<'_> {
     fn open_replica(&self, n: u64) -> Result<(Replica<SharedLog>, Trace), Failure> {
@@ -435,6 +443,7 @@ impl ClusterSetup<'_> {
             bootstraps,
             addresses,
             lane,
+            ready_visit_items,
         } = *self;
         let directory = root.join(format!("replica{n}"));
         let create = mode == NativeOpenMode::Create;
@@ -469,7 +478,14 @@ impl ClusterSetup<'_> {
         ))?
         .peers()
         .collect::<BTreeMap<_, _>>();
-        let (now, timed) = timed_shard(cores, owner_id, n, bootstraps.len(), clock)?;
+        let (now, timed) = timed_shard(
+            cores,
+            owner_id,
+            n,
+            bootstraps.len(),
+            clock,
+            ready_visit_items,
+        )?;
         let (version, codec) = wire_profile(member)?;
         let (outbound, roster) = peer_io(local, first, last, &remote, now, version)?;
         let Routers {
@@ -507,19 +523,7 @@ impl ClusterSetup<'_> {
                 roster,
                 factory,
                 ingress,
-                routes: remote
-                    .keys()
-                    .map(|p| {
-                        (
-                            *p,
-                            if node(n) < *p {
-                                ConnectDirection::Dial(addresses[&p.get()])
-                            } else {
-                                ConnectDirection::Accept
-                            },
-                        )
-                    })
-                    .collect(),
+                routes: routes(n, &remote, addresses),
             }),
         };
         // Failed construction retains its directory; successful runs join workers explicitly.
@@ -527,6 +531,26 @@ impl ClusterSetup<'_> {
             .map_err(|e| format!("node assembly failed: {:?}", e.reason))?;
         Ok((replica, trace))
     }
+}
+
+fn routes(
+    n: u64,
+    remote: &BTreeMap<NodeId, StoreIdentity>,
+    addresses: &BTreeMap<u64, std::net::SocketAddr>,
+) -> BTreeMap<NodeId, ConnectDirection<std::net::SocketAddr>> {
+    remote
+        .keys()
+        .map(|peer| {
+            (
+                *peer,
+                if node(n) < *peer {
+                    ConnectDirection::Dial(addresses[&peer.get()])
+                } else {
+                    ConnectDirection::Accept
+                },
+            )
+        })
+        .collect()
 }
 
 struct Workers {

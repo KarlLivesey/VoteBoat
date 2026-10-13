@@ -1,0 +1,48 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0027]: pattern does not mention field `ready_visit_items`
+   --> examples/benchmark/shared.rs:437:13
+    |
+437 |           let Self {
+    |  _____________^
+438 | |             root,
+439 | |             mode,
+440 | |             protocol,
+...   |
+445 | |             lane,
+446 | |         } = *self;
+    | |_________^ missing field `ready_visit_items`
+    |
+help: include the missing field in the pattern
+    |
+445 -             lane,
+446 -         } = *self;
+445 +             lane, ready_visit_items } = *self;
+    |
+help: if you don't care about this missing field, you can explicitly ignore it
+    |
+445 -             lane,
+446 -         } = *self;
+445 +             lane, ready_visit_items: _ } = *self;
+    |
+help: or always ignore missing fields here
+    |
+445 -             lane,
+446 -         } = *self;
+445 +             lane, .. } = *self;
+    |
+
+error[E0063]: missing field `ready_visit_items` in initializer of `shared::ClusterSetup<'_>`
+   --> examples/benchmark/shared_drain.rs:202:17
+    |
+202 |                 ClusterSetup {
+    |                 ^^^^^^^^^^^^ missing `ready_visit_items`
+
+error[E0063]: missing field `ready_visit_items` in initializer of `shared::ClusterSetup<'_>`
+  --> examples/benchmark/shared_recovery.rs:76:9
+   |
+76 |         ClusterSetup {
+   |         ^^^^^^^^^^^^ missing `ready_visit_items`
+
+Some errors have detailed explanations: E0027, E0063.
+For more information about an error, try `rustc --explain E0027`.
+error: could not compile `voteboat` (example "native_benchmark" test) due to 3 previous errors

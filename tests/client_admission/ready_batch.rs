@@ -196,3 +196,45 @@ fn failure_after_written_leaves_all_batched_results_unknown_and_releases_on_obse
     assert!(clients.is_drained());
     assert_eq!(apps[&group(1)].applied_index(), 1);
 }
+
+#[test]
+fn every_native_quantum_preserves_unknown_after_written_for_all_selected_originals() {
+    for items in [1, 16, 32, 64] {
+        let (mut owner, mut worker, mut clients, _, apps) = setup_with_visit_items(1, items, items);
+        let tickets: Vec<_> = (1..=items)
+            .map(|id| {
+                clients
+                    .submit(&mut owner, &apps[&group(1)], request(1, id as u128, 1))
+                    .unwrap()
+            })
+            .collect();
+        let steps = clients
+            .advance(&mut owner, MonoTime(400), items, |g| apps.get(&g))
+            .unwrap();
+        assert_eq!(steps.len(), items);
+        assert!(steps.iter().all(|step| step.visit == steps[0].visit));
+        let persist = owner.take_effect().unwrap().unwrap();
+        owner
+            .submit_persists(&mut worker, vec![persist], MonoTime(400))
+            .unwrap();
+        let written = worker.poll(1).pop().unwrap();
+        assert!(matches!(written, WorkerEvent::Written { .. }));
+        owner.deliver_worker(written, MonoTime(400)).unwrap();
+        assert!(clients.poll().is_none());
+        worker.fail = true;
+        assert!(owner
+            .deliver_worker(worker.poll(1).pop().unwrap(), MonoTime(400))
+            .is_err());
+        clients.reconcile(&owner, items).unwrap();
+        for ticket in tickets {
+            let completion = clients.poll().unwrap();
+            assert_eq!(completion.ticket(), ticket);
+            assert!(matches!(
+                clients.complete(completion).unwrap(),
+                ClientOutcome::Unknown(ClientUnknown::OwnerFailed)
+            ));
+        }
+        assert!(clients.is_drained());
+        assert_eq!(apps[&group(1)].applied_index(), 1);
+    }
+}

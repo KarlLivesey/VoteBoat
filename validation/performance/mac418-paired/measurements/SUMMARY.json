@@ -1,0 +1,220 @@
+{
+  "primary": [
+    {
+      "clients": 1,
+      "batch": 1,
+      "variants": {
+        "baseline": {
+          "writes_per_second": [
+            66609.43319690945,
+            65615.5506532232,
+            64715.16897550691
+          ],
+          "median_writes_per_second": 65615.5506532232,
+          "p99_ms": [
+            0.029292,
+            0.02875,
+            0.029083
+          ],
+          "median_p99_ms": 0.029083,
+          "leader_checkpoint_counts": [
+            26,
+            26,
+            26
+          ]
+        },
+        "candidate": {
+          "writes_per_second": [
+            66037.08248099063,
+            60770.14681374236,
+            63967.72721965347
+          ],
+          "median_writes_per_second": 63967.72721965347,
+          "p99_ms": [
+            0.028834,
+            0.031541,
+            0.029625
+          ],
+          "median_p99_ms": 0.029625,
+          "leader_checkpoint_counts": [
+            26,
+            26,
+            26
+          ],
+          "paired_vs_baseline_ratios": [
+            0.9914073624643097,
+            0.9261546418304298,
+            0.9884502850307579
+          ],
+          "median_paired_ratio": 0.9884502850307579
+        },
+        "untouched": {
+          "writes_per_second": [
+            11236.125583103949,
+            10816.300929091112,
+            11180.526726743848
+          ],
+          "median_writes_per_second": 11180.526726743848,
+          "p99_ms": [
+            0.122458,
+            0.129833,
+            0.123708
+          ],
+          "median_p99_ms": 0.123708,
+          "leader_checkpoint_counts": [
+            null,
+            null,
+            null
+          ]
+        }
+      }
+    },
+    {
+      "clients": 4096,
+      "batch": 4,
+      "variants": {
+        "baseline": {
+          "writes_per_second": [
+            2163457.6500590085,
+            2508921.15835086,
+            2284087.852969791
+          ],
+          "median_writes_per_second": 2284087.852969791,
+          "p99_ms": [
+            9.88425,
+            8.5325,
+            9.732917
+          ],
+          "median_p99_ms": 9.732917,
+          "leader_checkpoint_counts": [
+            25,
+            25,
+            25
+          ]
+        },
+        "candidate": {
+          "writes_per_second": [
+            2578628.323263026,
+            2709400.693514963,
+            2649074.2418052703
+          ],
+          "median_writes_per_second": 2649074.2418052703,
+          "p99_ms": [
+            7.433541,
+            7.0575,
+            8.237416
+          ],
+          "median_p99_ms": 7.433541,
+          "leader_checkpoint_counts": [
+            25,
+            25,
+            25
+          ],
+          "paired_vs_baseline_ratios": [
+            1.1919014560755066,
+            1.079906670042944,
+            1.1597952497146382
+          ],
+          "median_paired_ratio": 1.1597952497146382
+        },
+        "untouched": {
+          "writes_per_second": [
+            2218688.789998377,
+            2483390.412989842,
+            2154354.4185205577
+          ],
+          "median_writes_per_second": 2218688.789998377,
+          "p99_ms": [
+            8.681333,
+            9.020417,
+            8.78825
+          ],
+          "median_p99_ms": 8.78825,
+          "leader_checkpoint_counts": [
+            null,
+            null,
+            null
+          ]
+        }
+      }
+    }
+  ],
+  "phase": [
+    {
+      "clients": 4096,
+      "batch": 4,
+      "variants": {
+        "baseline": {
+          "writes_per_second": [
+            2653921.2291316907,
+            2574462.2301370404,
+            2523471.4751082687
+          ],
+          "median_writes_per_second": 2574462.2301370404,
+          "p99_ms": [
+            7.955542,
+            7.806,
+            8.421167
+          ],
+          "median_p99_ms": 7.955542,
+          "leader_checkpoint_counts": [
+            203,
+            204,
+            204
+          ]
+        },
+        "off": {
+          "writes_per_second": [
+            3063175.4193844143,
+            2805666.801776645,
+            2795033.7164856233
+          ],
+          "median_writes_per_second": 2805666.801776645,
+          "p99_ms": [
+            6.073,
+            6.61475,
+            6.762167
+          ],
+          "median_p99_ms": 6.61475,
+          "leader_checkpoint_counts": [
+            204,
+            204,
+            204
+          ],
+          "paired_vs_baseline_ratios": [
+            1.1542073614545911,
+            1.0898069386814415,
+            1.1076145476800776
+          ],
+          "median_paired_ratio": 1.1076145476800776
+        },
+        "on": {
+          "writes_per_second": [
+            2917712.759685614,
+            2960940.865209717,
+            2862451.8866881956
+          ],
+          "median_writes_per_second": 2917712.759685614,
+          "p99_ms": [
+            6.851,
+            6.320875,
+            6.603
+          ],
+          "median_p99_ms": 6.603,
+          "leader_checkpoint_counts": [
+            204,
+            204,
+            204
+          ],
+          "paired_vs_baseline_ratios": [
+            1.099396895302816,
+            1.1501201418100058,
+            1.1343309860736124
+          ],
+          "median_paired_ratio": 1.1343309860736124,
+          "median_paired_vs_off": 1.0241207001564696
+        }
+      }
+    }
+  ]
+}

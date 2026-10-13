@@ -37,6 +37,8 @@ mod maintenance;
 mod multi;
 #[path = "startup/peer_rotation.rs"]
 mod peer_rotation;
+#[path = "startup/ready_items.rs"]
+mod ready_items;
 #[path = "startup/shutdown_clock.rs"]
 mod shutdown_clock;
 #[path = "startup/timing_profile.rs"]
@@ -141,6 +143,7 @@ fn config(directory: PathBuf, mode: NativeOpenMode) -> NativeStartup {
         peers: BTreeMap::new(),
         entropy_seed: 17,
         limits: NodeLimits::default(),
+        ready_visit_items: 16,
         tls: NativeTlsConfig::new(TlsCredentials {
             roots: vec![include_bytes!("fixtures/tls/ca.der").to_vec()],
             certificate_chain: vec![include_bytes!("fixtures/tls/node1.der").to_vec()],
@@ -164,7 +167,11 @@ fn drive(n: &mut NativeNode<HostApplication>, done: impl Fn(&NativeNode<HostAppl
         std::thread::park_timeout(Duration::from_millis(1));
     }
 }
-fn close(mut n: NativeNode<HostApplication>) {
+fn close<A>(mut n: NativeNode<A>)
+where
+    A: ProposalAdmission + BoundedReadableStateMachine + CheckpointStateMachine,
+    A::Receipt: ApplicationReceipt,
+{
     // Each helper invocation starts a new local clock domain only after a complete open.
     // Use a forward time for shutdown following the earlier drive's elapsed milliseconds.
     n.begin_shutdown();

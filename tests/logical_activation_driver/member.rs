@@ -131,6 +131,7 @@ impl Member {
                     .unwrap(),
                 entropy_seed: id * 17,
                 limits: NodeLimits::default(),
+                ready_visit_items: 16,
             },
             provisioned_stores: (1..=4)
                 .map(|id| (support::node(id), support::identity(id.into())))

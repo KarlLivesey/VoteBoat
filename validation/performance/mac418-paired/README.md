@@ -1,0 +1,14 @@
+M2 Max compares frozen `355cfa6` (Core 415 + matching 417 observer harness) with `32217ae` (418 compaction). The standalone harness sources and policies match; primary attribution is off. All 18 primary and 9 separate phase cases passed original completion, applied-frontier, capacity, weighted-proposal and source/library/executable guards. Original runner 61157 / remote PID 85397 completed once with exit 0. All raw attempts are retained.
+
+| Primary cell | Before → after originals/s | Median paired ratio | Before → after p99 ms |
+| --- | ---: | ---: | ---: |
+| 1 client, batch 1 | 65,616 → 63,968 | 0.988× | 0.02908 → 0.02963 |
+| 4,096 clients, batch 4 | 2,284,088 → 2,649,074 | 1.160× | 9.733 → 7.434 |
+
+Primary runs measured 131,072 originals after 1,024 warmup originals, in three interleaved paired trials. Untouched pinned OpenRaft medians were 11,181 and 2,218,689 originals/s for these two cells. Every singleton pair regressed (−0.9%, −7.4%, −1.2%); every bulk pair improved (+19.2%, +8.0%, +16.0%). Ratios are medians of paired trials; absolute rates and p99 are medians of their respective values. Retain both forms rather than treating one median as a confidence interval. All leader runs performed 25–26 checkpoints, so the compaction path was active.
+
+The separate 1,048,576-original bulk diagnostic performed 203–204 leader checkpoints. TRACE-off rates changed 2,574,462 → 2,805,667/s (median paired 1.108×), with p99 7.956 → 6.615 ms. Candidate TRACE-on median was 2,917,713/s and p99 6.603 ms; its paired on/off ratios vary in both directions (median 1.024×). This short diagnostic does not establish instrumentation overhead or a speedup from instrumentation. All phase counters passed scope and original-count checks. Durations cover the whole actor lifetime, include campaign/warmup/drain/shutdown, nest, and overlap between replicas: do not sum them or interpret them as exclusive CPU cost or a demonstrated throughput cause.
+
+This is volatile, zero-payload, in-process quorum/application framework work, with bounded two-cell short runs. It does not measure durable network service throughput or qualify the published OpenRaft floor. Native 24 was deliberately deferred: 256 measured originals would never reach the native 5,000-entry checkpoint, so it would not exercise 418 compaction; actual Mac native compaction/recovery/maintenance was qualified separately.
+
+Fresh asserted-release root-library and executable compiler records, exact source maps and full hashes are linked in [417 baseline proof](../mac417-baseline/README.md) and [418 qualification](../mac418/README.md). Matched profiles use opt3, assertions/overflow enabled, thin LTO and one codegen unit. `measurements/RAW_FILES.json` verifies all 158 original transferred records; `SUMMARY.json` retains every numeric trial. `EVIDENCE.json` covers all publication files. No executable, rlib, source checkout or build tree is published here.

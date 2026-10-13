@@ -1,0 +1,24 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (target/p9/slice421-checks/debug/deps/voteboat-44fab20fa9e5fda9)
+
+running 17 tests
+test native::startup::ready_items::ready_visit_selection_changes_only_quantum_and_keeps_derived_resource_floors ... ok
+test runtime::ready_batch::tests::batch_reservation_charges_aggregate_input_and_selected_original_metadata ... ok
+test runtime::ready_batch::tests::small_core_batch_limit_never_changes_legacy_singleton_acceptance ... ok
+test runtime::ready_batch::tests::duplicate_operation_ids_keep_distinct_original_admissions_and_ordinal_positions ... ok
+test runtime::ready_batch::tests::routine::boundaries::later_original_refusal_remains_queued_with_routine_control_untouched ... ok
+test runtime::ready_batch::tests::routine::budgets::byte_budget_and_expired_visit_leave_routine_control_and_originals_bounded ... ok
+test runtime::ready_batch::tests::first_failure_and_declined_second_keep_legacy_singleton_execution ... ok
+test runtime::ready_batch::tests::four_ready_originals_share_one_suffix_keep_positions_and_hold_all_credits ... ok
+test runtime::ready_batch::tests::routine::two_control_turns_then_bounded_data_quantum_preserve_cursor_and_next_control ... ok
+test runtime::ready_batch::tests::failed_later_candidate_stays_queued_and_first_check_is_never_repeated ... ok
+test runtime::ready_batch::tests::routine::outcomes::deferred_heartbeat_batch_preserves_duplicate_conflict_and_original_application_outcomes ... ok
+test runtime::ready_batch::tests::original_output_and_visit_item_limits_cap_the_same_preview_and_collection ... ok
+test runtime::ready_batch::tests::nonproposal_untracked_and_protected_queues_are_boundaries ... ok
+test runtime::ready_batch::tests::routine::selected_data_batch_defers_same_term_reply_without_consuming_or_trusting_it ... ok
+test runtime::ready_batch::tests::routine::boundaries::protected_event_behind_routine_head_or_background_still_prevents_coalescing ... ok
+test runtime::ready_batch::tests::visit_bytes_and_hard_batch_count_are_independent_caps ... ok
+test runtime::ready_batch::tests::routine::budgets::routine_control_does_not_expand_per_core_visit_or_output_count_bounds ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 351 filtered out; finished in 0.00s
+

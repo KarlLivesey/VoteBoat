@@ -1,7 +1,8 @@
-# Slice 421 proposal: explicit native ready quantum
+# Slice 421: explicit native ready quantum
 
-Status: read-only source review and schema only. Slice 419 source remains frozen;
-no implementation, builds, host copies or timing are authorized by this document.
+Status: implementation authorized and implemented; focused qualification is in
+progress. This schema states contracts and planned acceptance, while README.md
+records actual checked scope. No throughput improvement is claimed here.
 Purpose: allow native startup to choose a bounded 32/64-item ready visit instead
 of the current hardcoded 16, increasing useful originals per proposal/barrier.
 The measured 16-wide visits/32 barriers for 256 writes motivate this experiment;
@@ -14,8 +15,8 @@ literal constructors selecting 16. It sets the whole visit's original item quant
 including consumed control/background turns; it is not a promised Data batch width.
 NodeLimits remains separate: it configures replica-driver/peer/configuration routing, not the
 Shard's queues, original visit quantum or class cursor. NativeMemberStartup and
-NativeMultiStartup already contain NativeStartup and inherit this choice. About
-30 current NativeStartup literals require explicit default initialization.
+NativeMultiStartup already contain NativeStartup and inherit this choice. Existing
+NativeStartup literal constructors explicitly initialize the unchanged default16.
 
 Native startup validates this scalar in `1..=64`, using the unchanged Core default
 max_proposal_entries=64, before binding listeners, opening files or starting worker
@@ -72,7 +73,7 @@ and follower/maintenance work remains real and present.
 
 ## Explicit benchmark opt-in
 
-Proposed additive `--ready-items 1|16|32|64` option, default16, parsed/validated before
+Implemented additive `--ready-items 1|16|32|64` option, default16, parsed/validated before
 fresh directory creation or endpoint reservations. Preserve the existing TCP/QUIC,
 window1..32, warmup64, offered/maintenance and journal-timing modes. Propagate the
 choice both through real NativeStartup and the existing shared manual Shard assembly,

@@ -109,6 +109,7 @@ impl Host {
                 tls,
                 entropy_seed: 1,
                 limits: NodeLimits::default(),
+                ready_visit_items: 16,
             },
             additional_groups: profile().participants().map(boot).to_vec(),
             provisioned_stores: BTreeMap::from([(node, store)]),

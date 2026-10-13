@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --test startup --test native_member_startup --test runtime --test effect_owner --test log_store --test maintenance --test leadership_maintenance -- --test-threads=1 

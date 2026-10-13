@@ -1,6 +1,9 @@
-# Slice 421 read-only implementation map
+# Slice 421 implementation map
 
-## Current source facts
+This reviewed map preceded implementation; paths identify existing propagation
+joints rather than a line-stable final diff. Actual checks are in README.md.
+
+## Reviewed source facts
 
 | Path | Current role / change point |
 | --- | --- |
@@ -59,7 +62,7 @@ are concentrated in native startup plus its current config literals.
 
 ## Effort and decision
 
-Reviewed API: one public NativeStartup.ready_visit_items scalar, ~30 literal default
+Reviewed API: one public NativeStartup.ready_visit_items scalar, existing literal default
 updates selecting16, common helper propagation into ShardLimits.visit_items, pure
 range validation before resources in legacy/ordinary/member/multi/enrollment paths,
 and one benchmark flag threaded through startup/shared/recovery settings.

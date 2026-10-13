@@ -89,6 +89,7 @@ impl Cluster {
                 .unwrap(),
             entropy_seed: id * 17,
             limits: NodeLimits::default(),
+            ready_visit_items: 16,
         }
     }
     pub fn open(&mut self, mode: NativeOpenMode) {

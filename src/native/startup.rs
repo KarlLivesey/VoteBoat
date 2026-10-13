@@ -35,6 +35,8 @@ use std::{collections::BTreeMap, net::SocketAddr, net::TcpListener, path::PathBu
 mod multi;
 mod owner_limits;
 mod peer_rotation;
+#[cfg(test)]
+mod ready_items;
 mod timing_profile;
 pub use multi::*;
 pub use peer_rotation::NativePeerRotationStartup;
@@ -66,6 +68,10 @@ pub struct NativeStartup {
     pub tls: NativeTlsConfig,
     pub entropy_seed: u64,
     pub limits: NodeLimits,
+    /// Maximum original items in one runtime visit, including control and
+    /// background turns. Native defaults select 16; this does not promise a
+    /// proposal batch width. Valid startup values are 1..=64.
+    pub ready_visit_items: usize,
 }
 /// Explicit trusted deployment input for reopening a durably assigned member.
 /// Bootstrap remains the original group identity/history. Provisioned stores
@@ -534,6 +540,7 @@ impl NativeStartup {
         &self,
         stores: &BTreeMap<NodeId, StoreIdentity>,
     ) -> Result<(), NativeStartupError> {
+        validate_ready_items(self.ready_visit_items)?;
         if stores.len() > 1024
             || self
                 .bootstrap
@@ -971,7 +978,7 @@ fn validate_storage_selection(
 ) -> Result<(), NativeStartupError> {
     let limits = checked(limits.validate())?;
     let worker = startup_worker_limits(limits)?;
-    startup_shard_limits(limits, 1)?;
+    startup_shard_limits(limits, 1, config.ready_visit_items)?;
     if worker.batch_units > limits.max_batch_units || worker.batch_bytes > limits.max_batch_bytes {
         return Err(error(
             "storage limits",
@@ -990,9 +997,21 @@ fn startup_worker_limits(limits: LogLimits) -> Result<WorkerLimits, NativeStartu
     worker.max_bytes = worker.max_bytes.max(ordinary_and_control);
     checked(worker.validate())
 }
-fn startup_shard_limits(log: LogLimits, groups: usize) -> Result<ShardLimits, NativeStartupError> {
+fn validate_ready_items(items: usize) -> Result<(), NativeStartupError> {
+    if !(1..=crate::raft::BatchLimits::default().max_proposal_entries).contains(&items) {
+        return Err(error("runtime limits", "ready visit items outside 1..=64"));
+    }
+    Ok(())
+}
+fn startup_shard_limits(
+    log: LogLimits,
+    groups: usize,
+    ready_visit_items: usize,
+) -> Result<ShardLimits, NativeStartupError> {
+    validate_ready_items(ready_visit_items)?;
     let mut limits = ShardLimits {
         max_groups: groups,
+        visit_items: ready_visit_items,
         ..ShardLimits::default()
     };
     if log.max_batch_bytes > limits.max_event_bytes {
@@ -1178,7 +1197,7 @@ fn prepare_runtime<S: SecureSession>(
         ));
     }
     let group_count = cores.len();
-    let shard_limits = startup_shard_limits(log_limits, group_count)?;
+    let shard_limits = startup_shard_limits(log_limits, group_count, config.ready_visit_items)?;
     let owner_limits =
         owner_limits::startup_owner_limits(&cores, shard_limits.max_event_bytes, log_limits)?;
     let mut shard = checked(Shard::new(

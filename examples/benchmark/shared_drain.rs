@@ -208,6 +208,7 @@ impl Harness {
                     bootstraps: &self.bootstraps,
                     addresses: &self.addresses,
                     lane: 1,
+                    ready_visit_items: 16,
                 }
                 .open_profile(n, None, true)
                 .unwrap()

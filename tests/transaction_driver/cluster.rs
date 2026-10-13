@@ -155,6 +155,7 @@ impl Cluster {
                     .unwrap(),
                 entropy_seed: id * 17,
                 limits: NodeLimits::default(),
+                ready_visit_items: 16,
             },
             additional_groups: bootstraps[1..].to_vec(),
             provisioned_stores: bootstraps[0].voter_stores.clone(),

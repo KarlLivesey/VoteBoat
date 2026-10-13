@@ -144,6 +144,7 @@ impl Members {
                     .unwrap(),
                 entropy_seed: id * 17,
                 limits: NodeLimits::default(),
+                ready_visit_items: 16,
             },
             provisioned_stores: groups::stores(self.slot),
         }

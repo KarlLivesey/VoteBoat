@@ -1,0 +1,20 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0599]: no variant, associated function, or constant named `ProposeBatch` found for enum `voteboat::raft::Event` in the current scope
+  --> tests/log_store/batch_limits/ready_items.rs:24:22
+   |
+24 |         .step(Event::ProposeBatch(
+   |                      ^^^^^^^^^^^^ variant, associated function, or constant not found in `voteboat::raft::Event`
+
+error[E0609]: no field `operation` on type `voteboat::runtime::ProposalPosition`
+  --> tests/startup/ready_items/history.rs:99:33
+   |
+99 |             assert_eq!(position.operation, tickets[offset].operation);
+   |                                 ^^^^^^^^^ unknown field
+   |
+   = note: available fields are: `index`, `term`
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "log_store") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+For more information about this error, try `rustc --explain E0609`.
+error: could not compile `voteboat` (test "startup") due to 1 previous error

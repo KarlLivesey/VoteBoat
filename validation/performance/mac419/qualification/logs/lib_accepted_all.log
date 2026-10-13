@@ -1,0 +1,21 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running unittests src/lib.rs (/tmp/voteboat-mac419-7511e5e/target-root-checks/debug/deps/voteboat-5e6bd92568224565)
+
+running 14 tests
+test native::log_store::accepted::tests::compact::deferred_trim_composes_with_accepted_tail_and_subset_publication ... ok
+test native::log_store::accepted::tests::compact::invalid_later_unit_does_not_trim_or_write_the_earlier_compaction ... ok
+test native::log_store::accepted::tests::compact::trimmed_accepted_view_materializes_exact_configuration_and_replacement_fallback ... ok
+test native::log_store::accepted::tests::configured::configured_delta_uncertainty_fences_and_recovers_complete_transition ... ok
+test native::log_store::accepted::tests::configured::configured_multiple_accepted_deltas_subset_publication_and_full_fallback_recover ... ok
+test native::log_store::accepted::tests::creations_obey_accepted_identity_and_batch_group_limits ... ok
+test native::log_store::accepted::tests::incoming::owned_preparation_retains_original_mutation_ticket_order ... ok
+test native::log_store::accepted::tests::incoming::received_append_payload_moves_into_accepted_tail_and_canonical_after_subset_barrier ... ok
+test native::log_store::accepted::tests::incoming_codec::codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_io ... ok
+test native::log_store::accepted::tests::invalid_later_group_and_stale_summary_refuse_before_any_append ... ok
+test native::log_store::accepted::tests::metadata_update_does_not_allocate_a_second_retained_log ... ok
+test native::log_store::accepted::tests::original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barriers ... ok
+test native::log_store::accepted::tests::replacement_materializes_the_exact_accepted_tail_and_invalidates_old_generation ... ok
+test native::log_store::accepted::tests::uncertain_append_sync_or_publication_does_not_promote_an_overlay ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 353 filtered out; finished in 0.00s
+

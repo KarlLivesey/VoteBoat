@@ -1,0 +1,30 @@
+{
+  "base_commit": "32217aebe6d425f8658fbe8b0a111bfaf4aaca09",
+  "changed": {
+    "benchmarks/matched/src/voteboat_engine/actor/lookahead/control_tests.rs": {
+      "base": null,
+      "candidate": "961e35a4cf317696102132237b8e4d1af77bc5aeae00624be591864783b355aa"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/lookahead/tests.rs": {
+      "base": null,
+      "candidate": "64466006f09fb3a854beb82fca0ce4d9904be5674d9fe89d9721451722f39d02"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/lookahead.rs": {
+      "base": null,
+      "candidate": "872b3b2e9f570e62e17229596cca4c8f1305ba3ee9a3e259b4eca01632624aef"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs": {
+      "base": "60cbc79657f1fd41965f0efdc562f55b43f635dc0da3d907ff231a044c609267",
+      "candidate": "4a301a8bfc82f328f2ad5a06c6e8f69b09b5b48669560d222d45a10b62cd1522"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor.rs": {
+      "base": "c7e627cb9f1fe7da3b49a32fde761f2584d60a93cb77671bbb40bd977ee470dc",
+      "candidate": "fc83ffca841974d2cb41280984dc955f7053c14b7566b784a75734ff2ccef080"
+    },
+    "benchmarks/matched/src/voteboat_engine/stats.rs": {
+      "base": "029b0167456ca8d8a6b9374c0f75ea9d78c03926635ddd212e24bbcc7932c733",
+      "candidate": "3acb26f5fa8475690650fcce44004ad75ba5d35bcc1565c14906933f6db0f771"
+    }
+  },
+  "patch_sha256": "1dec7a740ad7ae77128ddca461d6b69c5b6dc753a12fe1cc12820cd9c2dc68e0"
+}

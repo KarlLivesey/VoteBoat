@@ -39,6 +39,7 @@ pub(super) fn prepare(
         tls: channels::config(id).with_wire_version(8).unwrap(),
         entropy_seed: id * 17,
         limits: NodeLimits::default(),
+        ready_visit_items: 16,
     };
     let parts = startup
         .prepare_for_discovery(

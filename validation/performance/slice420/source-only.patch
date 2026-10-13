@@ -1,0 +1,927 @@
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -8,6 +8,7 @@
+ use std::{collections::VecDeque, mem::size_of, time::Instant};
+ use voteboat::{application::StateMachine, snapshot::*};
+ 
++mod lookahead;
+ #[cfg(test)]
+ mod tests;
+ 
+@@ -37,6 +38,7 @@
+     attribution: Recorder<TRACE>,
+     pending: BTreeMap<OperationId, Reply>,
+     deferred: Option<Request>,
++    lookahead: lookahead::Lookahead,
+     last_snapshot_at: u64,
+     last_contact: Instant,
+ }
+@@ -47,6 +49,7 @@
+             attribution: Recorder::default(),
+             pending: BTreeMap::new(),
+             deferred: None,
++            lookahead: lookahead::Lookahead::default(),
+             last_snapshot_at: 0,
+             last_contact: Instant::now(),
+         }
+@@ -67,43 +70,40 @@
+         if self.parts.slot == 0 {
+             self.step(Event::Campaign)?;
+         }
++        self.drive(&mut tick).await
++    }
++    async fn drive(&mut self, tick: &mut tokio::time::Interval) -> Result<(), Failure> {
+         loop {
+             // Keep stop and already-delivered peer progress ahead of more data.
+-            if let Some(request) = self.deferred.take() {
++            if self.parts.stopping.load(Ordering::Acquire) {
++                return Ok(());
++            }
++            if self.lookahead.len() == 0
++                && self.parts.peer_receiver.is_empty()
++                && self.deferred.is_some()
++            {
++                let request = self.deferred.take().unwrap();
+                 self.requests(request)?;
+-            } else {
+-                let started = Recorder::<TRACE>::start();
+-                tokio::select! {
+-                    biased;
+-                    _ = self.parts.stopped.changed() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+-                        return Ok(());
+-                    }
+-                    message = self.parts.peer_receiver.recv(), if self.accepts_peer() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+-                        let message = message.ok_or("peer actor input closed")?;
+-                        self.last_contact = Instant::now();
+-                        self.step(Event::Receive(message))?;
+-                    }
+-                    request = self.parts.receiver.recv(), if self.accepts_proposals() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+-                        self.requests(request.ok_or("client actor input closed")?)?;
+-                    }
+-                    _ = tick.tick() => {
+-                        self.attribution.finish(Phase::HostWait, started, false, 0)?;
+-                        self.tick()?;
+-                    }
+-                }
++            } else if self.select_turn(tick).await? {
++                return Ok(());
+             }
+             let stats = &self.parts.stats[self.parts.slot];
++            stats.actor_turns.fetch_add(1, Ordering::Relaxed);
+             let retained = self.parts.core.state().entries.len();
+             stats.peak_retained.fetch_max(retained, Ordering::Relaxed);
+             stats
+                 .peak_client_queue
+                 .fetch_max(self.parts.receiver.len(), Ordering::Relaxed);
++            stats.peak_peer_queue.fetch_max(
++                self.parts.peer_receiver.len() + self.lookahead.len(),
++                Ordering::Relaxed,
++            );
+             stats
+-                .peak_peer_queue
+-                .fetch_max(self.parts.peer_receiver.len(), Ordering::Relaxed);
++                .peak_staged_peer_items
++                .fetch_max(self.lookahead.len(), Ordering::Relaxed);
++            stats
++                .peak_staged_peer_bytes
++                .fetch_max(self.lookahead.owned_bytes(), Ordering::Relaxed);
+             self.maintain()?;
+             self.parts.stats[self.parts.slot]
+                 .retained
+@@ -112,6 +112,59 @@
+                 .store(self.parts.application.applied, Ordering::Release);
+         }
+     }
++    async fn select_turn(&mut self, tick: &mut tokio::time::Interval) -> Result<bool, Failure> {
++        let started = Recorder::<TRACE>::start();
++        let courtesy = self.accepts_peer()
++            && self.parts.core.role() == Role::Leader
++            && self.parts.core.local_voter()
++            && !self.parts.core.has_pending_dependency()
++            && self.parts.core.leadership_transfer().is_none()
++            && self.lookahead.timer_courtesy(
++                &self.parts.peer_receiver,
++                self.parts.core.state().hard_state.term,
++            );
++        if courtesy {
++            tokio::select! {
++                biased;
++                _ = self.parts.stopped.changed() => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    return Ok(true);
++                }
++                _ = tick.tick() => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    self.tick()?;
++                }
++                message = self.lookahead.receive(&mut self.parts.peer_receiver) => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    self.last_contact = Instant::now();
++                    self.step(Event::Receive(message.ok_or("peer actor input closed")?))?;
++                }
++            }
++        } else {
++            tokio::select! {
++                biased;
++                _ = self.parts.stopped.changed() => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    return Ok(true);
++                }
++                message = self.lookahead.receive(&mut self.parts.peer_receiver), if self.accepts_peer() => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    let message = message.ok_or("peer actor input closed")?;
++                    self.last_contact = Instant::now();
++                    self.step(Event::Receive(message))?;
++                }
++                request = self.parts.receiver.recv(), if self.accepts_proposals() && self.deferred.is_none() => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    self.requests(request.ok_or("client actor input closed")?)?;
++                }
++                _ = tick.tick() => {
++                    self.attribution.finish(Phase::HostWait, started, false, 0)?;
++                    self.tick()?;
++                }
++            }
++        }
++        Ok(false)
++    }
+     fn accepts_peer(&self) -> bool {
+         #[cfg(test)]
+         {
+@@ -135,6 +188,9 @@
+         }
+     }
+     fn tick(&mut self) -> Result<(), Failure> {
++        self.parts.stats[self.parts.slot]
++            .timer_turns
++            .fetch_add(1, Ordering::Relaxed);
+         let event = if self.parts.core.role() == Role::Leader {
+             Some(Event::Heartbeat)
+         } else if self.last_contact.elapsed() >= Duration::from_millis(2000) {
+@@ -152,7 +208,11 @@
+         if self
+             .parts
+             .core
+-            .effect_reservation(input)
++            .effect_reservation(
++                input
++                    .checked_add(self.lookahead.owned_bytes())
++                    .ok_or("actor input ownership overflow")?,
++            )
+             .is_none_or(|bytes| bytes > u32::MAX as usize)
+         {
+             return Err("core effect reservation exceeds declared4GiB actor budget".into());
+@@ -206,9 +266,10 @@
+     }
+     fn collect(&mut self, first: Request) -> Result<Vec<Proposal>, Failure> {
+         let capacity = self.parts.core.batch_limits().max_proposal_entries;
++        let batch = self.ready_data_quantum()?;
+         let mut proposals = Vec::with_capacity(first.proposals.len());
+         self.include(first, &mut proposals)?;
+-        while proposals.len() < capacity && self.parts.peer_receiver.is_empty() {
++        while batch && proposals.len() < capacity {
+             match self.parts.receiver.try_recv() {
+                 Ok(request) if proposals.len() + request.proposals.len() <= capacity => {
+                     self.include(request, &mut proposals)?;
+@@ -225,6 +286,42 @@
+         }
+         self.reserve(size_of::<Vec<Proposal>>() + proposals.capacity() * size_of::<Proposal>())?;
+         Ok(proposals)
++    }
++    fn ready_data_quantum(&mut self) -> Result<bool, Failure> {
++        let result = self.inspect_data_quantum();
++        let stats = &self.parts.stats[self.parts.slot];
++        stats
++            .data_collection_decisions
++            .fetch_add(1, Ordering::Relaxed);
++        if !matches!(result, Ok(true)) {
++            stats.data_collection_vetoes.fetch_add(1, Ordering::Relaxed);
++        }
++        result
++    }
++    fn inspect_data_quantum(&mut self) -> Result<bool, Failure> {
++        if self.parts.core.role() != Role::Leader
++            || !self.parts.core.local_voter()
++            || self.parts.core.leadership_transfer().is_some()
++            || self.parts.core.has_pending_dependency()
++        {
++            return Ok(false);
++        }
++        let clear = self.lookahead.inspect(
++            &mut self.parts.peer_receiver,
++            self.parts.core.state().hard_state.term,
++        )?;
++        let stats = &self.parts.stats[self.parts.slot];
++        stats
++            .peak_staged_peer_items
++            .fetch_max(self.lookahead.len(), Ordering::Relaxed);
++        stats
++            .peak_staged_peer_bytes
++            .fetch_max(self.lookahead.owned_bytes(), Ordering::Relaxed);
++        stats.peak_peer_queue.fetch_max(
++            self.parts.peer_receiver.len() + self.lookahead.len(),
++            Ordering::Relaxed,
++        );
++        Ok(clear)
+     }
+     fn include(&mut self, request: Request, proposals: &mut Vec<Proposal>) -> Result<(), Failure> {
+         if request.proposals.is_empty()
+--- /dev/null
++++ b/benchmarks/matched/src/voteboat_engine/actor/lookahead.rs
+@@ -0,0 +1,113 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Inspect owned peer inputs without promoting replies or reordering ingress.
++use super::*;
++
++pub(super) const PEER_LOOKAHEAD_ITEMS: usize = 64;
++const ROUTINE_BYTES: usize = 1024 * 1024;
++const OWNER_BYTES: usize = u32::MAX as usize;
++
++pub(super) struct Lookahead {
++    queue: VecDeque<(Message, usize)>,
++    active_bytes: usize,
++    count_limit: usize,
++    routine_bytes: usize,
++}
++impl Default for Lookahead {
++    fn default() -> Self {
++        Self::new(PEER_LOOKAHEAD_ITEMS, ROUTINE_BYTES)
++    }
++}
++impl Lookahead {
++    fn new(count_limit: usize, routine_bytes: usize) -> Self {
++        Self {
++            queue: VecDeque::with_capacity(count_limit),
++            active_bytes: 0,
++            count_limit,
++            routine_bytes,
++        }
++    }
++    pub fn len(&self) -> usize {
++        self.queue.len()
++    }
++    pub fn owned_bytes(&self) -> usize {
++        size_of::<Self>()
++            + self.queue.capacity() * size_of::<(Message, usize)>()
++            + self.active_bytes
++            - self.len() * size_of::<Message>()
++    }
++    fn routine(message: &Message, term: u64) -> bool {
++        message.term == term && matches!(message.rpc, Rpc::Appended { .. })
++    }
++    pub fn inspect(
++        &mut self,
++        receiver: &mut mpsc::Receiver<Message>,
++        term: u64,
++    ) -> Result<bool, Failure> {
++        while self.queue.len() < self.count_limit && self.active_bytes < self.routine_bytes {
++            let message = match receiver.try_recv() {
++                Ok(message) => message,
++                Err(mpsc::error::TryRecvError::Empty) => break,
++                Err(mpsc::error::TryRecvError::Disconnected) => {
++                    return Err("peer actor input closed".into())
++                }
++            };
++            let cost = voteboat::outbound::message_cost(&message, OWNER_BYTES)
++                .map_err(debug_error)?
++                .1;
++            let active = self
++                .active_bytes
++                .checked_add(cost)
++                .ok_or("peer lookahead bytes overflow")?;
++            let payload = active
++                .checked_sub((self.queue.len() + 1) * size_of::<Message>())
++                .ok_or("peer lookahead accounting")?;
++            let owned = (size_of::<Self>() + self.queue.capacity() * size_of::<(Message, usize)>())
++                .checked_add(payload)
++                .ok_or("peer lookahead ownership overflow")?;
++            if owned > OWNER_BYTES {
++                return Err("peer lookahead actor ownership exceeded".into());
++            }
++            let routine = Self::routine(&message, term);
++            self.queue.push_back((message, cost));
++            self.active_bytes = active;
++            if !routine || active > self.routine_bytes {
++                break;
++            }
++        }
++        Ok(receiver.is_empty()
++            && self.active_bytes <= self.routine_bytes
++            && self
++                .queue
++                .iter()
++                .all(|(message, _)| Self::routine(message, term)))
++    }
++    pub fn timer_courtesy(&self, receiver: &mpsc::Receiver<Message>, term: u64) -> bool {
++        !self.queue.is_empty()
++            && receiver.is_empty()
++            && self.active_bytes <= self.routine_bytes
++            && self
++                .queue
++                .iter()
++                .all(|(message, _)| Self::routine(message, term))
++    }
++    fn pop(&mut self) -> Option<Message> {
++        self.queue.pop_front().map(|(message, cost)| {
++            self.active_bytes -= cost;
++            message
++        })
++    }
++    pub async fn receive(&mut self, receiver: &mut mpsc::Receiver<Message>) -> Option<Message> {
++        if let Some(message) = self.pop() {
++            Some(message)
++        } else {
++            receiver.recv().await
++        }
++    }
++}
++
++#[cfg(test)]
++mod tests;
++
++#[cfg(test)]
++mod control_tests;
+--- /dev/null
++++ b/benchmarks/matched/src/voteboat_engine/actor/lookahead/control_tests.rs
+@@ -0,0 +1,254 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::super::tests::ready_actor;
++use super::tests::reply;
++use super::*;
++
++fn request(first: u128, count: usize) -> (Request, Vec<oneshot::Receiver<OperationId>>) {
++    let mut proposals = Vec::new();
++    let mut replies = Vec::new();
++    let mut waits = Vec::new();
++    for value in first..first + count as u128 {
++        let (sender, receiver) = oneshot::channel();
++        proposals.push(Proposal {
++            operation: OperationId::new(value).unwrap(),
++            bytes: Vec::new(),
++        });
++        replies.push(sender);
++        waits.push(receiver);
++    }
++    (Request { proposals, replies }, waits)
++}
++fn persist<const TRACE: bool>(
++    core: &mut Raft,
++    store: &mut MemoryStore<TRACE>,
++    app: &mut Noop,
++    initial: Vec<Effect>,
++) -> Vec<Message> {
++    let mut queue = VecDeque::from(initial);
++    let mut sends = Vec::new();
++    while let Some(effect) = queue.pop_front() {
++        match effect {
++            Effect::Persist(update) => queue.extend(persist_effect(core, store, update).unwrap()),
++            Effect::Committed(entries) => {
++                app.apply_batch(&entries).unwrap();
++            }
++            Effect::Send(message) => sends.push(message),
++            _ => panic!("unexpected election fixture effect"),
++        }
++    }
++    sends
++}
++fn follower_reply(mut request: Message, rpc: Rpc) -> Message {
++    let b = bootstrap().unwrap();
++    request.from = request.to;
++    request.to = NodeId::new(1).unwrap();
++    request.sender = StoreBinding {
++        identity: b.voter_stores[&request.from],
++        session: StoreSession::new(1).unwrap(),
++    };
++    request.rpc = rpc;
++    request
++}
++fn majority_actor<const TRACE: bool>() -> (
++    Actor<TRACE>,
++    mpsc::Sender<Request>,
++    Vec<mpsc::Receiver<Message>>,
++) {
++    let (mut actor, client) = ready_actor::<TRACE>(crate::Envelopes::UpstreamDefault);
++    let b = bootstrap().unwrap();
++    let binding = actor.parts.store.binding();
++    let limits = LogLimits::default();
++    let mut store = MemoryStore::<TRACE>::new(binding, limits, b.clone()).unwrap();
++    let mut core = Raft::recover(
++        NodeId::new(1).unwrap(),
++        binding,
++        store.state(b.group).unwrap(),
++        limits,
++    )
++    .unwrap();
++    core.configure_batch_limits(crate::Envelopes::UpstreamDefault.voteboat_limits())
++        .unwrap();
++    let mut app = Noop {
++        group: b.group,
++        applied: 0,
++    };
++    let effects = core.step(Event::Campaign).unwrap();
++    let vote = persist(&mut core, &mut store, &mut app, effects)
++        .into_iter()
++        .find(|m| m.to == NodeId::new(2).unwrap())
++        .unwrap();
++    let effects = core
++        .step(Event::Receive(follower_reply(
++            vote,
++            Rpc::Voted { granted: true },
++        )))
++        .unwrap();
++    let append = persist(&mut core, &mut store, &mut app, effects)
++        .into_iter()
++        .find(|m| m.to == NodeId::new(2).unwrap() && matches!(m.rpc, Rpc::Append { .. }))
++        .unwrap();
++    let effects = core
++        .step(Event::Receive(follower_reply(
++            append,
++            Rpc::Appended {
++                success: true,
++                matching_index: 1,
++            },
++        )))
++        .unwrap();
++    let final_sent = persist(&mut core, &mut store, &mut app, effects);
++    assert_eq!(core.role(), Role::Leader);
++    assert_eq!(app.applied, 1);
++    actor.parts.core = core;
++    actor.parts.store = store;
++    actor.parts.application = app;
++    actor.parts.settings.clients = 4096;
++    let (senders, receivers): (Vec<_>, Vec<_>) =
++        (0..3).map(|_| mpsc::channel(CHANNEL_CAPACITY)).unzip();
++    actor.parts.peers = senders;
++    for message in final_sent {
++        actor.send(message).unwrap();
++    }
++    (actor, client, receivers)
++}
++fn finish_wave<const TRACE: bool>(
++    actor: &mut Actor<TRACE>,
++    outbound: &mut mpsc::Receiver<Message>,
++    expected: u64,
++) {
++    while actor.parts.application.applied < expected {
++        let message = outbound
++            .try_recv()
++            .expect("controlled follower needs an actual emitted request");
++        let Rpc::Append {
++            previous_index,
++            ref entries,
++            ..
++        } = message.rpc
++        else {
++            panic!("expected ordinary append");
++        };
++        let matching_index = entries.last().map_or(previous_index, |entry| entry.index);
++        actor
++            .step(Event::Receive(follower_reply(
++                message,
++                Rpc::Appended {
++                    success: true,
++                    matching_index,
++                },
++            )))
++            .unwrap();
++    }
++}
++#[tokio::test]
++async fn actual_loop_deferred_overflow_yields_to_staged_protected_and_raw_higher_term() {
++    let (mut actor, client, _outbound) = majority_actor::<false>();
++    let (peer, receiver) = mpsc::channel(128);
++    actor.parts.peer_receiver = receiver;
++    let (_stop, stopped) = watch::channel(false);
++    actor.parts.stopped = stopped;
++    let (first, _first_waits) = request(1, 4094);
++    let (overflow, _overflow_waits) = request(4095, 4);
++    client.try_send(overflow).unwrap();
++    actor.requests(first).unwrap();
++    assert_eq!(actor.deferred.as_ref().unwrap().proposals.len(), 4);
++    assert_eq!(actor.parts.core.state().last_index(), 4095);
++    let mut protected = reply(100);
++    protected.rpc = Rpc::SnapshotAck { index: 1 };
++    peer.try_send(protected).unwrap();
++    assert!(!actor
++        .lookahead
++        .inspect(&mut actor.parts.peer_receiver, 1)
++        .unwrap());
++    let mut higher = reply(101);
++    higher.term = 5;
++    higher.rpc = Rpc::Voted { granted: false };
++    peer.try_send(higher).unwrap();
++    let mut timer = tokio::time::interval(Duration::from_secs(3600));
++    let result = actor.drive(&mut timer).await;
++    assert!(result.is_err());
++    assert_eq!(actor.parts.core.state().hard_state.term, 5);
++    assert_eq!(
++        actor.parts.core.state().last_index(),
++        4095,
++        "deferred Data must not append before the higher term"
++    );
++    assert_eq!(actor.parts.application.applied, 1);
++    assert_eq!(actor.parts.stats[0].actor_turns.load(Ordering::Relaxed), 2);
++    assert_eq!(actor.parts.stats[0].timer_turns.load(Ordering::Relaxed), 0);
++    assert_eq!(actor.lookahead.len(), 0);
++}
++#[tokio::test]
++async fn actual_loop_timer_courtesy_and_checkpoint_progress_while_routine_prefix_remains() {
++    let (mut actor, _client, mut outbound) = majority_actor::<true>();
++    let (peer, receiver) = mpsc::channel(128);
++    actor.parts.peer_receiver = receiver;
++    let (first, waits) = request(1, 4096);
++    actor.requests(first).unwrap();
++    finish_wave(&mut actor, &mut outbound[1], 4097);
++    let (second, more_waits) = request(4097, 2000);
++    actor.requests(second).unwrap();
++    finish_wave(&mut actor, &mut outbound[1], 6097);
++    for (offset, mut wait) in waits.into_iter().chain(more_waits).enumerate() {
++        assert_eq!(wait.try_recv().unwrap().get(), offset as u128 + 1);
++    }
++    assert_eq!(actor.parts.application.applied, 6097);
++    for n in 1..=64 {
++        // Authorized voter source, deliberately unmatched request scope: the
++        // receive path must discard these without granting progress evidence.
++        peer.try_send(reply(1_000_000 + n)).unwrap();
++    }
++    assert!(actor.ready_data_quantum().unwrap());
++    let (stop, stopped) = watch::channel(false);
++    actor.parts.stopped = stopped;
++    let stats = actor.parts.stats.clone();
++    let stopping = actor.parts.stopping.clone();
++    let mut timer = tokio::time::interval(Duration::from_secs(3600));
++    let done = Arc::new(AtomicBool::new(false));
++    let observer_done = done.clone();
++    let control = async move {
++        while stats[0].actor_turns.load(Ordering::Relaxed) < 65
++            && !observer_done.load(Ordering::Acquire)
++        {
++            tokio::task::yield_now().await;
++        }
++        if observer_done.load(Ordering::Acquire) {
++            return;
++        }
++        assert!(stats[0].timer_turns.load(Ordering::Relaxed) > 0);
++        assert_eq!(stats[0].checkpoint_count.load(Ordering::Relaxed), 1);
++        stopping.store(true, Ordering::Release);
++        stop.send(true).unwrap();
++    };
++    let (result, ()) = tokio::time::timeout(Duration::from_secs(10), async {
++        tokio::join!(
++            async {
++                let result = actor.drive(&mut timer).await;
++                done.store(true, Ordering::Release);
++                result
++            },
++            control
++        )
++    })
++    .await
++    .unwrap();
++    result.unwrap();
++    assert_eq!(actor.lookahead.len(), 0);
++    assert_eq!(actor.parts.core.state().base_index(), 5097);
++    assert_eq!(actor.parts.application.applied, 6097);
++    let record = serde_json::to_value(
++        actor
++            .attribution
++            .report(0, &actor.parts.store.attribution)
++            .unwrap(),
++    )
++    .unwrap();
++    let maintenance = record["phases"]
++        .as_array()
++        .unwrap()
++        .iter()
++        .find(|p| p["phase"] == "maintenance_tick_inclusive")
++        .unwrap();
++    assert!(maintenance["calls"].as_u64().unwrap() >= 65);
++}
+--- /dev/null
++++ b/benchmarks/matched/src/voteboat_engine/actor/lookahead/tests.rs
+@@ -0,0 +1,232 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::super::tests::{preload, ready_actor};
++use super::*;
++
++pub(super) fn reply(sequence: u64) -> Message {
++    let b = bootstrap().unwrap();
++    Message {
++        group: b.group,
++        configuration: b.configuration,
++        from: NodeId::new(2).unwrap(),
++        to: NodeId::new(1).unwrap(),
++        sender: StoreBinding {
++            identity: b.voter_stores[&NodeId::new(2).unwrap()],
++            session: StoreSession::new(1).unwrap(),
++        },
++        term: 1,
++        context: RequestContext {
++            origin: StoreBinding {
++                identity: b.voter_stores[&NodeId::new(1).unwrap()],
++                session: StoreSession::new(1).unwrap(),
++            },
++            sequence,
++        },
++        rpc: Rpc::Appended {
++            success: true,
++            matching_index: 1,
++        },
++    }
++}
++#[tokio::test]
++async fn full_routine_prefix_is_untrusted_owned_and_released_in_fifo_order() {
++    let (sender, mut receiver) = mpsc::channel(128);
++    let mut lookahead = Lookahead::default();
++    let empty_owned = lookahead.owned_bytes();
++    for n in 1..=64 {
++        sender.try_send(reply(n)).unwrap();
++    }
++    assert!(lookahead.inspect(&mut receiver, 1).unwrap());
++    assert_eq!(lookahead.len(), 64);
++    assert!(lookahead.owned_bytes() >= empty_owned);
++    for n in 1..=64 {
++        assert_eq!(
++            lookahead
++                .receive(&mut receiver)
++                .await
++                .unwrap()
++                .context
++                .sequence,
++            n
++        );
++    }
++    assert_eq!(lookahead.active_bytes, 0);
++    assert_eq!(lookahead.owned_bytes(), empty_owned);
++}
++#[test]
++fn protected_head_tail_stale_term_and_uninspected_overflow_veto() {
++    for protected_at in [0, 1, 63] {
++        for rpc in [
++            Rpc::Appended {
++                success: true,
++                matching_index: 1,
++            },
++            Rpc::Voted { granted: true },
++            Rpc::SnapshotAck { index: 1 },
++        ] {
++            let (sender, mut receiver) = mpsc::channel(128);
++            let mut lookahead = Lookahead::default();
++            for n in 0..64 {
++                let mut message = reply(n);
++                if n == protected_at {
++                    message.term = 2;
++                    message.rpc = rpc.clone();
++                }
++                sender.try_send(message).unwrap();
++            }
++            assert!(!lookahead.inspect(&mut receiver, 1).unwrap());
++            assert_eq!(lookahead.len(), protected_at as usize + 1);
++        }
++    }
++    for term in [0, 2] {
++        let (sender, mut receiver) = mpsc::channel(128);
++        let mut message = reply(1);
++        message.term = term;
++        sender.try_send(message).unwrap();
++        assert!(!Lookahead::default().inspect(&mut receiver, 1).unwrap());
++    }
++    let (sender, mut receiver) = mpsc::channel(128);
++    for n in 0..65 {
++        sender.try_send(reply(n)).unwrap();
++    }
++    let mut lookahead = Lookahead::default();
++    assert!(!lookahead.inspect(&mut receiver, 1).unwrap());
++    assert_eq!(lookahead.len(), 64);
++    assert_eq!(receiver.len(), 1);
++}
++#[test]
++fn routine_byte_stop_and_protected_payload_capacity_stay_owned() {
++    let (sender, mut receiver) = mpsc::channel(128);
++    sender.try_send(reply(1)).unwrap();
++    sender.try_send(reply(2)).unwrap();
++    let mut small = Lookahead::new(64, size_of::<Message>());
++    assert!(!small.inspect(&mut receiver, 1).unwrap());
++    assert_eq!(small.len(), 1);
++    assert_eq!(receiver.len(), 1);
++    let (sender, mut receiver) = mpsc::channel(128);
++    let mut message = reply(1);
++    message.rpc = Rpc::Append {
++        previous_index: 1,
++        previous_term: 1,
++        leader_commit: 1,
++        entries: vec![LogEntry {
++            index: 2,
++            term: 1,
++            payload: EntryPayload::Command {
++                operation: OperationId::new(1).unwrap(),
++                bytes: Vec::with_capacity(64 * 1024),
++            },
++        }],
++    };
++    sender.try_send(message).unwrap();
++    let mut lookahead = Lookahead::new(64, 1024);
++    let empty_owned = lookahead.owned_bytes();
++    assert!(!lookahead.inspect(&mut receiver, 1).unwrap());
++    assert!(lookahead.owned_bytes() >= empty_owned + 64 * 1024);
++    lookahead.pop().unwrap();
++    assert_eq!(lookahead.owned_bytes(), empty_owned);
++}
++#[test]
++fn routine_queue_permits_wide_original_batch_without_consuming_ack_evidence() {
++    for trace in [false, true] {
++        if trace {
++            checked_batch::<true>();
++        } else {
++            checked_batch::<false>();
++        }
++    }
++}
++fn checked_batch<const TRACE: bool>() {
++    let (mut actor, sender) = ready_actor::<TRACE>(crate::Envelopes::UpstreamDefault);
++    let (peer, receiver) = mpsc::channel(128);
++    actor.parts.peer_receiver = receiver;
++    peer.try_send(reply(1)).unwrap();
++    let waits = preload(&sender);
++    let first = actor.parts.receiver.try_recv().unwrap();
++    let before = actor.parts.core.state().commit_index;
++    assert!(actor.ready_data_quantum().unwrap());
++    assert_eq!(actor.lookahead.len(), 1);
++    assert_eq!(actor.parts.core.state().commit_index, before);
++    actor.requests(first).unwrap();
++    let diagnostics = serde_json::to_value(actor.parts.stats[0].read()).unwrap();
++    assert_eq!(diagnostics["maximum_proposal_width"], 4096);
++    assert_eq!(diagnostics["proposed_originals"], 4096);
++    for (operation, mut wait) in waits {
++        assert_eq!(wait.try_recv().unwrap(), operation);
++    }
++    assert_eq!(actor.parts.application.applied, 4097);
++    assert!(actor.pending.is_empty());
++}
++#[test]
++fn protected_tail_limits_first_request_and_pending_or_nonleader_vetoes() {
++    let (mut actor, sender) = ready_actor::<false>(crate::Envelopes::UpstreamDefault);
++    let (peer, receiver) = mpsc::channel(128);
++    actor.parts.peer_receiver = receiver;
++    peer.try_send(reply(1)).unwrap();
++    let mut protected = reply(2);
++    protected.rpc = Rpc::Voted { granted: true };
++    peer.try_send(protected).unwrap();
++    let _waits = preload(&sender);
++    let first = actor.parts.receiver.try_recv().unwrap();
++    assert_eq!(actor.collect(first).unwrap().len(), 4);
++    assert_eq!(actor.lookahead.len(), 2);
++    assert_eq!(actor.parts.receiver.len(), 1023);
++    actor.lookahead.pop();
++    actor.lookahead.pop();
++    actor
++        .parts
++        .core
++        .step(Event::Propose {
++            operation: OperationId::new(9999).unwrap(),
++            bytes: Vec::new(),
++        })
++        .unwrap();
++    assert!(!actor.ready_data_quantum().unwrap());
++    let node = NodeId::new(1).unwrap();
++    let binding = actor.parts.store.binding();
++    actor.parts.core = Raft::recover(
++        node,
++        binding,
++        actor.parts.store.state(bootstrap().unwrap().group).unwrap(),
++        LogLimits::default(),
++    )
++    .unwrap();
++    assert_eq!(actor.parts.core.role(), Role::Follower);
++    assert!(!actor.ready_data_quantum().unwrap());
++}
++
++#[tokio::test]
++async fn shutdown_drops_staged_peers_and_original_waiters_without_new_data() {
++    let (mut actor, sender) = ready_actor::<false>(crate::Envelopes::UpstreamDefault);
++    let (peer, receiver) = mpsc::channel(128);
++    actor.parts.peer_receiver = receiver;
++    peer.try_send(reply(1)).unwrap();
++    assert!(actor.ready_data_quantum().unwrap());
++    let waits = preload(&sender);
++    actor.parts.stopping.store(true, Ordering::Release);
++    actor.run().await.unwrap();
++    for (_, wait) in waits {
++        assert!(wait.await.is_err());
++    }
++}
++#[test]
++fn canceled_first_waiter_fails_observation_without_withdrawing_committed_commands() {
++    let (mut actor, sender) = ready_actor::<false>(crate::Envelopes::UpstreamDefault);
++    let (peer, receiver) = mpsc::channel(128);
++    actor.parts.peer_receiver = receiver;
++    peer.try_send(reply(1)).unwrap();
++    let mut waits = preload(&sender);
++    let (_, canceled) = waits.remove(0);
++    drop(canceled);
++    let first = actor.parts.receiver.try_recv().unwrap();
++    assert!(actor.requests(first).is_err());
++    assert_eq!(actor.parts.core.state().commit_index, 4097);
++    assert_eq!(actor.parts.application.applied, 4097);
++    for (_, mut wait) in waits {
++        assert!(matches!(
++            wait.try_recv(),
++            Err(oneshot::error::TryRecvError::Empty)
++        ));
++    }
++    drop(actor);
++}
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -2,7 +2,7 @@
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+ 
+-fn ready_actor<const TRACE: bool>(
++pub(super) fn ready_actor<const TRACE: bool>(
+     envelopes: crate::Envelopes,
+ ) -> (Actor<TRACE>, mpsc::Sender<Request>) {
+     let node = NodeId::new(1).unwrap();
+@@ -32,6 +32,7 @@
+     .validate()
+     .unwrap();
+     let (sender, receiver) = mpsc::channel(CHANNEL_CAPACITY);
++    let (peer_sender, peer_receiver) = mpsc::channel(CHANNEL_CAPACITY);
+     let parts = Parts {
+         slot: 0,
+         core,
+@@ -39,8 +40,8 @@
+         snapshots: MemorySnapshots::new(binding, group),
+         application: Noop { group, applied: 0 },
+         receiver,
+-        peer_receiver: mpsc::channel(CHANNEL_CAPACITY).1,
+-        peers: Vec::new(),
++        peer_receiver,
++        peers: vec![peer_sender],
+         stopped: watch::channel(false).1,
+         stopping: Arc::new(AtomicBool::new(false)),
+         stats: Arc::new(std::array::from_fn(|_| stats::Stats::default())),
+@@ -56,7 +57,9 @@
+     (actor, sender)
+ }
+ 
+-fn preload(sender: &mpsc::Sender<Request>) -> Vec<(OperationId, oneshot::Receiver<OperationId>)> {
++pub(super) fn preload(
++    sender: &mpsc::Sender<Request>,
++) -> Vec<(OperationId, oneshot::Receiver<OperationId>)> {
+     let mut waits = Vec::new();
+     for start in (1..=4096).step_by(4) {
+         let mut proposals = Vec::new();
+--- a/benchmarks/matched/src/voteboat_engine/stats.rs
++++ b/benchmarks/matched/src/voteboat_engine/stats.rs
+@@ -14,8 +14,14 @@
+ #[derive(Default)]
+ pub(super) struct Stats {
+     pub retained: AtomicUsize,
++    pub actor_turns: AtomicUsize,
++    pub timer_turns: AtomicUsize,
++    pub data_collection_decisions: AtomicUsize,
++    pub data_collection_vetoes: AtomicUsize,
+     pub peak_retained: AtomicUsize,
+     pub peak_peer_queue: AtomicUsize,
++    pub peak_staged_peer_items: AtomicUsize,
++    pub peak_staged_peer_bytes: AtomicUsize,
+     pub peak_client_queue: AtomicUsize,
+     pub persistence_units: AtomicUsize,
+     pub checkpoint_count: AtomicUsize,
+@@ -30,8 +36,14 @@
+ #[derive(Serialize)]
+ pub(crate) struct Diagnostics {
+     retained_entries: usize,
++    actor_turns: usize,
++    timer_turns: usize,
++    data_collection_decisions: usize,
++    data_collection_vetoes: usize,
+     peak_retained_entries: usize,
+     peak_peer_queue: usize,
++    peak_staged_peer_items: usize,
++    peak_staged_peer_bytes: usize,
+     peak_client_queue: usize,
+     persistence_units: usize,
+     checkpoint_count: usize,
+@@ -69,8 +81,14 @@
+             .collect();
+         Diagnostics {
+             retained_entries: self.retained.load(Ordering::Relaxed),
++            actor_turns: self.actor_turns.load(Ordering::Relaxed),
++            timer_turns: self.timer_turns.load(Ordering::Relaxed),
++            data_collection_decisions: self.data_collection_decisions.load(Ordering::Relaxed),
++            data_collection_vetoes: self.data_collection_vetoes.load(Ordering::Relaxed),
+             peak_retained_entries: self.peak_retained.load(Ordering::Relaxed),
+             peak_peer_queue: self.peak_peer_queue.load(Ordering::Relaxed),
++            peak_staged_peer_items: self.peak_staged_peer_items.load(Ordering::Relaxed),
++            peak_staged_peer_bytes: self.peak_staged_peer_bytes.load(Ordering::Relaxed),
+             peak_client_queue: self.peak_client_queue.load(Ordering::Relaxed),
+             persistence_units: self.persistence_units.load(Ordering::Relaxed),
+             checkpoint_count: self.checkpoint_count.load(Ordering::Relaxed),

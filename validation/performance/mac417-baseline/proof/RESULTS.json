@@ -1,0 +1,20 @@
+{
+  "scope": "Mac matched-only1378-input355 baseline; no native/tests/timed run",
+  "source_unchanged": true,
+  "compiler_source_and_falsefresh_profile_guards": true,
+  "commit": "355cfa6244e9e4d04cb12d7ba1d44204b07ec215",
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/deps/libvoteboat-aefac919a7ec6efc.rlib",
+      "copy": "/tmp/voteboat-mac417-baseline-355cfa6/artifacts/libvoteboat-aefac919a7ec6efc.rlib",
+      "sha256": "e463cfe0f90ecb688a4ca7ec7ddabb88a085d4f30612ee34703c25778d701cff"
+    },
+    {
+      "target": "voteboat-matched-framework",
+      "original": "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/tmp/voteboat-mac417-baseline-355cfa6/artifacts/voteboat-matched-framework",
+      "sha256": "ac3d87f93fe976766710e9fcbc78721fafd7e5b953f88c554040baff892452c5"
+    }
+  ]
+}

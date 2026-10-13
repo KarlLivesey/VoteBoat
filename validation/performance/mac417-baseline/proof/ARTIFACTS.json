@@ -1,0 +1,80 @@
+[
+  {
+    "target": "voteboat",
+    "original": "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/deps/libvoteboat-aefac919a7ec6efc.rlib",
+    "copy": "/tmp/voteboat-mac417-baseline-355cfa6/artifacts/libvoteboat-aefac919a7ec6efc.rlib",
+    "sha256": "e463cfe0f90ecb688a4ca7ec7ddabb88a085d4f30612ee34703c25778d701cff",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac417-baseline-355cfa6/source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac417-baseline-355cfa6/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/tmp/voteboat-mac417-baseline-355cfa6/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/deps/libvoteboat-aefac919a7ec6efc.rlib",
+        "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/deps/libvoteboat-aefac919a7ec6efc.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "target": "voteboat-matched-framework",
+    "original": "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/voteboat-matched-framework",
+    "copy": "/tmp/voteboat-mac417-baseline-355cfa6/artifacts/voteboat-matched-framework",
+    "sha256": "ac3d87f93fe976766710e9fcbc78721fafd7e5b953f88c554040baff892452c5",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac417-baseline-355cfa6/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac417-baseline-355cfa6/source/benchmarks/matched/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-matched-framework",
+        "src_path": "/tmp/voteboat-mac417-baseline-355cfa6/source/benchmarks/matched/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/voteboat-matched-framework",
+        "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/voteboat-matched-framework.dSYM"
+      ],
+      "executable": "/tmp/voteboat-mac417-baseline-355cfa6/target-matched-release/release/voteboat-matched-framework",
+      "fresh": false
+    }
+  }
+]

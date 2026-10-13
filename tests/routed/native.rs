@@ -126,6 +126,7 @@ fn configuration(root: &Path, g: u128, voters: &[u64], mode: NativeOpenMode) -> 
             tls: support::tls::configuration(*n),
             entropy_seed: *n + g as u64,
             limits: NodeLimits::default(),
+            ready_visit_items: 16,
         })
         .collect()
 }
