@@ -11,6 +11,7 @@ mod store;
 mod workload;
 
 type Failure = Box<dyn Error>;
+const MAX_RETAINED_ENTRIES: usize = 1_048_576;
 
 #[derive(Clone, Copy, Debug)]
 struct Settings {
@@ -33,18 +34,23 @@ impl Default for Settings {
 }
 impl Settings {
     fn validate(self) -> Result<Self, Failure> {
-        if self.batch != 1 {
-            return Err(
-                "batch writes unsupported: public Event::Propose admits one command".into(),
-            );
+        if self.batch == 0 || self.batch > voteboat::raft::MAX_PROPOSAL_BATCH_ENTRIES {
+            return Err("batch must be 1..=64 original commands".into());
         }
         if self.clients == 0 || self.clients > 4096 || self.operations < self.clients {
             return Err("clients must be 1..=4096 and operations must cover every client".into());
         }
-        if !self.operations.is_multiple_of(self.clients) {
+        let group = self
+            .clients
+            .checked_mul(self.batch)
+            .ok_or("clients times batch overflow")?;
+        if self.operations < group || !self.operations.is_multiple_of(group) {
             return Err(
-                "operations must be divisible by clients; every client runs the same count".into(),
+                "operations must be divisible by clients times batch; every client runs the same count".into(),
             );
+        }
+        if self.retained_entries == 0 || self.retained_entries > MAX_RETAINED_ENTRIES {
+            return Err("retained entries must be 1..=1048576; checkpoints are not hidden".into());
         }
         let history = self
             .operations

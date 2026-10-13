@@ -32377,3 +32377,21 @@ The explicit P9 PERFORMANCE-ONLY goal is now active at the user’s request.
 Preserve existing features/security; correctness checks validate optimizations.
 First-slice real TCP/QUIC three-service replacement/retry/recovery passes2/0.
 Matching Mac1317-input controls are running independently; remote CI is not a gate.
+
+Matching406 Mac qualification is terminal431/0, fmt/four strict0 and1317 source
+guards0. P9 first-slice shared-source correctness is qualified on both hosts.
+[Mac records](../validation/performance/slice406/mac/README.md).
+
+
+### P9 Core batching407 — measured performance enabler
+
+Direct Core batches preserve all original commands/results under one ordered
+transition. Existing singleton validation is unchanged; no Node/native-client
+ready batching or early replication overlap is claimed. Linux all417/core259
+controls pass, fmt/four strict0. [Slice407](../validation/performance/slice407/README.md).
+Three paired volatile trials per concurrency cell show2.83–3.78x useful-rate gain
+for batch4 at fixed4096 commands/1024 warmups. Larger retained histories expose
+remainingO(history) copying/scanning. These rates do not pass the OpenRaft curve
+or establish durable application capacity. Macro remains active; next native
+ready collection and explicit overlap, with validated delta/cached-state work
+addressing the concrete CPU ceiling. All feature/security semantics remain.

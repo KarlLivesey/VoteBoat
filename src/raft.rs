@@ -26,6 +26,8 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 mod leadership;
+mod proposals;
+pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
 mod readiness;
 mod receive;
 mod send_window;
@@ -888,14 +890,8 @@ impl Raft {
     }
 
     pub fn step(&mut self, event: Event) -> Result<Vec<Effect>, RaftError> {
-        if self.fenced {
-            return Err(RaftError::Fenced);
-        }
-        if self.has_pending_dependency() {
-            return Err(RaftError::Busy);
-        }
-        self.refresh_transfer();
-        let mut effects = match event {
+        self.begin_step()?;
+        let effects = match event {
             Event::TransferLeadership(request) => self.start_transfer(request),
             Event::CancelLeadershipTransfer { context } => self.cancel_transfer(context),
             Event::CheckLearnerReadiness {
@@ -958,8 +954,7 @@ impl Raft {
                 }
             }
         }?;
-        effects.extend(self.drive_transfer()?);
-        Ok(effects)
+        self.finish_step(effects)
     }
     fn set_campaigning(&mut self, enabled: bool) -> Result<Vec<Effect>, RaftError> {
         if self.campaigning_enabled != enabled {
@@ -1004,41 +999,6 @@ impl Raft {
             self.durable.commit_index,
             None,
             After::Campaign,
-            None,
-        )
-    }
-    fn propose(
-        &mut self,
-        operation: OperationId,
-        bytes: Vec<u8>,
-    ) -> Result<Vec<Effect>, RaftError> {
-        if self.role != Role::Leader || !self.local_voter() {
-            return Err(RaftError::NotLeader);
-        }
-        if self.transfer.is_some() {
-            return Err(RaftError::Busy);
-        }
-        if bytes.len() > self.limits.max_command_bytes {
-            return Err(StorageError::Rejected("command byte budget").into());
-        }
-        let index = self
-            .durable
-            .last_index()
-            .checked_add(1)
-            .ok_or(RaftError::Exhausted)?;
-        let entry = LogEntry {
-            index,
-            term: self.durable.hard_state.term,
-            payload: EntryPayload::Command { operation, bytes },
-        };
-        self.persist(
-            self.durable.hard_state,
-            self.durable.commit_index,
-            Some(Suffix {
-                from: index,
-                entries: vec![entry],
-            }),
-            After::LeaderAppend,
             None,
         )
     }

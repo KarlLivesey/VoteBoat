@@ -35,9 +35,15 @@ fn multiple_clients_remain_outstanding_until_original_application() {
 }
 
 #[test]
-fn unsupported_batch_and_hidden_history_reset_are_refused() {
+fn invalid_batch_and_hidden_history_reset_are_refused() {
     assert!(Settings {
-        batch: 4,
+        batch: 65,
+        ..Settings::default()
+    }
+    .validate()
+    .is_err());
+    assert!(Settings {
+        retained_entries: MAX_RETAINED_ENTRIES + 1,
         ..Settings::default()
     }
     .validate()
@@ -61,6 +67,27 @@ fn unsupported_batch_and_hidden_history_reset_are_refused() {
     }
     .validate()
     .is_err());
+}
+
+#[test]
+fn four_entry_batches_return_every_original_result_from_three_voters() {
+    let settings = Settings {
+        clients: 4,
+        operations: 32,
+        warmup: 2,
+        batch: 4,
+        ..Settings::default()
+    };
+    let report = workload::run(settings).unwrap();
+    assert_eq!(report.completed, 32);
+    assert_eq!(report.completed_batches, 8);
+    assert!(report.peak_pending > 4);
+    assert!(report.peak_pending <= 16);
+    assert_eq!(report.frontiers, [35; 3]);
+    let json = report.json(settings);
+    assert!(json.contains("\"comparison_gate\":\"unmatched\""));
+    assert!(json.contains("\"batch\":4"));
+    assert!(!json.contains("batch_many_unsupported"));
 }
 
 #[test]

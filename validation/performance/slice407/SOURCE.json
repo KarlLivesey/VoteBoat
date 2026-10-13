@@ -1,0 +1,16 @@
+{
+  "base": "85db216",
+  "sha256": {
+    "Cargo.toml": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f",
+    "Cargo.lock": "6cafd199f69a26defbe844e4f281d076b54b7886ef84e6bf33ab00117a4c2f5e",
+    "clippy.toml": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521",
+    "src/raft.rs": "79dc461fde384d0da9c4d4908e3bb8d389188bdc1698a86226c53fc9fcb3105f",
+    "src/raft/proposals.rs": "863a39f96fcbebfd387a3a935165de9d6d5ecc637a63083271543ee3b6a0733f",
+    "src/raft/proposals/tests.rs": "326858d21a06c72696c2d7719e88f887f666895925521d4721768bf96aff5dd6",
+    "examples/framework_benchmark.rs": "b087692e46319cc58f28f1c655bf04d32b19eb2b910fd5601b711fa783467d9e",
+    "examples/framework_benchmark/cluster.rs": "912cddae9b988d6585d19825d4ed191b849724a3c18879226a094b1da8a5d5ad",
+    "examples/framework_benchmark/store.rs": "2ea3046dbd3a24ef99f4d80cd8f0a8db2d3c03dc04f635197d4c64597bbae6ed",
+    "examples/framework_benchmark/workload.rs": "d675d0d0160b9f5eb33bfa433b2da38a3a0a90b5c8278d570c7a48c119285b69",
+    "examples/framework_benchmark/tests.rs": "890fe3d905585546727ae9ac89cc6e18513e2f95dfb6d1ebb1550a43422ed9c4"
+  }
+}

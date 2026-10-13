@@ -13,8 +13,9 @@ are returned. Recovery/fencing/generation/retention contracts stay unchanged.
 Linux all-feature library+Raft/reference+storage/reclaim/striped/provider/shared
 barrier+new benchmark controls:431/0. Core-only counterpart250/0. Formatting and
 all four strict all-target Clippy configurations: zero. Real three-process TCP and QUIC leader-replacement/retry/native-recovery
-service checks pass2/0 (16.02s). Matching Mac controls are running from the
-frozen1317-input source; no Mac pass is inferred from compilation.
+service checks pass2/0 (16.02s). Matching Mac controls pass431/0 from the frozen1317-input source,
+with formatting/four strict0 and all before/terminal source hashes matching.
+See [Mac records](mac/README.md); no Mac performance run is implied.
 
 ## Paired diagnostic results
 

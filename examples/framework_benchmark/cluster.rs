@@ -96,6 +96,16 @@ impl Cluster {
             },
         )
     }
+    pub fn propose_batch(&mut self, proposals: Vec<Proposal>) -> Result<(), Failure> {
+        let effects = self
+            .replicas
+            .get_mut(&leader())
+            .unwrap()
+            .core
+            .propose_batch(proposals)
+            .map_err(|e| format!("{e:?}"))?;
+        self.effects(leader(), effects)
+    }
     fn act(&mut self, node: NodeId, event: Event) -> Result<(), Failure> {
         let effects = self
             .replicas
