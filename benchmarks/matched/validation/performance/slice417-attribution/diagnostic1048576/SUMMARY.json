@@ -1,0 +1,358 @@
+{
+  "scope": "per-replica whole-lifetime elapsed intervals; inclusive/nested; not CPU or critical path; median per field across3instrumentedtrials",
+  "phases": [
+    {
+      "replica_slot": 0,
+      "phase": "host_admission",
+      "median_calls": 2337,
+      "median_failures": 0,
+      "median_items": 1049600,
+      "median_total_elapsed_ns": 97513540,
+      "median_maximum_elapsed_ns": 1092853
+    },
+    {
+      "replica_slot": 0,
+      "phase": "core_direct",
+      "median_calls": 9061,
+      "median_failures": 0,
+      "median_items": 1049600,
+      "median_total_elapsed_ns": 23511399,
+      "median_maximum_elapsed_ns": 161153
+    },
+    {
+      "replica_slot": 0,
+      "phase": "persist_helper_inclusive",
+      "median_calls": 4692,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 315101231,
+      "median_maximum_elapsed_ns": 1259807
+    },
+    {
+      "replica_slot": 0,
+      "phase": "store_append_nested",
+      "median_calls": 4896,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 148570837,
+      "median_maximum_elapsed_ns": 714372
+    },
+    {
+      "replica_slot": 0,
+      "phase": "store_barrier_nested",
+      "median_calls": 4896,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 119468,
+      "median_maximum_elapsed_ns": 201
+    },
+    {
+      "replica_slot": 0,
+      "phase": "application",
+      "median_calls": 2353,
+      "median_failures": 0,
+      "median_items": 1049600,
+      "median_total_elapsed_ns": 1482581,
+      "median_maximum_elapsed_ns": 4789
+    },
+    {
+      "replica_slot": 0,
+      "phase": "results",
+      "median_calls": 2353,
+      "median_failures": 0,
+      "median_items": 1049600,
+      "median_total_elapsed_ns": 86169410,
+      "median_maximum_elapsed_ns": 413566
+    },
+    {
+      "replica_slot": 0,
+      "phase": "send",
+      "median_calls": 6675,
+      "median_failures": 0,
+      "median_items": 6675,
+      "median_total_elapsed_ns": 2793315,
+      "median_maximum_elapsed_ns": 31800
+    },
+    {
+      "replica_slot": 0,
+      "phase": "maintenance_tick_inclusive",
+      "median_calls": 9060,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 487161207,
+      "median_maximum_elapsed_ns": 2980890
+    },
+    {
+      "replica_slot": 0,
+      "phase": "snapshot_helpers_inclusive",
+      "median_calls": 392,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 205623,
+      "median_maximum_elapsed_ns": 1754
+    },
+    {
+      "replica_slot": 0,
+      "phase": "host_wait",
+      "median_calls": 9061,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 209329979,
+      "median_maximum_elapsed_ns": 4447425
+    },
+    {
+      "replica_slot": 0,
+      "phase": "actor_lifetime_inclusive",
+      "median_calls": 1,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 1221525916,
+      "median_maximum_elapsed_ns": 1221525916
+    },
+    {
+      "replica_slot": 1,
+      "phase": "host_admission",
+      "median_calls": 0,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 0,
+      "median_maximum_elapsed_ns": 0
+    },
+    {
+      "replica_slot": 1,
+      "phase": "core_direct",
+      "median_calls": 3360,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 41365692,
+      "median_maximum_elapsed_ns": 262994
+    },
+    {
+      "replica_slot": 1,
+      "phase": "persist_helper_inclusive",
+      "median_calls": 3030,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 298842385,
+      "median_maximum_elapsed_ns": 994268
+    },
+    {
+      "replica_slot": 1,
+      "phase": "store_append_nested",
+      "median_calls": 3288,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 116526653,
+      "median_maximum_elapsed_ns": 496513
+    },
+    {
+      "replica_slot": 1,
+      "phase": "store_barrier_nested",
+      "median_calls": 3288,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 83089,
+      "median_maximum_elapsed_ns": 170
+    },
+    {
+      "replica_slot": 1,
+      "phase": "application",
+      "median_calls": 2099,
+      "median_failures": 0,
+      "median_items": 1041472,
+      "median_total_elapsed_ns": 1842275,
+      "median_maximum_elapsed_ns": 20057
+    },
+    {
+      "replica_slot": 1,
+      "phase": "results",
+      "median_calls": 0,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 0,
+      "median_maximum_elapsed_ns": 0
+    },
+    {
+      "replica_slot": 1,
+      "phase": "send",
+      "median_calls": 3360,
+      "median_failures": 0,
+      "median_items": 3360,
+      "median_total_elapsed_ns": 468782,
+      "median_maximum_elapsed_ns": 2104
+    },
+    {
+      "replica_slot": 1,
+      "phase": "maintenance_tick_inclusive",
+      "median_calls": 3386,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 132926927,
+      "median_maximum_elapsed_ns": 1317154
+    },
+    {
+      "replica_slot": 1,
+      "phase": "snapshot_helpers_inclusive",
+      "median_calls": 108,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 28446867,
+      "median_maximum_elapsed_ns": 744649
+    },
+    {
+      "replica_slot": 1,
+      "phase": "host_wait",
+      "median_calls": 3387,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 722594507,
+      "median_maximum_elapsed_ns": 4977400
+    },
+    {
+      "replica_slot": 1,
+      "phase": "actor_lifetime_inclusive",
+      "median_calls": 1,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 1221528952,
+      "median_maximum_elapsed_ns": 1221528952
+    },
+    {
+      "replica_slot": 2,
+      "phase": "host_admission",
+      "median_calls": 0,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 0,
+      "median_maximum_elapsed_ns": 0
+    },
+    {
+      "replica_slot": 2,
+      "phase": "core_direct",
+      "median_calls": 3322,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 41149649,
+      "median_maximum_elapsed_ns": 189096
+    },
+    {
+      "replica_slot": 2,
+      "phase": "persist_helper_inclusive",
+      "median_calls": 3012,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 299438451,
+      "median_maximum_elapsed_ns": 972497
+    },
+    {
+      "replica_slot": 2,
+      "phase": "store_append_nested",
+      "median_calls": 3259,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 116141910,
+      "median_maximum_elapsed_ns": 243227
+    },
+    {
+      "replica_slot": 2,
+      "phase": "store_barrier_nested",
+      "median_calls": 3259,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 84484,
+      "median_maximum_elapsed_ns": 140
+    },
+    {
+      "replica_slot": 2,
+      "phase": "application",
+      "median_calls": 2101,
+      "median_failures": 0,
+      "median_items": 1041568,
+      "median_total_elapsed_ns": 1951441,
+      "median_maximum_elapsed_ns": 71895
+    },
+    {
+      "replica_slot": 2,
+      "phase": "results",
+      "median_calls": 0,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 0,
+      "median_maximum_elapsed_ns": 0
+    },
+    {
+      "replica_slot": 2,
+      "phase": "send",
+      "median_calls": 3322,
+      "median_failures": 0,
+      "median_items": 3322,
+      "median_total_elapsed_ns": 486165,
+      "median_maximum_elapsed_ns": 4739
+    },
+    {
+      "replica_slot": 2,
+      "phase": "maintenance_tick_inclusive",
+      "median_calls": 3347,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 130791995,
+      "median_maximum_elapsed_ns": 1100537
+    },
+    {
+      "replica_slot": 2,
+      "phase": "snapshot_helpers_inclusive",
+      "median_calls": 106,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 27462829,
+      "median_maximum_elapsed_ns": 879512
+    },
+    {
+      "replica_slot": 2,
+      "phase": "host_wait",
+      "median_calls": 3348,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 729981924,
+      "median_maximum_elapsed_ns": 4445432
+    },
+    {
+      "replica_slot": 2,
+      "phase": "actor_lifetime_inclusive",
+      "median_calls": 1,
+      "median_failures": 0,
+      "median_items": 0,
+      "median_total_elapsed_ns": 1221519204,
+      "median_maximum_elapsed_ns": 1221519204
+    }
+  ],
+  "rates": {
+    "baseline": {
+      "median_operations_per_second": 861765.738434882,
+      "median_request_p99_ns": 22358492,
+      "trial_rates": [
+        864390.75,
+        794084.1,
+        861765.74
+      ]
+    },
+    "off": {
+      "median_operations_per_second": 857110.5647673195,
+      "median_request_p99_ns": 25662889,
+      "trial_rates": [
+        923158.59,
+        775710.54,
+        857110.56
+      ]
+    },
+    "on": {
+      "median_operations_per_second": 872289.1265705909,
+      "median_request_p99_ns": 22051565,
+      "trial_rates": [
+        880768.46,
+        872289.13,
+        838715.04
+      ]
+    }
+  }
+}

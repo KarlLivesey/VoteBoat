@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac415416-8a5840d/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.92s
+     Running tests/counter_service.rs (/tmp/voteboat-mac415416-8a5840d/target-root-checks/debug/deps/counter_service-968275d57c44c591)
+
+running 2 tests
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... ok
+test three_service_processes_retry_replace_leader_and_recover_native_files ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 18.79s
+

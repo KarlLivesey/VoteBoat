@@ -1,0 +1,1 @@
+opt3 debug_assertions=true overflow_checks=true lto=default codegen_units=default

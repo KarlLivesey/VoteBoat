@@ -1,0 +1,11 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/effect_owner.rs (/tmp/voteboat-mac415416-8a5840d/target-root-checks/debug/deps/effect_owner-a90c84dd66bfb8bb)
+
+running 4 tests
+test persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable ... ok
+test persistence_overlap::insufficient_extra_space_keeps_original_serialized_progress ... ok
+test persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge ... ok
+test persistence_overlap::written_and_durable_in_one_poll_preserve_queued_sends_and_original_commit ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 198 filtered out; finished in 0.01s
+

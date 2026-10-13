@@ -1,0 +1,1 @@
+opt3; assertions=true; overflow=true; LTO=thin; codegen_units=1; default Cargo cache; locked offline

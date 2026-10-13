@@ -26,8 +26,10 @@ campaign, warmup and follower drain. Direct Core work, full persistence helpers,
 nested store append/barrier, application, original results, send, inclusive
 maintenance ticks/snapshot helpers, host wait and actor lifetime remain separately
 labeled. Inclusive/nested intervals and concurrent replicas must not be summed
-as CPU time or the critical path. Actual diagnostic trials require a frozen
-asserted release and a coordinated quiet window; no trials have run yet.
+as CPU time or the critical path. The subsequent Linux diagnostic uses a frozen
+asserted release and a coordinated quiet window; its nine cases and interpretation
+are recorded separately in DIAGNOSTIC-LINUX.md. No capacity qualification follows
+from these functional controls or diagnostic trials.
 
 Root's tracked pre-push check also passes with zero diagnostics: formatter,
 strict default/all/no-default/native root profiles, and standalone formatter/

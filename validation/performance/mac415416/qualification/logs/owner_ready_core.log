@@ -1,0 +1,19 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac415416-8a5840d/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.87s
+     Running tests/effect_owner.rs (/tmp/voteboat-mac415416-8a5840d/target-core-checks/debug/deps/effect_owner-7b8fca88c85c0ed1)
+
+running 11 tests
+test client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton ... ok
+test client_admission::ready_batch::budget::tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving ... ok
+test client_admission::ready_batch::canceling_one_batched_observation_does_not_cancel_other_commands ... ok
+test client_admission::ready_batch::context::default_host_context_is_rechecked_after_original_singleton_durability ... ok
+test client_admission::ready_batch::failure_after_written_leaves_all_batched_results_unknown_and_releases_on_observation ... ok
+test client_admission::ready_batch::per_poll_original_step_budget_does_not_expand_with_batch_size ... ok
+test client_admission::ready_batch::ready_native_admissions_share_persist_but_keep_every_original_result ... ok
+test client_admission::ready_batch::wrapper::checks::maintenance_wrapper_keeps_actual_capability_and_singleton_data_order ... ok
+test client_admission::ready_batch::wrapper::checks::retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome ... ok
+test client_admission::ready_batch::wrapper::checks::written_failure_keeps_every_wrapped_original_unknown ... ok
+test client_admission::ready_batch::wrapper::plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 183 filtered out; finished in 0.03s
+

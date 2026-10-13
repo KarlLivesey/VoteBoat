@@ -2,6 +2,25 @@
 
 ## Active P9 plan — 13 October 2026
 
+The terminal 417 Linux diagnostic verifies nine rotating 1,048,576-original cases
+and all three applied frontiers, with immutable source/artifact guards. Baseline,
+attribution-off and attribution-on medians are 861,766 / 857,111 / 872,289
+completed originals/s; overlapping trials establish no observer speedup. Leader
+maintenance records 487.2 ms and persistence helpers 315.1 ms, inclusive elapsed
+intervals with nested work; direct Core calls record 23.5 ms. These cannot be
+summed as CPU time. All trials publish 204 leader checkpoints. This prioritizes
+plain matching-prefix compaction and incoming transition ownership before a
+larger pipeline redesign. [Diagnostic and raw records](../benchmarks/matched/validation/performance/slice417-attribution/DIAGNOSTIC-LINUX.md).
+
+Frozen 415/416 macOS qualification is terminal with exact 1,377-input source
+guards, zero formatter/four strict root/standalone diagnostics, both-feature Core
+and owner checks, executable 52, actual TCP/QUIC retry/replacement/recovery 2,
+maintenance/reclaim 6 and native recovery 40. Fresh profile-specific immutable
+artifacts are verified. [Exact Mac scope](../validation/performance/mac415416/README.md).
+Paired Mac timing is terminal and its separate raw archive is being collected;
+qualification controls are not throughput measurements. Benchmarks exercise
+Core415 directly; wrapper416 is covered by actual owner/executable controls.
+
 417 adds opt-in, bounded elapsed phase attribution to the standalone comparison.
 Eleven controls and four actual off/on CLI cases retain every original result,
 all replica prefixes, maintenance and snapshot installation. Formatter, all four
@@ -42,8 +61,9 @@ unchanged. The actual owner suite passes 202 controls, executable tests 52, and
 real TCP/QUIC retry/recovery and checkpoint/reclaim controls 8. Formatter, all four
 strict root profiles and standalone matched checks pass with zero diagnostics.
 [Schema and actual validation](../validation/performance/slice416/SCHEMA.md).
-The mini plan now prioritizes measured Core/host cost attribution, a coordinated
-bounded persistence pipeline, then configured resource summaries. No macro
+The mini plan now prioritizes plain matching-prefix compaction deltas (418),
+owned normalized incoming transitions (419), then a coordinated bounded same-group
+persistence pipeline. Configured resource summaries remain subsequent work. No macro
 milestone or healthy-margin requirement is closed by these changes.
 
 Linux's 24-case native batching comparison verifies every original Applied result,

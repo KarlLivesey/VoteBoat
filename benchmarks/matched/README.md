@@ -60,4 +60,8 @@ phase attribution is unavailable and explicitly rejected. Instrumented rates are
 diagnostic and cannot qualify the performance minimum.
 [Attribution checks](validation/performance/slice417-attribution/REPORT.md) cover
 the default and enabled paths, every original result, maintenance and snapshot
-installation; actual elapsed diagnostic trials remain pending.
+installation.
+
+[The Linux elapsed diagnostic](validation/performance/slice417-attribution/DIAGNOSTIC-LINUX.md)
+passes nine exact cases and guards. It points first to inclusive maintenance and
+persistence-helper work; off/on rates overlap across trials and qualify no floor.

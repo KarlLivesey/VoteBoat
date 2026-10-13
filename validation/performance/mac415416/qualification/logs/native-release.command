@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable build --locked --offline --release --all-features --manifest-path /tmp/voteboat-mac415416-8a5840d/source/Cargo.toml --example native_benchmark --message-format=json -vv 

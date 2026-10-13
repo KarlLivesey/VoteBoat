@@ -1,0 +1,13 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.04s
+     Running tests/counter_service.rs (/tmp/voteboat-mac415416-8a5840d/target-root-checks/debug/deps/counter_service-968275d57c44c591)
+
+running 6 tests
+test maintenance::automatic_checkpoints_and_reclaim_quic_survive_restart ... ok
+test maintenance::automatic_checkpoints_and_reclaim_tcp_survive_restart ... ok
+test maintenance::automatic_reclaim_service_quic_recovers_and_retries ... ok
+test maintenance::automatic_reclaim_service_tcp_recovers_and_retries ... ok
+test maintenance::invalid_checkpoint_schedule_precedes_resource_creation ... ok
+test maintenance::invalid_schedule_rejected_before_files_or_listeners ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 196 filtered out; finished in 19.87s
+
