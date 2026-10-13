@@ -1,0 +1,1 @@
+["/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native421-linux/artifacts/native/native_benchmark","target/p9/native421-quantum/linux-results/native-quic-w1-t3-q64","quic","256","1","--ready-items","64","--journal-timings"]

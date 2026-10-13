@@ -1,0 +1,1 @@
+["/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native421-linux/artifacts/native/native_benchmark","target/p9/native421-quantum/linux-results/native-tcp-w1-t3-q16","tcp","256","1","--ready-items","16","--journal-timings"]

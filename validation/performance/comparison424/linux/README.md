@@ -28,7 +28,9 @@ Publication takes1.090ms. Intervals overlap and nest; they cannot be summed as
 CPU time or a critical path. Next inspect work outside provider methods inside
 the public compaction helper, Core transition/completion and returned broadcasts.
 The evidence does not identify pure Core cost or justify removing proofs.
-Eliminating only the clone would address about2.9% of this one compaction interval.
+Clone construction is about2.9% of this interval. Equality and temporary
+destruction occur after that provider timer; the number does not bound the
+benefit of avoiding materialization while retaining exact full comparison.
 
 Driver qualification retains two mistakes: an older debug artifact rejected
 --attribution; then successful smoke processes exposed an incorrect assumption

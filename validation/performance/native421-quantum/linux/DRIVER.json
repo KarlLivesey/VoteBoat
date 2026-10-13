@@ -1,0 +1,7 @@
+{
+  "reused_source": "target/p9/mac419-native/measure.mjs",
+  "original_sha256": "0b1b010c7e2dcd32cec44a8965119bd546bf711528d41a8748bedffed268ecac",
+  "adapted_sha256": "8898515d8937288d00e05070fc6a12f7c1801645f03618d31873ed1c596ad508",
+  "purpose": "same-artifact readyquantum16/32/64 only; original semantic/journal/error/source checks preserved",
+  "timing_executed": false
+}

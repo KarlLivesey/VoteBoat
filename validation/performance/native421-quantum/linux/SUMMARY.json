@@ -1,0 +1,487 @@
+{
+  "source_commit": "1091610a1d348a473e491c54834ae2fe341da419",
+  "original_runner": 15132,
+  "exit": 0,
+  "cases": 36,
+  "quiet_host": "No builds/tests/copies; relevant processes absent beforelaunch; Macarchive/localcopyhold retained untilterminal",
+  "source_artifacts_before_after": "1396 source/full rootlib/exe SHA unchanged",
+  "scope": "short sameartifact ready policy trial; threeCounter replicas shareone host/device; notsustainedmaintenance/hotcold/offeredload norOpenRaftvolatilefloor",
+  "rows": [
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "ready_items": 16,
+      "rates": [
+        1927.479,
+        526.441,
+        1399.046
+      ],
+      "median_puts_per_second": 1399.046,
+      "paired_ratio_to_q16": 1.0,
+      "paired_ratios": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "request_p99_ms": 43.517103999999996,
+      "measurement_widths": [
+        {
+          "16": 16
+        },
+        {
+          "16": 16
+        },
+        {
+          "16": 16
+        }
+      ],
+      "leader_durability_barriers": [
+        32,
+        32,
+        32
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 0.118155,
+        "sync_ns": 44.400044,
+        "publish_ns": 111.491495
+      }
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "ready_items": 32,
+      "rates": [
+        2684.935,
+        2727.364,
+        2632.503
+      ],
+      "median_puts_per_second": 2684.935,
+      "paired_ratio_to_q16": 1.8816414899867482,
+      "paired_ratios": [
+        1.3929775629202703,
+        5.180759097410726,
+        1.8816414899867482
+      ],
+      "request_p99_ms": 18.261812999999997,
+      "measurement_widths": [
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        }
+      ],
+      "leader_durability_barriers": [
+        16,
+        16,
+        16
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 0.069369,
+        "sync_ns": 17.072539,
+        "publish_ns": 36.890089
+      }
+    },
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "ready_items": 64,
+      "rates": [
+        1398.575,
+        2685.962,
+        533.73
+      ],
+      "median_puts_per_second": 1398.575,
+      "paired_ratio_to_q16": 0.7255980480202379,
+      "paired_ratios": [
+        0.7255980480202379,
+        5.102114007077716,
+        0.3814956763394485
+      ],
+      "request_p99_ms": 41.710980000000006,
+      "measurement_widths": [
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        }
+      ],
+      "leader_durability_barriers": [
+        16,
+        16,
+        16
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 0.078899,
+        "sync_ns": 41.535297,
+        "publish_ns": 65.382636
+      }
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "ready_items": 16,
+      "rates": [
+        10.246,
+        8.721,
+        7.739
+      ],
+      "median_puts_per_second": 8.721,
+      "paired_ratio_to_q16": 1.0,
+      "paired_ratios": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "request_p99_ms": 322.45012199999996,
+      "measurement_widths": [
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        }
+      ],
+      "leader_durability_barriers": [
+        512,
+        512,
+        512
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 2.702158,
+        "sync_ns": 6466.518479,
+        "publish_ns": 11651.251888
+      }
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "ready_items": 32,
+      "rates": [
+        8.504,
+        8.435,
+        8.808
+      ],
+      "median_puts_per_second": 8.504,
+      "paired_ratio_to_q16": 0.9672055956885679,
+      "paired_ratios": [
+        0.8299824321686511,
+        0.9672055956885679,
+        1.138131541542835
+      ],
+      "request_p99_ms": 279.195562,
+      "measurement_widths": [
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        }
+      ],
+      "leader_durability_barriers": [
+        512,
+        512,
+        512
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 2.73147,
+        "sync_ns": 6228.565969,
+        "publish_ns": 12262.552872
+      }
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "ready_items": 64,
+      "rates": [
+        8.056,
+        7.547,
+        8.066
+      ],
+      "median_puts_per_second": 8.056,
+      "paired_ratio_to_q16": 0.865382410274051,
+      "paired_ratios": [
+        0.7862580519227014,
+        0.865382410274051,
+        1.0422535211267607
+      ],
+      "request_p99_ms": 333.82935399999997,
+      "measurement_widths": [
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        }
+      ],
+      "leader_durability_barriers": [
+        512,
+        512,
+        512
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 2.804844,
+        "sync_ns": 7398.230693,
+        "publish_ns": 13068.837996
+      }
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "ready_items": 16,
+      "rates": [
+        187.237,
+        141.295,
+        187.494
+      ],
+      "median_puts_per_second": 187.237,
+      "paired_ratio_to_q16": 1.0,
+      "paired_ratios": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "request_p99_ms": 332.04442800000004,
+      "measurement_widths": [
+        {
+          "16": 16
+        },
+        {
+          "16": 16
+        },
+        {
+          "16": 16
+        }
+      ],
+      "leader_durability_barriers": [
+        32,
+        32,
+        32
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 0.168926,
+        "sync_ns": 454.931543,
+        "publish_ns": 884.628233
+      }
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "ready_items": 32,
+      "rates": [
+        251.421,
+        343.139,
+        250.853
+      ],
+      "median_puts_per_second": 251.421,
+      "paired_ratio_to_q16": 1.3427954944802576,
+      "paired_ratios": [
+        1.3427954944802576,
+        2.4285289642237875,
+        1.3379254802820357
+      ],
+      "request_p99_ms": 219.220744,
+      "measurement_widths": [
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        }
+      ],
+      "leader_durability_barriers": [
+        16,
+        16,
+        16
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 0.085975,
+        "sync_ns": 212.117379,
+        "publish_ns": 415.741007
+      }
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "ready_items": 64,
+      "rates": [
+        304.989,
+        135.555,
+        260.107
+      ],
+      "median_puts_per_second": 260.107,
+      "paired_ratio_to_q16": 1.3872817263485766,
+      "paired_ratios": [
+        1.6288927936251916,
+        0.9593757740896707,
+        1.3872817263485766
+      ],
+      "request_p99_ms": 307.845846,
+      "measurement_widths": [
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        },
+        {
+          "32": 8
+        }
+      ],
+      "leader_durability_barriers": [
+        16,
+        16,
+        16
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 0.083477,
+        "sync_ns": 198.972531,
+        "publish_ns": 372.983201
+      }
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "ready_items": 16,
+      "rates": [
+        8.898,
+        8.393,
+        8.296
+      ],
+      "median_puts_per_second": 8.393,
+      "paired_ratio_to_q16": 1.0,
+      "paired_ratios": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "request_p99_ms": 271.11159499999997,
+      "measurement_widths": [
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        }
+      ],
+      "leader_durability_barriers": [
+        512,
+        512,
+        512
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 2.824472,
+        "sync_ns": 6383.812928,
+        "publish_ns": 12594.965917
+      }
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "ready_items": 32,
+      "rates": [
+        7.813,
+        7.483,
+        7.725
+      ],
+      "median_puts_per_second": 7.725,
+      "paired_ratio_to_q16": 0.891576313594662,
+      "paired_ratios": [
+        0.8780624859518993,
+        0.891576313594662,
+        0.9311716489874639
+      ],
+      "request_p99_ms": 409.062737,
+      "measurement_widths": [
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        }
+      ],
+      "leader_durability_barriers": [
+        512,
+        512,
+        512
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 2.963946,
+        "sync_ns": 7001.479865,
+        "publish_ns": 13871.866488
+      }
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "ready_items": 64,
+      "rates": [
+        8.352,
+        7.863,
+        8.411
+      ],
+      "median_puts_per_second": 8.352,
+      "paired_ratio_to_q16": 0.9386378961564397,
+      "paired_ratios": [
+        0.9386378961564397,
+        0.936852138687001,
+        1.0138621022179364
+      ],
+      "request_p99_ms": 316.743654,
+      "measurement_widths": [
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        },
+        {
+          "1": 256
+        }
+      ],
+      "leader_durability_barriers": [
+        512,
+        512,
+        512
+      ],
+      "leader_io_elapsed_ms": {
+        "io_append_ns": 3.009997,
+        "sync_ns": 6630.37544,
+        "publish_ns": 12539.284459
+      }
+    }
+  ],
+  "notes": [
+    "Everycase256originals+64warmups,recovered320, first/lastduplicate receipts andworkersjoins",
+    "Window32prevents64widebatches; q64alwaysactual32here",
+    "Native/defaultpolicyremains16; no automaticpromotion",
+    "Sync/publish elapsedmethodintervals are not CPU andcannot beaddedacrossreplicas orinterpretedastransportcausality",
+    "Initiallocalpreflight incorrectlyrequired executepermissionofrlib; correctedtoexecutableonly beforeanytiming, bytes unchanged",
+    "Archive initially expected storage.csv, but startup/journal mode emits journal+publication CSV while storage.csv is shared-assembly only. Corrected archive shape from actual report writer; no measurement restart or data change. All root CSVs retained."
+  ]
+}

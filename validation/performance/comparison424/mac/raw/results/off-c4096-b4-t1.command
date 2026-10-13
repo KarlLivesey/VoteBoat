@@ -1,0 +1,1 @@
+/tmp/voteboat-mac424-41ee217/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 

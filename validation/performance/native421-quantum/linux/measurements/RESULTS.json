@@ -1,0 +1,3500 @@
+{
+  "scope": "Native421 same exact1091610 source/library/executable perhost; requested ready quantum16/32/64 only. Same three-replica Counter durability/security/window/device/benchmark observer. Three rotating policy orders. Actual proposal widths are bounded by window32 or1, so quantum64 is not64-wide input. Short diagnostic, not sustained maintenance/headroom or OpenRaft floor acceptance.",
+  "cases": [
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.132816",
+        "applied_ops_s": "1927.479",
+        "p50_us": "14948.484",
+        "p95_us": "25511.376",
+        "p99_us": "25523.299",
+        "max_us": "25527.096",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "838",
+        "host_poll_ms": "18.056",
+        "max_host_poll_ms": "0.154",
+        "persistence_batches": "62",
+        "worker_events": "124",
+        "application_deliveries": "44",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 4,
+          "widths": {
+            "16": 4
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 16,
+          "widths": {
+            "16": 16
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 32,
+          "io_append_ns": 117562,
+          "sync_calls": 32,
+          "sync_ns": 33996857,
+          "publish_calls": 32,
+          "publish_ns": 72160128
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 15,
+          "io_append_ns": 70813,
+          "sync_calls": 15,
+          "sync_ns": 21170248,
+          "publish_calls": 15,
+          "publish_ns": 45935159
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 15,
+          "io_append_ns": 62626,
+          "sync_calls": 15,
+          "sync_ns": 22643165,
+          "publish_calls": 15,
+          "publish_ns": 40458829
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.095347",
+        "applied_ops_s": "2684.935",
+        "p50_us": "11047.827",
+        "p95_us": "18259.799",
+        "p99_us": "18261.813",
+        "max_us": "18262.354",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "579",
+        "host_poll_ms": "15.016",
+        "max_host_poll_ms": "0.174",
+        "persistence_batches": "44",
+        "worker_events": "88",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 88536,
+          "sync_calls": 16,
+          "sync_ns": 16578107,
+          "publish_calls": 16,
+          "publish_ns": 41357864
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 15,
+          "io_append_ns": 71715,
+          "sync_calls": 15,
+          "sync_ns": 17246748,
+          "publish_calls": 15,
+          "publish_ns": 46901199
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 13,
+          "io_append_ns": 58952,
+          "sync_calls": 13,
+          "sync_ns": 14941001,
+          "publish_calls": 13,
+          "publish_ns": 43053814
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.183043",
+        "applied_ops_s": "1398.575",
+        "p50_us": "13047.959",
+        "p95_us": "41707.513",
+        "p99_us": "41710.980",
+        "max_us": "41716.671",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "1053",
+        "host_poll_ms": "30.359",
+        "max_host_poll_ms": "0.308",
+        "persistence_batches": "43",
+        "worker_events": "86",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 78899,
+          "sync_calls": 16,
+          "sync_ns": 41535297,
+          "publish_calls": 16,
+          "publish_ns": 65382636
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 14,
+          "io_append_ns": 65527,
+          "sync_calls": 14,
+          "sync_ns": 44470042,
+          "publish_calls": 14,
+          "publish_ns": 80197758
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 13,
+          "io_append_ns": 65344,
+          "sync_calls": 13,
+          "sync_ns": 39085300,
+          "publish_calls": 13,
+          "publish_ns": 70493254
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.093864",
+        "applied_ops_s": "2727.364",
+        "p50_us": "11981.648",
+        "p95_us": "13027.040",
+        "p99_us": "13030.947",
+        "max_us": "13034.023",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "580",
+        "host_poll_ms": "13.999",
+        "max_host_poll_ms": "0.120",
+        "persistence_batches": "44",
+        "worker_events": "88",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 68402,
+          "sync_calls": 16,
+          "sync_ns": 17072539,
+          "publish_calls": 16,
+          "publish_ns": 36890089
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 15,
+          "io_append_ns": 62068,
+          "sync_calls": 15,
+          "sync_ns": 17619149,
+          "publish_calls": 15,
+          "publish_ns": 42536165
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 13,
+          "io_append_ns": 49261,
+          "sync_calls": 13,
+          "sync_ns": 17676690,
+          "publish_calls": 13,
+          "publish_ns": 38289958
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.095310",
+        "applied_ops_s": "2685.962",
+        "p50_us": "11318.718",
+        "p95_us": "16533.463",
+        "p99_us": "16538.172",
+        "max_us": "16538.462",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "601",
+        "host_poll_ms": "13.897",
+        "max_host_poll_ms": "0.115",
+        "persistence_batches": "44",
+        "worker_events": "88",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 66848,
+          "sync_calls": 16,
+          "sync_ns": 25874221,
+          "publish_calls": 16,
+          "publish_ns": 34122966
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 15,
+          "io_append_ns": 56676,
+          "sync_calls": 15,
+          "sync_ns": 27798832,
+          "publish_calls": 15,
+          "publish_ns": 35362357
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 13,
+          "io_append_ns": 51486,
+          "sync_calls": 13,
+          "sync_ns": 23644044,
+          "publish_calls": 13,
+          "publish_ns": 30434573
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.486284",
+        "applied_ops_s": "526.441",
+        "p50_us": "47539.392",
+        "p95_us": "116052.200",
+        "p99_us": "116060.235",
+        "max_us": "116065.656",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "2994",
+        "host_poll_ms": "44.856",
+        "max_host_poll_ms": "0.121",
+        "persistence_batches": "60",
+        "worker_events": "120",
+        "application_deliveries": "42",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 4,
+          "widths": {
+            "16": 4
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 16,
+          "widths": {
+            "16": 16
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 32,
+          "io_append_ns": 118155,
+          "sync_calls": 32,
+          "sync_ns": 134663724,
+          "publish_calls": 32,
+          "publish_ns": 279398128
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 14,
+          "io_append_ns": 57478,
+          "sync_calls": 14,
+          "sync_ns": 60318216,
+          "publish_calls": 14,
+          "publish_ns": 110505540
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 14,
+          "io_append_ns": 58103,
+          "sync_calls": 14,
+          "sync_ns": 107578838,
+          "publish_calls": 14,
+          "publish_ns": 145603885
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.479643",
+        "applied_ops_s": "533.730",
+        "p50_us": "38843.089",
+        "p95_us": "146381.420",
+        "p99_us": "146383.554",
+        "max_us": "146386.079",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "2911",
+        "host_poll_ms": "46.243",
+        "max_host_poll_ms": "0.160",
+        "persistence_batches": "41",
+        "worker_events": "82",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 82997,
+          "sync_calls": 16,
+          "sync_ns": 119412597,
+          "publish_calls": 16,
+          "publish_ns": 128050650
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 14,
+          "io_append_ns": 62456,
+          "sync_calls": 14,
+          "sync_ns": 105510436,
+          "publish_calls": 14,
+          "publish_ns": 207515781
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 11,
+          "io_append_ns": 57710,
+          "sync_calls": 11,
+          "sync_ns": 84013861,
+          "publish_calls": 11,
+          "publish_ns": 208023080
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.182982",
+        "applied_ops_s": "1399.046",
+        "p50_us": "19627.899",
+        "p95_us": "43498.869",
+        "p99_us": "43517.104",
+        "max_us": "43518.406",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "1124",
+        "host_poll_ms": "25.450",
+        "max_host_poll_ms": "0.122",
+        "persistence_batches": "61",
+        "worker_events": "122",
+        "application_deliveries": "43",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 4,
+          "widths": {
+            "16": 4
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 16,
+          "widths": {
+            "16": 16
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 32,
+          "io_append_ns": 124424,
+          "sync_calls": 32,
+          "sync_ns": 44400044,
+          "publish_calls": 32,
+          "publish_ns": 111491495
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 15,
+          "io_append_ns": 57218,
+          "sync_calls": 15,
+          "sync_ns": 25368044,
+          "publish_calls": 15,
+          "publish_ns": 64296179
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 14,
+          "io_append_ns": 48101,
+          "sync_calls": 14,
+          "sync_ns": 22736502,
+          "publish_calls": 14,
+          "publish_ns": 58729527
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "tcp",
+      "window": 32,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.097246",
+        "applied_ops_s": "2632.503",
+        "p50_us": "11062.614",
+        "p95_us": "20319.773",
+        "p99_us": "20323.089",
+        "max_us": "20325.514",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "601",
+        "host_poll_ms": "14.421",
+        "max_host_poll_ms": "0.159",
+        "persistence_batches": "44",
+        "worker_events": "88",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 69369,
+          "sync_calls": 16,
+          "sync_ns": 26273912,
+          "publish_calls": 16,
+          "publish_ns": 31905523
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 15,
+          "io_append_ns": 51927,
+          "sync_calls": 15,
+          "sync_ns": 17350894,
+          "publish_calls": 15,
+          "publish_ns": 36644674
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 13,
+          "io_append_ns": 50767,
+          "sync_calls": 13,
+          "sync_ns": 17393903,
+          "publish_calls": 13,
+          "publish_ns": 43126847
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "24.984811",
+        "applied_ops_s": "10.246",
+        "p50_us": "91134.792",
+        "p95_us": "237031.037",
+        "p99_us": "581036.698",
+        "max_us": "635092.857",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "151380",
+        "host_poll_ms": "2225.122",
+        "max_host_poll_ms": "1.117",
+        "persistence_batches": "1415",
+        "worker_events": "2830",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2495568,
+          "sync_calls": 512,
+          "sync_ns": 4802250859,
+          "publish_calls": 512,
+          "publish_ns": 10814857539
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 454,
+          "io_append_ns": 2183938,
+          "sync_calls": 454,
+          "sync_ns": 4947979950,
+          "publish_calls": 454,
+          "publish_ns": 9926510750
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 449,
+          "io_append_ns": 2175339,
+          "sync_calls": 449,
+          "sync_ns": 4906198213,
+          "publish_calls": 449,
+          "publish_ns": 11177756181
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "30.101874",
+        "applied_ops_s": "8.504",
+        "p50_us": "99853.379",
+        "p95_us": "239327.049",
+        "p99_us": "279195.562",
+        "max_us": "864139.904",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "183022",
+        "host_poll_ms": "2545.816",
+        "max_host_poll_ms": "1.160",
+        "persistence_batches": "1412",
+        "worker_events": "2824",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2731470,
+          "sync_calls": 512,
+          "sync_ns": 6200685342,
+          "publish_calls": 512,
+          "publish_ns": 12903162457
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 446,
+          "io_append_ns": 2443708,
+          "sync_calls": 446,
+          "sync_ns": 6009278399,
+          "publish_calls": 446,
+          "publish_ns": 12235944858
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 454,
+          "io_append_ns": 2441983,
+          "sync_calls": 454,
+          "sync_ns": 6586867284,
+          "publish_calls": 454,
+          "publish_ns": 12355449763
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "31.778693",
+        "applied_ops_s": "8.056",
+        "p50_us": "104956.535",
+        "p95_us": "241055.241",
+        "p99_us": "302703.345",
+        "max_us": "357971.043",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "190955",
+        "host_poll_ms": "2901.254",
+        "max_host_poll_ms": "8.860",
+        "persistence_batches": "1407",
+        "worker_events": "2814",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2719110,
+          "sync_calls": 512,
+          "sync_ns": 6942923791,
+          "publish_calls": 512,
+          "publish_ns": 13068837996
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 450,
+          "io_append_ns": 2333592,
+          "sync_calls": 450,
+          "sync_ns": 6670522795,
+          "publish_calls": 450,
+          "publish_ns": 12738718497
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 445,
+          "io_append_ns": 2387517,
+          "sync_calls": 445,
+          "sync_ns": 6687168811,
+          "publish_calls": 445,
+          "publish_ns": 13404002066
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "30.349651",
+        "applied_ops_s": "8.435",
+        "p50_us": "101555.786",
+        "p95_us": "230696.942",
+        "p99_us": "358985.372",
+        "max_us": "431365.229",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "182026",
+        "host_poll_ms": "2817.833",
+        "max_host_poll_ms": "1.650",
+        "persistence_batches": "1404",
+        "worker_events": "2808",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2870994,
+          "sync_calls": 512,
+          "sync_ns": 6475638081,
+          "publish_calls": 512,
+          "publish_ns": 12262552872
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 442,
+          "io_append_ns": 2281783,
+          "sync_calls": 442,
+          "sync_ns": 6122487447,
+          "publish_calls": 442,
+          "publish_ns": 12595469183
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 450,
+          "io_append_ns": 2308291,
+          "sync_calls": 450,
+          "sync_ns": 6311198498,
+          "publish_calls": 450,
+          "publish_ns": 12871456470
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "33.921670",
+        "applied_ops_s": "7.547",
+        "p50_us": "109673.974",
+        "p95_us": "281739.886",
+        "p99_us": "407169.121",
+        "max_us": "671669.755",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "202638",
+        "host_poll_ms": "3142.518",
+        "max_host_poll_ms": "1.789",
+        "persistence_batches": "1403",
+        "worker_events": "2806",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2871904,
+          "sync_calls": 512,
+          "sync_ns": 7555441015,
+          "publish_calls": 512,
+          "publish_ns": 14191656954
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 450,
+          "io_append_ns": 2399455,
+          "sync_calls": 450,
+          "sync_ns": 6889839805,
+          "publish_calls": 450,
+          "publish_ns": 12941250150
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 441,
+          "io_append_ns": 2298674,
+          "sync_calls": 441,
+          "sync_ns": 7432159439,
+          "publish_calls": 441,
+          "publish_ns": 13899527809
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "29.354052",
+        "applied_ops_s": "8.721",
+        "p50_us": "97733.648",
+        "p95_us": "224772.102",
+        "p99_us": "279113.893",
+        "max_us": "395600.686",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "177315",
+        "host_poll_ms": "2651.569",
+        "max_host_poll_ms": "0.989",
+        "persistence_batches": "1393",
+        "worker_events": "2786",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2702158,
+          "sync_calls": 512,
+          "sync_ns": 6466518479,
+          "publish_calls": 512,
+          "publish_ns": 11651251888
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 433,
+          "io_append_ns": 2227346,
+          "sync_calls": 433,
+          "sync_ns": 5869217725,
+          "publish_calls": 433,
+          "publish_ns": 11821821444
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 448,
+          "io_append_ns": 2257193,
+          "sync_calls": 448,
+          "sync_ns": 6286505035,
+          "publish_calls": 448,
+          "publish_ns": 12643449186
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "31.736503",
+        "applied_ops_s": "8.066",
+        "p50_us": "106024.283",
+        "p95_us": "244106.728",
+        "p99_us": "333829.354",
+        "max_us": "374643.654",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "190884",
+        "host_poll_ms": "2887.125",
+        "max_host_poll_ms": "1.658",
+        "persistence_batches": "1379",
+        "worker_events": "2758",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2804844,
+          "sync_calls": 512,
+          "sync_ns": 7398230693,
+          "publish_calls": 512,
+          "publish_ns": 12568626256
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 438,
+          "io_append_ns": 2317178,
+          "sync_calls": 438,
+          "sync_ns": 6316284366,
+          "publish_calls": 438,
+          "publish_ns": 12409674679
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 429,
+          "io_append_ns": 2375306,
+          "sync_calls": 429,
+          "sync_ns": 6917236985,
+          "publish_calls": 429,
+          "publish_ns": 12822222480
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "33.077882",
+        "applied_ops_s": "7.739",
+        "p50_us": "111299.689",
+        "p95_us": "247858.968",
+        "p99_us": "322450.122",
+        "max_us": "418695.455",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "196985",
+        "host_poll_ms": "3217.182",
+        "max_host_poll_ms": "3.702",
+        "persistence_batches": "1434",
+        "worker_events": "2868",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 3113131,
+          "sync_calls": 512,
+          "sync_ns": 7200801317,
+          "publish_calls": 512,
+          "publish_ns": 13522070886
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 464,
+          "io_append_ns": 2599366,
+          "sync_calls": 464,
+          "sync_ns": 7024300090,
+          "publish_calls": 464,
+          "publish_ns": 13111224398
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 458,
+          "io_append_ns": 2505768,
+          "sync_calls": 458,
+          "sync_ns": 7204448211,
+          "publish_calls": 458,
+          "publish_ns": 14146996767
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "tcp",
+      "window": 1,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "TcpTls",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "29.064807",
+        "applied_ops_s": "8.808",
+        "p50_us": "96501.513",
+        "p95_us": "217521.794",
+        "p99_us": "271678.870",
+        "max_us": "300814.525",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "177472",
+        "host_poll_ms": "2365.228",
+        "max_host_poll_ms": "0.926",
+        "persistence_batches": "1378",
+        "worker_events": "2756",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2549678,
+          "sync_calls": 512,
+          "sync_ns": 6228565969,
+          "publish_calls": 512,
+          "publish_ns": 12058463549
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 433,
+          "io_append_ns": 2110878,
+          "sync_calls": 433,
+          "sync_ns": 6122284920,
+          "publish_calls": 433,
+          "publish_ns": 11791981874
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 433,
+          "io_append_ns": 2025201,
+          "sync_calls": 433,
+          "sync_ns": 5907142198,
+          "publish_calls": 433,
+          "publish_ns": 11266560038
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "1.367250",
+        "applied_ops_s": "187.237",
+        "p50_us": "145832.707",
+        "p95_us": "260910.739",
+        "p99_us": "260923.242",
+        "max_us": "260933.813",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "8110",
+        "host_poll_ms": "145.426",
+        "max_host_poll_ms": "1.389",
+        "persistence_batches": "64",
+        "worker_events": "128",
+        "application_deliveries": "44",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 4,
+          "widths": {
+            "16": 4
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 16,
+          "widths": {
+            "16": 16
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 32,
+          "io_append_ns": 168926,
+          "sync_calls": 32,
+          "sync_ns": 454931543,
+          "publish_calls": 32,
+          "publish_ns": 884628233
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 16,
+          "io_append_ns": 99567,
+          "sync_calls": 16,
+          "sync_ns": 218548913,
+          "publish_calls": 16,
+          "publish_ns": 495898902
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 16,
+          "io_append_ns": 89850,
+          "sync_calls": 16,
+          "sync_ns": 251831104,
+          "publish_calls": 16,
+          "publish_ns": 493428154
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "1.018210",
+        "applied_ops_s": "251.421",
+        "p50_us": "105077.183",
+        "p95_us": "219216.406",
+        "p99_us": "219220.744",
+        "max_us": "219226.736",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "6160",
+        "host_poll_ms": "90.603",
+        "max_host_poll_ms": "0.507",
+        "persistence_batches": "44",
+        "worker_events": "87",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 85975,
+          "sync_calls": 16,
+          "sync_ns": 250309753,
+          "publish_calls": 16,
+          "publish_ns": 417418679
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 14,
+          "io_append_ns": 76354,
+          "sync_calls": 14,
+          "sync_ns": 195578502,
+          "publish_calls": 14,
+          "publish_ns": 417449557
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 14,
+          "io_append_ns": 83146,
+          "sync_calls": 14,
+          "sync_ns": 220503100,
+          "publish_calls": 14,
+          "publish_ns": 462246706
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.839374",
+        "applied_ops_s": "304.989",
+        "p50_us": "88813.450",
+        "p95_us": "221294.725",
+        "p99_us": "221298.632",
+        "max_us": "221302.319",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "5057",
+        "host_poll_ms": "76.989",
+        "max_host_poll_ms": "0.863",
+        "persistence_batches": "40",
+        "worker_events": "80",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 83477,
+          "sync_calls": 16,
+          "sync_ns": 189436513,
+          "publish_calls": 16,
+          "publish_ns": 372983201
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 14,
+          "io_append_ns": 69271,
+          "sync_calls": 14,
+          "sync_ns": 168616819,
+          "publish_calls": 14,
+          "publish_ns": 402276764
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 10,
+          "io_append_ns": 49234,
+          "sync_calls": 10,
+          "sync_ns": 135144419,
+          "publish_calls": 10,
+          "publish_ns": 263193581
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.746053",
+        "applied_ops_s": "343.139",
+        "p50_us": "90847.899",
+        "p95_us": "132996.632",
+        "p99_us": "133001.572",
+        "max_us": "133003.826",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "4486",
+        "host_poll_ms": "67.936",
+        "max_host_poll_ms": "0.375",
+        "persistence_batches": "39",
+        "worker_events": "78",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 78527,
+          "sync_calls": 16,
+          "sync_ns": 204345821,
+          "publish_calls": 16,
+          "publish_ns": 309830827
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 10,
+          "io_append_ns": 52778,
+          "sync_calls": 10,
+          "sync_ns": 107620467,
+          "publish_calls": 10,
+          "publish_ns": 253122914
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 13,
+          "io_append_ns": 62187,
+          "sync_calls": 13,
+          "sync_ns": 149922479,
+          "publish_calls": 13,
+          "publish_ns": 297965932
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "1.888532",
+        "applied_ops_s": "135.555",
+        "p50_us": "188446.432",
+        "p95_us": "479871.015",
+        "p99_us": "479875.823",
+        "max_us": "479881.304",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "11356",
+        "host_poll_ms": "168.490",
+        "max_host_poll_ms": "1.151",
+        "persistence_batches": "41",
+        "worker_events": "82",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 92594,
+          "sync_calls": 16,
+          "sync_ns": 591856327,
+          "publish_calls": 16,
+          "publish_ns": 688090184
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 10,
+          "io_append_ns": 47571,
+          "sync_calls": 10,
+          "sync_ns": 308712975,
+          "publish_calls": 10,
+          "publish_ns": 610161369
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 15,
+          "io_append_ns": 81104,
+          "sync_calls": 15,
+          "sync_ns": 400908505,
+          "publish_calls": 15,
+          "publish_ns": 807043701
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "1.811815",
+        "applied_ops_s": "141.295",
+        "p50_us": "172435.342",
+        "p95_us": "400481.061",
+        "p99_us": "400489.636",
+        "max_us": "400499.145",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "10855",
+        "host_poll_ms": "169.087",
+        "max_host_poll_ms": "0.385",
+        "persistence_batches": "64",
+        "worker_events": "128",
+        "application_deliveries": "44",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 4,
+          "widths": {
+            "16": 4
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 16,
+          "widths": {
+            "16": 16
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 32,
+          "io_append_ns": 159501,
+          "sync_calls": 32,
+          "sync_ns": 590806079,
+          "publish_calls": 32,
+          "publish_ns": 1145164282
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 16,
+          "io_append_ns": 80932,
+          "sync_calls": 16,
+          "sync_ns": 317002962,
+          "publish_calls": 16,
+          "publish_ns": 632345077
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 16,
+          "io_append_ns": 73970,
+          "sync_calls": 16,
+          "sync_ns": 272926020,
+          "publish_calls": 16,
+          "publish_ns": 556643375
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "0.984210",
+        "applied_ops_s": "260.107",
+        "p50_us": "68143.058",
+        "p95_us": "307841.478",
+        "p99_us": "307845.846",
+        "max_us": "307849.773",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "5893",
+        "host_poll_ms": "93.155",
+        "max_host_poll_ms": "0.424",
+        "persistence_batches": "42",
+        "worker_events": "83",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 82827,
+          "sync_calls": 16,
+          "sync_ns": 198972531,
+          "publish_calls": 16,
+          "publish_ns": 348473100
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 11,
+          "io_append_ns": 51059,
+          "sync_calls": 11,
+          "sync_ns": 147832641,
+          "publish_calls": 11,
+          "publish_ns": 414549893
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 15,
+          "io_append_ns": 70112,
+          "sync_calls": 15,
+          "sync_ns": 206026569,
+          "publish_calls": 15,
+          "publish_ns": 618475254
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "1.365377",
+        "applied_ops_s": "187.494",
+        "p50_us": "129692.880",
+        "p95_us": "332032.646",
+        "p99_us": "332044.428",
+        "max_us": "332053.305",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "8112",
+        "host_poll_ms": "141.366",
+        "max_host_poll_ms": "0.293",
+        "persistence_batches": "64",
+        "worker_events": "128",
+        "application_deliveries": "44",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 4,
+          "widths": {
+            "16": 4
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 16,
+          "widths": {
+            "16": 16
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 32,
+          "io_append_ns": 267355,
+          "sync_calls": 32,
+          "sync_ns": 398285022,
+          "publish_calls": 32,
+          "publish_ns": 873689632
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 16,
+          "io_append_ns": 123979,
+          "sync_calls": 16,
+          "sync_ns": 232680494,
+          "publish_calls": 16,
+          "publish_ns": 458627093
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 16,
+          "io_append_ns": 110869,
+          "sync_calls": 16,
+          "sync_ns": 224689818,
+          "publish_calls": 16,
+          "publish_ns": 569782433
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "quic",
+      "window": 32,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "32",
+        "max_inflight": "32",
+        "elapsed_s": "1.020519",
+        "applied_ops_s": "250.853",
+        "p50_us": "87978.066",
+        "p95_us": "308370.585",
+        "p99_us": "308374.481",
+        "max_us": "308379.341",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "5977",
+        "host_poll_ms": "114.893",
+        "max_host_poll_ms": "0.360",
+        "persistence_batches": "40",
+        "worker_events": "80",
+        "application_deliveries": "22",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 2,
+          "widths": {
+            "32": 2
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 8,
+          "widths": {
+            "32": 8
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 16,
+          "io_append_ns": 110560,
+          "sync_calls": 16,
+          "sync_ns": 212117379,
+          "publish_calls": 16,
+          "publish_ns": 415741007
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 13,
+          "io_append_ns": 80641,
+          "sync_calls": 13,
+          "sync_ns": 201905828,
+          "publish_calls": 13,
+          "publish_ns": 426390925
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 11,
+          "io_append_ns": 74358,
+          "sync_calls": 11,
+          "sync_ns": 201310425,
+          "publish_calls": 11,
+          "publish_ns": 395721168
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "28.771497",
+        "applied_ops_s": "8.898",
+        "p50_us": "99812.986",
+        "p95_us": "207847.427",
+        "p99_us": "278708.749",
+        "max_us": "304840.181",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "173690",
+        "host_poll_ms": "2545.101",
+        "max_host_poll_ms": "1.824",
+        "persistence_batches": "1406",
+        "worker_events": "2812",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2605311,
+          "sync_calls": 512,
+          "sync_ns": 6383812928,
+          "publish_calls": 512,
+          "publish_ns": 11701492811
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 453,
+          "io_append_ns": 2302331,
+          "sync_calls": 453,
+          "sync_ns": 5995298234,
+          "publish_calls": 453,
+          "publish_ns": 11369962087
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 441,
+          "io_append_ns": 2244661,
+          "sync_calls": 441,
+          "sync_ns": 6107213344,
+          "publish_calls": 441,
+          "publish_ns": 11987711800
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "32.763938",
+        "applied_ops_s": "7.813",
+        "p50_us": "100380.725",
+        "p95_us": "252359.623",
+        "p99_us": "369207.220",
+        "max_us": "406454.494",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "196495",
+        "host_poll_ms": "2989.784",
+        "max_host_poll_ms": "1.652",
+        "persistence_batches": "1411",
+        "worker_events": "2822",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2963946,
+          "sync_calls": 512,
+          "sync_ns": 6928991538,
+          "publish_calls": 512,
+          "publish_ns": 13649237002
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 444,
+          "io_append_ns": 2527301,
+          "sync_calls": 444,
+          "sync_ns": 6723914859,
+          "publish_calls": 444,
+          "publish_ns": 14069436881
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 455,
+          "io_append_ns": 2657280,
+          "sync_calls": 455,
+          "sync_ns": 7088735664,
+          "publish_calls": 455,
+          "publish_ns": 13744078223
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 1,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "30.649788",
+        "applied_ops_s": "8.352",
+        "p50_us": "100504.854",
+        "p95_us": "228206.816",
+        "p99_us": "316743.654",
+        "max_us": "424062.789",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "184702",
+        "host_poll_ms": "2779.925",
+        "max_host_poll_ms": "1.538",
+        "persistence_batches": "1397",
+        "worker_events": "2794",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2851745,
+          "sync_calls": 512,
+          "sync_ns": 6630375440,
+          "publish_calls": 512,
+          "publish_ns": 12539284459
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 443,
+          "io_append_ns": 2408775,
+          "sync_calls": 443,
+          "sync_ns": 6476301501,
+          "publish_calls": 443,
+          "publish_ns": 12072750576
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 442,
+          "io_append_ns": 2341011,
+          "sync_calls": 442,
+          "sync_ns": 6574604574,
+          "publish_calls": 442,
+          "publish_ns": 12882283031
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "34.211584",
+        "applied_ops_s": "7.483",
+        "p50_us": "110895.981",
+        "p95_us": "262093.823",
+        "p99_us": "412129.248",
+        "max_us": "502496.778",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "206234",
+        "host_poll_ms": "3051.288",
+        "max_host_poll_ms": "1.664",
+        "persistence_batches": "1428",
+        "worker_events": "2856",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2858214,
+          "sync_calls": 512,
+          "sync_ns": 7482104003,
+          "publish_calls": 512,
+          "publish_ns": 14416540056
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 466,
+          "io_append_ns": 2425851,
+          "sync_calls": 466,
+          "sync_ns": 6949193543,
+          "publish_calls": 466,
+          "publish_ns": 13833850027
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 450,
+          "io_append_ns": 2404252,
+          "sync_calls": 450,
+          "sync_ns": 7219110280,
+          "publish_calls": 450,
+          "publish_ns": 14406783546
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "32.556045",
+        "applied_ops_s": "7.863",
+        "p50_us": "109547.291",
+        "p95_us": "258278.852",
+        "p99_us": "323886.554",
+        "max_us": "527121.726",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "193897",
+        "host_poll_ms": "2943.310",
+        "max_host_poll_ms": "1.672",
+        "persistence_batches": "1412",
+        "worker_events": "2824",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 3106163,
+          "sync_calls": 512,
+          "sync_ns": 6973104830,
+          "publish_calls": 512,
+          "publish_ns": 13543715924
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 444,
+          "io_append_ns": 2835160,
+          "sync_calls": 444,
+          "sync_ns": 6819503288,
+          "publish_calls": 444,
+          "publish_ns": 12799837664
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 456,
+          "io_append_ns": 2632339,
+          "sync_calls": 456,
+          "sync_ns": 6838132592,
+          "publish_calls": 456,
+          "publish_ns": 13531907379
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 2,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "30.503418",
+        "applied_ops_s": "8.393",
+        "p50_us": "101594.440",
+        "p95_us": "216274.581",
+        "p99_us": "271111.595",
+        "max_us": "450189.894",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "184291",
+        "host_poll_ms": "2683.438",
+        "max_host_poll_ms": "1.334",
+        "persistence_batches": "1406",
+        "worker_events": "2812",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 2824472,
+          "sync_calls": 512,
+          "sync_ns": 6302896965,
+          "publish_calls": 512,
+          "publish_ns": 12594965917
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 444,
+          "io_append_ns": 2384979,
+          "sync_calls": 444,
+          "sync_ns": 6259249378,
+          "publish_calls": 444,
+          "publish_ns": 12639381379
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 450,
+          "io_append_ns": 2438547,
+          "sync_calls": 450,
+          "sync_ns": 6515601381,
+          "publish_calls": 450,
+          "publish_ns": 13011020702
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q64",
+      "quantum": 64,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "30.436993",
+        "applied_ops_s": "8.411",
+        "p50_us": "102928.954",
+        "p95_us": "236639.514",
+        "p99_us": "314592.876",
+        "max_us": "349772.894",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "183798",
+        "host_poll_ms": "2648.276",
+        "max_host_poll_ms": "3.567",
+        "persistence_batches": "1441",
+        "worker_events": "2882",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "64",
+        "ready_visit_items_effective": "64",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 3009997,
+          "sync_calls": 512,
+          "sync_ns": 6187557052,
+          "publish_calls": 512,
+          "publish_ns": 12410592639
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 461,
+          "io_append_ns": 2368201,
+          "sync_calls": 461,
+          "sync_ns": 6380664552,
+          "publish_calls": 461,
+          "publish_ns": 12629080068
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 468,
+          "io_append_ns": 2491372,
+          "sync_calls": 468,
+          "sync_ns": 7049579174,
+          "publish_calls": 468,
+          "publish_ns": 13104649344
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q16",
+      "quantum": 16,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "30.857645",
+        "applied_ops_s": "8.296",
+        "p50_us": "106235.683",
+        "p95_us": "224474.140",
+        "p99_us": "270407.976",
+        "max_us": "420566.157",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "185195",
+        "host_poll_ms": "2848.133",
+        "max_host_poll_ms": "1.792",
+        "persistence_batches": "1388",
+        "worker_events": "2776",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "16",
+        "ready_visit_items_effective": "16",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 3087235,
+          "sync_calls": 512,
+          "sync_ns": 6674249385,
+          "publish_calls": 512,
+          "publish_ns": 12641125360
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 443,
+          "io_append_ns": 2532468,
+          "sync_calls": 443,
+          "sync_ns": 6239069440,
+          "publish_calls": 443,
+          "publish_ns": 12548319697
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 433,
+          "io_append_ns": 2381028,
+          "sync_calls": 433,
+          "sync_ns": 6528108455,
+          "publish_calls": 433,
+          "publish_ns": 12222145865
+        }
+      ]
+    },
+    {
+      "kind": "durable_native",
+      "variant": "q32",
+      "quantum": 32,
+      "protocol": "quic",
+      "window": 1,
+      "trial": 3,
+      "completed": 256,
+      "summary": {
+        "protocol": "Quic",
+        "replicas": "3",
+        "groups": "1",
+        "assembly": "startup",
+        "leader_placement": "1:1",
+        "wal_workers_per_replica": "1",
+        "snapshot_workers_per_replica": "1",
+        "peer_endpoints_per_replica": "1",
+        "heartbeat_ms": "50",
+        "election_min_ms": "1000",
+        "election_spread_ms": "1000",
+        "payload_bytes": "8",
+        "warmup": "64",
+        "operations": "256",
+        "window": "1",
+        "max_inflight": "1",
+        "elapsed_s": "33.140012",
+        "applied_ops_s": "7.725",
+        "p50_us": "106731.098",
+        "p95_us": "271728.434",
+        "p99_us": "409062.737",
+        "max_us": "500721.967",
+        "recovered_value": "320",
+        "recovery_retries": "0",
+        "retry_verified": "true",
+        "workers_joined": "true",
+        "poll_rounds": "199936",
+        "host_poll_ms": "2907.569",
+        "max_host_poll_ms": "3.815",
+        "persistence_batches": "1407",
+        "worker_events": "2813",
+        "application_deliveries": "766",
+        "journal_timings": "true",
+        "proposal_batch_diagnostics": "true",
+        "queue_selection_reason_observed": "false",
+        "ready_visit_items_requested": "32",
+        "ready_visit_items_effective": "32",
+        "core_proposal_entries": "64",
+        "ready_visit_bytes": "1048576",
+        "ready_visit_ms": "2",
+        "ready_batch_capable": "true"
+      },
+      "histograms": {
+        "warmup": {
+          "weightedOriginals": 64,
+          "visits": 64,
+          "widths": {
+            "1": 64
+          }
+        },
+        "measurement": {
+          "weightedOriginals": 256,
+          "visits": 256,
+          "widths": {
+            "1": 256
+          }
+        }
+      },
+      "physical": [
+        {
+          "replica": 1,
+          "io_append_calls": 512,
+          "io_append_ns": 3358401,
+          "sync_calls": 512,
+          "sync_ns": 7001479865,
+          "publish_calls": 512,
+          "publish_ns": 13871866488
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 444,
+          "io_append_ns": 2362873,
+          "sync_calls": 444,
+          "sync_ns": 6845836831,
+          "publish_calls": 444,
+          "publish_ns": 13771456124
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 451,
+          "io_append_ns": 2284466,
+          "sync_calls": 451,
+          "sync_ns": 6923545593,
+          "publish_calls": 451,
+          "publish_ns": 13621400939
+        }
+      ]
+    }
+  ],
+  "sourceUnchanged": true,
+  "artifactsUnchanged": true,
+  "sameArtifactAllQuantums": true
+}

@@ -1,0 +1,15 @@
+M2 Max actual equal-work424 diagnostic completed once on frozen `41ee2171224c909bf09cc8bb96df3bdb16a113d3`, original runner61770 / PID97884, exit0. All nine cases passed exact original/frontier/capacity/histogram/27phase/four-provider-scope controls and before/after1,407-source, four-artifact, compiler and reviewed-driver guards. No build/service/copy overlapped timing.
+
+| Shared binary engine | Median originals/s | Median p99 ms |
+| --- | ---: | ---: |
+| VoteBoat attribution off | 3,180,633 | 5.678 |
+| VoteBoat attribution on | 3,296,154 | 5.607 |
+| OpenRaft | 2,488,992 | 8.381 |
+
+Three rotating Latin-order trials used the same asserted-release binary/compiler/150-record lock/runtime:4,096 clients,batch4,1,048,576 originals plus1,024 singleton warmups,default-retention and corrected primary envelopes,common3,600s campaign/30s cleanup guards. Each consumed262,144 requests and all original applied results, with three frontiers1,049,601. Actual capacity units/bounds are explicit: VoteBoat16,384 original API/append entries; OpenRaft4,096 API request messages and soft append merge threshold; both ordinary replication1,024 entries. Current OpenRaft snapshot versus VoteBoat historical snapshot base representation remains disclosed. Rates/p99 are within-host medians; every trial is retained. These short volatile zero-payload in-process results do not qualify a sustained published floor or durable minimum.
+
+On/off paired ratios were1.020/1.007/1.040; this short perturbation does not establish an instrumentation benefit. Leader on-controls each completed204 checkpoints. Compact inclusive elapsed times were30.653/33.176/31.522ms; compact store-state cloning6.432/6.785/6.323ms; append4.850/5.351/5.095ms. Reconcile contains load-pinned and other helper/provider scopes nest; replicas overlap. Do not sum categories as exclusive CPU/critical path, infer pure Core residuals, or treat Linux/Mac absolute differences as a speedup ratio. All full per-replica scopes and raw histograms remain available.
+
+`raw/CONFIG.json` binds actual fresh:false matched root-library/executable records, opt3/debug2/assertions/overflow/thin-LTO/codegen1, actual rustc executable hash/version/verbose invocations and shared OpenRaft/bench_minimal provider-library copies. Reviewed three-helper bytes match DRIVER_HANDOFF; the wrapper only selects `/usr/bin` Python/bash provenance, with no helper semantic change. No Cargo/rustc/service processes were live at preflight. Artifact01025f9e… and its complete proof are separately qualified under mac424. Independent untouched/guard-extended references and native fsync results remain separate.
+
+All66 original remote files and hash manifest are retained uncensored in raw/, plus SUMMARY with every trial. `EVIDENCE.json` verifies publication; no executable/rlib/checkout/build tree is included. Archive/parse stayed onMac while Linux15132 timing was active; local transfer occurred only after explicit terminal release. No failed attempt, restart, reduced workload or selected faster trial occurred.

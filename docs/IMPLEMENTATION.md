@@ -2,18 +2,30 @@
 
 ## Active P9 plan — 13 October 2026
 
+Linux native421's same-artifact visit-policy comparison passes all36 cases,
+source/artifact guards, original results, recovery and representative retries.
+With32 writes in flight, TCP/TLS medians rise1,399→2,685 durable PUTS/s for visit
+size16→32, while QUIC rises187→251. Leader barriers halve32→16; actual proposal
+widths rise16→32. Size64 shows no consistent benefit. Singletons and slow tails
+remain recorded. Default16 remains; broader/mixed/sustained qualification is open.
+[All durable trials](../validation/performance/native421-quantum/linux/README.md).
+The corrected short Mac framework comparison passes allnine cases: VoteBoat
+3,180,633 PUTS/s versus OpenRaft2,488,992, p995.678/8.381ms. This is about28%
+ahead within the shared driver, below the8,422,500 healthy minimum and not a
+sustained qualification. [All Mac trials](../validation/performance/comparison424/mac/README.md).
+Mac native421 policy timing is active on the same frozen native artifact.
+
 The corrected Linux diagnostic on41ee217 passes all nine original-result,
 frontier, capacity-unit, source/artifact/compiler and provider checks. Median
 completed PUTS/s is1,160,164 for VoteBoat without observation versus3,217,590 for
 OpenRaft in the shared driver; request p99 is17.021/6.393ms. These short results
 establish no sustained margin. First instrumented leader compaction takes408.832ms
-inclusive, with state cloning11.678ms and store append4.868ms. The next inspection
-covers the remaining public helper, Core transition/completion and broadcast work;
+inclusive, with state cloning11.678ms and store append4.868ms. The next three-gap observer separates comparison/temporary destruction,
+validation/planning and Core completion/broadcast inside the unchanged helper;
 it is not labeled pure CPU time and does not justify removing proofs.
 [All trials and scope](../validation/performance/comparison424/linux/README.md).
 Fresh Linux/Mac41 library and executable artifacts are qualified. Mac422/423
-broader checks and the Mac424 standalone delta are terminal. Native421's comparison
-of visit policies on one artifact per host follows. The reference Cargo.lock has
+broader checks and the Mac424 standalone delta are terminal. Linux native421 policy results are recorded above; the Mac campaign follows. The reference Cargo.lock has
 196 package records, with unchanged SHA3ef72b; the shared driver's150 records
 include149 dependencies excluding its root package. The earlier149 reference label
 is corrected from the actual lock without changing dependencies.

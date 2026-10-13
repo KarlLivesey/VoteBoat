@@ -1,0 +1,19 @@
+{
+  "source_commit": "41ee2171224c909bf09cc8bb96df3bdb16a113d3",
+  "sha256": {
+    "phase-diagnostic.sh": "7bdd1f4f73e68d74d9b49f132da3baf30c542088686ed5b04ada2113bc4950e0",
+    "phase-diagnostic-check.py": "aed748cc748e48a847b2b629bf2f51e05e7ffa2ab2b5b5dce84ee369ecc2f92b",
+    "artifact-guard.py": "0c520175403b5aeb268b0def07fc01c6e76a06f1c4c274df8b8f9d9d78bb2aec",
+    "CONFIG_SCHEMA.md": "847ceb7638f43f834e4135fc605956bcf29ed1a4d0d0f0424f652b03ea527ae9",
+    "ADAPTATION.patch": "0f02521204ff97722996a0bdaaf7f96891b334332e3625722769ee8a2239469b"
+  },
+  "functional_smoke": "smoke16384-reviewed: three cases exit0 and exact counters/frontiers/27-phase/four-scope validation; process timers disabled; no performance claim",
+  "release_guard": "release-guard-final.log: full1407 source/artifact/compiler guards pass",
+  "retained_failures": [
+    "smoke16384: older debug artifact rejects --attribution; all exits retained",
+    "smoke16384-final: all processes0, rejected incorrect full follower direct-application assumption with3 verified snapshot installs"
+  ],
+  "scope_correction": "direct follower application counter excludes snapshot restore/replay; full direct count required only without snapshot installs; exact leader receipts/all frontiers remain mandatory",
+  "qualification_note": "known isolated424 debug artifact source compiled code matches promoted41; frozen release-source map belongs prepared41 release identity, not a debug compiler record; no debug release proof claim",
+  "jobs": "all terminal; source/driver frozen"
+}
