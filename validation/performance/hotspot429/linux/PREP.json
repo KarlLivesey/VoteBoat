@@ -1,0 +1,44 @@
+{
+  "commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "source_inputs": 1425,
+  "source_inventory": {
+    "path": "target/p9/matched429-linux/SOURCE.json",
+    "sha256": "121733925b7d78f41806902db548a06aeeb72b1be22592ce080a6ee6efc80687"
+  },
+  "guard_pair": {
+    "baseline": {
+      "source_inputs": 1424,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    },
+    "candidate": {
+      "source_inputs": 1425,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    }
+  },
+  "guard_config_sha256": "312c1a8e146424019ff4cc63b7070695fd568ce99dda3ca469bfa5dcdaf5845a",
+  "binary_sha256": "2ddcf9ecdf999b91364b0b9d7751f27700a715a3a06530e25ff4d9a1f0ad4499",
+  "dwp_sha256": "b362a69c25239b923ad9207cd4c135f03c6f693d3f768a15246de2a804e1b9d2",
+  "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+  "perf_version": "perf version 7.2.10-1",
+  "settings": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "runner_sha256": "060968616884f66332522b4e79430a5c5c8d4434802b4bfae04a35d59a5d9341",
+  "not_started": "await Linux archive terminal and root quiet START authorization"
+}

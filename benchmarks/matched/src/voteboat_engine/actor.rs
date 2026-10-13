@@ -5,7 +5,11 @@ use crate::{
     attribution::{Attribution, Phase, Recorder},
     Maintenance,
 };
-use std::{collections::VecDeque, mem::size_of, time::Instant};
+use std::{
+    collections::{HashMap, VecDeque},
+    mem::size_of,
+    time::Instant,
+};
 use voteboat::{application::StateMachine, snapshot::*};
 
 #[cfg(test)]
@@ -35,17 +39,18 @@ pub(super) struct Parts<const TRACE: bool = false> {
 pub(super) struct Actor<const TRACE: bool = false> {
     parts: Parts<TRACE>,
     attribution: Recorder<TRACE>,
-    pending: BTreeMap<OperationId, Reply>,
+    pending: HashMap<OperationId, Reply>,
     deferred: Option<Request>,
     last_snapshot_at: u64,
     last_contact: Instant,
 }
 impl<const TRACE: bool> Actor<TRACE> {
     pub fn new(parts: Parts<TRACE>) -> Self {
+        let pending = HashMap::with_capacity(parts.settings.clients * 4 + 1);
         Self {
             parts,
             attribution: Recorder::default(),
-            pending: BTreeMap::new(),
+            pending,
             deferred: None,
             last_snapshot_at: 0,
             last_contact: Instant::now(),

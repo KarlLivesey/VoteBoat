@@ -1,0 +1,262 @@
+{
+  "created_utc": "2026-10-13T23:03:03.017021+00:00",
+  "prep": {
+    "commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+    "source_inputs": 1425,
+    "source_inventory": {
+      "path": "target/p9/matched429-linux/SOURCE.json",
+      "sha256": "121733925b7d78f41806902db548a06aeeb72b1be22592ce080a6ee6efc80687"
+    },
+    "guard_pair": {
+      "baseline": {
+        "source_inputs": 1424,
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "mode": "asserted_release",
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+      },
+      "candidate": {
+        "source_inputs": 1425,
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "mode": "asserted_release",
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+      }
+    },
+    "guard_config_sha256": "312c1a8e146424019ff4cc63b7070695fd568ce99dda3ca469bfa5dcdaf5845a",
+    "binary_sha256": "2ddcf9ecdf999b91364b0b9d7751f27700a715a3a06530e25ff4d9a1f0ad4499",
+    "dwp_sha256": "b362a69c25239b923ad9207cd4c135f03c6f693d3f768a15246de2a804e1b9d2",
+    "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+    "perf_version": "perf version 7.2.10-1",
+    "settings": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    },
+    "runner_sha256": "060968616884f66332522b4e79430a5c5c8d4434802b4bfae04a35d59a5d9341",
+    "not_started": "await Linux archive terminal and root quiet START authorization"
+  },
+  "recording": {
+    "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched429-linux/artifacts/matched/voteboat-matched-framework",
+    "binary_sha256": "2ddcf9ecdf999b91364b0b9d7751f27700a715a3a06530e25ff4d9a1f0ad4499",
+    "perf": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+    "perf_version": "perf version 7.2.10-1",
+    "settings_before": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    },
+    "scope": "CPU-sampling diagnostic; not unprofiled capacity or acceptance",
+    "events": "cycles:u",
+    "frequency": 1000,
+    "call_graph": "dwarf,16384",
+    "mmap_pages": 128,
+    "cases": [
+      {
+        "name": "bulk",
+        "start_unix": 1791932385.6007304,
+        "end_unix": 1791932390.7715988,
+        "exit": 0,
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+          "record",
+          "-e",
+          "cycles:u",
+          "-F",
+          "1000",
+          "--call-graph",
+          "dwarf,16384",
+          "-m",
+          "128",
+          "-o",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile429/linux/perf-quiet/bulk.data",
+          "--",
+          "/usr/bin/env",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched429-linux/artifacts/matched/voteboat-matched-framework",
+          "--engine",
+          "voteboat",
+          "--clients",
+          "4096",
+          "--batch",
+          "4",
+          "--operations",
+          "20000000",
+          "--warmup",
+          "1024",
+          "--maintenance",
+          "default-retention",
+          "--envelopes",
+          "upstream-default",
+          "--attribution",
+          "false",
+          "--campaign-timeout-secs",
+          "3600"
+        ]
+      },
+      {
+        "name": "singleton",
+        "start_unix": 1791932390.7717955,
+        "end_unix": 1791932405.045862,
+        "exit": 0,
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+          "record",
+          "-e",
+          "cycles:u",
+          "-F",
+          "1000",
+          "--call-graph",
+          "dwarf,16384",
+          "-m",
+          "128",
+          "-o",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile429/linux/perf-quiet/singleton.data",
+          "--",
+          "/usr/bin/env",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched429-linux/artifacts/matched/voteboat-matched-framework",
+          "--engine",
+          "voteboat",
+          "--clients",
+          "1",
+          "--batch",
+          "1",
+          "--operations",
+          "1048576",
+          "--warmup",
+          "1024",
+          "--maintenance",
+          "default-retention",
+          "--envelopes",
+          "upstream-default",
+          "--attribution",
+          "false",
+          "--campaign-timeout-secs",
+          "3600"
+        ]
+      }
+    ],
+    "settings_after": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    }
+  },
+  "after_source_artifact_release_oracle_guard": {
+    "baseline": {
+      "source_inputs": 1424,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    },
+    "candidate": {
+      "source_inputs": 1425,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    }
+  },
+  "original_capture_session": 48667,
+  "capture_terminal_exit": 0,
+  "imports_terminal_exit": [
+    0,
+    0
+  ],
+  "original_symbolication_session": 86885,
+  "symbolication_terminal_exit": 0,
+  "owned_server": {
+    "pid": 3729596,
+    "original_session": 26662,
+    "stop_signal": "SIGINT",
+    "terminal_exit": 0,
+    "browser_opened": false,
+    "external_symbol_requests": false
+  },
+  "commands": {
+    "imports": [
+      [
+        "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+        "import",
+        "--save-only",
+        "--no-open",
+        "--symbol-dir",
+        "target/p9/matched429-linux/target-matched-release/release",
+        "--output",
+        "target/p9/profile429/linux/perf-quiet/bulk.json.gz",
+        "target/p9/profile429/linux/perf-quiet/bulk.data"
+      ],
+      [
+        "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+        "import",
+        "--save-only",
+        "--no-open",
+        "--symbol-dir",
+        "target/p9/matched429-linux/target-matched-release/release",
+        "--output",
+        "target/p9/profile429/linux/perf-quiet/singleton.json.gz",
+        "target/p9/profile429/linux/perf-quiet/singleton.data"
+      ]
+    ],
+    "symbolication": [
+      [
+        "python3",
+        "target/p9/profile429/linux/symbolication/symbolize-full-json.py",
+        "target/p9/profile429/linux/perf-quiet/bulk.json.gz",
+        "http://127.0.0.1:38473/0xgyih05xhkmi4rvrc3x9r83jm1qbhx2qfcr5z8/symbolicate/v5",
+        "target/p9/profile429/linux/symbolication/bulk-symbolicated"
+      ],
+      [
+        "python3",
+        "target/p9/profile429/linux/symbolication/symbolize-full-json.py",
+        "target/p9/profile429/linux/perf-quiet/singleton.json.gz",
+        "http://127.0.0.1:38473/0xgyih05xhkmi4rvrc3x9r83jm1qbhx2qfcr5z8/symbolicate/v5",
+        "target/p9/profile429/linux/symbolication/singleton-symbolicated"
+      ]
+    ],
+    "subsets": [
+      "python3",
+      "target/p9/profile429/linux/symbolication/subsets.py"
+    ]
+  },
+  "inputs": {
+    "target/p9/profile429/linux/perf-quiet/bulk.data": "93beabdabbb374591bde0d5370de10985b07b64ca09f41d201493a5eb14427f3",
+    "target/p9/profile429/linux/perf-quiet/bulk.json.gz": "53c78bcfcb14980d49d19106543a3d77218c24dd69cb5ba38d9c0afbbb948f00",
+    "target/p9/profile429/linux/perf-quiet/singleton.data": "cfcc97d2adf66ce1fdb01a0a9f70b5d68e74c06c5e052d96d9ac46cc6ee34b63",
+    "target/p9/profile429/linux/perf-quiet/singleton.json.gz": "4bb9a808dcdade82be61757aac6300653376611bc24bb967bae7f8da1bea1dd7"
+  },
+  "quiet_window": "root explicit authorization after linux426 ARCHIVE_DONE; root/local collection held; no known competing Linux work",
+  "limitations": [
+    "two lost bulk perf capture chunks retained",
+    "samplecount weights, not perf-period cycles or CPUmicroseconds",
+    "inclusive scopes overlap and must not be added",
+    "synthetic FDE labels retained unchanged, unresolved symbols explicit",
+    "zero exact context count does not imply zero execution cost if optimized inline frame absent",
+    "allocator/clone contexts are samples, not causes/callcounts/bytes",
+    "thread labels do not establish leader/follower CPU ownership",
+    "profiled CLI rates not capacity acceptance"
+  ],
+  "no_browser_SVG_builds_frameflags_or_kernel_changes": true,
+  "summary_annotation": "After subset analysis, semantic_symbol_name_coverage added from unresolved leaf totals and sum synthetic FDE boundary leaf names; raw response JSON unchanged."
+}

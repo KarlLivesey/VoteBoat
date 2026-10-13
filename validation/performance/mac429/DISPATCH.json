@@ -1,0 +1,10 @@
+{
+  "remote_job": "/tmp/voteboat-mac429-832479d-4o73Bl",
+  "original_remote_pid": 41839,
+  "original_setup_handle": 14441,
+  "setup_exit": 0,
+  "source_inputs": 1428,
+  "source_exact_sha256_modes": true,
+  "published_remote_main": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "scope": "qualification/build/CLI only; no performance timing launched"
+}

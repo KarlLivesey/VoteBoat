@@ -2,8 +2,17 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+mod replies;
+
 fn ready_actor<const TRACE: bool>(
     envelopes: crate::Envelopes,
+) -> (Actor<TRACE>, mpsc::Sender<Request>) {
+    ready_actor_clients(envelopes, 4096)
+}
+
+fn ready_actor_clients<const TRACE: bool>(
+    envelopes: crate::Envelopes,
+    clients: usize,
 ) -> (Actor<TRACE>, mpsc::Sender<Request>) {
     let node = NodeId::new(1).unwrap();
     let mut bootstrap = bootstrap().unwrap();
@@ -15,7 +24,7 @@ fn ready_actor<const TRACE: bool>(
         session: StoreSession::new(1).unwrap(),
     };
     let limits = Settings {
-        clients: 4096,
+        clients,
         batch: 4,
         requested_operations: 16384,
         operations: 16384,
@@ -32,7 +41,7 @@ fn ready_actor<const TRACE: bool>(
     core.configure_batch_limits(envelopes.voteboat_limits(4).unwrap())
         .unwrap();
     let settings = Settings {
-        clients: 4096,
+        clients,
         batch: 4,
         requested_operations: 16384,
         operations: 16384,

@@ -1,0 +1,21 @@
+{
+  "baseline_inputs": 1427,
+  "candidate_inputs": 1428,
+  "added": [
+    "tests/provider_conformance/log_store/entry_equality.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "src/log.rs",
+    "tests/provider_conformance/log_store.rs"
+  ],
+  "essential_committed_inputs": 1421,
+  "all_essential_exact_published_commit_sha256": true,
+  "scope": "Selected committed production/harness source, tests fixtures, locks/build/config/hooks and contract docs; not every inventory file compiled",
+  "actual_guards": 0,
+  "actual_cli_controls": 3,
+  "negative_cli_controls": 4,
+  "negative_artifact_controls": 4,
+  "within_host_rustc_sha_equal": true,
+  "within_host_rustc_version_sha_equal": true
+}

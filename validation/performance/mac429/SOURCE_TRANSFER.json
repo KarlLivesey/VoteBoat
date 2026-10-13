@@ -1,0 +1,8 @@
+{
+  "commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "inputs": 1428,
+  "exact_sha256_and_modes": true,
+  "build_rs_present": true,
+  "archive_sha256": "030509db9e9c11ce3bf9e9b5565acf5a8eb31acea1845c82ddd1b78c5fa8f64b",
+  "source_inventory_scope": "Selected committed production/harness source, fixtures, locks, build/config/hooks and contract documents; no builds/WAL states; not a claim every input compiled."
+}

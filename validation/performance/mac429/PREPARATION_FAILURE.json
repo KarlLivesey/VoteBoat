@@ -1,0 +1,7 @@
+{
+  "command": "python3 target/p9/mac429/prepare-source.py",
+  "exit": 1,
+  "scope": "before archive/source output or remote transfer",
+  "error": "git archive exit128: pathspec .cargo did not match any files",
+  "fix": "Optional .cargo selector included only if present in committed tree; record its absence and retain all required source/config/fixture selectors"
+}

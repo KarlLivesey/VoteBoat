@@ -1,0 +1,600 @@
+{
+  "scope": "paired short equal-work diagnostic; not sustained/minimum qualification",
+  "original_remote_pid": 70865,
+  "terminal_status": 0,
+  "terminal_stage": "DONE",
+  "cases": [
+    {
+      "label": "baseline-c4096-b4-t1",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 1,
+      "variant": "baseline",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 3603814.224602995,
+      "p50_ms": 4.518083,
+      "p99_ms": 4.92275,
+      "seconds": 0.290962834,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "candidate-c4096-b4-t1",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 1,
+      "variant": "candidate",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 3415804.565640344,
+      "p50_ms": 4.765917,
+      "p99_ms": 5.031625,
+      "seconds": 0.30697775,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "on-c4096-b4-t1",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 1,
+      "variant": "on",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 3221719.5000559757,
+      "p50_ms": 5.070375,
+      "p99_ms": 5.4935,
+      "seconds": 0.325470917,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "openraft-c4096-b4-t1",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 1,
+      "variant": "openraft",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2306704.9985019383,
+      "p50_ms": 6.943292,
+      "p99_ms": 9.126709,
+      "seconds": 0.454577417,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "baseline-c4096-b4-t2",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 2,
+      "variant": "baseline",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2690414.6652251263,
+      "p50_ms": 6.110917,
+      "p99_ms": 6.549083,
+      "seconds": 0.389745125,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "candidate-c4096-b4-t2",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 2,
+      "variant": "candidate",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2716406.7127785403,
+      "p50_ms": 5.990417,
+      "p99_ms": 6.328292,
+      "seconds": 0.386015833,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "on-c4096-b4-t2",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 2,
+      "variant": "on",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2488156.208588831,
+      "p50_ms": 6.556625,
+      "p99_ms": 6.879708,
+      "seconds": 0.421426917,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "openraft-c4096-b4-t2",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 2,
+      "variant": "openraft",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2139994.3269056035,
+      "p50_ms": 7.620917,
+      "p99_ms": 9.734375,
+      "seconds": 0.489990084,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "baseline-c4096-b4-t3",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 3,
+      "variant": "baseline",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2856831.292636087,
+      "p50_ms": 5.720875,
+      "p99_ms": 5.975625,
+      "seconds": 0.367041625,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "candidate-c4096-b4-t3",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 3,
+      "variant": "candidate",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2826140.919473624,
+      "p50_ms": 5.804917,
+      "p99_ms": 6.076291,
+      "seconds": 0.3710275,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "on-c4096-b4-t3",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 3,
+      "variant": "on",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2710230.5402880106,
+      "p50_ms": 6.023833,
+      "p99_ms": 6.341,
+      "seconds": 0.3868955,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "openraft-c4096-b4-t3",
+      "clients": 4096,
+      "batch": 4,
+      "trial": 3,
+      "variant": "openraft",
+      "completed_originals": 1048576,
+      "completed_requests": 262144,
+      "originals_per_second": 2022631.1878311432,
+      "p50_ms": 8.063375,
+      "p99_ms": 9.428834,
+      "seconds": 0.51842175,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "baseline-c1-b1-t1",
+      "clients": 1,
+      "batch": 1,
+      "trial": 1,
+      "variant": "baseline",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 54463.44232934424,
+      "p50_ms": 0.017834,
+      "p99_ms": 0.034958,
+      "seconds": 19.252841083,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "candidate-c1-b1-t1",
+      "clients": 1,
+      "batch": 1,
+      "trial": 1,
+      "variant": "candidate",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 56155.11190312929,
+      "p50_ms": 0.017458,
+      "p99_ms": 0.031125,
+      "seconds": 18.672850333,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "on-c1-b1-t1",
+      "clients": 1,
+      "batch": 1,
+      "trial": 1,
+      "variant": "on",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 51489.129607131166,
+      "p50_ms": 0.018958,
+      "p99_ms": 0.032542,
+      "seconds": 20.364997583,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "openraft-c1-b1-t1",
+      "clients": 1,
+      "batch": 1,
+      "trial": 1,
+      "variant": "openraft",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 9955.542731515363,
+      "p50_ms": 0.100083,
+      "p99_ms": 0.136084,
+      "seconds": 105.325849959,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "baseline-c1-b1-t2",
+      "clients": 1,
+      "batch": 1,
+      "trial": 2,
+      "variant": "baseline",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 55193.340843209284,
+      "p50_ms": 0.01775,
+      "p99_ms": 0.03175,
+      "seconds": 18.998233917,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "candidate-c1-b1-t2",
+      "clients": 1,
+      "batch": 1,
+      "trial": 2,
+      "variant": "candidate",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 53116.9293765468,
+      "p50_ms": 0.01825,
+      "p99_ms": 0.036125,
+      "seconds": 19.740900167,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "on-c1-b1-t2",
+      "clients": 1,
+      "batch": 1,
+      "trial": 2,
+      "variant": "on",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 49979.56684301459,
+      "p50_ms": 0.019541,
+      "p99_ms": 0.033333,
+      "seconds": 20.980093791,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "openraft-c1-b1-t2",
+      "clients": 1,
+      "batch": 1,
+      "trial": 2,
+      "variant": "openraft",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 10013.01978196574,
+      "p50_ms": 0.09975,
+      "p99_ms": 0.135,
+      "seconds": 104.721255209,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "baseline-c1-b1-t3",
+      "clients": 1,
+      "batch": 1,
+      "trial": 3,
+      "variant": "baseline",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 53989.58827099686,
+      "p50_ms": 0.018125,
+      "p99_ms": 0.033208,
+      "seconds": 19.421818791,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "candidate-c1-b1-t3",
+      "clients": 1,
+      "batch": 1,
+      "trial": 3,
+      "variant": "candidate",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 54696.21828180704,
+      "p50_ms": 0.017958,
+      "p99_ms": 0.03175,
+      "seconds": 19.170904917,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "on-c1-b1-t3",
+      "clients": 1,
+      "batch": 1,
+      "trial": 3,
+      "variant": "on",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 50132.82912229224,
+      "p50_ms": 0.019459,
+      "p99_ms": 0.033416,
+      "seconds": 20.915955041,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    },
+    {
+      "label": "openraft-c1-b1-t3",
+      "clients": 1,
+      "batch": 1,
+      "trial": 3,
+      "variant": "openraft",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "originals_per_second": 9688.771685231777,
+      "p50_ms": 0.102416,
+      "p99_ms": 0.143875,
+      "seconds": 108.225896333,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "exit": 0,
+      "stderr_bytes": 0
+    }
+  ],
+  "comparisons": [
+    {
+      "clients": 4096,
+      "trial": 1,
+      "variant": "candidate",
+      "compared_to": "baseline",
+      "throughput_change_percent": -5.216963118662498,
+      "p50_change_percent": 5.485379529326928,
+      "p99_change_percent": 2.2116703062312837
+    },
+    {
+      "clients": 4096,
+      "trial": 1,
+      "variant": "on",
+      "compared_to": "candidate",
+      "throughput_change_percent": -5.681972192925622,
+      "p50_change_percent": 6.388235464444736,
+      "p99_change_percent": 9.179440041736031
+    },
+    {
+      "clients": 4096,
+      "trial": 2,
+      "variant": "candidate",
+      "compared_to": "baseline",
+      "throughput_change_percent": 0.9660981962882342,
+      "p50_change_percent": -1.9718808159233658,
+      "p99_change_percent": -3.3713269476047247
+    },
+    {
+      "clients": 4096,
+      "trial": 2,
+      "variant": "on",
+      "compared_to": "candidate",
+      "throughput_change_percent": -8.40266308855635,
+      "p50_change_percent": 9.451896253633096,
+      "p99_change_percent": 8.713504370531577
+    },
+    {
+      "clients": 4096,
+      "trial": 3,
+      "variant": "candidate",
+      "compared_to": "baseline",
+      "throughput_change_percent": -1.0742802083403502,
+      "p50_change_percent": 1.469041012082939,
+      "p99_change_percent": 1.6846103964020642
+    },
+    {
+      "clients": 4096,
+      "trial": 3,
+      "variant": "on",
+      "compared_to": "candidate",
+      "throughput_change_percent": -4.101365872696883,
+      "p50_change_percent": 3.77121671162568,
+      "p99_change_percent": 4.356424009317528
+    },
+    {
+      "clients": 1,
+      "trial": 1,
+      "variant": "candidate",
+      "compared_to": "baseline",
+      "throughput_change_percent": 3.106064364340777,
+      "p50_change_percent": -2.1083323987888147,
+      "p99_change_percent": -10.964586074718241
+    },
+    {
+      "clients": 1,
+      "trial": 1,
+      "variant": "on",
+      "compared_to": "candidate",
+      "throughput_change_percent": -8.309096247634951,
+      "p50_change_percent": 8.592049490205046,
+      "p99_change_percent": 4.552610441767069
+    },
+    {
+      "clients": 1,
+      "trial": 2,
+      "variant": "candidate",
+      "compared_to": "baseline",
+      "throughput_change_percent": -3.762068820151787,
+      "p50_change_percent": 2.8169014084507005,
+      "p99_change_percent": 13.779527559055115
+    },
+    {
+      "clients": 1,
+      "trial": 2,
+      "variant": "on",
+      "compared_to": "candidate",
+      "throughput_change_percent": -5.906520897116241,
+      "p50_change_percent": 7.07397260273972,
+      "p99_change_percent": -7.728719723183374
+    },
+    {
+      "clients": 1,
+      "trial": 3,
+      "variant": "candidate",
+      "compared_to": "baseline",
+      "throughput_change_percent": 1.3088264486539547,
+      "p50_change_percent": -0.9213793103448276,
+      "p99_change_percent": -4.390508311250308
+    },
+    {
+      "clients": 1,
+      "trial": 3,
+      "variant": "on",
+      "compared_to": "candidate",
+      "throughput_change_percent": -8.343152969010049,
+      "p50_change_percent": 8.358391803096122,
+      "p99_change_percent": 5.2472440944882015
+    }
+  ],
+  "failures": [],
+  "refusal_scope": "No run failure; offered-load refusal counts not exposed by these diagnostic cases; no acceptance claim."
+}
