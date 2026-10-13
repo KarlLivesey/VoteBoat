@@ -46,15 +46,21 @@ CLI histories and zero formatter/four strict/standalone diagnostics. Its fresh
 asserted root/executable/upstream records are fresh:false. A mode-only extraction
 repair reused unchanged successful checks/builds and preserves the original guard
 failure. [Mac426 proof](../validation/performance/mac426/README.md). Mac paired
-timing is underway in a quiet window; these1048576-original
+timing is terminal0 with all24 cases passing. Bulk medians425/426/OpenRaft are
+2,607,177/3,021,055/2,107,743 PUTS/s (p996.795/5.680/10.006ms). The first bulk
+pair regresses and the paired median ratio is1.008, distinct from the1.159
+median-rate ratio. Every singleton pair regresses, medians56,415→55,253/s.
+[All Mac trials](../validation/performance/comparison426/mac/README.md) remain.
+Mac exact comparison takes7.905/16.424/8.014ms versus Linux372–380ms inclusive;
+no cross-host CPU or allocator cause is inferred; these1048576-original
 diagnostics do not qualify sustained floors. [Every Linux trial and scope](../validation/performance/comparison426/linux/README.md),
 [fresh asserted artifacts](../validation/performance/matched426-linux/README.md).
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: qualify and measure426 on both hosts | Establish actual useful-rate/latency effect of removing provider materialization | Published426; immutable425; fresh asserted root/library/executable/upstream artifacts; exact within-host compiler/settings | Mac affected/core/service/strict/CLI controls; three rotating trials per singleton/bulk cell with1048576 originals; all frontiers, scopes, bounds and regressions retained | P9.0/P9.1/P9.3 |
-| Next: exact empty-payload comparison experiment427 | Remove per-entry byte-library calls exposed by426 executable inspection in the measured comparison interval | Terminal paired426 evidence; isolated equality/ownership schema; independent derived oracle | Preserve every header/operation/variant/configuration/byte; differing capacities ignored as before; actual empty-path assembly, affected/core/provider/recovery checks, strict profiles and paired supported-host PUTS/s/p99 before performance claims | P9.1/P9.3 |
-| Following: qualify bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Both native42136 campaigns; exact publication/ticket ownership; bounded fairness schema | Sustained/mixed/hot-cold/skew evidence, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
+| Current: protected-prefix checkpoint verification428 | Avoid rescanning exactly verified immutable retained entries, the largest measured Linux checkpoint interval | Terminal both-host426 pairs; sealed core view and both canonical owners' mutation provenance; [schema](../validation/performance/slice428-plan/SCHEMA.md) | Raw matches_state stays full Eq; every current header exact; all new entries exact; rewrites/recovery/default providers full fallback; certified compaction survivor transfer; full oracle/adversarial/error/native controls; zero strict profiles | P9.1/P9.3 |
+| Next: measure published protected-prefix implementation | Establish actual useful-rate/latency effect and next remaining cost | Complete checked428, immutable426 and fresh asserted published artifacts; identical within-host profiles/workload | Three rotating singleton/bulk diagnostic pairs on Linux/M2 Max; all originals/frontiers/skipped-versus-compared units, all slower trials; sustained20M/full seven-cell qualification remains distinct | P9.0/P9.1/P9.3 |
+| Following: bounded durable batching/overlap under mixed load | Amortize barriers and preserve cold-neighbor progress | Both native42136 campaigns, exact publication/ticket ownership, bounded fairness schema | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on
@@ -62,19 +68,24 @@ both hosts, real durable applications, offered-load/headroom, fairness/skew,
 placement/shared barriers, active maintenance and P8 composition remain required.
 P9 stays active; P10 is excluded.
 
-427 schema is an isolated hypothesis against published426. Public data/API and
-persistent/wire representation remain unchanged; full GroupLog derived equality
-still compares every metadata field. Exhaustive LogEntry field destructuring
-checks index/term and payload variant, full operation ID and equal byte lengths;
-only two empty byte vectors can skip byte-library comparison. Nonempty bytes
-and configurations retain exact equality. No digest/revision/pointer shortcut,
-state generation, ownership transfer, early completion, or new cleanup/restart
-path is introduced. Provider/binding/error ordering stays outside unchanged
-comparison semantics. Independent legacy-derived payload/header oracle and actual
-machine-code checks must qualify the code; syntax alone establishes no gain.
-Linux original426 code contains an unconditional bcmp call after equal Command
-lengths, including zero. Its individual elapsed share remains unmeasured.
-Main production426 remains unchanged while the isolated candidate is checked.
+User priority now selects protected-prefix verification. The macro plan is reviewed
+and remains active; no acceptance family closes. [428 schema](../validation/performance/slice428-plan/SCHEMA.md)
+retains arbitrary-state full Eq and adds an object-safe sealed core view with exact
+provider default. Private owner lineage and provider-owned bounded records certify
+unchanged absolute entry intervals; current headers/new entries always compare
+exactly. Ordinary compaction increments storage generation, so proof must explicitly
+transfer to its surviving interval; invalidating every generation would retain
+all204 scans. Rewrite/install/rollback/unknown paths and fresh recovery invalidate.
+The marker is never a durability/quorum token, digest or metadata-only shortcut.
+Public raw GroupLog cannot manufacture it. Main remains production426 while this
+isolated API/ownership implementation proceeds.
+
+The per-entry empty-byte427 experiment is [held unpromoted](../validation/performance/slice427-held/README.md),
+with fmt/compile/351 library passes and21 socket-permission failures recorded;
+integration/core/strict checks are unrun. No timing/build gain is claimed and it
+is not a prerequisite for428. Shared payloads, per-batch application admission,
+physical batching and broader persistence pipelining remain later measured
+opportunities; no manifest/durability feature is removed.
 
 Linux native421's same-artifact visit-policy comparison passes all36 cases,
 source/artifact guards, original results, recovery and representative retries.

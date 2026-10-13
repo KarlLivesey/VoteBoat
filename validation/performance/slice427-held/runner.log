@@ -1,0 +1,35 @@
+thread 'transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node' (4177) panicked at src/transaction/driver/tests/native.rs:97:57:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+---- transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket stdout ----
+
+thread 'transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket' (4178) panicked at src/transaction/driver/tests/native.rs:97:57:
+called `Result::unwrap()` on an `Err` value: Os { code: 1, kind: PermissionDenied, message: "Operation not permitted" }
+
+
+failures:
+    logical_voter::bridge::enrollment::tests::native_quic_candidate_original_unknown_and_owned_recovery_fresh_reads
+    logical_voter::bridge::enrollment::tests::native_tcp_candidate_original_applied_and_fresh_enrollment_image_snapshot
+    native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease
+    program_transaction::driver::tests::history::actual_commit_then_version_refusal_preserves_original_first_positions
+    program_transaction::driver::tests::history::actual_lifetime_quota_refuses_new_start_but_original_controls_still_finish
+    program_transaction::driver::tests::history::real_exported_completion_is_rejected_intact_by_fresh_driver
+    program_transaction::driver::tests::history::unconsumed_actual_start_cannot_supply_prepare_then_fresh_resume_finishes
+    program_transaction::driver::tests::native::real_applied_output_rejects_wrong_original_command
+    program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_node
+    program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_operation
+    program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_ticket
+    program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_original_query
+    program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node
+    program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket
+    transaction::driver::tests::native::real_applied_output_rejects_wrong_original_command
+    transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_node
+    transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_operation
+    transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_ticket
+    transaction::driver::tests::native::real_quorum_output_rejects_wrong_original_query
+    transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node
+    transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket
+
+test result: FAILED. 351 passed; 21 failed; 0 ignored; 0 measured; 0 filtered out; finished in 102.76s
+
+error: test failed, to rerun pass `--lib`

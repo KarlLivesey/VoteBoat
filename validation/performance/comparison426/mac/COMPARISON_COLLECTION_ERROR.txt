@@ -1,0 +1,4 @@
+Mac terminal0/DONE before collection; first collection tar option placed after . interpreted as operand by BSD tar. Error:
+tar: --exclude=./test-tmp: Cannot stat: No such file or directory
+tar: Error exit delayed from previous errors.
+Original first archive retained comparison426-mac.initial-archive-error.tgz; complete raw24 checked successfully from its extraction. Recollect entire already-terminal directory without exclusion; no benchmark retry.
