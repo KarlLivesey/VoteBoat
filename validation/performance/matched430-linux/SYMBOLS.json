@@ -1,0 +1,11 @@
+{
+  "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched430-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+  "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched430-linux/artifacts/matched/voteboat-matched-framework.dwp",
+  "sha256": "cbbd4bb2071543aaa450ada6bf1e0dc482b3a39c459f525a7abb9dff89465c72",
+  "bytes": 34681600,
+  "executable_sha256": "d13a87684f46ef03d91db4ab90eb96ee3cb3b39f5834721326a77bd49f8a10f9",
+  "cargo_filenames": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched430-linux/target-matched-release/release/voteboat-matched-framework",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched430-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "root_scope_files": 1401,
+  "root_source_unchanged_from_qualified_slice429": true,
+  "slice429_base_commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "export_commit": "abed154925581486f6f19216a76cf0772ffcbca9",
+  "root_scope_hashes_sha256": "a0c2cab634c0302dad91c780be374e7d106d6bd382d9dc15c88ff15651abad7c",
+  "production_changes": [],
+  "new_seam": false,
+  "root_validation_reused": "validation/performance/slice429/isolated; normal enabled pre-push root formatter/four strict profiles required after promotion"
+}

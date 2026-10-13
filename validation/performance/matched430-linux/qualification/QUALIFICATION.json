@@ -1,0 +1,75 @@
+{
+  "base_commit": "abed154925581486f6f19216a76cf0772ffcbca9",
+  "production_baseline_commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "source_files": 1426,
+  "changed_files": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "new_files": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "patch_sha256": "88406259786a016172cb0865cfbbbfe23c2f6653b535e7ca0dd9ff9be79ae0f6",
+  "original_jobs": [
+    {
+      "handle": 82359,
+      "terminal": 0,
+      "scope": "all42 matched tests,fmt,strict,sourcebefore/after; old monotonic test assertion passed but corrected afterward"
+    },
+    {
+      "handle": 26967,
+      "terminal": 0,
+      "scope": "8focusedreplytests,fmt,strict,sourcebefore/after; partialrotation small boundary only"
+    },
+    {
+      "handle": 34858,
+      "terminal": 0,
+      "scope": "final8focusedreplytests inclbothclientboundaries,fmt,strict,sourcebefore/after"
+    }
+  ],
+  "counts": {
+    "all_matched_attempt1": 42,
+    "existing_matched_tests_reused": 35,
+    "final_focused_replies": 8,
+    "final_effective_matched_coverage": 43
+  },
+  "scope_reuse": "Only test fixtures changed after82359. Actor production and preexisting35matched controls remained exact hashes. Final SOURCE does not claim all43 tests executed together afterfixturechanges. Root production and all root selected inputs exactpublished429 hashes; no unchanged root tests rerun.",
+  "capacity": {
+    "semantics": "available insertion capacity, not bucket bytes or retained allocation",
+    "logical_bounds": [
+      5,
+      16385
+    ],
+    "full_drain_small": {
+      "rounds": 256,
+      "initial": 7,
+      "minimum": 7,
+      "high_water": 7,
+      "final": 7
+    },
+    "partial_small": {
+      "rounds": 1024,
+      "initial": 7,
+      "minimum": 7,
+      "high_water": 7,
+      "final": 7
+    },
+    "partial_large": {
+      "rounds": 65540,
+      "initial": 28672,
+      "minimum": 15048,
+      "high_water": 28672,
+      "final": 15048
+    },
+    "exact_large_after_drain": 28117,
+    "formal_physical_bound_proven": false,
+    "growth_observed_in_finite_controls": false
+  },
+  "errors": [
+    "Initial metadata-free patch attempt had unmatched schema context; atomic apply_patch failed with no edits, corrected patch succeeded; raw description EDIT_ATTEMPTS.json",
+    "Portable test assumption pending.capacity()>=initial_capacity removed after successful82359 terminal, preservingattempt1; not a production behavior fix"
+  ],
+  "performance_gain_measured": false,
+  "publication": "pending parent review; no main/source/docs changes or commit/push fromthisagent"
+}

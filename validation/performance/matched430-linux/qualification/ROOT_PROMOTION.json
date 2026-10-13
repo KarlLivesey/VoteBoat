@@ -1,0 +1,12 @@
+{
+  "source_files_verified": 1426,
+  "all_selected_hashes_match": true,
+  "only_changed_files": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "changed_production_scope": "matched host adapter pending lookup only; no root production changes",
+  "independent_review": "mac426 runtime/outcome audit; original capacity monotonic test corrected; actual near-bound churn reported",
+  "patch_sha256": "88406259786a016172cb0865cfbbbfe23c2f6653b535e7ca0dd9ff9be79ae0f6"
+}

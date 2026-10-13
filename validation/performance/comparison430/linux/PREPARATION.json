@@ -1,0 +1,33 @@
+{
+  "published_baseline": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "published_candidate": "9d2b7852862a633e188afb38de8e2d3578efb5ca",
+  "source_counts": [
+    1425,
+    1426
+  ],
+  "root_inputs_identical": 1401,
+  "config_sha256": "2c6ade4083b71f63aa07ea670df81d02a7ac99fb4191e57be06ad7c5742522bc",
+  "actual_main_cli_controls": 3,
+  "checker_negative_controls": 10,
+  "artifact_negative_controls": 8,
+  "all_controls_exit": 0,
+  "fresh_original_handle": 82277,
+  "fresh_original_terminal": 0,
+  "fresh_stage": "DONE",
+  "source_inventory_difference": "One new Actor reply fixture module; only matched Actor lookup and fixture parameterization changed. All1,401 selected root inputs match baseline.",
+  "compiler_profile_locks_identical": true,
+  "release_oracle_both": "actualPROFILErelease omitsreferencecfg only; debugassertions/overflowtrue; freshbuildscript",
+  "per_node_capacity_scope": "sourcepreallocationall3replicas; existingisolatedslot0finiteavailablecapacitytraces separately archived, notCLI perNodephysicalmemorymeasurements",
+  "timing": "notstarted; requiresrootquietauthorization",
+  "driver_sha256": {
+    "artifact-guard.py": "3956328bfc4a3f481e6f4b33450539fae17c01213c6f9db3041c665a420b5866",
+    "phase-diagnostic-check.py": "0f44bec9ebbe1628d03ca3b7e23641289a249b358c6436fb977d46dfd572e755",
+    "phase-diagnostic.sh": "3ad5eb355fbcef979877596f2bfd9b11ef0683a4be3c1ec1c591ba616702ca5c",
+    "prepare-pair.py": "8f29db883aa3665b765677054643447306bf406887632c31f7ba69b3df1ddb64",
+    "linux-run.sh": "6182ab2022c1bc7ac8787bb0163afd256eb292e3b52361304e552e507ed8c4d6"
+  },
+  "control_files_sha256": {
+    "MAIN_CHECKER_CONTROLS.json": "9ec414f25efc3b6cad256e1e80c4ed4eebd754842c6fdd1b01e3fbcdd55d5ed6",
+    "ARTIFACT_GUARD_CONTROLS.json": "af4d9b38d303ae2ccedd7421b3cdfc5dab0a1cf096528197aae688cfe3ad2b7a"
+  }
+}

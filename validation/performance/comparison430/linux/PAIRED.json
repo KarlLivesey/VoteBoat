@@ -1,0 +1,133 @@
+{
+  "scope": "paired short equal-work diagnostic; not sustained/minimum qualification",
+  "cases": 24,
+  "failures": [],
+  "cells": [
+    {
+      "clients": 4096,
+      "batch": 4,
+      "pairs": [
+        {
+          "trial": 1,
+          "rates": {
+            "baseline": 4768554.007222565,
+            "candidate": 5830496.859947576,
+            "on": 6286894.380323103,
+            "openraft": 3475442.0048226886
+          },
+          "request_p99_ms": {
+            "baseline": 5.323452,
+            "candidate": 4.90762,
+            "on": 3.259534,
+            "openraft": 7.045638
+          },
+          "candidate_to_baseline_rate": 1.2226970379525046,
+          "candidate_to_baseline_p99": 0.9218867757237221,
+          "on_to_candidate_rate": 1.0782776376248027,
+          "candidate_to_openraft_rate": 1.6776274361237797
+        },
+        {
+          "trial": 2,
+          "rates": {
+            "baseline": 4418276.379642485,
+            "candidate": 4500911.491923627,
+            "on": 5784238.859294629,
+            "openraft": 3429383.9442013972
+          },
+          "request_p99_ms": {
+            "baseline": 5.422127,
+            "candidate": 5.835293,
+            "on": 4.830025,
+            "openraft": 7.326456
+          },
+          "candidate_to_baseline_rate": 1.0187030201781604,
+          "candidate_to_baseline_p99": 1.0761999857251592,
+          "on_to_candidate_rate": 1.2851261060506936,
+          "candidate_to_openraft_rate": 1.3124548213780587
+        },
+        {
+          "trial": 3,
+          "rates": {
+            "baseline": 4784002.324258942,
+            "candidate": 5232102.392282139,
+            "on": 4666640.521725796,
+            "openraft": 3387123.874638998
+          },
+          "request_p99_ms": {
+            "baseline": 5.10388,
+            "candidate": 4.845614,
+            "on": 5.485075,
+            "openraft": 5.937215
+          },
+          "candidate_to_baseline_rate": 1.0936663566718916,
+          "candidate_to_baseline_p99": 0.94939810497112,
+          "on_to_candidate_rate": 0.8919245404313085,
+          "candidate_to_openraft_rate": 1.5447035850850834
+        }
+      ]
+    },
+    {
+      "clients": 1,
+      "batch": 1,
+      "pairs": [
+        {
+          "trial": 1,
+          "rates": {
+            "baseline": 108305.37244253467,
+            "candidate": 93519.24674354341,
+            "on": 85548.31059869699,
+            "openraft": 19070.5720688078
+          },
+          "request_p99_ms": {
+            "baseline": 0.017563,
+            "candidate": 0.022693,
+            "on": 0.021089,
+            "openraft": 0.134442
+          },
+          "candidate_to_baseline_rate": 0.8634774493127145,
+          "candidate_to_baseline_p99": 1.2920913283607585,
+          "on_to_candidate_rate": 0.9147668910689046,
+          "candidate_to_openraft_rate": 4.903851148571747
+        },
+        {
+          "trial": 2,
+          "rates": {
+            "baseline": 110891.02124881999,
+            "candidate": 105627.35022021495,
+            "on": 88104.01854225673,
+            "openraft": 19217.86029511381
+          },
+          "request_p99_ms": {
+            "baseline": 0.016611,
+            "candidate": 0.017162,
+            "on": 0.019426,
+            "openraft": 0.13332
+          },
+          "candidate_to_baseline_rate": 0.9525329375694513,
+          "candidate_to_baseline_p99": 1.0331707904400698,
+          "on_to_candidate_rate": 0.8341023263252834,
+          "candidate_to_openraft_rate": 5.496311691217309
+        },
+        {
+          "trial": 3,
+          "rates": {
+            "baseline": 85643.6913088088,
+            "candidate": 102029.59245505524,
+            "on": 89662.42376638029,
+            "openraft": 21913.014569065206
+          },
+          "request_p99_ms": {
+            "baseline": 0.028013,
+            "candidate": 0.018995,
+            "on": 0.019086,
+            "openraft": 0.119014
+          },
+          "candidate_to_baseline_rate": 1.191326423415861,
+          "candidate_to_baseline_p99": 0.6780780351979439,
+          "on_to_candidate_rate": 0.8787884143110463,
+          "candidate_to_openraft_rate": 4.656118496771836
+        }
+      ]
+    }
+  ]
+}

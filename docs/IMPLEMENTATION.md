@@ -1,6 +1,6 @@
 # Implementation record
 
-## Active P9 plan — 13 October 2026
+## Active P9 plan — 14 October 2026
 
 Slice425 is published and qualified on main: 32 controls, three actual
 16,384-original CLI histories and the complete strict hook pass. Linux's fresh
@@ -58,8 +58,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: qualify and measure reply lookup430 on both hosts | Establish actual benefit of removing unused key order | Checked430/source reuse and enabled publication hook; immutable429 baseline; fresh asserted artifacts/Mac qualification | Exact outcomes/bounds/churn and guards, rotating bulk/singleton pairs including all regressions, exported profiles; sustained seven-cell acceptance stays distinct | P9.0/P9.1/P9.3 |
-| Next: reduce the next measured limiting stage | Remove, share or reorder remaining work rather than assume a core bottleneck | Both-host430 measurements, compact profile data and ownership/composition contracts | Small schema, exact partial-progress/restart coverage, strict checked publication and both-host measurement | P9.1/P9.3 |
+| Current: remove the owned incoming append copy431; finish430 Mac diagnostics | Transfer already-owned input after existing checks rather than clone it | Linux430 exported copy contexts; exact ownership/allocation schema below;430 Mac source/artifacts qualified | Differential outcomes/errors/capacities/partial progress, root/standalone strict checks and checked publication; retain both-host430 pairs/profiles | P9.0/P9.1/P9.3 |
+| Next: measure431 and reduce the next limiting stage | Establish actual gain and select remaining avoidable work | Published431 fresh asserted artifacts, Mac qualification, compact both-host CPU data and immutable430 baselines | Rotating bulk/singleton rates/p99 with every regression; schema/ownership/restart coverage for the next change; sustained acceptance stays distinct | P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -112,6 +112,49 @@ payload tuple oracle across all variants and differing fields, existing native/
 provider/codec/recovery histories and actual network services, then fresh asserted
 both-host measurements. Mac may gain less or regress; retain every result. Held427
 is an unqualified earlier experiment, not validation of429.
+
+### Slice431 schema — reuse owned ordinary append input (planned)
+
+430 Linux saved stack data records entry cloning910/8,085samples (11.255%):
+core durable completion287 (3.550%), independent pending plan340 (4.205%),
+ordinary receive append188 (2.325%), materialization46 (0.569%). These overlap
+with broader helper scopes and are not copy-byte/call measurements. Completion
+leases and provider submission require the first two independent owners under
+current contracts; a local borrow cannot remove them. The next contained change
+targets the owned received append, with at most the measured receive context as
+a diagnostic ceiling, not an11.255% performance promise. Mac430 paired/profile
+work continues separately and neither host's sustained acceptance closes.
+
+Data/API: private receive_append takes the already-owned Message. Public Message,
+LogEntry/Vec payloads, effects, providers and stored/wire formats remain unchanged.
+Transitions: retain retirement_commit before ordinary authentication and all
+existing term, entry, prefix, configuration and matching checks. Find the first
+missing/replaced offset, compute matching/commit and build its reply before taking
+anything. Only offset0, exact entry capacity==len and Noop/Command payloads with
+bytes capacity==len permit moving the whole Vec into Suffix. Configuration,
+overlapping offset>0 and spare allocation cases keep exact slice.to_vec behavior.
+This guard preserves the current cloned update's advertised raw allocation shape
+and effect reservation; it does not normalize a formerly inadmissible request.
+
+Ownership/failure: the message exclusively owns its consumed vector; core pending
+still makes its independent normalized plan, and the original update still crosses
+the same owned LogStore seam. Tickets/barriers/durable effects, storage-failure
+fencing and unknown outcomes stay unchanged. No new proof/cache/generation is
+introduced. Rewrites retain the same suffix-generation/checkpoint invalidation;
+recovery reconstructs exactly the existing serialized records. No reply escapes
+before its existing durability dependency. Early errors and fully matching/empty
+appends must not take input or fabricate a suffix. Drop releases remaining input.
+
+Acceptance: differential moved-versus-forced-clone flows for arbitrary128-bit IDs,
+empty/nonempty commands, tight/spare payload and entry allocations, matching
+prefixes, uncommitted replacement and configured payload fallback; pointer controls
+prove only the intended transfer and the independent pending owner. Compare exact
+updates, errors, committed effects, replies and recovered state across delayed/
+wrong completions and storage failure. Existing retirement/authentication,
+configuration rollback, core/provider/snapshot and actual TCP/QUIC retry/recovery
+histories stay enabled. Root format/four strict plus standalone checks must remain
+zero; publish the checked slice, then fresh both-host paired rates/p99 and new
+profiles decide whether the guard's work yields an actual gain.
 
 ### Slice430 schema — unordered pending reply lookup
 
@@ -283,9 +326,40 @@ terminal, retaining all attempts. Actual large partial rotation65,540 steps reco
 available insertion capacity initial/high28,672, minimum/final15,048; this is not
 physical bucket bytes or a formal allocation bound. Three actor tables including
 inactive followers are preallocated; no hot shrink/weak hasher or dense-ID premise.
-Macro review: target measured maps14.18% on Linux and19.32% on Mac's earlier
-distinct CPU-delta profile; no430 speedup is measured yet. Fresh published artifacts,
-Mac qualification and both-host pairs are next; no native/durable claim follows.
+Macro review: maps were14.18% of Linux429 CPU samples and19.32% of Mac426's
+earlier distinct CPU-delta profile. Checked430 is published at9d2b785 through
+the enabled full strict hook, original14493exit0. The results below replace the
+previous pending measurement; no native/durable claim follows.
+
+[Fresh Linux430 artifacts](../validation/performance/matched430-linux/README.md)
+pass exact1,426 source identities, four fresh:false compiler records plus root
+buildscript, asserted release/profile/DWP guards and three actual16,384-original
+CLI histories. Original82277 ends0/DONE. The initial proof-summary wrong-key
+error remains; only that summary was corrected, with no build/CLI repeat.
+[Mac430 qualification](../validation/performance/mac430/README.md) ends0/DONE
+with1,429 exact hashes/modes, fresh matched43/fmt/strict, fresh asserted library/
+executable/upstream and dSYM proofs, and post-release CLI controls. All1,401
+root checked inputs plus three contextual inputs match429; ten successful root
+check scopes are reused through actual source/tool/log hashes, not relabeled as
+rerun430 suites.
+
+[Linux430 paired measurements](../validation/performance/comparison430/linux/README.md)
+end0/DONE, original30585, all24 exact cases and guards passing. Bulk429OFF/430OFF/
+430ON/OpenRaft medians4,768,554/5,232,102/5,784,239/3,429,384 completed PUTS/s;
+p995.323452/4.907620/4.830025/7.045638ms. All three OFF bulk pairs improve
+1.222697/1.018703/1.093666; trial2 p99 worsens1.076200×. Singleton medians
+108,305/102,030/88,104/19,218 PUTS/s, p990.017563/0.018995/0.019426/0.133320ms;
+OFF ratios0.863477/0.952533/1.191326 retain two rate and latency regressions.
+ON bulk regresses versusOFF in trial3; ON singleton regresses in every trial.
+Leader ON admission61.164/68.978/79.470ms and results48.445/51.255/63.689ms
+are inclusive overlapping wall scopes, not additive CPU costs. Every raw case,
+tail and failure is retained. Short OFF5.232M remains below published5.615M and
+healthy8.4225M; ON5.784M is not a sustained acceptance result.
+
+Current work completes Mac430 rotating pairs and both-host exported430 CPU
+profiles before selecting the next limiting stage. Linux user-only perf retains
+paranoid2/kptr2/mlock516, actual430 records terminate0/0 with no known overlap.
+No browser or image analysis is used. Macro acceptance remains active and unmet.
 
 [Mac428 qualification](../validation/performance/mac428/README.md) passes on
 1,427 exact inputs, all affected/actual service/standalone checks, zero four strict

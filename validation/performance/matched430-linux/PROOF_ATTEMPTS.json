@@ -1,0 +1,11 @@
+{
+  "original_proof_summary_attempt": {
+    "tool_chunk": "5a624e",
+    "reported_python_error": "KeyError: latency_ms at stdin line8; actual CLI schema request_p99_ns",
+    "composite_command_exit": 0,
+    "reason_composite_exit_zero": "later independent prepare-pair completed0; initial summary did not create PROOF",
+    "guard_build_cli_affected": false,
+    "raw_trace_scope": "toolresult, not separate stderrfile"
+  },
+  "focused_correction": "savedproof.py uses actualrequest_p99_ns, terminal0 logs/proof.log+stderr; no builds/CLI reruns"
+}
