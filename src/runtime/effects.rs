@@ -19,6 +19,7 @@ use crate::{log::LogEntry, worker::*};
 use std::collections::BTreeSet;
 #[path = "effect_inspection.rs"]
 mod inspection;
+mod ready;
 pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
 #[cfg(all(test, feature = "native"))]
 #[path = "effects/peer_ingress_tests.rs"]
@@ -553,9 +554,24 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         &mut self,
         now: MonoTime,
         limit: usize,
-        check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+        mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(now, limit, check);
+        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
+        match result {
+            Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
+                self.fail(error)
+            }
+            other => other,
+        }
+    }
+    pub(super) fn advance_batch_authorized(
+        &mut self,
+        now: MonoTime,
+        limit: usize,
+        eligible: impl FnMut(GroupIdentity) -> bool,
+        check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+    ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
+        let result = self.advance_inner(now, limit, eligible, check);
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -567,7 +583,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         &mut self,
         now: MonoTime,
         limit: usize,
-        mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
+        mut eligible: impl FnMut(GroupIdentity) -> bool,
+        mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         self.check()?;
         if limit > 4096 {
@@ -578,81 +595,39 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             .poll_timers(now)
             .map_err(EffectOwnerError::Runtime)?;
         for _ in 0..limit {
-            if self.active.len() >= self.limits.active_visits {
+            if self.active.len() >= self.limits.active_visits || steps.len() >= limit {
                 break;
             }
             let Some(visit) = self.runtime.poll(now).map_err(EffectOwnerError::Runtime)? else {
                 break;
             };
-            let Some(reserved) = self
+            let max_items = if eligible(visit.group) {
+                limit - steps.len()
+            } else {
+                1
+            };
+            let control = self
                 .runtime
-                .next_effect_reservation(visit, now)
+                .next_class(visit, now)
                 .map_err(EffectOwnerError::Runtime)?
+                == Some(MessageClass::Control);
+            let Some((reserved, max_items)) =
+                self.fit_ready_reservation(visit, now, max_items, control)?
             else {
                 self.runtime
                     .finish(visit)
                     .map_err(EffectOwnerError::Runtime)?;
                 continue;
             };
-            if reserved > self.limits.reserved_bytes {
-                return self.fail(EffectOwnerError::ReservationTooLarge);
-            }
-            if reserved > self.limits.reserved_bytes - self.reserved {
-                self.runtime
-                    .finish(visit)
-                    .map_err(EffectOwnerError::Runtime)?;
+            if !self.reserve_ready_visit(visit, reserved, control)? {
                 continue;
             }
-            let control = self
-                .runtime
-                .next_class(visit, now)
-                .map_err(EffectOwnerError::Runtime)?
-                == Some(MessageClass::Control);
-            if !control {
-                if reserved > self.limits.reserved_bytes - self.limits.control_bytes {
-                    return self.fail(EffectOwnerError::ReservationTooLarge);
-                }
-                let bulk_count = self.active.values().filter(|a| !a.control).count();
-                let bulk_bytes = self
-                    .active
-                    .values()
-                    .filter(|a| !a.control)
-                    .map(|a| a.reserved)
-                    .sum::<usize>();
-                if bulk_count >= self.limits.active_visits - self.limits.control_visits
-                    || reserved
-                        > (self.limits.reserved_bytes - self.limits.control_bytes)
-                            .saturating_sub(bulk_bytes)
-                {
-                    self.runtime
-                        .finish(visit)
-                        .map_err(EffectOwnerError::Runtime)?;
-                    continue;
-                }
-            }
-            self.reserved += reserved;
-            self.active.insert(
-                visit.group,
-                Active {
-                    visit,
-                    received_from: None,
-                    reserved,
-                    continuation_bytes: reserved,
-                    effects: VecDeque::new(),
-                    leased: None,
-                    kind: None,
-                    waiting: false,
-                    ready: false,
-                    control,
-                    read_captured: false,
-                },
-            );
             let stepped = self
                 .runtime
-                .step_next_checked(visit, now, &mut check)
+                .step_ready_checked(visit, now, max_items, &mut check)
                 .map_err(EffectOwnerError::Runtime)?;
             if let Some(step) = stepped {
-                steps.push(self.install_step(visit, step)?);
+                self.install_ready_steps(visit, step, &mut steps)?;
             } else {
                 self.refresh(visit.group)?;
             }

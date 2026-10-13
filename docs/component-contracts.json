@@ -408,7 +408,8 @@
       "public_contract": "ProposalAdmission",
       "operations": [
         "validate_proposal",
-        "validate_proposal_context"
+        "validate_proposal_context",
+        "supports_ready_batch"
       ],
       "native": "Counter",
       "conformance": [
@@ -417,7 +418,7 @@
         "tests/routed.rs",
         "tests/leadership_maintenance.rs"
       ],
-      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence."
+      "scope": "Optional contract 1, deterministic syntax and dedup capacity validation over applied state, unapplied durable log and retained client commands, with per-command receipt bound. Repeated immediately before service proposal. No mutation or I/O; native and independent host applications use the same public contract. Directory now implements this same public application contract for fixed trusted initial ownership, bounded CAS publication, full original-command deduplication and schema-1 checkpoint replay; three real native WALs exercise commitment, reply-loss recovery, isolated uncommitted publication, leader replacement, compaction and snapshot installation. RoutedApplication now composes this contract with fixed committed owner context, semantic retries, local fencing and native TCP/QUIC parent-independent child histories. No P6 transfer claim. Slice196b1 adds an optional deterministic current-core context check, repeated at admission and immediately before execution by ClientRouter. It restricts proposals without granting quorum or authentication authority. Composite applications must forward it for translated inner commands; low-level hosts retain the same obligation. A host test changes the accepted context after queuing and verifies rejection before persistence. Slice410 adds optional default-false supports_ready_batch for already-ready original commands sharing unchanged Core context and an exact admission-indexed pending prefix. Counter opts in; context-dependent host applications retain singleton validation. Per-original positions/outcomes and shared-visit credits remain distinct from commitment/application. Preview charges whole input and expanded observation metadata before dequeue; original poll/visit budgets and protected traffic boundaries remain. Admission scans skip the validated applied prefix by index rather than visiting retained history."
     },
     {
       "design_id": "C05/C10/C15",

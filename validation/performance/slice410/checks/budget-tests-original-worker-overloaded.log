@@ -1,0 +1,23 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.17s
+     Running tests/effect_owner.rs (target/p9/checks/debug/deps/effect_owner-4f003f5204247ed2)
+
+running 2 tests
+test client_admission::ready_batch::budget::tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving ... ok
+test client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton ... FAILED
+
+failures:
+
+---- client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton stdout ----
+
+thread 'client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton' (1405) panicked at tests/effect_owner.rs:476:22:
+called `Result::unwrap()` on an `Err` value: EffectBatchRejected { reason: Worker(Overloaded), leases: [EffectLease { ticket: EffectTicket { visit: VisitTicket { owner: RuntimeOwner { store: StoreBinding { identity: StoreIdentity { id: StoreId(1), incarnation: StoreIncarnation(1) }, session: StoreSession(1) }, lane: ExecutionLaneId(1), generation: RuntimeGeneration(1) }, group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, sequence: 5 }, sequence: 15 }, effect: Persist(LogUpdate { group: GroupIdentity { id: GroupId(2), incarnation: GroupIncarnation(1) }, expected_revision: LogRevision(6), hard_state: HardState { term: 1, voted_for: Some(NodeId(1)) }, commit_index: 2, suffix: Some(Suffix { from: 3, entries: [LogEntry { index: 3, term: 1, payload: Command { operation: OperationId(101), bytes: [1, 0, 0, 0, 0, 0, 0, 0] } }] }), snapshot: None, snapshot_membership: None }) }] }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 192 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

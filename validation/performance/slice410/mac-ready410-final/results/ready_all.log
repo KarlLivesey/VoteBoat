@@ -1,0 +1,55 @@
+   Compiling cfg-if v1.0.5
+   Compiling libc v0.2.190
+   Compiling bytes v1.12.1
+   Compiling getrandom v0.2.17
+   Compiling rand_core v0.10.1
+   Compiling untrusted v0.9.0
+   Compiling zeroize v1.9.1
+   Compiling once_cell v1.21.4
+   Compiling rustls-pki-types v1.15.1
+   Compiling ring v0.17.14
+   Compiling getrandom v0.4.3
+   Compiling protobuf v2.28.0
+   Compiling rustls-webpki v0.103.15
+   Compiling tracing-core v0.1.36
+   Compiling chacha20 v0.10.2
+   Compiling subtle v2.6.1
+   Compiling pin-project-lite v0.2.17
+   Compiling tracing v0.1.44
+   Compiling rustls v0.23.45
+   Compiling rand v0.10.3
+   Compiling protobuf-codegen v2.28.0
+   Compiling thiserror v2.0.21
+   Compiling rand_pcg v0.10.2
+   Compiling lru-slab v0.1.3
+   Compiling tinyvec v1.13.3
+   Compiling rustc-hash v2.1.3
+   Compiling slab v0.4.12
+   Compiling quinn-proto v0.11.19
+   Compiling protobuf-build v0.14.1
+   Compiling zerocopy v0.8.62
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-p9-ready410-final/repo)
+   Compiling ppv-lite86 v0.2.21
+   Compiling raft-proto v0.7.0
+   Compiling rand_core v0.6.4
+   Compiling rand_chacha v0.3.1
+   Compiling byteorder v1.5.0
+   Compiling fxhash v0.2.1
+   Compiling thiserror v1.0.69
+   Compiling rand v0.8.8
+   Compiling slog v2.7.0
+   Compiling raft v0.7.0
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 43.60s
+     Running tests/effect_owner.rs (/tmp/voteboat-p9-ready410-final/build/debug/deps/effect_owner-a90c84dd66bfb8bb)
+
+running 7 tests
+test client_admission::ready_batch::context::default_host_context_is_rechecked_after_original_singleton_durability ... ok
+test client_admission::ready_batch::ready_native_admissions_share_persist_but_keep_every_original_result ... ok
+test client_admission::ready_batch::failure_after_written_leaves_all_batched_results_unknown_and_releases_on_observation ... ok
+test client_admission::ready_batch::canceling_one_batched_observation_does_not_cancel_other_commands ... ok
+test client_admission::ready_batch::budget::tight_bulk_output_budget_shrinks_ready_prefix_instead_of_fencing_or_starving ... ok
+test client_admission::ready_batch::per_poll_original_step_budget_does_not_expand_with_batch_size ... ok
+test client_admission::ready_batch::budget::held_visit_reduces_current_global_or_bulk_room_without_blocking_a_fitting_singleton ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 187 filtered out; finished in 0.02s
+

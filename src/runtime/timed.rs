@@ -473,6 +473,46 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         self.check()?;
         self.shard.next_class(visit, now)
     }
+    pub(super) fn next_ready_effect_reservation(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+        max_items: usize,
+    ) -> Result<Option<usize>, RuntimeError> {
+        self.check()?;
+        if self.authorization.is_logical() {
+            return if max_items == 0 {
+                Ok(None)
+            } else {
+                self.shard.next_effect_reservation(visit, now)
+            };
+        }
+        self.shard
+            .next_ready_effect_reservation(visit, now, max_items)
+    }
+    pub(super) fn step_ready_checked(
+        &mut self,
+        visit: VisitTicket,
+        now: MonoTime,
+        max_items: usize,
+        mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
+    ) -> Result<Option<Stepped>, RuntimeError> {
+        self.check()?;
+        if max_items == 0 {
+            return Ok(None);
+        }
+        let step = if self.authorization.is_logical() {
+            self.shard
+                .step_next_checked(visit, now, |core, event| check(core, event, &[]))?
+        } else {
+            self.shard
+                .step_ready_checked(visit, now, max_items, check)?
+        };
+        if let Some(stepped) = &step {
+            self.refresh(visit.group, now, stepped.timer.is_some())?;
+        }
+        Ok(step)
+    }
     pub fn next_effect_reservation(
         &mut self,
         visit: VisitTicket,

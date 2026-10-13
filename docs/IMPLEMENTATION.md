@@ -2,6 +2,14 @@
 
 ## Active P9 plan — 13 October 2026
 
+The user explicitly requests M2 Max benchmarks alongside Linux. The409 campaign
+is now measured on both hosts:96 valid Mac cases, independent release builds and
+exact source/artifact guards. Framework median ratios1.83–2.00x; native append
+8.11–65.07x. [M2 Max records](../validation/performance/slice409/m2-max/README.md).
+The first shared-cache run is rejected because it reused reference artifacts;
+corrected isolated builds establish the recorded candidate identity. No floor
+or durable device throughput is inferred from these volatile diagnostics.
+
 [P9 macro and mini plan](P9.md) records the complete acceptance curve, current
 deliverable and next two, with purposes, dependencies and completion checks.
 
@@ -32444,3 +32452,28 @@ Next native ready batching and bounded overlap still advanceP9.1. The remaining
 modeled-store/configured-history costs require owned cached state rather than
 discarding validation. Macro acceptance and the complete P9 goal remain active.
 Production and96-case evidence are committed/pushed ase105f84.
+
+### P9 ready original-request batching410
+
+[Schema, checks and scope](../validation/performance/slice410/README.md).
+The native ClientRouter path now joins already-ready opted-in original requests
+under one ordered Core transition. Individual admissions/positions/outcomes stay
+exact, with no arrival delay or Written-only success. Owner reservations account
+for currently free space and select a smaller fitting prefix rather than block a
+valid singleton. Default-false host applications retain serial context checks.
+Client validation indexes admissions and skips the already applied log prefix.
+
+Final Linux all-feature691/core-only523 pass; formatting and all four strict
+Clippy configurations are zero. Original duplicate/conflict, cancellation,
+worker failure, context-dependent applications, step caps and held-space controls
+pass. A test-fixture busy-worker submission failure was corrected in its lease
+drain; original failures and final passing broad checks remain in the archive.
+Earlier real TCP/QUIC retry/recovery2 pass is labeled before the final reservation
+refinement. Mac original broad689/521 and final exact-source ready7/scheduler9
+controls in both configurations pass; fmt/four strict and source guards are zero.
+The archived scopes distinguish the earlier broad run from final focused checks.
+
+The linked macro plan remains incomplete and active. Current overlap, next owned
+cached state, then matched concurrent/durable measurement are the next three
+deliverables. No performance floor or security/feature regression is accepted
+from these functional checks. Measured changes run on Linux and M2 Max.

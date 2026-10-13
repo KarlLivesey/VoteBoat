@@ -364,6 +364,7 @@ mod application_results {
 }
 mod client_admission {
     use super::*;
+    mod ready_batch;
     #[test]
     fn stopping_runtime_returns_exact_unprocessed_tracked_inputs() {
         let mut store = HostLogStore::new(1);
@@ -393,7 +394,20 @@ mod client_admission {
         ApplicationRouter<CounterReceipt>,
         BTreeMap<GroupIdentity, Counter>,
     ) {
-        let (mut owner, mut worker) = single(count);
+        setup_with_visit_items(count, capacity, 1)
+    }
+    fn setup_with_visit_items(
+        count: u128,
+        capacity: usize,
+        visit_items: usize,
+    ) -> (
+        Owner,
+        HostWorker,
+        Clients,
+        ApplicationRouter<CounterReceipt>,
+        BTreeMap<GroupIdentity, Counter>,
+    ) {
+        let (mut owner, mut worker) = single_with_visit_items(count, visit_items);
         let mut apps = BTreeMap::new();
         pump(&mut owner, &mut worker, &mut apps, MonoTime(400));
         for g in 1..=count {
@@ -427,12 +441,12 @@ mod client_admission {
             bytes: delta.to_le_bytes().to_vec(),
         }
     }
-    fn drive(
+    fn drive<A: ProposalAdmission<Receipt = CounterReceipt>>(
         owner: &mut Owner,
         worker: &mut HostWorker,
         clients: &mut Clients,
         results: &mut ApplicationRouter<CounterReceipt>,
-        apps: &mut BTreeMap<GroupIdentity, Counter>,
+        apps: &mut BTreeMap<GroupIdentity, A>,
     ) {
         for _ in 0..1000 {
             for event in worker.poll(1) {
@@ -1155,6 +1169,15 @@ fn timed<L: LogStore>(
     count: u128,
     voters: u64,
 ) -> TimedShard<Ready, Timers, Entropy> {
+    timed_with_visit_items(id, store, count, voters, 1)
+}
+fn timed_with_visit_items<L: LogStore>(
+    id: u64,
+    store: &mut L,
+    count: u128,
+    voters: u64,
+    visit_items: usize,
+) -> TimedShard<Ready, Timers, Entropy> {
     append(
         store,
         (1..=count)
@@ -1170,7 +1193,7 @@ fn timed<L: LogStore>(
         owner,
         ShardLimits {
             max_groups: 100,
-            visit_items: 1,
+            visit_items,
             ..ShardLimits::default()
         },
         Ready(VecDeque::new()),
@@ -1372,8 +1395,11 @@ impl PersistenceWorker for HostWorker {
     }
 }
 fn single(count: u128) -> (Owner, HostWorker) {
+    single_with_visit_items(count, 1)
+}
+fn single_with_visit_items(count: u128, visit_items: usize) -> (Owner, HostWorker) {
     let mut store = HostLogStore::new(1);
-    let runtime = timed(1, &mut store, count, 1);
+    let runtime = timed_with_visit_items(1, &mut store, count, 1, visit_items);
     let worker = HostWorker::new(store);
     (
         EffectOwner::new(runtime, worker.binding(), EffectOwnerLimits::default()).unwrap(),

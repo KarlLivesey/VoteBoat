@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Client proposal ownership, deterministic application admission and outcomes.
 use super::*;
+mod ready;
 use crate::{application::*, log::EntryPayload, logical_voter::LogicalActivationControlProfile};
 mod control;
 mod observer_clear;
@@ -311,7 +312,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
         let log = state
             .entries
             .iter()
-            .filter(|e| e.index > application.applied_index())
+            .skip((application.applied_index() - state.base_index()) as usize)
             .filter_map(|e| match &e.payload {
                 EntryPayload::Command { operation, bytes } => Some((*operation, bytes.as_slice())),
                 _ => None,
@@ -490,65 +491,20 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
             return Err(ClientError::WrongBinding);
         }
         let steps = owner
-            .advance_authorized(now, limit, |core, event| {
-                if let Event::Configure(proposal) = event {
-                    let app = application(core.state().bootstrap.group)
-                        .ok_or(RaftError::Admission(ApplicationError::NotApplied))?;
-                    app.validate_deployment_requirements(proposal.requirements)
-                        .map_err(RaftError::Admission)?;
-                }
-                configuration(core, event)?;
-                let Event::Propose { operation, bytes } = event else {
-                    return Ok(());
-                };
-                if core.role() != Role::Leader {
-                    return Err(RaftError::NotLeader);
-                }
-                let group = core.state().bootstrap.group;
-                let app =
-                    application(group).ok_or(RaftError::Admission(ApplicationError::NotApplied))?;
-                app.validate_proposal_context(core, *operation, bytes)
-                    .map_err(RaftError::Admission)?;
-                if app.applied_index() < core.state().base_index()
-                    || app.applied_index() > core.state().commit_index
-                {
-                    return Err(RaftError::Admission(ApplicationError::NotApplied));
-                }
-                let log = core
-                    .state()
-                    .entries
-                    .iter()
-                    .filter(|e| e.index > app.applied_index())
-                    .filter_map(|e| match &e.payload {
-                        EntryPayload::Command { operation, bytes } => {
-                            Some((*operation, bytes.as_slice()))
-                        }
-                        _ => None,
-                    });
-                let pending = self
-                    .pending
-                    .values()
-                    .filter(|p| p.ticket.group == group)
-                    .map(|p| (p.ticket.operation, p.bytes.as_slice()));
-                let bound = app
-                    .validate_proposal(*operation, bytes, log.chain(pending))
-                    .map_err(RaftError::Admission)?;
-                let reserved = self
-                    .pending
-                    .values()
-                    .filter(|p| {
-                        p.ticket.group == group
-                            && p.ticket.operation == *operation
-                            && p.bytes == *bytes
-                    })
-                    .map(|p| p.receipt_bound)
-                    .min()
-                    .unwrap_or(self.limits.receipt_bytes);
-                if bound < size_of::<R>() || bound > reserved || bound > self.limits.receipt_bytes {
-                    return Err(RaftError::Admission(ApplicationError::ReceiptBudget));
-                }
-                Ok(())
-            })
+            .advance_batch_authorized(
+                now,
+                limit,
+                |group| application(group).is_some_and(ProposalAdmission::supports_ready_batch),
+                |core, event, prefix| {
+                    self.check_ready_execution(
+                        core,
+                        event,
+                        prefix,
+                        &application,
+                        &mut configuration,
+                    )
+                },
+            )
             .map_err(ClientError::Owner)?;
         for step in &steps {
             let Some(admission) = step.admission else {

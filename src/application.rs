@@ -32,6 +32,14 @@ pub trait ProposalAdmission: BoundedStateMachine
 where
     Self::Receipt: ApplicationReceipt,
 {
+    /// Opt into validating already-ready commands against one unchanged Core
+    /// context and their reserved predecessor commands. Default preserves
+    /// singleton execution for applications with context-dependent guards.
+    /// This grants no durability, admission or result authority.
+    fn supports_ready_batch(&self) -> bool {
+        false
+    }
+
     /// Optional deterministic check against the current consensus context.
     /// The owning client router calls this at admission and again immediately
     /// before execution. It may restrict proposals; it grants no consensus or
@@ -179,6 +187,10 @@ impl BoundedStateMachine for Counter {
 }
 
 impl ProposalAdmission for Counter {
+    fn supports_ready_batch(&self) -> bool {
+        true
+    }
+
     fn validate_proposal<'a>(
         &self,
         operation: OperationId,

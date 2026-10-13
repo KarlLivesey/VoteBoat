@@ -1,0 +1,69 @@
+{
+  "parent_commit": "25762e0d84db0c01f81085861d11679ebeae8de4",
+  "scope": "Final frozen ready410 output-budget fix; exactly4changedinputs from originalqualified1335snapshot",
+  "changes_from_original": [
+    "src/runtime/effects.rs",
+    "src/runtime/effects/ready.rs",
+    "tests/client_admission/ready_batch.rs",
+    "tests/client_admission/ready_batch/budget.rs"
+  ],
+  "original_broad_qualification": "../mac-ready410/RESULTS.json (pre-fixall689/core521; separate source identity)",
+  "source_inputs": 1336,
+  "source_guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1336,
+      "status": 0
+    },
+    {
+      "name": "source_after_all",
+      "matching_inputs": 1336,
+      "status": 0
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1336,
+      "status": 0
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "fmt": 0,
+    "clippy_all": 0,
+    "compile_identity": 0,
+    "clippy_default": 0,
+    "clippy_core": 0,
+    "clippy_native": 0,
+    "ready_all": 0,
+    "scheduler_all": 0,
+    "source_after_all": 0,
+    "ready_core": 0,
+    "scheduler_core": 0,
+    "source_terminal": 0
+  },
+  "tests": {
+    "ready_all": {
+      "passed": 7,
+      "failed": 0,
+      "filtered_out": 187
+    },
+    "scheduler_all": {
+      "passed": 9,
+      "failed": 0,
+      "filtered_out": 297
+    },
+    "ready_core": {
+      "passed": 7,
+      "failed": 0,
+      "filtered_out": 179
+    },
+    "scheduler_core": {
+      "passed": 9,
+      "failed": 0,
+      "filtered_out": 232
+    }
+  },
+  "performance_claim": false,
+  "terminal": "failures=0"
+}

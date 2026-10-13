@@ -17,6 +17,10 @@ pub struct Proposal {
 }
 
 impl Raft {
+    pub(crate) fn proposal_limits(&self) -> LogLimits {
+        self.limits
+    }
+
     /// Admit original commands in order under one exact persistence ticket.
     /// The embedding host must perform application admission and reserve input,
     /// effects and individual receipts, as for `Event::Propose`.

@@ -1,0 +1,14 @@
+platform=0
+source_start=0
+fmt=0
+clippy_all=0
+compile_identity=0
+clippy_default=0
+clippy_core=0
+clippy_native=0
+ready_all=0
+scheduler_all=0
+source_after_all=0
+ready_core=0
+scheduler_core=0
+source_terminal=0

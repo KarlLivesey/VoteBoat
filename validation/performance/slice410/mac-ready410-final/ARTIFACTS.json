@@ -1,0 +1,209 @@
+{
+  "artifacts": [
+    {
+      "path": "PARENT.txt",
+      "bytes": 41,
+      "sha256": "f4f027cc19ac167047fa32a3f9007a7e08be2a1d47f98748f3d7d6fc8c080c9a"
+    },
+    {
+      "path": "RESULTS.json",
+      "bytes": 1604,
+      "sha256": "f039a4d35bf8c76175291e840bbd7af856eb3f59e06d033bd989a34e8ca4c0ed"
+    },
+    {
+      "path": "ROOT_STATUS.txt",
+      "bytes": 374,
+      "sha256": "7b88606db72f39f9eaf2aecafba508cc04491b3a437d39e96d32deceb2c548ab"
+    },
+    {
+      "path": "SCHEMA.md",
+      "bytes": 1114,
+      "sha256": "5ba1b488521190c0f430d6b1d5477252d4be117135360373325811bc4624c13a"
+    },
+    {
+      "path": "SOURCE.json",
+      "bytes": 148303,
+      "sha256": "0e29b67d25b4f9dbda3d7dd75dcaaf7aacf6b7870f43cfab6c1aaf39bfea72e1"
+    },
+    {
+      "path": "SOURCE_SHA256.txt",
+      "bytes": 135876,
+      "sha256": "027d651cee3f09ed09bdb0aa398ba11a5ebbe2de9b3869cb68f357c30c1d1146"
+    },
+    {
+      "path": "check-compile.mjs",
+      "bytes": 684,
+      "sha256": "35bdb112b82d76d8c4095537eb4e26a9782db51eaa106c4e7018e1dc7eb430a5"
+    },
+    {
+      "path": "checks.sh",
+      "bytes": 2687,
+      "sha256": "9c6078885c17926df7b6965aa3f60e8cda9d1da7566da572826d8ee505c575b7"
+    },
+    {
+      "path": "results/clippy_all.command",
+      "bytes": 119,
+      "sha256": "bd6f06e859cf20ab43aa39fbe45952580b45bad8613cd7c94de29579c9341c7a"
+    },
+    {
+      "path": "results/clippy_all.jsonl",
+      "bytes": 150647,
+      "sha256": "dbe61e5e1a881819305145340c66829e315dbfff80f85ff9fd9a84cf86c2a3b0"
+    },
+    {
+      "path": "results/clippy_all.log",
+      "bytes": 1875,
+      "sha256": "8963678f6dc7274d9895dbf1194ecb302ab8b5f753ebaeca9af0cccc8a49eb83"
+    },
+    {
+      "path": "results/clippy_core.command",
+      "bytes": 105,
+      "sha256": "6260051ce8d9dc97821723a3b473dc5fa09dd30ee081abeda2e91c09e680f8aa"
+    },
+    {
+      "path": "results/clippy_core.log",
+      "bytes": 176,
+      "sha256": "f53a946f69bc32e38fd5632362b6ba66160ed71437262faa83eb97e9a172dcf2"
+    },
+    {
+      "path": "results/clippy_default.command",
+      "bytes": 83,
+      "sha256": "4da79b8440e88f910a4f7684b395ef8724be33743f5a29d6ba48106d54b3f65b"
+    },
+    {
+      "path": "results/clippy_default.log",
+      "bytes": 209,
+      "sha256": "b3903689e53b93fed2a0bb9ec1011a54126406d9dc105f0552954b4b30adacd5"
+    },
+    {
+      "path": "results/clippy_native.command",
+      "bytes": 123,
+      "sha256": "a1ca7e00ad8b1d9b19b201010a6cca7de01c249c1a8d19fd2a6aef414f8b3c1b"
+    },
+    {
+      "path": "results/clippy_native.log",
+      "bytes": 149,
+      "sha256": "b87460da93b72e09ee9f5a677059438e0813c5d016b3c6daec03086529eef07e"
+    },
+    {
+      "path": "results/compile_identity.command",
+      "bytes": 88,
+      "sha256": "93e8517d085b71e86a3e957a55281239348a2bb679928cc70ac6b74c14f60770"
+    },
+    {
+      "path": "results/compile_identity.log",
+      "bytes": 501,
+      "sha256": "02bc7291b0f2eef8f49ea1839d48c5fb5587c842f9c1d6fd3d2ed0d2c276965a"
+    },
+    {
+      "path": "results/exits.txt",
+      "bytes": 206,
+      "sha256": "766764ac8c5662b1445024d9d0608312d92aa694941f2ca8447609ba07d995a4"
+    },
+    {
+      "path": "results/fmt.command",
+      "bytes": 36,
+      "sha256": "7960ce018e2e60dd99f5b5b008d281c4df3aa4a630b0fe711bc8e0edaf7cfc87"
+    },
+    {
+      "path": "results/fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "results/platform.command",
+      "bytes": 222,
+      "sha256": "422bea20b06ebcf495b40ed58727849c7db3ade49dfc4b8f5eb14d539a1e7def"
+    },
+    {
+      "path": "results/platform.log",
+      "bytes": 217,
+      "sha256": "a9e2cc727761e130ece80638cf02d1a8b5a840b9ffc908c559fec61e744c0c02"
+    },
+    {
+      "path": "results/ready_all.command",
+      "bytes": 104,
+      "sha256": "39d1a957c1b74f931423ab38a73135de387e505375a40ae83d4dda0ffa3cc5ff"
+    },
+    {
+      "path": "results/ready_all.log",
+      "bytes": 2428,
+      "sha256": "76c7cad12bdac62cc00e7687318ec752e5c8c4f67219f29306570d5abeb1b191"
+    },
+    {
+      "path": "results/ready_core.command",
+      "bytes": 111,
+      "sha256": "4d2d769079afda62206def34831c11713ea51dd70018958dbab7ac2594b09c2b"
+    },
+    {
+      "path": "results/ready_core.log",
+      "bytes": 1246,
+      "sha256": "d3344c70c84a81c31eead7a36316822a219999c170a91bcde030347eb7757867"
+    },
+    {
+      "path": "results/scheduler_all.command",
+      "bytes": 81,
+      "sha256": "599f9efe42f33b0637648bf3668d607aff6fca71526073a3c912a23492a7c1a9"
+    },
+    {
+      "path": "results/scheduler_all.log",
+      "bytes": 1359,
+      "sha256": "42720acbbcb445cbf2583d71a27eea6435762dc732b8155b00f9bf485b23bb44"
+    },
+    {
+      "path": "results/scheduler_core.command",
+      "bytes": 88,
+      "sha256": "50a98dbaa22aca63d6ceabfb0cfcece63cf4a014464a642aed4906984c487d22"
+    },
+    {
+      "path": "results/scheduler_core.log",
+      "bytes": 1359,
+      "sha256": "c94fec8c71f271bbfaeecfeb2d9b4e047bf229f5659b04809093c33b1b55becf"
+    },
+    {
+      "path": "results/source_after_all.command",
+      "bytes": 68,
+      "sha256": "365bd6776e85c9676d38729cc2c2a1e784f8a1aac5c75732b657f132407d85b3"
+    },
+    {
+      "path": "results/source_after_all.log",
+      "bytes": 53044,
+      "sha256": "44a08aa1520ac646de966396d66e73386c5f2c4e0aaef16d74e58e3cd57bfb36"
+    },
+    {
+      "path": "results/source_start.command",
+      "bytes": 68,
+      "sha256": "365bd6776e85c9676d38729cc2c2a1e784f8a1aac5c75732b657f132407d85b3"
+    },
+    {
+      "path": "results/source_start.log",
+      "bytes": 53044,
+      "sha256": "44a08aa1520ac646de966396d66e73386c5f2c4e0aaef16d74e58e3cd57bfb36"
+    },
+    {
+      "path": "results/source_terminal.command",
+      "bytes": 68,
+      "sha256": "365bd6776e85c9676d38729cc2c2a1e784f8a1aac5c75732b657f132407d85b3"
+    },
+    {
+      "path": "results/source_terminal.log",
+      "bytes": 53044,
+      "sha256": "44a08aa1520ac646de966396d66e73386c5f2c4e0aaef16d74e58e3cd57bfb36"
+    },
+    {
+      "path": "results/stage.txt",
+      "bytes": 9,
+      "sha256": "770b1fadc4019d4de6b2fd32561beaa2c8cffa7837f43c85cbeff1e211c60702"
+    },
+    {
+      "path": "results/terminal.txt",
+      "bytes": 11,
+      "sha256": "deba3c0f12f8be95caab57396231cb5cbc34166388df4c68fe91d44a98e14da2"
+    },
+    {
+      "path": "runner.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

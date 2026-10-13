@@ -1,0 +1,17 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-p9-ready410-final/repo)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.55s
+     Running unittests src/lib.rs (/tmp/voteboat-p9-ready410-final/build/debug/deps/voteboat-b4df062d1c8e545b)
+
+running 9 tests
+test runtime::ready_batch::tests::batch_reservation_charges_aggregate_input_and_selected_original_metadata ... ok
+test runtime::ready_batch::tests::duplicate_operation_ids_keep_distinct_original_admissions_and_ordinal_positions ... ok
+test runtime::ready_batch::tests::small_core_batch_limit_never_changes_legacy_singleton_acceptance ... ok
+test runtime::ready_batch::tests::failed_later_candidate_stays_queued_and_first_check_is_never_repeated ... ok
+test runtime::ready_batch::tests::original_output_and_visit_item_limits_cap_the_same_preview_and_collection ... ok
+test runtime::ready_batch::tests::nonproposal_untracked_and_protected_queues_are_boundaries ... ok
+test runtime::ready_batch::tests::four_ready_originals_share_one_suffix_keep_positions_and_hold_all_credits ... ok
+test runtime::ready_batch::tests::first_failure_and_declined_second_keep_legacy_singleton_execution ... ok
+test runtime::ready_batch::tests::visit_bytes_and_hard_batch_count_are_independent_caps ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 232 filtered out; finished in 0.01s
+

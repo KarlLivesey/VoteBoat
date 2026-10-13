@@ -40,6 +40,8 @@ mod peer_network;
 mod peers;
 mod read_requests;
 mod reads;
+mod ready_batch;
+pub(crate) use ready_batch::ReadyProposal;
 mod replica;
 mod snapshot_send;
 mod snapshots;
@@ -380,6 +382,16 @@ pub struct Stepped {
     /// A consumed live expiration. Stale queued timers produce no core effects.
     pub timer: Option<TimerToken>,
     pub result: Result<Vec<Effect>, RaftError>,
+    /// Later original invocations sharing this step's ordered persistence batch.
+    /// The first invocation retains the singular fields above.
+    pub batch_members: Vec<SteppedProposal>,
+}
+#[derive(Clone, Debug)]
+pub struct SteppedProposal {
+    pub admission: Option<AdmissionTicket>,
+    pub operation: OperationId,
+    pub proposed: Option<ProposalPosition>,
+    pub error: Option<RaftError>,
 }
 pub struct Stopped {
     /// Exact tracked inputs still unprocessed; active/stepped work is excluded.
@@ -816,6 +828,7 @@ impl<Q: ReadyScheduler> Shard<Q> {
             received_from,
             timer,
             result,
+            batch_members: Vec::new(),
         };
         if stepped.result.is_ok() {
             self.retain_connection_history(ticket.group)?;
