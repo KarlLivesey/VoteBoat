@@ -1,0 +1,1 @@
+["/tmp/voteboat-p9-configured413-candidate/artifacts/log_staging_benchmark","/tmp/voteboat-p9-configured413-candidate/measure/staging-plain-h256-append-t3-candidate.csv","0","256","256","append","plain"]

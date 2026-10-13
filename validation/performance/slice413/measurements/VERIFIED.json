@@ -1,0 +1,32 @@
+{
+  "hosts": {
+    "linux": {
+      "acceptedCases": 96,
+      "exits": 96,
+      "failures": 0
+    },
+    "mac": {
+      "acceptedCases": 96,
+      "exits": 96,
+      "failures": 0,
+      "actualRunnerPid": 70898
+    }
+  },
+  "eachCase": {
+    "measuredTransitions": 256,
+    "warmupTransitions": 16
+  },
+  "sourceInputs": {
+    "reference": 1346,
+    "candidate": 1350
+  },
+  "identicalDiagnosticOverlay": true,
+  "sourceUnchanged": true,
+  "artifactsUnchanged": true,
+  "pairedCodecAndSemanticShapeHashesMatch": true,
+  "macRawBeforeAndAfterCopyHashesVerified": true,
+  "invalidSandboxAttemptPreservedAndExcluded": true,
+  "noApplicationSnapshotImage": true,
+  "noDeviceDurabilityOrConsensusTpsClaim": true,
+  "noMatchedOpenRaftFloorClaim": true
+}

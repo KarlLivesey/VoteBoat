@@ -1,0 +1,47 @@
+{
+  "source_tree_sha256": "9bd40105b592d1d4680d0fca857c63709e412f202be2b702cf8cc33eeddf1741",
+  "base_commit": "cab9d6de805ecc6b877a16103280b356f1436f6c",
+  "source_files": 1353,
+  "source_guard_passed": true,
+  "compiler_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source#voteboat@0.1.0",
+    "manifest_path": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "native_benchmark",
+      "src_path": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/examples/native_benchmark.rs",
+      "edition": "2021",
+      "required-features": [
+        "tls"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/../asserted-build/release/examples/native_benchmark"
+    ],
+    "executable": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/../asserted-build/release/examples/native_benchmark",
+    "fresh": false
+  },
+  "binary_sha256": "91d72a3bc47e22cd39e8f9cdffba0f293d346ff4231b331cb6adc1d3de09a025"
+}

@@ -42,7 +42,9 @@ for both variants on both hosts. Linux96-case timing is terminal: configured
 metadata paths improve5.20–6.21x at256 entries and54.86–62.89x at4096.
 Plain4096 append-commit regresses1.585→2.059µs and remains explicitly recorded.
 [Raw413 timing](../validation/performance/slice413/measurements/README.md).
-Mac timing awaits a quiet window; no physical durability or floor claim.
+Mac96-case timing also passes: configured metadata gains4.03–4.20x at256 entries
+and32.01–32.39x at4096, with plain paths approximately unchanged. Both archives
+and source/artifact/codec guards are verified; no physical durability or floor claim.
 Configured connection/resource scans remain a separate cost.
 The standalone [concurrent comparison](../benchmarks/matched/README.md) now passes
 six Linux controls (including real maintenance and paused-follower snapshot
@@ -59,8 +61,12 @@ four repository strict profiles are zero. It records pre-poll correlations,
 not private queue causes. Mac accounting4/0 and targeted strict lint pass on the
 same1353-input source; both genuine asserted-release artifacts are ready. Three
 Mac environment failures and their exact tool-path/protoc-version corrections
-are retained. Production scheduling/durability policy is unchanged; both-host
-pilot attribution remains pending.
+are retained. All eight native pilot cells pass on both hosts and protocols:
+64 originals at window1 use64 singleton visits and128 leader publications;
+window32 uses32 singleton visits plus two16-command batches and44 publications.
+Exact receipts/recovery/joins, weighted counts and source/artifact guards pass.
+Production scheduling/durability policy is unchanged; private queue causes remain
+unobserved. [Native attribution](../validation/performance/native-batching/README.md).
 The current mini plan covers measured campaigns, then the qualified concurrent
 comparison, then bounded configured resource/connection summaries. Planned
 work remains separate from passing evidence; no minimum floor is achieved.

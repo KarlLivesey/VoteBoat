@@ -1,0 +1,1 @@
+["/tmp/voteboat-p9-configured413-reference/artifacts/log_staging_benchmark","/tmp/voteboat-p9-configured413-candidate/measure/staging-joint-h4096-append-commit-t2-reference.csv","0","4096","256","append-commit","joint"]

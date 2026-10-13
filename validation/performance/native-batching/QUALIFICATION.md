@@ -78,3 +78,45 @@ Four attribution cells per host are prepared: TCP/QUIC x window1/32, 64 measured
 commands plus the actual fixed64-command warmup. See pilot-plan.csv. These are
 future observation cells, not paired throughput claims. **No pilot has run**;
 root must release each host only after other qualification/timing work ends.
+
+## Quiet Linux attribution — actual terminal
+
+Runner76545 completed all four cells serially, exit0, with no case restarted.
+Before/after source and asserted binary guards matched. Exact original samples,
+weighted width counts (64 in each warmup/measurement phase), useful-write receipts,
+three-replica state, duplicate retry, recovery and worker joins passed in all cells.
+Every raw phase, CSV, stdout/stderr and final native store is in linux/raw.tgz;
+raw-files.sha256 identifies unmodified files. Per-cell validation is in
+linux/linux-analysis.json and summary.csv. These are short diagnostic observations
+with instrumentation overhead, not paired protocol throughput conclusions.
+
+Measured leader counts: window1 had64 singleton proposal visits and128 actual WAL
+synchronizations/manifest publications for both TCP and QUIC. Window32 had32
+singleton visits plus2 width16 visits (64 originals total), with44 actual WAL
+synchronizations/publications for both protocols. Thus window32 did batch half its
+original commands; the observer does not expose why remaining visits were single.
+Pre-poll heartbeat deadline correlations remain explicitly unobserved queue
+selection reasons. Do not infer a queued Control cause from the deadline counts.
+
+## Quiet macOS attribution — actual terminal
+
+SSH runner43451 completed all four fresh cells serially, exit0; no case restarted.
+Source and asserted91d72a3b binary guards are byte-identical before/after. Each
+warmup/measurement histogram sums to64 originals, with all useful-write receipts,
+three-replica state, recovery/retry and worker joins verified. The identical
+cross-host analyzer checked unique operations65..128, unique original applied
+positions and expected counter values. Full raw phases/native stores/stdout/stderr
+are retained in mac-pilots/raw.tgz with hash inventory; exact aggregate is in
+mac-pilots/mac-analysis.json and attribution-summary.csv.
+
+Mac structural counts matched Linux in these cells: window1 had64 singleton
+proposal visits and128 leader WAL sync/manifest calls; window32 had32 singletons
+plus2 width16 batches, with44 leader sync/manifest calls. Mac per-call average WAL
+sync was5.4–6.5ms; manifest publication was13.8–19.0ms. Linux cells were8.4–14.9ms
+and16.0–26.3ms respectively. These ranges describe the actual individual short
+observation cells; they are not paired host/protocol throughput comparisons or a
+statement that any specific queued class caused the singleton visits. Public
+queue/refusal reasons remain unobserved in all eight cells.
+
+All eight prepared cells are now terminal and archived. No production batching,
+protected-queue order, heartbeat schedule or durability policy changed.

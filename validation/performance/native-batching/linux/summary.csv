@@ -1,0 +1,5 @@
+cell,measured_commands,proposal_visits,leader_sync_calls,leader_publish_calls,leader_width_histogram,leader_sync_ms_per_call,leader_publish_ms_per_call,applied_ops_s,leader_pre_poll_heartbeat_due_batch_visits,queue_selection_reason_observed
+quic-window1,64,64,128,128,1:64,14.8713204296875,26.32172565625,7.505,53,False
+quic-window32,64,34,44,44,1:32|16:2,8.357772295454545,16.02331343181818,58.483,24,False
+tcp-window1,64,64,128,128,1:64,10.4994068828125,20.6126020546875,9.884,46,False
+tcp-window32,64,34,44,44,1:32|16:2,12.074071340909091,24.109736022727272,39.613,27,False

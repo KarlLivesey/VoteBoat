@@ -1,0 +1,47 @@
+{
+  "source_tree_sha256": "9bd40105b592d1d4680d0fca857c63709e412f202be2b702cf8cc33eeddf1741",
+  "base_commit": "cab9d6de805ecc6b877a16103280b356f1436f6c",
+  "source_files": 1353,
+  "source_guard_passed": true,
+  "compiler_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/source#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "native_benchmark",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/source/examples/native_benchmark.rs",
+      "edition": "2021",
+      "required-features": [
+        "tls"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/asserted-linux-build/release/examples/native_benchmark"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/asserted-linux-build/release/examples/native_benchmark",
+    "fresh": false
+  },
+  "binary_sha256": "619ed16f88f2d0d4ebd05b06af7dc5146e8142f38951515a4dc9faf3230bc8b3"
+}

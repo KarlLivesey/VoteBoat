@@ -1,0 +1,100 @@
+[
+  {
+    "cell": "quic-window1",
+    "protocol": "Quic",
+    "window": 1,
+    "leader_replica": 1,
+    "measured_commands": 64,
+    "warmup_commands": 64,
+    "proposal_visits": 64,
+    "leader_width_histogram": {
+      "1": 64
+    },
+    "leader_sync_calls": 128,
+    "leader_publish_calls": 128,
+    "leader_io_append_calls": 128,
+    "leader_sync_ms_per_call": 6.1506139765625,
+    "leader_publish_ms_per_call": 18.9625862421875,
+    "leader_pre_poll_heartbeat_due_batch_visits": 50,
+    "leader_pre_poll_dependency_batch_visits": 0,
+    "elapsed_s": 5.48021,
+    "applied_ops_s": 11.678,
+    "receipt_recovery_join_checks_passed": true,
+    "weighted_counts_verified": true,
+    "queue_selection_reason_observed": false
+  },
+  {
+    "cell": "quic-window32",
+    "protocol": "Quic",
+    "window": 32,
+    "leader_replica": 1,
+    "measured_commands": 64,
+    "warmup_commands": 64,
+    "proposal_visits": 34,
+    "leader_width_histogram": {
+      "1": 32,
+      "16": 2
+    },
+    "leader_sync_calls": 44,
+    "leader_publish_calls": 44,
+    "leader_io_append_calls": 44,
+    "leader_sync_ms_per_call": 5.429297386363637,
+    "leader_publish_ms_per_call": 13.7920625,
+    "leader_pre_poll_heartbeat_due_batch_visits": 24,
+    "leader_pre_poll_dependency_batch_visits": 0,
+    "elapsed_s": 0.898676,
+    "applied_ops_s": 71.216,
+    "receipt_recovery_join_checks_passed": true,
+    "weighted_counts_verified": true,
+    "queue_selection_reason_observed": false
+  },
+  {
+    "cell": "tcp-window1",
+    "protocol": "TcpTls",
+    "window": 1,
+    "leader_replica": 1,
+    "measured_commands": 64,
+    "warmup_commands": 64,
+    "proposal_visits": 64,
+    "leader_width_histogram": {
+      "1": 64
+    },
+    "leader_sync_calls": 128,
+    "leader_publish_calls": 128,
+    "leader_io_append_calls": 128,
+    "leader_sync_ms_per_call": 6.4825611640625,
+    "leader_publish_ms_per_call": 18.9562151484375,
+    "leader_pre_poll_heartbeat_due_batch_visits": 50,
+    "leader_pre_poll_dependency_batch_visits": 0,
+    "elapsed_s": 5.423652,
+    "applied_ops_s": 11.8,
+    "receipt_recovery_join_checks_passed": true,
+    "weighted_counts_verified": true,
+    "queue_selection_reason_observed": false
+  },
+  {
+    "cell": "tcp-window32",
+    "protocol": "TcpTls",
+    "window": 32,
+    "leader_replica": 1,
+    "measured_commands": 64,
+    "warmup_commands": 64,
+    "proposal_visits": 34,
+    "leader_width_histogram": {
+      "1": 32,
+      "16": 2
+    },
+    "leader_sync_calls": 44,
+    "leader_publish_calls": 44,
+    "leader_io_append_calls": 44,
+    "leader_sync_ms_per_call": 5.402079613636364,
+    "leader_publish_ms_per_call": 14.125855136363636,
+    "leader_pre_poll_heartbeat_due_batch_visits": 25,
+    "leader_pre_poll_dependency_batch_visits": 0,
+    "elapsed_s": 0.915702,
+    "applied_ops_s": 69.892,
+    "receipt_recovery_join_checks_passed": true,
+    "weighted_counts_verified": true,
+    "queue_selection_reason_observed": false
+  }
+]

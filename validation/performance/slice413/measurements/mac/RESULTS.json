@@ -1,0 +1,3080 @@
+{
+  "scope": "413 VOLATILE native-log configured/checkpoint staging; real codec/validation/exact simulated publication; no device durability, consensus, network/application TPS or matched OpenRaft floor claim",
+  "cases": [
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1dd861f1efbe956f9ecc54f835353a0067f67ba4979b69870a61f5823fc2d942",
+      "append": {
+        "mean_ns": 11029.609375,
+        "median_ns": 10000,
+        "p99_ns": 21833,
+        "min_ns": 9708,
+        "max_ns": 60333
+      },
+      "barrier": {
+        "mean_ns": 4617.17578125,
+        "median_ns": 4292,
+        "p99_ns": 10667,
+        "min_ns": 4125,
+        "max_ns": 22917
+      },
+      "total": {
+        "mean_ns": 15861.953125,
+        "median_ns": 14541,
+        "p99_ns": 32167,
+        "min_ns": 14166,
+        "max_ns": 71167
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1dd861f1efbe956f9ecc54f835353a0067f67ba4979b69870a61f5823fc2d942",
+      "append": {
+        "mean_ns": 9410.66015625,
+        "median_ns": 10000,
+        "p99_ns": 22417,
+        "min_ns": 3708,
+        "max_ns": 26250
+      },
+      "barrier": {
+        "mean_ns": 4249.984375,
+        "median_ns": 4333,
+        "p99_ns": 16750,
+        "min_ns": 1583,
+        "max_ns": 27292
+      },
+      "total": {
+        "mean_ns": 13888.66796875,
+        "median_ns": 14541,
+        "p99_ns": 30875,
+        "min_ns": 5416,
+        "max_ns": 37750
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1dd861f1efbe956f9ecc54f835353a0067f67ba4979b69870a61f5823fc2d942",
+      "append": {
+        "mean_ns": 1923.1328125,
+        "median_ns": 1875,
+        "p99_ns": 2917,
+        "min_ns": 1792,
+        "max_ns": 4625
+      },
+      "barrier": {
+        "mean_ns": 769.078125,
+        "median_ns": 750,
+        "p99_ns": 1708,
+        "min_ns": 708,
+        "max_ns": 4375
+      },
+      "total": {
+        "mean_ns": 2738.11328125,
+        "median_ns": 2667,
+        "p99_ns": 4750,
+        "min_ns": 2583,
+        "max_ns": 6375
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1dd861f1efbe956f9ecc54f835353a0067f67ba4979b69870a61f5823fc2d942",
+      "append": {
+        "mean_ns": 1891.44140625,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 3417
+      },
+      "barrier": {
+        "mean_ns": 749.30078125,
+        "median_ns": 750,
+        "p99_ns": 958,
+        "min_ns": 667,
+        "max_ns": 4000
+      },
+      "total": {
+        "mean_ns": 2692.0859375,
+        "median_ns": 2625,
+        "p99_ns": 3875,
+        "min_ns": 2541,
+        "max_ns": 5875
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1dd861f1efbe956f9ecc54f835353a0067f67ba4979b69870a61f5823fc2d942",
+      "append": {
+        "mean_ns": 1896.80078125,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1792,
+        "max_ns": 2959
+      },
+      "barrier": {
+        "mean_ns": 765.9375,
+        "median_ns": 750,
+        "p99_ns": 1791,
+        "min_ns": 666,
+        "max_ns": 3916
+      },
+      "total": {
+        "mean_ns": 2712.23046875,
+        "median_ns": 2667,
+        "p99_ns": 3834,
+        "min_ns": 2583,
+        "max_ns": 5791
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1dd861f1efbe956f9ecc54f835353a0067f67ba4979b69870a61f5823fc2d942",
+      "append": {
+        "mean_ns": 1885.76953125,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 2917
+      },
+      "barrier": {
+        "mean_ns": 761.40234375,
+        "median_ns": 750,
+        "p99_ns": 1583,
+        "min_ns": 667,
+        "max_ns": 3833
+      },
+      "total": {
+        "mean_ns": 2696.77734375,
+        "median_ns": 2666,
+        "p99_ns": 3792,
+        "min_ns": 2583,
+        "max_ns": 5750
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "8bacf2fcf2bcfec499764c28c0079901ce01fe3a91f4c7d3cdce2d36a94bc25f",
+      "append": {
+        "mean_ns": 1895.1796875,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 2875
+      },
+      "barrier": {
+        "mean_ns": 751.4765625,
+        "median_ns": 709,
+        "p99_ns": 1500,
+        "min_ns": 667,
+        "max_ns": 4167
+      },
+      "total": {
+        "mean_ns": 2697.078125,
+        "median_ns": 2625,
+        "p99_ns": 3750,
+        "min_ns": 2583,
+        "max_ns": 6208
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "8bacf2fcf2bcfec499764c28c0079901ce01fe3a91f4c7d3cdce2d36a94bc25f",
+      "append": {
+        "mean_ns": 1898.11328125,
+        "median_ns": 1875,
+        "p99_ns": 2959,
+        "min_ns": 1791,
+        "max_ns": 4041
+      },
+      "barrier": {
+        "mean_ns": 759.9296875,
+        "median_ns": 750,
+        "p99_ns": 1000,
+        "min_ns": 666,
+        "max_ns": 4166
+      },
+      "total": {
+        "mean_ns": 2710.09765625,
+        "median_ns": 2666,
+        "p99_ns": 4250,
+        "min_ns": 2541,
+        "max_ns": 6083
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "8bacf2fcf2bcfec499764c28c0079901ce01fe3a91f4c7d3cdce2d36a94bc25f",
+      "append": {
+        "mean_ns": 1884.76953125,
+        "median_ns": 1875,
+        "p99_ns": 2833,
+        "min_ns": 1791,
+        "max_ns": 3042
+      },
+      "barrier": {
+        "mean_ns": 755.828125,
+        "median_ns": 709,
+        "p99_ns": 1875,
+        "min_ns": 667,
+        "max_ns": 3791
+      },
+      "total": {
+        "mean_ns": 2694.22265625,
+        "median_ns": 2625,
+        "p99_ns": 4625,
+        "min_ns": 2542,
+        "max_ns": 5666
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "8bacf2fcf2bcfec499764c28c0079901ce01fe3a91f4c7d3cdce2d36a94bc25f",
+      "append": {
+        "mean_ns": 1900.07421875,
+        "median_ns": 1875,
+        "p99_ns": 2958,
+        "min_ns": 1791,
+        "max_ns": 3667
+      },
+      "barrier": {
+        "mean_ns": 768.40234375,
+        "median_ns": 750,
+        "p99_ns": 1583,
+        "min_ns": 708,
+        "max_ns": 4125
+      },
+      "total": {
+        "mean_ns": 2717.4296875,
+        "median_ns": 2667,
+        "p99_ns": 4625,
+        "min_ns": 2583,
+        "max_ns": 6083
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "8bacf2fcf2bcfec499764c28c0079901ce01fe3a91f4c7d3cdce2d36a94bc25f",
+      "append": {
+        "mean_ns": 1877.73828125,
+        "median_ns": 1875,
+        "p99_ns": 2667,
+        "min_ns": 1791,
+        "max_ns": 3125
+      },
+      "barrier": {
+        "mean_ns": 766.9453125,
+        "median_ns": 750,
+        "p99_ns": 1583,
+        "min_ns": 666,
+        "max_ns": 4250
+      },
+      "total": {
+        "mean_ns": 2693.328125,
+        "median_ns": 2625,
+        "p99_ns": 3959,
+        "min_ns": 2541,
+        "max_ns": 6166
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "8bacf2fcf2bcfec499764c28c0079901ce01fe3a91f4c7d3cdce2d36a94bc25f",
+      "append": {
+        "mean_ns": 1923.68359375,
+        "median_ns": 1875,
+        "p99_ns": 5250,
+        "min_ns": 1792,
+        "max_ns": 6542
+      },
+      "barrier": {
+        "mean_ns": 784.98828125,
+        "median_ns": 750,
+        "p99_ns": 1750,
+        "min_ns": 667,
+        "max_ns": 4166
+      },
+      "total": {
+        "mean_ns": 2788.91015625,
+        "median_ns": 2666,
+        "p99_ns": 6625,
+        "min_ns": 2541,
+        "max_ns": 10584
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b28b1aab1e243360a4fa84e4e28068555a93ca46ffb5516116290b5b8c39b9c3",
+      "append": {
+        "mean_ns": 1905.11328125,
+        "median_ns": 1875,
+        "p99_ns": 2917,
+        "min_ns": 1792,
+        "max_ns": 3375
+      },
+      "barrier": {
+        "mean_ns": 748.0703125,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 667,
+        "max_ns": 1667
+      },
+      "total": {
+        "mean_ns": 2702.27734375,
+        "median_ns": 2666,
+        "p99_ns": 3833,
+        "min_ns": 2542,
+        "max_ns": 4333
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b28b1aab1e243360a4fa84e4e28068555a93ca46ffb5516116290b5b8c39b9c3",
+      "append": {
+        "mean_ns": 1877.6171875,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 2917
+      },
+      "barrier": {
+        "mean_ns": 784.03125,
+        "median_ns": 709,
+        "p99_ns": 1875,
+        "min_ns": 666,
+        "max_ns": 8625
+      },
+      "total": {
+        "mean_ns": 2708.84765625,
+        "median_ns": 2625,
+        "p99_ns": 3958,
+        "min_ns": 2542,
+        "max_ns": 10458
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b28b1aab1e243360a4fa84e4e28068555a93ca46ffb5516116290b5b8c39b9c3",
+      "append": {
+        "mean_ns": 1993.3359375,
+        "median_ns": 1834,
+        "p99_ns": 6208,
+        "min_ns": 1791,
+        "max_ns": 9125
+      },
+      "barrier": {
+        "mean_ns": 746.37890625,
+        "median_ns": 750,
+        "p99_ns": 916,
+        "min_ns": 667,
+        "max_ns": 1584
+      },
+      "total": {
+        "mean_ns": 2800.671875,
+        "median_ns": 2625,
+        "p99_ns": 7042,
+        "min_ns": 2583,
+        "max_ns": 9959
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b28b1aab1e243360a4fa84e4e28068555a93ca46ffb5516116290b5b8c39b9c3",
+      "append": {
+        "mean_ns": 1874.66796875,
+        "median_ns": 1834,
+        "p99_ns": 2750,
+        "min_ns": 1791,
+        "max_ns": 3000
+      },
+      "barrier": {
+        "mean_ns": 733.54296875,
+        "median_ns": 709,
+        "p99_ns": 916,
+        "min_ns": 625,
+        "max_ns": 1583
+      },
+      "total": {
+        "mean_ns": 2657.40234375,
+        "median_ns": 2625,
+        "p99_ns": 3500,
+        "min_ns": 2541,
+        "max_ns": 3917
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b28b1aab1e243360a4fa84e4e28068555a93ca46ffb5516116290b5b8c39b9c3",
+      "append": {
+        "mean_ns": 1907.8671875,
+        "median_ns": 1875,
+        "p99_ns": 2958,
+        "min_ns": 1791,
+        "max_ns": 3541
+      },
+      "barrier": {
+        "mean_ns": 732.390625,
+        "median_ns": 709,
+        "p99_ns": 916,
+        "min_ns": 667,
+        "max_ns": 1792
+      },
+      "total": {
+        "mean_ns": 2690.78515625,
+        "median_ns": 2666,
+        "p99_ns": 3875,
+        "min_ns": 2583,
+        "max_ns": 4458
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b28b1aab1e243360a4fa84e4e28068555a93ca46ffb5516116290b5b8c39b9c3",
+      "append": {
+        "mean_ns": 1870.921875,
+        "median_ns": 1834,
+        "p99_ns": 2667,
+        "min_ns": 1791,
+        "max_ns": 2875
+      },
+      "barrier": {
+        "mean_ns": 773.7890625,
+        "median_ns": 750,
+        "p99_ns": 1584,
+        "min_ns": 708,
+        "max_ns": 2500
+      },
+      "total": {
+        "mean_ns": 2692.20703125,
+        "median_ns": 2667,
+        "p99_ns": 3541,
+        "min_ns": 2583,
+        "max_ns": 5458
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "128f91e01001fa3976e76f78490dd8874290682430efd59b0c61a79b37021de1",
+      "append": {
+        "mean_ns": 1881.17578125,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 2917
+      },
+      "barrier": {
+        "mean_ns": 738.40234375,
+        "median_ns": 709,
+        "p99_ns": 916,
+        "min_ns": 666,
+        "max_ns": 1667
+      },
+      "total": {
+        "mean_ns": 2669.94140625,
+        "median_ns": 2625,
+        "p99_ns": 3666,
+        "min_ns": 2541,
+        "max_ns": 4625
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "128f91e01001fa3976e76f78490dd8874290682430efd59b0c61a79b37021de1",
+      "append": {
+        "mean_ns": 1885.5703125,
+        "median_ns": 1875,
+        "p99_ns": 3084,
+        "min_ns": 1791,
+        "max_ns": 3167
+      },
+      "barrier": {
+        "mean_ns": 745.15234375,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 666,
+        "max_ns": 2917
+      },
+      "total": {
+        "mean_ns": 2677.5234375,
+        "median_ns": 2625,
+        "p99_ns": 4042,
+        "min_ns": 2542,
+        "max_ns": 4958
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "128f91e01001fa3976e76f78490dd8874290682430efd59b0c61a79b37021de1",
+      "append": {
+        "mean_ns": 2015.4453125,
+        "median_ns": 1875,
+        "p99_ns": 6583,
+        "min_ns": 1791,
+        "max_ns": 11292
+      },
+      "barrier": {
+        "mean_ns": 782.40625,
+        "median_ns": 750,
+        "p99_ns": 1792,
+        "min_ns": 708,
+        "max_ns": 5250
+      },
+      "total": {
+        "mean_ns": 2845.078125,
+        "median_ns": 2625,
+        "p99_ns": 7375,
+        "min_ns": 2583,
+        "max_ns": 12084
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "128f91e01001fa3976e76f78490dd8874290682430efd59b0c61a79b37021de1",
+      "append": {
+        "mean_ns": 1943.828125,
+        "median_ns": 1875,
+        "p99_ns": 3125,
+        "min_ns": 1791,
+        "max_ns": 10041
+      },
+      "barrier": {
+        "mean_ns": 764.48046875,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 666,
+        "max_ns": 6500
+      },
+      "total": {
+        "mean_ns": 2757.66796875,
+        "median_ns": 2666,
+        "p99_ns": 6625,
+        "min_ns": 2583,
+        "max_ns": 10791
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "128f91e01001fa3976e76f78490dd8874290682430efd59b0c61a79b37021de1",
+      "append": {
+        "mean_ns": 1919.43359375,
+        "median_ns": 1875,
+        "p99_ns": 2834,
+        "min_ns": 1792,
+        "max_ns": 3166
+      },
+      "barrier": {
+        "mean_ns": 751.9453125,
+        "median_ns": 750,
+        "p99_ns": 958,
+        "min_ns": 667,
+        "max_ns": 1667
+      },
+      "total": {
+        "mean_ns": 2720.5859375,
+        "median_ns": 2667,
+        "p99_ns": 3750,
+        "min_ns": 2583,
+        "max_ns": 4875
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "128f91e01001fa3976e76f78490dd8874290682430efd59b0c61a79b37021de1",
+      "append": {
+        "mean_ns": 1912.09375,
+        "median_ns": 1875,
+        "p99_ns": 2833,
+        "min_ns": 1833,
+        "max_ns": 4500
+      },
+      "barrier": {
+        "mean_ns": 742.67578125,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 708,
+        "max_ns": 1834
+      },
+      "total": {
+        "mean_ns": 2704.44140625,
+        "median_ns": 2667,
+        "p99_ns": 3791,
+        "min_ns": 2583,
+        "max_ns": 5459
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "131fd3545586058117b8ae325f457240a9b384ab3c454fd6b0daadb2f7321210",
+      "append": {
+        "mean_ns": 7444.828125,
+        "median_ns": 7417,
+        "p99_ns": 12416,
+        "min_ns": 6041,
+        "max_ns": 12750
+      },
+      "barrier": {
+        "mean_ns": 3529.6328125,
+        "median_ns": 3458,
+        "p99_ns": 5500,
+        "min_ns": 2791,
+        "max_ns": 5542
+      },
+      "total": {
+        "mean_ns": 11029.14453125,
+        "median_ns": 10958,
+        "p99_ns": 16417,
+        "min_ns": 8916,
+        "max_ns": 18041
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "131fd3545586058117b8ae325f457240a9b384ab3c454fd6b0daadb2f7321210",
+      "append": {
+        "mean_ns": 1935.0546875,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1791,
+        "max_ns": 14958
+      },
+      "barrier": {
+        "mean_ns": 752.4453125,
+        "median_ns": 709,
+        "p99_ns": 1541,
+        "min_ns": 666,
+        "max_ns": 4125
+      },
+      "total": {
+        "mean_ns": 2738.28515625,
+        "median_ns": 2625,
+        "p99_ns": 4959,
+        "min_ns": 2500,
+        "max_ns": 15708
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "131fd3545586058117b8ae325f457240a9b384ab3c454fd6b0daadb2f7321210",
+      "append": {
+        "mean_ns": 1949.37109375,
+        "median_ns": 1875,
+        "p99_ns": 6125,
+        "min_ns": 1791,
+        "max_ns": 7000
+      },
+      "barrier": {
+        "mean_ns": 776.2421875,
+        "median_ns": 750,
+        "p99_ns": 1708,
+        "min_ns": 666,
+        "max_ns": 5459
+      },
+      "total": {
+        "mean_ns": 2770.96484375,
+        "median_ns": 2625,
+        "p99_ns": 7083,
+        "min_ns": 2541,
+        "max_ns": 7750
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "131fd3545586058117b8ae325f457240a9b384ab3c454fd6b0daadb2f7321210",
+      "append": {
+        "mean_ns": 7392.23828125,
+        "median_ns": 7375,
+        "p99_ns": 10542,
+        "min_ns": 6000,
+        "max_ns": 12875
+      },
+      "barrier": {
+        "mean_ns": 3500.9765625,
+        "median_ns": 3417,
+        "p99_ns": 5500,
+        "min_ns": 2750,
+        "max_ns": 5500
+      },
+      "total": {
+        "mean_ns": 10946.46875,
+        "median_ns": 10875,
+        "p99_ns": 13875,
+        "min_ns": 8875,
+        "max_ns": 18417
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "131fd3545586058117b8ae325f457240a9b384ab3c454fd6b0daadb2f7321210",
+      "append": {
+        "mean_ns": 7459.96484375,
+        "median_ns": 7416,
+        "p99_ns": 11833,
+        "min_ns": 6000,
+        "max_ns": 13834
+      },
+      "barrier": {
+        "mean_ns": 3529.15625,
+        "median_ns": 3458,
+        "p99_ns": 5459,
+        "min_ns": 2791,
+        "max_ns": 5500
+      },
+      "total": {
+        "mean_ns": 11038.71875,
+        "median_ns": 10959,
+        "p99_ns": 15125,
+        "min_ns": 8917,
+        "max_ns": 18583
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "131fd3545586058117b8ae325f457240a9b384ab3c454fd6b0daadb2f7321210",
+      "append": {
+        "mean_ns": 1881.2109375,
+        "median_ns": 1834,
+        "p99_ns": 2875,
+        "min_ns": 1791,
+        "max_ns": 4042
+      },
+      "barrier": {
+        "mean_ns": 765.796875,
+        "median_ns": 750,
+        "p99_ns": 959,
+        "min_ns": 667,
+        "max_ns": 4042
+      },
+      "total": {
+        "mean_ns": 2695.81640625,
+        "median_ns": 2666,
+        "p99_ns": 4750,
+        "min_ns": 2541,
+        "max_ns": 5959
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "5673827744d0c85695422d74e05f382c48e9abe5b53e28ff611efc84ec90344f",
+      "append": {
+        "mean_ns": 7406.09375,
+        "median_ns": 7375,
+        "p99_ns": 12667,
+        "min_ns": 6041,
+        "max_ns": 15500
+      },
+      "barrier": {
+        "mean_ns": 3496.08203125,
+        "median_ns": 3417,
+        "p99_ns": 5500,
+        "min_ns": 2750,
+        "max_ns": 5542
+      },
+      "total": {
+        "mean_ns": 10951.98046875,
+        "median_ns": 10834,
+        "p99_ns": 16709,
+        "min_ns": 8834,
+        "max_ns": 19333
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "5673827744d0c85695422d74e05f382c48e9abe5b53e28ff611efc84ec90344f",
+      "append": {
+        "mean_ns": 2012.6796875,
+        "median_ns": 1875,
+        "p99_ns": 6208,
+        "min_ns": 1792,
+        "max_ns": 11375
+      },
+      "barrier": {
+        "mean_ns": 809.39453125,
+        "median_ns": 750,
+        "p99_ns": 3750,
+        "min_ns": 667,
+        "max_ns": 8583
+      },
+      "total": {
+        "mean_ns": 2871.9375,
+        "median_ns": 2667,
+        "p99_ns": 10250,
+        "min_ns": 2542,
+        "max_ns": 12167
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "5673827744d0c85695422d74e05f382c48e9abe5b53e28ff611efc84ec90344f",
+      "append": {
+        "mean_ns": 1910.48828125,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1791,
+        "max_ns": 6750
+      },
+      "barrier": {
+        "mean_ns": 759.79296875,
+        "median_ns": 750,
+        "p99_ns": 1708,
+        "min_ns": 667,
+        "max_ns": 3958
+      },
+      "total": {
+        "mean_ns": 2720.78515625,
+        "median_ns": 2666,
+        "p99_ns": 4875,
+        "min_ns": 2583,
+        "max_ns": 7541
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "5673827744d0c85695422d74e05f382c48e9abe5b53e28ff611efc84ec90344f",
+      "append": {
+        "mean_ns": 7402.8203125,
+        "median_ns": 7375,
+        "p99_ns": 10500,
+        "min_ns": 6042,
+        "max_ns": 13334
+      },
+      "barrier": {
+        "mean_ns": 3500.0390625,
+        "median_ns": 3458,
+        "p99_ns": 5459,
+        "min_ns": 2750,
+        "max_ns": 5500
+      },
+      "total": {
+        "mean_ns": 10951,
+        "median_ns": 10916,
+        "p99_ns": 13834,
+        "min_ns": 8875,
+        "max_ns": 17834
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "5673827744d0c85695422d74e05f382c48e9abe5b53e28ff611efc84ec90344f",
+      "append": {
+        "mean_ns": 7426.21484375,
+        "median_ns": 7417,
+        "p99_ns": 11042,
+        "min_ns": 6000,
+        "max_ns": 13833
+      },
+      "barrier": {
+        "mean_ns": 3516.4765625,
+        "median_ns": 3417,
+        "p99_ns": 5500,
+        "min_ns": 2791,
+        "max_ns": 5791
+      },
+      "total": {
+        "mean_ns": 10990.06640625,
+        "median_ns": 10917,
+        "p99_ns": 14375,
+        "min_ns": 8875,
+        "max_ns": 18000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "5673827744d0c85695422d74e05f382c48e9abe5b53e28ff611efc84ec90344f",
+      "append": {
+        "mean_ns": 1895.98046875,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1791,
+        "max_ns": 3709
+      },
+      "barrier": {
+        "mean_ns": 754.38671875,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 708,
+        "max_ns": 3875
+      },
+      "total": {
+        "mean_ns": 2696.43359375,
+        "median_ns": 2666,
+        "p99_ns": 4166,
+        "min_ns": 2583,
+        "max_ns": 5750
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "23eaea354fe679530ea96787c2790255e53f4317605f7cb5871d543a89f46097",
+      "append": {
+        "mean_ns": 48378.078125,
+        "median_ns": 47000,
+        "p99_ns": 64167,
+        "min_ns": 42875,
+        "max_ns": 70916
+      },
+      "barrier": {
+        "mean_ns": 39733.7265625,
+        "median_ns": 38584,
+        "p99_ns": 52167,
+        "min_ns": 35375,
+        "max_ns": 59875
+      },
+      "total": {
+        "mean_ns": 88167.6484375,
+        "median_ns": 87292,
+        "p99_ns": 114416,
+        "min_ns": 80500,
+        "max_ns": 117875
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "23eaea354fe679530ea96787c2790255e53f4317605f7cb5871d543a89f46097",
+      "append": {
+        "mean_ns": 1884.9375,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1791,
+        "max_ns": 3750
+      },
+      "barrier": {
+        "mean_ns": 739.90234375,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 666,
+        "max_ns": 1583
+      },
+      "total": {
+        "mean_ns": 2673.01171875,
+        "median_ns": 2625,
+        "p99_ns": 3542,
+        "min_ns": 2541,
+        "max_ns": 4667
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "23eaea354fe679530ea96787c2790255e53f4317605f7cb5871d543a89f46097",
+      "append": {
+        "mean_ns": 1888.8046875,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1750,
+        "max_ns": 3000
+      },
+      "barrier": {
+        "mean_ns": 756.83203125,
+        "median_ns": 750,
+        "p99_ns": 1667,
+        "min_ns": 708,
+        "max_ns": 1750
+      },
+      "total": {
+        "mean_ns": 2693.54296875,
+        "median_ns": 2667,
+        "p99_ns": 3791,
+        "min_ns": 2542,
+        "max_ns": 4625
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "23eaea354fe679530ea96787c2790255e53f4317605f7cb5871d543a89f46097",
+      "append": {
+        "mean_ns": 47232.7421875,
+        "median_ns": 45125,
+        "p99_ns": 64875,
+        "min_ns": 43625,
+        "max_ns": 70208
+      },
+      "barrier": {
+        "mean_ns": 38777.3671875,
+        "median_ns": 37250,
+        "p99_ns": 54167,
+        "min_ns": 35916,
+        "max_ns": 59834
+      },
+      "total": {
+        "mean_ns": 86063.4765625,
+        "median_ns": 82667,
+        "p99_ns": 107500,
+        "min_ns": 80667,
+        "max_ns": 118708
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "23eaea354fe679530ea96787c2790255e53f4317605f7cb5871d543a89f46097",
+      "append": {
+        "mean_ns": 46964.96484375,
+        "median_ns": 45125,
+        "p99_ns": 61542,
+        "min_ns": 43541,
+        "max_ns": 69458
+      },
+      "barrier": {
+        "mean_ns": 38812.66015625,
+        "median_ns": 37208,
+        "p99_ns": 50833,
+        "min_ns": 35875,
+        "max_ns": 55250
+      },
+      "total": {
+        "mean_ns": 85827.1484375,
+        "median_ns": 82500,
+        "p99_ns": 106708,
+        "min_ns": 80542,
+        "max_ns": 110709
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "23eaea354fe679530ea96787c2790255e53f4317605f7cb5871d543a89f46097",
+      "append": {
+        "mean_ns": 1884.26171875,
+        "median_ns": 1875,
+        "p99_ns": 2667,
+        "min_ns": 1791,
+        "max_ns": 3125
+      },
+      "barrier": {
+        "mean_ns": 754.06640625,
+        "median_ns": 750,
+        "p99_ns": 1667,
+        "min_ns": 667,
+        "max_ns": 2458
+      },
+      "total": {
+        "mean_ns": 2688.45703125,
+        "median_ns": 2666,
+        "p99_ns": 3792,
+        "min_ns": 2583,
+        "max_ns": 5500
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "4451a0ffebc9d41b715c77d93ab7a2797fe935f3ac69797bdcc583df74f60ace",
+      "append": {
+        "mean_ns": 47930.98828125,
+        "median_ns": 47083,
+        "p99_ns": 59458,
+        "min_ns": 43208,
+        "max_ns": 71208
+      },
+      "barrier": {
+        "mean_ns": 39658.68359375,
+        "median_ns": 38791,
+        "p99_ns": 53292,
+        "min_ns": 35458,
+        "max_ns": 57959
+      },
+      "total": {
+        "mean_ns": 87643.0625,
+        "median_ns": 87042,
+        "p99_ns": 104583,
+        "min_ns": 80417,
+        "max_ns": 110083
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "4451a0ffebc9d41b715c77d93ab7a2797fe935f3ac69797bdcc583df74f60ace",
+      "append": {
+        "mean_ns": 1902.37890625,
+        "median_ns": 1875,
+        "p99_ns": 2917,
+        "min_ns": 1791,
+        "max_ns": 3084
+      },
+      "barrier": {
+        "mean_ns": 754.078125,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 708,
+        "max_ns": 1792
+      },
+      "total": {
+        "mean_ns": 2707.9765625,
+        "median_ns": 2667,
+        "p99_ns": 3875,
+        "min_ns": 2583,
+        "max_ns": 4792
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "4451a0ffebc9d41b715c77d93ab7a2797fe935f3ac69797bdcc583df74f60ace",
+      "append": {
+        "mean_ns": 1899.734375,
+        "median_ns": 1875,
+        "p99_ns": 2834,
+        "min_ns": 1750,
+        "max_ns": 3042
+      },
+      "barrier": {
+        "mean_ns": 747.4140625,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 708,
+        "max_ns": 2375
+      },
+      "total": {
+        "mean_ns": 2697.2734375,
+        "median_ns": 2667,
+        "p99_ns": 3750,
+        "min_ns": 2583,
+        "max_ns": 4459
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "4451a0ffebc9d41b715c77d93ab7a2797fe935f3ac69797bdcc583df74f60ace",
+      "append": {
+        "mean_ns": 47059.87109375,
+        "median_ns": 46542,
+        "p99_ns": 54792,
+        "min_ns": 42750,
+        "max_ns": 71875
+      },
+      "barrier": {
+        "mean_ns": 38882.16796875,
+        "median_ns": 38042,
+        "p99_ns": 45667,
+        "min_ns": 35458,
+        "max_ns": 46166
+      },
+      "total": {
+        "mean_ns": 85997.0625,
+        "median_ns": 85792,
+        "p99_ns": 95125,
+        "min_ns": 80542,
+        "max_ns": 107583
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "4451a0ffebc9d41b715c77d93ab7a2797fe935f3ac69797bdcc583df74f60ace",
+      "append": {
+        "mean_ns": 47922.03125,
+        "median_ns": 46833,
+        "p99_ns": 60458,
+        "min_ns": 42958,
+        "max_ns": 73542
+      },
+      "barrier": {
+        "mean_ns": 39383.3046875,
+        "median_ns": 38333,
+        "p99_ns": 51000,
+        "min_ns": 35417,
+        "max_ns": 53708
+      },
+      "total": {
+        "mean_ns": 87357.56640625,
+        "median_ns": 86667,
+        "p99_ns": 101708,
+        "min_ns": 80541,
+        "max_ns": 117792
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "4451a0ffebc9d41b715c77d93ab7a2797fe935f3ac69797bdcc583df74f60ace",
+      "append": {
+        "mean_ns": 1897.765625,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1750,
+        "max_ns": 4000
+      },
+      "barrier": {
+        "mean_ns": 744.9609375,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 708,
+        "max_ns": 1542
+      },
+      "total": {
+        "mean_ns": 2688.109375,
+        "median_ns": 2666,
+        "p99_ns": 3542,
+        "min_ns": 2542,
+        "max_ns": 5000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "6a4ebe10397d42b48bcada097c2d8b0ba35fb04ee6dafaf8ca529ef186d97dc7",
+      "append": {
+        "mean_ns": 7803.2109375,
+        "median_ns": 7750,
+        "p99_ns": 10916,
+        "min_ns": 6334,
+        "max_ns": 15792
+      },
+      "barrier": {
+        "mean_ns": 3577.66015625,
+        "median_ns": 3500,
+        "p99_ns": 5541,
+        "min_ns": 2875,
+        "max_ns": 5625
+      },
+      "total": {
+        "mean_ns": 11434.70703125,
+        "median_ns": 11375,
+        "p99_ns": 14792,
+        "min_ns": 9292,
+        "max_ns": 19917
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "6a4ebe10397d42b48bcada097c2d8b0ba35fb04ee6dafaf8ca529ef186d97dc7",
+      "append": {
+        "mean_ns": 1973.125,
+        "median_ns": 1875,
+        "p99_ns": 6667,
+        "min_ns": 1791,
+        "max_ns": 8583
+      },
+      "barrier": {
+        "mean_ns": 781.578125,
+        "median_ns": 750,
+        "p99_ns": 1791,
+        "min_ns": 708,
+        "max_ns": 5042
+      },
+      "total": {
+        "mean_ns": 2803.40625,
+        "median_ns": 2666,
+        "p99_ns": 7458,
+        "min_ns": 2541,
+        "max_ns": 9375
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "6a4ebe10397d42b48bcada097c2d8b0ba35fb04ee6dafaf8ca529ef186d97dc7",
+      "append": {
+        "mean_ns": 1912.55859375,
+        "median_ns": 1875,
+        "p99_ns": 2834,
+        "min_ns": 1791,
+        "max_ns": 10042
+      },
+      "barrier": {
+        "mean_ns": 808.1015625,
+        "median_ns": 750,
+        "p99_ns": 2125,
+        "min_ns": 667,
+        "max_ns": 10583
+      },
+      "total": {
+        "mean_ns": 2766.109375,
+        "median_ns": 2625,
+        "p99_ns": 5875,
+        "min_ns": 2541,
+        "max_ns": 12458
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "6a4ebe10397d42b48bcada097c2d8b0ba35fb04ee6dafaf8ca529ef186d97dc7",
+      "append": {
+        "mean_ns": 7946.90625,
+        "median_ns": 7792,
+        "p99_ns": 18459,
+        "min_ns": 6458,
+        "max_ns": 21500
+      },
+      "barrier": {
+        "mean_ns": 3607.2734375,
+        "median_ns": 3500,
+        "p99_ns": 5542,
+        "min_ns": 2792,
+        "max_ns": 12167
+      },
+      "total": {
+        "mean_ns": 11600.90234375,
+        "median_ns": 11416,
+        "p99_ns": 22292,
+        "min_ns": 9333,
+        "max_ns": 25000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "6a4ebe10397d42b48bcada097c2d8b0ba35fb04ee6dafaf8ca529ef186d97dc7",
+      "append": {
+        "mean_ns": 7850.90234375,
+        "median_ns": 7792,
+        "p99_ns": 11625,
+        "min_ns": 6416,
+        "max_ns": 14250
+      },
+      "barrier": {
+        "mean_ns": 3607.25390625,
+        "median_ns": 3500,
+        "p99_ns": 5583,
+        "min_ns": 2834,
+        "max_ns": 10625
+      },
+      "total": {
+        "mean_ns": 11510.9140625,
+        "median_ns": 11375,
+        "p99_ns": 17375,
+        "min_ns": 9333,
+        "max_ns": 18667
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "6a4ebe10397d42b48bcada097c2d8b0ba35fb04ee6dafaf8ca529ef186d97dc7",
+      "append": {
+        "mean_ns": 1898.4453125,
+        "median_ns": 1875,
+        "p99_ns": 2833,
+        "min_ns": 1791,
+        "max_ns": 3958
+      },
+      "barrier": {
+        "mean_ns": 751.96484375,
+        "median_ns": 750,
+        "p99_ns": 1000,
+        "min_ns": 666,
+        "max_ns": 4500
+      },
+      "total": {
+        "mean_ns": 2696.7890625,
+        "median_ns": 2666,
+        "p99_ns": 3917,
+        "min_ns": 2541,
+        "max_ns": 6417
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1802468aa95b3df55c038b2d26b3cf16790119ef04adfe8796d284d35ce3131d",
+      "append": {
+        "mean_ns": 7818,
+        "median_ns": 7792,
+        "p99_ns": 11417,
+        "min_ns": 6458,
+        "max_ns": 13792
+      },
+      "barrier": {
+        "mean_ns": 3598,
+        "median_ns": 3500,
+        "p99_ns": 5542,
+        "min_ns": 2833,
+        "max_ns": 11166
+      },
+      "total": {
+        "mean_ns": 11465.78515625,
+        "median_ns": 11416,
+        "p99_ns": 16583,
+        "min_ns": 9375,
+        "max_ns": 17958
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1802468aa95b3df55c038b2d26b3cf16790119ef04adfe8796d284d35ce3131d",
+      "append": {
+        "mean_ns": 1923.48828125,
+        "median_ns": 1875,
+        "p99_ns": 3125,
+        "min_ns": 1791,
+        "max_ns": 3375
+      },
+      "barrier": {
+        "mean_ns": 761.05078125,
+        "median_ns": 750,
+        "p99_ns": 1542,
+        "min_ns": 708,
+        "max_ns": 4125
+      },
+      "total": {
+        "mean_ns": 2734.05859375,
+        "median_ns": 2667,
+        "p99_ns": 4292,
+        "min_ns": 2583,
+        "max_ns": 6125
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1802468aa95b3df55c038b2d26b3cf16790119ef04adfe8796d284d35ce3131d",
+      "append": {
+        "mean_ns": 1981.1171875,
+        "median_ns": 1875,
+        "p99_ns": 3834,
+        "min_ns": 1709,
+        "max_ns": 10583
+      },
+      "barrier": {
+        "mean_ns": 821.91796875,
+        "median_ns": 750,
+        "p99_ns": 2084,
+        "min_ns": 666,
+        "max_ns": 15667
+      },
+      "total": {
+        "mean_ns": 2850.91015625,
+        "median_ns": 2666,
+        "p99_ns": 7875,
+        "min_ns": 2500,
+        "max_ns": 17583
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1802468aa95b3df55c038b2d26b3cf16790119ef04adfe8796d284d35ce3131d",
+      "append": {
+        "mean_ns": 7771.6484375,
+        "median_ns": 7750,
+        "p99_ns": 11333,
+        "min_ns": 6375,
+        "max_ns": 14000
+      },
+      "barrier": {
+        "mean_ns": 3570.49609375,
+        "median_ns": 3500,
+        "p99_ns": 5500,
+        "min_ns": 2833,
+        "max_ns": 5583
+      },
+      "total": {
+        "mean_ns": 11390.95703125,
+        "median_ns": 11334,
+        "p99_ns": 14959,
+        "min_ns": 9292,
+        "max_ns": 17709
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1802468aa95b3df55c038b2d26b3cf16790119ef04adfe8796d284d35ce3131d",
+      "append": {
+        "mean_ns": 7812.33984375,
+        "median_ns": 7791,
+        "p99_ns": 12208,
+        "min_ns": 6375,
+        "max_ns": 12916
+      },
+      "barrier": {
+        "mean_ns": 3567.8828125,
+        "median_ns": 3500,
+        "p99_ns": 5500,
+        "min_ns": 2792,
+        "max_ns": 5583
+      },
+      "total": {
+        "mean_ns": 11431.63671875,
+        "median_ns": 11375,
+        "p99_ns": 16250,
+        "min_ns": 9334,
+        "max_ns": 16625
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "1802468aa95b3df55c038b2d26b3cf16790119ef04adfe8796d284d35ce3131d",
+      "append": {
+        "mean_ns": 1904.44140625,
+        "median_ns": 1875,
+        "p99_ns": 2833,
+        "min_ns": 1833,
+        "max_ns": 3250
+      },
+      "barrier": {
+        "mean_ns": 788.41015625,
+        "median_ns": 750,
+        "p99_ns": 1875,
+        "min_ns": 708,
+        "max_ns": 4375
+      },
+      "total": {
+        "mean_ns": 2738.9375,
+        "median_ns": 2667,
+        "p99_ns": 4000,
+        "min_ns": 2625,
+        "max_ns": 6333
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "03d423a195ee0525282ff5eca5997a684bc99b0d0beefcb1fd3c8e89e6a00c60",
+      "append": {
+        "mean_ns": 47274.5625,
+        "median_ns": 45458,
+        "p99_ns": 58916,
+        "min_ns": 43792,
+        "max_ns": 66834
+      },
+      "barrier": {
+        "mean_ns": 38704.1484375,
+        "median_ns": 37250,
+        "p99_ns": 49750,
+        "min_ns": 35833,
+        "max_ns": 53125
+      },
+      "total": {
+        "mean_ns": 86032.71484375,
+        "median_ns": 83042,
+        "p99_ns": 103750,
+        "min_ns": 81000,
+        "max_ns": 105125
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "03d423a195ee0525282ff5eca5997a684bc99b0d0beefcb1fd3c8e89e6a00c60",
+      "append": {
+        "mean_ns": 1918.46875,
+        "median_ns": 1875,
+        "p99_ns": 3000,
+        "min_ns": 1791,
+        "max_ns": 6250
+      },
+      "barrier": {
+        "mean_ns": 749.82421875,
+        "median_ns": 750,
+        "p99_ns": 1875,
+        "min_ns": 666,
+        "max_ns": 2166
+      },
+      "total": {
+        "mean_ns": 2716.46484375,
+        "median_ns": 2625,
+        "p99_ns": 4875,
+        "min_ns": 2541,
+        "max_ns": 7083
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "03d423a195ee0525282ff5eca5997a684bc99b0d0beefcb1fd3c8e89e6a00c60",
+      "append": {
+        "mean_ns": 1890,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 3667
+      },
+      "barrier": {
+        "mean_ns": 733.05078125,
+        "median_ns": 709,
+        "p99_ns": 834,
+        "min_ns": 666,
+        "max_ns": 1625
+      },
+      "total": {
+        "mean_ns": 2670.60546875,
+        "median_ns": 2625,
+        "p99_ns": 3584,
+        "min_ns": 2541,
+        "max_ns": 4583
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "03d423a195ee0525282ff5eca5997a684bc99b0d0beefcb1fd3c8e89e6a00c60",
+      "append": {
+        "mean_ns": 48774.2890625,
+        "median_ns": 47625,
+        "p99_ns": 66458,
+        "min_ns": 43125,
+        "max_ns": 73916
+      },
+      "barrier": {
+        "mean_ns": 39382.80078125,
+        "median_ns": 38666,
+        "p99_ns": 49125,
+        "min_ns": 35292,
+        "max_ns": 51834
+      },
+      "total": {
+        "mean_ns": 88213.078125,
+        "median_ns": 87333,
+        "p99_ns": 107000,
+        "min_ns": 81250,
+        "max_ns": 113458
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "03d423a195ee0525282ff5eca5997a684bc99b0d0beefcb1fd3c8e89e6a00c60",
+      "append": {
+        "mean_ns": 47825.33984375,
+        "median_ns": 46209,
+        "p99_ns": 61791,
+        "min_ns": 43666,
+        "max_ns": 84000
+      },
+      "barrier": {
+        "mean_ns": 39087.74609375,
+        "median_ns": 37417,
+        "p99_ns": 49625,
+        "min_ns": 35666,
+        "max_ns": 52708
+      },
+      "total": {
+        "mean_ns": 86965.48828125,
+        "median_ns": 85334,
+        "p99_ns": 105208,
+        "min_ns": 81000,
+        "max_ns": 133666
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "03d423a195ee0525282ff5eca5997a684bc99b0d0beefcb1fd3c8e89e6a00c60",
+      "append": {
+        "mean_ns": 1956.88671875,
+        "median_ns": 1875,
+        "p99_ns": 2833,
+        "min_ns": 1791,
+        "max_ns": 10834
+      },
+      "barrier": {
+        "mean_ns": 752.94140625,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 667,
+        "max_ns": 2375
+      },
+      "total": {
+        "mean_ns": 2758.953125,
+        "median_ns": 2667,
+        "p99_ns": 5209,
+        "min_ns": 2583,
+        "max_ns": 11625
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a791c261c605375085271c785f66bcc8f41a4a3a500d861db02d2ea07e6824cc",
+      "append": {
+        "mean_ns": 48354.7890625,
+        "median_ns": 47375,
+        "p99_ns": 64500,
+        "min_ns": 43209,
+        "max_ns": 75292
+      },
+      "barrier": {
+        "mean_ns": 39624.35546875,
+        "median_ns": 38792,
+        "p99_ns": 50459,
+        "min_ns": 35416,
+        "max_ns": 55375
+      },
+      "total": {
+        "mean_ns": 88034.19921875,
+        "median_ns": 87375,
+        "p99_ns": 104625,
+        "min_ns": 81083,
+        "max_ns": 114375
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a791c261c605375085271c785f66bcc8f41a4a3a500d861db02d2ea07e6824cc",
+      "append": {
+        "mean_ns": 1942.3984375,
+        "median_ns": 1875,
+        "p99_ns": 2875,
+        "min_ns": 1791,
+        "max_ns": 12208
+      },
+      "barrier": {
+        "mean_ns": 781.234375,
+        "median_ns": 750,
+        "p99_ns": 1000,
+        "min_ns": 708,
+        "max_ns": 8834
+      },
+      "total": {
+        "mean_ns": 2772.35546875,
+        "median_ns": 2666,
+        "p99_ns": 7250,
+        "min_ns": 2583,
+        "max_ns": 13000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a791c261c605375085271c785f66bcc8f41a4a3a500d861db02d2ea07e6824cc",
+      "append": {
+        "mean_ns": 1881.69140625,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1791,
+        "max_ns": 3209
+      },
+      "barrier": {
+        "mean_ns": 744.6328125,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 666,
+        "max_ns": 2500
+      },
+      "total": {
+        "mean_ns": 2673.99609375,
+        "median_ns": 2625,
+        "p99_ns": 3708,
+        "min_ns": 2541,
+        "max_ns": 4542
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a791c261c605375085271c785f66bcc8f41a4a3a500d861db02d2ea07e6824cc",
+      "append": {
+        "mean_ns": 47235.48828125,
+        "median_ns": 45500,
+        "p99_ns": 59458,
+        "min_ns": 43750,
+        "max_ns": 69791
+      },
+      "barrier": {
+        "mean_ns": 38582.03125,
+        "median_ns": 37209,
+        "p99_ns": 47708,
+        "min_ns": 35917,
+        "max_ns": 55667
+      },
+      "total": {
+        "mean_ns": 85870.4296875,
+        "median_ns": 82959,
+        "p99_ns": 103167,
+        "min_ns": 80916,
+        "max_ns": 107041
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a791c261c605375085271c785f66bcc8f41a4a3a500d861db02d2ea07e6824cc",
+      "append": {
+        "mean_ns": 47815.3828125,
+        "median_ns": 45584,
+        "p99_ns": 60500,
+        "min_ns": 43833,
+        "max_ns": 67667
+      },
+      "barrier": {
+        "mean_ns": 39306.4765625,
+        "median_ns": 37375,
+        "p99_ns": 50292,
+        "min_ns": 35959,
+        "max_ns": 52500
+      },
+      "total": {
+        "mean_ns": 87175.77734375,
+        "median_ns": 85917,
+        "p99_ns": 104584,
+        "min_ns": 80875,
+        "max_ns": 107292
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a791c261c605375085271c785f66bcc8f41a4a3a500d861db02d2ea07e6824cc",
+      "append": {
+        "mean_ns": 1903.671875,
+        "median_ns": 1875,
+        "p99_ns": 3000,
+        "min_ns": 1791,
+        "max_ns": 3459
+      },
+      "barrier": {
+        "mean_ns": 749.328125,
+        "median_ns": 750,
+        "p99_ns": 916,
+        "min_ns": 666,
+        "max_ns": 1834
+      },
+      "total": {
+        "mean_ns": 2702.51953125,
+        "median_ns": 2667,
+        "p99_ns": 3833,
+        "min_ns": 2583,
+        "max_ns": 5334
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "7b3d23316fc93d712d93a6707c4c8885eda0caef53de22fa9de452f310ac45c0",
+      "append": {
+        "mean_ns": 7691.77734375,
+        "median_ns": 7542,
+        "p99_ns": 16375,
+        "min_ns": 6125,
+        "max_ns": 21167
+      },
+      "barrier": {
+        "mean_ns": 3601.2421875,
+        "median_ns": 3500,
+        "p99_ns": 5667,
+        "min_ns": 2792,
+        "max_ns": 10333
+      },
+      "total": {
+        "mean_ns": 11345.06640625,
+        "median_ns": 11125,
+        "p99_ns": 22042,
+        "min_ns": 9000,
+        "max_ns": 24417
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "7b3d23316fc93d712d93a6707c4c8885eda0caef53de22fa9de452f310ac45c0",
+      "append": {
+        "mean_ns": 1912.44140625,
+        "median_ns": 1875,
+        "p99_ns": 2709,
+        "min_ns": 1792,
+        "max_ns": 4333
+      },
+      "barrier": {
+        "mean_ns": 756.1640625,
+        "median_ns": 750,
+        "p99_ns": 1500,
+        "min_ns": 666,
+        "max_ns": 1834
+      },
+      "total": {
+        "mean_ns": 2722.6953125,
+        "median_ns": 2667,
+        "p99_ns": 3791,
+        "min_ns": 2584,
+        "max_ns": 5291
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "7b3d23316fc93d712d93a6707c4c8885eda0caef53de22fa9de452f310ac45c0",
+      "append": {
+        "mean_ns": 1924.1484375,
+        "median_ns": 1875,
+        "p99_ns": 2875,
+        "min_ns": 1833,
+        "max_ns": 6500
+      },
+      "barrier": {
+        "mean_ns": 762.8359375,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 708,
+        "max_ns": 1834
+      },
+      "total": {
+        "mean_ns": 2732.76171875,
+        "median_ns": 2667,
+        "p99_ns": 3916,
+        "min_ns": 2625,
+        "max_ns": 7333
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "7b3d23316fc93d712d93a6707c4c8885eda0caef53de22fa9de452f310ac45c0",
+      "append": {
+        "mean_ns": 7698.86328125,
+        "median_ns": 7500,
+        "p99_ns": 15166,
+        "min_ns": 6125,
+        "max_ns": 19583
+      },
+      "barrier": {
+        "mean_ns": 3620.765625,
+        "median_ns": 3500,
+        "p99_ns": 5584,
+        "min_ns": 2833,
+        "max_ns": 16625
+      },
+      "total": {
+        "mean_ns": 11365.23828125,
+        "median_ns": 11083,
+        "p99_ns": 21083,
+        "min_ns": 9041,
+        "max_ns": 24917
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "7b3d23316fc93d712d93a6707c4c8885eda0caef53de22fa9de452f310ac45c0",
+      "append": {
+        "mean_ns": 7594.0625,
+        "median_ns": 7500,
+        "p99_ns": 12958,
+        "min_ns": 6083,
+        "max_ns": 16542
+      },
+      "barrier": {
+        "mean_ns": 3553.01953125,
+        "median_ns": 3459,
+        "p99_ns": 5500,
+        "min_ns": 2833,
+        "max_ns": 5541
+      },
+      "total": {
+        "mean_ns": 11199.6875,
+        "median_ns": 11042,
+        "p99_ns": 17041,
+        "min_ns": 9000,
+        "max_ns": 22084
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "7b3d23316fc93d712d93a6707c4c8885eda0caef53de22fa9de452f310ac45c0",
+      "append": {
+        "mean_ns": 1915.375,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 2959
+      },
+      "barrier": {
+        "mean_ns": 768.37890625,
+        "median_ns": 750,
+        "p99_ns": 1708,
+        "min_ns": 708,
+        "max_ns": 1917
+      },
+      "total": {
+        "mean_ns": 2735.1875,
+        "median_ns": 2708,
+        "p99_ns": 3625,
+        "min_ns": 2625,
+        "max_ns": 4916
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "dd9fa5407e86b2a73358f3243e2a1daee0b518ab1c58ee60686e943c25a10abf",
+      "append": {
+        "mean_ns": 7905.1484375,
+        "median_ns": 7541,
+        "p99_ns": 20417,
+        "min_ns": 6125,
+        "max_ns": 24542
+      },
+      "barrier": {
+        "mean_ns": 3704.7734375,
+        "median_ns": 3500,
+        "p99_ns": 10500,
+        "min_ns": 2791,
+        "max_ns": 14584
+      },
+      "total": {
+        "mean_ns": 11660.4765625,
+        "median_ns": 11084,
+        "p99_ns": 25833,
+        "min_ns": 9041,
+        "max_ns": 28250
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "dd9fa5407e86b2a73358f3243e2a1daee0b518ab1c58ee60686e943c25a10abf",
+      "append": {
+        "mean_ns": 1901.359375,
+        "median_ns": 1875,
+        "p99_ns": 2792,
+        "min_ns": 1791,
+        "max_ns": 2875
+      },
+      "barrier": {
+        "mean_ns": 760.7421875,
+        "median_ns": 750,
+        "p99_ns": 1459,
+        "min_ns": 708,
+        "max_ns": 1666
+      },
+      "total": {
+        "mean_ns": 2711.38671875,
+        "median_ns": 2667,
+        "p99_ns": 3625,
+        "min_ns": 2583,
+        "max_ns": 4500
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "dd9fa5407e86b2a73358f3243e2a1daee0b518ab1c58ee60686e943c25a10abf",
+      "append": {
+        "mean_ns": 1906.25390625,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1792,
+        "max_ns": 4125
+      },
+      "barrier": {
+        "mean_ns": 762.38671875,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 667,
+        "max_ns": 1542
+      },
+      "total": {
+        "mean_ns": 2714.36328125,
+        "median_ns": 2667,
+        "p99_ns": 3584,
+        "min_ns": 2583,
+        "max_ns": 5083
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "dd9fa5407e86b2a73358f3243e2a1daee0b518ab1c58ee60686e943c25a10abf",
+      "append": {
+        "mean_ns": 7629.88671875,
+        "median_ns": 7542,
+        "p99_ns": 11542,
+        "min_ns": 6167,
+        "max_ns": 13833
+      },
+      "barrier": {
+        "mean_ns": 3561.53515625,
+        "median_ns": 3500,
+        "p99_ns": 5500,
+        "min_ns": 2833,
+        "max_ns": 5541
+      },
+      "total": {
+        "mean_ns": 11240.36328125,
+        "median_ns": 11125,
+        "p99_ns": 14959,
+        "min_ns": 9083,
+        "max_ns": 17708
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "dd9fa5407e86b2a73358f3243e2a1daee0b518ab1c58ee60686e943c25a10abf",
+      "append": {
+        "mean_ns": 7697.90625,
+        "median_ns": 7500,
+        "p99_ns": 15208,
+        "min_ns": 6083,
+        "max_ns": 20791
+      },
+      "barrier": {
+        "mean_ns": 3656.73828125,
+        "median_ns": 3500,
+        "p99_ns": 7542,
+        "min_ns": 2833,
+        "max_ns": 12667
+      },
+      "total": {
+        "mean_ns": 11404.30859375,
+        "median_ns": 11125,
+        "p99_ns": 21000,
+        "min_ns": 8958,
+        "max_ns": 24250
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "dd9fa5407e86b2a73358f3243e2a1daee0b518ab1c58ee60686e943c25a10abf",
+      "append": {
+        "mean_ns": 1902.328125,
+        "median_ns": 1875,
+        "p99_ns": 2750,
+        "min_ns": 1792,
+        "max_ns": 2958
+      },
+      "barrier": {
+        "mean_ns": 772.8046875,
+        "median_ns": 750,
+        "p99_ns": 1625,
+        "min_ns": 708,
+        "max_ns": 1833
+      },
+      "total": {
+        "mean_ns": 2725.6015625,
+        "median_ns": 2667,
+        "p99_ns": 3750,
+        "min_ns": 2583,
+        "max_ns": 4833
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a9b39fa627886c3bc26011d171a339e44ed56e403232a5f1f2f24568bcb20ea7",
+      "append": {
+        "mean_ns": 48160.00390625,
+        "median_ns": 47125,
+        "p99_ns": 61709,
+        "min_ns": 43375,
+        "max_ns": 63875
+      },
+      "barrier": {
+        "mean_ns": 39394.71875,
+        "median_ns": 37667,
+        "p99_ns": 50959,
+        "min_ns": 35417,
+        "max_ns": 54209
+      },
+      "total": {
+        "mean_ns": 87609.20703125,
+        "median_ns": 86125,
+        "p99_ns": 108000,
+        "min_ns": 80042,
+        "max_ns": 116000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a9b39fa627886c3bc26011d171a339e44ed56e403232a5f1f2f24568bcb20ea7",
+      "append": {
+        "mean_ns": 1938.265625,
+        "median_ns": 1916,
+        "p99_ns": 3209,
+        "min_ns": 1792,
+        "max_ns": 4125
+      },
+      "barrier": {
+        "mean_ns": 784.875,
+        "median_ns": 791,
+        "p99_ns": 959,
+        "min_ns": 750,
+        "max_ns": 1750
+      },
+      "total": {
+        "mean_ns": 2770.9609375,
+        "median_ns": 2750,
+        "p99_ns": 4250,
+        "min_ns": 2666,
+        "max_ns": 5000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a9b39fa627886c3bc26011d171a339e44ed56e403232a5f1f2f24568bcb20ea7",
+      "append": {
+        "mean_ns": 1888.33203125,
+        "median_ns": 1875,
+        "p99_ns": 3083,
+        "min_ns": 1791,
+        "max_ns": 3458
+      },
+      "barrier": {
+        "mean_ns": 763.96484375,
+        "median_ns": 750,
+        "p99_ns": 916,
+        "min_ns": 708,
+        "max_ns": 1875
+      },
+      "total": {
+        "mean_ns": 2704.2421875,
+        "median_ns": 2667,
+        "p99_ns": 3916,
+        "min_ns": 2583,
+        "max_ns": 4959
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a9b39fa627886c3bc26011d171a339e44ed56e403232a5f1f2f24568bcb20ea7",
+      "append": {
+        "mean_ns": 48079.25390625,
+        "median_ns": 47250,
+        "p99_ns": 64000,
+        "min_ns": 42750,
+        "max_ns": 66375
+      },
+      "barrier": {
+        "mean_ns": 39589.67578125,
+        "median_ns": 39000,
+        "p99_ns": 50458,
+        "min_ns": 35333,
+        "max_ns": 52625
+      },
+      "total": {
+        "mean_ns": 87720.5390625,
+        "median_ns": 87000,
+        "p99_ns": 107666,
+        "min_ns": 80708,
+        "max_ns": 113875
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a9b39fa627886c3bc26011d171a339e44ed56e403232a5f1f2f24568bcb20ea7",
+      "append": {
+        "mean_ns": 46859.26171875,
+        "median_ns": 45209,
+        "p99_ns": 58416,
+        "min_ns": 43583,
+        "max_ns": 62042
+      },
+      "barrier": {
+        "mean_ns": 38335.59765625,
+        "median_ns": 37209,
+        "p99_ns": 46291,
+        "min_ns": 35875,
+        "max_ns": 51916
+      },
+      "total": {
+        "mean_ns": 85247.5546875,
+        "median_ns": 82625,
+        "p99_ns": 98416,
+        "min_ns": 80708,
+        "max_ns": 109250
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "a9b39fa627886c3bc26011d171a339e44ed56e403232a5f1f2f24568bcb20ea7",
+      "append": {
+        "mean_ns": 1910.140625,
+        "median_ns": 1875,
+        "p99_ns": 2875,
+        "min_ns": 1791,
+        "max_ns": 3042
+      },
+      "barrier": {
+        "mean_ns": 766.59765625,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 708,
+        "max_ns": 2834
+      },
+      "total": {
+        "mean_ns": 2725.73046875,
+        "median_ns": 2708,
+        "p99_ns": 3792,
+        "min_ns": 2583,
+        "max_ns": 5000
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b88543faba893fb37bc8d8b84fc0f6caea5c7371816b0186bbd37d9e58f2a096",
+      "append": {
+        "mean_ns": 47993.29296875,
+        "median_ns": 47083,
+        "p99_ns": 60916,
+        "min_ns": 42791,
+        "max_ns": 64958
+      },
+      "barrier": {
+        "mean_ns": 39322.10546875,
+        "median_ns": 38666,
+        "p99_ns": 50250,
+        "min_ns": 35458,
+        "max_ns": 51833
+      },
+      "total": {
+        "mean_ns": 87368.12890625,
+        "median_ns": 87083,
+        "p99_ns": 104333,
+        "min_ns": 80625,
+        "max_ns": 108375
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 1,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b88543faba893fb37bc8d8b84fc0f6caea5c7371816b0186bbd37d9e58f2a096",
+      "append": {
+        "mean_ns": 1921.22265625,
+        "median_ns": 1875,
+        "p99_ns": 3250,
+        "min_ns": 1792,
+        "max_ns": 6667
+      },
+      "barrier": {
+        "mean_ns": 756.5,
+        "median_ns": 750,
+        "p99_ns": 917,
+        "min_ns": 666,
+        "max_ns": 1708
+      },
+      "total": {
+        "mean_ns": 2723.140625,
+        "median_ns": 2667,
+        "p99_ns": 4167,
+        "min_ns": 2583,
+        "max_ns": 7500
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b88543faba893fb37bc8d8b84fc0f6caea5c7371816b0186bbd37d9e58f2a096",
+      "append": {
+        "mean_ns": 1934.890625,
+        "median_ns": 1875,
+        "p99_ns": 2875,
+        "min_ns": 1791,
+        "max_ns": 12792
+      },
+      "barrier": {
+        "mean_ns": 758.3125,
+        "median_ns": 750,
+        "p99_ns": 875,
+        "min_ns": 708,
+        "max_ns": 1875
+      },
+      "total": {
+        "mean_ns": 2743.63671875,
+        "median_ns": 2667,
+        "p99_ns": 3833,
+        "min_ns": 2583,
+        "max_ns": 13584
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 2,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b88543faba893fb37bc8d8b84fc0f6caea5c7371816b0186bbd37d9e58f2a096",
+      "append": {
+        "mean_ns": 47427.3984375,
+        "median_ns": 45500,
+        "p99_ns": 64208,
+        "min_ns": 43875,
+        "max_ns": 76916
+      },
+      "barrier": {
+        "mean_ns": 38782.40234375,
+        "median_ns": 37167,
+        "p99_ns": 49333,
+        "min_ns": 35667,
+        "max_ns": 56625
+      },
+      "total": {
+        "mean_ns": 86264.96484375,
+        "median_ns": 84167,
+        "p99_ns": 108542,
+        "min_ns": 80625,
+        "max_ns": 112791
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "reference",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b88543faba893fb37bc8d8b84fc0f6caea5c7371816b0186bbd37d9e58f2a096",
+      "append": {
+        "mean_ns": 48229.66796875,
+        "median_ns": 47291,
+        "p99_ns": 65917,
+        "min_ns": 42917,
+        "max_ns": 70834
+      },
+      "barrier": {
+        "mean_ns": 39752.953125,
+        "median_ns": 39041,
+        "p99_ns": 51750,
+        "min_ns": 35375,
+        "max_ns": 56542
+      },
+      "total": {
+        "mean_ns": 88035.98828125,
+        "median_ns": 87541,
+        "p99_ns": 107875,
+        "min_ns": 80667,
+        "max_ns": 117334
+      }
+    },
+    {
+      "kind": "volatile_native_staging",
+      "variant": "candidate",
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "trial": 3,
+      "completed": 256,
+      "warmup": 16,
+      "shapeHash": "b88543faba893fb37bc8d8b84fc0f6caea5c7371816b0186bbd37d9e58f2a096",
+      "append": {
+        "mean_ns": 1890.3125,
+        "median_ns": 1875,
+        "p99_ns": 2875,
+        "min_ns": 1791,
+        "max_ns": 2916
+      },
+      "barrier": {
+        "mean_ns": 761.71484375,
+        "median_ns": 750,
+        "p99_ns": 834,
+        "min_ns": 708,
+        "max_ns": 2458
+      },
+      "total": {
+        "mean_ns": 2703.77734375,
+        "median_ns": 2667,
+        "p99_ns": 3708,
+        "min_ns": 2583,
+        "max_ns": 4542
+      }
+    }
+  ],
+  "sourceUnchanged": true,
+  "artifactsUnchanged": true,
+  "identicalDiagnosticOverlay": true
+}

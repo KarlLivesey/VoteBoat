@@ -4,7 +4,8 @@ Benchmark-only observer enabled by existing startup `--journal-timings`; no
 production queue, heartbeat, durability or batching policy changes. The normal
 benchmark CLI/primary artifacts remain and `proposal-batches.csv` is additive.
 This profile includes diagnostic CPU overhead; it is not an uninstrumented
-throughput baseline. No timed attribution pilot has run in this qualification.
+throughput baseline. Eight quiet attribution cells have now completed on Linux and M2 Max; see
+attribution-summary.csv and the Linux/Mac pilot raw archives.
 
 Each successful positioned original OwnerStep is counted. The exact VisitTicket
 identifies one invocation's expanded original proposal batch; commit-only,
@@ -40,3 +41,15 @@ now pass against the same frozen source; both asserted-release artifacts and
 compiler/source guards are prepared. The corrected Mac environment and initial
 failures are retained. No timed throughput conclusion is claimed. Sources are
 identified in OWNED_SOURCES.sha256; root owns serialized benchmark campaigns.
+
+
+Both hosts/protocols showed the same measured structural counts for64 originals:
+
+| Window | Actual proposal widths | Leader WAL sync / publication calls |
+|---|---|---|
+| 1 | 64 singletons | 128 / 128 |
+| 32 | 32 singletons + 2 batches of16 | 44 / 44 |
+
+Each phase's weighted histogram was checked against its64 successful receipts.
+Private queue selection/refusal causes are unavailable; heartbeat deadline
+correlations must not be labeled as queued Control causes. No policy changed.

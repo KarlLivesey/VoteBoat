@@ -1,0 +1,1 @@
+["/tmp/voteboat-p9-configured413-reference/artifacts/log_staging_benchmark","/tmp/voteboat-p9-configured413-candidate/measure/staging-joint-h256-append-t3-reference.csv","0","256","256","append","joint"]

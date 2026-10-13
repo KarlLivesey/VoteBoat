@@ -1,0 +1,1 @@
+["/tmp/voteboat-p9-configured413-reference/artifacts/log_staging_benchmark","/tmp/voteboat-p9-configured413-candidate/measure/staging-plain-h256-append-commit-t1-reference.csv","0","256","256","append-commit","plain"]

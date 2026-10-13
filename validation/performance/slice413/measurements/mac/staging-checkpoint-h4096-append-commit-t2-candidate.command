@@ -1,0 +1,1 @@
+["/tmp/voteboat-p9-configured413-candidate/artifacts/log_staging_benchmark","/tmp/voteboat-p9-configured413-candidate/measure/staging-checkpoint-h4096-append-commit-t2-candidate.csv","0","4096","256","append-commit","checkpoint"]

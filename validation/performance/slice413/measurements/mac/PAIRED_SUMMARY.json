@@ -1,0 +1,374 @@
+{
+  "statistic": "Median of three per-case mean durations for each variant; ratio reference/candidate. p99 is median of per-case nearest-rank p99. Retain all paired trial ratios.",
+  "scope": "413 VOLATILE native-log configured/checkpoint staging; real codec/validation/exact simulated publication; no device durability, consensus, network/application TPS or matched OpenRaft floor claim",
+  "rows": [
+    {
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 1896.80078125,
+        "barrierMean_ns": 765.9375,
+        "totalMean_ns": 2712.23046875,
+        "p99_ns": 3875
+      },
+      "candidate": {
+        "appendMean_ns": 1923.1328125,
+        "barrierMean_ns": 769.078125,
+        "totalMean_ns": 2738.11328125,
+        "p99_ns": 4750
+      },
+      "totalLatencyRatio": 0.9905472090299405,
+      "pairRatios": [
+        1.1420787911907724,
+        0.9831901243585556,
+        1.0057302190838313
+      ]
+    },
+    {
+      "historyKind": "plain",
+      "history": 256,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 1895.1796875,
+        "barrierMean_ns": 766.9453125,
+        "totalMean_ns": 2697.078125,
+        "p99_ns": 3959
+      },
+      "candidate": {
+        "appendMean_ns": 1898.11328125,
+        "barrierMean_ns": 759.9296875,
+        "totalMean_ns": 2710.09765625,
+        "p99_ns": 4625
+      },
+      "totalLatencyRatio": 0.9951959180437744,
+      "pairRatios": [
+        0.9951959180437744,
+        1.0086136278292237,
+        0.9657278198669115
+      ]
+    },
+    {
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 1905.11328125,
+        "barrierMean_ns": 733.54296875,
+        "totalMean_ns": 2690.78515625,
+        "p99_ns": 3833
+      },
+      "candidate": {
+        "appendMean_ns": 1877.6171875,
+        "barrierMean_ns": 773.7890625,
+        "totalMean_ns": 2708.84765625,
+        "p99_ns": 3958
+      },
+      "totalLatencyRatio": 0.9933320355028733,
+      "pairRatios": [
+        0.9975744990734933,
+        0.9488445852836652,
+        0.9994718552535168
+      ]
+    },
+    {
+      "historyKind": "plain",
+      "history": 4096,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 1919.43359375,
+        "barrierMean_ns": 751.9453125,
+        "totalMean_ns": 2720.5859375,
+        "p99_ns": 3750
+      },
+      "candidate": {
+        "appendMean_ns": 1912.09375,
+        "barrierMean_ns": 745.15234375,
+        "totalMean_ns": 2704.44140625,
+        "p99_ns": 4042
+      },
+      "totalLatencyRatio": 1.005969636174291,
+      "pairRatios": [
+        0.9971682670844968,
+        0.9692767114259824,
+        1.005969636174291
+      ]
+    },
+    {
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 7444.828125,
+        "barrierMean_ns": 3529.15625,
+        "totalMean_ns": 11029.14453125,
+        "p99_ns": 15125
+      },
+      "candidate": {
+        "appendMean_ns": 1935.0546875,
+        "barrierMean_ns": 765.796875,
+        "totalMean_ns": 2738.28515625,
+        "p99_ns": 4959
+      },
+      "totalLatencyRatio": 4.027756023172578,
+      "pairRatios": [
+        4.027756023172578,
+        3.950417766825917,
+        4.094759095763256
+      ]
+    },
+    {
+      "historyKind": "stable",
+      "history": 256,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 7406.09375,
+        "barrierMean_ns": 3500.0390625,
+        "totalMean_ns": 10951.98046875,
+        "p99_ns": 14375
+      },
+      "candidate": {
+        "appendMean_ns": 1910.48828125,
+        "barrierMean_ns": 759.79296875,
+        "totalMean_ns": 2720.78515625,
+        "p99_ns": 4875
+      },
+      "totalLatencyRatio": 4.02530146255461,
+      "pairRatios": [
+        3.813446660573219,
+        4.024941100124763,
+        4.075778625412329
+      ]
+    },
+    {
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 47232.7421875,
+        "barrierMean_ns": 38812.66015625,
+        "totalMean_ns": 86063.4765625,
+        "p99_ns": 107500
+      },
+      "candidate": {
+        "appendMean_ns": 1884.9375,
+        "barrierMean_ns": 754.06640625,
+        "totalMean_ns": 2688.45703125,
+        "p99_ns": 3791
+      },
+      "totalLatencyRatio": 32.01221948579358,
+      "pairRatios": [
+        32.984385298067636,
+        31.951774135773196,
+        31.92431474256987
+      ]
+    },
+    {
+      "historyKind": "stable",
+      "history": 4096,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 47922.03125,
+        "barrierMean_ns": 39383.3046875,
+        "totalMean_ns": 87357.56640625,
+        "p99_ns": 101708
+      },
+      "candidate": {
+        "appendMean_ns": 1899.734375,
+        "barrierMean_ns": 747.4140625,
+        "totalMean_ns": 2697.2734375,
+        "p99_ns": 3750
+      },
+      "totalLatencyRatio": 32.38736021039765,
+      "pairRatios": [
+        32.36477882182557,
+        31.88296051278635,
+        32.49777230744192
+      ]
+    },
+    {
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 7850.90234375,
+        "barrierMean_ns": 3607.25390625,
+        "totalMean_ns": 11510.9140625,
+        "p99_ns": 17375
+      },
+      "candidate": {
+        "appendMean_ns": 1912.55859375,
+        "barrierMean_ns": 781.578125,
+        "totalMean_ns": 2766.109375,
+        "p99_ns": 5875
+      },
+      "totalLatencyRatio": 4.161409583632246,
+      "pairRatios": [
+        4.078861931355828,
+        4.19394202145387,
+        4.268377613423371
+      ]
+    },
+    {
+      "historyKind": "joint",
+      "history": 256,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 7812.33984375,
+        "barrierMean_ns": 3570.49609375,
+        "totalMean_ns": 11431.63671875,
+        "p99_ns": 16250
+      },
+      "candidate": {
+        "appendMean_ns": 1923.48828125,
+        "barrierMean_ns": 788.41015625,
+        "totalMean_ns": 2738.9375,
+        "p99_ns": 4292
+      },
+      "totalLatencyRatio": 4.173748659379778,
+      "pairRatios": [
+        4.1936866980322005,
+        3.9955510370180574,
+        4.173748659379778
+      ]
+    },
+    {
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 47825.33984375,
+        "barrierMean_ns": 39087.74609375,
+        "totalMean_ns": 86965.48828125,
+        "p99_ns": 105208
+      },
+      "candidate": {
+        "appendMean_ns": 1918.46875,
+        "barrierMean_ns": 749.82421875,
+        "totalMean_ns": 2716.46484375,
+        "p99_ns": 4875
+      },
+      "totalLatencyRatio": 32.01421453376761,
+      "pairRatios": [
+        31.670836838434603,
+        33.031115661681355,
+        31.52119095218408
+      ]
+    },
+    {
+      "historyKind": "joint",
+      "history": 4096,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 47815.3828125,
+        "barrierMean_ns": 39306.4765625,
+        "totalMean_ns": 87175.77734375,
+        "p99_ns": 104584
+      },
+      "candidate": {
+        "appendMean_ns": 1903.671875,
+        "barrierMean_ns": 749.328125,
+        "totalMean_ns": 2702.51953125,
+        "p99_ns": 3833
+      },
+      "totalLatencyRatio": 32.25722380012864,
+      "pairRatios": [
+        31.75429709900905,
+        32.11314701925226,
+        32.25722380012864
+      ]
+    },
+    {
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 7691.77734375,
+        "barrierMean_ns": 3601.2421875,
+        "totalMean_ns": 11345.06640625,
+        "p99_ns": 21083
+      },
+      "candidate": {
+        "appendMean_ns": 1915.375,
+        "barrierMean_ns": 762.8359375,
+        "totalMean_ns": 2732.76171875,
+        "p99_ns": 3791
+      },
+      "totalLatencyRatio": 4.151502243466503,
+      "pairRatios": [
+        4.166851264687738,
+        4.15888374140743,
+        4.0946690126362455
+      ]
+    },
+    {
+      "historyKind": "checkpoint",
+      "history": 256,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 7697.90625,
+        "barrierMean_ns": 3656.73828125,
+        "totalMean_ns": 11404.30859375,
+        "p99_ns": 21000
+      },
+      "candidate": {
+        "appendMean_ns": 1902.328125,
+        "barrierMean_ns": 762.38671875,
+        "totalMean_ns": 2714.36328125,
+        "p99_ns": 3625
+      },
+      "totalLatencyRatio": 4.201467310041921,
+      "pairRatios": [
+        4.3005582648408405,
+        4.141068131482262,
+        4.184143695342485
+      ]
+    },
+    {
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append",
+      "reference": {
+        "appendMean_ns": 48079.25390625,
+        "barrierMean_ns": 39394.71875,
+        "totalMean_ns": 87609.20703125,
+        "p99_ns": 107666
+      },
+      "candidate": {
+        "appendMean_ns": 1910.140625,
+        "barrierMean_ns": 766.59765625,
+        "totalMean_ns": 2725.73046875,
+        "p99_ns": 3916
+      },
+      "totalLatencyRatio": 32.14155179159256,
+      "pairRatios": [
+        31.616904390681256,
+        32.4381223945017,
+        31.27512263771036
+      ]
+    },
+    {
+      "historyKind": "checkpoint",
+      "history": 4096,
+      "mode": "append-commit",
+      "reference": {
+        "appendMean_ns": 47993.29296875,
+        "barrierMean_ns": 39322.10546875,
+        "totalMean_ns": 87368.12890625,
+        "p99_ns": 107875
+      },
+      "candidate": {
+        "appendMean_ns": 1921.22265625,
+        "barrierMean_ns": 758.3125,
+        "totalMean_ns": 2723.140625,
+        "p99_ns": 3833
+      },
+      "totalLatencyRatio": 32.083590580728824,
+      "pairRatios": [
+        32.083590580728824,
+        31.441832023246974,
+        32.56036910167633
+      ]
+    }
+  ]
+}
