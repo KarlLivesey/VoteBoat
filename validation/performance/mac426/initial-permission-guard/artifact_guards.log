@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/tmp/voteboat-mac426-799f2cf-VRN5Xr/collect.py", line 8, in <module>
+    assert oct(stat.S_IMODE((root/'source'/rel).stat().st_mode))==source['modes'][rel],rel
+AssertionError: .githooks/pre-push

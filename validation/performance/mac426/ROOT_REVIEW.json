@@ -1,0 +1,23 @@
+{
+  "actual_terminal_status": 0,
+  "guarded_inputs": 1422,
+  "test_counts": {
+    "affected_all": [
+      19,
+      31,
+      26
+    ],
+    "affected_core": [
+      16,
+      11
+    ],
+    "services": [
+      2
+    ],
+    "matched_tests": [
+      34
+    ]
+  },
+  "four_fresh_false_records_correlated": true,
+  "scope": "review archived terminal proof only; remote source/artifact guards were executed before timing; no remote check/copy during timing"
+}

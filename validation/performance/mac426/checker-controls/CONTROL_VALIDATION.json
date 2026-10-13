@@ -1,0 +1,52 @@
+{
+  "scope": "426 collector CLI assertions verified against actual terminal Linux main426 off/on/OpenRaft outputs; no synthetic fixture",
+  "controls": [
+    {
+      "name": "off",
+      "engine": "voteboat",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "on",
+      "engine": "voteboat",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "openraft",
+      "engine": "openraft",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": null,
+      "performance_claim": false
+    }
+  ]
+}

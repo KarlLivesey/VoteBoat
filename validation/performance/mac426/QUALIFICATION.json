@@ -1,0 +1,76 @@
+{
+  "commit": "799f2cf300a50e004e74d07b6a9237f59003892b",
+  "guarded_inputs": 1422,
+  "scope": "Full426 scoped affected providers/log/snapshot, real TCP/QUIC retry/replacement/native recovery, formatting four strict profiles, matched34 and functional off/on/OpenRaft maintenance histories; no timing or floor claim",
+  "controls": [
+    {
+      "name": "off",
+      "engine": "voteboat",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "on",
+      "engine": "voteboat",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ],
+      "performance_claim": false
+    },
+    {
+      "name": "openraft",
+      "engine": "openraft",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "checkpoint_counts": null,
+      "performance_claim": false
+    }
+  ],
+  "test_counts": {
+    "affected_all": [
+      19,
+      31,
+      26
+    ],
+    "affected_core": [
+      16,
+      11
+    ],
+    "services": [
+      2
+    ],
+    "matched_tests": [
+      34
+    ]
+  },
+  "four_artifacts_fresh_false": true,
+  "profile": "opt3/debug2/assertions/overflow/thinLTO/codegen1",
+  "source_unchanged": true,
+  "source_permissions_preserved": true,
+  "clippy_config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521"
+}

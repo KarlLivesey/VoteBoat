@@ -1,0 +1,1 @@
+Original source tar extraction applied remote umask to archive664/775 modes. Content hashes and successful checks/build unaffected. Restore exact archived modes; rerun only collector and final inventory, not original runner/tests/build.

@@ -40,14 +40,20 @@ p9915.708→15.191ms, versus OpenRaft3,501,421/s and5.904ms. Singleton regresses
 110,076→94,903/s (p990.018→0.022ms); all slower trials remain. Exact comparison
 still takes372–380ms inclusive in leader traces, about97% of compaction. This
 identifies the remaining comparison interval, without isolating codegen or CPU
-cause. Mac checks/builds are underway, then paired timings; these1048576-original
+cause. Mac426 qualification is terminal with exact1422 source hashes/modes, all log19/
+provider31/snapshot26, core provider16/snapshot11, services2, matched34, actual
+CLI histories and zero formatter/four strict/standalone diagnostics. Its fresh
+asserted root/executable/upstream records are fresh:false. A mode-only extraction
+repair reused unchanged successful checks/builds and preserves the original guard
+failure. [Mac426 proof](../validation/performance/mac426/README.md). Mac paired
+timing is underway in a quiet window; these1048576-original
 diagnostics do not qualify sustained floors. [Every Linux trial and scope](../validation/performance/comparison426/linux/README.md),
 [fresh asserted artifacts](../validation/performance/matched426-linux/README.md).
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
 | Current: qualify and measure426 on both hosts | Establish actual useful-rate/latency effect of removing provider materialization | Published426; immutable425; fresh asserted root/library/executable/upstream artifacts; exact within-host compiler/settings | Mac affected/core/service/strict/CLI controls; three rotating trials per singleton/bulk cell with1048576 originals; all frontiers, scopes, bounds and regressions retained | P9.0/P9.1/P9.3 |
-| Next: optimize the remaining measured limiting stage | Increase one-group sustained useful throughput without dropping outcomes | Terminal paired426 evidence and reviewed data/API/ownership/restart schema | Exact originals, provider/quorum/fence/retry/cleanup controls, zero strict diagnostics and both-host useful PUTS/s/p99; choose the measured stage before adding helpers | P9.1/P9.3 |
+| Next: exact empty-payload comparison experiment427 | Remove per-entry byte-library calls exposed by426 executable inspection in the measured comparison interval | Terminal paired426 evidence; isolated equality/ownership schema; independent derived oracle | Preserve every header/operation/variant/configuration/byte; differing capacities ignored as before; actual empty-path assembly, affected/core/provider/recovery checks, strict profiles and paired supported-host PUTS/s/p99 before performance claims | P9.1/P9.3 |
 | Following: qualify bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Both native42136 campaigns; exact publication/ticket ownership; bounded fairness schema | Sustained/mixed/hot-cold/skew evidence, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -55,6 +61,20 @@ comparison or short diagnostics. All seven one-group healthy-margin cells on
 both hosts, real durable applications, offered-load/headroom, fairness/skew,
 placement/shared barriers, active maintenance and P8 composition remain required.
 P9 stays active; P10 is excluded.
+
+427 schema is an isolated hypothesis against published426. Public data/API and
+persistent/wire representation remain unchanged; full GroupLog derived equality
+still compares every metadata field. Exhaustive LogEntry field destructuring
+checks index/term and payload variant, full operation ID and equal byte lengths;
+only two empty byte vectors can skip byte-library comparison. Nonempty bytes
+and configurations retain exact equality. No digest/revision/pointer shortcut,
+state generation, ownership transfer, early completion, or new cleanup/restart
+path is introduced. Provider/binding/error ordering stays outside unchanged
+comparison semantics. Independent legacy-derived payload/header oracle and actual
+machine-code checks must qualify the code; syntax alone establishes no gain.
+Linux original426 code contains an unconditional bcmp call after equal Command
+lengths, including zero. Its individual elapsed share remains unmeasured.
+Main production426 remains unchanged while the isolated candidate is checked.
 
 Linux native421's same-artifact visit-policy comparison passes all36 cases,
 source/artifact guards, original results, recovery and representative retries.

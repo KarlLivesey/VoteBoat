@@ -1,0 +1,14 @@
+Initial unprivileged SSH blocked by /etc/ssh/ssh_config.d/20-systemd-ssh-proxy.conf bad owner/permissions; -F /dev/null skipped configured 1password IdentityAgent and authentication failed. Authorized escalated normal SSH successful. Remote tools verified stable 1.98.0 aarch64-apple-darwin LLVM22.1.8 protoc3.21.12.
+
+Raw first SSH error:
+Bad owner or permissions on /etc/ssh/ssh_config.d/20-systemd-ssh-proxy.conf
+
+Raw -F /dev/null authentication error:
+ssh_askpass: exec(/usr/lib/ssh/ssh-askpass): No such file or directory (six times)
+Permission denied, please try again. (twice)
+Received disconnect from 192.168.192.76 port 22:2: Too many authentication failures
+Disconnected from 192.168.192.76 port 22
+
+Non-runner poll error after successfully reading STATUS=running/STAGE=affected_all:
+zsh:1: no matches found: /tmp/voteboat-mac426-799f2cf-VRN5Xr/logs/*.exit
+Use find rather than unmatched glob in subsequent poll; original job continues.

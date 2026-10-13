@@ -1,0 +1,7112 @@
+[
+  {
+    "file": ".githooks/pre-push",
+    "before": "0o755",
+    "after": "0o775"
+  },
+  {
+    "file": "AGENTS.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "Cargo.lock",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "Cargo.toml",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "LICENSE",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "README.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/COMPARISON.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/Cargo.lock",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/Cargo.toml",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/README.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/SCHEMA.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/attribution.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/attribution/gaps.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/attribution/gaps/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/attribution/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/envelopes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/envelopes/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/guard.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/guard/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/main.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/openraft_engine.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/store/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/voteboat_engine.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/voteboat_engine/stats.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "benchmarks/matched/src/workload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "clippy.toml",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "docs/IMPLEMENTATION.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "docs/P9.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "docs/component-contracts.json",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "docs/provider-conformance.json",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/batching.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/checkpoint_steps.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/failure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/lanes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/lanes/report.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/lanes/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/lanes/worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/observe.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/offered.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/ready_items.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/shared.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/shared_drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/shared_drain/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/shared_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/shared_recovery/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/benchmark/shared_recovery/receive_pressure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/durable_vote.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/embedded_counter.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/embedded_transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/embedded_transfer/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/embedded_transfer/host/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/embedded_transfer/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/framework_benchmark.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/framework_benchmark/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/framework_benchmark/store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/framework_benchmark/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/framework_benchmark/tests/owned_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/framework_benchmark/workload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/journal_attribution.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/journal_attribution/copy.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/journal_attribution/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/log_staging_benchmark.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/log_staging_benchmark/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/log_staging_benchmark/journal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/log_staging_benchmark/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/log_staging_benchmark/workload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/native_benchmark.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/replicated_counter.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "examples/wal_benchmark.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "rust-toolchain.toml",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/authorization.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/counter_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/directory_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/administration_set.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/assignment_listing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/assignment_listing_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/authority_endpoints.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/command_client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/command_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/command_discovery/peer_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/command_discovery/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/command_endpoints.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/command_observation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/counter_admin.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/counter_application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/counter_setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/credential_reload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/credential_reload_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/credential_worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/diagnostics.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/directory_client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/directory_connection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/directory_owner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/directory_plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_commands.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_commands/commands.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_commands/plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_commands/validation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/multi.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/multi_actions.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/multi_rows.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/multi_rows_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/observation_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/pacing_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_runner/recovery_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/drain_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/group_command.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/group_drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/group_drain/commands.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/group_drain_plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/group_setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/leadership_commands.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/leadership_commands/driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/leadership_commands/terminal_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/leadership_set.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/local_client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/operator_shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/operator_shutdown/close_limit.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/peer_credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/peer_credentials_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/peer_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/peer_discovery/assembly.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/peer_discovery/upgrade.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/peer_metrics.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/placement_format.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/placement_input.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/placement_plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/policy_input.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/preview_input.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/quorum_diagnostics.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/route_client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/route_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/route_discovery/connection_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/route_discovery/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/service_access.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/service_setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/shutdown/contract.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_app.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_binding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_connection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_preview.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_server.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/support/transfer_wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bin/transfer_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/bucket_counter.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/buffer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/child_slots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/connect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/connect/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/contracts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/credential_reload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/delegation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/deletion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/dial.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/child_slots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/creation_cancellation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/deletion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/metadata_locators.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/namespace.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/reparent_commit.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/reparent_guards.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/directory/reparenting.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/drain/coordinator.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/drain/membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/drain/membership/digest.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/drain/membership/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/drain/membership/retained.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/format_crc.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/group_creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/identity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/lib.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/owned.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/owned/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/owned/tests/compact.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/owned/tests/incoming.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/compact.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/incoming.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/tests/compact.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/tests/configured.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/tests/incoming.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/tests/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/tests/overlay.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log/transition/view.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log_format.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/log_format/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/control_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/authorization.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/child.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/child/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/child/progression.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/consume.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/enrollment/validation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/driver/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/response.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/state.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/tests/control_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/tests/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/tests/semantics.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/traits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/activation/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/authorize.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/authorize/authority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/execute.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/authority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/authority/promotion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/authority/snapshot_ack.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/control_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/control_profile/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/eligibility.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment/empty.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment/formats.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment/refusals.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/enrollment/v1-empty.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/application/tests/snapshots/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/activation/configuration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/activation/continuation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/activation/export.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/activation/readiness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/backing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/backing/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/backing/inspection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/backing/physical.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/backing/physical/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/consume.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/consume/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment/tests/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment/tests/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/enrollment/tests/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/persistence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/polling.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/release.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/bridge/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/codec/atoms.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/codec/commands.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/codec/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/codec/origins.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/command.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/control_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/endpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/endpoint/hop.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/endpoint/shape.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/endpoint/shape/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/enrollment/capability.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/network/frame.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/network/plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/network/poll.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/network/queue.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/network/session.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/administration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/backing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/backing/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/exports.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/peers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/peers/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/requests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/node/shutdown/network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/persistence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/persistence/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/persistence/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/persistence/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/query.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/query/configurations.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/atoms.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/configurations.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/tests/decode.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/tests/limits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/tests/providers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/tests/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/tests/receipts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/response/values.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/runtime.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/snapshots/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/snapshots/port.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/snapshots/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/snapshots/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/snapshots/worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/startup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/startup/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/startup/views.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/traits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/logical_voter/types/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/maintenance/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/maintenance/state.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/membership/status.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/metadata_transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/metadata_transfer/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/metadata_transfer/locators.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/metadata_transfer/publication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/metadata_transfer/serving.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/metadata_transfer/target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/namespace_creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/namespace_creation/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/namespace_creation/application/owner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/administration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/authority_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/authorization.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/buffer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/connect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/credential_journal/file.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/credential_journal/format.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/credential_journal/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/dial.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/drain_journal/file.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/drain_journal/format.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/drain_journal/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/group_creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted/tests/compact.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted/tests/configured.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted/tests/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted/tests/incoming.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/accepted/tests/incoming_codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/file.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/catalog.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/file.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/file/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/file/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/file/tests/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/file/tests/io_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/journal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/striped/record.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/log_store/timing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/lookup_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/manifest_read_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/node.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/observability.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/observability/events.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/observability/timing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/outbound.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/peer_credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/placement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/placement_planning.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/quic.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/quic_connect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/quic_socket.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/completion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder/intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder/intake/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder/ledger.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder/poll.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/forwarder/sources.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/frame.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/frame/bounds.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/frame/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/frame/codec/fields.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/hop.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/hop/poll.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/hop/validation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/plan/tree.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider/channel.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider/configuration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider/ingress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider/output.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider/parts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/relay/network/provider/poll.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_discovery/channel.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_discovery/client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_discovery/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_discovery/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_discovery/reconnect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_discovery/server.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_manifest/channel.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_manifest/client.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_manifest/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_manifest/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/remote_manifest/server.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/routing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/runtime.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/snapshot_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/snapshot_worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup/multi.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup/multi/storage.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup/owner_limits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup/peer_rotation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup/ready_items.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/startup/timing_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/tls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/transport.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/vote_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/native/worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/observability.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/observability/events.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/observability/timing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/outbound.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/placement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/placement/changes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/placement/planning.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/codec/atoms.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/codec/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/codec/outcomes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/codec/program.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/command.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/outputs.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/polling.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/polling/consume.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/polling/intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/tests/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/tests/native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/driver/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/state.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/state/participant.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/status.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/tests/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/tests/atomic.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/tests/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/traits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/program_transaction/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/quorum.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/quorum/explanation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/admitted_replication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/admitted_replication/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/authority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/batch_limits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/batched_repair.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/configuration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/configured_delta_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/connections.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/joint_repair.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/leadership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/leadership_membership_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/log_staging.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/membership_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/progress_broadcast.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/progress_broadcast/membership_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/progress_broadcast/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/progress_broadcast/tests/histories.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals/tests/batch_limits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals/tests/batch_limits/aggregate.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals/tests/batch_limits/aggregate/flow.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals/tests/compact.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/proposals/tests/incoming.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/readiness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/receive.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window/replication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window/special.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window/special/one_way.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window_tests/native_output.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/request_window_tests/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/send_window.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/send_window/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/snapshot_repair.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/raft/source_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/reparent_commit.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/reparent_guard.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/reparenting.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/control_apply.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/control_reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/cross_parent_adoption.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/locator_adoption.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/metadata_adoption.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/parent_adoption.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/parent_slots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routed/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routing/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routing/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/routing/read_mapping.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/administration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/applications.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/applications/control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/applications/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/applications/tests/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/applications/tests/classification.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/applications/tests/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/checkpoint_schedule.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/observer_clear.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/ready.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/tests/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/tests/classification.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/tests/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/clients/tests/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/connections.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/effect_inspection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/effects.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/effects/overlap.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/effects/peer_ingress_tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/effects/ready.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ingress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_authority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_intake/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_intake/tests/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_intake/tests/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/capture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/publication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/tests/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/tests/classification.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/tests/construction_capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/logical_release/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/node.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/node/drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/node/drain/planned.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/node/drain/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/peer_network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/peer_network/configuration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/peer_network/optional.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/peers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/peers/network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/inspection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/observer_clear.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests/classification.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/read_requests/tests/submission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/reads/control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/reads/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/reads/tests/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/reads/tests/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch/tests/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch/tests/routine.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch/tests/routine/boundaries.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch/tests/routine/budgets.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/ready_batch/tests/routine/outcomes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/replica.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/replica/logical.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshot_send.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots/export/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots/export/delivery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots/export/drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots/export/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots/export/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/snapshots/export/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/runtime/timed.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/scope.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/scoped_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/scoped_source/adoption.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/scoped_source/parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/secure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/secure/validity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/snapshot_format.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/snapshot_worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/codec/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/codec/outcome.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/codec/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/command.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/outputs.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/polling.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/polling/consume.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/polling/intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/tests/native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/driver/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/state.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/status.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/tests/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/tests/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/tests/refusal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/traits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transaction/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/insertion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/operation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/operation/observation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/operation/observation/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/operation/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/operation/validation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/preview.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer/remaining.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer_publication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer_target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer_target/metadata.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer_target/parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transfer_target/partial.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transport.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transport/membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transport/peers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transport/source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/transport/source/path.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/vote.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/wire_format.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/wire_format/capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "src/worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/activation_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/authorization.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/ballot_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/ballots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/buffer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/child_slots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/client_admission/ready_batch.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/client_admission/ready_batch/budget.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/client_admission/ready_batch/context.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/client_admission/ready_batch/wrapper.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/client_admission/ready_batch/wrapper/checks.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/configuration_capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/connect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/connect/conformance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/connect/fairness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/assignments.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/command_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/command_discovery_updates.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/command_endpoints.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/configuration_pending.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/credential_reload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_replacement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_replacement/configuration_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_replacement/setup_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_runner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_runner/confirmation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_runner/follower.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/drain_runner/historical.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/events.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/failure_diagnostics.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_admin.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_drain_bounds.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_drain_runner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_leadership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_leadership/busy.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/group_leadership/historical.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/groups.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/groups/lost_reply.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/joint_retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/leadership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/leadership/binding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/leadership/cancellation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/leadership/follower.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/membership_drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/membership_drain/preparation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/new_voter.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/peer_credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/peer_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/peer_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/placement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/preparing_command.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/quorum.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/read_failover.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/startup_ports.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/timing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/write_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/counter_service/write_recovery/authentication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/credential_journal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/credential_refresh.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/credential_refresh/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/credential_refresh/keys.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/credential_refresh/native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/delegation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/delegation/cancellation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/delegation/fixtures.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/delegation/repeat.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/deletion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/dial.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory/creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory/transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service/initialization.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service/initialization/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service/lookup_auto.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service/peer_credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service/peer_credentials/diagnostics.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/directory_service/routes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/discovery/driven.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/drain_journal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/drain_membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/drain_membership/retained.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/effect_owner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/README.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/ca.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node1-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node1.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node2-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node2.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node3-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node3.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node4-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/four-node-tls/node4.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/README.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/ca.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/node1-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/node1.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/node2-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/node2.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/node3-key.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/node3.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/fixtures/tls/other-ca.der",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/group_creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/imported_parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/insertion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/insertion/cancellation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/insertion/cross_authority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/insertion/nested.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/insertion/nested_continuity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/journal_timings.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/leadership_maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/leadership_maintenance/binding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/learner_enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/learners.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_owned.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_reclaim.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_reclaim/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_staging.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/batch_limits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/batch_limits/aggregate.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/batch_limits/ready_items.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/compact.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/configured.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/matches.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/log_store/staging.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_application/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_application/contracts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/bindings.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cancel.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/assembly.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/assertions.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/business.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/byte_pressure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/byte_pressure/clients.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/byte_pressure/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/byte_pressure/holding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/channels.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/assembly.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/gate.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/rejection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/rejection/assembly.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/rejection/fault.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/close/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/export.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/groups.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/members.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/preflight.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/preflight/lifetime.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure/guards.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure/holding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/pressure/ownership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/rejection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/cohort/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/learners.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/member.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/owner_intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/read_intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/readiness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_driver/source_export.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/assembly.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/business.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/channels.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/cold_joint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/cold_joint/restore.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/cold_target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/diagnostic.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/enrollment.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/lower.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/parts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/physical.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/readiness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/repeated.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/uncommitted_target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/uncommitted_target/abort.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_activation_nested/unknown_target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_configuration_history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_configuration_history/encoding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_configuration_history/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_configuration_history/retention.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/README.md",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/log-batch.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/log-checkpoint.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/snapshot1.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/snapshot2.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire1.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire2.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire3.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire4.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire5.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire6.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire7.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/golden/wire8.bin",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/log.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_formats/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/aliases.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/channels.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/cluster_inspection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/cold_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/convergence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/diagnostic.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/handoff_control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/handoff_control/held.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/hold.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/lower.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/maintenance_controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/middle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/observed.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/parts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/read.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/read_inspection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/requests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/setup/profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/watchdog.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/watchdog/read_result.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/watchdog/readiness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_nested_native/write.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_network/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_network/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_network/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_network/refusals.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_relay_native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_relay_native/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_relay_native/cluster/providers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_relay_native/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_relay_native/history/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_relay_native/setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/actions.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/journal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/scenarios.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_activation/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_application/candidate.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/aliases.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/authority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/authority/snapshot_ack.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/authority/vote_window.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/backing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/drive.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/endpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/abort.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/administration.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/cancel.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/construction_capacity.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/exports.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/histories.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/restart.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/facade/shutdown_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/outbound.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/parent_snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/persistence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/results.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_native/setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/aliases.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/bootstrap.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/channels.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/claim.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/held_read.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/held_read/inspection.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/held_read/phases.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_network/setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/control.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/image.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/storage.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_payload/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/engine.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/engine/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/engine/parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/engine/storage.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/program.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/logical_voter_promises/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/lookup_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/lookup_discovery/handoff.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/manifest_mapping.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/member_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/member_recovery/older_checkpoint.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/member_recovery/older_checkpoint/election_rollback.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/member_recovery/older_checkpoint/native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer/activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer/adoption.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer/locators.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer/owner_locators.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer/repeated.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/metadata_transfer/target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/namespace_creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/namespace_creation/cancellation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/namespace_creation/cancellation_faults.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/namespace_creation/source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/namespace_creation/transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/drain_status.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/driven_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/driven_discovery/source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/poll_progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/shared_contract.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/shared_contract/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native/shared_lifetimes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_member_startup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_member_startup/checkpoint_final.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_member_startup/recursive.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/channels.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/clean_close.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/cluster/setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/envelopes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/helper_restart.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/late_reply.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/minority.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/observed_wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/provider_refusal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/tree_history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/tree_plan.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_relay/tree_restart.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/native_vote_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/observability.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/observability/events.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/observability/timing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/outbound.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/parser_campaign.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/parser_campaign/generator.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/parser_campaign/routing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/parser_campaign/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/parser_campaign/wal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/parser_campaign/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/peer_rotation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/peer_rotation/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/peers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/persistence_overlap/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/persistence_overlap/owner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/placement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/placement_planning.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/placement_planning/changes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver/drive.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver/ownership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_driver/unavailable.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_model/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_model/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_model/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/program_transaction_model/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/application/checks.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/application/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/application/mutants.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/buffer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/buffer_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/buffer_mutants.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/credential.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/credential_native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/log_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/log_store/default_errors.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/log_store/matches.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/snapshot_native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/snapshot_worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/provider_conformance/snapshot_worker_native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic/chunk_progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic/closing_timer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic/frame_progress.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic/frame_progress/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic/keep_alive.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic/peer_close.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic_connect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic_connect/credential_refresh.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic_connect/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic_connect/driven_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quic_connect/remote_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quorum.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/quorum/explanation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/campaigning.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/drain_coordinator.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/crash.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/delayed.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/publication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/reads.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/reduce.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/snapshots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/snapshots/device.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/snapshots/effects.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/snapshots/histories.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/fault_schedule/snapshots/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/leadership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference/histories.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference/host/persistence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference/native_host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/raft/reference/persistence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery/reconnect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery/renewal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery/scenario.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery/source_reconnect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_discovery/tcp_reconnect.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_manifest.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_manifest/session.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/remote_manifest/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/reparent_guards.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/reparent_guards/commit.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/reparent_guards/commit_owner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/reparenting.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/reparenting/owner.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/replication_scope.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/representative_relay_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/representative_relay_model/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/representative_relay_model/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/representative_relay_model/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/representative_relay_model/tests.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/representative_relay_model/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/imported_partial.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/imported_partial/remaining.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/imported_partial/remaining/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/metadata.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/metadata/imported.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/parent_moves.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retained_insertion/parent_slots.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retirement/fixtures.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retirement/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/retirement/storage.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/created_group.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/creation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/creation_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/cross_authority_insertion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/delegation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/delegation_cancel.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/delegation_repeat.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/deletion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/host.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/imported_partial.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/imported_partial/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/insertion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/lookup_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/merge.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_endpoint_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_endpoint_discovery/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_endpoint_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_families.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_family_setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_imported_retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_imported_setup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_imported_transfer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_lookup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_lookup/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_moves.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_retained_handoff.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/metadata_source_connector.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/namespace_cancellation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/namespace_race.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/namespace_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/nested_insertion.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/nested_merge_retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/nested_moves.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/nested_retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/parent_independence.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/publication_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/remote_manifest.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/remote_manifest_restart.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/reparenting.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/repeat.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/retained.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/retained_parent.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/scoped.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/shutdown.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/shutdown/long_rtt.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/split.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/split/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/split_membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/split_operator.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/target_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routed/unread_phase.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/routing.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/campaign_delay.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/campaigning.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/ready_quantum.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/scheduler_contract.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/timer_contract.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/timer_contract/isolation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/timer_contract/mutants.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/timer_contract/polling.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/timer_replay.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/runtime/timer_replay/schedule.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/scoped_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/scopes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/scopes/preview.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/scopes/preview/provider.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/secure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/service_profiles.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/shared_barrier.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot/codec.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot/log_match.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot/refusal.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/contention.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/errors.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/failed_jobs.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/intake.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/lifecycle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/native.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_exports/providers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_routes/envelopes.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_routes/recovery_budget.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_routes/reservation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/snapshot_worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/log_limits.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/log_limits/application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/maintenance/binding.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/maintenance/drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/maintenance/drain_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/maintenance/membership_drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/multi.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/multi/peer_rotation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/peer_rotation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/ready_items.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/ready_items/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/shutdown_clock.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/startup/timing_profile.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_log_store.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_log_store/faults.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_log_store/files.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_log_store/histories.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_log_store/membership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_log_store/model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_node.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_node/cleanup.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_node/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_node/construction.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_node/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_node/peers.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_wal_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_wal_model/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_wal_model/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_wal_model/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_wal_model/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/striped_wal_model/types.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/admission.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/buffer.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/connection_budget.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/credential_commands.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/manifest_sessions.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/mod.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/native_checkpoints.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/native_node.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/native_pressure.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_checkpoints.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_drain.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_drain_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_events.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_maintenance.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_network.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_network/provider.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/node_peer_credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/outbound.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/peer_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/peer_driver_closed.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/peer_driver_disconnected.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/peer_fault.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/peer_receive_fairness.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/protocol_close.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/protocol_close/contract.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/replica_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/retirement_storage.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/snapshot.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/tls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/transaction_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/support/transaction_driver/fixture.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_application.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver/cluster.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver/drive.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver/history.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver/ownership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_driver/unavailable.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_model.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_model/controls.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_model/oracle.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_model/protocol.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transaction_model/search.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_activation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_merge.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_merge/fixtures.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_operation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_operation/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_operation/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_operation/wire_generated.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_preview_cli.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_publication.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_repeat.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/cuts.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/cuts_support.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/initialization.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/interrupt.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/interrupt/observation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/interrupt/recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/merge.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/peer_credentials.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/profiles.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/retirement.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/retirement_retry.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/revocation.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/startup_data.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/startup_discovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_service/startup_recovery.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_source.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_source/fixtures.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_target.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transfer_target/fixtures.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/transport.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/vote.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/wire.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/wire/leadership.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/wire/shared_contract.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/wire/shared_contract/mutants.rs",
+    "before": "0o644",
+    "after": "0o664"
+  },
+  {
+    "file": "tests/worker.rs",
+    "before": "0o644",
+    "after": "0o664"
+  }
+]
