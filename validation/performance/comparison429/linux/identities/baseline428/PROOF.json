@@ -1,0 +1,99 @@
+{
+  "commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+  "inputs": 1424,
+  "changed_inputs": 30,
+  "new_build_input": "build.rs",
+  "original_build_handle": 93265,
+  "original_build_exit": 1,
+  "original_build_compilation": "successful1m14s; terminal failure was guard text location only",
+  "resume_guard_exit": 0,
+  "resume_guard": "no rebuild; exact root rustc check-cfg and existing original/copied hashes validated",
+  "source_manifest_sha256": "2c424ad046599875562197327f0d324e44c4695e4db513f6141d73d7333dbec7",
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/deps/libvoteboat-d9e6057d3aa5196f.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/libvoteboat-d9e6057d3aa5196f.rlib",
+      "sha256": "fb0ca33e8ae33aad0b589ac91489e1d09219b2760d0690e0b463593c2aa375da"
+    },
+    {
+      "target": "voteboat-matched-framework",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework",
+      "sha256": "85f997d4a969f762c636933dea62aa56fe1864c330c6d21562bfd575dbc9b730"
+    },
+    {
+      "target": "openraft",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/deps/libopenraft-5a9af487d2dbc148.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/libopenraft-5a9af487d2dbc148.rlib",
+      "sha256": "51ff3d679e16f1d70562cdcf253c650443121e41d85bedf1c1469775497b33de"
+    },
+    {
+      "target": "bench_minimal",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/deps/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "sha256": "e45583e8af98a01ba3812fdada6b9bd97da6a6885c892402770655c4613e851b"
+    }
+  ],
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "5a2c79a9bba8b9ce27e4a3da9a4de79c377ff153d567875e6c9c910a64fcf3fd",
+    "bytes": 34870776,
+    "executable_sha256": "85f997d4a969f762c636933dea62aa56fe1864c330c6d21562bfd575dbc9b730",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched428-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "compiler_cargo_protoc_match_linux426": true,
+  "framework_profile": "opt3/debug2/assertions/overflow/thinLTO/codegen1/split-debuginfo-packed",
+  "fresh_records": "root library/executable/openraft/bench_minimal and root buildscript allfresh:false actual CargoJSON",
+  "oracle_gate": "RELEASE_ORACLE.json proves actualPROFILErelease omits redundantreferencecfg only; assertions/overflowon",
+  "cli_exit": 0,
+  "cli_controls": [
+    {
+      "case": "off",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "operations_per_second": 1384799.8104690495,
+      "request_p99_ms": 8.967887,
+      "meaning": "small qualification CLI only; no capacity or sustained comparison claim"
+    },
+    {
+      "case": "on",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "operations_per_second": 1416815.5703741997,
+      "request_p99_ms": 7.826454,
+      "meaning": "small qualification CLI only; no capacity or sustained comparison claim"
+    },
+    {
+      "case": "openraft",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "operations_per_second": 1790503.2511884596,
+      "request_p99_ms": 4.659578,
+      "meaning": "small qualification CLI only; no capacity or sustained comparison claim"
+    }
+  ],
+  "source_readonly": true,
+  "capacity_campaign": "not run",
+  "performance_acceptance": "not established",
+  "publication": "target-only pending root review"
+}

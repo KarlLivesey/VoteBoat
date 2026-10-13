@@ -1,0 +1,14 @@
+Checking formatting and strict Clippy before push...
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 8.98s
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.57s
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 5.09s
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.36s
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Checking voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.82s
+To github.com:KarlLivesey/VoteBoat.git
+   d25eadf..832479d  main -> main

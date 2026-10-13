@@ -1,0 +1,18 @@
+{
+  "baseline_commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+  "candidate_commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "usable_pair_exists": true,
+  "config_pair_sha256": "312c1a8e146424019ff4cc63b7070695fd568ce99dda3ca469bfa5dcdaf5845a",
+  "source_inputs": [
+    1424,
+    1425
+  ],
+  "actual429_fixture_controls": 3,
+  "checker_negative_controls": 10,
+  "artifact_negative_controls": 8,
+  "profile_dependency_compiler_changes": "none",
+  "both_profile_gate_and_original_copied_DWP_proofs_guarded": true,
+  "run_plan": "24 rotating cases, singleton1/batch1 andbulk4096/batch4;1048576originals+1024warmups;3600/30s guards",
+  "timing": "pending root-authorized quiet launch",
+  "no_source_changes": true
+}

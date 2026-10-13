@@ -1,0 +1,11 @@
+{
+  "source_commit": "832479d7dc11db176549baea422b98b00b3e01dc",
+  "evidence_predecessor": "d25eadff0c106783a31917ddd7ea8eac5d200dcc",
+  "actual_push_original_session": 63311,
+  "actual_push_exit": 0,
+  "enabled_pre_push_hook": ".githooks/pre-push",
+  "root_fmt_four_strict_and_matched_fmt_strict": "all0",
+  "raw_push_log": "target/p9/slice429/push.log",
+  "qualified_source_inputs": 1425,
+  "performance_scope": "Linux429 short paired24cases improvebulk; Mac429 and full-P9 acceptance pending"
+}

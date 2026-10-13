@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison429/prepare-pair.py", line 96, in <module>
+    main()
+    ~~~~^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison429/prepare-pair.py", line 49, in main
+    guard.need(guard.REQUIRED_CANDIDATE_COMMIT != 'UNPUBLISHED_CANDIDATE_NOT_AUTHORIZED_FOR_TIMING', 'candidate not yet qualified/published')
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison429/artifact-guard.py", line 15, in need
+    raise ValueError(label)
+ValueError: candidate not yet qualified/published

@@ -1,0 +1,11 @@
+{
+  "original_handle": 70128,
+  "exit": 0,
+  "stage": "DONE",
+  "cases": 24,
+  "failures": [],
+  "quiet_window": "root authorized before original launch; polling/status only while binary cases active, no other source/archive/hash/build/check activity by this agent",
+  "guard_before_after": "linux-results/identity-before.log,identity-after.log",
+  "same_original_no_restart": true,
+  "scope": "paired short volatile diagnostic; no sustained/durable/full-floor acceptance"
+}

@@ -1,0 +1,43 @@
+{
+  "created_utc": "2026-10-13T22:28:50.185348+00:00",
+  "baseline_commit": "a46da2b0a4a13166974601ef0752341aecf9c1c6",
+  "baseline_executable_sha256": "85f997d4a969f762c636933dea62aa56fe1864c330c6d21562bfd575dbc9b730",
+  "candidate_commit": "UNPUBLISHED_CANDIDATE_NOT_AUTHORIZED_FOR_TIMING",
+  "usable_pair_exists": false,
+  "syntax_checks": "all7drivers Pythoncompile/bash-n pass",
+  "checker_controls": "3actual428off/on/OpenRaftfixtures and10negativecopies pass; not429 qualification",
+  "artifact_controls": "actual428fourfresh:false/artifact/compiler/source/release-oracle/DWP guard pass;8negative/unpublishedcontrols pass",
+  "unpublished_prepare": {
+    "command": [
+      "python3",
+      "target/p9/comparison429/prepare-pair.py",
+      "--baseline-config",
+      "target/p9/comparison429/BASELINE_CONFIG.linux.json",
+      "--baseline-job",
+      "target/p9/matched428-linux",
+      "--candidate-job",
+      "target/p9/matched429-linux",
+      "--output",
+      "target/p9/comparison429/CONFIG_PAIR.linux.json"
+    ],
+    "exit": 1,
+    "expected_reason": "candidate not yet qualified/published"
+  },
+  "after_publication_required": [
+    "setguardcandidatecommittopublished429",
+    "qualifiedfresh429Linuxartifacts+actualoff/on/OpenRaftCLI",
+    "runcheck-main-controls.py--fixture-jobtarget/p9/matched429-linux",
+    "prepareactualpairwithbothreleaseoracleproofs",
+    "freshactualpairartifact/refusalcontrols+quietwindowbeforetiming"
+  ],
+  "driver_sha256": {
+    "target/p9/comparison429/artifact-guard.py": "68859245ab320327c5704ff2e4679b57772acbfefff437a49eed79514d4d36e6",
+    "target/p9/comparison429/phase-diagnostic-check.py": "0f44bec9ebbe1628d03ca3b7e23641289a249b358c6436fb977d46dfd572e755",
+    "target/p9/comparison429/phase-diagnostic.sh": "6c6d857d7074ecd44113c7018884fc7b6abfd8bc6db961861c94cd773188c3a5",
+    "target/p9/comparison429/prepare-pair.py": "5486f34592526d45433bd2cc985b7a97b4e8a202c64a89537709b0dfd46d1115",
+    "target/p9/comparison429/check-main-controls.py": "fce550647c4135f47e3a6dd96673bb758a0389ac418757a50b0475e0daa1e4c8",
+    "target/p9/comparison429/check-artifact-controls.py": "d8ae001af77b09eef5cc27c71c7f27ef7d9f69146a49816208408c916b2506de",
+    "target/p9/comparison429/summarize.py": "01cbc0f1ed420ac3e504fe958cfe95d7e4187ea7e22bd9ae780d00b34fa6c6eb"
+  },
+  "no_benchmarks_builds_artifact_or_source_copies": true
+}

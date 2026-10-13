@@ -1,0 +1,9 @@
+{
+  "original_handle": 59526,
+  "child_initial_poll_error": "write_stdin failed: Unknown process id59526",
+  "child_did_not_restart": true,
+  "root_monitor_actual_terminal": 0,
+  "root_terminal_confirmed_before_child_CLI": true,
+  "markers": "STATUS0/STAGEDONE",
+  "scope": "reported original root tool terminal plus recorded runner markers; no fabricated reconstructed stderr"
+}

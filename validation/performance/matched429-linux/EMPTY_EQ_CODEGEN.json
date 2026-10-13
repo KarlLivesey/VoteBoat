@@ -1,0 +1,10 @@
+{
+  "executable_sha256": "2ddcf9ecdf999b91364b0b9d7751f27700a715a3a06530e25ff4d9a1f0ad4499",
+  "symbol": "<voteboat::log::LogEntry as core::cmp::PartialEq>::eq",
+  "text_address": "0x1ae3d0",
+  "disassembly_sha256": "741d26034277dee9fa173d9831f1048bf54f6e4d8995e8a278ae48d72e3b6011",
+  "empty_command_path": "After full operation comparison, lengths at [rdi+0x18]/[rsi+0x18] bothzero branch1ae46f\u21921ae442:al=1;ret1ae444. Bypasses bcmpcall1ae47f. Length mismatch returnsfalse; equal nonempty lengths reach bcmp.",
+  "scope": "static exact assertedLinux429 executable; other inlined sites and capacity improvement not claimed",
+  "tool_options": "objdump -dC -WN -WE (no linked debug loading or debuginfod)",
+  "initial_attempt": "objdump emitted missing-DWO warnings; instruction bytes valid; final focused -WN/-WE avoids linked-debug loading, stderr retained"
+}

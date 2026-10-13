@@ -1,0 +1,63 @@
+
+target/p9/matched429-linux/artifacts/matched/voteboat-matched-framework:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000001ae3d0 <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq>:
+  1ae3d0:	48 8b 47 30          	mov    0x30(%rdi),%rax
+  1ae3d4:	48 3b 46 30          	cmp    0x30(%rsi),%rax
+  1ae3d8:	0f 85 b1 00 00 00    	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae3de:	48 8b 47 38          	mov    0x38(%rdi),%rax
+  1ae3e2:	48 3b 46 38          	cmp    0x38(%rsi),%rax
+  1ae3e6:	0f 85 a3 00 00 00    	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae3ec:	48 8b 0f             	mov    (%rdi),%rcx
+  1ae3ef:	48 8b 06             	mov    (%rsi),%rax
+  1ae3f2:	48 85 c9             	test   %rcx,%rcx
+  1ae3f5:	74 46                	je     1ae43d <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0x6d>
+  1ae3f7:	83 f9 01             	cmp    $0x1,%ecx
+  1ae3fa:	75 49                	jne    1ae445 <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0x75>
+  1ae3fc:	83 f8 01             	cmp    $0x1,%eax
+  1ae3ff:	0f 85 8a 00 00 00    	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae405:	48 8b 7f 08          	mov    0x8(%rdi),%rdi
+  1ae409:	48 8b 76 08          	mov    0x8(%rsi),%rsi
+  1ae40d:	66 0f 6f 07          	movdqa (%rdi),%xmm0
+  1ae411:	66 0f 74 06          	pcmpeqb (%rsi),%xmm0
+  1ae415:	66 0f d7 c0          	pmovmskb %xmm0,%eax
+  1ae419:	3d ff ff 00 00       	cmp    $0xffff,%eax
+  1ae41e:	75 6f                	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae420:	48 8b 87 88 00 00 00 	mov    0x88(%rdi),%rax
+  1ae427:	48 3b 86 88 00 00 00 	cmp    0x88(%rsi),%rax
+  1ae42e:	75 5f                	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae430:	48 83 c7 10          	add    $0x10,%rdi
+  1ae434:	48 83 c6 10          	add    $0x10,%rsi
+  1ae438:	e9 f3 2f 00 00       	jmp    1b1430 <<voteboat::membership::ConfigurationChange as core::cmp::PartialEq>::eq>
+  1ae43d:	48 85 c0             	test   %rax,%rax
+  1ae440:	75 4d                	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae442:	b0 01                	mov    $0x1,%al
+  1ae444:	c3                   	ret
+  1ae445:	83 f8 02             	cmp    $0x2,%eax
+  1ae448:	75 45                	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae44a:	66 0f 6f 47 20       	movdqa 0x20(%rdi),%xmm0
+  1ae44f:	66 0f 74 46 20       	pcmpeqb 0x20(%rsi),%xmm0
+  1ae454:	66 0f d7 c0          	pmovmskb %xmm0,%eax
+  1ae458:	3d ff ff 00 00       	cmp    $0xffff,%eax
+  1ae45d:	75 30                	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae45f:	48 8b 57 18          	mov    0x18(%rdi),%rdx
+  1ae463:	48 8b 46 18          	mov    0x18(%rsi),%rax
+  1ae467:	48 85 d2             	test   %rdx,%rdx
+  1ae46a:	75 05                	jne    1ae471 <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xa1>
+  1ae46c:	48 85 c0             	test   %rax,%rax
+  1ae46f:	74 d1                	je     1ae442 <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0x72>
+  1ae471:	48 39 c2             	cmp    %rax,%rdx
+  1ae474:	75 19                	jne    1ae48f <<voteboat::log::LogEntry as core::cmp::PartialEq>::eq+0xbf>
+  1ae476:	50                   	push   %rax
+  1ae477:	48 8b 76 10          	mov    0x10(%rsi),%rsi
+  1ae47b:	48 8b 7f 10          	mov    0x10(%rdi),%rdi
+  1ae47f:	ff 15 eb e1 1f 00    	call   *0x1fe1eb(%rip)        # 3ac670 <bcmp@GLIBC_2.2.5>
+  1ae485:	85 c0                	test   %eax,%eax
+  1ae487:	0f 94 c0             	sete   %al
+  1ae48a:	48 83 c4 08          	add    $0x8,%rsp
+  1ae48e:	c3                   	ret
+  1ae48f:	31 c0                	xor    %eax,%eax
+  1ae491:	c3                   	ret
