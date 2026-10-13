@@ -1,0 +1,1 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/reference-build/release/examples/log_staging_benchmark /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/measure/store-8-2-reference.csv 8 256 512 

@@ -1,0 +1,1 @@
+scope=VOLATILE native_codec=true state_and_restart_verified=true unrelated_groups=32 history=256 measured_iterations=512 warmup_iterations=16; NOT a durability or consensus benchmark

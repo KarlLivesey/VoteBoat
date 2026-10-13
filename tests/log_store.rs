@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![cfg(feature = "native")]
+#[path = "log_store/staging.rs"]
+mod staging;
 mod support;
 use support::*;
 use voteboat::{contracts::*, log::*, native::log_store::*};

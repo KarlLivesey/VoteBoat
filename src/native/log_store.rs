@@ -15,7 +15,10 @@
 //! Native recoverable log: atomic group transitions, shared barriers, no threads.
 use super::vote_store::crc32c;
 use crate::{contracts::StorageError, identity::*, log::*};
-use std::{collections::BTreeMap, io};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    io,
+};
 
 mod checkpoint;
 mod file;
@@ -58,6 +61,7 @@ pub struct NativeLogStore<I: JournalIo, C: LogCodec = NativeLogCodec> {
     limits: LogLimits,
     durable: BTreeMap<GroupIdentity, GroupLog>,
     accepted: BTreeMap<GroupIdentity, GroupLog>,
+    dirty: BTreeSet<GroupIdentity>,
     pending: Vec<LogTicket>,
     length: usize,
     sequence: u64,
@@ -139,6 +143,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             limits,
             durable: BTreeMap::new(),
             accepted: BTreeMap::new(),
+            dirty: BTreeSet::new(),
             pending: Vec::new(),
             length: 0,
             sequence: 0,
@@ -231,6 +236,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             limits,
             durable: state.clone(),
             accepted: state,
+            dirty: BTreeSet::new(),
             pending: Vec::new(),
             length: offset,
             sequence,
@@ -288,8 +294,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                 "codec encoded length outside budget",
             ));
         }
-        let mut next = self.accepted.clone();
-        apply_batch(&mut next, &mutations, self.limits)?;
+        let next = stage_batch(&self.accepted, &mutations, self.limits)?;
         let control = mutations.iter().all(|m| match m {
             LogMutation::Create(_) => true,
             LogMutation::Update(u) => u.suffix.as_ref().is_none_or(|s| {
@@ -329,10 +334,13 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             return Err(self.failed(e));
         }
         // A suffix fence invalidates outstanding evidence for the old suffix.
-        self.pending
-            .retain(|t| next[&t.group].generation == t.generation);
+        self.pending.retain(|t| {
+            next.get(&t.group)
+                .is_none_or(|s| s.generation == t.generation)
+        });
         self.pending.extend(tickets.iter().copied());
-        self.accepted = next;
+        self.dirty.extend(next.keys().copied());
+        self.accepted.extend(next);
         self.sequence = sequence;
         self.length += bytes.len();
         Ok(tickets)
@@ -359,7 +367,10 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         {
             return Err(self.failed(e));
         }
-        self.durable = self.accepted.clone();
+        for group in &self.dirty {
+            self.durable.insert(*group, self.accepted[group].clone());
+        }
+        self.dirty.clear();
         self.pending.retain(|t| !dependencies.contains(t));
         Ok(DurableLog {
             tickets: dependencies.to_vec(),
@@ -372,7 +383,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         if self.fenced {
             return Err(StorageError::Fenced);
         }
-        if !self.pending.is_empty() || self.accepted != self.durable {
+        if !self.pending.is_empty() || !self.dirty.is_empty() || self.accepted != self.durable {
             return Err(StorageError::Rejected(
                 "reclamation requires drained transitions",
             ));

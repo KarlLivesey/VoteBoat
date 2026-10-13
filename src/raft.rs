@@ -1260,13 +1260,7 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
-        let mut state = BTreeMap::from([(update.group, self.durable.clone())]);
-        apply_batch(
-            &mut state,
-            &[LogMutation::Update(update.clone())],
-            self.limits,
-        )?;
-        let next = state.remove(&update.group).unwrap();
+        let next = crate::log::stage_update(&self.durable, &update, self.limits)?;
         let membership = next.membership().map_err(|_| RaftError::InvalidRecovery)?;
         if self
             .learner_readiness

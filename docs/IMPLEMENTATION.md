@@ -1,5 +1,45 @@
 # Implementation record
 
+## Active P9 plan — 13 October 2026
+
+[P9 macro and mini plan](P9.md) records the complete acceptance curve, current
+deliverable and next two, with purposes, dependencies and completion checks.
+
+The user now authorizes P9 planning and implementation. The earlier P8 stop
+boundary below is historical; P10 and Windows remain deferred. No performance
+floor is claimed achieved.
+
+P9 execution begins on 13 October 2026. No P10 security phase or Windows work.
+Minimum framework acceptance: exceed complete OpenRaft published client curve
+on matched conditions: batch1 clients1/64/256/512/1024/4096, rates
+33000/912000/1808000/2543000/3006000/3548000 entries/s; batch4 clients4096,
+5615000 entries/s. Pinned reference e88bb40707f2e511d8ecc44d31edcb1d814a11a8.
+Published setup 3 replicas, empty requests/responses, in-memory BTree log,
+no-op application, function-call RPC, client1worker/server16workers, MacM1Max,
+1024 warmup/default20M rounded total. Actual code, every completion, hardware,
+retention and revision must match before declaring a comparison pass.
+Different framework harness or incomplete batch support is diagnostic only.
+Durable application throughput/tail/headroom is a separate acceptance family.
+
+Macro: P9.0 reproducible attributed baseline; P9.1 cheap/pipelined ordered group;
+P9.2 parallel independent groups/resources and fairness; P9.3 sustainable
+maintenance/skew/catch-up performance on Linux/macOS; P9.4 P8 topology cost.
+
+Mini: current touched-group/log-core staging + comparative diagnostic, no disk
+format change. Purpose removes unrelated-data and duplicate validation copies;
+depends on existing atomic validators/tickets; checks independent transition,
+crash/restart/fencing/unchanged-state tests and quiet interleaved comparisons;
+advances P9.1, measured by P9.0. Next ready same-group proposal batches with
+individual outcomes, immediate singletons; depends on admission/result ownership,
+checks every original command/result under retries/config/term changes and bounded
+hot/cold fairness; advances P9.1 and makes batch4 framework support real. Following
+bounded accepted/durable pipeline and optional persistence/replication overlap;
+depends on batch ownership+explicit ordered completion dependencies; checks prefix
+holes/term/vote/configuration changes and exact old completions; advances P9.1/2.
+Measure each independently before combining. Larger chunked log representation,
+segmented WAL and platform async-I/O remain explicit subsequent decisions.
+
+
 ## Current completion boundary — user clarification, 12 October 2026
 
 P0–P8 capabilities are implemented. The user clarified that the final15-second
@@ -32303,3 +32343,37 @@ Mac405 passes those six controls and both actual timer controls and is running
 only the remaining full QUIC cold history. Full routed regression is running
 because its helper now shares the same stricter original-close checks.
 No production files changed. [Evidence405](../validation/baseline/slice405/README.md).
+
+
+### P8 background handback — 13 October 2026
+
+The original405 background checks are now terminal: Mac cold QUIC1/0 (918.62s),
+source1307 and original executables/library guards0, all actual cleanup retained;
+Linux routed192/0 (1192.34s). [Terminal evidence](../validation/baseline/slice405/mac-final/README.md).
+No P9 transaction performance claim comes from those functional tests.
+
+
+### P9 touched-state staging406 — first measured slice
+
+Schema/ownership/source and paired evidence: [slice406](../validation/performance/slice406/README.md).
+No disk, durability, authentication, quorum or client-outcome change. Core removes
+the duplicate singleton transition clone; storage stages only touched groups and
+promotes only dirty groups after original publication. Linux focused all431/0,
+core-only250/0; fmt/four strict0. Native-service/Mac qualification remains explicit.
+Five paired volatile native-store trials show2.59x/11.17x/40.36x shorter staged
+transition time with1/8/32 unrelated histories. This is CPU attribution, not real
+durability or an OpenRaft win. The short cooperative framework remains unmatched;
+its singleton median31,811/s and64-client68,436/s do not pass the required curve.
+
+User emphasis: optimize concurrent useful work, pipeline occupancy and less waiting
+and contention, not just batch-of-one time. The next deliverable is real ordered
+proposal batches with individual outcomes; then native ready collection and
+explicit accepted/durable replication overlap. A one-owner ordered prefix does not
+require one client operation in flight. Overload stays bounded and local. The
+reviewed dependency DAG preserves original security and feature semantics; no
+helper or storage rewrite becomes an automatic prerequisite for that pipeline.
+
+The explicit P9 PERFORMANCE-ONLY goal is now active at the user’s request.
+Preserve existing features/security; correctness checks validate optimizations.
+First-slice real TCP/QUIC three-service replacement/retry/recovery passes2/0.
+Matching Mac1317-input controls are running independently; remote CI is not a gate.

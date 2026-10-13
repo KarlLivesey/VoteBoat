@@ -1,0 +1,8 @@
+    Finished `release` profile [optimized] target(s) in 0.03s
+     Running tests/quic.rs (/tmp/voteboat-macos-close405/build/release/deps/quic-3f83771a3828b67d)
+
+running 1 test
+test closing_timer::resolved_send_close_retains_actual_long_rtt_protocol_deadline ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 24 filtered out; finished in 0.01s
+

@@ -1,6 +1,7 @@
 # Feature status
 
 **P0–P8 capabilities are implemented for Linux and macOS.**
+P9 implementation is now explicitly authorized; see [the P9 plan](P9.md).
 The user confirmed that shutdown speed is a performance requirement, not an
 unfinished capability. P9 is performance, P10 is dedicated security work;
 Windows remains deferred. Do not start those phases automatically.
@@ -21,9 +22,9 @@ as passing.** A fixed shutdown-speed target is deferred to P9. The test-only405
 change permits an already-flushed original QUIC close to reach its actual
 protocol deadline while still requiring real resource release. No production
 optimization was made. Linux full nested suites pass15/15 and13/13; Mac shared
-close controls6/6 and both real timer controls pass. The already-started full Mac
-rerun and additional routed regression may finish in the background; they do not
-reinstate a15-second P8 speed gate. Their terminal results are not yet claimed.
+close controls6/6 and both real timer controls pass. The full Mac405 rerun now passes1/1 (918.62s), including actual cleanup;
+the Linux routed regression passes192/192. Neither establishes a15-second
+shutdown speed requirement. [Final records](../validation/baseline/slice405/mac-final/README.md).
 
 Formatting and strict Clippy are zero across all four feature configurations,
 enforced by the enabled pre-push hook. This is a feature-completion boundary,

@@ -38,3 +38,10 @@ that402's failed Mac test passed, or that405's still-running full Mac/routed
 checks have terminal results. Fixed shutdown speed belongs to P9. All original
 functional release checks remain in the implementation. P0–P8 capability closure
 uses the reconciled bounded evidence; no tuning or security phase starts here.
+
+## Terminal handback — 13 October 2026
+
+Both already-running checks have finished: full Mac QUIC1/0 (918.62s), exact
+source/artifact guards and all original cleanup; Linux routed192/0 (1192.34s).
+See [Mac terminal evidence](mac-final/README.md) and routed-all.log. The earlier
+pending entries describe handover time; no old failed result is rewritten.

@@ -70,6 +70,15 @@ name = "journal_attribution"
 required-features = ["native"]
 test = true
 
+[[example]]
+name = "log_staging_benchmark"
+required-features = ["native"]
+test = true
+
+[[example]]
+name = "framework_benchmark"
+test = true
+
 [[bin]]
 name = "voteboat-directory"
 path = "src/bin/directory_service.rs"

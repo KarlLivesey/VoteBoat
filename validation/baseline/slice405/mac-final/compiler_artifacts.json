@@ -1,0 +1,165 @@
+{
+  "compiler_records": [
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-close405/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-close405/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "logical_nested_native",
+        "src_path": "/private/tmp/voteboat-macos-close405/repo/tests/logical_nested_native.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-close405/build/release/deps/logical_nested_native-4dbba713a780d579"
+      ],
+      "executable": "/tmp/voteboat-macos-close405/build/release/deps/logical_nested_native-4dbba713a780d579",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-close405/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-close405/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "routed",
+        "src_path": "/private/tmp/voteboat-macos-close405/repo/tests/routed.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-close405/build/release/deps/routed-15fdb9a3f20d0893"
+      ],
+      "executable": "/tmp/voteboat-macos-close405/build/release/deps/routed-15fdb9a3f20d0893",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-close405/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-close405/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "quic",
+        "src_path": "/private/tmp/voteboat-macos-close405/repo/tests/quic.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-close405/build/release/deps/quic-3f83771a3828b67d"
+      ],
+      "executable": "/tmp/voteboat-macos-close405/build/release/deps/quic-3f83771a3828b67d",
+      "fresh": false
+    },
+    {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-macos-close405/repo#voteboat@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-macos-close405/repo/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/private/tmp/voteboat-macos-close405/repo/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-macos-close405/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+        "/tmp/voteboat-macos-close405/build/release/deps/libvoteboat-ca76d170795d1aa6.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  ],
+  "launch_files": [
+    "/tmp/voteboat-macos-close405/build/release/deps/logical_nested_native-4dbba713a780d579",
+    "/tmp/voteboat-macos-close405/build/release/deps/routed-15fdb9a3f20d0893",
+    "/tmp/voteboat-macos-close405/build/release/deps/quic-3f83771a3828b67d",
+    "/tmp/voteboat-macos-close405/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib"
+  ],
+  "before_sha256": {
+    "/tmp/voteboat-macos-close405/build/release/deps/logical_nested_native-4dbba713a780d579": "28df8844501aa99f3e4c70738cf7c8334534484656dfb2d204850d3c2db87cab",
+    "/tmp/voteboat-macos-close405/build/release/deps/routed-15fdb9a3f20d0893": "d67b2dc20311c5d66719ae7468d5ca63adbb8f6bb1d02d184ef2f85d7077589f",
+    "/tmp/voteboat-macos-close405/build/release/deps/quic-3f83771a3828b67d": "ba9439e37630a790aafd0ac8fa73c6e3064f61cff3be2ae02d270152c5ffd172",
+    "/tmp/voteboat-macos-close405/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib": "50d9c3a8819620943c0c9917f4fffe76802c88404dbb8b501d3f507facf71ac8"
+  }
+}

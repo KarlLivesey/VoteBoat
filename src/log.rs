@@ -320,45 +320,73 @@ pub fn apply_batch(
     mutations: &[LogMutation],
     limits: LogLimits,
 ) -> Result<(), StorageError> {
+    let next = stage_batch(state, mutations, limits)?;
+    state.extend(next);
+    Ok(())
+}
+
+/// Validate a whole batch without copying groups unrelated to its transitions.
+/// The caller installs these owned replacements only after admission succeeds.
+pub(crate) fn stage_batch(
+    state: &BTreeMap<GroupIdentity, GroupLog>,
+    mutations: &[LogMutation],
+    limits: LogLimits,
+) -> Result<BTreeMap<GroupIdentity, GroupLog>, StorageError> {
     let limits = limits.validate()?;
     if mutations.is_empty() || mutations.len() > limits.max_batch_units {
         return Err(StorageError::Rejected("batch unit limit"));
     }
-    let mut next = state.clone();
-    let mut seen = std::collections::BTreeSet::new();
+    let mut next = BTreeMap::new();
+    let mut created = 0;
     for mutation in mutations {
         let group = match mutation {
             LogMutation::Create(b) => b.group,
             LogMutation::Update(u) => u.group,
         };
-        if !seen.insert(group) {
+        if next.contains_key(&group) {
             return Err(StorageError::Rejected(
                 "one atomic unit per group per batch",
             ));
         }
         match mutation {
-            LogMutation::Create(b) => apply_create(&mut next, b, limits)?,
+            LogMutation::Create(b) => {
+                if state.len() + created >= limits.max_groups
+                    || state.keys().chain(next.keys()).any(|g| g.id == b.group.id)
+                {
+                    return Err(StorageError::Rejected(
+                        "existing group identity or group limit",
+                    ));
+                }
+                next.insert(group, stage_create(b)?);
+                created += 1;
+            }
             LogMutation::Update(update) => {
-                let current = next
-                    .get_mut(&group)
+                let current = state
+                    .get(&group)
                     .ok_or(StorageError::Rejected("group not bootstrapped"))?;
-                apply_update(current, update, limits)?;
+                next.insert(group, stage_update(current, update, limits)?);
             }
         }
     }
-    *state = next;
-    Ok(())
+    Ok(next)
 }
-fn apply_create(
-    next: &mut BTreeMap<GroupIdentity, GroupLog>,
-    b: &Bootstrap,
+
+/// Single-group counterpart used by deterministic core transition staging.
+pub(crate) fn stage_update(
+    current: &GroupLog,
+    update: &LogUpdate,
     limits: LogLimits,
-) -> Result<(), StorageError> {
-    if next.len() >= limits.max_groups || next.keys().any(|g| g.id == b.group.id) {
-        return Err(StorageError::Rejected(
-            "existing group identity or group limit",
-        ));
+) -> Result<GroupLog, StorageError> {
+    let limits = limits.validate()?;
+    if current.bootstrap.group != update.group {
+        return Err(StorageError::Rejected("group not bootstrapped"));
     }
+    let mut next = current.clone();
+    apply_update(&mut next, update, limits)?;
+    Ok(next)
+}
+
+fn stage_create(b: &Bootstrap) -> Result<GroupLog, StorageError> {
     Policy::new(b.policy.tree().clone(), PolicyLimits::default())
         .map_err(|_| StorageError::Rejected("policy exceeds persisted format limits"))?;
     if b.voter_stores
@@ -371,21 +399,17 @@ fn apply_create(
             "voter stores must match exact policy membership",
         ));
     }
-    next.insert(
-        b.group,
-        GroupLog {
-            snapshot_membership: None,
-            bootstrap: b.clone(),
-            revision: LogRevision::new(1).unwrap(),
-            generation: LogGeneration::new(1).unwrap(),
-            hard_state: HardState::default(),
-            ballot_origin: None,
-            commit_index: 0,
-            snapshot: None,
-            entries: Vec::new(),
-        },
-    );
-    Ok(())
+    Ok(GroupLog {
+        snapshot_membership: None,
+        bootstrap: b.clone(),
+        revision: LogRevision::new(1).unwrap(),
+        generation: LogGeneration::new(1).unwrap(),
+        hard_state: HardState::default(),
+        ballot_origin: None,
+        commit_index: 0,
+        snapshot: None,
+        entries: Vec::new(),
+    })
 }
 fn ballot_origin(
     current: &GroupLog,

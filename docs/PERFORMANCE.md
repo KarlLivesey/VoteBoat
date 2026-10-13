@@ -1,5 +1,9 @@
 # Native performance baseline
 
+P9 implementation is active. See [the P9 plan](P9.md) for the minimum OpenRaft
+framework curve, separate durable application acceptance and current/next slices.
+The existing commands and historical evidence below do not establish that floor.
+
 Build and run the release harness through the same public Node, native WAL,
 TLS/QUIC and Counter contracts as embeddings:
 
