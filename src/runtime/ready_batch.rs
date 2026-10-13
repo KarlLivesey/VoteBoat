@@ -12,10 +12,23 @@ struct Window {
     count: usize,
     input_bytes: usize,
 }
+fn routine_control(queued: &Queued, term: u64) -> bool {
+    match &queued.event {
+        Event::Heartbeat => true,
+        Event::Receive(message) => {
+            message.term == term && matches!(&message.rpc, Rpc::Appended { .. })
+        }
+        _ => false,
+    }
+}
 fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -> Option<Window> {
     let (turn, class) = group.next_queued(limits, now)?;
     if class != Class::Data as usize
-        || !group.queues[0].is_empty()
+        // Inspect only: routine replies remain queued and untrusted until the
+        // normal control turn validates them. A protected tail still vetoes.
+        || !group.queues[0]
+            .iter()
+            .all(|queued| routine_control(queued, group.core.state().hard_state.term))
         || !group.queues[2].is_empty()
         || group.core.role() != Role::Leader
         || !group.core.local_voter()
@@ -28,7 +41,7 @@ fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -
         .visit_items
         .saturating_sub(used.items)
         .min(max_items)
-        .min(MAX_PROPOSAL_BATCH_ENTRIES);
+        .min(group.core.batch_limits().max_proposal_entries);
     let byte_limit = limits.visit_bytes.saturating_sub(used.bytes);
     let log = group.core.proposal_limits();
     let remaining_entries = log

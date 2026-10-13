@@ -14,7 +14,14 @@ impl Raft {
                 leader_commit,
             } if sent.snapshot.is_none()
                 && *leader_commit <= self.durable.commit_index
-                && self.range_matches(m.to, &sent, *previous_index, *previous_term, entries) =>
+                && self.range_matches(
+                    m.to,
+                    &sent,
+                    *previous_index,
+                    *previous_term,
+                    entries,
+                    self.batch_limits.max_replication_entries,
+                ) =>
             {
                 Some(Boundary::Append {
                     start: sent.start,
@@ -43,7 +50,7 @@ impl Raft {
                     self.repair_joint(m.to, Some(m.configuration)).ok()??;
                 if sent.snapshot.is_some()
                     || **joint != expected
-                    || !self.range_matches(m.to, sent, *previous_index, *previous_term, entries)
+                    || !self.range_matches(m.to, sent, *previous_index, *previous_term, entries, 64)
                     || sent.end > joint.index
                 {
                     return None;
@@ -84,11 +91,12 @@ impl Raft {
         previous: u64,
         term: u64,
         entries: &[LogEntry],
+        max_entries: usize,
     ) -> bool {
         previous.checked_add(1) == Some(sent.start)
             && self.durable.term_at(previous) == Some(term)
             && entries.last().map_or(previous, |e| e.index) == sent.end
-            && entries.len() <= 64
+            && entries.len() <= max_entries
             && entries.iter().enumerate().all(|(offset, e)| {
                 previous.checked_add(offset as u64 + 1) == Some(e.index)
                     && self

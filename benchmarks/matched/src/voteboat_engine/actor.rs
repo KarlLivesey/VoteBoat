@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 use super::*;
-use crate::{Maintenance, ENTRY_BATCH_CAPACITY};
+use crate::Maintenance;
 use std::{collections::VecDeque, mem::size_of, time::Instant};
 use voteboat::{application::StateMachine, snapshot::*};
 
@@ -19,6 +19,8 @@ pub(super) struct Parts {
     pub stats: Arc<[stats::Stats; 3]>,
     #[cfg(test)]
     pub paused: Arc<[AtomicBool; 3]>,
+    #[cfg(test)]
+    pub paused_proposals: Arc<AtomicBool>,
     pub frontiers: Arc<[AtomicU64; 3]>,
     pub settings: Settings,
 }
@@ -58,7 +60,7 @@ impl Actor {
                         self.last_contact = Instant::now();
                         self.step(Event::Receive(message))?;
                     }
-                    request = self.parts.receiver.recv() => self.requests(request.ok_or("client actor input closed")?)?,
+                    request = self.parts.receiver.recv(), if self.accepts_proposals() => self.requests(request.ok_or("client actor input closed")?)?,
                     _ = tick.tick() => self.tick()?,
                 }
             }
@@ -83,6 +85,16 @@ impl Actor {
         #[cfg(test)]
         {
             !self.parts.paused[self.parts.slot].load(Ordering::Acquire)
+        }
+        #[cfg(not(test))]
+        {
+            true
+        }
+    }
+    fn accepts_proposals(&self) -> bool {
+        #[cfg(test)]
+        {
+            !self.parts.paused_proposals.load(Ordering::Acquire)
         }
         #[cfg(not(test))]
         {
@@ -129,13 +141,12 @@ impl Actor {
         self.effects(effects)
     }
     fn requests(&mut self, first: Request) -> Result<(), Failure> {
+        let capacity = self.parts.core.batch_limits().max_proposal_entries;
         let mut proposals = Vec::with_capacity(first.proposals.len());
         self.include(first, &mut proposals)?;
-        while proposals.len() < ENTRY_BATCH_CAPACITY && self.parts.peer_receiver.is_empty() {
+        while proposals.len() < capacity && self.parts.peer_receiver.is_empty() {
             match self.parts.receiver.try_recv() {
-                Ok(request)
-                    if proposals.len() + request.proposals.len() <= ENTRY_BATCH_CAPACITY =>
-                {
+                Ok(request) if proposals.len() + request.proposals.len() <= capacity => {
                     self.include(request, &mut proposals)?;
                 }
                 Ok(request) => {
@@ -149,7 +160,8 @@ impl Actor {
             }
         }
         self.reserve(size_of::<Vec<Proposal>>() + proposals.capacity() * size_of::<Proposal>())?;
-        let effects = if proposals.len() == 1 {
+        let width = proposals.len();
+        let effects = if width == 1 {
             let proposal = proposals.pop().unwrap();
             self.parts.core.step(Event::Propose {
                 operation: proposal.operation,
@@ -159,11 +171,12 @@ impl Actor {
             self.parts.core.propose_batch(proposals)
         }
         .map_err(debug_error)?;
+        self.parts.stats[self.parts.slot].record_proposals(width)?;
         self.effects(effects)
     }
     fn include(&mut self, request: Request, proposals: &mut Vec<Proposal>) -> Result<(), Failure> {
         if request.proposals.is_empty()
-            || request.proposals.len() > ENTRY_BATCH_CAPACITY
+            || request.proposals.len() > self.parts.core.batch_limits().max_proposal_entries
             || request.proposals.len() != request.replies.len()
         {
             return Err("original proposal/reply shape differs".into());

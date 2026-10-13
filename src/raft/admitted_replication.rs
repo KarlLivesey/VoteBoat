@@ -122,7 +122,7 @@ impl Raft {
         let suffix = pending.update.suffix.as_ref()?;
         if self.durable.last_index().checked_add(1) != Some(suffix.from)
             || suffix.entries.is_empty()
-            || suffix.entries.len() > MAX_PROPOSAL_BATCH_ENTRIES
+            || suffix.entries.len() > self.batch_limits.max_replication_entries
             || suffix
                 .entries
                 .iter()

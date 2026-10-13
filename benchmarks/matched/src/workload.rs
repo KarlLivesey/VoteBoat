@@ -137,9 +137,20 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
     }
     let frontiers = cluster.verify(settings).await?;
     latencies.sort_unstable();
-    let (engine, diagnostics) = match cluster {
-        Cluster::Openraft(_) => ("openraft", None),
-        Cluster::Voteboat(c) => ("voteboat", Some(c.diagnostics())),
+    let (engine, diagnostics, capacities) = match cluster {
+        Cluster::Openraft(c) => ("openraft", None, c.capacities()),
+        Cluster::Voteboat(c) => {
+            let limits = c.batch_limits();
+            (
+                "voteboat",
+                Some(c.diagnostics()),
+                (
+                    limits.max_proposal_entries,
+                    limits.max_proposal_entries,
+                    limits.max_replication_entries,
+                ),
+            )
+        }
     };
     Ok(Report {
         engine,
@@ -147,9 +158,9 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
         upstream_commit: UPSTREAM, settings, client_workers: 1, server_workers: 16,
         members: 3, payload_bytes: 0, completion: "every_original_locally_applied_after_quorum_commit",
         durability: "volatile_no_disk", transport: "in_process_actor_messages",
-        api_entry_batch_capacity: if engine == "openraft" && settings.envelopes == crate::Envelopes::UpstreamDefault { 4096 } else { 64 },
-        append_entry_batch_capacity: if engine == "openraft" && settings.envelopes == crate::Envelopes::UpstreamDefault { 4096 } else { 64 },
-        replication_entry_capacity: if engine == "openraft" && settings.envelopes == crate::Envelopes::UpstreamDefault { 1024 } else { 64 },
+        api_entry_batch_capacity: capacities.0,
+        append_entry_batch_capacity: capacities.1,
+        replication_entry_capacity: capacities.2,
         primary_upstream_envelopes_preserved: settings.envelopes == crate::Envelopes::UpstreamDefault,
         snapshot_model: match settings.maintenance {
             super::Maintenance::DefaultRetention => "openraft_current_snapshot_keep1000_voteboat_historical_snapshot_retained_suffix1000",
@@ -193,10 +204,45 @@ mod tests {
     async fn both_engines_finish_every_original_for_single_and_four_entry_requests() {
         for engine in ["voteboat", "openraft"] {
             for batch in [1, 4] {
-                let report = checked_run(engine, settings(batch, 128)).await;
-                assert_eq!(report.completed_originals, 128);
-                assert_eq!(report.completed_requests, 128 / batch);
-                assert_eq!(report.applied_frontiers, vec![133; 3]);
+                for envelopes in [
+                    crate::Envelopes::UpstreamDefault,
+                    crate::Envelopes::Common64,
+                ] {
+                    let report = checked_run(
+                        engine,
+                        Settings {
+                            envelopes,
+                            ..settings(batch, 128)
+                        },
+                    )
+                    .await;
+                    assert_eq!(report.completed_originals, 128);
+                    assert_eq!(report.completed_requests, 128 / batch);
+                    assert_eq!(report.applied_frontiers, vec![133; 3]);
+                    let limits = envelopes.voteboat_limits();
+                    assert_eq!(report.api_entry_batch_capacity, limits.max_proposal_entries);
+                    assert_eq!(
+                        report.append_entry_batch_capacity,
+                        limits.max_proposal_entries
+                    );
+                    assert_eq!(
+                        report.replication_entry_capacity,
+                        limits.max_replication_entries
+                    );
+                    if let Some(diagnostics) = report.diagnostics {
+                        let leader = serde_json::to_value(&diagnostics[0]).unwrap();
+                        assert_eq!(leader["proposed_originals"], 132);
+                        let widths = leader["proposal_widths"].as_array().unwrap();
+                        let originals: u64 = widths
+                            .iter()
+                            .map(|w| {
+                                w["original_entries"].as_u64().unwrap()
+                                    * w["batches"].as_u64().unwrap()
+                            })
+                            .sum();
+                        assert_eq!(originals, 132);
+                    }
+                }
             }
         }
     }

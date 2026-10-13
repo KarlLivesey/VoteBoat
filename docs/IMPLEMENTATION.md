@@ -91,6 +91,21 @@ and55.521 TCP/50.450 QUIC writes/s on M2 Max, with three replicas sharing each
 host/filesystem. CPU staging ratios do not predict these end-to-end durable rates.
 Planned work remains separate from passing evidence; no minimum floor is achieved.
 
+414 now implements bounded startup-only Core envelopes (defaults64/64,
+maxima4096/1024), independent1024 ordinary receive capacity, explicit unchanged64
+repair capacity, per-Core owner limits and exact durable chunked replication.
+Routine queued Heartbeats/same-term append replies no longer veto an already-
+selected bounded native Data quantum; protected tails and background work still
+do. This changes the bounded data quantum while preserving class turns and all
+individual admission/result/credit ownership. [Schema and validation](../validation/performance/slice414/README.md).
+Final Linux library335/266, affected integrations246 and real TCP/QUIC recovery2
+pass, with modeled large-batch append/commit publication cuts and all formatter/
+four strict profiles at zero. Review identified and fixed low-ordinary-limit
+repair inspection; the historical repair regression covers1/64/1024 settings.
+The standalone harness passes7 controls and both-engine/profile original-result
+CLI checks, observes primary4096/Common64 widths and retains upstream defaults.
+Mac qualification and independent paired throughput measurements remain pending.
+
 The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance
 floor is claimed achieved.

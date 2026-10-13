@@ -4,6 +4,9 @@
 use super::*;
 use crate::quorum::{Limits, Policy, Tree};
 
+#[path = "tests/batch_limits.rs"]
+mod batch_limit_tests;
+
 fn node(value: u64) -> NodeId {
     NodeId::new(value).unwrap()
 }

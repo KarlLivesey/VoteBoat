@@ -1,0 +1,72 @@
+{
+  "scope": "Linux_standalone_functional_not_performance",
+  "tests": 7,
+  "format_exit": 0,
+  "strict_all_targets_clippy_exit": 0,
+  "cli_controls": [
+    {
+      "case": "cli-voteboat-upstream-default",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        4096,
+        4096,
+        1024
+      ],
+      "validated": true
+    },
+    {
+      "case": "cli-openraft-upstream-default",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        4096,
+        4096,
+        1024
+      ],
+      "validated": true
+    },
+    {
+      "case": "cli-voteboat-common64",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        64,
+        64,
+        64
+      ],
+      "validated": true
+    },
+    {
+      "case": "cli-openraft-common64",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        64,
+        64,
+        64
+      ],
+      "validated": true
+    }
+  ]
+}

@@ -41,7 +41,14 @@ pub(super) fn command(id: u128) -> Event {
         bytes: id.to_le_bytes().to_vec(),
     }
 }
-pub(super) fn shard(mut limits: ShardLimits, log: LogLimits) -> Shard<Ready> {
+pub(super) fn shard(limits: ShardLimits, log: LogLimits) -> Shard<Ready> {
+    shard_with_batch_limits(limits, log, BatchLimits::default())
+}
+pub(super) fn shard_with_batch_limits(
+    mut limits: ShardLimits,
+    log: LogLimits,
+    batch: BatchLimits,
+) -> Shard<Ready> {
     let identity = StoreIdentity {
         id: StoreId::new(1).unwrap(),
         incarnation: StoreIncarnation::new(1).unwrap(),
@@ -69,6 +76,7 @@ pub(super) fn shard(mut limits: ShardLimits, log: LogLimits) -> Shard<Ready> {
         entries: Vec::new(),
     };
     let mut core = Raft::recover(node, binding, state, log).unwrap();
+    core.configure_batch_limits(batch).unwrap();
     let effects = core.step(Event::Campaign).unwrap();
     finish(&mut core, effects);
     assert_eq!(core.role(), Role::Leader);

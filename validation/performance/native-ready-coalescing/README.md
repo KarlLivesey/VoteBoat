@@ -1,0 +1,11 @@
+# Bounded routine-control proposal coalescing
+
+When the existing class scheduler selects Data, already-ready ordinary proposals may share one bounded transition despite queued Heartbeat or same-current-term Appended inputs. Inspection neither consumes nor validates those replies; normal later control processing retains all identity/context/quorum checks. Any other control anywhere in its queue, or any background work, remains a boundary.
+
+The C,C,Data,Background cursor and selected turns remain unchanged. A Data turn can consume a bounded batch quantum; this is not a promise of the old per-command 2:1 event ratio. Existing visit/output/byte/entry budgets and per-original authorization still apply. The window now uses the Core's configured max_proposal_entries, with defaults unchanged at 64. No timer delay, extra worker request, disk-format change or relaxed Written/Durable/application gate is added.
+
+Seven new deterministic controls cover natural consecutive control turns and subsequent control progress; untouched same-term untrusted replies with normal WrongIdentity rejection; protected higher/lower-term, vote, campaign, configuration and checkpoint boundaries including a protected tail behind a routine head; later-original refusal; duplicate/conflicting-byte/retry Counter outcomes; and visit/output/byte/deadline/per-Core count bounds. A configured 80-entry cap admits 70 ready originals while smaller limits remain enforced.
+
+Actual scoped validation: 16 ready_batch library tests passed with all features and 16 with no default features; all-feature library strict Clippy passed. Commands/logs are in target/p9/ready-coalescing-{all,core,clippy}.log, using isolated target/p9/ready-coalescing-checks. Scoped rustfmt and diff checks passed. Root owns complete repository formatting/four strict profiles and broader real persistence/quorum validation.
+
+The prior observer did not identify queue-selection causes; no causal or capacity gain is claimed from its singleton counts. No timed benchmark or Mac work was run for this slice. Shared append/barrier/publication failure semantics remain unchanged; service performance claims require controlled actual-completion measurements after broader qualification.

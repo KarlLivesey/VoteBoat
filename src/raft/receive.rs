@@ -244,7 +244,7 @@ impl Raft {
         let old = self.durable.hard_state;
         if previous_term > m.term
             || ((previous_index == 0) != (previous_term == 0))
-            || entries.len() > 64
+            || entries.len() > BatchLimits::MAX_REPLICATION_ENTRIES
             || entries.iter().map(LogEntry::payload_bytes).sum::<usize>()
                 > self.limits.max_batch_bytes
         {

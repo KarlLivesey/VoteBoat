@@ -33,8 +33,11 @@ pub(super) struct Cluster {
     stopping: Arc<AtomicBool>,
     stop: watch::Sender<bool>,
     stats: Arc<[stats::Stats; 3]>,
+    batch_limits: BatchLimits,
     #[cfg(test)]
     paused: Arc<[AtomicBool; 3]>,
+    #[cfg(test)]
+    paused_proposals: Arc<AtomicBool>,
 }
 impl Drop for Cluster {
     fn drop(&mut self) {
@@ -63,6 +66,9 @@ impl Cluster {
         let stats = Arc::new(std::array::from_fn(|_| stats::Stats::default()));
         #[cfg(test)]
         let paused = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
+        #[cfg(test)]
+        let paused_proposals = Arc::new(AtomicBool::new(false));
+        let batch_limits = settings.envelopes.voteboat_limits();
         let mut parts = Vec::new();
         for (slot, (receiver, peer_receiver)) in
             receivers.into_iter().zip(peer_receivers).enumerate()
@@ -73,8 +79,13 @@ impl Cluster {
                 session: StoreSession::new(1).unwrap(),
             };
             let store = MemoryStore::new(binding, limits, bootstrap.clone())?;
-            let core =
+            let mut core =
                 Raft::recover(node, binding, store.state(group)?, limits).map_err(debug_error)?;
+            core.configure_batch_limits(batch_limits)
+                .map_err(debug_error)?;
+            if core.batch_limits() != batch_limits {
+                return Err("Core batch limit readback differs from requested profile".into());
+            }
             parts.push(actor::Parts {
                 slot,
                 core,
@@ -91,6 +102,8 @@ impl Cluster {
                 stats: stats.clone(),
                 #[cfg(test)]
                 paused: paused.clone(),
+                #[cfg(test)]
+                paused_proposals: paused_proposals.clone(),
             });
         }
         // Validate all fallible replica construction before starting any actor.
@@ -105,8 +118,11 @@ impl Cluster {
             stopping,
             stop,
             stats,
+            batch_limits,
             #[cfg(test)]
             paused,
+            #[cfg(test)]
+            paused_proposals,
         };
         cluster.wait_frontier(1).await?;
         Ok(cluster)
@@ -118,6 +134,9 @@ impl Cluster {
     }
     pub fn diagnostics(&self) -> Vec<Diagnostics> {
         self.stats.iter().map(stats::Stats::read).collect()
+    }
+    pub fn batch_limits(&self) -> BatchLimits {
+        self.batch_limits
     }
     pub fn client(&self) -> Client {
         Client(self.senders[0].clone())
@@ -222,6 +241,76 @@ fn bootstrap() -> Result<Bootstrap, Failure> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    fn preload_originals(cluster: &Cluster) -> Vec<oneshot::Receiver<OperationId>> {
+        let mut waits = Vec::new();
+        for start in (1..=4096).step_by(4) {
+            let mut proposals = Vec::new();
+            let mut replies = Vec::new();
+            for original in start..start + 4 {
+                let operation = OperationId::new(original as u128).unwrap();
+                let (reply, wait) = oneshot::channel();
+                proposals.push(Proposal {
+                    operation,
+                    bytes: Vec::new(),
+                });
+                replies.push(reply);
+                waits.push(wait);
+            }
+            assert!(
+                cluster.senders[0]
+                    .try_send(Request { proposals, replies })
+                    .is_ok(),
+                "preloaded requests must fit the bounded admission queue"
+            );
+        }
+        waits
+    }
+    #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
+    async fn ready_original_batches_use_the_configured_bound_and_keep_every_receipt() {
+        for envelopes in [
+            crate::Envelopes::UpstreamDefault,
+            crate::Envelopes::Common64,
+        ] {
+            let settings = Settings {
+                clients: 1024,
+                batch: 4,
+                requested_operations: 4096,
+                operations: 4096,
+                warmup: 0,
+                maintenance: crate::Maintenance::DefaultRetention,
+                envelopes,
+            }
+            .validate()
+            .unwrap();
+            let mut cluster = Cluster::new(settings).await.unwrap();
+            cluster.paused_proposals.store(true, Ordering::Release);
+            let waits = preload_originals(&cluster);
+            cluster.paused_proposals.store(false, Ordering::Release);
+            let checked = tokio::time::timeout(Duration::from_secs(10), async {
+                for (offset, wait) in waits.into_iter().enumerate() {
+                    assert_eq!(wait.await.unwrap().get(), offset as u128 + 1);
+                }
+                cluster.verify(4096, 0).await.unwrap()
+            })
+            .await;
+            let diagnostics = cluster.diagnostics();
+            cluster.shutdown().await.unwrap();
+            assert_eq!(checked.unwrap(), vec![4097; 3]);
+            let leader = serde_json::to_value(&diagnostics[0]).unwrap();
+            assert_eq!(leader["proposed_originals"], 4096);
+            let width = leader["maximum_proposal_width"].as_u64().unwrap() as usize;
+            assert!(width <= settings.envelopes.voteboat_limits().max_proposal_entries);
+            match envelopes {
+                crate::Envelopes::UpstreamDefault => assert!(width > 64),
+                crate::Envelopes::Common64 => assert!(width <= 64),
+            }
+            for follower in &diagnostics[1..] {
+                let follower = serde_json::to_value(follower).unwrap();
+                assert_eq!(follower["proposed_originals"], 0);
+                assert_eq!(follower["proposal_widths"], serde_json::json!([]));
+            }
+        }
+    }
     #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
     async fn compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install() {
         let settings = Settings {

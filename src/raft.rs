@@ -27,6 +27,8 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 mod admitted_replication;
+mod batch_limits;
+pub use batch_limits::BatchLimits;
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
@@ -315,6 +317,8 @@ pub struct Raft {
     node: NodeId,
     binding: StoreBinding,
     limits: LogLimits,
+    batch_limits: BatchLimits,
+    batch_limits_locked: bool,
     durable: GroupLog,
     log_summary: LogSummary,
     membership: Membership,
@@ -437,6 +441,8 @@ impl Raft {
             node,
             binding,
             limits,
+            batch_limits: BatchLimits::default(),
+            batch_limits_locked: false,
             log_summary: LogSummary::from_validated(&state),
             durable: state,
             membership,
@@ -756,12 +762,12 @@ impl Raft {
         use std::mem::size_of;
         let log = self.retained_log_bytes()?;
         // A heartbeat can produce append and read probes for every peer. Each
-        // append contains at most 64 entries and max_batch_bytes payload/framing.
+        // append uses its configured entry count and max_batch_bytes framing.
         // Other paths add bounded persist/commit/snapshot-reference metadata.
         let message = self
             .limits
             .max_batch_bytes
-            .checked_add(64 * size_of::<LogEntry>())?
+            .checked_add(self.batch_limits.max_replication_entries.max(64) * size_of::<LogEntry>())?
             .checked_add(size_of::<Message>() + 4 * size_of::<Effect>())?;
         log.checked_add(input_bytes.checked_mul(4)?)?
             .checked_add(peers.checked_add(2)?.checked_mul(2)?.checked_mul(message)?)?
@@ -1476,7 +1482,7 @@ impl Raft {
             .entries
             .iter()
             .skip((next - self.durable.base_index() - 1) as usize)
-            .take(64)
+            .take(self.batch_limits.max_replication_entries)
         {
             let size = 37 + entry.payload_bytes();
             if size > self.limits.max_batch_bytes.saturating_sub(bytes + 256) {

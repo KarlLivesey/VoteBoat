@@ -3,6 +3,7 @@
 use super::*;
 use crate::log::LogLimits;
 mod fixture;
+mod routine;
 use fixture::*;
 
 #[test]

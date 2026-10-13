@@ -14,13 +14,14 @@ Primary OpenRaft configuration matches pinned minimal bench: election200–2000m
 purge1024, payload1024; default API4096/append4096, snapshot5000/keep1000, zero
 append/flush/network delays, ordinary tick/heartbeat/election flags and runtime
 statistics feature. Shared dependency requirements follow its pinned manifest;
-this standalone lock preserves exact resolved versions. VoteBoat cap64 remains its
-own implementation cost; optional Common64 is attribution only. RetainAll is an
+this standalone lock preserves exact resolved versions. VoteBoat configures its
+startup-only Core limits to 4096 proposal/1024 replication entries and reads back
+the actual limits before actors start; optional Common64 is 64/64 attribution only. RetainAll is an
 explicit secondary profile, never silently substituted for default maintenance.
 
 Ownership: three Core actors each own one LogStore, snapshot store and no-op
 application. Client -> bounded admission -> already-ready original proposals
-combined within64 -> exact volatile persistence ticket/barrier -> real owned peer
+combined within the configured proposal bound -> exact volatile persistence ticket/barrier -> real owned peer
 messages -> validated quorum commit -> exact local completion -> contiguous no-op
 application -> per-original reply. No shared Core lock, group aggregation, opaque
 four-result command or wait to fill a batch. Core effect reservations and owned
@@ -32,6 +33,11 @@ client has at most one live request. Setup/warmup precede measurement; joins of 
 original results end measurement. Postmeasurement verifies every follower's full
 applied prefix. Watched stop joins actors; dropped handles abort owned tasks.
 Fallible replica construction completes before any actor starts.
+
+Original batch widths: each actor has a bounded 0..4096 histogram. A bucket counts
+the original commands in a successfully admitted Core proposal, not request
+batches. Post-run diagnostics derive total admitted originals, batch count and
+maximum width; warmup is included. Non-proposing followers expose empty histograms.
 
 Maintenance: volatile SnapshotRetention validates stage/chunk/seal/publication,
 checks image integrity and retains at most two exact log anchors. Public checkpoint,
@@ -51,7 +57,7 @@ actors. Engine metadata/store/queue differences are measured, not erased. The
 original upstream driver, including its stats-print task, remains separately
 reproducible. Framework volatile callbacks establish no device durability claim.
 
-Implemented evidence: Linux six tests pass under the final independent lock;
+Frozen baseline evidence: Linux and macOS six tests pass under the final independent lock;
 strict all-target Clippy and fmt exit0 without a Cargo-home override. Controls
 cover rounding, partial-prefix refusal, exact historical restore, both-engine
 single/four-original outcomes,12000-entry real maintenance, and a paused follower
@@ -60,9 +66,23 @@ CLI controls at4096/batch4 complete16384 originals plus1024 warmups with all thr
 frontiers17409. Raw compiler failure/final checks and CLI controls are preserved in
 validation/. Tiny debug rates establish no minimum-floor or sustained-capacity win.
 
-Linked mini plan: current—publish this checked workspace and normal-cache hook
-coverage (depends on pinned source/independent lock; Linux scoped tests/fmt/strict0).
-Next—independent Mac qualification and asserted release artifacts (depends on frozen
+The short primary pilots subsequently passed all 18 exact cases and source/artifact
+guards per host. They expose a high-concurrency gap and remain diagnostic. Their
+64/64 VoteBoat baseline source and executables are immutable; the new startup
+batch-limits harness slice has separate qualification evidence.
+
+Startup-limit candidate evidence: seven Linux tests, standalone fmt and strict
+all-target Clippy pass. Four separate 1-client/16-server-runtime controls complete
+16384 originals in4096 requests per engine/profile, with all frontiers17409.
+VoteBoat's observed original proposal width reaches4096 in the primary profile
+and64 in Common64; histogram totals include exactly17408 originals with warmup.
+New Mac checks and candidate performance remain pending. Raw checks are separate
+under validation/performance/slice414-harness.
+
+Linked mini plan: current—qualify effective startup batch limits and original-width
+diagnostics (depends on public Core startup API; every original result, wide-ready
+batch, maintenance/follower tests, fmt/strict0).
+Next—independent Linux/macOS candidate asserted release artifacts (depends on frozen
 source/toolchain/flags; original outcomes/maintenance/snapshot controls and hashes).
 Following—quiet complete primary curves on both hosts (depends on qualified
 artifacts/policy review; seven cells, at least three interleaved trials, exact

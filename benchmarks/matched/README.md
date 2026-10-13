@@ -1,16 +1,24 @@
 # Concurrent framework comparison
 
 Standalone benchmark workspace; comparison dependencies stay outside VoteBoat
-production. Linux qualification passes six tests, formatting and strict
-all-target Clippy with the normal Cargo cache. Actual 1-client/16-server-worker
-CLI controls complete every original for both engines at 4096 clients/batch4.
-These small debug controls establish no performance win. [Evidence](validation/REPORT.md).
+production. The frozen baseline passed Linux/macOS scoped checks and short
+primary diagnostics. The startup batch-limits update passes seven Linux tests,
+formatting, strict all-target Clippy and four actual client/server runtime controls.
+New macOS qualification remains pending.
+These controls establish no sustained capacity or minimum-floor win.
+[Baseline evidence](validation/REPORT.md),
+[Linux pilot](validation/pilot-linux131072/REPORT.md),
+[Mac pilot](validation/pilot-mac131072/REPORT.md),
+[Startup limits checks](validation/performance/slice414-harness/REPORT.md).
 
 One three-voter group, empty business payloads, 1024 singleton warmups and equal
 closed-loop per-client requests. Every request awaits all its original applied
 results. Requested totals round down like pinned OpenRaft. Primary defaults retain
-OpenRaft payload1024/API4096/append4096; VoteBoat's current64 cap is an implementation
-cost to expose. Optional `--envelopes common64` is attribution only.
+OpenRaft payload1024/API4096/append4096. VoteBoat configures its public startup
+limits to 4096 original proposal entries and 1024 replication entries. Reports
+read back effective Core limits and record exact original-entry batch widths,
+including warmup. Optional `--envelopes common64` selects 64/64 for both engines
+and remains attribution only.
 
 Default-retention snapshots every5000 entries, keeps1000 and requires1024 newly
 reclaimable entries. VoteBoat uses real public publication/pinning/compaction and
@@ -38,6 +46,6 @@ Freeze source, lock, toolchain, flags and artifact hashes. `run-curve.sh` runs t
 seven required cells, interleaves engines and preserves every cell's output/error/
 exit status. It never builds. `run-upstream-curve.sh` separately preserves the
 untouched published-default driver. Internal OpenRaft queue/retention occupancy is
-unavailable through its minimal provider; it is not reported as zero. Mac checks,
-long curves and policy review remain outstanding. Reports keep the comparison gate
+unavailable through its minimal provider; it is not reported as zero. Long curves
+and policy review remain outstanding. Reports keep the comparison gate
 pending until that evidence exists.

@@ -13,6 +13,8 @@
 // ENJOYMENT, OR NON-INFRINGEMENT. See the RPL for specific language governing
 // rights and limitations under the RPL.
 #![cfg(feature = "native")]
+#[path = "log_store/batch_limits.rs"]
+mod batch_limits;
 #[path = "log_store/configured.rs"]
 mod configured;
 #[path = "log_store/staging.rs"]

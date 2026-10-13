@@ -242,6 +242,26 @@ fn relay_batched_candidate_repair_and_one_way_joint_output_are_distinct() {
 }
 
 #[test]
+fn ordinary_startup_envelope_does_not_reduce_the_existing_repair_window() {
+    for max_replication_entries in [1, 64, 1024] {
+        let (mut core, _) = retained_repair_pair(7, 0);
+        core.configure_batch_limits(BatchLimits {
+            max_replication_entries,
+            ..BatchLimits::default()
+        })
+        .unwrap();
+        core = core.with_batched_joint_repair();
+        let campaign = core.step(Event::Campaign).unwrap();
+        let original = sent(durable(&mut core, campaign), 4);
+        let Rpc::LearnerRepair { entries, .. } = &original.rpc else {
+            panic!("bounded repair required");
+        };
+        assert!(entries.len() > 1 && entries.len() <= 64);
+        assert!(window(&core, &original).current(&core));
+    }
+}
+
+#[test]
 fn relay_retiring_leader_notice_survives_the_original_role_transition() {
     let mut core = retiring_leader(true);
     acknowledge(&mut core, 2);

@@ -4,8 +4,8 @@
 use super::*;
 use std::mem::size_of;
 
-/// Maximum original commands admitted by one direct Core batch.
-/// Matches the bounded ordinary replication range; not a cross-group unit count.
+/// Default original-command count for one direct Core batch.
+/// Startup BatchLimits can select a larger bounded envelope.
 pub const MAX_PROPOSAL_BATCH_ENTRIES: usize = 64;
 
 /// One original command. Sharing admission does not combine operation identities
@@ -58,6 +58,7 @@ impl Raft {
     }
 
     pub(super) fn begin_step(&mut self) -> Result<(), RaftError> {
+        self.batch_limits_locked = true;
         if self.fenced {
             return Err(RaftError::Fenced);
         }
@@ -104,10 +105,10 @@ impl Raft {
         capacity: usize,
     ) -> Result<u64, RaftError> {
         let count = proposals.len();
-        if count == 0 || count > MAX_PROPOSAL_BATCH_ENTRIES {
+        if count == 0 || count > self.batch_limits.max_proposal_entries {
             return Err(StorageError::Rejected("proposal count budget").into());
         }
-        if capacity > MAX_PROPOSAL_BATCH_ENTRIES {
+        if capacity > self.batch_limits.max_proposal_entries {
             return Err(StorageError::Rejected("proposal allocation count budget").into());
         }
         if self
