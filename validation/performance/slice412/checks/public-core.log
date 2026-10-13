@@ -1,0 +1,14 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.74s
+     Running tests/log_owned.rs (target/p9/owned412/checks/debug/deps/log_owned-ef3a7fdbfd4399f8)
+
+running 5 tests
+test immutable_limits_bound_new_groups_and_missing_lookup_has_no_side_effect ... ok
+test cross_group_failed_later_unit_and_reused_identity_keep_every_original_state ... ok
+test plain_append_and_metadata_keep_prior_payload_allocations_and_cold_groups ... ok
+test configuration_snapshot_and_generation_replacement_keep_the_exact_fallback ... ok
+test finite_ballot_commit_suffix_rows_match_materialized_map_validator ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

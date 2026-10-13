@@ -5,10 +5,7 @@ use super::*;
 
 impl Raft {
     pub(super) fn replication_window(&self, m: &Message) -> Option<Boundary> {
-        let sent = self.requests.get(&m.to)?;
-        if !same_request(sent, m) {
-            return None;
-        }
+        let sent = self.original_replication(m.to, m.context, m.configuration)?;
         match &m.rpc {
             Rpc::Append {
                 previous_index,
@@ -17,14 +14,14 @@ impl Raft {
                 leader_commit,
             } if sent.snapshot.is_none()
                 && *leader_commit <= self.durable.commit_index
-                && self.range_matches(sent, *previous_index, *previous_term, entries) =>
+                && self.range_matches(m.to, &sent, *previous_index, *previous_term, entries) =>
             {
                 Some(Boundary::Append {
                     start: sent.start,
                     end: sent.end,
                 })
             }
-            Rpc::Snapshot { snapshot } if self.snapshot_matches(sent, snapshot) => {
+            Rpc::Snapshot { snapshot } if self.snapshot_matches(&sent, snapshot) => {
                 sent.snapshot.map(Boundary::Snapshot)
             }
             _ => None,
@@ -46,7 +43,7 @@ impl Raft {
                     self.repair_joint(m.to, Some(m.configuration)).ok()??;
                 if sent.snapshot.is_some()
                     || **joint != expected
-                    || !self.range_matches(sent, *previous_index, *previous_term, entries)
+                    || !self.range_matches(m.to, sent, *previous_index, *previous_term, entries)
                     || sent.end > joint.index
                 {
                     return None;
@@ -82,6 +79,7 @@ impl Raft {
     }
     fn range_matches(
         &self,
+        peer: NodeId,
         sent: &Replication,
         previous: u64,
         term: u64,
@@ -93,7 +91,11 @@ impl Raft {
             && entries.len() <= 64
             && entries.iter().enumerate().all(|(offset, e)| {
                 previous.checked_add(offset as u64 + 1) == Some(e.index)
-                    && self.durable.entry_at(e.index) == Some(e)
+                    && self
+                        .durable
+                        .entry_at(e.index)
+                        .or_else(|| self.admitted_entry(peer, sent, e.index))
+                        == Some(e)
             })
     }
     fn snapshot_matches(&self, sent: &Replication, snapshot: &Snapshot) -> bool {
@@ -118,7 +120,12 @@ impl RequestWindow {
             Boundary::Repair { .. } | Boundary::RepairSnapshot(_) => (&core.repair_requests, true),
             _ => return false,
         };
-        let Some(sent) = map.get(&self.recipient.node) else {
+        let sent = if historical {
+            map.get(&self.recipient.node).copied()
+        } else {
+            core.original_replication(self.recipient.node, self.context, self.configuration)
+        };
+        let Some(sent) = sent else {
             return false;
         };
         if sent.context != self.context || sent.configuration != self.configuration {

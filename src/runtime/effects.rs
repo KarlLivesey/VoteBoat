@@ -19,6 +19,7 @@ use crate::{log::LogEntry, worker::*};
 use std::collections::BTreeSet;
 #[path = "effect_inspection.rs"]
 mod inspection;
+mod overlap;
 mod ready;
 pub use inspection::{EffectLeaseInspectionKind, EffectVisitInspection};
 #[cfg(all(test, feature = "native"))]
@@ -102,6 +103,7 @@ struct Active {
     continuation_bytes: usize,
     effects: VecDeque<Effect>,
     leased: Option<EffectTicket>,
+    leased_bytes: usize,
     kind: Option<LeaseKind>,
     waiting: bool,
     ready: bool,
@@ -681,6 +683,8 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 a.effects = VecDeque::new();
             }
             a.leased = Some(ticket);
+            a.leased_bytes = effect_bytes(std::slice::from_ref(&effect), 1)
+                .ok_or(EffectOwnerError::ReservationTooLarge)?;
             a.kind = Some(kind(&effect));
             return Ok(Some(EffectLease { ticket, effect }));
         }
@@ -845,6 +849,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 return Err(EffectOwnerError::StaleEffect);
             }
             a.leased = None;
+            a.leased_bytes = 0;
             a.kind = None;
             a.read_captured = false;
             self.refresh(lease.ticket.visit.group)
@@ -922,6 +927,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             }
             a.effects.extend(effects);
             a.leased = None;
+            a.leased_bytes = 0;
             a.kind = None;
             a.read_captured = false;
             self.refresh(lease.ticket.visit.group)?;
@@ -976,6 +982,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
             return Err(EffectOwnerError::StaleEffect);
         }
         a.leased = None;
+        a.leased_bytes = 0;
         a.kind = None;
         self.refresh(ticket.visit.group)
     }
@@ -1075,6 +1082,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                     for ticket in &tickets {
                         let a = self.active.get_mut(&ticket.visit.group).unwrap();
                         a.leased = None;
+                        a.leased_bytes = 0;
                         a.kind = None;
                     }
                     let _ = self.fail::<()>(EffectOwnerError::ProviderContract);
@@ -1094,6 +1102,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 for ticket in tickets {
                     let a = self.active.get_mut(&ticket.visit.group).unwrap();
                     a.leased = None;
+                    a.leased_bytes = 0;
                     a.kind = None;
                     a.waiting = true;
                 }
@@ -1144,7 +1153,12 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         } else {
             self.requests.get_mut(&request.sequence).unwrap().written = true;
         }
-        for delivery in apply_to_timed(&mut self.runtime, event, now) {
+        let early = self.reserve_replication(&event)?;
+        for delivery in
+            crate::worker::apply_to_timed_with_replication(&mut self.runtime, event, now, |visit| {
+                early.contains(&visit.group)
+            })
+        {
             if terminal {
                 self.active
                     .get_mut(&delivery.visit.group)
@@ -1155,7 +1169,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 Ok(e) => e,
                 Err(e) => return self.fail(EffectOwnerError::Worker(e)),
             };
-            self.install(delivery.visit, effects)?;
+            self.install_continuation(delivery.visit, effects)?;
         }
         Ok(())
     }

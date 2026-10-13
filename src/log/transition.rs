@@ -83,6 +83,9 @@ pub(crate) enum NextLog {
         update: LogUpdate,
     },
 }
+/// Preflighted for one exact exclusive predecessor. Keep preparation and commit
+/// under the same owner, with no intervening mutation of that predecessor.
+pub(crate) struct PreparedLog(NextLog);
 impl NextLog {
     pub(crate) fn plan(
         view: LogView<'_>,
@@ -156,28 +159,47 @@ impl NextLog {
         current: &mut GroupLog,
         update: LogUpdate,
     ) -> Result<LogSummary, StorageError> {
-        match self {
+        let prepared = self.prepare_install(current, &update)?;
+        Ok(prepared.install(current))
+    }
+    pub(crate) fn prepare_install(
+        self,
+        current: &GroupLog,
+        update: &LogUpdate,
+    ) -> Result<PreparedLog, StorageError> {
+        match &self {
             Self::Full {
                 predecessor,
-                next,
                 update: original,
+                ..
             } => {
-                if LogMetadata::from_log(current) != predecessor || update != original {
+                if LogMetadata::from_log(current) != *predecessor || update != original {
                     return Err(StorageError::Rejected(
                         "transition plan predecessor or update mismatch",
                     ));
                 }
-                *current = *next;
-                Ok(LogSummary::from_validated(current))
             }
             Self::Delta(delta) => {
-                delta.check_install(LogMetadata::from_log(current), &update)?;
+                delta.check_install(LogMetadata::from_log(current), update)?;
+            }
+        }
+        Ok(PreparedLog(self))
+    }
+}
+impl PreparedLog {
+    pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
+        match self.0 {
+            NextLog::Full { next, .. } => {
+                *current = *next;
+                LogSummary::from_validated(current)
+            }
+            NextLog::Delta(delta) => {
                 let metadata = delta.metadata();
                 if let Some(suffix) = delta.append {
                     current.entries.extend(suffix.entries);
                 }
                 metadata.install_header(current);
-                Ok(delta.summary)
+                delta.summary
             }
         }
     }

@@ -69,7 +69,7 @@ impl Raft {
             self.clear_reads();
             self.role = Role::Follower;
             self.vote_context = None;
-            self.requests.clear();
+            self.clear_replication_requests();
             self.repair_requests.clear();
         }
         match &m.rpc {
@@ -262,7 +262,7 @@ impl Raft {
         self.role = Role::Follower;
         self.clear_reads();
         self.vote_context = None;
-        self.requests.clear();
+        self.clear_replication_requests();
         self.repair_requests.clear();
         self.validate_append_entries(m, previous_index, previous_term, entries)?;
         if self.durable.term_at(previous_index) != Some(previous_term) {
@@ -372,6 +372,9 @@ impl Raft {
         if self.role != Role::Leader || m.term != old.term {
             return Ok(Vec::new());
         }
+        if self.is_empty_alias(m) {
+            return self.consume_empty_alias(m, success, matching_index);
+        }
         let Some(sent) = self.requests.get(&m.from).copied() else {
             return Ok(Vec::new());
         };
@@ -381,7 +384,7 @@ impl Raft {
         if sent.snapshot.is_some() {
             return Ok(Vec::new());
         }
-        self.requests.remove(&m.from);
+        self.retire_replication(m.from);
         if success {
             if matching_index != sent.end {
                 return Err(RaftError::InvalidMessage);
@@ -417,7 +420,7 @@ impl Raft {
         self.role = Role::Follower;
         self.clear_reads();
         self.vote_context = None;
-        self.requests.clear();
+        self.clear_replication_requests();
         self.repair_requests.clear();
         let mut reply = self.reply(m, Rpc::ReadAck);
         reply.term = hard.term;
@@ -472,7 +475,7 @@ impl Raft {
         self.role = Role::Follower;
         self.clear_reads();
         self.vote_context = None;
-        self.requests.clear();
+        self.clear_replication_requests();
         self.repair_requests.clear();
         if meta.index <= self.durable.commit_index {
             if self
@@ -525,7 +528,7 @@ impl Raft {
         if index != sent.end {
             return Err(RaftError::InvalidMessage);
         }
-        self.requests.remove(&m.from);
+        self.retire_replication(m.from);
         let prefix = self.progress[&m.from].max(index);
         self.progress.insert(m.from, prefix);
         self.next_index.insert(m.from, prefix + 1);
@@ -549,6 +552,20 @@ impl Raft {
         if self.role != Role::Leader || m.term != old.term {
             return Ok(Vec::new());
         }
+        if self.is_empty_alias(m) {
+            if index == 0
+                || term == 0
+                || index > self.durable.last_index()
+                || self
+                    .durable
+                    .term_at(index)
+                    .is_some_and(|found| found != term)
+            {
+                return Err(RaftError::InvalidMessage);
+            }
+            self.empty_append_aliases.remove(&m.from);
+            return Ok(Vec::new());
+        }
         let Some(sent) = self.requests.get(&m.from) else {
             return Ok(Vec::new());
         };
@@ -565,7 +582,7 @@ impl Raft {
         {
             return Err(RaftError::InvalidMessage);
         }
-        self.requests.remove(&m.from);
+        self.retire_replication(m.from);
         if index < self.durable.base_index() {
             self.next_index.insert(m.from, self.durable.base_index());
         } else {

@@ -1,0 +1,22 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.21s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-4f003f5204247ed2)
+
+running 4 tests
+
+thread 'persistence_overlap::insufficient_extra_space_keeps_original_serialized_progress' (1415) panicked at tests/persistence_overlap/owner.rs:109:5:
+assertion failed: extra > nodes[0].owner.limits().reserved_bytes - original
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test persistence_overlap::insufficient_extra_space_keeps_original_serialized_progress ... FAILED
+test persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge ... ok
+test persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable ... ok
+test persistence_overlap::written_and_durable_in_one_poll_preserve_queued_sends_and_original_commit ... ok
+
+failures:
+
+failures:
+    persistence_overlap::insufficient_extra_space_keeps_original_serialized_progress
+
+test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 194 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test effect_owner`

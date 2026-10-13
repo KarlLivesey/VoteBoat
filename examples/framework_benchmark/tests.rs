@@ -128,3 +128,5 @@ fn volatile_completion_requires_the_exact_accepted_ticket() {
     assert!(store.state(group).is_ok());
     assert!(store.barrier(&tickets).is_err());
 }
+#[path = "tests/owned_store.rs"]
+mod owned_store;

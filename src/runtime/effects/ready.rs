@@ -104,6 +104,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 continuation_bytes: reserved,
                 effects: VecDeque::new(),
                 leased: None,
+                leased_bytes: 0,
                 kind: None,
                 waiting: false,
                 ready: false,

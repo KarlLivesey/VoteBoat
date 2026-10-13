@@ -410,3 +410,23 @@ pub fn apply_to_timed<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy>(
         shard.with_core(visit, now, |core| task.apply(core))
     })
 }
+
+/// Physical owner continuation after independently reserving early output.
+/// The public helpers retain their original Written-only admission behavior.
+pub(crate) fn apply_to_timed_with_replication<
+    Q: ReadyScheduler,
+    T: TimerService,
+    E: ElectionEntropy,
+>(
+    shard: &mut TimedShard<Q, T, E>,
+    event: WorkerEvent,
+    now: MonoTime,
+    mut replicate: impl FnMut(VisitTicket) -> bool,
+) -> Vec<WorkerDelivery> {
+    deliver(event, |visit, task| {
+        shard.with_core(visit, now, |core| match task {
+            Task::Written(ticket) if replicate(visit) => core.replicate_admitted(ticket),
+            other => other.apply(core),
+        })
+    })
+}

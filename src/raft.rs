@@ -26,7 +26,9 @@ use crate::{
 };
 use std::collections::{BTreeMap, BTreeSet};
 
+mod admitted_replication;
 mod leadership;
+use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
 mod proposals;
 pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
@@ -324,6 +326,8 @@ pub struct Raft {
     progress: BTreeMap<NodeId, u64>,
     next_index: BTreeMap<NodeId, u64>,
     requests: BTreeMap<NodeId, Replication>,
+    admitted_ranges: BTreeMap<NodeId, AdmittedRange>,
+    empty_append_aliases: BTreeMap<NodeId, EmptyAppendAlias>,
     // Candidate-only transfer cursors; never quorum replication or ballots.
     repair_requests: BTreeMap<NodeId, Replication>,
     batched_joint_repair: bool,
@@ -444,6 +448,8 @@ impl Raft {
             progress: BTreeMap::new(),
             next_index: BTreeMap::new(),
             requests: BTreeMap::new(),
+            admitted_ranges: BTreeMap::new(),
+            empty_append_aliases: BTreeMap::new(),
             repair_requests: BTreeMap::new(),
             batched_joint_repair: false,
             snapshot_joint_repair: false,
@@ -778,6 +784,7 @@ impl Raft {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
+        self.clear_replication_requests();
         self.transfer = None;
         self.leader_contact = None;
         self.readiness_check = None;
@@ -985,7 +992,7 @@ impl Raft {
         self.clear_reads();
         self.role = Role::Candidate;
         self.votes.clear();
-        self.requests.clear();
+        self.clear_replication_requests();
         self.repair_requests.clear();
         self.vote_context = None;
         let term = self
@@ -1118,7 +1125,7 @@ impl Raft {
             self.clear_reads();
             self.votes.clear();
             self.vote_context = None;
-            self.requests.clear();
+            self.clear_replication_requests();
             self.repair_requests.clear();
             self.progress.clear();
             self.next_index.clear();
@@ -1183,13 +1190,13 @@ impl Raft {
             }
             After::LeaderAppend => {
                 self.progress.insert(self.node, self.durable.last_index());
-                effects.extend(self.broadcast()?);
+                effects.extend(self.broadcast_after_admission()?);
                 effects.extend(self.maybe_commit()?);
             }
             After::Commit if self.role == Role::Leader => effects.extend(self.broadcast()?),
             After::Commit => (),
             After::Compact => {
-                self.requests.clear();
+                self.clear_replication_requests();
                 self.repair_requests.clear();
                 if self.role == Role::Leader {
                     effects.extend(self.broadcast()?);
@@ -1201,7 +1208,7 @@ impl Raft {
                 effects.push(Effect::SnapshotInstalled(reference));
             }
             After::CheckpointCompact(reference) => {
-                self.requests.clear();
+                self.clear_replication_requests();
                 self.repair_requests.clear();
                 self.checkpoint_reconcile = Some(reference);
                 effects.push(Effect::CheckpointCompacted(reference));
@@ -1303,7 +1310,7 @@ impl Raft {
         self.clear_reads();
         self.votes.clear();
         self.vote_context = None;
-        self.requests.clear();
+        self.clear_replication_requests();
         self.repair_requests.clear();
         self.progress.clear();
         self.next_index.clear();
@@ -1366,7 +1373,7 @@ impl Raft {
         self.role = Role::Leader;
         self.progress.clear();
         self.next_index.clear();
-        self.requests.clear();
+        self.clear_replication_requests();
         self.repair_requests.clear();
         let next = self
             .durable

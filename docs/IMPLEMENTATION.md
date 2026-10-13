@@ -13,6 +13,19 @@ or durable device throughput is inferred from these volatile diagnostics.
 [P9 macro and mini plan](P9.md) records the complete acceptance curve, current
 deliverable and next two, with purposes, dependencies and completion checks.
 
+411 ordinary Written replication overlap and412 opaque owned log validation are
+implemented and locally qualified together. [411 evidence](../validation/performance/slice411/README.md)
+defines the exact ticket, additional output reservation, original held leases,
+terminal continuation and serialized fallback. [412 evidence](../validation/performance/slice412/README.md)
+records atomic validated state ownership and the modeled provider's removed
+history copy. Final affected all716/core547 and formatting/four strict profiles
+pass; real TCP/QUIC service retry/replacement/recovery2 also passes. Mac checks
+and paired Linux/M2 Max timing remain separately tracked.
+Configured-Core caching is still pending;412 does not implement it. The current
+mini plan now prioritizes paired measurement, then configured/snapshot steady
+state deltas, then the matched concurrent framework comparison. These planned
+steps are separate from the passing functional evidence.
+
 The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance
 floor is claimed achieved.

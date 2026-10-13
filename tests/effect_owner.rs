@@ -1069,6 +1069,8 @@ mod client_admission {
 mod node_facade;
 #[path = "support/peer_driver.rs"]
 mod peer_driver;
+#[path = "persistence_overlap/owner.rs"]
+mod persistence_overlap;
 #[path = "support/replica_driver.rs"]
 mod replica_driver;
 mod support;

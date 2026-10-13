@@ -21,7 +21,9 @@ use crate::{
 };
 use std::collections::BTreeMap;
 
+mod owned;
 pub(crate) mod transition;
+pub use owned::OwnedLogState;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EntryPayload {

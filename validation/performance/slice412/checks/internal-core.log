@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.14s
+     Running unittests src/lib.rs (target/p9/owned412/checks/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 2 tests
+test log::owned::tests::stale_later_private_summary_is_refused_before_any_canonical_install ... ok
+test log::owned::tests::revision_exhaustion_after_an_earlier_valid_unit_has_no_partial_progress ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 245 filtered out; finished in 0.00s
+

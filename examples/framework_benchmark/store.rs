@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 //! Exact-ticket volatile completion through the public logical store seam.
-use std::collections::BTreeMap;
 use voteboat::{contracts::StorageError, identity::*, log::*};
 
 pub(super) struct MemoryStore {
     binding: StoreBinding,
     limits: LogLimits,
-    state: BTreeMap<GroupIdentity, GroupLog>,
+    state: OwnedLogState,
     sequence: u64,
     pending: Vec<LogTicket>,
 }
@@ -17,8 +16,8 @@ impl MemoryStore {
         limits: LogLimits,
         bootstrap: Bootstrap,
     ) -> Result<Self, StorageError> {
-        let mut state = BTreeMap::new();
-        apply_batch(&mut state, &[LogMutation::Create(bootstrap)], limits)?;
+        let mut state = OwnedLogState::new(limits)?;
+        state.apply_batch(vec![LogMutation::Create(bootstrap)])?;
         Ok(Self {
             binding,
             limits,
@@ -26,6 +25,14 @@ impl MemoryStore {
             sequence: 0,
             pending: Vec::new(),
         })
+    }
+    fn completed_state(&self, group: GroupIdentity) -> Result<&GroupLog, StorageError> {
+        if !self.pending.is_empty() {
+            return Err(StorageError::Rejected("volatile transition not completed"));
+        }
+        self.state
+            .get(group)
+            .ok_or(StorageError::Rejected("unknown group"))
     }
 }
 impl LogStore for MemoryStore {
@@ -36,13 +43,7 @@ impl LogStore for MemoryStore {
         self.limits
     }
     fn state(&self, group: GroupIdentity) -> Result<GroupLog, StorageError> {
-        if !self.pending.is_empty() {
-            return Err(StorageError::Rejected("volatile transition not completed"));
-        }
-        self.state
-            .get(&group)
-            .cloned()
-            .ok_or(StorageError::Rejected("unknown group"))
+        self.completed_state(group).cloned()
     }
     fn append_batch(
         &mut self,
@@ -65,16 +66,19 @@ impl LogStore for MemoryStore {
                 "scaffold does not implement checkpoints",
             ));
         }
-        apply_batch(&mut self.state, &mutations, self.limits)?;
-        self.sequence = sequence;
-        let tickets: Vec<_> = mutations
+        let groups: Vec<_> = mutations
             .iter()
-            .map(|m| {
-                let group = match m {
-                    LogMutation::Create(b) => b.group,
-                    LogMutation::Update(u) => u.group,
-                };
-                let state = &self.state[&group];
+            .map(|mutation| match mutation {
+                LogMutation::Create(bootstrap) => bootstrap.group,
+                LogMutation::Update(update) => update.group,
+            })
+            .collect();
+        self.state.apply_batch(mutations)?;
+        self.sequence = sequence;
+        let tickets: Vec<_> = groups
+            .iter()
+            .map(|&group| {
+                let state = self.state.get(group).unwrap();
                 LogTicket {
                     binding: self.binding,
                     batch: sequence,
@@ -106,7 +110,7 @@ impl LogStore for MemoryStore {
         count: usize,
         bytes: usize,
     ) -> Result<Vec<LogEntry>, StorageError> {
-        let state = self.state(group)?;
+        let state = self.completed_state(group)?;
         if state.generation != generation {
             return Err(StorageError::StaleTicket);
         }

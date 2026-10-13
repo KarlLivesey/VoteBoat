@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.63s
+     Running tests/effect_owner.rs (target/debug/deps/effect_owner-4f003f5204247ed2)
+
+running 4 tests
+test persistence_overlap::local_failure_after_early_send_fences_and_retains_external_charge ... ok
+test persistence_overlap::insufficient_extra_space_keeps_original_serialized_progress ... ok
+test persistence_overlap::written_and_durable_in_one_poll_preserve_queued_sends_and_original_commit ... ok
+test persistence_overlap::follower_can_persist_before_local_barrier_and_held_send_survives_durable ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 194 filtered out; finished in 0.00s
+

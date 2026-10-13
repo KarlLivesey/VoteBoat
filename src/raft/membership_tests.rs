@@ -53,7 +53,7 @@ fn configuration(id: u64, voters: &[u64], learners: &[u64]) -> Configuration {
     )
     .unwrap()
 }
-fn core() -> Raft {
+pub(super) fn core() -> Raft {
     let initial = configuration(1, &[1, 2, 3], &[]);
     let bootstrap = Bootstrap {
         group: GroupIdentity {
@@ -114,7 +114,7 @@ fn core() -> Raft {
 }
 /// Deliver one exact host-asserted completion to the actual core. No filesystem,
 /// wire, application or quorum durability is inferred from these fixture tokens.
-fn durable(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
+pub(super) fn durable(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
     assert_eq!(effects.len(), 1);
     let Effect::Persist(update) = &effects[0] else {
         panic!("expected one persistence dependency")

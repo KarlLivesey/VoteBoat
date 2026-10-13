@@ -363,7 +363,7 @@ impl Raft {
             self.clear_reads();
             self.role = Role::Follower;
             self.vote_context = None;
-            self.requests.clear();
+            self.clear_replication_requests();
             self.repair_requests.clear();
             return self.persist(
                 HardState {
