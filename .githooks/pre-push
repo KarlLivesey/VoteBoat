@@ -9,3 +9,10 @@ cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warning
 cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings
 cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings
+
+# The comparison workspace has its own lock and comparison-only dependencies.
+# Root --all-targets does not lint it, so check it explicitly when present.
+if [ -f benchmarks/matched/Cargo.toml ]; then
+    cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml -- --check
+    cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings
+fi

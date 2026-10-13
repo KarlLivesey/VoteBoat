@@ -58,6 +58,8 @@ type Replica<
     NativeServiceConnector,
     voteboat::native::transport::NativeTransportFactory<voteboat::native::wire::NativeWireCodec>,
 >;
+#[path = "benchmark/batching.rs"]
+mod batching;
 #[path = "benchmark/failure.rs"]
 mod failure;
 #[path = "benchmark/observe.rs"]
@@ -224,6 +226,7 @@ fn open_recorded(
 }
 #[derive(Default)]
 struct PollTotals {
+    batching: Option<batching::Totals>,
     rounds: usize,
     host_ns: u128,
     max_host_ns: u128,
@@ -256,11 +259,16 @@ fn poll_selected<L: LogStore + Send + 'static>(
             continue;
         }
         let checkpoints = replica.checkpoints().pending.clone();
-        let progress = checked(replica.poll(
-            MonoTime(clock.elapsed().as_millis() as u64),
-            NodePollBudget::default(),
-        ))?;
+        let now = MonoTime(clock.elapsed().as_millis() as u64);
+        let batch_before = totals
+            .batching
+            .as_ref()
+            .map(|_| batching::before(replica, now));
+        let progress = checked(replica.poll(now, NodePollBudget::default()))?;
         if let Some(p) = progress.replica {
+            if let (Some(batches), Some(before)) = (&mut totals.batching, &batch_before) {
+                batches.observe(i + 1, before, &p.steps)?;
+            }
             totals.persistence_batches += p.persistence_batches;
             totals.worker_events += p.worker_events;
             totals.application_deliveries += p.applications;
@@ -388,12 +396,30 @@ fn workload<L: LogStore + Send + 'static>(
 ) -> Result<Measurement, Failure> {
     workload_in_partition(replicas, clock, spec, 0, Instant::now())
 }
+fn workload_diagnostic<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    spec: Workload<'_>,
+    enabled: bool,
+) -> Result<Measurement, Failure> {
+    workload_observed(replicas, clock, spec, 0, Instant::now(), enabled)
+}
 fn workload_in_partition<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     clock: &Instant,
     spec: Workload<'_>,
     offset: usize,
     start: Instant,
+) -> Result<Measurement, Failure> {
+    workload_observed(replicas, clock, spec, offset, start, false)
+}
+fn workload_observed<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    spec: Workload<'_>,
+    offset: usize,
+    start: Instant,
+    batch_diagnostics: bool,
 ) -> Result<Measurement, Failure> {
     let Workload {
         first,
@@ -407,7 +433,10 @@ fn workload_in_partition<L: LogStore + Send + 'static>(
     let mut group_pending = BTreeMap::<GroupIdentity, usize>::new();
     let mut samples = Vec::with_capacity(count);
     let mut max_inflight = 0;
-    let mut polls = PollTotals::default();
+    let mut polls = PollTotals {
+        batching: batch_diagnostics.then(batching::Totals::default),
+        ..PollTotals::default()
+    };
     let result = drive(replicas, clock, &mut polls, |ns| {
         while sent < count && pending.len() < window {
             let operation = (first + sent) as u128;
@@ -465,6 +494,9 @@ fn workload_in_partition<L: LogStore + Send + 'static>(
             }
         }
         return Err(error);
+    }
+    if let Some(batches) = &polls.batching {
+        batches.verify(&samples)?;
     }
     Ok(Measurement {
         elapsed: start.elapsed(),
@@ -793,7 +825,7 @@ fn run<L: LogStore + Send + 'static>(
     let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
     campaign(&mut replicas, clock, groups)?;
     eprintln!("phase=warmup protocol={protocol:?} window={window}");
-    let warmup = match workload(
+    let warmup = match workload_diagnostic(
         &mut replicas,
         clock,
         Workload {
@@ -803,6 +835,7 @@ fn run<L: LogStore + Send + 'static>(
             groups,
             diagnostic: Some((root, "warmup")),
         },
+        !shared && !traces.is_empty(),
     ) {
         Ok(result) => result,
         Err(error) => {
@@ -817,7 +850,7 @@ fn run<L: LogStore + Send + 'static>(
     let placement = leader_placement(&replicas, groups)?;
     eprintln!("phase=measurement operations={count} groups={groups} leaders={placement}");
     observe::capture(&mut storage, "before_measurement", &traces);
-    let measured = match workload(
+    let measured = match workload_diagnostic(
         &mut replicas,
         clock,
         Workload {
@@ -827,6 +860,7 @@ fn run<L: LogStore + Send + 'static>(
             groups,
             diagnostic: Some((root, "measurement")),
         },
+        !shared && !traces.is_empty(),
     ) {
         Ok(result) => result,
         Err(error) => {
@@ -861,18 +895,35 @@ fn run<L: LogStore + Send + 'static>(
     )?;
     close(replicas, clock)?;
     observe::capture(&mut storage, "after_recover_join", &recovered_traces);
-    if shared {
-        observe::write_csv(&mut exclusive(&root.join("storage.csv"))?, &storage)?;
-    } else if !traces.is_empty() {
-        observe::write_journal(root, &storage)?;
-    }
-    report_run(
+    write_run_reports(
         &config,
         &placement,
+        &warmup,
         &measured,
         recovery_retries,
+        &storage,
         !traces.is_empty(),
     )
+}
+fn write_run_reports(
+    config: &RunConfig<'_>,
+    placement: &str,
+    warmup: &Measurement,
+    measured: &Measurement,
+    recovery_retries: usize,
+    storage: &[(String, usize, observe::Totals)],
+    journal: bool,
+) -> Result<(), Failure> {
+    batching::write(
+        config.root,
+        &[("warmup", &warmup.polls), ("measurement", &measured.polls)],
+    )?;
+    if config.shared {
+        observe::write_csv(&mut exclusive(&config.root.join("storage.csv"))?, storage)?;
+    } else if journal {
+        observe::write_journal(config.root, storage)?;
+    }
+    report_run(config, placement, measured, recovery_retries, journal)
 }
 
 fn collect_workload_receipts<L: LogStore + Send + 'static>(
@@ -989,7 +1040,7 @@ fn report_run(
     let percentile = |p: usize| latency[(count * p).div_ceil(100) - 1] as f64 / 1000.;
     let election_ms = if shared { 10000 } else { 1000 };
     let diagnostic = if !shared && journal {
-        " journal_timings=true"
+        " journal_timings=true proposal_batch_diagnostics=true queue_selection_reason_observed=false"
     } else {
         ""
     };

@@ -48,6 +48,12 @@ The no-default-features command is
 The native-only command is
 `cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings`.
 
+The separate `benchmarks/matched` workspace has its own comparison-only lock and
+dependencies. Root `--all-targets` does not cover it. When present, the pre-push
+hook also runs its formatting check and strict all-target Clippy with that lock
+offline. Fetch its pinned dependencies before first use; do not bypass the hook
+or count a clean production workspace as a clean comparison harness.
+
 Run feature configurations that spawn `target/debug` executables sequentially,
 or give each configuration a distinct `CARGO_TARGET_DIR`. Cargo's build lock
 can be released while integration tests are still using those executables.

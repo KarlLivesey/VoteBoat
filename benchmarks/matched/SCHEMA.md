@@ -1,0 +1,71 @@
+# Concurrent framework schema and qualification
+
+Macro: P9.0 reproducible matched-framework evidence, P9.1 ordered-group capacity,
+and the selected P9.3 maintenance path. This is a benchmark embedding; it adds no
+production runtime adapter or dependency.
+
+Data/API: one real three-voter group; clients1/64/256/512/1024/4096; original entries
+per request1 or4; requested total rounded down to equal complete client batches;
+1024 singleton warmups. Empty business requests/responses. Original VoteBoat IDs
+remain required metadata. Each original has an applied completion; a batch client
+waits for all four. Common client runtime has1 worker; separate server runtime has16.
+
+Primary OpenRaft configuration matches pinned minimal bench: election200–2000ms,
+purge1024, payload1024; default API4096/append4096, snapshot5000/keep1000, zero
+append/flush/network delays, ordinary tick/heartbeat/election flags and runtime
+statistics feature. Shared dependency requirements follow its pinned manifest;
+this standalone lock preserves exact resolved versions. VoteBoat cap64 remains its
+own implementation cost; optional Common64 is attribution only. RetainAll is an
+explicit secondary profile, never silently substituted for default maintenance.
+
+Ownership: three Core actors each own one LogStore, snapshot store and no-op
+application. Client -> bounded admission -> already-ready original proposals
+combined within64 -> exact volatile persistence ticket/barrier -> real owned peer
+messages -> validated quorum commit -> exact local completion -> contiguous no-op
+application -> per-original reply. No shared Core lock, group aggregation, opaque
+four-result command or wait to fill a batch. Core effect reservations and owned
+input/receipt/mailbox bounds remain enforced. Peer progress precedes more data.
+
+Failure/cleanup: overflow, unexpected effect, missing/duplicate/wrong result,
+noncontiguous application, unavailable actor or timeout invalidates a run. Each
+client has at most one live request. Setup/warmup precede measurement; joins of all
+original results end measurement. Postmeasurement verifies every follower's full
+applied prefix. Watched stop joins actors; dropped handles abort owned tasks.
+Fallible replica construction completes before any actor starts.
+
+Maintenance: volatile SnapshotRetention validates stage/chunk/seal/publication,
+checks image integrity and retains at most two exact log anchors. Public checkpoint,
+compact, supply, stage and install helpers perform actual transitions. After5000
+newly applied entries, historical no-op state at applied−1000 is exactly known;
+compact only with at least1024 newly reclaimable entries. No hidden reset/truncation
+or bypass of the authoritative log validator. Core/store generations and original
+context/application gates remain intact.
+
+Remaining model differences: VoteBoat snapshot image frontier is also its logical
+base, while OpenRaft keeps1000 older entries behind a latest-frontier image. Their
+healthy retained suffix policy is selected alike, but image frontiers and catch-up
+mechanics differ. VoteBoat inline application and fixed2000ms host campaign guard
+also differ from OpenRaft's worker separation/randomized200–2000ms elections.
+VoteBoat uses owned message delivery; upstream uses function-call RPC into its
+actors. Engine metadata/store/queue differences are measured, not erased. The
+original upstream driver, including its stats-print task, remains separately
+reproducible. Framework volatile callbacks establish no device durability claim.
+
+Implemented evidence: Linux six tests pass under the final independent lock;
+strict all-target Clippy and fmt exit0 without a Cargo-home override. Controls
+cover rounding, partial-prefix refusal, exact historical restore, both-engine
+single/four-original outcomes,12000-entry real maintenance, and a paused follower
+that catches up through verified snapshot installation. Two actual1/16-runtime
+CLI controls at4096/batch4 complete16384 originals plus1024 warmups with all three
+frontiers17409. Raw compiler failure/final checks and CLI controls are preserved in
+validation/. Tiny debug rates establish no minimum-floor or sustained-capacity win.
+
+Linked mini plan: current—publish this checked workspace and normal-cache hook
+coverage (depends on pinned source/independent lock; Linux scoped tests/fmt/strict0).
+Next—independent Mac qualification and asserted release artifacts (depends on frozen
+source/toolchain/flags; original outcomes/maintenance/snapshot controls and hashes).
+Following—quiet complete primary curves on both hosts (depends on qualified
+artifacts/policy review; seven cells, at least three interleaved trials, exact
+counts/p99/errors/raw reports, source/lock/artifact/hardware identities). The
+comparison gate remains pending; no performance acceptance closes from these
+functional controls alone.

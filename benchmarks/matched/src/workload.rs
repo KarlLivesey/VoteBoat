@@ -1,0 +1,219 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+use super::{openraft_engine, voteboat_engine, Failure, Settings, UPSTREAM};
+use serde::Serialize;
+use std::{sync::Arc, time::Instant};
+use tokio::sync::Barrier;
+
+pub(super) enum Cluster {
+    Openraft(openraft_engine::Cluster),
+    Voteboat(voteboat_engine::Cluster),
+}
+#[derive(Clone)]
+enum Client {
+    Openraft(openraft_engine::Client),
+    Voteboat(voteboat_engine::Client),
+}
+impl Cluster {
+    pub async fn new(engine: &str, settings: Settings) -> Result<Self, Failure> {
+        match engine {
+            "openraft" => Ok(Self::Openraft(
+                openraft_engine::Cluster::new(settings).await?,
+            )),
+            "voteboat" => Ok(Self::Voteboat(
+                voteboat_engine::Cluster::new(settings).await?,
+            )),
+            _ => Err("unknown engine".into()),
+        }
+    }
+    fn client(&self) -> Client {
+        match self {
+            Self::Openraft(c) => Client::Openraft(c.client()),
+            Self::Voteboat(c) => Client::Voteboat(c.client()),
+        }
+    }
+    async fn verify(&self, settings: Settings) -> Result<Vec<u64>, Failure> {
+        match self {
+            Self::Openraft(c) => c.verify(settings.operations, settings.warmup).await,
+            Self::Voteboat(c) => c.verify(settings.operations, settings.warmup).await,
+        }
+    }
+    pub async fn shutdown(&mut self) -> Result<(), Failure> {
+        match self {
+            Self::Openraft(c) => c.shutdown().await,
+            Self::Voteboat(c) => c.shutdown().await,
+        }
+    }
+}
+impl Client {
+    async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
+        match self {
+            Self::Openraft(c) => c.write(originals).await,
+            Self::Voteboat(c) => c.write(originals).await,
+        }
+    }
+}
+#[derive(Serialize)]
+pub(super) struct Report {
+    engine: &'static str,
+    comparison_gate: &'static str,
+    upstream_commit: &'static str,
+    settings: Settings,
+    client_workers: usize,
+    server_workers: usize,
+    members: usize,
+    payload_bytes: usize,
+    completion: &'static str,
+    durability: &'static str,
+    transport: &'static str,
+    api_entry_batch_capacity: usize,
+    append_entry_batch_capacity: usize,
+    replication_entry_capacity: usize,
+    primary_upstream_envelopes_preserved: bool,
+    snapshot_model: &'static str,
+    diagnostics: Option<Vec<voteboat_engine::Diagnostics>>,
+    upstream_internal_queues: &'static str,
+    completed_originals: usize,
+    completed_requests: usize,
+    seconds: f64,
+    operations_per_second: f64,
+    request_p50_ns: u64,
+    request_p99_ns: u64,
+    applied_frontiers: Vec<u64>,
+}
+struct Completed {
+    originals: usize,
+    latencies: Vec<u64>,
+}
+async fn client_loop(
+    client: Client,
+    id: usize,
+    settings: Settings,
+    start: Arc<Barrier>,
+) -> Result<Completed, Failure> {
+    let requests = settings.operations / settings.clients / settings.batch;
+    let mut latencies = Vec::with_capacity(requests);
+    let mut completed = 0;
+    start.wait().await;
+    for request in 0..requests {
+        let first = settings.warmup + (request * settings.clients + id) * settings.batch + 1;
+        let originals: Vec<_> = (first..first + settings.batch).map(|n| n as u128).collect();
+        let now = Instant::now();
+        completed += client.write(&originals).await?;
+        latencies.push(u64::try_from(now.elapsed().as_nanos())?);
+    }
+    if completed != settings.operations / settings.clients {
+        return Err("client completion count differs".into());
+    }
+    Ok(Completed {
+        originals: completed,
+        latencies,
+    })
+}
+pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Report, Failure> {
+    let client = cluster.client();
+    for original in 1..=settings.warmup {
+        if client.write(&[original as u128]).await? != 1 {
+            return Err("warmup original completion differs".into());
+        }
+    }
+    let start = Arc::new(Barrier::new(settings.clients + 1));
+    let mut tasks = tokio::task::JoinSet::new();
+    for id in 0..settings.clients {
+        tasks.spawn(client_loop(client.clone(), id, settings, start.clone()));
+    }
+    let now = Instant::now();
+    start.wait().await;
+    let mut completed = 0;
+    let mut latencies = Vec::with_capacity(settings.operations / settings.batch);
+    while let Some(result) = tasks.join_next().await {
+        let result = result??;
+        completed += result.originals;
+        latencies.extend(result.latencies);
+    }
+    let seconds = now.elapsed().as_secs_f64();
+    if completed != settings.operations || latencies.len() != completed / settings.batch {
+        return Err("global original completion count differs".into());
+    }
+    let frontiers = cluster.verify(settings).await?;
+    latencies.sort_unstable();
+    let (engine, diagnostics) = match cluster {
+        Cluster::Openraft(_) => ("openraft", None),
+        Cluster::Voteboat(c) => ("voteboat", Some(c.diagnostics())),
+    };
+    Ok(Report {
+        engine,
+        comparison_gate: "pending_independent_validation_and_policy_review",
+        upstream_commit: UPSTREAM, settings, client_workers: 1, server_workers: 16,
+        members: 3, payload_bytes: 0, completion: "every_original_locally_applied_after_quorum_commit",
+        durability: "volatile_no_disk", transport: "in_process_actor_messages",
+        api_entry_batch_capacity: if engine == "openraft" && settings.envelopes == crate::Envelopes::UpstreamDefault { 4096 } else { 64 },
+        append_entry_batch_capacity: if engine == "openraft" && settings.envelopes == crate::Envelopes::UpstreamDefault { 4096 } else { 64 },
+        replication_entry_capacity: if engine == "openraft" && settings.envelopes == crate::Envelopes::UpstreamDefault { 1024 } else { 64 },
+        primary_upstream_envelopes_preserved: settings.envelopes == crate::Envelopes::UpstreamDefault,
+        snapshot_model: match settings.maintenance {
+            super::Maintenance::DefaultRetention => "openraft_current_snapshot_keep1000_voteboat_historical_snapshot_retained_suffix1000",
+            super::Maintenance::RetainAll => "snapshots_disabled_both_retain_whole_run",
+        },
+        diagnostics, upstream_internal_queues: "not_exposed_by_pinned_minimal_provider",
+        completed_originals: completed, completed_requests: latencies.len(), seconds,
+        operations_per_second: completed as f64 / seconds,
+        request_p50_ns: percentile(&latencies, 50), request_p99_ns: percentile(&latencies, 99),
+        applied_frontiers: frontiers,
+    })
+}
+fn percentile(sorted: &[u64], percent: usize) -> u64 {
+    let rank = (sorted.len() / 100) * percent + ((sorted.len() % 100) * percent).div_ceil(100);
+    sorted[rank.saturating_sub(1)]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    fn settings(batch: usize, operations: usize) -> Settings {
+        Settings {
+            clients: 8,
+            batch,
+            requested_operations: operations,
+            operations: 0,
+            warmup: 4,
+            maintenance: crate::Maintenance::DefaultRetention,
+            envelopes: crate::Envelopes::UpstreamDefault,
+        }
+        .validate()
+        .unwrap()
+    }
+    async fn checked_run(engine: &str, settings: Settings) -> Report {
+        let mut cluster = Cluster::new(engine, settings).await.unwrap();
+        let result = tokio::time::timeout(crate::TIMEOUT, run(&mut cluster, settings)).await;
+        cluster.shutdown().await.unwrap();
+        result.unwrap().unwrap()
+    }
+    #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
+    async fn both_engines_finish_every_original_for_single_and_four_entry_requests() {
+        for engine in ["voteboat", "openraft"] {
+            for batch in [1, 4] {
+                let report = checked_run(engine, settings(batch, 128)).await;
+                assert_eq!(report.completed_originals, 128);
+                assert_eq!(report.completed_requests, 128 / batch);
+                assert_eq!(report.applied_frontiers, vec![133; 3]);
+            }
+        }
+    }
+    #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
+    async fn actual_maintenance_keeps_original_results_and_all_follower_prefixes() {
+        let settings = settings(4, 12_000);
+        for engine in ["voteboat", "openraft"] {
+            let report = checked_run(engine, settings).await;
+            assert_eq!(report.completed_originals, 12_000);
+            assert_eq!(report.applied_frontiers, vec![12_005; 3]);
+            if let Some(stats) = report.diagnostics {
+                for value in stats {
+                    let value = serde_json::to_value(value).unwrap();
+                    assert!(value["checkpoint_count"].as_u64().unwrap() >= 2);
+                    assert!(value["retained_entries"].as_u64().unwrap() < 5000);
+                }
+            }
+        }
+    }
+}

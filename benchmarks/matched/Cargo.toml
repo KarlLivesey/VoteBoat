@@ -1,0 +1,31 @@
+[package]
+name = "voteboat-matched-framework"
+version = "0.1.0"
+edition = "2021"
+publish = false
+license = "RPL-1.5"
+
+# Comparison-only workspace; never inherited by the production crate.
+[workspace]
+
+[dependencies]
+voteboat = { path = "../..", default-features = false }
+bench-minimal = { git = "https://github.com/databendlabs/openraft", rev = "e88bb40707f2e511d8ecc44d31edcb1d814a11a8" }
+openraft = { git = "https://github.com/databendlabs/openraft", rev = "e88bb40707f2e511d8ecc44d31edcb1d814a11a8", features = ["serde", "type-alias"] }
+tokio = { version = "1.39", default-features = false, features = ["rt-multi-thread", "sync", "time", "macros"] }
+futures = "0.3"
+serde = { version = "1.0.114", features = ["derive"] }
+serde_json = "1.0.57"
+
+[lints.rust]
+unsafe_code = "forbid"
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+cognitive_complexity = "deny"
+too_many_lines = "deny"
+
+[profile.release]
+debug = 2
+split-debuginfo = "packed"
+lto = "thin"
+codegen-units = 1

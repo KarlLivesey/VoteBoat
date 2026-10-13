@@ -1,0 +1,55 @@
+{
+  "qualified_at_utc": "2026-10-13T12:40:03.191157+00:00",
+  "scope": "linux_debug_functional_and_lint_only_no_floor_claim",
+  "upstream_commit": "e88bb40707f2e511d8ecc44d31edcb1d814a11a8",
+  "dependency_requirement_source": "https://github.com/databendlabs/openraft/blob/e88bb40707f2e511d8ecc44d31edcb1d814a11a8/benchmarks/minimal/Cargo.toml",
+  "root_git_head": "cab9d6de805ecc6b877a16103280b356f1436f6c",
+  "lock_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+  "source_manifest_sha256": "702c8b8ec009999e326ff83be7147190a4bc6cebdeba5662dff647cd8b5414ce",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "host": "Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux",
+  "resolved_versions": {
+    "bench-minimal": "0.1.0",
+    "futures": "0.3.34",
+    "openraft": "0.10.0-alpha.37",
+    "serde": "1.0.229",
+    "serde_json": "1.0.154",
+    "tokio": "1.53.2"
+  },
+  "standard_cargo_cache": true,
+  "tests": {
+    "passed": 6,
+    "failed": 0
+  },
+  "strict_all_targets_clippy_exit": 0,
+  "format_exit": 0,
+  "cli_controls": [
+    {
+      "engine": "voteboat",
+      "clients": 4096,
+      "batch": 4,
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "applied_frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "profile": "debug_functional_only"
+    },
+    {
+      "engine": "openraft",
+      "clients": 4096,
+      "batch": 4,
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "applied_frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "profile": "debug_functional_only"
+    }
+  ]
+}

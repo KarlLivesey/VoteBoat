@@ -1,0 +1,3 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.39s
+     Running `target/p9/matched-checks/debug/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 16384 --warmup 1024`

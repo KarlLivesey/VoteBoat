@@ -1,0 +1,12 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.78s
+     Running unittests examples/native_benchmark.rs (target/p9/native-batching/checks/debug/examples/native_benchmark-93e64635ca318301)
+
+running 4 tests
+test batching::tests::commit_only_failed_and_unproposed_originals_do_not_count_as_batches ... ok
+test batching::tests::invalid_admissions_positions_and_noncontiguous_visit_members_are_refused ... ok
+test batching::tests::distinct_original_admissions_preserve_duplicate_operations_and_exact_widths ... ok
+test batching::tests::real_native_owner_steps_account_for_every_applied_original_and_singleton ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.03s
+

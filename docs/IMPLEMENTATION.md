@@ -40,7 +40,21 @@ claimed. The existing volatile staging diagnostic now covers stable/joint/
 checkpoint histories and append-plus-commit with full-validator final-state and
 restart oracles; five diagnostic controls pass. Both-host paired timing follows.
 Configured connection/resource scans remain a separate cost.
-The current mini plan covers measured campaigns, then the prepared concurrent
+The standalone [concurrent comparison](../benchmarks/matched/README.md) now passes
+six Linux controls (including real maintenance and paused-follower snapshot
+installation), formatting and strict all-target Clippy. Both actual1/16-runtime
+debug CLI controls return16384 original results and three frontiers17409. The
+independent lock follows the pinned upstream dependency requirements; comparison
+dependencies stay outside production. Mac/release/full curves remain pending.
+The push hook now explicitly checks that workspace's formatter and strict lint.
+
+The [native batch observer](../validation/performance/native-batching/README.md)
+adds actual original proposal-width histograms under existing journal diagnostics.
+Four accounting controls and the original four-result owner control pass; all
+four repository strict profiles are zero. It records pre-poll correlations,
+not private queue causes. Production scheduling/durability policy is unchanged;
+both-host pilot attribution remains pending.
+The current mini plan covers measured campaigns, then the qualified concurrent
 comparison, then bounded configured resource/connection summaries. Planned
 work remains separate from passing evidence; no minimum floor is achieved.
 
