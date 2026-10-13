@@ -1,8 +1,12 @@
 {
   "files": [
     {
+      "path": "MAC-EVIDENCE.json",
+      "sha256": "1e81f1241f679317632bf46da4aa7c318e5a29d493b057f5d866b69d39109c3b"
+    },
+    {
       "path": "MAC-QUALIFICATION.md",
-      "sha256": "3b25a8fb4dec72649d0b1d06751a84dd7a2a19025e5bf1e5599f826a7d1af652"
+      "sha256": "20f4c5319eaa5056579b624b4d6f53c1c3dadb541fdc7546bfd087971d9c4fce"
     },
     {
       "path": "PAIRED-LINUX.md",

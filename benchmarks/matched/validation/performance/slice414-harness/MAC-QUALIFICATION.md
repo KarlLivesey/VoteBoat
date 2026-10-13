@@ -56,3 +56,9 @@ tests/Clippy and verbose builds are under artifacts-mac. No executable or checko
 included. Matching native proofs are under native-mac-profilematched. Mac short
 matched timing passed all 18 exact cases and guards, archived in mac-paired131072;
 sustained/margin qualification remains separate.
+
+MAC-EVIDENCE.json records hashes for all 160 archived Mac evidence files. Every
+file matches its retained local original; final validation confirms all 18 pilot
+cases and source/artifact guards, five explicit-policy strict commands, and both
+fresh asserted native compiler artifacts. This is archive integrity verification,
+not a repeated build or timing run.
