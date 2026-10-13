@@ -3,7 +3,7 @@
 Purpose: permit the unchanged full20M workload to complete in slow singleton cells.
 The original400s driver and its proven artifacts remain untouched. The new source
 is explicitly guard-extended, not an untouched reference. Pin e88bb40707f2e511d8ecc44d31edcb1d814a11a8;
-copy the existing exact1357-file guarded reference including its independent149-
+copy the existing exact1357-file guarded reference including its independent196-
 package lock. Change only WAIT_TIMEOUT Duration::from_secs(400) to3600 in the
 benchmark binary. The same constant also bounds optional delay validation; campaign
 uses defaultzero delay, with no selected network pacing or workload changes.

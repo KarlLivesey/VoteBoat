@@ -1,0 +1,39 @@
+{
+  "pinned_engine": "e88bb40707f2e511d8ecc44d31edcb1d814a11a8",
+  "source_files": 1357,
+  "guard_extended_seconds": 3600,
+  "original_guard_seconds": 400,
+  "independent_lock_packages": 196,
+  "default_benchmark_features": true,
+  "engine_and_driver_fresh_false": true,
+  "source_and_original_anchor_unchanged": true,
+  "functional_controls": [
+    {
+      "batch": 1,
+      "originals": 16384,
+      "samples": 16384,
+      "performance_claim": false
+    },
+    {
+      "batch": 4,
+      "originals": 16384,
+      "samples": 4096,
+      "performance_claim": false
+    }
+  ],
+  "timing_claim": false,
+  "artifacts": [
+    {
+      "target": "openraft",
+      "original": "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/deps/libopenraft-3f31169e9118cfeb.rlib",
+      "copy": "/tmp/voteboat-mac-upstream-guard424-corrected/artifacts/libopenraft-3f31169e9118cfeb.rlib",
+      "sha256": "c2439f2b6c78fa4232d18b2ac8adaa3961e428544cf17d67e50e9662dc75a59e"
+    },
+    {
+      "target": "bench",
+      "original": "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/bench",
+      "copy": "/tmp/voteboat-mac-upstream-guard424-corrected/artifacts/bench",
+      "sha256": "0fc9dd0bc7615549536b9b8c6ad5337ad87ea63b72be05529338a2efba77b089"
+    }
+  ]
+}

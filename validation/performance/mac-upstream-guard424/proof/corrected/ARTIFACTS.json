@@ -1,0 +1,90 @@
+[
+  {
+    "target": "openraft",
+    "original": "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/deps/libopenraft-3f31169e9118cfeb.rlib",
+    "copy": "/tmp/voteboat-mac-upstream-guard424-corrected/artifacts/libopenraft-3f31169e9118cfeb.rlib",
+    "sha256": "c2439f2b6c78fa4232d18b2ac8adaa3961e428544cf17d67e50e9662dc75a59e",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-mac-upstream-guard424-corrected/source/openraft#0.10.0-alpha.37",
+      "manifest_path": "/private/tmp/voteboat-mac-upstream-guard424-corrected/source/openraft/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "openraft",
+        "src_path": "/private/tmp/voteboat-mac-upstream-guard424-corrected/source/openraft/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "clap",
+        "default",
+        "runtime-stats",
+        "serde",
+        "tokio-rt",
+        "type-alias"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/deps/libopenraft-3f31169e9118cfeb.rlib",
+        "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/deps/libopenraft-3f31169e9118cfeb.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "target": "bench",
+    "original": "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/bench",
+    "copy": "/tmp/voteboat-mac-upstream-guard424-corrected/artifacts/bench",
+    "sha256": "0fc9dd0bc7615549536b9b8c6ad5337ad87ea63b72be05529338a2efba77b089",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///private/tmp/voteboat-mac-upstream-guard424-corrected/source/benchmarks/minimal#bench-minimal@0.1.0",
+      "manifest_path": "/private/tmp/voteboat-mac-upstream-guard424-corrected/source/benchmarks/minimal/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench",
+        "src_path": "/private/tmp/voteboat-mac-upstream-guard424-corrected/source/benchmarks/minimal/src/bin/bench.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/bench",
+        "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/bench.dSYM"
+      ],
+      "executable": "/tmp/voteboat-mac-upstream-guard424-corrected/target-release/release/bench",
+      "fresh": false
+    }
+  }
+]

@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/tmp/voteboat-mac-upstream-guard424/prepare.py", line 11, in <module>
+    assert (r/'source/benchmarks/minimal/Cargo.lock').read_text().count('[[package]]')==149
+AssertionError

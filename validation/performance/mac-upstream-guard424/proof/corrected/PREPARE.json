@@ -1,0 +1,9 @@
+{
+  "source_files": 1357,
+  "changed_paths": [
+    "benchmarks/minimal/src/bin/bench.rs"
+  ],
+  "independent_lock_packages": 196,
+  "original_anchor_preserved": true,
+  "candidate_matches_qualified_linux_map": true
+}

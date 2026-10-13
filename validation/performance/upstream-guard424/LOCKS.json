@@ -1,0 +1,15 @@
+{
+  "locks": {
+    "upstream": {
+      "path": "/tmp/voteboat-upstream-guard424-source/benchmarks/minimal/Cargo.lock",
+      "sha256": "3ef72b525fd94d0aa3d7f106b4e003a6c5e2a7ccc0ded39f776470d92787af0b",
+      "package_records": 196
+    },
+    "shared_driver": {
+      "path": "benchmarks/matched/Cargo.lock",
+      "sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+      "package_records": 150
+    }
+  },
+  "correction": "Earlier149 label conflated shared-driver nonroot dependencies with pinned independent upstream lock. Actual exact unchanged upstream196 package records; shareddriver150 records includingroot. No source/dependency/lock change or resolution."
+}

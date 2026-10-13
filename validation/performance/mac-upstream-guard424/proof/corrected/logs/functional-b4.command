@@ -1,0 +1,1 @@
+["/tmp/voteboat-mac-upstream-guard424-corrected/artifacts/bench", "--client-workers", "1", "--server-workers", "16", "--clients", "64", "--batch", "4", "--operations", "16384", "--members", "3", "--warmup-writes", "1024", "--latency"]

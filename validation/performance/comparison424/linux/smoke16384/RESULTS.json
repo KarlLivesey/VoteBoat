@@ -1,0 +1,19 @@
+{
+  "mode": "functional_debug_smoke",
+  "scope": "functional smoke only; no timing/performance claim",
+  "cases": [],
+  "failures": [
+    {
+      "label": "off-c4096-b4-t1",
+      "failure": "off-c4096-b4-t1: actual process failed"
+    },
+    {
+      "label": "on-c4096-b4-t1",
+      "failure": "on-c4096-b4-t1: actual process failed"
+    },
+    {
+      "label": "openraft-c4096-b4-t1",
+      "failure": "openraft-c4096-b4-t1: actual process failed"
+    }
+  ]
+}

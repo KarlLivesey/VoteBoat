@@ -1,0 +1,1 @@
+opt3 debug_assertions=true overflow_checks=true debuginfo=2 lto=thin codegen_units=1; rustflags/wrappers unset

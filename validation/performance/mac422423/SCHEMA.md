@@ -1,0 +1,9 @@
+# Frozen Mac422/423 qualification and matched artifact
+
+Purpose: qualify aggregate bounded proposal staging and explicit equivalent request/original envelopes plus detailed checkpoint/provider observer contracts on published82bce5fd1808c73b1c5ea610bd01e2f56ef6a128. No native build or performance timing. Read only frozenGitblobs: prior actual1396compiledpaths +sixnewmodules =1402compiledinputs; supplementalchanged docs/component-contracts.json creates1403 guardedexportfiles. Distinguish this from the earlier isolated1398configurationinventory. All19combinedSOURCEhashes mustmatch; live424 excluded.
+
+Acceptance: whole rootlibs allfeatures372/core296 sequential; all logstore17/provider29 and coreprovider14; standalone18; debugCLI9 at4096clients/16384originals/1024warmup: bothengines×upstream/common64×batch1/4 plusVBprimaryb4TRACEon. Requireeveryoriginal/request/frontier17409, explicitcapacityunits and request-to-original bounds, exactweightedoriginalhistograms, nestedphase/provider/checkpointshape/count/errorguards. Hostelapsed/inclusive/providerresidual metrics do notproveexclusiveCPUcause.
+
+Ownership/failure: oneoriginalrunner/PID/stage andrawcommandexit/log retained. Separateall/core/matchedtargets, executableconfigssequential. No unchangedrestart fromobservationtimeout. Formatter/fourstrict +standaloneformat/strict zero. Failedfirstattempts retained andfocusedfix/refreeze coordinatedifneeded. No production/main-doc edits.
+
+Artifact: fresh matched-only opt3/debugassertions/overflow/thinLTO/codegen1 after qualification. Actualrootlib/exe fresh:false; compilerpaths resolveintofrozencompiledmap; exactrustcflags, immutablecopies andfullhashes before/after. Artifactishistoricaldiagnostic becausefuture424 guardswillchange acceptance; qualificationdoesnotjustifycapacityfloororhistoricalunit-mismatchedcomparison.

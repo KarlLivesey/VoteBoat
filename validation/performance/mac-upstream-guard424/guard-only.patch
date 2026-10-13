@@ -1,0 +1,11 @@
+--- pinned/benchmarks/minimal/src/bin/bench.rs
++++ guard-extended/benchmarks/minimal/src/bin/bench.rs
+@@ -25,7 +25,7 @@
+ use tracing_flame::FlushGuard;
+ 
+ const WARMUP_WRITES: usize = 1024;
+-const WAIT_TIMEOUT: Duration = Duration::from_secs(400);
++const WAIT_TIMEOUT: Duration = Duration::from_secs(3600);
+ 
+ /// Openraft cluster benchmark
+ #[derive(Parser, Debug)]

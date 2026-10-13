@@ -2,6 +2,22 @@
 
 ## Active P9 plan — 13 October 2026
 
+The corrected Linux diagnostic on41ee217 passes all nine original-result,
+frontier, capacity-unit, source/artifact/compiler and provider checks. Median
+completed PUTS/s is1,160,164 for VoteBoat without observation versus3,217,590 for
+OpenRaft in the shared driver; request p99 is17.021/6.393ms. These short results
+establish no sustained margin. First instrumented leader compaction takes408.832ms
+inclusive, with state cloning11.678ms and store append4.868ms. The next inspection
+covers the remaining public helper, Core transition/completion and broadcast work;
+it is not labeled pure CPU time and does not justify removing proofs.
+[All trials and scope](../validation/performance/comparison424/linux/README.md).
+Fresh Linux/Mac41 library and executable artifacts are qualified. Mac422/423
+broader checks and the Mac424 standalone delta are terminal. Native421's comparison
+of visit policies on one artifact per host follows. The reference Cargo.lock has
+196 package records, with unchanged SHA3ef72b; the shared driver's150 records
+include149 dependencies excluding its root package. The earlier149 reference label
+is corrected from the actual lock without changing dependencies.
+
 419 Linux paired diagnostic is terminal with all nine original-result, frontier,
 weighted-histogram, source and library/executable guards passing. Off medians rise
 977,881→1,247,186 originals/s, with all three pairs improving (paired median

@@ -1,0 +1,361 @@
+{
+  "commit": "82bce5fd1808c73b1c5ea610bd01e2f56ef6a128",
+  "guarded_inputs": 1403,
+  "compiled_inputs": 1402,
+  "supplemental_inputs": [
+    "docs/component-contracts.json"
+  ],
+  "source_unchanged": true,
+  "clippy_config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521",
+  "scope": "Frozen82bce5f Mac422/423 all/core library+contract and standalone/equivalent-envelope/checkpoint observer qualification; freshmatched artifact only, no native/timing/floorclaim",
+  "test_counts": {
+    "library_all": [
+      372
+    ],
+    "library_core": [
+      296
+    ],
+    "model_contract_all": [
+      17,
+      29
+    ],
+    "contract_core": [
+      14
+    ],
+    "matched_tests": [
+      18
+    ]
+  },
+  "cli_original_controls": [
+    {
+      "name": "cli-voteboat-upstream-default-b1",
+      "engine": "voteboat",
+      "profile": "upstream-default",
+      "batch": 1,
+      "originals": 16384,
+      "requests": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        4096,
+        4096,
+        1024
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 4096,
+          "proposal_input_bytes": 196632,
+          "proposal_and_staged_entries_bytes": 458776,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 459576,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-voteboat-upstream-default-b4",
+      "engine": "voteboat",
+      "profile": "upstream-default",
+      "batch": 4,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        16384,
+        16384,
+        1024
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 16384,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 16384,
+          "proposal_input_bytes": 786456,
+          "proposal_and_staged_entries_bytes": 1835032,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 1835832,
+          "selected_log_batch_bytes": 1835832
+        }
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-voteboat-common64-b1",
+      "engine": "voteboat",
+      "profile": "common64",
+      "batch": 1,
+      "originals": 16384,
+      "requests": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        64,
+        64,
+        64
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 64,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 64,
+          "proposal_input_bytes": 3096,
+          "proposal_and_staged_entries_bytes": 7192,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 7992,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-voteboat-common64-b4",
+      "engine": "voteboat",
+      "profile": "common64",
+      "batch": 4,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        256,
+        256,
+        64
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 256,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 256,
+          "proposal_input_bytes": 12312,
+          "proposal_and_staged_entries_bytes": 28696,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 29496,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-openraft-upstream-default-b1",
+      "engine": "openraft",
+      "profile": "upstream-default",
+      "batch": 1,
+      "originals": 16384,
+      "requests": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        4096,
+        4096,
+        1024
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-openraft-upstream-default-b4",
+      "engine": "openraft",
+      "profile": "upstream-default",
+      "batch": 4,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        4096,
+        4096,
+        1024
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 16384,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-openraft-common64-b1",
+      "engine": "openraft",
+      "profile": "common64",
+      "batch": 1,
+      "originals": 16384,
+      "requests": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        64,
+        64,
+        64
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 64,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-openraft-common64-b4",
+      "engine": "openraft",
+      "profile": "common64",
+      "batch": 4,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        64,
+        64,
+        64
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 256,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "attribution": false,
+      "performance_claim": false
+    },
+    {
+      "name": "cli-attribution",
+      "engine": "voteboat",
+      "profile": "upstream-default",
+      "batch": 4,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "limits": [
+        16384,
+        16384,
+        1024
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 16384,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 16384,
+          "proposal_input_bytes": 786456,
+          "proposal_and_staged_entries_bytes": 1835032,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 1835832,
+          "selected_log_batch_bytes": 1835832
+        }
+      },
+      "attribution": true,
+      "performance_claim": false
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "matched",
+      "target": "voteboat",
+      "original": "/tmp/voteboat-mac422423-82bce5f/target-matched-release/release/deps/libvoteboat-2826a7f9533e7ab8.rlib",
+      "copy": "/tmp/voteboat-mac422423-82bce5f/artifacts/matched/libvoteboat-2826a7f9533e7ab8.rlib",
+      "sha256": "fa1b76161b11ad01130ab0d28cc95e1f41f55fc4f002f2143b5dd2c833868e54"
+    },
+    {
+      "kind": "matched",
+      "target": "voteboat-matched-framework",
+      "original": "/tmp/voteboat-mac422423-82bce5f/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/tmp/voteboat-mac422423-82bce5f/artifacts/matched/voteboat-matched-framework",
+      "sha256": "75b18cd166d4254405f6cb320978dc8d8c6df9310805d9f1eff1c06382d77bc3"
+    }
+  ],
+  "profiles": {
+    "matched": "opt3/assertions/overflow/thinLTO/codegen1"
+  },
+  "fresh_root_library_and_executable_each": true
+}

@@ -1,0 +1,1 @@
+{"artifacts": ["voteboat-matched-framework"], "checks": "all frozen source, artifact, driver and applicable compiler guards pass", "mode": "functional_debug_smoke", "source_inputs": 1407}

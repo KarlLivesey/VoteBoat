@@ -47,5 +47,8 @@
   "preserved_setup_failures": [
     "nestedworkspace101 beforecompile; moved exact frozen files outsideVoteBoatworkspace",
     "artifactcopy126 permission; copied original execute mode, bytes/hash unchanged"
-  ]
+  ],
+  "locked_package_records": 196,
+  "locked_sha256": "3ef72b525fd94d0aa3d7f106b4e003a6c5e2a7ccc0ded39f776470d92787af0b",
+  "lock_label_correction": "196 exactreference records;149 was shared-driver nonroot label, notreference count. Source/hash/artifact evidence unchanged."
 }

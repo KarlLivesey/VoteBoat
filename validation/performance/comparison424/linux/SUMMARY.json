@@ -1,0 +1,466 @@
+{
+  "scope": "nine short same41 asserted-artifact/equal-original-envelope cases; no sustainedhealthyfloor orlike-for-like before-after optimizationclaim",
+  "cases_guarded": 9,
+  "source_inputs": 1407,
+  "summaries": {
+    "off": {
+      "completed_originals_each": 1048576,
+      "rates": [
+        1130989.722518544,
+        1160164.2202133038,
+        1236146.7989963926
+      ],
+      "median_originals_per_second": 1160164.2202133038,
+      "request_p99_ms": 17.021463,
+      "checkpoints_each": [
+        204,
+        204,
+        204
+      ]
+    },
+    "on": {
+      "completed_originals_each": 1048576,
+      "rates": [
+        1219277.9077243384,
+        1208676.4288583742,
+        1224573.6528693063
+      ],
+      "median_originals_per_second": 1219277.9077243384,
+      "request_p99_ms": 16.190814,
+      "checkpoints_each": [
+        204,
+        204,
+        204
+      ]
+    },
+    "openraft": {
+      "completed_originals_each": 1048576,
+      "rates": [
+        3217590.2659057076,
+        3157220.804670433,
+        3383739.8844966255
+      ],
+      "median_originals_per_second": 3217590.2659057076,
+      "request_p99_ms": 6.392894
+    },
+    "leader_first_on": {
+      "phase_ms": {
+        "host_admission": 98.625131,
+        "core_direct": 20.442745,
+        "persist_helper_inclusive": 116.563336,
+        "store_append_nested": 10.063763,
+        "store_barrier_nested": 0.128256,
+        "application": 2.006681,
+        "results": 91.844787,
+        "send": 2.93635,
+        "maintenance_tick_inclusive": 410.755093,
+        "snapshot_helpers_inclusive": 0.360315,
+        "host_wait": 133.088199,
+        "actor_lifetime_inclusive": 881.834375,
+        "checkpoint_reserve_inclusive": 0.063028,
+        "checkpoint_publish_inclusive": 1.089881,
+        "checkpoint_compact_inclusive": 408.832499,
+        "checkpoint_effects_inclusive": 0.413661,
+        "store_state_clone_nested": 11.679105,
+        "snapshot_begin_nested": 0.265995,
+        "snapshot_write_chunk_nested": 0.023257,
+        "snapshot_seal_nested": 0.014021,
+        "snapshot_publish_nested": 0.085171,
+        "snapshot_abort_nested": 0.0,
+        "snapshot_load_nested": 0.0,
+        "snapshot_latest_reference_nested": 0.0,
+        "snapshot_pin_for_log_nested": 0.084844,
+        "snapshot_load_pinned_nested": 0.214354,
+        "snapshot_reconcile_log_inclusive_nested": 0.152942
+      },
+      "checkpoint_provider_scopes": [
+        {
+          "scope": "checkpoint_reserve_inclusive",
+          "methods": [
+            {
+              "method": "store_append_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "store_barrier_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "store_state_clone_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_begin_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_write_chunk_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_seal_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_publish_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_abort_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_latest_reference_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_pin_for_log_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_pinned_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_reconcile_log_inclusive_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            }
+          ]
+        },
+        {
+          "scope": "checkpoint_publish_inclusive",
+          "methods": [
+            {
+              "method": "store_append_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "store_barrier_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "store_state_clone_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_begin_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 265995,
+              "items": 0
+            },
+            {
+              "method": "snapshot_write_chunk_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 23257,
+              "items": 1632
+            },
+            {
+              "method": "snapshot_seal_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 14021,
+              "items": 0
+            },
+            {
+              "method": "snapshot_publish_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 85171,
+              "items": 0
+            },
+            {
+              "method": "snapshot_abort_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_latest_reference_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_pin_for_log_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_pinned_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_reconcile_log_inclusive_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            }
+          ]
+        },
+        {
+          "scope": "checkpoint_compact_inclusive",
+          "methods": [
+            {
+              "method": "store_append_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 4867770,
+              "items": 0
+            },
+            {
+              "method": "store_barrier_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 7239,
+              "items": 0
+            },
+            {
+              "method": "store_state_clone_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 11677502,
+              "items": 4334273
+            },
+            {
+              "method": "snapshot_begin_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_write_chunk_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_seal_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_publish_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_abort_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_latest_reference_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_pin_for_log_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 84844,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_pinned_nested",
+              "calls": 408,
+              "failures": 0,
+              "total_elapsed_ns": 83561,
+              "items": 0
+            },
+            {
+              "method": "snapshot_reconcile_log_inclusive_nested",
+              "calls": 204,
+              "failures": 0,
+              "total_elapsed_ns": 152942,
+              "items": 0
+            }
+          ]
+        },
+        {
+          "scope": "checkpoint_effects_inclusive",
+          "methods": [
+            {
+              "method": "store_append_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "store_barrier_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "store_state_clone_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_begin_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_write_chunk_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_seal_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_publish_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_abort_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_latest_reference_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_pin_for_log_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            },
+            {
+              "method": "snapshot_load_pinned_nested",
+              "calls": 128,
+              "failures": 0,
+              "total_elapsed_ns": 11852,
+              "items": 0
+            },
+            {
+              "method": "snapshot_reconcile_log_inclusive_nested",
+              "calls": 0,
+              "failures": 0,
+              "total_elapsed_ns": 0,
+              "items": 0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "maintain_semantics": "all everyoriginal/frame/APIhardsoft/snapshotrepresentation/settings preserved; inclusive/nonadditive elapsed intervals, notCPU",
+  "next_lead": "checkpointcompact408.832ms versusactualscopedstateclone11.678ms andstoreappend4.868ms in firstONleader; inspectpublichelper+Coretransition/completion/broadcast residual beforechangingalgorithm"
+}

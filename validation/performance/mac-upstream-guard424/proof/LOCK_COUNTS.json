@@ -1,0 +1,8 @@
+{
+  "pinned_minimal_lock_records": 196,
+  "pinned_lock_sha256": "3ef72b525fd94d0aa3d7f106b4e003a6c5e2a7ccc0ded39f776470d92787af0b",
+  "matched_shared_lock_records": 150,
+  "matched_shared_nonroot_dependencies": 149,
+  "first_attempt_exit": 1,
+  "corrected_attempt_exit": 0
+}

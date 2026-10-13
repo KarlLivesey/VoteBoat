@@ -1,7 +1,7 @@
 # Pinned-engine guard-extended reference
 
 ExactOpenRaft e88bb40707f2e511d8ecc44d31edcb1d814a11a8 source, same independent
-149-package lock and default benchmark features. All1357 source inputs are guarded;
+196-package lock and default benchmark features. All1357 source inputs are guarded;
 only bench.rs changes WAIT_TIMEOUT400→3600. The same constant also bounds optional
 delay validation; actual default network/append/flush delays remainzero. This is
 explicitly a guard-extended driver. Original400s source/artifacts remain unchanged.
