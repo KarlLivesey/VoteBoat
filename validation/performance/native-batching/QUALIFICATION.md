@@ -49,3 +49,32 @@ formatting already passed. Original remote log is retained at
 The focused retry adds the existing Homebrew tool directory to PATH; source and
 behavior are unchanged. No Mac accounting pass, strict check, asserted build or
 pilot is claimed until its actual terminal is recorded.
+
+## Completed macOS and matched build-profile follow-up
+
+The Mac follow-up is now qualified: terminal57578 exit0 ran four accounting
+controls (4/0, actual loopback TCP endpoints), targeted strict native-example
+Clippy (0 diagnostics), fresh asserted release build and exact source/example
+guard. Format check had already passed. Supplementary library profile guard
+terminal9869 exit0 verified fresh:false for the actual compiled library too.
+No source or package versions changed. Three original environment failures are
+preserved: absent protoc PATH; Homebrew cargo shadowing rustup; protobuf-build's
+major==3 check rejecting Homebrew protoc36.2. Final combined preflight verifies
+rustup Cargo/rustc1.98.0, explicit existing protoc3.21.12, two build jobs and the
+independent snapshot target. No installation or fallback source mutation occurred.
+
+Both hosts compiled the exact same 1353-file frozen source tree:
+9bd40105b592d1d4680d0fca857c63709e412f202be2b702cf8cc33eeddf1741.
+Actual compiler-artifact records require opt_level3, debug_assertions:true,
+overflow_checks:true, test:false and fresh:false for library and native example.
+The original Linux ordinary-release binary/hash is preserved separately and is
+excluded from planned asserted-profile attribution cells. Linux asserted binary
+hash is 619ed16f88f2d0d4ebd05b06af7dc5146e8142f38951515a4dc9faf3230bc8b3;
+Mac asserted binary hash is 91d72a3bc47e22cd39e8f9cdffba0f293d346ff4231b331cb6adc1d3de09a025.
+The raw compiler JSONL remains under target/p9/native-batching and the independent
+Mac workspace; archive guards retain the actual artifact/profile/source identity.
+
+Four attribution cells per host are prepared: TCP/QUIC x window1/32, 64 measured
+commands plus the actual fixed64-command warmup. See pilot-plan.csv. These are
+future observation cells, not paired throughput claims. **No pilot has run**;
+root must release each host only after other qualification/timing work ends.

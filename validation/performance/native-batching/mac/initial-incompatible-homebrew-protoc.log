@@ -1,0 +1,16 @@
+   Compiling ring v0.17.14
+   Compiling rustls v0.23.45
+   Compiling raft-proto v0.7.0
+error: failed to run custom build command for `raft-proto v0.7.0`
+
+Caused by:
+  process didn't exit successfully: `/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/../checks/debug/build/raft-proto-aecdcd7b808c2f66/build-script-build` (exit status: 101)
+  --- stdout
+  The system `protoc` version mismatch, require >= 3.1.0, got 36.2.x, fallback to the bundled `protoc`
+
+  --- stderr
+
+  thread 'main' (24027449) panicked at /Users/karllivesey/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/protobuf-build-0.14.1/src/protobuf_impl.rs:35:14:
+  No suitable `protoc` (>= 3.1.0) found in PATH
+  note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+warning: build failed, waiting for other jobs to finish...

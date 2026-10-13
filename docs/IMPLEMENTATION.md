@@ -35,10 +35,14 @@ ballots/configuration/snapshots/rollback keep full validation. Linux broad840/59
 real TCP/QUIC2 and formatting/four strict profiles pass, including actual modeled
 power loss and stale-session controls. Mac413 scoped qualification passes532/338,
 formatting/four strict profiles and1349-input guards; its exact scope is recorded
-[separately](../validation/performance/slice413/mac/README.md). No timed413 gain is
-claimed. The existing volatile staging diagnostic now covers stable/joint/
-checkpoint histories and append-plus-commit with full-validator final-state and
-restart oracles; five diagnostic controls pass. Both-host paired timing follows.
+[separately](../validation/performance/slice413/mac/README.md). The existing
+volatile diagnostic covers stable/joint/checkpoint histories and append-plus-
+commit with exact full-validator final-state/restart oracles; five controls pass
+for both variants on both hosts. Linux96-case timing is terminal: configured
+metadata paths improve5.20–6.21x at256 entries and54.86–62.89x at4096.
+Plain4096 append-commit regresses1.585→2.059µs and remains explicitly recorded.
+[Raw413 timing](../validation/performance/slice413/measurements/README.md).
+Mac timing awaits a quiet window; no physical durability or floor claim.
 Configured connection/resource scans remain a separate cost.
 The standalone [concurrent comparison](../benchmarks/matched/README.md) now passes
 six Linux controls (including real maintenance and paused-follower snapshot
@@ -52,8 +56,11 @@ The [native batch observer](../validation/performance/native-batching/README.md)
 adds actual original proposal-width histograms under existing journal diagnostics.
 Four accounting controls and the original four-result owner control pass; all
 four repository strict profiles are zero. It records pre-poll correlations,
-not private queue causes. Production scheduling/durability policy is unchanged;
-both-host pilot attribution remains pending.
+not private queue causes. Mac accounting4/0 and targeted strict lint pass on the
+same1353-input source; both genuine asserted-release artifacts are ready. Three
+Mac environment failures and their exact tool-path/protoc-version corrections
+are retained. Production scheduling/durability policy is unchanged; both-host
+pilot attribution remains pending.
 The current mini plan covers measured campaigns, then the qualified concurrent
 comparison, then bounded configured resource/connection summaries. Planned
 work remains separate from passing evidence; no minimum floor is achieved.

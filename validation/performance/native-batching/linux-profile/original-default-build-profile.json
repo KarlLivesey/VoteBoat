@@ -1,0 +1,7 @@
+{
+  "command": "CARGO_TARGET_DIR=target/p9/native-batching/checks cargo +stable build --locked --offline --release --all-features --example native_benchmark",
+  "cargo_explicit_profile_overrides": null,
+  "compiler_jsonl_retained": false,
+  "profile_status": "Cargo default release; assertions/overflow were not explicitly enabled or compiler-artifact verified",
+  "original_binary_sha256": "c74324ddcbbb55356e821c82b02d114a63fa0efe0a8ce3bf339cfa6c58c72893"
+}

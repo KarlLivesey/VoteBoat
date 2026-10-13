@@ -1,0 +1,30 @@
+{
+  "host": "Apple M2 Max",
+  "variant": "reference",
+  "productionCommit": "8d50b0edfc95b45d6b4ec87489eb0a3b1a62f5a2",
+  "inputs": 1346,
+  "diagnosticPassed": 5,
+  "exits": {
+    "platform": 0,
+    "source_start": 0,
+    "fmt": 0,
+    "diagnostic_controls": 0,
+    "diagnostic_strict": 0,
+    "build": 0,
+    "collect": 0,
+    "source_terminal": 0
+  },
+  "guards": [
+    {
+      "label": "source_start",
+      "matching": 1346
+    },
+    {
+      "label": "source_terminal",
+      "matching": 1346
+    }
+  ],
+  "artifacts": 2,
+  "assertedRelease": true,
+  "timedCases": 0
+}

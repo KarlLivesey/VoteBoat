@@ -1,0 +1,1 @@
+["/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/configured413/reference-linux/artifacts/log_staging_benchmark","/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/configured413/measure-linux/staging-stable-h4096-append-t1-reference.csv","0","4096","256","append","stable"]

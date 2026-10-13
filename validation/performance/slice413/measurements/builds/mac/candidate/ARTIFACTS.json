@@ -1,0 +1,44 @@
+[
+  {
+    "target": "voteboat",
+    "compiler_source": "/private/tmp/voteboat-p9-configured413-candidate/repo/src/lib.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-configured413-candidate/build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-p9-configured413-candidate/artifacts/libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "7923ed40dfc50a39aa72d9eb3f6e0311b96dd57f98554dd754b9d37d2f2f5bdf"
+  },
+  {
+    "target": "log_staging_benchmark",
+    "compiler_source": "/private/tmp/voteboat-p9-configured413-candidate/repo/examples/log_staging_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-p9-configured413-candidate/build/release/examples/log_staging_benchmark",
+    "copy": "/tmp/voteboat-p9-configured413-candidate/artifacts/log_staging_benchmark",
+    "sha256": "ce27b6027dc92d343c3cd8872e8c1d2dc959e7fc84dd5dc523974cead18a3f03"
+  }
+]

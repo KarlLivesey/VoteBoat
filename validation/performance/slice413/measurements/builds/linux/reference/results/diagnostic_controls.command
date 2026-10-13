@@ -1,0 +1,1 @@
+env CARGO_TARGET_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/configured413/reference-linux/controls cargo +stable test --locked --offline --all-features --example log_staging_benchmark 

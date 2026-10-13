@@ -1,0 +1,38 @@
+{
+  "reason": "compiler-artifact",
+  "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/source#voteboat@0.1.0",
+  "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/source/Cargo.toml",
+  "target": {
+    "kind": [
+      "lib"
+    ],
+    "crate_types": [
+      "lib"
+    ],
+    "name": "voteboat",
+    "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/source/src/lib.rs",
+    "edition": "2021",
+    "doc": true,
+    "doctest": true,
+    "test": true
+  },
+  "profile": {
+    "opt_level": "3",
+    "debuginfo": 0,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "test": false
+  },
+  "features": [
+    "default",
+    "native",
+    "quic",
+    "tls"
+  ],
+  "filenames": [
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/asserted-linux-build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native-batching/asserted-linux-build/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+  ],
+  "executable": null,
+  "fresh": false
+}

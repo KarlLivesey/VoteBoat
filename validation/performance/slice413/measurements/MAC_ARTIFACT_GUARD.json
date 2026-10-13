@@ -1,0 +1,36 @@
+[
+  {
+    "variant": "reference",
+    "inputs": 1346,
+    "artifacts": [
+      {
+        "target": "voteboat",
+        "sha256": "daf28a51346dac34d8ec23e8a8e52cafacf92e9b99b34ada3979955343489d64"
+      },
+      {
+        "target": "log_staging_benchmark",
+        "sha256": "6643b4e5b21a3a10e006f3de79f4b6e943a3ce122a72d591cd87f4ff08120e3c"
+      }
+    ],
+    "sourceUnchanged": true,
+    "originalsUnchanged": true,
+    "copiesUnchanged": true
+  },
+  {
+    "variant": "candidate",
+    "inputs": 1350,
+    "artifacts": [
+      {
+        "target": "voteboat",
+        "sha256": "7923ed40dfc50a39aa72d9eb3f6e0311b96dd57f98554dd754b9d37d2f2f5bdf"
+      },
+      {
+        "target": "log_staging_benchmark",
+        "sha256": "ce27b6027dc92d343c3cd8872e8c1d2dc959e7fc84dd5dc523974cead18a3f03"
+      }
+    ],
+    "sourceUnchanged": true,
+    "originalsUnchanged": true,
+    "copiesUnchanged": true
+  }
+]

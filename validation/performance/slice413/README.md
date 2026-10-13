@@ -24,7 +24,9 @@ Initial fixture import/recovery assumptions and an invalid broad test-target
 command are retained separately. Corrected commands execute the actual targets;
 no product validator or lint threshold was weakened. [Mac affected qualification](mac/README.md)
 passes532 all-feature/338 core with four strict profiles and1349-input guards.
-No measured413 gain is claimed yet.
+Separate [volatile staging measurements](measurements/README.md) now quantify
+Linux gains and its plain-path regression; Mac timing is pending. They establish
+no real durable, network/application or minimum-framework performance claim.
 
 The existing volatile staging example now accepts stable/joint/checkpoint
 histories and append-plus-commit updates. Its five controls verify complete

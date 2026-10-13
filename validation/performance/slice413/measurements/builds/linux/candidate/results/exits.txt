@@ -1,0 +1,8 @@
+platform=0
+source_start=0
+fmt=0
+diagnostic_controls=0
+diagnostic_strict=0
+build=0
+collect=0
+source_terminal=0

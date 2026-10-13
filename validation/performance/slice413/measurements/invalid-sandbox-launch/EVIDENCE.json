@@ -1,0 +1,16 @@
+{
+  "files": 11,
+  "sha256": {
+    "IDENTITY_BEFORE.json": "11d51013164576bf6c207193210ab7ad813ca052958c801bed757f440d02fde4",
+    "INVALID_COMPARISON.md": "b60d3e49858be75dfc7b7804ef2c32bd6017c996ca8fd3b58e1791b61179dd89",
+    "PARTIAL_RESULTS.json": "dfa88d65a7126b8a2985abbb7787795598428ec5ac583f7db7cd5fbf412a8ece",
+    "exits.txt": "27c2da12fcee925fd94ade158b85e0478f00e051e5094c1762293d967bffed5c",
+    "runner.log": "0a324806ae451ee3b461b80ff0062a9929a6847afdc2d9373b8003d7c5ae80f4",
+    "stage.txt": "6da5b18878e110928643ebcc38dbb7552cf3a296eea56493e23edc2b93eecff8",
+    "staging-plain-h256-append-t1-reference.command": "fd3a22d762e1da9e3fc69a23561fc0b93686d325e4935e2bedf19b8a26c144a2",
+    "staging-plain-h256-append-t1-reference.csv": "caa12b19f173a37d16b729a7ca3ba1b3d778ab7342443e9a5048cf24a82e3b68",
+    "staging-plain-h256-append-t1-reference.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "staging-plain-h256-append-t1-reference.stdout": "37654ba59f29627778931760192eac2c99518012ebce7acf7b5ea95f4c0f4c50",
+    "terminal.txt": "77e8033a25a31a6e52d97b525f0f29610b64322ace7eaee66f4a3dc301d07e38"
+  }
+}

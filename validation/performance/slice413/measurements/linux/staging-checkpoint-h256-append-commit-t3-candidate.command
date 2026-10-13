@@ -1,0 +1,1 @@
+["/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/configured413/candidate-linux/artifacts/log_staging_benchmark","/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/configured413/measure-linux/staging-checkpoint-h256-append-commit-t3-candidate.csv","0","256","256","append-commit","checkpoint"]

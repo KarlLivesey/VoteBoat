@@ -35,6 +35,8 @@ The internal real-node control additionally uses window4 and window1, checking
 actual returned originals against applied receipts and singleton widths.
 
 See SCHEMA.md for the pre-edit ownership/failure plan and QUALIFICATION.md for
-actual local checks and original failures. No macOS or throughput conclusions are
-claimed here. Sources are identified in OWNED_SOURCES.sha256; root owns final
-publication and serialized benchmark campaigns.
+actual checks and original failures. Mac accounting4/0 and targeted strict lint
+now pass against the same frozen source; both asserted-release artifacts and
+compiler/source guards are prepared. The corrected Mac environment and initial
+failures are retained. No timed throughput conclusion is claimed. Sources are
+identified in OWNED_SOURCES.sha256; root owns serialized benchmark campaigns.

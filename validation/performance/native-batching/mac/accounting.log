@@ -1,0 +1,17 @@
+   Compiling rustls-webpki v0.103.15
+   Compiling raft-proto v0.7.0
+   Compiling rustls v0.23.45
+   Compiling raft v0.7.0
+   Compiling quinn-proto v0.11.19
+   Compiling voteboat v0.1.0 (/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 22.40s
+     Running unittests examples/native_benchmark.rs (../checks/debug/examples/native_benchmark-df69266be613137d)
+
+running 4 tests
+test batching::tests::commit_only_failed_and_unproposed_originals_do_not_count_as_batches ... ok
+test batching::tests::invalid_admissions_positions_and_noncontiguous_visit_members_are_refused ... ok
+test batching::tests::distinct_original_admissions_preserve_duplicate_operations_and_exact_widths ... ok
+test batching::tests::real_native_owner_steps_account_for_every_applied_original_and_singleton ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 36 filtered out; finished in 0.88s
+
