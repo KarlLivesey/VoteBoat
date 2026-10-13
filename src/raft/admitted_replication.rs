@@ -82,6 +82,7 @@ impl Raft {
                     start,
                     end,
                     snapshot: None,
+                    commit_at_start: self.durable.commit_index,
                 },
             );
             self.admitted_ranges

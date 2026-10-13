@@ -1,0 +1,33 @@
+   Compiling bytes v1.12.1
+    Checking cfg-if v1.0.5
+    Checking libc v0.2.190
+    Checking byteorder v1.5.0
+    Checking untrusted v0.9.0
+    Checking zerocopy v0.8.62
+    Checking slog v2.7.0
+    Checking thiserror v1.0.69
+    Checking fxhash v0.2.1
+    Checking protobuf v2.28.0
+    Checking getrandom v0.2.17
+    Checking rand_core v0.6.4
+    Checking ring v0.17.14
+    Checking voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+   Compiling protobuf-codegen v2.28.0
+    Checking ppv-lite86 v0.2.21
+    Checking rand_chacha v0.3.1
+    Checking rand v0.8.8
+   Compiling protobuf-build v0.14.1
+   Compiling raft-proto v0.7.0
+    Checking raft v0.7.0
+error: this function has too many lines (101/100)
+    --> src/raft.rs:1418:5
+     |
+1418 |     fn append_for(&mut self, peer: NodeId) -> Result<Effect, RaftError> {
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#too_many_lines
+     = note: requested on the command line with `-D clippy::too-many-lines`
+
+error: could not compile `voteboat` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `voteboat` (lib test) due to 1 previous error

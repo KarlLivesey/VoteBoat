@@ -166,6 +166,7 @@ impl Raft {
                 start,
                 end,
                 snapshot: None,
+                commit_at_start: self.durable.commit_index,
             },
         );
         Ok(vec![Effect::Send(self.scoped_message(

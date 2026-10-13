@@ -205,6 +205,7 @@ fn bulk_snapshot_unknown_peer_and_changed_ballot_keep_original_serialized_path()
                     start: 1,
                     end: 1,
                     snapshot: None,
+                    commit_at_start: core.durable.commit_index,
                 },
             );
             core.progress.insert(node(3), 0);
@@ -229,6 +230,7 @@ fn bulk_snapshot_unknown_peer_and_changed_ballot_keep_original_serialized_path()
                     start: 0,
                     end: 1,
                     snapshot: Some(reference),
+                    commit_at_start: core.durable.commit_index,
                 },
             );
             core.progress.insert(node(3), 0);

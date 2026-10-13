@@ -291,6 +291,11 @@ fn signal_without_election_quorum_is_not_transfer_success() {
     assert_eq!(c.replicas[&2].core.role(), Role::Candidate);
     c.act(1, Event::CancelLeadershipTransfer { context: t.context });
     c.propose(1, 2, 8);
+    // The explicit queue loss above dropped the source's original requests.
+    // Progress does not resend them; the unchanged heartbeat repairs that loss.
+    assert_eq!(c.commands(1), vec![vec![7]]);
+    c.act(1, Event::Heartbeat);
+    c.pump();
     assert_eq!(c.commands(1), vec![vec![7], vec![8]]);
 }
 #[test]

@@ -117,6 +117,7 @@ impl Raft {
                     start: 0,
                     end: reference.index,
                     snapshot: Some(reference),
+                    commit_at_start: self.durable.commit_index,
                 },
             );
             effects.push(Effect::SnapshotRequired {

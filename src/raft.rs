@@ -32,6 +32,7 @@ pub use batch_limits::BatchLimits;
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
+mod progress_broadcast;
 mod proposals;
 pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
 mod readiness;
@@ -307,6 +308,8 @@ struct Replication {
     start: u64,
     end: u64,
     snapshot: Option<SnapshotRef>,
+    // Original notification frontier; retries do not acknowledge a newer one.
+    commit_at_start: u64,
 }
 struct PendingRead {
     barrier: ReadBarrier,
@@ -1196,10 +1199,12 @@ impl Raft {
             }
             After::LeaderAppend => {
                 self.progress.insert(self.node, self.durable.last_index());
-                effects.extend(self.broadcast_after_admission()?);
+                effects.extend(self.broadcast_append_progress()?);
                 effects.extend(self.maybe_commit()?);
             }
-            After::Commit if self.role == Role::Leader => effects.extend(self.broadcast()?),
+            After::Commit if self.role == Role::Leader => {
+                effects.extend(self.broadcast_commit_progress()?)
+            }
             After::Commit => (),
             After::Compact => {
                 self.clear_replication_requests();
@@ -1416,40 +1421,7 @@ impl Raft {
         // network round trip exceeds the heartbeat interval. Term changes and
         // compaction clear requests; responses retire them before new work.
         if let Some(sent) = self.requests.get(&peer).copied() {
-            if let Some(reference) = sent.snapshot {
-                return Ok(Effect::SnapshotRequired {
-                    to: peer,
-                    context: sent.context,
-                    reference,
-                });
-            }
-            let entries = if sent.start > sent.end {
-                Vec::new()
-            } else {
-                let start = (sent.start - self.durable.base_index() - 1) as usize;
-                let end = (sent.end - self.durable.base_index()) as usize;
-                self.durable
-                    .entries
-                    .get(start..end)
-                    .ok_or(RaftError::WrongCompletion)?
-                    .to_vec()
-            };
-            return Ok(Effect::Send(
-                self.scoped_message(
-                    sent.configuration,
-                    peer,
-                    sent.context,
-                    Rpc::Append {
-                        previous_index: sent.start - 1,
-                        previous_term: self
-                            .durable
-                            .term_at(sent.start - 1)
-                            .ok_or(RaftError::WrongCompletion)?,
-                        entries,
-                        leader_commit: self.durable.commit_index,
-                    },
-                ),
-            ));
+            return self.retry_replication(peer, sent);
         }
         let next = self.next_index[&peer]
             .min(self.durable.last_index() + 1)
@@ -1465,6 +1437,7 @@ impl Raft {
                     start: 0,
                     end: reference.index,
                     snapshot: Some(reference),
+                    commit_at_start: self.durable.commit_index,
                 },
             );
             return Ok(Effect::SnapshotRequired {
@@ -1504,6 +1477,7 @@ impl Raft {
                 start: next,
                 end,
                 snapshot: None,
+                commit_at_start: self.durable.commit_index,
             },
         );
         Ok(Effect::Send(self.message(

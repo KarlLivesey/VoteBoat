@@ -2350,6 +2350,13 @@ fn advance_readiness_commit(
     ready: &ReadyLearner,
     binding: StoreBinding,
 ) {
+    // Keep the actual original heartbeat scope: ordinary append progress no
+    // longer retransmits another request merely because the log grew.
+    let heartbeat = leader.step(Event::Heartbeat).unwrap();
+    let append_two = sent(&heartbeat, 2);
+    assert!(matches!(&append_two.rpc, Rpc::Append {
+        previous_index: 2, entries, leader_commit: 2, ..
+    } if entries.is_empty()));
     let effects = leader
         .step(Event::Propose {
             operation: OperationId::new(99).unwrap(),
@@ -2361,7 +2368,8 @@ fn advance_readiness_commit(
         Err(ReadinessError::Consensus(RaftError::Busy))
     );
     let effects = persist(leader, leader_log, effects);
-    let append_two = sent(&effects, 2);
+    assert!(effects.iter().all(|effect| !matches!(effect,
+        Effect::Send(message) if message.to == node(2))));
     // Complete the heartbeat already in flight before acknowledging the new
     // command; a reply cannot exceed the original request's matching end.
     let effects = leader
@@ -2374,10 +2382,14 @@ fn advance_readiness_commit(
             },
         )))
         .unwrap();
-    let append_two = sent(&effects, 2);
+    let command_two = sent(&effects, 2);
+    assert_ne!(command_two.context, append_two.context);
+    assert!(matches!(&command_two.rpc, Rpc::Append {
+        previous_index: 2, entries, leader_commit: 2, ..
+    } if entries.len() == 1 && entries[0].index == 3));
     let effects = leader
         .step(Event::Receive(response(
-            &append_two,
+            &command_two,
             2,
             Rpc::Appended {
                 success: true,

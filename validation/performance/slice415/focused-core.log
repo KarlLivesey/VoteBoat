@@ -1,0 +1,50 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling memchr v2.8.3
+   Compiling protobuf v2.28.0
+   Compiling libc v0.2.190
+   Compiling bytes v1.12.1
+   Compiling regex-syntax v0.8.11
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling zerocopy v0.8.62
+   Compiling cfg-if v1.0.5
+   Compiling bitflags v1.3.2
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling slog v2.7.0
+   Compiling thiserror v1.0.69
+   Compiling byteorder v1.5.0
+   Compiling untrusted v0.9.0
+   Compiling cc v1.6.0
+   Compiling fxhash v0.2.1
+   Compiling aho-corasick v1.1.5
+   Compiling syn v2.0.119
+   Compiling ring v0.17.14
+   Compiling getrandom v0.2.17
+   Compiling rand_core v0.6.4
+   Compiling regex-automata v0.4.18
+   Compiling thiserror-impl v1.0.69
+   Compiling getset v0.1.7
+   Compiling protobuf-codegen v2.28.0
+   Compiling regex v1.13.1
+   Compiling ppv-lite86 v0.2.21
+   Compiling protobuf-build v0.14.1
+   Compiling rand_chacha v0.3.1
+   Compiling rand v0.8.8
+   Compiling raft-proto v0.7.0
+   Compiling raft v0.7.0
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0063]: missing field `commit_at_start` in initializer of `raft::Replication`
+   --> src/raft/admitted_replication/tests.rs:202:17
+    |
+202 |                 Replication {
+    |                 ^^^^^^^^^^^ missing `commit_at_start`
+
+error[E0063]: missing field `commit_at_start` in initializer of `raft::Replication`
+   --> src/raft/admitted_replication/tests.rs:226:17
+    |
+226 |                 Replication {
+    |                 ^^^^^^^^^^^ missing `commit_at_start`
+
+For more information about this error, try `rustc --explain E0063`.
+error: could not compile `voteboat` (lib test) due to 2 previous errors

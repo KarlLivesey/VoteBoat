@@ -128,6 +128,19 @@ attempts and exact cfg(test) overlays are retained. Mac final qualification runs
 against frozen306b production plus the test-only overlay; native code remains
 exact306b, and current415 work is separate.
 
+415 separates ordinary progress sends from exact heartbeat retransmission.
+An existing bounded request records its original commit-notification obligation;
+newer retry contents never become acknowledged evidence. Exact ACK sends the next
+data chunk or a fresh owed empty notification, terminating at the same frontier.
+Stable committed membership uses this path; joint/uncommitted configuration,
+snapshot, repair, retirement and transfer retain their original fallback.
+[Schema and evidence](../validation/performance/slice415/README.md).
+Final Linux library345/Core276, affected integrations246, real TCP/QUIC service2,
+matched controls8 and formatter/four strict profiles pass. Four simulated histories
+required explicit original-request/heartbeat packet-loss handling; their original
+counter, duplicate-retry, power-loss, readiness and no-election-quorum assertions
+remain, with failed attempts recorded. Mac/paired415 qualification remains pending.
+
 The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance
 floor is claimed achieved.

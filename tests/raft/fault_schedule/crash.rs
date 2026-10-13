@@ -110,18 +110,36 @@ fn uncertain_counter_write_recovers_and_original_id_applies_once() {
         run.action(&Action::Campaign(1)).unwrap();
         finish_local(&mut run, 1);
         assert_eq!(run.point().roles[&1], Role::Leader);
+        // The delayed campaign can consume follower replies while Busy. Retry
+        // their original scopes before submitting another original invocation.
+        run.action(&Action::Heartbeat(1)).unwrap();
+        run.action(&Action::Pump).unwrap();
+        assert!(run.point().held.is_empty());
         run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
         finish_local(&mut run, 1);
         assert_original_counter(&run, 1);
         assert_eq!(counter(&run, 1).1.len(), if power_loss { 1 } else { 2 });
+        // Commit completion no longer replays an in-flight request to the other
+        // follower. The explicit heartbeat carries the latest durable frontier.
+        run.action(&Action::Heartbeat(1)).unwrap();
+        run.action(&Action::Pump).unwrap();
+        assert!(run.point().held.is_empty());
+        assert_eq!(run.point().queued, 0);
         for id in 1..=3 {
             run.action(&Action::PowerLoss(id)).unwrap();
             assert_original_counter(&run, id);
         }
         run.action(&Action::Campaign(1)).unwrap();
         finish_local(&mut run, 1);
+        run.action(&Action::Heartbeat(1)).unwrap();
+        run.action(&Action::Pump).unwrap();
+        assert!(run.point().held.is_empty());
         run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
         finish_local(&mut run, 1);
+        run.action(&Action::Heartbeat(1)).unwrap();
+        run.action(&Action::Pump).unwrap();
+        assert!(run.point().held.is_empty());
+        assert_eq!(run.point().queued, 0);
         for id in 1..=3 {
             assert_original_counter(&run, id);
             assert!(counter(&run, id).1.last().unwrap().duplicate);

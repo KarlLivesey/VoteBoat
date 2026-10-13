@@ -393,7 +393,11 @@ impl Raft {
             self.progress.insert(m.from, prefix);
             self.next_index.insert(m.from, prefix + 1);
             let mut effects = self.maybe_commit()?;
-            if self.pending.is_none() && prefix < self.durable.last_index() {
+            if self.pending.is_none()
+                && (prefix < self.durable.last_index()
+                    || (self.progress_sends_enabled()
+                        && sent.commit_at_start < self.durable.commit_index))
+            {
                 effects.push(self.append_for(m.from)?);
             }
             Ok(effects)

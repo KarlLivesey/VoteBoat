@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.82s
+     Running unittests src/lib.rs (target/p9/slice415/checks/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 9 tests
+test raft::membership_tests::progress_broadcasts::uncommitted_membership_retains_progress_fallback ... ok
+test raft::progress_broadcast::tests::histories::lost_initial_request_and_reply_are_repaired_by_exact_heartbeat_retry ... ok
+
+thread 'raft::progress_broadcast::tests::histories::checkpoint_history_keeps_progress_and_owed_notification_contracts' (298) panicked at src/raft/progress_broadcast/tests/histories.rs:59:5:
+assertion failed: !leader.log_summary.is_plain()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test raft::membership_tests::progress_broadcasts::stable_configured_progress_skips_held_append_and_joint_keeps_legacy_retries ... ok
+test raft::progress_broadcast::tests::histories::higher_term_cancels_original_progress_debt_before_stale_ack ... ok
+test raft::progress_broadcast::tests::progress_skips_delayed_peer_and_each_commit_notification_terminates ... ok
+test raft::progress_broadcast::tests::histories::pending_snapshot_keeps_original_progress_retry_context ... ok
+test raft::progress_broadcast::tests::old_ack_after_newer_heartbeat_retry_still_owes_a_fresh_notification ... ok
+test raft::progress_broadcast::tests::histories::checkpoint_history_keeps_progress_and_owed_notification_contracts ... FAILED
+test raft::progress_broadcast::tests::partial_prefixes_commit_all_originals_without_replaying_other_peer ... ok
+
+failures:
+
+failures:
+    raft::progress_broadcast::tests::histories::checkpoint_history_keeps_progress_and_owed_notification_contracts
+
+test result: FAILED. 8 passed; 1 failed; 0 ignored; 0 measured; 266 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

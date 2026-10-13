@@ -22,6 +22,8 @@ mod authenticated_sources;
 mod configured_deltas;
 #[path = "leadership_membership_tests.rs"]
 mod leadership;
+#[path = "progress_broadcast/membership_tests.rs"]
+mod progress_broadcasts;
 #[cfg(feature = "native")]
 #[path = "request_window_tests.rs"]
 mod relay_request_windows;
@@ -1209,6 +1211,12 @@ fn learner_replication_is_separate_from_ballots_reads_and_identity_authority() {
     assert!(effects
         .iter()
         .all(|e| matches!(e,Effect::Send(m) if m.configuration == cid(2))));
+    let notification = acknowledge(&mut core, 4);
+    assert_eq!(notification.len(), 1);
+    let notification = message_to(notification, 4);
+    assert!(matches!(notification.rpc, Rpc::Append {
+        previous_index: 2, entries, leader_commit: 2, ..
+    } if entries.is_empty()));
     assert!(acknowledge(&mut core, 4).is_empty());
     assert_eq!(core.progress[&node(4)], 2);
     assert_eq!(core.durable.commit_index, 2);
@@ -1644,6 +1652,7 @@ fn partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation(
             start: 2,
             end: 2,
             snapshot: None,
+            commit_at_start: leader.durable.commit_index,
         },
     );
     let append = leader.scoped_message(

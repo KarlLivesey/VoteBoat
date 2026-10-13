@@ -93,8 +93,19 @@ fn ambiguous_commit_publication_recovers_counter_and_original_retry_once() {
             assert_original_counter(&run, 1);
             run.action(&Action::Campaign(1)).unwrap();
             finish_local(&mut run, 1);
+            // Resolve the campaign's original scopes after replies delivered
+            // during a delayed commit were consumed as Busy by this schedule.
+            run.action(&Action::Heartbeat(1)).unwrap();
+            run.action(&Action::Pump).unwrap();
+            assert!(run.point().held.is_empty());
             run.action(&Action::TryCounter(1, 9911, 9)).unwrap();
             finish_local(&mut run, 1);
+            // Publish the durable retry frontier through an explicit heartbeat
+            // rather than relying on another peer's progress to replay it.
+            run.action(&Action::Heartbeat(1)).unwrap();
+            run.action(&Action::Pump).unwrap();
+            assert!(run.point().held.is_empty());
+            assert_eq!(run.point().queued, 0);
             for id in 1..=3 {
                 assert_original_counter(&run, id);
                 assert!(counter(&run, id).1.last().unwrap().duplicate);
