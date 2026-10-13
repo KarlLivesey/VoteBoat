@@ -120,14 +120,14 @@ fn durable(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
         panic!("expected one persistence dependency")
     };
     core.validate_persist_effect(update).unwrap();
-    let next = &core.pending.as_ref().unwrap().next;
+    let next = core.pending.as_ref().unwrap().next.metadata();
     let ticket = LogTicket {
         binding: core.binding,
         batch: core.last_batch + 1,
-        group: next.bootstrap.group,
+        group: next.group,
         revision: next.revision,
         generation: next.generation,
-        last_index: next.last_index(),
+        last_index: next.last_index,
         term: next.hard_state.term,
     };
     core.admitted(ticket).unwrap();

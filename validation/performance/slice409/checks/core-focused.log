@@ -1,0 +1,334 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.68s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 232 tests
+test log::transition::tests::oracle::checked_index_and_revision_exhaustion_matches_fallback_without_arithmetic_panic ... ok
+test log::transition::tests::plain_install_keeps_old_payloads_and_normalizes_only_new_allocations ... ok
+test log_format::configuration_tests::configuration_codec_bounds_store_counts_and_rejects_duplicate_or_overlapping_members ... ok
+test log::transition::tests::overlay::virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates ... ok
+test log::transition::tests::stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log ... ok
+test log_format::configuration_tests::configuration_codec_roundtrip_rejects_every_truncation_and_unknown_tag ... ok
+test log::transition::tests::oracle::retained_historical_ballot_origin_and_new_votes_match_original_validator ... ok
+test log::transition::tests::oracle::configuration_and_snapshot_and_replacement_transitions_keep_full_fallback ... ok
+test logical_voter::activation::tests::control_profile::actual_profile_classifies_complete_control_envelopes_without_promoting_business ... ok
+test log_format::configuration_tests::membership_checkpoint_codec_rejects_truncation_versions_counts_and_changed_operation ... ok
+test logical_voter::activation::tests::control_profile::profile_encoding_is_bounded_and_pins_all_selected_limits_and_inner_schema ... ok
+test logical_voter::activation::tests::semantics::malformed_configuration_or_cross_incarnation_cannot_begin ... ok
+test logical_voter::activation::tests::semantics::malformed_late_and_unprepared_phases_do_not_partially_apply ... ok
+test logical_voter::activation::tests::semantics::reserved_terminal_capacity_survives_full_business_and_intent_lifetimes ... ok
+test logical_voter::activation::tests::semantics::all_pending_and_retained_phase_aliases_refuse ... ok
+test logical_voter::activation::tests::recovery::own_checkpoint_and_original_suffix_restore_busy_and_active_state ... ok
+test logical_voter::activation::tests::semantics::one_replicated_slot_retains_busy_terminal_and_first_positions ... ok
+test logical_voter::application::tests::batch_conflict_and_malformed_suffix_are_atomic ... ok
+test logical_voter::application::tests::applied_boundary_terms_are_monotonic_and_restored_exactly ... ok
+test logical_voter::application::tests::authority::snapshot_ack::original_raft_snapshot_ack_above_base_requires_committed_known_prefix ... ok
+test logical_voter::application::tests::authority::snapshot_ack::snapshot_ack_keeps_original_term_configuration_and_origin_guards ... ok
+test log::transition::tests::oracle::finite_plain_ballot_commit_suffix_and_budget_cases_match_original_validator ... ok
+test logical_voter::application::tests::authority::term_zero_actual_request_and_denial_keep_distinct_configuration_scopes ... ok
+test logical_voter::application::tests::control_profile::reads::foreign_read_bindings_and_schema_do_not_borrow_control_credits ... ok
+test logical_voter::application::tests::authority::authority_exception_does_not_relax_normal_promise_or_original_request_scope ... ok
+test logical_voter::application::tests::control_profile::malformed_and_business_wrapped_controls_do_not_use_reserved_capacity ... ok
+test logical_voter::application::tests::enrollment::formats::candidate_v2_configuration_checkpoint_and_schema_are_explicit ... ok
+test logical_voter::application::tests::eligibility::original_admission_configuration_is_not_current_eligibility ... ok
+test logical_voter::application::tests::enrollment::formats::exact_candidate_command_reserve_boundary_and_measured_envelope ... ok
+test logical_voter::application::tests::enrollment::original_v1_empty_checkpoint_bytes_schema_and_query_shapes_are_preserved ... ok
+test logical_voter::application::tests::control_profile::control_result_reservation_requires_exact_schema_group_and_operation ... ok
+test logical_voter::application::tests::enrollment::empty::host_empty_checkpoint_codec_imports_and_restores_the_actual_zero_byte_application ... ok
+test logical_voter::application::tests::enrollment::refusals::candidate_plain_claim_never_constructs_an_empty_parent ... ok
+test logical_voter::application::tests::control_profile::selected_profile_is_immutable_and_checkpoint_binding_is_exact ... ok
+test logical_voter::application::tests::enrollment::candidate_import_materializes_exact_learner_pin_lineage_and_no_source_ballot ... ok
+test logical_voter::application::tests::control_profile::reads::status_and_active_results_use_selected_reserve_without_creating_authority ... ok
+test logical_voter::application::tests::control_reserve_and_pending_content_are_enforced ... ok
+test logical_voter::application::tests::eligibility::removed_representative_cannot_new_work_but_original_retry_survives ... ok
+test logical_voter::application::tests::enrollment::formats::complete_v2_enrollment_response_retains_plan_entry_origin_and_target_floor ... ok
+test logical_voter::application::tests::enrollment::refusals::selected_native_codec_refuses_empty_data_and_truncated_commands_are_atomic ... ok
+test logical_voter::application::tests::authority::promotion::actual_grant_uses_retained_base_and_exact_committed_promotion_boundary ... ok
+test logical_voter::application::tests::exact_retry_keeps_original_outcome_after_replacement ... ok
+test logical_voter::application::tests::reads::read_bound_is_stable_across_growth_and_actual_allocations_are_charged ... ok
+test logical_voter::endpoint::shape::tests::synthetic_shape_guard_accepts_declared_eight_and_refuses_nine_before_mint ... ok
+test logical_voter::endpoint::shape::tests::synthetic_shape_guard_refuses_cycles_and_wrong_incarnation_edges ... ok
+test logical_voter::endpoint::shape::tests::synthetic_shape_guard_refuses_reused_voter_store_and_physical_leaf ... ok
+test logical_voter::network::frame::tests::fixed_prefix_is_checked_before_declared_allocation ... ok
+test logical_voter::persistence::tests::durable_matches_every_original_written_ticket_field ... ok
+test logical_voter::application::tests::stale_read_capsule_cannot_release_after_new_write ... ok
+test logical_voter::persistence::tests::original_written_ticket_releases_only_at_consumed_durable ... ok
+test logical_voter::response::tests::limits::accepted_state_growth_cannot_exceed_the_checked_response_envelope ... ok
+test logical_voter::activation::tests::recovery::invalid_restore_is_atomic_and_rejects_history_materialization_and_profile ... ok
+test logical_voter::application::tests::eligibility::child_journal_does_not_inherit_parent_batch_limit ... ok
+test logical_voter::application::tests::enrollment::recovery::candidate_checkpoint_suffix_reclaim_and_original_retry_preserve_import ... ok
+test logical_voter::response::tests::limits::staged_response_capacity_never_exceeds_the_static_encoding_bound ... ok
+test logical_voter::response::tests::limits::bounds_stay_stable_across_apply_checkpoint_and_restore ... ok
+test logical_voter::application::tests::enrollment::refusals::source_lineage_membership_and_conflicting_imports_are_refused_without_materialization ... ok
+test logical_voter::application::tests::snapshots::recovery::identical_anchor_selection_and_invalid_publication_preserve_durable_pins ... ok
+test logical_voter::response::tests::limits::full_image_framing_refuses_growth_even_when_parent_codec_fits ... ok
+test logical_voter::response::tests::reads::all_read_variants_preserve_exact_typed_values ... ok
+test logical_voter::response::tests::reads::complete_outcome_status_and_maximum_command_fit_the_static_bound ... ok
+test logical_voter::application::tests::enrollment::recovery::original_joint_then_final_parent_updates_promote_without_changing_candidate_schema ... ok
+test logical_voter::application::tests::snapshots::incoming_ahead_snapshot_must_be_pinned_before_install ... ok
+test logical_voter::application::tests::snapshots::recovery::no_anchor_orphan_does_not_set_restart_publication_floor_or_reuse_generation ... ok
+test logical_voter::response::tests::reads::complete_image_membership_parent_and_pin_fields_are_retained ... ok
+test logical_voter::response::tests::reads::metadata_optional_and_counter_fields_are_retained ... ok
+test logical_voter::snapshots::tests::foreign_snapshot_rejection_returns_original_buffer_and_no_credits ... ok
+test logical_voter::response::tests::receipts::exact_query_variants_and_every_snapshot_reference_field_are_distinct ... ok
+test logical_voter::snapshots::tests::foreign_completion_fences_and_returns_original_uncertainty ... ok
+test logical_voter::snapshots::tests::original_readiness_credit_survives_queued_output_and_close_until_poll ... ok
+test logical_voter::types::capacity::retained_512_kib_cannot_be_declared_inside_a_48_kib_checkpoint ... ok
+test logical_voter::response::tests::receipts::short_receipt_and_query_destinations_remain_unchanged ... ok
+test logical_voter::types::capacity::checkpoint_exports_exact_encoded_ownership_without_changing_bytes_or_errors ... ok
+test logical_voter::application::tests::enrollment::recovery::permanent_import_generation_floor_survives_checkpoint_and_new_publication ... ok
+test program_transaction::driver::tests::budget_rejects_invalid_nested_scope ... ok
+test logical_voter::response::tests::receipts::receipts_preserve_all_outcomes_and_original_fields ... ok
+test program_transaction::tests::admission::aggregate_catalog_capacity_retains_absent_abort_and_control_phases_at_bound ... ok
+test program_transaction::tests::admission::retained_and_pending_content_capacity_and_deterministic_coordinators ... ok
+test program_transaction::tests::atomic::failed_second_key_never_installs_partial_locks_and_refusal_is_retained ... ok
+test program_transaction::tests::admission::internal_fact_shape_and_original_retry_content_are_exact ... ok
+test logical_voter::types::capacity::coherent_checkpoint_restores_the_original_command_and_duplicate_receipt ... ok
+test program_transaction::tests::recovery::whole_batch_failure_and_failed_restore_preserve_original_state ... ok
+test program_transaction::tests::atomic::committed_same_value_advances_version_and_rejects_stale_program ... ok
+test program_transaction::tests::atomic::no_wait_refusal_aborts_prepared_and_uncontacted_then_closes_late_prepare ... ok
+test logical_voter::application::tests::control_profile::original_mixed_action_uses_reserved_capacity_and_replays_without_splitting ... ok
+test raft::membership_tests::a_reused_candidate_node_with_a_new_store_needs_a_new_term_ballot ... ok
+test program_transaction::tests::atomic::all_key_commit_versions_and_read_dependencies_hold_until_applied_all ... ok
+test logical_voter::application::tests::control_profile::reads::incomplete_trailing_zero_and_business_queries_remain_ordinary_at_quota ... ok
+test logical_voter::response::tests::providers::selected_snapshot_roundtrip_failure_leaves_output_and_state_unchanged ... ok
+test logical_voter::application::tests::snapshots::two_publications_pin_original_anchor_until_exact_reconcile ... ok
+test program_transaction::tests::recovery::partial_prepare_and_every_decision_stage_reconstruct_from_own_checkpoint ... ok
+test raft::membership_tests::accepted_final_clears_prior_authority_and_rollback_restores_joint_base ... ok
+test raft::membership_tests::authenticated_sources::source_preflight_accepts_learner_replication_but_refuses_learner_read_authority ... ok
+test raft::membership_tests::authenticated_sources::source_preflight_preserves_higher_term_reply_without_collector ... ok
+test raft::membership_tests::authenticated_sources::source_preflight_allows_actual_not_caught_up_readiness_reply ... ok
+test raft::membership_tests::authenticated_sources::source_preflight_keeps_historical_authority_base_and_exact_pending_reply ... ok
+test raft::membership_tests::connection_retention_includes_pending_and_rollback_views_until_exact_commit ... ok
+test raft::membership_tests::compacted_hint_echoes_request_scope_and_only_advances_a_matching_prefix ... ok
+test raft::membership_tests::configuration_changes_discard_old_request_authority_even_with_retained_peer_and_prefix ... ok
+test raft::membership_tests::connection_reservations_cover_staged_snapshot_and_verified_promoted_peer_permit ... ok
+test raft::membership_tests::committed_joint_candidate_can_repair_a_missing_learner_without_exporting_commit_authority ... ok
+test raft::membership_tests::connection_retention_keeps_committed_joint_predecessor_until_final_is_durable ... ok
+test program_transaction::tests::recovery::checkpoint_changes_to_values_locks_events_or_suffix_are_refused_atomically ... ok
+test raft::membership_tests::batched_repair_missing_compacted_joint_keeps_ordinary_election_available ... ok
+test raft::membership_tests::batched_repair_uses_a_matching_learner_checkpoint_hint_without_commit_authority ... ok
+test raft::membership_tests::historical_repair_higher_term_needs_exact_context_and_durable_observation ... ok
+test raft::membership_tests::historical_repair_requires_old_voter_source_and_retained_promotion_evidence ... ok
+test raft::membership_tests::in_flight_promotion_cannot_emit_witness_evidence_before_completion ... ok
+test raft::membership_tests::batched_joint_repair_recovers_lost_cursor_and_rejects_delayed_traffic_after_promotion ... ok
+test raft::membership_tests::batched_repair_rejects_committed_divergence_and_accepted_configuration_work ... ok
+test raft::membership_tests::joint_commit_uses_old_and_new_and_never_counts_a_learner ... ok
+test raft::membership_tests::leadership::uncommitted_configuration_and_in_flight_configuration_changes_cannot_overlap_transfer ... ok
+test raft::membership_tests::learner_replication_is_separate_from_ballots_reads_and_identity_authority ... ok
+test raft::membership_tests::lagging_follower_probes_and_joint_replication_echo_the_request_scope ... ok
+test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+test raft::membership_tests::joint_repair_rejects_overwrite_commit_claims_and_foreign_authority_before_mutation ... ok
+test raft::membership_tests::joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners ... ok
+test raft::membership_tests::joint_repair_trims_only_a_verified_compacted_overlap ... ok
+test raft::membership_tests::leadership::real_learner_and_joint_views_refuse_transfer_without_changing_membership ... ok
+test raft::membership_tests::joint_repair_extends_retained_prefix_with_identical_overlap_and_no_commit_claim ... ok
+test raft::membership_tests::pending_configuration_view_precedes_durability_without_releasing_effects ... ok
+test raft::membership_tests::prospective_connection_inspection_rejects_store_conflicts_and_wrong_scope_without_mutation ... ok
+test raft::membership_tests::older_request_scope_can_roll_back_uncommitted_final_without_early_reply ... ok
+test raft::membership_tests::prospective_reservation_retains_intermediate_joint_fanout_after_final ... ok
+test raft::membership_tests::permit_survives_partial_progress_but_cannot_authorize_vote_read_or_other_heads ... ok
+test raft::membership_tests::promoted_term_observation_waits_for_storage_and_retains_same_base_permit ... ok
+test logical_voter::response::tests::providers::original_configuration_response_rejects_nonfaithful_selected_batch_codec ... ok
+test raft::membership_tests::owner_connection_budget_retains_pending_and_rollback_history_and_fences_unreserved_mutation ... ok
+test raft::membership_tests::partial_joint_repair_survives_lost_delivery_and_restart_without_learner_votes ... ok
+test raft::membership_tests::reservation_covers_rollback_until_the_shrink_is_committed ... ok
+test raft::membership_tests::partial_catch_up_scopes_matching_prefix_without_claiming_follower_activation ... ok
+test raft::membership_tests::prospective_reservation_is_pure_and_does_not_authorize_configuration_ingress ... ok
+test raft::membership_tests::removed_or_demoted_local_replica_stops_service_and_campaigning ... ok
+test raft::membership_tests::request_scope_bridge_does_not_authorize_learners_or_reads ... ok
+test raft::membership_tests::partially_delivered_final_can_elect_new_leader_after_old_leader_loss ... ok
+test raft::membership_tests::same_voter_policy_changes_use_joint_rules_for_elections_and_reads ... ok
+test raft::membership_tests::witness_reply_is_bound_to_exact_pending_request_and_local_restart_session ... ok
+test raft::membership_tests::retired_commit_uses_verified_joint_snapshot_history_but_not_compacted_final_history ... ok
+test raft::membership_tests::retiring_leader_announces_only_after_final_durability_and_receivers_preserve_authority ... ok
+test raft::proposals::tests::direct_batch_uses_the_same_fence_dependency_and_transfer_guards ... ok
+test raft::membership_tests::witness_requires_authenticated_historical_assignment_and_surviving_history ... ok
+test raft::membership_tests::retired_commit_exception_cannot_append_raise_terms_or_authorize_learners ... ok
+test raft::proposals::tests::index_exhaustion_is_rejected_before_pending_state ... ok
+test raft::membership_tests::reservation_covers_joint_rollback_and_compacted_membership ... ok
+test raft::proposals::tests::four_original_commands_share_one_uncommitted_transition ... ok
+test raft::membership_tests::witnessed_promoted_leader_catches_up_only_after_exact_durability ... ok
+test raft::proposals::tests::each_existing_checkpoint_install_and_readiness_dependency_stays_closed ... ok
+test raft::membership_tests::recursive_joint_recovery_catches_up_old_voter_and_commits_after_election ... ok
+test raft::proposals::tests::legacy_singletons_keep_custom_small_limits_and_spare_payload_capacity ... ok
+test raft::proposals::tests::stale_summary_cannot_admit_an_ordinary_transition ... ok
+test raft::proposals::tests::invalid_member_shape_and_aggregate_budgets_leave_no_partial_append ... ok
+test raft::proposals::tests::plain_append_and_commit_preserve_historical_payloads_and_exact_accounting ... ok
+test raft::send_window::tests::only_exact_current_candidate_vote_refreshes ... ok
+test raft::proposals::tests::singleton_and_duplicate_ids_preserve_original_commands ... ok
+test raft::membership_tests::witness_compaction_preserves_only_the_locally_retained_authorization_base ... ok
+test raft::send_window::tests::granted_reply_requires_exact_original_follower_ballot_context_and_store ... ok
+test raft::send_window::tests::unrelated_roles_and_old_campaign_are_unchanged_and_overflow_refuses ... ok
+test runtime::applications::tests::capacity::externally_held_credit_survives_wrong_completion_and_close_until_exact_consume ... ok
+test runtime::applications::tests::capacity::ordinary_receipts_batches_and_bytes_cannot_spend_control_reservations ... ok
+test runtime::applications::tests::construction::ordinary_defaults_stay_unchanged_and_cannot_claim_selected_full_batches ... ok
+test runtime::applications::tests::capacity::selected_control_still_obeys_total_counts_and_bytes ... ok
+test runtime::clients::tests::capacity::selected_work_still_obeys_total_count_group_and_byte_limits ... ok
+test runtime::applications::tests::construction::selected_construction_reserves_every_complete_declared_control_window ... ok
+test runtime::applications::tests::construction::selected_logical_batch_tracks_parent_log_instead_of_router_ceiling ... ok
+test runtime::clients::tests::classification::only_full_original_control_envelopes_use_selected_capacity ... ok
+test runtime::applications::tests::classification::whole_mixed_batch_requires_complete_selected_envelopes ... ok
+test runtime::clients::tests::capacity::ordinary_global_group_and_byte_ceilings_cannot_spend_reserve ... ok
+test raft::membership_tests::snapshot_reply_keeps_head_scope_through_log_and_application_dependencies ... ok
+test raft::proposals::tests::written_and_stale_completions_cannot_publish_batch_or_quorum_evidence ... ok
+test raft::membership_tests::stable_final_candidate_repairs_retained_promotion_before_ordinary_ballot ... ok
+test runtime::applications::tests::classification::any_malformed_entry_or_business_wrapped_control_keeps_the_whole_batch_ordinary ... ok
+test raft::membership_tests::witness_never_grants_from_accepted_uncommitted_promotion_or_future_head ... ok
+test runtime::clients::tests::classification::oversized_original_control_allocation_refuses_without_touching_original ... ok
+test runtime::clients::tests::construction::defaults_hold_every_declared_complete_control_window_and_one_ordinary_window ... ok
+test runtime::clients::tests::construction::unselected_physical_construction_ignores_new_reserves ... ok
+test runtime::clients::tests::construction::nested_command_profile_keeps_complete_ordinary_and_control_windows ... ok
+test runtime::clients::tests::construction::short_selected_count_bytes_and_profile_limits_refuse_before_transfer ... ok
+test runtime::clients::tests::lifecycle::canceled_observation_and_foreign_completion_keep_class_until_terminal_cleanup ... ok
+test runtime::logical_intake::tests::capacity::ordinary_byte_pressure_cannot_consume_the_selected_input_window ... ok
+test runtime::logical_intake::tests::capacity::original_control_allocation_refuses_unchanged_and_business_cannot_select_control ... ok
+test runtime::logical_intake::tests::capacity::ordinary_count_pressure_keeps_control_class_through_original_queue_and_visit ... ok
+test runtime::logical_release::tests::capacity::capsule_only_profile_cannot_admit_its_first_typed_capture ... ok
+test runtime::logical_intake::tests::reads::exact_scoped_read_class_requires_original_profile_group_event_and_request ... ok
+test runtime::logical_release::tests::capacity::control_capture_still_obeys_total_limits_and_sequence_exhaustion ... ok
+test runtime::logical_release::tests::capacity::public_capture_footprint_preserves_checked_overflow_refusal ... ok
+test runtime::logical_release::tests::capacity::every_declared_window_and_one_whole_ordinary_capture_must_fit ... ok
+test runtime::logical_release::tests::capacity::whole_static_batch_leaves_one_original_control_capture_reserved ... ok
+test runtime::logical_intake::tests::capacity::selected_whole_input_windows_refuse_short_limits_without_installation ... ok
+test runtime::logical_release::tests::classification::invalid_declared_bound_or_encoder_result_cannot_classify_as_control ... ok
+test runtime::logical_release::tests::construction_capacity::static_capability_rejects_missing_control_zero_count_and_overflow ... ok
+test runtime::logical_release::tests::classification::only_complete_canonical_original_query_bytes_select_control_capacity ... ok
+test runtime::logical_release::tests::construction_capacity::static_construction_rejects_whole_batch_even_when_one_capture_fits ... ok
+test runtime::logical_release::tests::construction_capacity::static_exact_boundary_preserves_one_control_capture_and_original_usage ... ok
+test runtime::maintenance::tests::deadline_exhaustion_stops_instead_of_wrapping_or_spinning ... ok
+test raft::membership_tests::batched_repair_checks_authority_ranges_and_ack_context_before_progress ... ok
+test runtime::read_requests::tests::capacity::ordinary_invocation_global_group_and_byte_pressure_preserve_selected_reserve ... ok
+test runtime::read_requests::tests::capacity::selected_invocation_still_obeys_total_count_group_and_byte_limits ... ok
+test runtime::read_requests::tests::classification::complete_encoding_rejects_trailing_zero_ids_overbound_and_faulty_encoder ... ok
+test runtime::read_requests::tests::construction::complete_selected_invocation_defaults_and_each_short_window_are_checked ... ok
+test runtime::read_requests::tests::classification::one_original_encoding_retains_complete_bytes_without_calling_encoder_again ... ok
+test runtime::logical_intake::tests::reads::ordinary_byte_ceiling_preserves_scoped_read_and_rejection_sequence ... ok
+test runtime::read_requests::tests::construction::physical_constructor_ignores_reserves_and_keeps_original_execution_on_refusal ... ok
+test runtime::read_requests::tests::construction::execution_profile_count_and_nested_maxima_must_match_selected_invocations ... ok
+test runtime::logical_release::tests::capacity::ordinary_count_and_bytes_leave_all_control_windows_available ... ok
+test runtime::logical_intake::tests::reads::scoped_read_uses_reserved_queue_and_preserves_full_total_ceiling_and_cleanup ... ok
+test runtime::read_requests::tests::classification::typed_wrapper_status_and_active_are_control_but_business_is_ordinary ... ok
+test runtime::read_requests::tests::submission::typed_original_encoding_runs_once_and_refusal_preserves_query_and_credits ... ok
+test runtime::read_requests::tests::submission::wrong_typed_profile_preserves_original_without_encoding_or_spending_admission ... ok
+test runtime::reads::tests::capacity::ordinary_result_counts_groups_and_bytes_cannot_spend_selected_reserve ... ok
+test runtime::read_requests::tests::lifecycle::held_cancellation_keeps_class_and_credit_until_exact_terminal_cancellation_cleanup ... ok
+test runtime::reads::tests::capacity::selected_result_class_still_checks_exact_group_and_total_limits ... ok
+test runtime::reads::tests::construction::every_declared_complete_selected_result_window_and_one_ordinary_window_fit ... ok
+test runtime::reads::tests::construction::physical_result_constructor_ignores_reserves_and_cannot_claim_selected_authority ... ok
+test runtime::snapshot_send::tests::exact_retry_window_capacity_and_cleanup ... ok
+test runtime::snapshot_send::tests::zero_delay_and_clock_exhaustion_do_not_wrap ... ok
+test runtime::reads::tests::construction::short_selected_count_bytes_and_large_inline_query_refuse ... ok
+test transaction::driver::tests::budget_rejects_invalid_nested_scope ... ok
+test transaction::tests::admission::missing_account_and_incorrect_outer_operation_refuse_before_binding ... ok
+test transaction::tests::admission::new_protocol_phase_requires_original_binding_but_pending_start_reserves_it ... ok
+test transaction::tests::admission::pending_whole_records_and_all_destination_phase_ids_reserve_terminal_capacity ... ok
+test transaction::tests::refusal::insufficient_and_overflow_are_committed_business_outcomes_without_mutation ... ok
+test transaction::tests::recovery::semantic_restore_rejects_unknown_version_capacity_incarnation_and_opening_accounts ... ok
+test transaction::tests::complete_capacity_one_retains_every_original_outcome_and_first_position ... ok
+test transaction::tests::participant_status_binds_exact_destination_and_reverse_direction_is_supported ... ok
+test transaction::tests::refusal::refusal_abort_absent_tombstone_and_late_prepare_preserve_other_lock ... ok
+test transaction::tests::refusal::changed_phase_assertion_or_transaction_content_never_reapplies ... ok
+test transaction::tests::recovery::active_lock_checkpoint_and_suffix_reconstruct_original_atomic_phases ... ok
+test logical_voter::response::tests::limits::short_read_destinations_and_overbound_values_are_atomic ... ok
+test logical_voter::application::tests::snapshots::recovery::anchored_orphan_recovery_reuses_bytes_then_keeps_generations_after_reconcile ... ok
+test transaction::tests::recovery::malformed_batch_and_every_checkpoint_truncation_preserve_original_state ... ok
+test logical_voter::response::tests::providers::refusing_or_nonfaithful_selected_log_codecs_cannot_encode_image ... ok
+test logical_voter::application::tests::durable_term_vote_and_prefix_survive_checkpoint ... ok
+
+test result: ok. 232 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/application.rs (target/debug/deps/application-077792e8d50894fd)
+
+running 12 tests
+test conflicting_operation_content_never_changes_the_original_effect ... ok
+test checkpoint_restores_retry_content_original_outcomes_overflow_and_capacity ... ok
+test counter_envelope_covers_full_retry_history_and_survives_restore ... ok
+test downstream_deployment_envelope_is_optional_but_membership_validation_fails_closed ... ok
+test invalid_batches_and_capacity_do_not_partly_advance_state ... ok
+test host_application_can_supply_its_own_receipt_type_through_the_public_seam ... ok
+test mixed_retry_sources_preserve_original_outcomes_at_exact_capacity ... ok
+test overflow_result_is_deduplicated_and_noops_advance_the_applied_boundary ... ok
+test retries_return_the_original_result_without_reapplying ... ok
+test malformed_or_incompatible_checkpoints_never_partly_restore_counter ... ok
+test late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel ... ok
+test bounded_counter_receipts_cover_default_maximum_commit_batch_without_growth ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/log_staging.rs (target/debug/deps/log_staging-b2918737c3735bc6)
+
+running 2 tests
+test later_invalid_transition_leaves_the_whole_batch_uninstalled ... ok
+test creates_count_new_groups_and_reject_reused_ids_and_duplicate_units_atomically ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/provider_conformance.rs (target/debug/deps/provider_conformance-410b87d518ea1706)
+
+running 14 tests
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/raft.rs (target/debug/deps/raft-ec95b63b8af6b74c)
+
+running 29 tests
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test three_node_history_with_only_host_components ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+
+test result: ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/framework_benchmark.rs (target/debug/examples/framework_benchmark-071c061b10b4b91e)
+
+running 7 tests
+test tests::invalid_batch_and_hidden_history_reset_are_refused ... ok
+test workload::tests::nearest_rank_keeps_small_sample_tail ... ok
+test workload::tests::partial_or_duplicate_batch_result_never_releases_client ... ok
+test tests::volatile_completion_requires_the_exact_accepted_ticket ... ok
+test tests::four_entry_batches_return_every_original_result_from_three_voters ... ok
+test tests::multiple_clients_remain_outstanding_until_original_application ... ok
+test tests::singleton_counts_only_original_applied_results ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

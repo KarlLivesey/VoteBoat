@@ -1,0 +1,15 @@
+# Native accepted overlays: slice 409 schema
+
+Purpose: make ordinary native metadata updates and pure appends O(new batch), preserving durable-prefix, exact-ticket and uncertain-I/O contracts. Shared transition API is log::transition::{LogView,LogMetadata,LogSummary,NextLog,PlainDelta}; eligibility/validation belongs to that one shared planner, with original materialized fallback.
+
+Data: durable remains canonical BTreeMap<GroupIdentity,GroupLog>. Private Accepted owns clean durable summary cache and dirty overlays: Plain{metadata,summary,tail of only admitted new entries}, Full{canonical pending state,summary}. No second clean GroupLog map and no dirty full clone on ordinary path. Pending tickets remain native original batch/revision/generation identities.
+
+Transition: encode exact original mutations -> validate all plans against unchanged accepted views -> enforce WAL/control budgets and issue proposed tickets -> append bytes -> only after actual append success install plans into overlays. Plain+Plain extends owned normalized new tail, metadata-only leaves payload pointers; Full/complex transition uses shared full validator. No partial plans install before append succeeds.
+
+Barrier: validate exact requested dependencies -> sync WAL -> publish original complete boundary -> promote ALL overlays (including groups outside requested dependencies) into durable map -> update clean summaries -> remove only requested pending observations. An old outstanding ticket may remain after its overlay is already durable; a subsequent append uses durable newest revision and the next subset barrier still promotes newer written work. Written-only tickets never expose state.
+
+Ownership: one NativeLogStore owns canonical state, summaries, tails, plans and JournalIo. LogViews borrow only during synchronous planning; no self-reference/background borrow. New payload normalization is shared planner O(batch) work. Fallback materializes only touched complex accepted view.
+
+Failure: codec/validation/budget rejection leaves state/overlays/tickets unchanged. Append uncertainty fences before overlay mutation. Sync/publication uncertainty fences before durable mutation. Internal predecessor/summary mismatch refuses pre-I/O; impossible install/promotion mismatch fences. Recovery replays original format, advances store session, initializes clean summaries and no overlays. Reclaim requires no pending ticket/overlay and uses canonical durable map.
+
+Acceptance: old payload allocation addresses preserved across ordinary accepted append+metadata and barrier; multiple appends before sync including metadata-between; subset barrier/old-ticket/new-append; pure-to-full replacement/config/snapshot; stale generation; all written groups promotion; batch invalid-last-unit atomic rejection; uncertain append/sync/publication/wholebatch recovery; stale summary refusal; full affected native storage suites and strict four lint configurations. No benchmark/provider/public-contract changes in this slice.

@@ -106,14 +106,14 @@ fn unrelated_roles_and_old_campaign_are_unchanged_and_overflow_refuses() {
 
 fn durable(core: &mut Raft, effects: Vec<Effect>) -> Vec<Effect> {
     assert!(matches!(effects.as_slice(), [Effect::Persist(_)]));
-    let next = &core.pending.as_ref().unwrap().next;
+    let next = core.pending.as_ref().unwrap().next.metadata();
     let ticket = LogTicket {
         binding: core.binding,
         batch: core.last_batch + 1,
         group: core.durable.bootstrap.group,
         revision: next.revision,
         generation: next.generation,
-        last_index: next.last_index(),
+        last_index: next.last_index,
         term: next.hard_state.term,
     };
     core.admitted(ticket).unwrap();

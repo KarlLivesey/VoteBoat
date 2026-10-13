@@ -24,6 +24,7 @@ struct Workload {
     unrelated: usize,
     history: usize,
     iterations: usize,
+    append: bool,
 }
 
 impl Workload {
@@ -41,17 +42,23 @@ impl Workload {
 }
 
 fn arguments(args: &[String]) -> Result<(PathBuf, Workload), Failure> {
-    let [output, unrelated, history, iterations] = args else {
+    let [output, unrelated, history, iterations, mode @ ..] = args else {
         return Err(concat!(
             "usage: log_staging_benchmark FRESH_CSV_PATH ",
-            "UNRELATED_GROUPS(0..32) HISTORY(2..4096) ITERATIONS(1..2000)"
+            "UNRELATED_GROUPS(0..32) HISTORY(2..4096) ITERATIONS(1..2000) [append]"
         )
         .into());
+    };
+    let append = match mode {
+        [] => false,
+        [mode] if mode == "append" => true,
+        _ => return Err("expected optional append mode".into()),
     };
     let config = Workload {
         unrelated: unrelated.parse()?,
         history: history.parse()?,
         iterations: iterations.parse()?,
+        append,
     }
     .validate()?;
     Ok((output.into(), config))
@@ -66,7 +73,12 @@ fn main() -> Result<(), Failure> {
     for sample in samples {
         writeln!(
             output,
-            "volatile_native_log_staging,suffix_replacement,{},{},{},{},{},{},{},{},{},{},{},{},{},true,true",
+            "volatile_native_log_staging,{},{},{},{},{},{},{},{},{},{},{},{},{},{},true,true",
+            if config.append {
+                "pure_append"
+            } else {
+                "suffix_replacement"
+            },
             config.unrelated,
             config.unrelated + 1,
             config.history,

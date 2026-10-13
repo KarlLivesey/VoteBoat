@@ -1,0 +1,2648 @@
+{
+  "scope": "Unmatched volatile CPU diagnostics; not an OpenRaft floor or durable application comparison",
+  "sourceUnchanged": true,
+  "referenceUnchanged": true,
+  "artifactsUnchanged": true,
+  "cases": [
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 1.063898249,
+        "operations_per_second": 3849.992237368557,
+        "request_p50_ns": 249679,
+        "request_p99_ns": 498307,
+        "peak_pending_operations": 1,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 49142,
+        "peak_message_queue": 5,
+        "persistence_units": 24573,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.532617886,
+        "operations_per_second": 7690.3162805163465,
+        "request_p50_ns": 122611,
+        "request_p99_ns": 281218,
+        "peak_pending_operations": 1,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 49142,
+        "peak_message_queue": 5,
+        "persistence_units": 24573,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.551078814,
+        "operations_per_second": 7432.693647337348,
+        "request_p50_ns": 127370,
+        "request_p99_ns": 295285,
+        "peak_pending_operations": 1,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 49142,
+        "peak_message_queue": 5,
+        "persistence_units": 24573,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 1.083081342,
+        "operations_per_second": 3781.8027521703902,
+        "request_p50_ns": 255640,
+        "request_p99_ns": 507174,
+        "peak_pending_operations": 1,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 49142,
+        "peak_message_queue": 5,
+        "persistence_units": 24573,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 1.060773394,
+        "operations_per_second": 3861.3336487962483,
+        "request_p50_ns": 251383,
+        "request_p99_ns": 515179,
+        "peak_pending_operations": 1,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 49142,
+        "peak_message_queue": 5,
+        "persistence_units": 24573,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.532042454,
+        "operations_per_second": 7698.633763537974,
+        "request_p50_ns": 123051,
+        "request_p99_ns": 281078,
+        "peak_pending_operations": 1,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 49142,
+        "peak_message_queue": 5,
+        "persistence_units": 24573,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.282473991,
+        "operations_per_second": 14500.450060904901,
+        "request_p50_ns": 263766,
+        "request_p99_ns": 599076,
+        "peak_pending_operations": 4,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 12278,
+        "peak_message_queue": 5,
+        "persistence_units": 6141,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.139918091,
+        "operations_per_second": 29274.27018711969,
+        "request_p50_ns": 121779,
+        "request_p99_ns": 328337,
+        "peak_pending_operations": 4,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 12278,
+        "peak_message_queue": 5,
+        "persistence_units": 6141,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.13548017,
+        "operations_per_second": 30233.206822813994,
+        "request_p50_ns": 118021,
+        "request_p99_ns": 309392,
+        "peak_pending_operations": 4,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 12278,
+        "peak_message_queue": 5,
+        "persistence_units": 6141,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.273653212,
+        "operations_per_second": 14967.849162318622,
+        "request_p50_ns": 260459,
+        "request_p99_ns": 571344,
+        "peak_pending_operations": 4,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 12278,
+        "peak_message_queue": 5,
+        "persistence_units": 6141,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.275916425,
+        "operations_per_second": 14845.07491716015,
+        "request_p50_ns": 260540,
+        "request_p99_ns": 569391,
+        "peak_pending_operations": 4,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 12278,
+        "peak_message_queue": 5,
+        "persistence_units": 6141,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.136450113,
+        "operations_per_second": 30018.29687015356,
+        "request_p50_ns": 119084,
+        "request_p99_ns": 311716,
+        "peak_pending_operations": 4,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 12278,
+        "peak_message_queue": 5,
+        "persistence_units": 6141,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 64,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.271912639,
+        "operations_per_second": 15063.661678484905,
+        "request_p50_ns": 4293440,
+        "request_p99_ns": 7165898,
+        "peak_pending_operations": 64,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 17158,
+        "peak_message_queue": 129,
+        "persistence_units": 4680,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 64,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.138126985,
+        "operations_per_second": 29653.872485524822,
+        "request_p50_ns": 2145272,
+        "request_p99_ns": 3630914,
+        "peak_pending_operations": 64,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 17158,
+        "peak_message_queue": 129,
+        "persistence_units": 4680,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 64,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.137174163,
+        "operations_per_second": 29859.85050260522,
+        "request_p50_ns": 2119704,
+        "request_p99_ns": 3563658,
+        "peak_pending_operations": 64,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 17158,
+        "peak_message_queue": 129,
+        "persistence_units": 4680,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 64,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.282423375,
+        "operations_per_second": 14503.048835812548,
+        "request_p50_ns": 4290655,
+        "request_p99_ns": 7500167,
+        "peak_pending_operations": 64,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 17158,
+        "peak_message_queue": 129,
+        "persistence_units": 4680,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 64,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.278615888,
+        "operations_per_second": 14701.243455290678,
+        "request_p50_ns": 4301946,
+        "request_p99_ns": 7174765,
+        "peak_pending_operations": 64,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 17158,
+        "peak_message_queue": 129,
+        "persistence_units": 4680,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 64,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.13755002,
+        "operations_per_second": 29778.25812020965,
+        "request_p50_ns": 2160150,
+        "request_p99_ns": 3589787,
+        "peak_pending_operations": 64,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 17158,
+        "peak_message_queue": 129,
+        "persistence_units": 4680,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 64,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.088337413,
+        "operations_per_second": 46367.669834297725,
+        "request_p50_ns": 5116947,
+        "request_p99_ns": 8106175,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 129,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 64,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.049488676,
+        "operations_per_second": 82766.40902658216,
+        "request_p50_ns": 3073346,
+        "request_p99_ns": 4227606,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 129,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 64,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.048367979,
+        "operations_per_second": 84684.12542107662,
+        "request_p50_ns": 2998306,
+        "request_p99_ns": 4160680,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 129,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 64,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.088111118,
+        "operations_per_second": 46486.7555079712,
+        "request_p50_ns": 5096199,
+        "request_p99_ns": 8135551,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 129,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 64,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.089232966,
+        "operations_per_second": 45902.31820827294,
+        "request_p50_ns": 5191748,
+        "request_p99_ns": 8250006,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 129,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 64,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 64,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.048952197,
+        "operations_per_second": 83673.46617762631,
+        "request_p50_ns": 3066794,
+        "request_p99_ns": 4212999,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 129,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 256,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.292799026,
+        "operations_per_second": 13989.117573089194,
+        "request_p50_ns": 17540719,
+        "request_p99_ns": 28221664,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 509,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 256,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.165119258,
+        "operations_per_second": 24806.31302255489,
+        "request_p50_ns": 10700011,
+        "request_p99_ns": 14467132,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 509,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 256,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.166419732,
+        "operations_per_second": 24612.46602656469,
+        "request_p50_ns": 10800731,
+        "request_p99_ns": 15189870,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 509,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 256,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.295250263,
+        "operations_per_second": 13872.976634740542,
+        "request_p50_ns": 17512526,
+        "request_p99_ns": 28672381,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 509,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 256,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.307747883,
+        "operations_per_second": 13309.596024093527,
+        "request_p50_ns": 17904953,
+        "request_p99_ns": 33325366,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 509,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 256,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.179378057,
+        "operations_per_second": 22834.45404919287,
+        "request_p50_ns": 11289599,
+        "request_p99_ns": 16393612,
+        "peak_pending_operations": 256,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 509,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 256,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.095233234,
+        "operations_per_second": 43010.19536940224,
+        "request_p50_ns": 24049191,
+        "request_p99_ns": 31219097,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 487,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 256,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.051977684,
+        "operations_per_second": 78803.04940096985,
+        "request_p50_ns": 12807823,
+        "request_p99_ns": 19119415,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 487,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 256,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.049616637,
+        "operations_per_second": 82552.9549695196,
+        "request_p50_ns": 11968606,
+        "request_p99_ns": 18444116,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 487,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 256,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.095857518,
+        "operations_per_second": 42730.086126369344,
+        "request_p50_ns": 23989049,
+        "request_p99_ns": 31380571,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 487,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 256,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.094962485,
+        "operations_per_second": 43132.82239823442,
+        "request_p50_ns": 24128170,
+        "request_p99_ns": 30782967,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 487,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 256,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 256,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.048905109,
+        "operations_per_second": 83754.03068828657,
+        "request_p50_ns": 11853229,
+        "request_p99_ns": 18244571,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 487,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1024,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.272606834,
+        "operations_per_second": 15025.301970236005,
+        "request_p50_ns": 68527751,
+        "request_p99_ns": 100121602,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 1883,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1024,
+      "batch": 1,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.153014205,
+        "operations_per_second": 26768.756534728265,
+        "request_p50_ns": 39567268,
+        "request_p99_ns": 59439539,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 1883,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1024,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.149737246,
+        "operations_per_second": 27354.58350823415,
+        "request_p50_ns": 38997176,
+        "request_p99_ns": 58961610,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 1883,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1024,
+      "batch": 1,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.275063521,
+        "operations_per_second": 14891.105825697623,
+        "request_p50_ns": 69110505,
+        "request_p99_ns": 100977601,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 1883,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1024,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.272869749,
+        "operations_per_second": 15010.82481664173,
+        "request_p50_ns": 68690797,
+        "request_p99_ns": 100361884,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 1883,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1024,
+      "batch": 1,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 1,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 4096,
+        "seconds": 0.146076757,
+        "operations_per_second": 28040.052942851133,
+        "request_p50_ns": 37408040,
+        "request_p99_ns": 55962233,
+        "peak_pending_operations": 1024,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 16907,
+        "peak_message_queue": 1883,
+        "persistence_units": 4493,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1024,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.09864143,
+        "operations_per_second": 41524.1344331687,
+        "request_p50_ns": 87445587,
+        "request_p99_ns": 98280632,
+        "peak_pending_operations": 4008,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 1787,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1024,
+      "batch": 4,
+      "trial": 1,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.056918981,
+        "operations_per_second": 71961.93480694955,
+        "request_p50_ns": 50669996,
+        "request_p99_ns": 56732921,
+        "peak_pending_operations": 4008,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 1787,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1024,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.057903962,
+        "operations_per_second": 70737.81928773716,
+        "request_p50_ns": 51765615,
+        "request_p99_ns": 57728232,
+        "peak_pending_operations": 4008,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 1787,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1024,
+      "batch": 4,
+      "trial": 2,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.098688038,
+        "operations_per_second": 41504.5235776194,
+        "request_p50_ns": 87513134,
+        "request_p99_ns": 98327730,
+        "peak_pending_operations": 4008,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 1787,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "reference",
+      "clients": 1024,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.102393262,
+        "operations_per_second": 40002.63220445111,
+        "request_p50_ns": 90085529,
+        "request_p99_ns": 102039166,
+        "peak_pending_operations": 4008,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 1787,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "framework",
+      "variant": "candidate",
+      "clients": 1024,
+      "batch": 4,
+      "trial": 3,
+      "result": {
+        "kind": "public_core_scaffold",
+        "comparison_gate": "unmatched",
+        "durability": "volatile_exact_ticket_no_disk",
+        "transport": "in_process_messages",
+        "scheduler": "single_cooperative_driver",
+        "latency_origin": "client_request_queued",
+        "latency_unit": "all_original_results_in_client_batch",
+        "percentile": "nearest_rank",
+        "members": 3,
+        "payload_bytes": 0,
+        "clients": 1024,
+        "batch": 4,
+        "warmup_single_writes": 1024,
+        "completed": 4096,
+        "completed_batches": 1024,
+        "seconds": 0.058692865,
+        "operations_per_second": 69787.01755315575,
+        "request_p50_ns": 51799438,
+        "request_p99_ns": 58495734,
+        "peak_pending_operations": 4008,
+        "applied_frontiers": [
+          5121,
+          5121,
+          5121
+        ],
+        "retained_entries": [
+          5121,
+          5121,
+          5121
+        ],
+        "delivered_messages": 4611,
+        "peak_message_queue": 1787,
+        "persistence_units": 1415,
+        "mismatches": [
+          "upstream_server_workers_16",
+          "no_checkpoint_purge"
+        ]
+      }
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 22978.986328125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 1717.708984375
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 1763.205078125
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 20789.734375
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 24017.669921875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 2116.39453125
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 15931.2421875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 6443.087890625
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 6486.953125
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 9677.115234375
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 10722.98828125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 256,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 6229.3046875
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 169515.697265625
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 1630.560546875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 1523.4140625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 178600.896484375
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 164847.849609375
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 1509.84765625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 126998.884765625
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 67766.736328125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 65356.134765625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 120170.966796875
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 123785.4453125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 0,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 68196.064453125
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 19101.28515625
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 1496.634765625
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 1540.228515625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 18910.5
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 18885.857421875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 1531.6171875
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 9754.044921875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 6147.05859375
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 6178.630859375
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 9669.3984375
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 9676.939453125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 256,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 6277.494140625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 138181.408203125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "append",
+      "trial": 1,
+      "mean_ns": 1506.98828125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 1495.978515625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "append",
+      "trial": 2,
+      "mean_ns": 134503.634765625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 140936.42578125
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "append",
+      "trial": 3,
+      "mean_ns": 1554.7265625
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 123318.373046875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 1,
+      "mean_ns": 72324.23046875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 68974.71875
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 2,
+      "mean_ns": 130527.888671875
+    },
+    {
+      "kind": "native",
+      "variant": "reference",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 127026.1796875
+    },
+    {
+      "kind": "native",
+      "variant": "candidate",
+      "unrelated": 8,
+      "history": 4096,
+      "mode": "replace",
+      "trial": 3,
+      "mean_ns": 83341.9296875
+    }
+  ]
+}

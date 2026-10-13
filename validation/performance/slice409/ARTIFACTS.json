@@ -1,0 +1,122 @@
+[
+  {
+    "variant": "reference",
+    "target": "voteboat",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/delta409/reference-build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+    "copy": "target/p9/delta409/artifacts/reference-libvoteboat-be40bd833a88996f.rlib",
+    "sha256": "944a250d117d29e31807aa1f4749dfab68a7061c40291328ecafb37aedda0c5c"
+  },
+  {
+    "variant": "reference",
+    "target": "framework_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/delta409/reference-build/release/examples/framework_benchmark",
+    "copy": "target/p9/delta409/artifacts/reference-framework_benchmark",
+    "sha256": "511b5339a6b474fc86e4b9c24498e9c2f111ce55d8829477fca7c1a20587a8ce"
+  },
+  {
+    "variant": "reference",
+    "target": "log_staging_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/delta409/reference-build/release/examples/log_staging_benchmark",
+    "copy": "target/p9/delta409/artifacts/reference-log_staging_benchmark",
+    "sha256": "ceced2bef8860183a705c830672a155395b66615f823263bb45c34b67f7a4e2a"
+  },
+  {
+    "variant": "candidate",
+    "target": "voteboat",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/candidate-build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+    "copy": "target/p9/delta409/artifacts/candidate-libvoteboat-be40bd833a88996f.rlib",
+    "sha256": "718b12d84b6ea6b3f18f792e5e8468fe35caac16f32e3d3373d7880129a711ac"
+  },
+  {
+    "variant": "candidate",
+    "target": "log_staging_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/candidate-build/release/examples/log_staging_benchmark",
+    "copy": "target/p9/delta409/artifacts/candidate-log_staging_benchmark",
+    "sha256": "49346d6ed1f7a095158a0c256153a1640162d943517236753e4bfeb27987baa5"
+  },
+  {
+    "variant": "candidate",
+    "target": "framework_benchmark",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/candidate-build/release/examples/framework_benchmark",
+    "copy": "target/p9/delta409/artifacts/candidate-framework_benchmark",
+    "sha256": "768aa53bde8355ef8386571870c95af0dc8e3de327b68f05c33911ff29d4e5f3"
+  }
+]

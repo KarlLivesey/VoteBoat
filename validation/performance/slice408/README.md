@@ -16,6 +16,8 @@ The subsequent sandboxed service attempt failed to allocate loopback ports;
 the authorized socket-enabled run passes both controls. Retained failed records
 are environmental/setup failures, not passing validation.
 
-No timed speedup, durable throughput result or macOS408 qualification is claimed.
+Mac408 now passes application/provider controls with all and no default features,
+formatting/four strict configurations, and three exact source guards.
+[Mac records](mac/README.md). No timed speedup or durable throughput is claimed.
 This removes history-sized application copying; log-history work and native
 batch/replication ownership remain separate P9 deliverables.

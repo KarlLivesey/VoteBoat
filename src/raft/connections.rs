@@ -35,7 +35,16 @@ impl Raft {
             peers.insert(node, store);
             Ok(())
         };
-        for state in std::iter::once(&self.durable).chain(self.pending.iter().map(|p| &p.next)) {
+        let plain = self.log_summary.matches(&self.durable) && self.log_summary.is_plain();
+        if plain {
+            for (&node, &store) in &self.durable.bootstrap.voter_stores {
+                add(node, store)?;
+            }
+        }
+        for state in std::iter::once(&self.durable)
+            .filter(|_| !plain)
+            .chain(self.pending.iter().filter_map(|p| p.next.full()))
+        {
             let committed = state
                 .membership_at(state.commit_index)
                 .map_err(|_| RaftError::InvalidRecovery)?;

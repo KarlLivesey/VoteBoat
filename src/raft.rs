@@ -15,6 +15,7 @@
 //! Deterministic static-configuration Raft. Host drives elections and delivery.
 //! Every persistence-dependent send/application notification waits for its exact
 //! store/group/revision/generation ticket. No transport or clock is constructed.
+use crate::log::transition::{LogSummary, LogView, NextLog};
 use crate::{
     contracts::{HardState, StorageError},
     identity::*,
@@ -26,6 +27,7 @@ use crate::{
 use std::collections::{BTreeMap, BTreeSet};
 
 mod leadership;
+mod log_staging;
 mod proposals;
 pub use proposals::{Proposal, MAX_PROPOSAL_BATCH_ENTRIES};
 mod readiness;
@@ -288,8 +290,8 @@ enum After {
 }
 struct Pending {
     update: LogUpdate,
-    next: GroupLog,
-    membership: Membership,
+    next: NextLog,
+    membership: Option<Membership>,
     ticket: Option<LogTicket>,
     after: After,
     reply: Option<Message>,
@@ -312,6 +314,7 @@ pub struct Raft {
     binding: StoreBinding,
     limits: LogLimits,
     durable: GroupLog,
+    log_summary: LogSummary,
     membership: Membership,
     role: Role,
     campaigning_enabled: bool,
@@ -430,6 +433,7 @@ impl Raft {
             node,
             binding,
             limits,
+            log_summary: LogSummary::from_validated(&state),
             durable: state,
             membership,
             role: Role::Follower,
@@ -611,7 +615,8 @@ impl Raft {
     pub fn membership(&self) -> &Membership {
         self.pending
             .as_ref()
-            .map_or(&self.membership, |p| &p.membership)
+            .and_then(|p| p.membership.as_ref())
+            .unwrap_or(&self.membership)
     }
     pub fn storage_binding(&self) -> StoreBinding {
         self.binding
@@ -686,6 +691,14 @@ impl Raft {
         self.reserve_effects(input_bytes, peers)
     }
     fn rollback_replicas(&self) -> usize {
+        if self.log_summary.matches(&self.durable) && self.log_summary.is_plain() {
+            return self
+                .durable
+                .bootstrap
+                .voter_stores
+                .len()
+                .max(self.membership().replicas().count());
+        }
         use crate::membership::ConfigurationChange;
         let base = self.durable.snapshot_membership.as_deref();
         let mut stable = base.map(Membership::stable);
@@ -735,17 +748,7 @@ impl Raft {
     }
     fn reserve_effects(&self, input_bytes: usize, peers: usize) -> Option<usize> {
         use std::mem::size_of;
-        let mut log = self
-            .durable
-            .entries
-            .len()
-            .checked_mul(size_of::<LogEntry>())?;
-        for entry in &self.durable.entries {
-            log = log.checked_add(entry.retained_payload_bytes())?;
-        }
-        if let Some(base) = &self.durable.snapshot_membership {
-            log = log.checked_add(base.retained_bytes())?;
-        }
+        let log = self.retained_log_bytes()?;
         // A heartbeat can produce append and read probes for every peer. Each
         // append contains at most 64 entries and max_batch_bytes payload/framing.
         // Other paths add bounded persist/commit/snapshot-reference metadata.
@@ -1052,14 +1055,15 @@ impl Raft {
             return Err(RaftError::Fenced);
         }
         let p = self.pending.as_mut().ok_or(RaftError::WrongCompletion)?;
+        let next = p.next.metadata();
         if p.ticket.is_some()
             || ticket.binding != self.binding
             || ticket.batch <= self.last_batch
-            || ticket.group != p.next.bootstrap.group
-            || ticket.revision != p.next.revision
-            || ticket.generation != p.next.generation
-            || ticket.last_index != p.next.last_index()
-            || ticket.term != p.next.hard_state.term
+            || ticket.group != next.group
+            || ticket.revision != next.revision
+            || ticket.generation != next.generation
+            || ticket.last_index != next.last_index
+            || ticket.term != next.hard_state.term
         {
             return Err(RaftError::WrongCompletion);
         }
@@ -1078,9 +1082,20 @@ impl Raft {
         }
         let p = self.pending.take().unwrap();
         let previous_commit = self.durable.commit_index;
-        let configuration_changed = p.membership.id() != self.membership.id();
-        self.durable = p.next;
-        self.membership = p.membership;
+        let configuration_changed = p
+            .membership
+            .as_ref()
+            .is_some_and(|membership| membership.id() != self.membership.id());
+        self.log_summary = match p.next.install(&mut self.durable, p.update) {
+            Ok(summary) => summary,
+            Err(error) => {
+                self.storage_failed();
+                return Err(error.into());
+            }
+        };
+        if let Some(membership) = p.membership {
+            self.membership = membership;
+        }
         if configuration_changed {
             self.configuration_changed()?;
         }
@@ -1220,21 +1235,35 @@ impl Raft {
         after: After,
         reply: Option<Message>,
     ) -> Result<Vec<Effect>, RaftError> {
-        let next = crate::log::stage_update(&self.durable, &update, self.limits)?;
-        let membership = next.membership().map_err(|_| RaftError::InvalidRecovery)?;
+        let next = NextLog::plan(
+            LogView::new(&self.durable),
+            &self.log_summary,
+            &update,
+            self.limits,
+        )?;
+        let membership = next
+            .full()
+            .map(GroupLog::membership)
+            .transpose()
+            .map_err(|_| RaftError::InvalidRecovery)?;
+        let metadata = next.metadata();
+        let accepted_membership = membership.as_ref().unwrap_or(&self.membership);
         if self
             .learner_readiness
             .as_ref()
             .or_else(|| self.ready_learner.as_ref().map(|r| r.request()))
             .is_some_and(|r| {
-                r.term != next.hard_state.term
-                    || r.configuration != membership.id()
-                    || r.index < next.commit_index
+                r.term != metadata.hard_state.term
+                    || r.configuration != accepted_membership.id()
+                    || r.index < metadata.commit_index
             })
         {
             self.cancel_learner_readiness();
         }
-        if membership.id() != self.membership().id() {
+        if membership
+            .as_ref()
+            .is_some_and(|m| m.id() != self.membership().id())
+        {
             self.clear_reads();
         }
         self.pending = Some(Pending {

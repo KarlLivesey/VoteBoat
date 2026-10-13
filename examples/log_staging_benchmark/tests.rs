@@ -12,7 +12,8 @@ fn bounded_workload_rejects_zero_and_oversized_inputs() {
         assert!(Workload {
             unrelated,
             history,
-            iterations
+            iterations,
+            append: false,
         }
         .validate()
         .is_err());
@@ -33,6 +34,7 @@ fn fixed_histories_and_all_unrelated_groups_survive_exact_native_recovery() {
             unrelated,
             history: 4,
             iterations: 3,
+            append: false,
         })
         .unwrap();
         assert_eq!(samples.len(), 3);
@@ -66,4 +68,21 @@ fn volatile_journal_retains_only_simulated_synchronized_prefix() {
     assert!(io.truncate_log(4).is_err());
     io.truncate_log(2).unwrap();
     assert_eq!(io.read_log(2).unwrap(), [1, 2]);
+}
+
+#[test]
+fn append_histories_preserve_exact_tickets_and_restart_with_unchanged_neighbors() {
+    let args = ["output.csv", "2", "4", "3", "append"].map(str::to_owned);
+    let (_, config) = arguments(&args).unwrap();
+    assert!(config.append);
+    let samples = workload::run(config).unwrap();
+    assert_eq!(samples.len(), 3);
+    for (index, sample) in samples.iter().enumerate() {
+        assert_eq!(sample.iteration, index);
+        assert_eq!(sample.io.appends, 1);
+        assert_eq!(sample.io.syncs, 1);
+        assert_eq!(sample.io.publications, 1);
+    }
+    let bad = ["output.csv", "2", "4", "3", "unbounded"].map(str::to_owned);
+    assert!(arguments(&bad).is_err());
 }

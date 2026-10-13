@@ -48,7 +48,12 @@ fn entry(index: usize, operation: u128) -> LogEntry {
 fn limits(config: Workload) -> LogLimits {
     LogLimits {
         max_groups: config.unrelated + 1,
-        max_entries_per_group: config.history,
+        max_entries_per_group: config.history
+            + if config.append {
+                config.iterations + WARMUP
+            } else {
+                0
+            },
         max_wal_bytes: 16 * 1024 * 1024,
         ..LogLimits::default()
     }
@@ -118,11 +123,12 @@ fn initialize(
 }
 
 fn replacement(original: &GroupLog, config: Workload, step: usize) -> LogMutation {
+    let index = config.history + if config.append { step } else { 0 };
     let mut mutation = update(
         original,
         Suffix {
-            from: config.history as u64,
-            entries: vec![entry(config.history, config.history as u128 + step as u128)],
+            from: index as u64,
+            entries: vec![entry(index, config.history as u128 + step as u128)],
         },
     );
     let LogMutation::Update(value) = &mut mutation else {
@@ -232,8 +238,10 @@ pub(super) fn run(config: Workload) -> Result<Vec<Sample>, Failure> {
         if ticket.binding != binding
             || ticket.group != group(1)
             || ticket.revision.get() != original.revision.get() + step as u64
-            || ticket.generation.get() != original.generation.get() + step as u64
-            || ticket.last_index != config.history as u64
+            || ticket.generation.get()
+                != original.generation.get() + if config.append { 0 } else { step as u64 }
+            || ticket.last_index
+                != config.history as u64 + if config.append { step as u64 } else { 0 }
             || ticket.term != 1
         {
             return Err("original scoped transition ticket mismatch".into());
@@ -249,9 +257,16 @@ pub(super) fn run(config: Workload) -> Result<Vec<Sample>, Failure> {
     let steps = config.iterations + WARMUP;
     let changed = expected.get_mut(&group(1)).unwrap();
     changed.revision = LogRevision::new(changed.revision.get() + steps as u64).unwrap();
-    changed.generation = LogGeneration::new(changed.generation.get() + steps as u64).unwrap();
-    *changed.entries.last_mut().unwrap() =
-        entry(config.history, config.history as u128 + steps as u128);
+    if config.append {
+        changed.entries.extend(
+            (1..=steps)
+                .map(|step| entry(config.history + step, config.history as u128 + step as u128)),
+        );
+    } else {
+        changed.generation = LogGeneration::new(changed.generation.get() + steps as u64).unwrap();
+        *changed.entries.last_mut().unwrap() =
+            entry(config.history, config.history as u128 + steps as u128);
+    }
     verify_states(&store, &expected)?;
     drop(store);
     verify_recovery(device, config, binding, last_ticket.unwrap(), &expected)?;

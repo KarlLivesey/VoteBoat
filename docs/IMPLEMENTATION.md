@@ -9,6 +9,12 @@ The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance
 floor is claimed achieved.
 
+Current execution adjustment: the larger fixed-history measurements expose
+retained-log copying/scanning as the CPU ceiling. The linked mini-plan now places
+validated Core/native log deltas first, native request batching next, and bounded
+disk/replication overlap third. All advance the existing P9.1 milestone; exact
+validation, tickets, control reserves and complex-history behavior remain.
+
 P9 execution begins on 13 October 2026. No P10 security phase or Windows work.
 Minimum framework acceptance: exceed complete OpenRaft published client curve
 on matched conditions: batch1 clients1/64/256/512/1024/4096, rates
@@ -25,7 +31,7 @@ Macro: P9.0 reproducible attributed baseline; P9.1 cheap/pipelined ordered group
 P9.2 parallel independent groups/resources and fairness; P9.3 sustainable
 maintenance/skew/catch-up performance on Linux/macOS; P9.4 P8 topology cost.
 
-Mini: current touched-group/log-core staging + comparative diagnostic, no disk
+Initial mini plan (historical): touched-group/log-core staging + comparative diagnostic, no disk
 format change. Purpose removes unrelated-data and duplicate validation copies;
 depends on existing atomic validators/tickets; checks independent transition,
 crash/restart/fencing/unchanged-state tests and quiet interleaved comparisons;
@@ -32412,6 +32418,27 @@ no-default features; formatting/four strict Clippy configurations are zero.
 Actual TCP/QUIC retry, leader replacement and native-file recovery pass2/0
 (11.41s) with loopback sockets available; sandbox port-allocation refusal is
 retained separately in the evidence.
-No timed throughput claim or macOS408 pass is inferred from those checks.
+No timed throughput claim is inferred from those checks. Mac408 is now terminal
+on exact6c404559: all-feature application12/provider29 and core-only
+application12/provider14 pass; fmt/four strict0; three1319-input guards match.
+[Mac records](../validation/performance/slice408/mac/README.md).
 This advancesP9.1 by removing history-sized application copying; the linked
 native-batching/overlap/log-delta mini-plan continues.
+
+### P9 validated log deltas409
+
+[Schemas, actual checks and paired measurements](../validation/performance/slice409/README.md).
+Core pending state and native accepted state use plain append/metadata deltas;
+canonical durable state remains unchanged until exact completion/publication.
+Versioned summaries avoid allocation/configuration scans on those paths.
+Complex/configured histories retain full validation. Linux all470/core296 and
+real TCP/QUIC recovery2 pass; formatting/four strict configurations are zero.
+Mac frozen1328-input checks are running. No terminal result is assumed.
+
+Three paired trials/cell show11.79–109.18x shorter ordinary native volatile
+staging time with initial histories256/4096 and0/8 unrelated groups. Fixed
+framework histories improve1.73–2.03x but still copy in the modeled provider.
+Source/artifact guards match across96 cases; no durable or minimum-floor win.
+Next native ready batching and bounded overlap still advanceP9.1. The remaining
+modeled-store/configured-history costs require owned cached state rather than
+discarding validation. Macro acceptance and the complete P9 goal remain active.

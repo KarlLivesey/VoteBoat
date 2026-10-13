@@ -226,7 +226,7 @@ impl Raft {
             leader_commit: 0,
         };
         let mut effects = self.receive_inner(message)?;
-        let convert = |reply: &mut Message, next: &GroupLog| {
+        let convert = |reply: &mut Message, term_at: &dyn Fn(u64) -> Option<u64>| {
             let (success, matching_index) = match reply.rpc {
                 Rpc::Appended {
                     success,
@@ -238,17 +238,19 @@ impl Raft {
             reply.rpc = Rpc::LearnerRepaired {
                 success,
                 matching_index,
-                matching_term: next.term_at(matching_index).unwrap_or(0),
+                matching_term: term_at(matching_index).unwrap_or(0),
             };
         };
         if let Some(pending) = &mut self.pending {
             if let Some(reply) = &mut pending.reply {
-                convert(reply, &pending.next);
+                convert(reply, &|index| {
+                    pending.next.term_at(&self.durable, &pending.update, index)
+                });
             }
         }
         for effect in &mut effects {
             if let Effect::Send(reply) = effect {
-                convert(reply, &self.durable);
+                convert(reply, &|index| self.durable.term_at(index));
             }
         }
         self.reset_election()?;

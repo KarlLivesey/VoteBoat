@@ -15,11 +15,9 @@
 //! Native recoverable log: atomic group transitions, shared barriers, no threads.
 use super::vote_store::crc32c;
 use crate::{contracts::StorageError, identity::*, log::*};
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    io,
-};
+use std::{collections::BTreeMap, io};
 
+mod accepted;
 mod checkpoint;
 mod file;
 pub mod striped;
@@ -60,8 +58,7 @@ pub struct NativeLogStore<I: JournalIo, C: LogCodec = NativeLogCodec> {
     binding: StoreBinding,
     limits: LogLimits,
     durable: BTreeMap<GroupIdentity, GroupLog>,
-    accepted: BTreeMap<GroupIdentity, GroupLog>,
-    dirty: BTreeSet<GroupIdentity>,
+    accepted: accepted::Accepted,
     pending: Vec<LogTicket>,
     length: usize,
     sequence: u64,
@@ -142,8 +139,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             binding,
             limits,
             durable: BTreeMap::new(),
-            accepted: BTreeMap::new(),
-            dirty: BTreeSet::new(),
+            accepted: accepted::Accepted::default(),
             pending: Vec::new(),
             length: 0,
             sequence: 0,
@@ -229,14 +225,14 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
         io.sync_log().map_err(uncertain)?;
         io.publish_manifest(&manifest(binding, offset as u64))
             .map_err(uncertain)?;
+        let accepted = accepted::Accepted::recovered(&state);
         Ok(Self {
             io,
             codec,
             binding,
             limits,
-            durable: state.clone(),
-            accepted: state,
-            dirty: BTreeSet::new(),
+            durable: state,
+            accepted,
             pending: Vec::new(),
             length: offset,
             sequence,
@@ -294,7 +290,9 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                 "codec encoded length outside budget",
             ));
         }
-        let next = stage_batch(&self.accepted, &mutations, self.limits)?;
+        let next = self
+            .accepted
+            .plan_batch(&self.durable, &mutations, self.limits)?;
         let control = mutations.iter().all(|m| match m {
             LogMutation::Create(_) => true,
             LogMutation::Update(u) => u.suffix.as_ref().is_none_or(|s| {
@@ -318,14 +316,14 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
                     LogMutation::Create(b) => b.group,
                     LogMutation::Update(u) => u.group,
                 };
-                let state = &next[&g];
+                let state = next[&g].metadata();
                 LogTicket {
                     binding: self.binding,
                     batch: sequence,
                     group: g,
                     revision: state.revision,
                     generation: state.generation,
-                    last_index: state.last_index(),
+                    last_index: state.last_index,
                     term: state.hard_state.term,
                 }
             })
@@ -336,11 +334,15 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         // A suffix fence invalidates outstanding evidence for the old suffix.
         self.pending.retain(|t| {
             next.get(&t.group)
-                .is_none_or(|s| s.generation == t.generation)
+                .is_none_or(|plan| plan.metadata().generation == t.generation)
         });
+        if let Err(error) = self.accepted.install(&self.durable, next, mutations) {
+            self.fenced = true;
+            return Err(StorageError::Uncertain(format!(
+                "accepted install invariant: {error:?}"
+            )));
+        }
         self.pending.extend(tickets.iter().copied());
-        self.dirty.extend(next.keys().copied());
-        self.accepted.extend(next);
         self.sequence = sequence;
         self.length += bytes.len();
         Ok(tickets)
@@ -358,6 +360,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         {
             return Err(StorageError::StaleTicket);
         }
+        self.accepted.check_promotion(&self.durable)?;
         if let Err(e) = self.io.sync_log() {
             return Err(self.failed(e));
         }
@@ -367,10 +370,12 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         {
             return Err(self.failed(e));
         }
-        for group in &self.dirty {
-            self.durable.insert(*group, self.accepted[group].clone());
+        if let Err(error) = self.accepted.promote(&mut self.durable) {
+            self.fenced = true;
+            return Err(StorageError::Uncertain(format!(
+                "accepted promotion invariant: {error:?}"
+            )));
         }
-        self.dirty.clear();
         self.pending.retain(|t| !dependencies.contains(t));
         Ok(DurableLog {
             tickets: dependencies.to_vec(),
@@ -383,7 +388,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         if self.fenced {
             return Err(StorageError::Fenced);
         }
-        if !self.pending.is_empty() || !self.dirty.is_empty() || self.accepted != self.durable {
+        if !self.pending.is_empty() || !self.accepted.is_clean() {
             return Err(StorageError::Rejected(
                 "reclamation requires drained transitions",
             ));

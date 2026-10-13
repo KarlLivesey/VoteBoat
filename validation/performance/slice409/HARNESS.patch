@@ -1,0 +1,161 @@
+diff --git a/examples/log_staging_benchmark.rs b/examples/log_staging_benchmark.rs
+index d7a13ce..798cd55 100644
+--- a/examples/log_staging_benchmark.rs
++++ b/examples/log_staging_benchmark.rs
+@@ -24,6 +24,7 @@ struct Workload {
+     unrelated: usize,
+     history: usize,
+     iterations: usize,
++    append: bool,
+ }
+ 
+ impl Workload {
+@@ -41,17 +42,23 @@ impl Workload {
+ }
+ 
+ fn arguments(args: &[String]) -> Result<(PathBuf, Workload), Failure> {
+-    let [output, unrelated, history, iterations] = args else {
++    let [output, unrelated, history, iterations, mode @ ..] = args else {
+         return Err(concat!(
+             "usage: log_staging_benchmark FRESH_CSV_PATH ",
+-            "UNRELATED_GROUPS(0..32) HISTORY(2..4096) ITERATIONS(1..2000)"
++            "UNRELATED_GROUPS(0..32) HISTORY(2..4096) ITERATIONS(1..2000) [append]"
+         )
+         .into());
+     };
++    let append = match mode {
++        [] => false,
++        [mode] if mode == "append" => true,
++        _ => return Err("expected optional append mode".into()),
++    };
+     let config = Workload {
+         unrelated: unrelated.parse()?,
+         history: history.parse()?,
+         iterations: iterations.parse()?,
++        append,
+     }
+     .validate()?;
+     Ok((output.into(), config))
+@@ -66,7 +73,12 @@ fn main() -> Result<(), Failure> {
+     for sample in samples {
+         writeln!(
+             output,
+-            "volatile_native_log_staging,suffix_replacement,{},{},{},{},{},{},{},{},{},{},{},{},{},true,true",
++            "volatile_native_log_staging,{},{},{},{},{},{},{},{},{},{},{},{},{},{},true,true",
++            if config.append {
++                "pure_append"
++            } else {
++                "suffix_replacement"
++            },
+             config.unrelated,
+             config.unrelated + 1,
+             config.history,
+diff --git a/examples/log_staging_benchmark/tests.rs b/examples/log_staging_benchmark/tests.rs
+index 796aa01..8ce0b15 100644
+--- a/examples/log_staging_benchmark/tests.rs
++++ b/examples/log_staging_benchmark/tests.rs
+@@ -12,7 +12,8 @@ fn bounded_workload_rejects_zero_and_oversized_inputs() {
+         assert!(Workload {
+             unrelated,
+             history,
+-            iterations
++            iterations,
++            append: false,
+         }
+         .validate()
+         .is_err());
+@@ -33,6 +34,7 @@ fn fixed_histories_and_all_unrelated_groups_survive_exact_native_recovery() {
+             unrelated,
+             history: 4,
+             iterations: 3,
++            append: false,
+         })
+         .unwrap();
+         assert_eq!(samples.len(), 3);
+@@ -67,3 +69,20 @@ fn volatile_journal_retains_only_simulated_synchronized_prefix() {
+     io.truncate_log(2).unwrap();
+     assert_eq!(io.read_log(2).unwrap(), [1, 2]);
+ }
++
++#[test]
++fn append_histories_preserve_exact_tickets_and_restart_with_unchanged_neighbors() {
++    let args = ["output.csv", "2", "4", "3", "append"].map(str::to_owned);
++    let (_, config) = arguments(&args).unwrap();
++    assert!(config.append);
++    let samples = workload::run(config).unwrap();
++    assert_eq!(samples.len(), 3);
++    for (index, sample) in samples.iter().enumerate() {
++        assert_eq!(sample.iteration, index);
++        assert_eq!(sample.io.appends, 1);
++        assert_eq!(sample.io.syncs, 1);
++        assert_eq!(sample.io.publications, 1);
++    }
++    let bad = ["output.csv", "2", "4", "3", "unbounded"].map(str::to_owned);
++    assert!(arguments(&bad).is_err());
++}
+diff --git a/examples/log_staging_benchmark/workload.rs b/examples/log_staging_benchmark/workload.rs
+index a5aac22..9a43d6d 100644
+--- a/examples/log_staging_benchmark/workload.rs
++++ b/examples/log_staging_benchmark/workload.rs
+@@ -48,7 +48,12 @@ fn entry(index: usize, operation: u128) -> LogEntry {
+ fn limits(config: Workload) -> LogLimits {
+     LogLimits {
+         max_groups: config.unrelated + 1,
+-        max_entries_per_group: config.history,
++        max_entries_per_group: config.history
++            + if config.append {
++                config.iterations + WARMUP
++            } else {
++                0
++            },
+         max_wal_bytes: 16 * 1024 * 1024,
+         ..LogLimits::default()
+     }
+@@ -118,11 +123,12 @@ fn initialize(
+ }
+ 
+ fn replacement(original: &GroupLog, config: Workload, step: usize) -> LogMutation {
++    let index = config.history + if config.append { step } else { 0 };
+     let mut mutation = update(
+         original,
+         Suffix {
+-            from: config.history as u64,
+-            entries: vec![entry(config.history, config.history as u128 + step as u128)],
++            from: index as u64,
++            entries: vec![entry(index, config.history as u128 + step as u128)],
+         },
+     );
+     let LogMutation::Update(value) = &mut mutation else {
+@@ -232,8 +238,10 @@ pub(super) fn run(config: Workload) -> Result<Vec<Sample>, Failure> {
+         if ticket.binding != binding
+             || ticket.group != group(1)
+             || ticket.revision.get() != original.revision.get() + step as u64
+-            || ticket.generation.get() != original.generation.get() + step as u64
+-            || ticket.last_index != config.history as u64
++            || ticket.generation.get()
++                != original.generation.get() + if config.append { 0 } else { step as u64 }
++            || ticket.last_index
++                != config.history as u64 + if config.append { step as u64 } else { 0 }
+             || ticket.term != 1
+         {
+             return Err("original scoped transition ticket mismatch".into());
+@@ -249,9 +257,16 @@ pub(super) fn run(config: Workload) -> Result<Vec<Sample>, Failure> {
+     let steps = config.iterations + WARMUP;
+     let changed = expected.get_mut(&group(1)).unwrap();
+     changed.revision = LogRevision::new(changed.revision.get() + steps as u64).unwrap();
+-    changed.generation = LogGeneration::new(changed.generation.get() + steps as u64).unwrap();
+-    *changed.entries.last_mut().unwrap() =
+-        entry(config.history, config.history as u128 + steps as u128);
++    if config.append {
++        changed.entries.extend(
++            (1..=steps)
++                .map(|step| entry(config.history + step, config.history as u128 + step as u128)),
++        );
++    } else {
++        changed.generation = LogGeneration::new(changed.generation.get() + steps as u64).unwrap();
++        *changed.entries.last_mut().unwrap() =
++            entry(config.history, config.history as u128 + steps as u128);
++    }
+     verify_states(&store, &expected)?;
+     drop(store);
+     verify_recovery(device, config, binding, last_ticket.unwrap(), &expected)?;

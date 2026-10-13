@@ -86,14 +86,14 @@ fn leader() -> Raft {
     core
 }
 fn ticket(core: &Raft) -> LogTicket {
-    let next = &core.pending.as_ref().unwrap().next;
+    let next = core.pending.as_ref().unwrap().next.metadata();
     LogTicket {
         binding: core.binding,
         batch: core.last_batch + 1,
-        group: next.bootstrap.group,
+        group: next.group,
         revision: next.revision,
         generation: next.generation,
-        last_index: next.last_index(),
+        last_index: next.last_index,
         term: next.hard_state.term,
     }
 }
@@ -103,6 +103,86 @@ fn rejected(core: &mut Raft, input: Vec<Proposal>) {
     assert!(core.propose_batch(input).is_err());
     assert_eq!(core.state(), &before);
     assert_eq!(core.membership(), &configuration);
+    assert!(core.pending.is_none());
+}
+
+fn payload_pointers(core: &Raft) -> Vec<*const u8> {
+    core.state()
+        .entries
+        .iter()
+        .filter_map(|entry| {
+            if let EntryPayload::Command { bytes, .. } = &entry.payload {
+                Some(bytes.as_ptr())
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+fn complete_exact(core: &mut Raft) {
+    let exact = ticket(core);
+    core.admitted(exact).unwrap();
+    core.complete(&DurableLog {
+        tickets: vec![exact],
+    })
+    .unwrap();
+}
+
+#[test]
+fn plain_append_and_commit_preserve_historical_payloads_and_exact_accounting() {
+    let mut core = leader();
+    core.propose_batch((1..=64).map(proposal).collect())
+        .unwrap();
+    complete_exact(&mut core);
+    let retained = payload_pointers(&core);
+    let membership = core.membership() as *const Membership;
+    let peers = core.connection_replicas(3).unwrap();
+    let before = core.state().clone();
+    core.propose_batch((65..=68).map(proposal).collect())
+        .unwrap();
+    assert!(core.pending.as_ref().unwrap().next.full().is_none());
+    assert_eq!(core.state(), &before);
+    assert_eq!(core.membership() as *const Membership, membership);
+    assert_eq!(core.connection_replicas(3).unwrap(), peers);
+    assert!(core.connection_replicas(2).is_err());
+    complete_exact(&mut core);
+    assert_eq!(&payload_pointers(&core)[..64], retained);
+    core.persist(
+        core.durable.hard_state,
+        core.durable.last_index(),
+        None,
+        After::Commit,
+        None,
+    )
+    .unwrap();
+    assert!(core.pending.as_ref().unwrap().next.full().is_none());
+    let all = payload_pointers(&core);
+    complete_exact(&mut core);
+    assert_eq!(payload_pointers(&core), all);
+    assert_eq!(core.state().commit_index, 69);
+    assert_eq!(core.membership() as *const Membership, membership);
+    let old_charge = core.state().entries.len() * std::mem::size_of::<LogEntry>()
+        + core
+            .state()
+            .entries
+            .iter()
+            .map(LogEntry::retained_payload_bytes)
+            .sum::<usize>();
+    assert_eq!(core.retained_log_bytes(), Some(old_charge));
+    assert!(core.log_summary.matches(core.state()));
+    assert_eq!(core.rollback_replicas(), 3);
+}
+
+#[test]
+fn stale_summary_cannot_admit_an_ordinary_transition() {
+    let mut core = leader();
+    let before = core.state().clone();
+    let mut other_revision = before.clone();
+    other_revision.revision = LogRevision::new(other_revision.revision.get() + 1).unwrap();
+    core.log_summary = LogSummary::from_validated(&other_revision);
+    assert!(core.propose_batch(vec![proposal(1)]).is_err());
+    assert_eq!(core.state(), &before);
     assert!(core.pending.is_none());
 }
 

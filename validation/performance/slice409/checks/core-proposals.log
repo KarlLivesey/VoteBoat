@@ -1,0 +1,30 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+warning: associated function `overlay` is never used
+  --> src/log/transition/view.rs:77:19
+   |
+67 | impl<'a> LogView<'a> {
+   | -------------------- associated function in this implementation
+...
+77 |     pub(crate) fn overlay(base: &'a GroupLog, tail: &'a [LogEntry], metadata: LogMetadata) -> Self {
+   |                   ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `voteboat` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.69s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-3e21d4a0e26b6834)
+
+running 10 tests
+test raft::proposals::tests::index_exhaustion_is_rejected_before_pending_state ... ok
+test raft::proposals::tests::direct_batch_uses_the_same_fence_dependency_and_transfer_guards ... ok
+test raft::proposals::tests::four_original_commands_share_one_uncommitted_transition ... ok
+test raft::proposals::tests::each_existing_checkpoint_install_and_readiness_dependency_stays_closed ... ok
+test raft::proposals::tests::stale_summary_cannot_admit_an_ordinary_transition ... ok
+test raft::proposals::tests::legacy_singletons_keep_custom_small_limits_and_spare_payload_capacity ... ok
+test raft::proposals::tests::invalid_member_shape_and_aggregate_budgets_leave_no_partial_append ... ok
+test raft::proposals::tests::singleton_and_duplicate_ids_preserve_original_commands ... ok
+test raft::proposals::tests::plain_append_and_commit_preserve_historical_payloads_and_exact_accounting ... ok
+test raft::proposals::tests::written_and_stale_completions_cannot_publish_batch_or_quorum_evidence ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 215 filtered out; finished in 0.00s
+

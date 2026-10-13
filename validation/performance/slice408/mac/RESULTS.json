@@ -1,0 +1,65 @@
+{
+  "commit": "6c404559a796bf97956dbe50cc8e25e40e7c1cee",
+  "scope": "Committed Counter408; Mac functional qualification only; no benchmark",
+  "platform": "Darwin arm64",
+  "rustc": "1.98.0 (88d9e12ae 2026-08-18)",
+  "cargo": "1.98.0 (797e8a9bc 2026-08-05)",
+  "remote": "/tmp/voteboat-p9-counter408-6c40455",
+  "build_cache": "/tmp/voteboat-p9-batch407/build",
+  "configurations_sequential": true,
+  "source_inputs": 1319,
+  "source_guards": [
+    {
+      "name": "source_start",
+      "matching_inputs": 1319,
+      "status": 0
+    },
+    {
+      "name": "source_after_all",
+      "matching_inputs": 1319,
+      "status": 0
+    },
+    {
+      "name": "source_terminal",
+      "matching_inputs": 1319,
+      "status": 0
+    }
+  ],
+  "checks": {
+    "platform": 0,
+    "source_start": 0,
+    "fmt": 0,
+    "clippy_all": 0,
+    "clippy_default": 0,
+    "clippy_core": 0,
+    "clippy_native": 0,
+    "correctness_all": 0,
+    "source_after_all": 0,
+    "correctness_core": 0,
+    "source_terminal": 0
+  },
+  "tests": {
+    "all_features": {
+      "application": {
+        "passed": 12,
+        "failed": 0
+      },
+      "provider_conformance": {
+        "passed": 29,
+        "failed": 0
+      }
+    },
+    "core_only": {
+      "application": {
+        "passed": 12,
+        "failed": 0
+      },
+      "provider_conformance": {
+        "passed": 14,
+        "failed": 0
+      }
+    }
+  },
+  "performance_claim": false,
+  "terminal": "failures=0"
+}

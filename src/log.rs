@@ -21,6 +21,8 @@ use crate::{
 };
 use std::collections::BTreeMap;
 
+pub(crate) mod transition;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum EntryPayload {
     Noop,
@@ -90,21 +92,7 @@ impl GroupLog {
     /// the candidate belongs to the current configuration. The selected store
     /// supplies the verified history; new promises are checked on admission.
     pub fn validate_ballot(&self) -> Result<(), StorageError> {
-        if !self.hard_state.follows(HardState::default()) {
-            return Err(StorageError::Rejected("invalid ballot term"));
-        }
-        match (self.hard_state.voted_for, self.ballot_origin) {
-            (None, None) => Ok(()),
-            (Some(candidate), Some(origin))
-                if origin.configuration >= self.bootstrap.configuration
-                    && (origin.configuration != self.bootstrap.configuration
-                        || self.bootstrap.voter_stores.get(&candidate)
-                            == Some(&origin.candidate_store)) =>
-            {
-                Ok(())
-            }
-            _ => Err(StorageError::Rejected("invalid ballot origin")),
-        }
+        validate_ballot_fields(&self.bootstrap, self.hard_state, self.ballot_origin)
     }
 
     /// Accepted-log activation, independent of application execution. Snapshot
@@ -411,6 +399,44 @@ fn stage_create(b: &Bootstrap) -> Result<GroupLog, StorageError> {
         entries: Vec::new(),
     })
 }
+fn validate_ballot_fields(
+    bootstrap: &Bootstrap,
+    hard_state: HardState,
+    origin: Option<BallotOrigin>,
+) -> Result<(), StorageError> {
+    if !hard_state.follows(HardState::default()) {
+        return Err(StorageError::Rejected("invalid ballot term"));
+    }
+    match (hard_state.voted_for, origin) {
+        (None, None) => Ok(()),
+        (Some(candidate), Some(origin))
+            if origin.configuration >= bootstrap.configuration
+                && (origin.configuration != bootstrap.configuration
+                    || bootstrap.voter_stores.get(&candidate) == Some(&origin.candidate_store)) =>
+        {
+            Ok(())
+        }
+        _ => Err(StorageError::Rejected("invalid ballot origin")),
+    }
+}
+
+fn ballot_origin_for(
+    current: HardState,
+    retained: Option<BallotOrigin>,
+    next: HardState,
+    lookup: impl FnOnce(NodeId) -> Result<BallotOrigin, StorageError>,
+) -> Result<Option<BallotOrigin>, StorageError> {
+    if let Some(candidate) = next.voted_for {
+        if next == current {
+            Ok(retained)
+        } else {
+            lookup(candidate).map(Some)
+        }
+    } else {
+        Ok(None)
+    }
+}
+
 fn ballot_origin(
     current: &GroupLog,
     update: &LogUpdate,
@@ -418,25 +444,23 @@ fn ballot_origin(
     // A retained promise is independent of the surviving electorate.
     // Only a genuinely new ballot consults the predecessor accepted
     // configuration; a suffix/snapshot cannot authorize itself.
-    let ballot_origin = if let Some(candidate) = update.hard_state.voted_for {
-        if update.hard_state == current.hard_state {
-            current.ballot_origin
-        } else {
+    ballot_origin_for(
+        current.hard_state,
+        current.ballot_origin,
+        update.hard_state,
+        |candidate| {
             let membership = current
                 .membership()
                 .map_err(|_| StorageError::Rejected("invalid ballot membership"))?;
             let candidate_store = membership
                 .voter_store(candidate)
                 .ok_or(StorageError::Rejected("candidate is not an accepted voter"))?;
-            Some(BallotOrigin {
+            Ok(BallotOrigin {
                 configuration: membership.id(),
                 candidate_store,
             })
-        }
-    } else {
-        None
-    };
-    Ok(ballot_origin)
+        },
+    )
 }
 fn apply_update(
     current: &mut GroupLog,
@@ -597,18 +621,12 @@ fn apply_suffix(
     if suffix.entries.len() > limits.max_entries_per_group.saturating_sub(start) {
         return Err(StorageError::Rejected("group entry limit"));
     }
-    let mut previous_term = current.term_at(suffix.from - 1).unwrap();
-    for (offset, entry) in suffix.entries.iter().enumerate() {
-        if entry.index != suffix.from + offset as u64
-            || entry.term == 0
-            || entry.term < previous_term
-            || entry.term > hard_term
-            || entry.payload_bytes() > limits.max_command_bytes
-        {
-            return Err(StorageError::Rejected("entry index/term/payload invalid"));
-        }
-        previous_term = entry.term;
-    }
+    validate_suffix_entries(
+        suffix,
+        current.term_at(suffix.from - 1).unwrap(),
+        hard_term,
+        limits,
+    )?;
     if suffix.from <= current.last_index() {
         current.generation = current
             .generation
@@ -619,5 +637,25 @@ fn apply_suffix(
     }
     current.entries.truncate(start);
     current.entries.extend(suffix.entries.iter().cloned());
+    Ok(())
+}
+
+fn validate_suffix_entries(
+    suffix: &Suffix,
+    mut previous_term: u64,
+    hard_term: u64,
+    limits: LogLimits,
+) -> Result<(), StorageError> {
+    for (offset, entry) in suffix.entries.iter().enumerate() {
+        if suffix.from.checked_add(offset as u64) != Some(entry.index)
+            || entry.term == 0
+            || entry.term < previous_term
+            || entry.term > hard_term
+            || entry.payload_bytes() > limits.max_command_bytes
+        {
+            return Err(StorageError::Rejected("entry index/term/payload invalid"));
+        }
+        previous_term = entry.term;
+    }
     Ok(())
 }
