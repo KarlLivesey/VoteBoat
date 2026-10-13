@@ -3,6 +3,7 @@
 use super::*;
 mod budget;
 mod context;
+mod wrapper;
 
 #[test]
 fn ready_native_admissions_share_persist_but_keep_every_original_result() {

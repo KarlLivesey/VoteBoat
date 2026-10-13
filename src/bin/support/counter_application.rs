@@ -88,6 +88,10 @@ impl BoundedStateMachine for Application {
     }
 }
 impl ProposalAdmission for Application {
+    fn supports_ready_batch(&self) -> bool {
+        delegate!(self, app => app.supports_ready_batch())
+    }
+
     fn validate_proposal_context(
         &self,
         core: &Raft,

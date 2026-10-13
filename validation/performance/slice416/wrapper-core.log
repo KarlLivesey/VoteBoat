@@ -1,0 +1,13 @@
+   Compiling ring v0.17.14
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.33s
+     Running tests/effect_owner.rs (target/p9/slice416-checks/debug/deps/effect_owner-2e123b8ee2a1b664)
+
+running 4 tests
+test client_admission::ready_batch::wrapper::checks::written_failure_keeps_every_wrapped_original_unknown ... ok
+test client_admission::ready_batch::wrapper::plain_service_wrapper_batches_originals_with_full_wrapper_receipt_bounds ... ok
+test client_admission::ready_batch::wrapper::checks::retained_capacity_refuses_novel_id_but_original_retry_keeps_exact_outcome ... ok
+test client_admission::ready_batch::wrapper::checks::maintenance_wrapper_keeps_actual_capability_and_singleton_data_order ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 190 filtered out; finished in 0.00s
+

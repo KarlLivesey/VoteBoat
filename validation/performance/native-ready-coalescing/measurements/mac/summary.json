@@ -1,0 +1,1193 @@
+{
+  "scope": "Native414 durable original-application before/after306b26b vs prior frozen observer; same instrumented benchmark; three replicas share one host/device; not an OpenRaft floor claim. Includes default-equivalent BatchLimits changes, no singleton-cause attribution from observer.",
+  "cases": 24,
+  "original_measured_completions": 6144,
+  "valid_campaign": true,
+  "method": "median of three trials; paired ratios before aggregation; all originals retained",
+  "limitations": [
+    "three replicas share one host/device; 256 measured originals and 64 warmup per trial",
+    "three pairs are a focused before/after campaign, not a capacity sweep or confidence interval",
+    "physical I/O timing is substantial and varies across trials; no queue-selection-cause tracing",
+    "RPL code and diagnostic are compared only; no OpenRaft matched-floor claim"
+  ],
+  "cells": [
+    {
+      "protocol": "tcp",
+      "window": 32,
+      "variants": {
+        "reference": {
+          "median_completed_writes_s": 56.202,
+          "median_p50_us": 594900.959,
+          "median_p99_us": 1004358.75,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 54.698,
+              "p99_us": 1003794.667,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 241,
+                "widths": {
+                  "1": 240,
+                  "16": 1
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 271,
+                  "io_append_ns": 112928703,
+                  "sync_calls": 271,
+                  "sync_ns": 1322329995,
+                  "publish_calls": 271,
+                  "publish_ns": 3129939458
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 31,
+                  "io_append_ns": 7514578,
+                  "sync_calls": 31,
+                  "sync_ns": 283452788,
+                  "publish_calls": 31,
+                  "publish_ns": 783792125
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 32,
+                  "io_append_ns": 30017371,
+                  "sync_calls": 32,
+                  "sync_ns": 327683169,
+                  "publish_calls": 32,
+                  "publish_ns": 827112420
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 56.202,
+              "p99_us": 1044815.125,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 226,
+                "widths": {
+                  "1": 224,
+                  "16": 2
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 256,
+                  "io_append_ns": 107074966,
+                  "sync_calls": 256,
+                  "sync_ns": 1273599675,
+                  "publish_calls": 256,
+                  "publish_ns": 3062622297
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 31,
+                  "io_append_ns": 7797501,
+                  "sync_calls": 31,
+                  "sync_ns": 286005668,
+                  "publish_calls": 31,
+                  "publish_ns": 819378834
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 30,
+                  "io_append_ns": 23698581,
+                  "sync_calls": 30,
+                  "sync_ns": 311053709,
+                  "publish_calls": 30,
+                  "publish_ns": 798120670
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 56.995,
+              "p99_us": 1004358.75,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 226,
+                "widths": {
+                  "1": 224,
+                  "16": 2
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 255,
+                  "io_append_ns": 83245492,
+                  "sync_calls": 255,
+                  "sync_ns": 1260171549,
+                  "publish_calls": 255,
+                  "publish_ns": 3027593715
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 29,
+                  "io_append_ns": 3850625,
+                  "sync_calls": 29,
+                  "sync_ns": 284421124,
+                  "publish_calls": 29,
+                  "publish_ns": 751420668
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 30,
+                  "io_append_ns": 7207870,
+                  "sync_calls": 30,
+                  "sync_ns": 299452419,
+                  "publish_calls": 30,
+                  "publish_ns": 765717751
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 256,
+          "median_leader_publish_calls": 256,
+          "median_leader_sync_total_ms": 1273.599675,
+          "median_leader_publish_total_ms": 3062.622297
+        },
+        "candidate": {
+          "median_completed_writes_s": 255.141,
+          "median_p50_us": 122375.542,
+          "median_p99_us": 146982.416,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 265.974,
+              "p99_us": 130944.083,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 16,
+                "widths": {
+                  "16": 16
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 32,
+                  "io_append_ns": 61729962,
+                  "sync_calls": 32,
+                  "sync_ns": 183335789,
+                  "publish_calls": 32,
+                  "publish_ns": 659288127
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 20,
+                  "io_append_ns": 33157499,
+                  "sync_calls": 20,
+                  "sync_ns": 133777415,
+                  "publish_calls": 20,
+                  "publish_ns": 472846376
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 21,
+                  "io_append_ns": 18178039,
+                  "sync_calls": 21,
+                  "sync_ns": 219124918,
+                  "publish_calls": 21,
+                  "publish_ns": 501528790
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 255.141,
+              "p99_us": 146982.416,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 16,
+                "widths": {
+                  "16": 16
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 32,
+                  "io_append_ns": 50390920,
+                  "sync_calls": 32,
+                  "sync_ns": 207514208,
+                  "publish_calls": 32,
+                  "publish_ns": 665511955
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 20,
+                  "io_append_ns": 14792711,
+                  "sync_calls": 20,
+                  "sync_ns": 155054707,
+                  "publish_calls": 20,
+                  "publish_ns": 506445749
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 20,
+                  "io_append_ns": 35190168,
+                  "sync_calls": 20,
+                  "sync_ns": 223482498,
+                  "publish_calls": 20,
+                  "publish_ns": 488455334
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 152.942,
+              "p99_us": 771780.625,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 16,
+                "widths": {
+                  "16": 16
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 32,
+                  "io_append_ns": 225883625,
+                  "sync_calls": 32,
+                  "sync_ns": 322273874,
+                  "publish_calls": 32,
+                  "publish_ns": 1019269041
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 20,
+                  "io_append_ns": 114554876,
+                  "sync_calls": 20,
+                  "sync_ns": 196568292,
+                  "publish_calls": 20,
+                  "publish_ns": 537935083
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 20,
+                  "io_append_ns": 105646123,
+                  "sync_calls": 20,
+                  "sync_ns": 325895086,
+                  "publish_calls": 20,
+                  "publish_ns": 957777416
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 32,
+          "median_leader_publish_calls": 32,
+          "median_leader_sync_total_ms": 207.514208,
+          "median_leader_publish_total_ms": 665.511955
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "candidate_reference_completed_ratio": 4.86259095396541,
+          "candidate_reference_p99_ratio": 0.1304490722105022
+        },
+        {
+          "trial": 2,
+          "candidate_reference_completed_ratio": 4.539713889185438,
+          "candidate_reference_p99_ratio": 0.14067791754067496
+        },
+        {
+          "trial": 3,
+          "candidate_reference_completed_ratio": 2.6834283709097293,
+          "candidate_reference_p99_ratio": 0.7684312253963038
+        }
+      ],
+      "median_paired_completed_ratio": 4.539713889185438,
+      "median_paired_p99_ratio": 0.14067791754067496
+    },
+    {
+      "protocol": "tcp",
+      "window": 1,
+      "variants": {
+        "reference": {
+          "median_completed_writes_s": 11.667,
+          "median_p50_us": 83309.875,
+          "median_p99_us": 96198.375,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 11.667,
+              "p99_us": 94674.458,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 188051157,
+                  "sync_calls": 512,
+                  "sync_ns": 3348555760,
+                  "publish_calls": 512,
+                  "publish_ns": 9852180087
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 406950551,
+                  "sync_calls": 511,
+                  "sync_ns": 4691835836,
+                  "publish_calls": 511,
+                  "publish_ns": 11792206880
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 410685968,
+                  "sync_calls": 511,
+                  "sync_ns": 4796855084,
+                  "publish_calls": 511,
+                  "publish_ns": 11988292414
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 11.695,
+              "p99_us": 96978.709,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 161099408,
+                  "sync_calls": 512,
+                  "sync_ns": 3248864665,
+                  "publish_calls": 512,
+                  "publish_ns": 9837380122
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 348517697,
+                  "sync_calls": 511,
+                  "sync_ns": 4741158619,
+                  "publish_calls": 511,
+                  "publish_ns": 11866876582
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 389418498,
+                  "sync_calls": 511,
+                  "sync_ns": 4804150242,
+                  "publish_calls": 511,
+                  "publish_ns": 12045589836
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 11.545,
+              "p99_us": 96198.375,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 188810925,
+                  "sync_calls": 512,
+                  "sync_ns": 3252467125,
+                  "publish_calls": 512,
+                  "publish_ns": 9825799338
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 437544506,
+                  "sync_calls": 511,
+                  "sync_ns": 4695899246,
+                  "publish_calls": 511,
+                  "publish_ns": 12191608995
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 371031711,
+                  "sync_calls": 511,
+                  "sync_ns": 4912158450,
+                  "publish_calls": 511,
+                  "publish_ns": 12242284098
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 512,
+          "median_leader_publish_calls": 512,
+          "median_leader_sync_total_ms": 3252.467125,
+          "median_leader_publish_total_ms": 9837.380122
+        },
+        "candidate": {
+          "median_completed_writes_s": 11.34,
+          "median_p50_us": 84376.667,
+          "median_p99_us": 298421.167,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 11.562,
+              "p99_us": 95226.875,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 205726049,
+                  "sync_calls": 512,
+                  "sync_ns": 3154609422,
+                  "publish_calls": 512,
+                  "publish_ns": 9946789379
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 539082846,
+                  "sync_calls": 511,
+                  "sync_ns": 4697704164,
+                  "publish_calls": 511,
+                  "publish_ns": 12229627581
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 452926109,
+                  "sync_calls": 511,
+                  "sync_ns": 4799432956,
+                  "publish_calls": 511,
+                  "publish_ns": 12304480303
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 11.34,
+              "p99_us": 298421.167,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 356740341,
+                  "sync_calls": 512,
+                  "sync_ns": 3398749165,
+                  "publish_calls": 512,
+                  "publish_ns": 9741504802
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 415745641,
+                  "sync_calls": 511,
+                  "sync_ns": 4774015245,
+                  "publish_calls": 511,
+                  "publish_ns": 12126388427
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 690096897,
+                  "sync_calls": 511,
+                  "sync_ns": 4790993514,
+                  "publish_calls": 511,
+                  "publish_ns": 12162109952
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 11.244,
+              "p99_us": 348888.375,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 257427377,
+                  "sync_calls": 512,
+                  "sync_ns": 3420035471,
+                  "publish_calls": 512,
+                  "publish_ns": 10590292792
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 421366790,
+                  "sync_calls": 511,
+                  "sync_ns": 4934284463,
+                  "publish_calls": 511,
+                  "publish_ns": 12303854471
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 554264996,
+                  "sync_calls": 511,
+                  "sync_ns": 4960603616,
+                  "publish_calls": 511,
+                  "publish_ns": 12090024032
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 512,
+          "median_leader_publish_calls": 512,
+          "median_leader_sync_total_ms": 3398.749165,
+          "median_leader_publish_total_ms": 9946.789379
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "candidate_reference_completed_ratio": 0.9910002571355104,
+          "candidate_reference_p99_ratio": 1.0058349106154905
+        },
+        {
+          "trial": 2,
+          "candidate_reference_completed_ratio": 0.9696451474989312,
+          "candidate_reference_p99_ratio": 3.077182301942172
+        },
+        {
+          "trial": 3,
+          "candidate_reference_completed_ratio": 0.9739281074058034,
+          "candidate_reference_p99_ratio": 3.6267595476534815
+        }
+      ],
+      "median_paired_completed_ratio": 0.9739281074058034,
+      "median_paired_p99_ratio": 3.077182301942172
+    },
+    {
+      "protocol": "quic",
+      "window": 32,
+      "variants": {
+        "reference": {
+          "median_completed_writes_s": 53.364,
+          "median_p50_us": 589627.25,
+          "median_p99_us": 1123056.958,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 56.444,
+              "p99_us": 1123056.958,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 226,
+                "widths": {
+                  "1": 224,
+                  "16": 2
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 255,
+                  "io_append_ns": 108151165,
+                  "sync_calls": 255,
+                  "sync_ns": 1282178538,
+                  "publish_calls": 255,
+                  "publish_ns": 3026462952
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 29,
+                  "io_append_ns": 11186750,
+                  "sync_calls": 29,
+                  "sync_ns": 277591497,
+                  "publish_calls": 29,
+                  "publish_ns": 779256542
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 30,
+                  "io_append_ns": 14395419,
+                  "sync_calls": 30,
+                  "sync_ns": 305437872,
+                  "publish_calls": 30,
+                  "publish_ns": 801042371
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 33.208,
+              "p99_us": 3575590.958,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 226,
+                "widths": {
+                  "1": 224,
+                  "16": 2
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 255,
+                  "io_append_ns": 153859250,
+                  "sync_calls": 255,
+                  "sync_ns": 2348352050,
+                  "publish_calls": 255,
+                  "publish_ns": 5085374167
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 30,
+                  "io_append_ns": 15097084,
+                  "sync_calls": 30,
+                  "sync_ns": 489705917,
+                  "publish_calls": 30,
+                  "publish_ns": 1318269126
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 29,
+                  "io_append_ns": 20245707,
+                  "sync_calls": 29,
+                  "sync_ns": 628544333,
+                  "publish_calls": 29,
+                  "publish_ns": 1221182585
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 53.364,
+              "p99_us": 1097652.042,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 241,
+                "widths": {
+                  "1": 240,
+                  "16": 1
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 271,
+                  "io_append_ns": 113932618,
+                  "sync_calls": 271,
+                  "sync_ns": 1337646365,
+                  "publish_calls": 271,
+                  "publish_ns": 3214622329
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 31,
+                  "io_append_ns": 11525376,
+                  "sync_calls": 31,
+                  "sync_ns": 303403331,
+                  "publish_calls": 31,
+                  "publish_ns": 801474084
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 32,
+                  "io_append_ns": 15852669,
+                  "sync_calls": 32,
+                  "sync_ns": 333933795,
+                  "publish_calls": 32,
+                  "publish_ns": 844057289
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 255,
+          "median_leader_publish_calls": 255,
+          "median_leader_sync_total_ms": 1337.646365,
+          "median_leader_publish_total_ms": 3214.622329
+        },
+        "candidate": {
+          "median_completed_writes_s": 251.029,
+          "median_p50_us": 128955.917,
+          "median_p99_us": 142508.625,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 226.204,
+              "p99_us": 174535.542,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 16,
+                "widths": {
+                  "16": 16
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 32,
+                  "io_append_ns": 73511833,
+                  "sync_calls": 32,
+                  "sync_ns": 232675040,
+                  "publish_calls": 32,
+                  "publish_ns": 715169875
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 20,
+                  "io_append_ns": 17005330,
+                  "sync_calls": 20,
+                  "sync_ns": 200073624,
+                  "publish_calls": 20,
+                  "publish_ns": 596308502
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 20,
+                  "io_append_ns": 57201920,
+                  "sync_calls": 20,
+                  "sync_ns": 220530957,
+                  "publish_calls": 20,
+                  "publish_ns": 552313496
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 251.029,
+              "p99_us": 142508.625,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 16,
+                "widths": {
+                  "16": 16
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 32,
+                  "io_append_ns": 56619751,
+                  "sync_calls": 32,
+                  "sync_ns": 217829583,
+                  "publish_calls": 32,
+                  "publish_ns": 675185788
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 21,
+                  "io_append_ns": 40011583,
+                  "sync_calls": 21,
+                  "sync_ns": 169102541,
+                  "publish_calls": 21,
+                  "publish_ns": 525913625
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 19,
+                  "io_append_ns": 39966710,
+                  "sync_calls": 19,
+                  "sync_ns": 195982210,
+                  "publish_calls": 19,
+                  "publish_ns": 504595665
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 251.198,
+              "p99_us": 133575.041,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 16,
+                "widths": {
+                  "16": 16
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 32,
+                  "io_append_ns": 42228254,
+                  "sync_calls": 32,
+                  "sync_ns": 201973626,
+                  "publish_calls": 32,
+                  "publish_ns": 687796671
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 20,
+                  "io_append_ns": 14845499,
+                  "sync_calls": 20,
+                  "sync_ns": 177386042,
+                  "publish_calls": 20,
+                  "publish_ns": 487421541
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 20,
+                  "io_append_ns": 38090002,
+                  "sync_calls": 20,
+                  "sync_ns": 184904998,
+                  "publish_calls": 20,
+                  "publish_ns": 494149541
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 32,
+          "median_leader_publish_calls": 32,
+          "median_leader_sync_total_ms": 217.829583,
+          "median_leader_publish_total_ms": 687.796671
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "candidate_reference_completed_ratio": 4.007582736871944,
+          "candidate_reference_p99_ratio": 0.1554111220777459
+        },
+        {
+          "trial": 2,
+          "candidate_reference_completed_ratio": 7.55929294145989,
+          "candidate_reference_p99_ratio": 0.03985596413962069
+        },
+        {
+          "trial": 3,
+          "candidate_reference_completed_ratio": 4.707255827898958,
+          "candidate_reference_p99_ratio": 0.12169160707487665
+        }
+      ],
+      "median_paired_completed_ratio": 4.707255827898958,
+      "median_paired_p99_ratio": 0.12169160707487665
+    },
+    {
+      "protocol": "quic",
+      "window": 1,
+      "variants": {
+        "reference": {
+          "median_completed_writes_s": 11.46,
+          "median_p50_us": 84512.5,
+          "median_p99_us": 93830.208,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 11.668,
+              "p99_us": 93789.583,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 349966086,
+                  "sync_calls": 512,
+                  "sync_ns": 3200525711,
+                  "publish_calls": 512,
+                  "publish_ns": 9786954911
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 411211789,
+                  "sync_calls": 511,
+                  "sync_ns": 4677489873,
+                  "publish_calls": 511,
+                  "publish_ns": 11777720326
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 462392915,
+                  "sync_calls": 511,
+                  "sync_ns": 4704615493,
+                  "publish_calls": 511,
+                  "publish_ns": 11953795419
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 11.46,
+              "p99_us": 93830.208,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 442794125,
+                  "sync_calls": 512,
+                  "sync_ns": 3062869962,
+                  "publish_calls": 512,
+                  "publish_ns": 9674810919
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 552283125,
+                  "sync_calls": 511,
+                  "sync_ns": 4538698042,
+                  "publish_calls": 511,
+                  "publish_ns": 12168046203
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 479905703,
+                  "sync_calls": 511,
+                  "sync_ns": 4901795464,
+                  "publish_calls": 511,
+                  "publish_ns": 12358277629
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 9.964,
+              "p99_us": 344259.292,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 403170920,
+                  "sync_calls": 512,
+                  "sync_ns": 3529968180,
+                  "publish_calls": 512,
+                  "publish_ns": 11525129087
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 488316833,
+                  "sync_calls": 511,
+                  "sync_ns": 5773497616,
+                  "publish_calls": 511,
+                  "publish_ns": 14265519205
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 598306822,
+                  "sync_calls": 511,
+                  "sync_ns": 5607909589,
+                  "publish_calls": 511,
+                  "publish_ns": 13934143496
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 512,
+          "median_leader_publish_calls": 512,
+          "median_leader_sync_total_ms": 3200.525711,
+          "median_leader_publish_total_ms": 9786.954911
+        },
+        "candidate": {
+          "median_completed_writes_s": 11.668,
+          "median_p50_us": 83079.791,
+          "median_p99_us": 95807.625,
+          "trials": [
+            {
+              "trial": 1,
+              "completed_writes_s": 11.397,
+              "p99_us": 383014.792,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 354159130,
+                  "sync_calls": 512,
+                  "sync_ns": 3246508490,
+                  "publish_calls": 512,
+                  "publish_ns": 10365536212
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 490884919,
+                  "sync_calls": 511,
+                  "sync_ns": 4841438923,
+                  "publish_calls": 511,
+                  "publish_ns": 12045562965
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 530198164,
+                  "sync_calls": 511,
+                  "sync_ns": 4897219760,
+                  "publish_calls": 511,
+                  "publish_ns": 12072205262
+                }
+              ]
+            },
+            {
+              "trial": 2,
+              "completed_writes_s": 11.712,
+              "p99_us": 92643.708,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 256054127,
+                  "sync_calls": 512,
+                  "sync_ns": 3064111231,
+                  "publish_calls": 512,
+                  "publish_ns": 9847070634
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 524676792,
+                  "sync_calls": 511,
+                  "sync_ns": 4569178079,
+                  "publish_calls": 511,
+                  "publish_ns": 11968768563
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 484842725,
+                  "sync_calls": 511,
+                  "sync_ns": 4716304344,
+                  "publish_calls": 511,
+                  "publish_ns": 12142433360
+                }
+              ]
+            },
+            {
+              "trial": 3,
+              "completed_writes_s": 11.668,
+              "p99_us": 95807.625,
+              "measurement_histogram": {
+                "weightedOriginals": 256,
+                "visits": 256,
+                "widths": {
+                  "1": 256
+                }
+              },
+              "physical": [
+                {
+                  "replica": 1,
+                  "io_append_calls": 512,
+                  "io_append_ns": 257271821,
+                  "sync_calls": 512,
+                  "sync_ns": 3050864881,
+                  "publish_calls": 512,
+                  "publish_ns": 9566318258
+                },
+                {
+                  "replica": 2,
+                  "io_append_calls": 511,
+                  "io_append_ns": 483631624,
+                  "sync_calls": 511,
+                  "sync_ns": 4533757822,
+                  "publish_calls": 511,
+                  "publish_ns": 12298746965
+                },
+                {
+                  "replica": 3,
+                  "io_append_calls": 511,
+                  "io_append_ns": 469302161,
+                  "sync_calls": 511,
+                  "sync_ns": 4587984750,
+                  "publish_calls": 511,
+                  "publish_ns": 12226225343
+                }
+              ]
+            }
+          ],
+          "median_leader_sync_calls": 512,
+          "median_leader_publish_calls": 512,
+          "median_leader_sync_total_ms": 3064.111231,
+          "median_leader_publish_total_ms": 9847.070634
+        }
+      },
+      "pairs": [
+        {
+          "trial": 1,
+          "candidate_reference_completed_ratio": 0.9767740829619473,
+          "candidate_reference_p99_ratio": 4.083766872062967
+        },
+        {
+          "trial": 2,
+          "candidate_reference_completed_ratio": 1.0219895287958114,
+          "candidate_reference_p99_ratio": 0.9873548186102283
+        },
+        {
+          "trial": 3,
+          "candidate_reference_completed_ratio": 1.1710156563629064,
+          "candidate_reference_p99_ratio": 0.2783007669695666
+        }
+      ],
+      "median_paired_completed_ratio": 1.0219895287958114,
+      "median_paired_p99_ratio": 0.9873548186102283
+    }
+  ]
+}

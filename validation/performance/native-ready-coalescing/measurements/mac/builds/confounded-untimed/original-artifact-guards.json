@@ -1,0 +1,279 @@
+{
+  "harness": {
+    "compiler_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-matched414-mac/source-final/benchmarks/matched#voteboat-matched-framework@0.1.0",
+      "manifest_path": "/tmp/voteboat-matched414-mac/source-final/benchmarks/matched/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-matched-framework",
+        "src_path": "/tmp/voteboat-matched414-mac/source-final/benchmarks/matched/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-matched414-mac/target-harness/release/voteboat-matched-framework",
+        "/tmp/voteboat-matched414-mac/target-harness/release/voteboat-matched-framework.dSYM"
+      ],
+      "executable": "/tmp/voteboat-matched414-mac/target-harness/release/voteboat-matched-framework",
+      "fresh": false
+    },
+    "production_library_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-matched414-mac/source-final#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-matched414-mac/source-final/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/tmp/voteboat-matched414-mac/source-final/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-matched414-mac/target-harness/release/deps/libvoteboat-6ada661ba50f865f.rlib",
+        "/tmp/voteboat-matched414-mac/target-harness/release/deps/libvoteboat-6ada661ba50f865f.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    "artifact_sha256": "df6f1fc5c122a30034ec5d6ba0fd42ca1099121f1558392700698072ba9ee9fd"
+  },
+  "native": {
+    "compiler_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-matched414-mac/native-source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-matched414-mac/native-source/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_benchmark",
+        "src_path": "/tmp/voteboat-matched414-mac/native-source/examples/native_benchmark.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-matched414-mac/target-native/release/examples/native_benchmark"
+      ],
+      "executable": "/tmp/voteboat-matched414-mac/target-native/release/examples/native_benchmark",
+      "fresh": false
+    },
+    "production_library_artifact": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-matched414-mac/native-source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-matched414-mac/native-source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/tmp/voteboat-matched414-mac/native-source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/tmp/voteboat-matched414-mac/target-native/release/deps/libvoteboat-0417cf84164748d0.rlib",
+        "/tmp/voteboat-matched414-mac/target-native/release/deps/libvoteboat-0417cf84164748d0.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    "artifact_sha256": "1db48936a587ebc2857b80cd4ac36a35fed81e7da0561fd1d4965f64a858ba23",
+    "production_library_sha256": "9bcafe724e8acbb90aacfc898eecf3c80720b0646a537bfacf5b7784765773fd"
+  },
+  "base_commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+  "matched_source": "/tmp/voteboat-matched414-mac/source-final",
+  "matched_overlay": {
+    "base_commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+    "changes": "test-only leader pause acknowledgement and deterministic single-voter actor wide collection; live3-voter tests retain original/frontier/bound invariants without scheduler-dependent minimum width",
+    "overlays": [
+      {
+        "path": "benchmarks/matched/src/voteboat_engine.rs",
+        "base_sha256": "09f2209a5dd7d43232d47b43111b736eba306291a1fd09616071ad56c93bdae7",
+        "overlay_sha256": "bf8ae44e38f5e5656c17a54a0c43b2c259a9addbd065d66470957296b9b2349f"
+      },
+      {
+        "path": "benchmarks/matched/src/voteboat_engine/actor.rs",
+        "base_sha256": "8ba4006fbbbf3ab1f331c3315755187f0fd7a5ad3d93d7ce12806eef393cec92",
+        "overlay_sha256": "8dc0276e4397223ca42aa73216f19428398e2f11367dc1153be8cbe2832e3ace"
+      },
+      {
+        "path": "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+        "base_sha256": null,
+        "overlay_sha256": "68f181505c67a6d6faf267ec957a441c78e7051ae5f9950b863c3c927d07e3ae"
+      }
+    ],
+    "release_behavior": "unchanged"
+  },
+  "native_source": "/tmp/voteboat-matched414-mac/native-source",
+  "native_source_manifest_sha256": "e72d0e539213dcaae5199ebe2a97e6aff80173c3167a010a45ea10001f057544",
+  "matched_source_manifest_sha256": "5a2b67489bb80c8c677baef5447b5d892db85f4e1bc6f9b05ec829eb227ee868",
+  "compiler": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "host": "Darwin Karls-MacBook-Pro.local 27.0.0 Darwin Kernel Version 27.0.0: Tue Aug 11 21:20:40 PDT 2026; root:xnu-13432.1.9~1/RELEASE_ARM64_T6020 arm64\nApple M2 Max",
+  "flags": {
+    "opt_level": 3,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "lto": "thin",
+    "codegen_units": 1
+  },
+  "source_guard": "all_before_after_hashes_pass",
+  "tests": {
+    "matched": 8,
+    "root_all_features_lib": 335,
+    "root_core_lib": 266,
+    "actual_model_io": 1
+  },
+  "format_exit": 0,
+  "strict_profiles_exit": {
+    "matched_all_targets": 0,
+    "root_default": 0,
+    "root_all": 0,
+    "root_core": 0,
+    "root_native": 0
+  },
+  "cli_original_controls": [
+    {
+      "engine": "voteboat",
+      "profile": "upstream-default",
+      "exact_originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        4096,
+        4096,
+        1024
+      ]
+    },
+    {
+      "engine": "openraft",
+      "profile": "upstream-default",
+      "exact_originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        4096,
+        4096,
+        1024
+      ]
+    },
+    {
+      "engine": "voteboat",
+      "profile": "common64",
+      "exact_originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        64,
+        64,
+        64
+      ]
+    },
+    {
+      "engine": "openraft",
+      "profile": "common64",
+      "exact_originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "capacities": [
+        64,
+        64,
+        64
+      ]
+    }
+  ],
+  "qualification": "functional_candidate_artifacts_unmeasured_Mac",
+  "native_manifest_comparison": {
+    "shared_identical": 1358,
+    "linux_extra_input": [
+      "clippy.toml"
+    ],
+    "different": []
+  }
+}

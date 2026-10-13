@@ -4,7 +4,8 @@ Standalone benchmark workspace; comparison dependencies stay outside VoteBoat
 production. The frozen baseline passed Linux/macOS scoped checks and short
 primary diagnostics. The startup batch-limits update passes eight Linux tests,
 formatting, strict all-target Clippy and four actual client/server runtime controls.
-New macOS qualification remains pending.
+Frozen414 macOS checks and short paired diagnostics now pass with the recorded
+test-only fixture correction. Current415 macOS qualification remains separate.
 These controls establish no sustained capacity or minimum-floor win.
 [Baseline evidence](validation/REPORT.md),
 [Linux pilot](validation/pilot-linux131072/REPORT.md),

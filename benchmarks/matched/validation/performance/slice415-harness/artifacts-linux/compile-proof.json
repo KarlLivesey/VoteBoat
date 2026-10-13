@@ -1,0 +1,55 @@
+[
+  {
+    "label": "matched",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/source/benchmarks/matched/Cargo.toml",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/source/benchmarks/matched/src/main.rs",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-harness/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-harness/release/voteboat-matched-framework.dwp"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-harness/release/voteboat-matched-framework"
+  },
+  {
+    "label": "native",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/source/Cargo.toml",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/source/examples/native_benchmark.rs",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-native/release/examples/native_benchmark"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-native/release/examples/native_benchmark"
+  },
+  {
+    "label": "native_library",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/source/Cargo.toml",
+    "source_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/source/src/lib.rs",
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "fresh": false,
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-native/release/deps/libvoteboat-be40bd833a88996f.rlib",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts415/linux/target-native/release/deps/libvoteboat-be40bd833a88996f.rmeta"
+    ],
+    "executable": null
+  }
+]

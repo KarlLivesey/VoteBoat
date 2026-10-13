@@ -1,0 +1,8 @@
+{
+  "config_commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+  "config_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521",
+  "environment": "CLIPPY_CONF_DIR=/tmp/voteboat-matched414-mac/lint-config",
+  "all_five_strict_commands_exit0": true,
+  "sources_unchanged": true,
+  "initial_scope_omission_retained": true
+}

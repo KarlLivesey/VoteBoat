@@ -441,13 +441,15 @@ mod client_admission {
             bytes: delta.to_le_bytes().to_vec(),
         }
     }
-    fn drive<A: ProposalAdmission<Receipt = CounterReceipt>>(
+    fn drive<A: ProposalAdmission>(
         owner: &mut Owner,
         worker: &mut HostWorker,
-        clients: &mut Clients,
-        results: &mut ApplicationRouter<CounterReceipt>,
+        clients: &mut ClientRouter<A::Receipt>,
+        results: &mut ApplicationRouter<A::Receipt>,
         apps: &mut BTreeMap<GroupIdentity, A>,
-    ) {
+    ) where
+        A::Receipt: ApplicationReceipt + std::fmt::Debug,
+    {
         for _ in 0..1000 {
             for event in worker.poll(1) {
                 owner.deliver_worker(event, MonoTime(400)).unwrap();

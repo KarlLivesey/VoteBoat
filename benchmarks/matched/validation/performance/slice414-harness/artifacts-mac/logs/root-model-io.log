@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/tmp/voteboat-matched414-mac/native-source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.64s
+     Running tests/log_store.rs (/tmp/voteboat-matched414-mac/target-root-checks/debug/deps/log_store-dc6ef2e339c8e79d)
+
+running 1 test
+test batch_limits::large_batch_and_commit_publication_cuts_recover_without_premature_original_results ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.20s
+

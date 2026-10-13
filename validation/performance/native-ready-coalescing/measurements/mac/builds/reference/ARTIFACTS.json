@@ -1,0 +1,44 @@
+[
+  {
+    "target": "voteboat",
+    "compiler_source": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/src/lib.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/../asserted-build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-native414-mac/reference/artifacts/libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "0364c0f2db30d5c0733afa17af2ed9dc0a674cc9ad14dacb1bbfc718c3d6c03c"
+  },
+  {
+    "target": "native_benchmark",
+    "compiler_source": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/examples/native_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/source/../asserted-build/release/examples/native_benchmark",
+    "copy": "/tmp/voteboat-native414-mac/reference/artifacts/native_benchmark",
+    "sha256": "91d72a3bc47e22cd39e8f9cdffba0f293d346ff4231b331cb6adc1d3de09a025"
+  }
+]

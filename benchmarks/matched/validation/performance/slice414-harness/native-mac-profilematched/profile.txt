@@ -1,0 +1,1 @@
+opt3 assertions=true overflow=true; LTO/codegen override UNSET; matching native baseline defaults

@@ -1,0 +1,1 @@
+CLIPPY_CONF_DIR=/tmp/voteboat-matched414-mac/lint-config

@@ -1,0 +1,44 @@
+[
+  {
+    "target": "voteboat",
+    "compiler_source": "/tmp/voteboat-matched414-mac/native-source/src/lib.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-matched414-mac/target-native-profilematched/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+    "copy": "/tmp/voteboat-native414-mac/candidate/artifacts/libvoteboat-ca76d170795d1aa6.rlib",
+    "sha256": "8f018f39f83e2adff68e9f9ad28e68cf0c1aa583d2b1205aa27b97a186f7ddf1"
+  },
+  {
+    "target": "native_benchmark",
+    "compiler_source": "/tmp/voteboat-matched414-mac/native-source/examples/native_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/tmp/voteboat-matched414-mac/target-native-profilematched/release/examples/native_benchmark",
+    "copy": "/tmp/voteboat-native414-mac/candidate/artifacts/native_benchmark",
+    "sha256": "e7e248b25db86f3d990f6e5f7edbfd64fbfb659ccf4d6e1a02e2aa929f15e4bc"
+  }
+]

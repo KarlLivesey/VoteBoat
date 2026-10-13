@@ -1,0 +1,44 @@
+[
+  {
+    "target": "voteboat",
+    "compiler_source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native414/candidate-linux/repo/src/lib.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native414/candidate-linux/build/release/deps/libvoteboat-be40bd833a88996f.rlib",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native414/candidate-linux/artifacts/libvoteboat-be40bd833a88996f.rlib",
+    "sha256": "fa372c939880dd8e53d8db54a2eed0d16a82b3c1c0cd5bee217434c42e888164"
+  },
+  {
+    "target": "native_benchmark",
+    "compiler_source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native414/candidate-linux/repo/examples/native_benchmark.rs",
+    "compiler_fresh": false,
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native414/candidate-linux/build/release/examples/native_benchmark",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native414/candidate-linux/artifacts/native_benchmark",
+    "sha256": "2dca63b825b24002b9622b54ba011ee788b93a3388ca5f478cdedc766403ddca"
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "sourceInputs": 1359,
+  "exits": {
+    "platform": 0,
+    "source_start": 0,
+    "build": 0,
+    "collect": 0,
+    "source_terminal": 0
+  },
+  "guards": [
+    {
+      "label": "source_start",
+      "matching": 1359
+    },
+    {
+      "label": "source_terminal",
+      "matching": 1359
+    }
+  ],
+  "genuineAssertedRelease": true,
+  "distinctFromReference": true,
+  "artifacts": 2,
+  "timedCases": 0
+}

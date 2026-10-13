@@ -76,7 +76,8 @@ all-target Clippy pass. Four separate 1-client/16-server-runtime controls comple
 16384 originals in4096 requests per engine/profile, with all frontiers17409.
 VoteBoat's observed original proposal width reaches4096 in the primary profile
 and64 in Common64; histogram totals include exactly17408 originals with warmup.
-New Mac checks and candidate performance remain pending. Raw checks are separate
+Frozen414 Mac checks and short paired diagnostics now pass; full sustained
+capacity and current415 Mac qualification remain pending. Raw checks are separate
 under validation/performance/slice414-harness.
 
 Fixture correction evidence: Mac's initial wide-ready assertion failed because

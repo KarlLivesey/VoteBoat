@@ -1,0 +1,114 @@
+{
+  "commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+  "native_source": "/tmp/voteboat-matched414-mac/native-source",
+  "compiler_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///tmp/voteboat-matched414-mac/native-source#voteboat@0.1.0",
+    "manifest_path": "/tmp/voteboat-matched414-mac/native-source/Cargo.toml",
+    "target": {
+      "kind": [
+        "example"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "native_benchmark",
+      "src_path": "/tmp/voteboat-matched414-mac/native-source/examples/native_benchmark.rs",
+      "edition": "2021",
+      "required-features": [
+        "tls"
+      ],
+      "doc": false,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/tmp/voteboat-matched414-mac/target-native-profilematched/release/examples/native_benchmark"
+    ],
+    "executable": "/tmp/voteboat-matched414-mac/target-native-profilematched/release/examples/native_benchmark",
+    "fresh": false
+  },
+  "production_library_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///tmp/voteboat-matched414-mac/native-source#voteboat@0.1.0",
+    "manifest_path": "/tmp/voteboat-matched414-mac/native-source/Cargo.toml",
+    "target": {
+      "kind": [
+        "lib"
+      ],
+      "crate_types": [
+        "lib"
+      ],
+      "name": "voteboat",
+      "src_path": "/tmp/voteboat-matched414-mac/native-source/src/lib.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": true,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/tmp/voteboat-matched414-mac/target-native-profilematched/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+      "/tmp/voteboat-matched414-mac/target-native-profilematched/release/deps/libvoteboat-ca76d170795d1aa6.rmeta"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "artifact_sha256": "e7e248b25db86f3d990f6e5f7edbfd64fbfb659ccf4d6e1a02e2aa929f15e4bc",
+  "production_library_sha256": "8f018f39f83e2adff68e9f9ad28e68cf0c1aa583d2b1205aa27b97a186f7ddf1",
+  "source_guard": "all1358_before_after_passed",
+  "explicit_lint_configuration_sha256": "6609f9c70e8f11b54a29637838fef0ad5cf28cd31e9085245996a36dc1edb521",
+  "native_flags": {
+    "opt_level": 3,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "lto": "native_Cargo_default",
+    "codegen_units": "native_Cargo_default"
+  },
+  "captured_rustc_flags": [
+    [
+      "-C opt-level=3",
+      "-C embed-bitcode=no",
+      "-C debug-assertions=on",
+      "-C metadata=3c3a88c67b69d287",
+      "-C extra-filename=-ca76d170795d1aa6",
+      "-C strip=debuginfo"
+    ],
+    [
+      "-C opt-level=3",
+      "-C embed-bitcode=no",
+      "-C debug-assertions=on",
+      "-C metadata=344c48be9057c4bc",
+      "-C extra-filename=-f7659d92e1dac3c0",
+      "-C strip=debuginfo"
+    ]
+  ],
+  "baseline_library_hash": "0364c0f2db30d5c0733afa17af2ed9dc0a674cc9ad14dacb1bbfc718c3d6c03c  /Users/karllivesey/voteboat-diagnostics/native-batching-cab9d6d/asserted-build/release/deps/libvoteboat-ca76d170795d1aa6.rlib",
+  "supersedes_confounded_native_sha": "1db48936a587ebc2857b80cd4ac36a35fed81e7da0561fd1d4965f64a858ba23",
+  "paired_status": "ready_after_root_quiet_grant"
+}

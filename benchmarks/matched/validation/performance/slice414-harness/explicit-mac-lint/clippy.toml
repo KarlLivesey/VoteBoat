@@ -1,0 +1,6 @@
+# Keep maintainability thresholds explicit. Local and CI Clippy checks enforce
+# these limits; Cargo.toml denies function length and cognitive complexity.
+cognitive-complexity-threshold = 25
+too-many-lines-threshold = 100
+too-many-arguments-threshold = 7
+type-complexity-threshold = 250

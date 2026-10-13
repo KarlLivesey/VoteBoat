@@ -1,0 +1,1 @@
+cargo +stable build --locked --offline --release --all-features --example native_benchmark --message-format=json

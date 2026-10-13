@@ -3,10 +3,10 @@
 ## Active P9 plan — 13 October 2026
 
 Latest user requirement: pass OpenRaft with a healthy margin. The working
-acceptance target is sustained1.5x the larger of each published floor or matched
+acceptance target is sustained 1.5× the larger of each published floor or matched
 upstream rate on each supported host, keeping the full curve and existing
-durability/features/security contracts. Batch4/4096 therefore requires at least
-8422500 completed writes/s. [Full margin curve](P9.md). This strengthens the
+durability/features/security contracts. Batch 4 with 4,096 clients therefore requires
+at least 8,422,500 completed writes/s. [Full margin curve](P9.md). This strengthens the
 active P9 goal; it neither closes P9 nor replaces real durable service acceptance.
 
 The user explicitly requests M2 Max benchmarks alongside Linux. The409 campaign
@@ -19,6 +19,34 @@ or durable device throughput is inferred from these volatile diagnostics.
 
 [P9 macro and mini plan](P9.md) records the complete acceptance curve, current
 deliverable and next two, with purposes, dependencies and completion checks.
+
+The latest 415 Linux paired comparison completes 18/18 guarded cases. Concurrent
+batch-four medians improve 829,252→922,734 completed writes/s (+11.27%), versus
+untouched OpenRaft 3,206,337/s; singleton falls 107,101→103,902/s (−2.99%). All
+originals and three applied frontiers pass, with maintenance active. This is a
+short volatile framework measurement, about 11% of the minimum margin, rather
+than sustained acceptance. [Exact records](../benchmarks/matched/validation/performance/slice415-harness/REPORT.md).
+416 restores existing Counter batching through the executable application wrapper.
+Its receipt bounds, pending admission and protected Maintenance behavior remain
+unchanged. The actual owner suite passes 202 controls, executable tests 52, and
+real TCP/QUIC retry/recovery and checkpoint/reclaim controls 8. Formatter, all four
+strict root profiles and standalone matched checks pass with zero diagnostics.
+[Schema and actual validation](../validation/performance/slice416/SCHEMA.md).
+The mini plan now prioritizes measured Core/host cost attribution, a coordinated
+bounded persistence pipeline, then configured resource summaries. No macro
+milestone or healthy-margin requirement is closed by these changes.
+
+Linux's 24-case native batching comparison verifies every original Applied result,
+reopen/retry/join and source/artifact guard. With 32 writes in flight, median TCP
+throughput increases 274→1,517 completed writes/s and QUIC 37→207/s. Candidate
+leader publications fall to 32 from 254–259. Singleton results regress and physical
+I/O varies substantially; all trials remain recorded. These actual disk-backed
+results are separate from the volatile framework curve. Mac's 24-case campaign
+also passes every original/recovery/guard: with 32 writes in flight, TCP medians
+rise 56.2→255.1/s and QUIC 53.4→251.0/s. Candidate leader publications are 32
+versus 255–271. Mac TCP singleton throughput and p99 regress; no native minimum
+or sustained acceptance is claimed.
+[Exact native evidence](../validation/performance/native-ready-coalescing/README.md).
 
 411 ordinary Written replication overlap and412 opaque owned log validation are
 implemented and locally qualified together. [411 evidence](../validation/performance/slice411/README.md)
@@ -124,9 +152,20 @@ original results: observing a pause is necessary but queued peer progress can
 still limit a real three-voter batch. The corrected eight-control fixture keeps
 real three-voter results/bounds and verifies collection deterministically through
 an actual preloaded single-voter actor; release behavior is unchanged. Both failed
-attempts and exact cfg(test) overlays are retained. Mac final qualification runs
-against frozen306b production plus the test-only overlay; native code remains
-exact306b, and current415 work is separate.
+attempts and exact cfg(test) overlays are retained. Mac final qualification passes
+8 matched controls, 335 all-feature/266 core library tests, the actual large-batch
+ModelIO recovery control, formatter and strict checks against frozen 306b production
+plus the test-only overlay. An omitted
+clippy.toml was supplied through exact separate CLIPPY_CONF_DIR; all four root
+profiles and matched strict rerun pass with zero diagnostics and unchanged source
+guards. Mac matched comparison passes 18/18 cases: singleton 54,897→54,231/s
+(~−1.2%), 4,096 clients/batch 4 rises 974,774→2,101,727/s (~2.16×), versus untouched
+OpenRaft 1,915,907/s. Request p99 moves 32.042→32.667 μs and 19.211→8.457 ms.
+This is only about 25% of the 8,422,500/s margin requirement.
+[Mac qualification and paired evidence](../benchmarks/matched/validation/performance/slice414-harness/PAIRED-MAC.md).
+The first native Mac build inherited unmatched harness LTO/codegen tuning and is
+retained as invalid for paired native use; a genuine fresh native-only rebuild
+matches baseline default tuning and exact306b source. Current415 work is separate.
 
 415 separates ordinary progress sends from exact heartbeat retransmission.
 An existing bounded request records its original commit-notification obligation;

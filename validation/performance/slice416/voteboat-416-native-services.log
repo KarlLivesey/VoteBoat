@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.14s
+     Running tests/counter_service.rs (target/debug/deps/counter_service-4ea2388b5d42bc7d)
+
+running 2 tests
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... FAILED
+test three_service_processes_retry_replace_leader_and_recover_native_files ... FAILED
+
+failures:
+
+---- three_quic_service_processes_retry_replace_leader_and_recover_native_files stdout ----
+
+thread 'three_quic_service_processes_retry_replace_leader_and_recover_native_files' (305) panicked at tests/counter_service.rs:146:10:
+available independent port block
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- three_service_processes_retry_replace_leader_and_recover_native_files stdout ----
+
+thread 'three_service_processes_retry_replace_leader_and_recover_native_files' (306) panicked at tests/counter_service.rs:146:10:
+available independent port block
+
+
+failures:
+    three_quic_service_processes_retry_replace_leader_and_recover_native_files
+    three_service_processes_retry_replace_leader_and_recover_native_files
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 201 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--test counter_service`

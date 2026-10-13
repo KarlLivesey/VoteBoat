@@ -1,0 +1,22 @@
+{
+  "base_commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+  "changes": "test-only leader pause acknowledgement and deterministic single-voter actor wide collection; live3-voter tests retain original/frontier/bound invariants without scheduler-dependent minimum width",
+  "overlays": [
+    {
+      "path": "benchmarks/matched/src/voteboat_engine.rs",
+      "base_sha256": "09f2209a5dd7d43232d47b43111b736eba306291a1fd09616071ad56c93bdae7",
+      "overlay_sha256": "bf8ae44e38f5e5656c17a54a0c43b2c259a9addbd065d66470957296b9b2349f"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/actor.rs",
+      "base_sha256": "8ba4006fbbbf3ab1f331c3315755187f0fd7a5ad3d93d7ce12806eef393cec92",
+      "overlay_sha256": "8dc0276e4397223ca42aa73216f19428398e2f11367dc1153be8cbe2832e3ace"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+      "base_sha256": null,
+      "overlay_sha256": "68f181505c67a6d6faf267ec957a441c78e7051ae5f9950b863c3c927d07e3ae"
+    }
+  ],
+  "release_behavior": "unchanged"
+}
