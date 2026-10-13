@@ -145,6 +145,12 @@ impl<L: LogStore> LogStore for ObservedLog<L> {
     ) -> Result<bool, StorageError> {
         self.inner.matches_state(group, expected)
     }
+    fn matches_checkpoint_state(
+        &mut self,
+        expected: CheckpointLog<'_>,
+    ) -> Result<bool, StorageError> {
+        self.inner.matches_checkpoint_state(expected)
+    }
     fn append_batch(
         &mut self,
         mutations: Vec<LogMutation>,

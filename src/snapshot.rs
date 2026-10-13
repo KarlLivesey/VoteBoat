@@ -651,7 +651,12 @@ pub fn compact_replica<A: CheckpointStateMachine, L: LogStore, S: SnapshotRetent
     application: &A,
     reference: SnapshotRef,
 ) -> Result<Vec<Effect>, CheckpointError> {
-    verify_log(raft, log)?;
+    // Binding remains first; only compaction uses the protected core view.
+    if log.binding() != raft.storage_binding()
+        || !log.matches_checkpoint_state(raft.checkpoint_log())?
+    {
+        return Err(CheckpointError::InvalidBinding);
+    }
     check_binding(raft, store)?;
     application.validate_group(raft.state().bootstrap.group)?;
     if application.applied_index() < reference.index {

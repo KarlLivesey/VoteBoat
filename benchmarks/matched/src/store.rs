@@ -124,6 +124,30 @@ impl<const TRACE: bool> LogStore for MemoryStore<TRACE> {
             .finish(Phase::StoreMatchesState, started, result.is_err(), items);
         result
     }
+    fn matches_checkpoint_state(
+        &mut self,
+        expected: CheckpointLog<'_>,
+    ) -> Result<bool, StorageError> {
+        let started = Recorder::<TRACE>::start();
+        let logical_items = if TRACE {
+            expected.state().entries.len()
+        } else {
+            0
+        };
+        // Retain the provider's pending-before-missing gate before cache access.
+        let result = self
+            .completed_state(expected.group())
+            .map(|_| ())
+            .and_then(|()| self.state.matches_checkpoint_state(expected));
+        let items = if TRACE && matches!(result, Ok(true)) {
+            logical_items
+        } else {
+            0
+        };
+        self.attribution
+            .finish(Phase::StoreCheckpointState, started, result.is_err(), items);
+        result
+    }
     fn append_batch(
         &mut self,
         mutations: Vec<LogMutation>,

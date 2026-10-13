@@ -20,11 +20,12 @@ use super::{
 };
 
 #[cfg(test)]
-mod tests;
+pub(super) mod tests;
 
 struct Group {
     state: GroupLog,
     summary: LogSummary,
+    comparison: CheckpointComparison,
 }
 enum Plan {
     Create(Group),
@@ -64,6 +65,18 @@ impl OwnedLogState {
     pub fn get(&self, group: GroupIdentity) -> Option<&GroupLog> {
         self.groups.get(&group).map(|group| &group.state)
     }
+    /// Exact checkpoint predicate over this owner's protected canonical history.
+    /// Visibility/durability gates remain the host provider's responsibility.
+    pub fn matches_checkpoint_state(
+        &mut self,
+        expected: CheckpointLog<'_>,
+    ) -> Result<bool, StorageError> {
+        let group = self
+            .groups
+            .get_mut(&expected.group())
+            .ok_or(StorageError::Rejected("group not bootstrapped"))?;
+        Ok(group.comparison.compare(&group.state, &expected))
+    }
     /// Transfer every canonical state to the caller, consuming its cache owner.
     pub fn into_states(self) -> BTreeMap<GroupIdentity, GroupLog> {
         self.groups
@@ -85,7 +98,13 @@ impl OwnedLogState {
                 }
                 Plan::Update(prepared) => {
                     let group = self.groups.get_mut(&id).expect("preflighted owned group");
+                    let preserves = prepared.preserves_checkpoint_prefix();
                     group.summary = prepared.install(&mut group.state);
+                    if preserves {
+                        group.comparison.preserve(&group.state);
+                    } else {
+                        group.comparison.clear();
+                    }
                 }
             }
         }
@@ -126,7 +145,11 @@ impl OwnedLogState {
                     let state = stage_create(&bootstrap)?;
                     created += 1;
                     let summary = LogSummary::from_validated(&state);
-                    Plan::Create(Group { state, summary })
+                    Plan::Create(Group {
+                        state,
+                        summary,
+                        comparison: CheckpointComparison::default(),
+                    })
                 }
                 LogMutation::Update(update) => {
                     let group = self

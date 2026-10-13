@@ -1,0 +1,908 @@
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison/tests.rs:1:
+ // SPDX-License-Identifier: RPL-1.5
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+-use crate::{contracts::HardState, quorum::{Limits, Policy, Tree}, snapshot::SnapshotRef};
++use crate::{
++    contracts::HardState,
++    quorum::{Limits, Policy, Tree},
++    snapshot::SnapshotRef,
++};
+ 
+ fn state() -> GroupLog {
+     let owned = crate::log::owned::tests::setup();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison/tests.rs:34:
+     }
+ }
+ fn work(cache: &CheckpointComparison, full: bool, compared: usize, reused: usize) {
+-    assert_eq!(cache.work(), CheckpointComparisonWork { full, compared, reused });
++    assert_eq!(
++        cache.work(),
++        CheckpointComparisonWork {
++            full,
++            compared,
++            reused
++        }
++    );
+ }
+ 
+ #[test]
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison/tests.rs:115:
+     let changes: &[fn(&mut GroupLog)] = &[
+         |s| s.bootstrap.group.incarnation = GroupIncarnation::new(99).unwrap(),
+         |s| s.bootstrap.configuration = ConfigurationId::new(99).unwrap(),
+-        |s| s.bootstrap.policy = Policy::new(Tree::Voter(NodeId::new(2).unwrap()), Limits::default()).unwrap(),
++        |s| {
++            s.bootstrap.policy =
++                Policy::new(Tree::Voter(NodeId::new(2).unwrap()), Limits::default()).unwrap()
++        },
+         |s| s.bootstrap.voter_stores.clear(),
+         |s| s.revision = LogRevision::new(99).unwrap(),
+         |s| s.generation = LogGeneration::new(99).unwrap(),
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison/tests.rs:122:
+-        |s| s.hard_state = HardState { term: 2, voted_for: Some(NodeId::new(1).unwrap()) },
+-        |s| s.ballot_origin = Some(BallotOrigin { configuration: ConfigurationId::new(1).unwrap(), candidate_store: *s.bootstrap.voter_stores.values().next().unwrap() }),
++        |s| {
++            s.hard_state = HardState {
++                term: 2,
++                voted_for: Some(NodeId::new(1).unwrap()),
++            }
++        },
++        |s| {
++            s.ballot_origin = Some(BallotOrigin {
++                configuration: ConfigurationId::new(1).unwrap(),
++                candidate_store: *s.bootstrap.voter_stores.values().next().unwrap(),
++            })
++        },
+         |s| s.commit_index = 1,
+         |s| s.snapshot = Some(snapshot(s, 1)),
+-        |s| s.snapshot_membership = Some(Box::new(crate::membership::Membership::replay(&s.bootstrap, &[], 0).unwrap())),
+-        |s| { s.entries.pop(); },
++        |s| {
++            s.snapshot_membership = Some(Box::new(
++                crate::membership::Membership::replay(&s.bootstrap, &[], 0).unwrap(),
++            ))
++        },
++        |s| {
++            s.entries.pop();
++        },
+     ];
+     for change in changes {
+         let mut cache = CheckpointComparison::default();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison.rs:97:
+         }
+         let equal = self.compare_inner(state, expected);
+         #[cfg(any(test, voteboat_checkpoint_debug_oracle))]
+-        assert_eq!(equal, state == expected.state(), "checkpoint comparison oracle");
++        assert_eq!(
++            equal,
++            state == expected.state(),
++            "checkpoint comparison oracle"
++        );
+         equal
+     }
+     fn compare_inner(&mut self, state: &GroupLog, expected: &CheckpointLog<'_>) -> bool {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison.rs:144:
+                 }
+             }
+         }
+-        self.verified = retained.filter(|_| retained == expected_retained).map(|interval| Verified {
+-            lineage: expected.lineage().clone(),
+-            revision: state.revision,
+-            generation: state.generation,
+-            interval,
+-        });
++        self.verified = retained
++            .filter(|_| retained == expected_retained)
++            .map(|interval| Verified {
++                lineage: expected.lineage().clone(),
++                revision: state.revision,
++                generation: state.generation,
++                interval,
++            });
+         true
+     }
+     #[cfg(test)]
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison.rs:158:
+     }
+     #[cfg(test)]
+     pub(crate) fn verified_interval(&self) -> Option<(u64, u64)> {
+-        self.verified.as_ref().and_then(|verified| verified.interval)
++        self.verified
++            .as_ref()
++            .and_then(|verified| verified.interval)
+     }
+ }
+ 
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/comparison.rs:181:
+     (start <= end).then_some((start, end))
+ }
+ fn headers_equal(left: &GroupLog, right: &GroupLog) -> bool {
+-    let GroupLog { bootstrap, revision, generation, hard_state, ballot_origin, commit_index,
+-        snapshot, snapshot_membership, entries } = left;
+-    let GroupLog { bootstrap: other_bootstrap, revision: other_revision,
+-        generation: other_generation, hard_state: other_hard_state,
+-        ballot_origin: other_ballot_origin, commit_index: other_commit_index,
+-        snapshot: other_snapshot, snapshot_membership: other_snapshot_membership,
+-        entries: other_entries } = right;
++    let GroupLog {
++        bootstrap,
++        revision,
++        generation,
++        hard_state,
++        ballot_origin,
++        commit_index,
++        snapshot,
++        snapshot_membership,
++        entries,
++    } = left;
++    let GroupLog {
++        bootstrap: other_bootstrap,
++        revision: other_revision,
++        generation: other_generation,
++        hard_state: other_hard_state,
++        ballot_origin: other_ballot_origin,
++        commit_index: other_commit_index,
++        snapshot: other_snapshot,
++        snapshot_membership: other_snapshot_membership,
++        entries: other_entries,
++    } = right;
+     bootstrap == other_bootstrap
+         && revision == other_revision
+         && generation == other_generation
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:2:
+ // Copyright (c) 2026 Karl Livesey
+ //! Pure transition controls; tickets below model the host's completed barrier.
+ use super::*;
+-use crate::{raft::{Effect, Event, Raft}, snapshot::SnapshotRef};
++use crate::{
++    raft::{Effect, Event, Raft},
++    snapshot::SnapshotRef,
++};
+ use std::collections::VecDeque;
+ 
+ fn complete(
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:30:
+                 term: state.hard_state.term,
+             };
+             core.admit_effect(&update, ticket).unwrap();
+-            effects.extend(core.complete(&DurableLog { tickets: vec![ticket] }).unwrap());
++            effects.extend(
++                core.complete(&DurableLog {
++                    tickets: vec![ticket],
++                })
++                .unwrap(),
++            );
+         }
+     }
+ }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:37:
+ fn check(core: &Raft, owned: &mut OwnedLogState, compared: usize, reused: usize) {
+-    assert_eq!(owned.matches_checkpoint_state(core.checkpoint_log()), Ok(true));
++    assert_eq!(
++        owned.matches_checkpoint_state(core.checkpoint_log()),
++        Ok(true)
++    );
+     let group = &owned.groups[&core.state().bootstrap.group];
+     assert_eq!(group.state, *core.state());
+     assert_eq!(group.comparison.work().compared, compared);
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:62:
+     check(&core, &mut owned, 0, 1);
+     let lineage = core.checkpoint_log().lineage().clone();
+     for id in 1..=2 {
+-        let effects = core.step(Event::Propose {
+-            operation: OperationId::new((1 << 127) | id).unwrap(),
+-            bytes: vec![7; usize::try_from(id - 1).unwrap()],
+-        }).unwrap();
++        let effects = core
++            .step(Event::Propose {
++                operation: OperationId::new((1 << 127) | id).unwrap(),
++                bytes: vec![7; usize::try_from(id - 1).unwrap()],
++            })
++            .unwrap();
+         complete(&mut core, &mut owned, effects, &mut sequence, &mut history);
+         assert_eq!(lineage, *core.checkpoint_log().lineage());
+         check(&core, &mut owned, 1, usize::try_from(id).unwrap());
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:84:
+     let effects = core.begin_compact(reference).unwrap();
+     complete(&mut core, &mut owned, effects, &mut sequence, &mut history);
+     assert_eq!(lineage, *core.checkpoint_log().lineage());
+-    assert_eq!(owned.groups[&first].comparison.verified_interval(), Some((3, 3)));
++    assert_eq!(
++        owned.groups[&first].comparison.verified_interval(),
++        Some((3, 3))
++    );
+     check(&core, &mut owned, 0, 1);
+     let mut restored = OwnedLogState::new(owned.limits()).unwrap();
+     for mutation in history {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:91:
+         restored.apply_batch(vec![mutation]).unwrap();
+     }
+     check(&core, &mut restored, 1, 0);
+-    let recovered = Raft::recover_verified(NodeId::new(1).unwrap(), binding, core.state().clone(), owned.limits()).unwrap();
++    let recovered = Raft::recover_verified(
++        NodeId::new(1).unwrap(),
++        binding,
++        core.state().clone(),
++        owned.limits(),
++    )
++    .unwrap();
+     assert_ne!(lineage, *recovered.checkpoint_log().lineage());
+     check(&recovered, &mut owned, 1, 0);
+     let effects = core.step(Event::Campaign).unwrap();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:98:
+-    complete(&mut core, &mut owned, effects, &mut sequence, &mut Vec::new());
++    complete(
++        &mut core,
++        &mut owned,
++        effects,
++        &mut sequence,
++        &mut Vec::new(),
++    );
+     assert_ne!(lineage, *core.checkpoint_log().lineage());
+     check(&core, &mut owned, 2, 0);
+ }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests/checkpoint.rs:125:
+     assert_eq!(arbitrary.revision, core.state().revision);
+     assert_ne!(arbitrary, *owned.get(first).unwrap());
+     let other = Raft::recover(NodeId::new(1).unwrap(), binding, arbitrary, owned.limits()).unwrap();
+-    assert_eq!(owned.matches_checkpoint_state(other.checkpoint_log()), Ok(false));
++    assert_eq!(
++        owned.matches_checkpoint_state(other.checkpoint_log()),
++        Ok(false)
++    );
+     assert_eq!(owned.groups[&first].comparison.verified_interval(), None);
+     check(&core, &mut owned, 1, 0);
+ }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned/tests.rs:14:
+ // rights and limitations under the RPL.
+ //! Consensus log transitions and the host-replaceable storage contract.
+ use super::*;
++mod checkpoint;
+ mod compact;
+ mod incoming;
+-mod checkpoint;
+ use crate::{
+     contracts::HardState,
+     quorum::{Limits, Tree},
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/owned.rs:71:
+         &mut self,
+         expected: CheckpointLog<'_>,
+     ) -> Result<bool, StorageError> {
+-        let group = self.groups.get_mut(&expected.group()).ok_or(
+-            StorageError::Rejected("group not bootstrapped"),
+-        )?;
++        let group = self
++            .groups
++            .get_mut(&expected.group())
++            .ok_or(StorageError::Rejected("group not bootstrapped"))?;
+         Ok(group.comparison.compare(&group.state, &expected))
+     }
+     /// Transfer every canonical state to the caller, consuming its cache owner.
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log/transition/incoming.rs:22:
+ }
+ impl OwnedNextLog {
+     pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
+-        matches!(&self.0, OwnedChange::Append(_)
+-            | OwnedChange::Other { next: NextLog::Delta(_) | NextLog::Compact(_), .. })
++        matches!(
++            &self.0,
++            OwnedChange::Append(_)
++                | OwnedChange::Other {
++                    next: NextLog::Delta(_) | NextLog::Compact(_),
++                    ..
++                }
++        )
+     }
+     /// Core needs one independent normalized copy while its original crosses
+     /// the public owned provider boundary. Inspect the raw input first.
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/log.rs:21:
+ };
+ use std::collections::BTreeMap;
+ 
++mod comparison;
+ mod owned;
+ pub(crate) mod transition;
+-mod comparison;
+-pub use comparison::{CheckpointLineage, CheckpointLog};
+ pub(crate) use comparison::CheckpointComparison;
++pub use comparison::{CheckpointLineage, CheckpointLog};
+ pub use owned::OwnedLogState;
+ 
+ #[derive(Clone, Debug, Eq, PartialEq)]
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:7:
+ 
+ fn core(store: &Store, id: u128) -> Raft {
+     Raft::recover(
+-        NodeId::new(1).unwrap(), store.binding(), store.state(group(id)).unwrap(), store.limits(),
+-    ).unwrap()
++        NodeId::new(1).unwrap(),
++        store.binding(),
++        store.state(group(id)).unwrap(),
++        store.limits(),
++    )
++    .unwrap()
+ }
+ fn drive(core: &mut Raft, store: &mut Store, effects: Vec<Effect>) {
+     let mut queue: VecDeque<_> = effects.into();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:19:
+     }
+ }
+ fn proposal(core: &mut Raft, store: &mut Store, operation: u128) {
+-    let effects = core.step(Event::Propose {
+-        operation: OperationId::new(operation).unwrap(), bytes: vec![7; 32],
+-    }).unwrap();
++    let effects = core
++        .step(Event::Propose {
++            operation: OperationId::new(operation).unwrap(),
++            bytes: vec![7; 32],
++        })
++        .unwrap();
+     drive(core, store, effects);
+ }
+ fn verified(store: &Store) -> Option<(u64, u64)> {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:28:
+-    store.checkpoint_comparisons.get(&group(1)).and_then(CheckpointComparison::verified_interval)
++    store
++        .checkpoint_comparisons
++        .get(&group(1))
++        .and_then(CheckpointComparison::verified_interval)
+ }
+ 
+ #[test]
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:38:
+         proposal(&mut owner, &mut store, operation);
+     }
+     assert_eq!(owner.state().entries.len(), 4);
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     let first = store.checkpoint_comparisons[&group(1)].work();
+     assert!(first.full);
+     assert_eq!((first.compared, first.reused), (4, 0));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:45:
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     let again = store.checkpoint_comparisons[&group(1)].work();
+     assert!(!again.full);
+     assert_eq!((again.compared, again.reused), (0, 4));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:49:
+ 
+-    let effects = owner.step(Event::Propose {
+-        operation: OperationId::new(4).unwrap(), bytes: vec![8; 32],
+-    }).unwrap();
+-    let update = effects.iter().find_map(|effect| match effect {
+-        Effect::Persist(update) => Some(update.clone()), _ => None,
+-    }).unwrap();
+-    let tickets = store.append_batch(vec![LogMutation::Update(update.clone())]).unwrap();
++    let effects = owner
++        .step(Event::Propose {
++            operation: OperationId::new(4).unwrap(),
++            bytes: vec![8; 32],
++        })
++        .unwrap();
++    let update = effects
++        .iter()
++        .find_map(|effect| match effect {
++            Effect::Persist(update) => Some(update.clone()),
++            _ => None,
++        })
++        .unwrap();
++    let tickets = store
++        .append_batch(vec![LogMutation::Update(update.clone())])
++        .unwrap();
+     owner.admit_effect(&update, tickets[0]).unwrap();
+     // Admission keeps the old durable view and cannot extend verified progress.
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert_eq!(verified(&store), Some((1, 4)));
+     let completed = store.barrier(&tickets).unwrap();
+     assert_eq!(verified(&store), Some((1, 4)));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:63:
+     let effects = owner.complete(&completed).unwrap();
+     drive(&mut owner, &mut store, effects);
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     let append = store.checkpoint_comparisons[&group(1)].work();
+     assert!(!append.full);
+     assert_eq!((append.compared, append.reused), (1, 4));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:70:
+ 
+     let old_generation = owner.state().generation;
+     let reference = crate::snapshot::SnapshotRef {
+-        store: store.binding().identity, group: group(1),
++        store: store.binding().identity,
++        group: group(1),
+         configuration: owner.state().bootstrap.configuration,
+-        generation: SnapshotGeneration::new(1).unwrap(), index: 3,
+-        term: owner.state().term_at(3).unwrap(), application_schema: 1, file_bytes: 100, checksum: 7,
++        generation: SnapshotGeneration::new(1).unwrap(),
++        index: 3,
++        term: owner.state().term_at(3).unwrap(),
++        application_schema: 1,
++        file_bytes: 100,
++        checksum: 7,
+     };
+     // Exercise only the canonical compaction transition here; snapshot data
+     // and pin dependencies are covered by the actual integration histories.
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:81:
+     drive(&mut owner, &mut store, effects);
+     assert_ne!(owner.state().generation, old_generation);
+     assert_eq!(verified(&store), Some((4, 5)));
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     let trim = store.checkpoint_comparisons[&group(1)].work();
+     assert!(!trim.full);
+     assert_eq!((trim.compared, trim.reused), (0, 2));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:88:
+     proposal(&mut owner, &mut store, 5);
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     let next = store.checkpoint_comparisons[&group(1)].work();
+     assert_eq!((next.compared, next.reused), (1, 2));
+     assert_eq!(store.state(group(1)).unwrap(), *owner.state());
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:95:
+ #[test]
+ fn combined_pending_append_trim_and_subset_barrier_only_preserve_verified_overlap() {
+     let mut store = open(2);
+-    let initial = mutation(&store, 1, 3, Some(Suffix {
+-        from: 1, entries: (1..=3).map(|i| entry(i, 1)).collect(),
+-    }));
++    let initial = mutation(
++        &store,
++        1,
++        3,
++        Some(Suffix {
++            from: 1,
++            entries: (1..=3).map(|i| entry(i, 1)).collect(),
++        }),
++    );
+     commit(&mut store, vec![initial]);
+     let owner = core(&store, 1);
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
+-    let update = mutation(&store, 1, 5, Some(Suffix {
+-        from: 4, entries: vec![entry(4, 1), entry(5, 1)],
+-    }));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
++    let update = mutation(
++        &store,
++        1,
++        5,
++        Some(Suffix {
++            from: 4,
++            entries: vec![entry(4, 1), entry(5, 1)],
++        }),
++    );
+     let old = store.append_batch(vec![update]).unwrap();
+-    let state = store.accepted.view(&store.durable, group(1)).unwrap().0.materialize();
+-    let LogMutation::Update(mut update) = mutation_raw(&state, 5, None) else { unreachable!() };
++    let state = store
++        .accepted
++        .view(&store.durable, group(1))
++        .unwrap()
++        .0
++        .materialize();
++    let LogMutation::Update(mut update) = mutation_raw(&state, 5, None) else {
++        unreachable!()
++    };
+     update.snapshot = Some(crate::snapshot::SnapshotRef {
+-        store: store.binding().identity, group: group(1), configuration: state.bootstrap.configuration,
+-        generation: SnapshotGeneration::new(1).unwrap(), index: 2, term: 1,
+-        application_schema: 1, file_bytes: 100, checksum: 7,
++        store: store.binding().identity,
++        group: group(1),
++        configuration: state.bootstrap.configuration,
++        generation: SnapshotGeneration::new(1).unwrap(),
++        index: 2,
++        term: 1,
++        application_schema: 1,
++        file_bytes: 100,
++        checksum: 7,
+     });
+-    let compact = store.append_batch(vec![LogMutation::Update(update)]).unwrap();
+-    let update = mutation(&store, 1, 5, Some(Suffix { from: 6, entries: vec![entry(6, 1)] }));
++    let compact = store
++        .append_batch(vec![LogMutation::Update(update)])
++        .unwrap();
++    let update = mutation(
++        &store,
++        1,
++        5,
++        Some(Suffix {
++            from: 6,
++            entries: vec![entry(6, 1)],
++        }),
++    );
+     let later = store.append_batch(vec![update]).unwrap();
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert_eq!(verified(&store), Some((1, 3)));
+     let update = mutation(&store, 2, 0, None);
+     let other = store.append_batch(vec![update]).unwrap();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:126:
+     assert_eq!(store.barrier(&compact).unwrap().tickets, compact);
+     assert_eq!(store.barrier(&later).unwrap().tickets, later);
+     // The stale core has different complete metadata: a mark cannot override it.
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(false));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(false)
++    );
+     assert_eq!(verified(&store), None);
+ }
+ 
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:133:
+ #[test]
+ fn rewrites_fresh_owners_and_reopen_cannot_reuse_old_prefix_proof() {
+     let mut store = open(1);
+-    let initial = mutation(&store, 1, 2, Some(Suffix {
+-        from: 1, entries: (1..=3).map(|i| entry(i, 1)).collect(),
+-    }));
++    let initial = mutation(
++        &store,
++        1,
++        2,
++        Some(Suffix {
++            from: 1,
++            entries: (1..=3).map(|i| entry(i, 1)).collect(),
++        }),
++    );
+     commit(&mut store, vec![initial]);
+     let owner = core(&store, 1);
+     let other_owner = core(&store, 1);
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:142:
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
+-    assert_eq!(store.matches_checkpoint_state(other_owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
++    assert_eq!(
++        store.matches_checkpoint_state(other_owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert!(store.checkpoint_comparisons[&group(1)].work().full);
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert!(store.checkpoint_comparisons[&group(1)].work().full);
+-    let replacement = mutation(&store, 1, 2, Some(Suffix { from: 3, entries: vec![entry(3, 2)] }));
++    let replacement = mutation(
++        &store,
++        1,
++        2,
++        Some(Suffix {
++            from: 3,
++            entries: vec![entry(3, 2)],
++        }),
++    );
+     let tickets = store.append_batch(vec![replacement]).unwrap();
+     // Safe later plans cannot erase an earlier full/rewrite provenance.
+-    let append = mutation(&store, 1, 2, Some(Suffix { from: 4, entries: vec![entry(4, 2)] }));
++    let append = mutation(
++        &store,
++        1,
++        2,
++        Some(Suffix {
++            from: 4,
++            entries: vec![entry(4, 2)],
++        }),
++    );
+     let appended = store.append_batch(vec![append]).unwrap();
+     let metadata = mutation(&store, 1, 3, None);
+     let metadata = store.append_batch(vec![metadata]).unwrap();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:154:
+-    assert!(matches!(store.accepted.overlays[&group(1)], Overlay::Full(_)));
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++    assert!(matches!(
++        store.accepted.overlays[&group(1)],
++        Overlay::Full(_)
++    ));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert_eq!(verified(&store), Some((1, 3)));
+     store.barrier(&tickets).unwrap();
+     assert!(store.checkpoint_comparisons.is_empty());
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:159:
+     store.barrier(&appended).unwrap();
+     store.barrier(&metadata).unwrap();
+-    assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(false));
++    assert_eq!(
++        store.matches_checkpoint_state(owner.checkpoint_log()),
++        Ok(false)
++    );
+     let new_owner = core(&store, 1);
+-    assert_eq!(store.matches_checkpoint_state(new_owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        store.matches_checkpoint_state(new_owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert!(store.checkpoint_comparisons[&group(1)].work().full);
+     let io = store.io.clone();
+     let identity = store.binding().identity;
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:167:
+     drop(store);
+     let mut reopened = NativeLogStore::recover(io, identity, LogLimits::default()).unwrap();
+     assert!(reopened.checkpoint_comparisons.is_empty());
+-    assert_eq!(reopened.matches_checkpoint_state(new_owner.checkpoint_log()), Ok(true));
++    assert_eq!(
++        reopened.matches_checkpoint_state(new_owner.checkpoint_log()),
++        Ok(true)
++    );
+     assert!(reopened.checkpoint_comparisons[&group(1)].work().full);
+ }
+ 
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests/checkpoint.rs:176:
+     for fault in [Fault::Append, Fault::Sync, Fault::Publish] {
+         let mut store = open(1);
+         let owner = core(&store, 1);
+-        assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Ok(true));
++        assert_eq!(
++            store.matches_checkpoint_state(owner.checkpoint_log()),
++            Ok(true)
++        );
+         store.io.0.borrow_mut().fault = fault;
+-        let update = mutation(&store, 1, 0, Some(Suffix { from: 1, entries: vec![entry(1, 1)] }));
++        let update = mutation(
++            &store,
++            1,
++            0,
++            Some(Suffix {
++                from: 1,
++                entries: vec![entry(1, 1)],
++            }),
++        );
+         match store.append_batch(vec![update]) {
+             Err(StorageError::Uncertain(_)) => (),
+-            Ok(tickets) => assert!(matches!(store.barrier(&tickets), Err(StorageError::Uncertain(_)))),
++            Ok(tickets) => assert!(matches!(
++                store.barrier(&tickets),
++                Err(StorageError::Uncertain(_))
++            )),
+             other => panic!("unexpected {other:?}"),
+         }
+-        assert_eq!(store.matches_checkpoint_state(owner.checkpoint_log()), Err(StorageError::Fenced));
++        assert_eq!(
++            store.matches_checkpoint_state(owner.checkpoint_log()),
++            Err(StorageError::Fenced)
++        );
+         let mut missing_state = owner.state().clone();
+         missing_state.bootstrap.group = group(99);
+-        let missing_owner = Raft::recover(NodeId::new(1).unwrap(), owner.storage_binding(), missing_state, store.limits()).unwrap();
+-        assert_eq!(store.matches_checkpoint_state(missing_owner.checkpoint_log()), Err(StorageError::Fenced));
++        let missing_owner = Raft::recover(
++            NodeId::new(1).unwrap(),
++            owner.storage_binding(),
++            missing_state,
++            store.limits(),
++        )
++        .unwrap();
++        assert_eq!(
++            store.matches_checkpoint_state(missing_owner.checkpoint_log()),
++            Err(StorageError::Fenced)
++        );
+         assert_eq!(verified(&store), None);
+         assert!(store.durable[&group(1)].entries.is_empty());
+     }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store/accepted/tests.rs:1:
+ // SPDX-License-Identifier: RPL-1.5
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+-mod compact;
+ mod checkpoint;
++mod compact;
+ mod configured;
+ mod fixture;
+ mod incoming;
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store.rs:14:
+ // rights and limitations under the RPL.
+ //! Native recoverable log: atomic group transitions, shared barriers, no threads.
+ use super::vote_store::crc32c;
+-use crate::{contracts::StorageError, identity::*, log::*};
+ use crate::log::comparison::CheckpointComparison;
++use crate::{contracts::StorageError, identity::*, log::*};
+ use std::{collections::BTreeMap, io};
+ 
+ mod accepted;
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/native/log_store.rs:408:
+         }
+         if let Err(error) = self
+             .accepted
+-            .promote(&mut self.durable, &mut self.checkpoint_comparisons) {
++            .promote(&mut self.durable, &mut self.checkpoint_comparisons)
++        {
+             self.fenced = true;
+             self.checkpoint_comparisons.clear();
+             return Err(StorageError::Uncertain(format!(
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/raft/checkpoint_tests.rs:11:
+     let mut comparison = CheckpointComparison::default();
+     assert!(comparison.compare(core.state(), &core.checkpoint_log()));
+     let first = core.checkpoint_log().lineage().clone();
+-    let effects = core.propose_batch(vec![
+-        Proposal { operation: OperationId::new(u128::MAX).unwrap(), bytes: Vec::new() },
+-        Proposal { operation: OperationId::new(7).unwrap(), bytes: vec![7] },
+-    ]).unwrap();
++    let effects = core
++        .propose_batch(vec![
++            Proposal {
++                operation: OperationId::new(u128::MAX).unwrap(),
++                bytes: Vec::new(),
++            },
++            Proposal {
++                operation: OperationId::new(7).unwrap(),
++                bytes: vec![7],
++            },
++        ])
++        .unwrap();
+     durable(&mut core, effects);
+     comparison.preserve(core.state());
+     assert_eq!(first, *core.checkpoint_log().lineage());
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/raft/checkpoint_tests.rs:32:
+         sender,
+         to: NodeId::new(1).unwrap(),
+         term: 2,
+-        context: RequestContext { origin: sender, sequence: 1 },
++        context: RequestContext {
++            origin: sender,
++            sequence: 1,
++        },
+         rpc: Rpc::Append {
+             previous_index: 1,
+             previous_term: 1,
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/raft/checkpoint_tests.rs:39:
+             entries: vec![
+-                LogEntry { index: 2, term: 2, payload: EntryPayload::Command { operation: OperationId::new((1 << 127) | 7).unwrap(), bytes: vec![9] } },
+-                LogEntry { index: 3, term: 2, payload: EntryPayload::Noop },
++                LogEntry {
++                    index: 2,
++                    term: 2,
++                    payload: EntryPayload::Command {
++                        operation: OperationId::new((1 << 127) | 7).unwrap(),
++                        bytes: vec![9],
++                    },
++                },
++                LogEntry {
++                    index: 3,
++                    term: 2,
++                    payload: EntryPayload::Noop,
++                },
+             ],
+             leader_commit: 1,
+         },
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/raft/checkpoint_tests.rs:53:
+             full_installs += 1;
+         }
+     }
+-    assert_eq!(full_installs, 2, "term installation then exact suffix replacement");
++    assert_eq!(
++        full_installs, 2,
++        "term installation then exact suffix replacement"
++    );
+     assert_eq!(core.state().entries[1].term, 2);
+     assert_ne!(first, *core.checkpoint_log().lineage());
+     assert!(comparison.compare(core.state(), &core.checkpoint_log()));
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/raft/checkpoint_tests.rs:68:
+     let before = core.checkpoint_log().lineage().clone();
+     core.step(Event::Heartbeat).unwrap();
+     assert_eq!(before, *core.checkpoint_log().lineage());
+-    let recovered = Raft::recover(core.node, core.binding, core.state().clone(), core.limits).unwrap();
++    let recovered =
++        Raft::recover(core.node, core.binding, core.state().clone(), core.limits).unwrap();
+     assert_eq!(core.state(), recovered.state());
+     assert_ne!(before, *recovered.checkpoint_log().lineage());
+     core.storage_failed();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/src/raft.rs:1896:
+ }
+ 
+ #[cfg(test)]
++mod checkpoint_tests;
++#[cfg(test)]
+ #[path = "raft/membership_tests.rs"]
+ mod membership_tests;
+-#[cfg(test)]
+-mod checkpoint_tests;
+ 
+ #[path = "raft/authority.rs"]
+ mod authority;
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/tests/provider_conformance/log_store/default_errors.rs:69:
+     for group in [group(1), group(99)] {
+         let mut state = expected.clone();
+         state.bootstrap.group = group;
+-        let core = voteboat::raft::Raft::recover(
+-            node(1),
+-            inner.binding(),
+-            state,
+-            inner.limits(),
+-        ).unwrap();
++        let core =
++            voteboat::raft::Raft::recover(node(1), inner.binding(), state, inner.limits()).unwrap();
+         for error in [
+             StorageError::Fenced,
+             StorageError::WrongIdentity,
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/tests/provider_conformance/log_store/default_errors.rs:83:
+             StorageError::Corrupt("state"),
+             StorageError::Uncertain("sync".into()),
+         ] {
+-            let mut faulted = Faulted { inner: HostLogStore::new(1), error: error.clone() };
++            let mut faulted = Faulted {
++                inner: HostLogStore::new(1),
++                error: error.clone(),
++            };
+             let object: &mut dyn LogStore = &mut faulted;
+-            assert_eq!(object.matches_checkpoint_state(core.checkpoint_log()), Err(error));
++            assert_eq!(
++                object.matches_checkpoint_state(core.checkpoint_log()),
++                Err(error)
++            );
+         }
+     }
+ }
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/tests/snapshot/log_match.rs:27:
+         self.result.clone()
+     }
+     fn matches_checkpoint_state(&mut self, _: CheckpointLog<'_>) -> Result<bool, StorageError> {
+-        self.checkpoint_comparisons.set(self.checkpoint_comparisons.get() + 1);
++        self.checkpoint_comparisons
++            .set(self.checkpoint_comparisons.get() + 1);
+         self.result.clone()
+     }
+     fn append_batch(&mut self, _: Vec<LogMutation>) -> Result<Vec<LogTicket>, StorageError> {
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/tests/snapshot/log_match.rs:118:
+         states: Cell::new(0),
+     };
+     let reference = SnapshotRef {
+-        store: identity(1), group: group(1), generation: SnapshotGeneration::new(1).unwrap(),
+-        configuration: ConfigurationId::new(1).unwrap(), index: 1, term: 1,
+-        application_schema: 1, file_bytes: 100, checksum: 7,
++        store: identity(1),
++        group: group(1),
++        generation: SnapshotGeneration::new(1).unwrap(),
++        configuration: ConfigurationId::new(1).unwrap(),
++        index: 1,
++        term: 1,
++        application_schema: 1,
++        file_bytes: 100,
++        checksum: 7,
+     };
+     let mut snapshots = HostSnapshots::new();
+     let mut application = Counter::new(20).unwrap();
+Diff in /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source/tests/snapshot/log_match.rs:127:
+     assert_eq!(
+-        finish_snapshot_install(&mut core, &probe, &mut snapshots, &mut application, reference),
++        finish_snapshot_install(
++            &mut core,
++            &probe,
++            &mut snapshots,
++            &mut application,
++            reference
++        ),
+         Err(CheckpointError::InvalidBinding)
+     );
+     assert_eq!(probe.comparisons.get(), 1);

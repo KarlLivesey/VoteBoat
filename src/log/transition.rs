@@ -211,6 +211,9 @@ impl NextLog {
     }
 }
 impl PreparedLog {
+    pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
+        matches!(self.0, NextLog::Delta(_) | NextLog::Compact(_))
+    }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self.0 {
             NextLog::Full { next, .. } => {

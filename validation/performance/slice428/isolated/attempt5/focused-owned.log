@@ -1,0 +1,10 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.09s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/checks/debug/deps/voteboat-ebeb84c4129d638f)
+
+running 2 tests
+test log::owned::tests::checkpoint::failed_owner_changes_lineage_and_arbitrary_same_revision_mutations_remain_visible ... ok
+test log::owned::tests::checkpoint::genuine_core_and_owned_plans_preserve_append_compact_and_metadata_but_reset_restart ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 384 filtered out; finished in 0.00s
+

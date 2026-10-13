@@ -104,3 +104,10 @@ Throughput ends after all client joins, before latency-vector flattening/sorting
 and follower verification; every original result and sample is still checked.
 The untouched upstream driver keeps its own 400-second guard, so an outer watchdog
 cannot make its slow 20M singleton cell finish. That limitation remains explicit.
+
+
+Slice428 adds a separately named protected checkpoint verification phase (29
+phases,15 scoped methods). It includes full fallback/dev reference work; logical
+equal-entry counts do not measure skipped or compared entries. Compaction alone
+uses the immutable core view and owner-preserved exact prefix. Raw equality and
+completion/provider contracts remain unchanged. See [schema](SCHEMA.md).

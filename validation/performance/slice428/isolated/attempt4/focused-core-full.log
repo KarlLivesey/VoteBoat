@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/checks/debug/deps/voteboat-ebeb84c4129d638f)
+
+running 2 tests
+test raft::checkpoint_tests::heartbeat_keeps_domain_but_recovery_and_failed_owner_do_not ... ok
+test raft::checkpoint_tests::same_core_suffix_replacement_and_replayed_higher_term_replace_lineage ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 384 filtered out; finished in 0.00s
+

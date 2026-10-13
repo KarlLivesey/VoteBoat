@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Native recoverable log: atomic group transitions, shared barriers, no threads.
 use super::vote_store::crc32c;
+use crate::log::CheckpointComparison;
 use crate::{contracts::StorageError, identity::*, log::*};
 use std::{collections::BTreeMap, io};
 
@@ -58,6 +59,7 @@ pub struct NativeLogStore<I: JournalIo, C: LogCodec = NativeLogCodec> {
     binding: StoreBinding,
     limits: LogLimits,
     durable: BTreeMap<GroupIdentity, GroupLog>,
+    checkpoint_comparisons: BTreeMap<GroupIdentity, CheckpointComparison>,
     accepted: accepted::Accepted,
     pending: Vec<LogTicket>,
     length: usize,
@@ -139,6 +141,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             binding,
             limits,
             durable: BTreeMap::new(),
+            checkpoint_comparisons: BTreeMap::new(),
             accepted: accepted::Accepted::default(),
             pending: Vec::new(),
             length: 0,
@@ -232,6 +235,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
             binding,
             limits,
             durable: state,
+            checkpoint_comparisons: BTreeMap::new(),
             accepted,
             pending: Vec::new(),
             length: offset,
@@ -242,6 +246,7 @@ impl<I: JournalIo, C: LogCodec> NativeLogStore<I, C> {
 
     fn failed(&mut self, error: io::Error) -> StorageError {
         self.fenced = true;
+        self.checkpoint_comparisons.clear();
         uncertain(error)
     }
 }
@@ -275,6 +280,25 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
             .get(&group)
             .ok_or(StorageError::Rejected("group not durably bootstrapped"))?;
         Ok(state == expected)
+    }
+    fn matches_checkpoint_state(
+        &mut self,
+        expected: CheckpointLog<'_>,
+    ) -> Result<bool, StorageError> {
+        if self.fenced {
+            self.checkpoint_comparisons.clear();
+            return Err(StorageError::Fenced);
+        }
+        let group = expected.group();
+        let state = self
+            .durable
+            .get(&group)
+            .ok_or(StorageError::Rejected("group not durably bootstrapped"))?;
+        Ok(self
+            .checkpoint_comparisons
+            .entry(group)
+            .or_default()
+            .compare(state, &expected))
     }
     fn append_batch(
         &mut self,
@@ -349,6 +373,7 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         });
         if let Err(error) = self.accepted.install(&self.durable, next) {
             self.fenced = true;
+            self.checkpoint_comparisons.clear();
             return Err(StorageError::Uncertain(format!(
                 "accepted install invariant: {error:?}"
             )));
@@ -381,8 +406,12 @@ impl<I: JournalIo, C: LogCodec> LogStore for NativeLogStore<I, C> {
         {
             return Err(self.failed(e));
         }
-        if let Err(error) = self.accepted.promote(&mut self.durable) {
+        if let Err(error) = self
+            .accepted
+            .promote(&mut self.durable, &mut self.checkpoint_comparisons)
+        {
             self.fenced = true;
+            self.checkpoint_comparisons.clear();
             return Err(StorageError::Uncertain(format!(
                 "accepted promotion invariant: {error:?}"
             )));

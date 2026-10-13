@@ -1,0 +1,302 @@
+{
+  "isolated_only": true,
+  "final_scopes_clean": true,
+  "full_repeated_suite_claim": false,
+  "base_commit": "92f8f714c30c6775cccc2369f3506e54e6929deb",
+  "source_manifest_sha256": "baf59a918e3b69ce704a532008fe9014d7b084ec7c2830dbf2870af45b55ca22",
+  "source_files": 1424,
+  "changed_files": [
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "benchmarks/matched/src/attribution.rs",
+    "benchmarks/matched/src/attribution/gaps.rs",
+    "benchmarks/matched/src/attribution/gaps/tests.rs",
+    "benchmarks/matched/src/store.rs",
+    "benchmarks/matched/src/store/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/workload.rs",
+    "build.rs",
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "examples/benchmark/observe.rs",
+    "src/log.rs",
+    "src/log/comparison.rs",
+    "src/log/comparison/tests.rs",
+    "src/log/owned.rs",
+    "src/log/owned/tests.rs",
+    "src/log/owned/tests/checkpoint.rs",
+    "src/log/transition.rs",
+    "src/log/transition/incoming.rs",
+    "src/native/log_store.rs",
+    "src/native/log_store/accepted.rs",
+    "src/native/log_store/accepted/tests.rs",
+    "src/native/log_store/accepted/tests/checkpoint.rs",
+    "src/raft.rs",
+    "src/raft/checkpoint_tests.rs",
+    "src/snapshot.rs",
+    "tests/provider_conformance/log_store/default_errors.rs",
+    "tests/snapshot/log_match.rs"
+  ],
+  "new_files": [
+    "build.rs",
+    "src/log/comparison.rs",
+    "src/log/comparison/tests.rs",
+    "src/log/owned/tests/checkpoint.rs",
+    "src/native/log_store/accepted/tests/checkpoint.rs",
+    "src/raft/checkpoint_tests.rs"
+  ],
+  "patch_sha256": "8397fd8f827872be2b3440283f596978f99fed33f90df0d6871f8f77743c6454",
+  "final_original_handle": 36555,
+  "final_original_exit": 0,
+  "scopes": {
+    "focused-owned": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --lib log::owned::tests::checkpoint:: -- --test-threads=1",
+      "log": "focused-owned.log",
+      "log_sha256": "37c7908394e933cd27f917b4ebf9f2a0dba66f95082bc4922548fde11818522a",
+      "test_results": [
+        "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 384 filtered out; finished in 0.00s"
+      ]
+    },
+    "focused-core-full": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --lib raft::checkpoint_tests:: -- --test-threads=1",
+      "log": "focused-core-full.log",
+      "log_sha256": "a0aa2b7039abf18850715a0f1f6f6e440fc8805c0f1332768596105ac75db5dc",
+      "test_results": [
+        "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 384 filtered out; finished in 0.00s"
+      ]
+    },
+    "drain-focus": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test effect_owner native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport -- --exact --nocapture --test-threads=1",
+      "log": "drain-focus.log",
+      "log_sha256": "e3f8cb9da8773294b7b7d0a8fe0a68dc81808e6c0ef205532b404717e96991cb",
+      "test_results": [
+        "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 37.11s"
+      ]
+    },
+    "remaining-all": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test log_store --test provider_conformance --test snapshot --test raft -- --test-threads=1",
+      "log": "remaining-all.log",
+      "log_sha256": "95e9f1e013218108bf3e3d4f412d8d6e1ff9a55b9b469ef0979ff46b5ce38908",
+      "test_results": [
+        "ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.69s",
+        "ok. 32 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.24s",
+        "ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.31s",
+        "ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.72s"
+      ]
+    },
+    "affected-core": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --no-default-features --lib --test log_store --test provider_conformance --test snapshot --test raft --test effect_owner -- --test-threads=1",
+      "log": "affected-core.log",
+      "log_sha256": "98f4dc93fcb1d5c606d81cc1506365a9ef5d880838f427c6933eaef2f5ed0baf",
+      "test_results": [
+        "ok. 306 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s",
+        "ok. 195 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s",
+        "ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s",
+        "ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s",
+        "ok. 29 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s",
+        "ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s"
+      ]
+    },
+    "actual-services": {
+      "status": 0,
+      "command": "cargo +stable test --locked --offline --all-features --test counter_service three_ -- --test-threads=1",
+      "log": "actual-services.log",
+      "log_sha256": "462d0e3376e2ddc536a997a97aedbf3b7b2697f33d554b37ea6bb1d9fe2680e6",
+      "test_results": [
+        "ok. 2 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 18.20s"
+      ]
+    },
+    "fmt-final": {
+      "status": 0,
+      "command": "cargo +stable fmt --all -- --check",
+      "log": "fmt-final.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "test_results": []
+    },
+    "clippy-all": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings",
+      "log": "clippy-all.log",
+      "log_sha256": "11612035c5125ebf93667a7e4388abfe836ad1ec472d4e5e6c590904451ebd15",
+      "test_results": []
+    },
+    "clippy-default": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings",
+      "log": "clippy-default.log",
+      "log_sha256": "1a16cb10f86c4ea8985261dd904c5c9836e4b24479ad21a03a96031623585773",
+      "test_results": []
+    },
+    "clippy-core": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings",
+      "log": "clippy-core.log",
+      "log_sha256": "c642969c9cbc58d7fff45ff08cc11a336a8341053d330932c0603c6fe63d5dba",
+      "test_results": []
+    },
+    "clippy-native": {
+      "status": 0,
+      "command": "cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings",
+      "log": "clippy-native.log",
+      "log_sha256": "b6dbbf578eda063c023a7dd62bd22bfc8a7e499ea224a0dbd90f38160439488f",
+      "test_results": []
+    },
+    "matched-tests": {
+      "status": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline -- --test-threads=1",
+      "log": "matched-tests.log",
+      "log_sha256": "7b422213e80cfa358891e365b3beb9087bb760324d488ca8ab196a2a95b65d60",
+      "test_results": [
+        "ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.85s"
+      ]
+    },
+    "matched-focused-actor": {
+      "status": 0,
+      "command": "cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline checkpoint_scopes_observe_actual_helpers_and_nested_retention -- --test-threads=1",
+      "log": "matched-focused-actor.log",
+      "log_sha256": "7e75cf1c366bad748147d07950cf6038cf339019a1ac1e9f784c78a7e311762f",
+      "test_results": [
+        "ok. 1 passed; 0 failed; 0 ignored; 0 measured; 34 filtered out; finished in 0.08s"
+      ]
+    },
+    "matched-final-fmt": {
+      "status": 0,
+      "command": "cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml --all -- --check",
+      "log": "matched-final-fmt.log",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "test_results": []
+    },
+    "matched-final-clippy": {
+      "status": 0,
+      "command": "cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings",
+      "log": "matched-final-clippy.log",
+      "log_sha256": "76548bac0c7a710b68e477ff8c8aacd1bd655670056d6221c6e3beff39e105a0",
+      "test_results": []
+    },
+    "source-after": {
+      "status": 0,
+      "command": "sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/source.sha256",
+      "log": "source-after.log",
+      "log_sha256": "94cfa698b95a145bc4412f0362c8708a7b9b6473806e64e02d91a63bbb9d099b",
+      "test_results": []
+    },
+    "source-after-metadata": {
+      "status": 0,
+      "command": "sha256sum -c ../source.sha256",
+      "log": "source-after-metadata.log",
+      "log_sha256": "94cfa698b95a145bc4412f0362c8708a7b9b6473806e64e02d91a63bbb9d099b",
+      "test_results": []
+    },
+    "metadata-final": {
+      "status": 0,
+      "command": "node target/p9/slice428/check-ledger.mjs",
+      "log": "metadata-final.log",
+      "log_sha256": "b845256335ddee9b1a540b83f62ab9702ba005ce3e6fa3eda576495ca92f2edf",
+      "test_results": []
+    }
+  },
+  "exact_source_reuse": {
+    "attempt2": {
+      "source_manifest_sha256": "72e0e8d233440264c53ab9db254cfbec393755fe2b9e2baf904cb078cddcee5f",
+      "only_changed_paths": [
+        "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+        "docs/provider-conformance.json",
+        "src/log/owned/tests/checkpoint.rs",
+        "src/raft/checkpoint_tests.rs"
+      ]
+    },
+    "attempt3": {
+      "source_manifest_sha256": "f67f2748b53b40d959929f25c79ebc9a6a7a0842a88bdfbce3a5c49294efd3ed",
+      "only_changed_paths": [
+        "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+        "docs/provider-conformance.json"
+      ]
+    },
+    "attempt4": {
+      "source_manifest_sha256": "f67f2748b53b40d959929f25c79ebc9a6a7a0842a88bdfbce3a5c49294efd3ed",
+      "only_changed_paths": [
+        "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+        "docs/provider-conformance.json"
+      ]
+    }
+  },
+  "coverage": {
+    "all_feature_library": {
+      "total": 386,
+      "reuse_passed": 384,
+      "corrected_fixture_controls": "focused-owned + focused-core-full (4 passes, includes the two earlier failures)"
+    },
+    "all_feature_effect_owner": {
+      "total": 203,
+      "reuse_passed": 202,
+      "focused_remaining": 1,
+      "original_timeout_preserved": true
+    },
+    "all_feature_log_store": 19,
+    "all_feature_provider": 32,
+    "all_feature_raft": 79,
+    "all_feature_snapshot": 27,
+    "core_library": 306,
+    "core_effect_owner": 195,
+    "core_log_store": 0,
+    "core_provider": 17,
+    "core_raft": 29,
+    "core_snapshot": 12,
+    "actual_tcp_quic_services": 2,
+    "matched": 35,
+    "matched_edited_fixture_rerun": 1
+  },
+  "history": [
+    {
+      "original_handle": 14940,
+      "exit": 101,
+      "reason": "Native private module import; focused pubcrate reexport import fix before tests",
+      "archive": "attempt1"
+    },
+    {
+      "original_handle": 95111,
+      "exit": 101,
+      "reason": "384 lib passed, two new fixture assumptions failed; corrected actual preserved campaign lineage and atomic one-Full higher-term replacement; production unchanged",
+      "archive": "attempt2"
+    },
+    {
+      "original_handle": 47105,
+      "exit": 101,
+      "reason": "202 effect_owner passed, existing hundred-group transport control exceeded initial 10s drive deadline; preserved raw failure",
+      "archive": "attempt3"
+    },
+    {
+      "original_handle": 85819,
+      "exit": 0,
+      "reason": "exact same control quiet rerun passed 37.11s; no source/limit changes"
+    },
+    {
+      "original_handle": 67028,
+      "exit": 101,
+      "reason": "standalone new fixture cognitive complexity26/25; extraction of unchanged report assertions, no weakened lint",
+      "archive": "attempt4"
+    },
+    {
+      "original_handle": 36555,
+      "exit": 0,
+      "reason": "affected matched fixture, standalone fmt/strict Clippy, frozen inventory pass"
+    }
+  ],
+  "metadata_only_refreeze": {
+    "checker": "metadata-final.command/log/stderr/status (existing checker, 41 contracts/391 operations)",
+    "prior_checked_source": "attempt5/SOURCE.json",
+    "only_changed_path": "docs/provider-conformance.json",
+    "native_private_matched_evidence": "QUALIFICATION.json scopes and raw logs; public ledger retains valid tests/* anchors",
+    "compiler_test_reruns": "none; production inputs unchanged"
+  },
+  "historical_check_status_kept": "101",
+  "dev_oracle_proof": "DEV_ORACLE.json",
+  "release_profile_proof": "pending",
+  "production_main_changed": false,
+  "performance_claim": "none; no428 measurements"
+}

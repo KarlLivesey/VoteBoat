@@ -8,6 +8,7 @@ struct Probe {
     binding: StoreBinding,
     result: Result<bool, StorageError>,
     comparisons: Cell<u32>,
+    checkpoint_comparisons: Cell<u32>,
     states: Cell<u32>,
 }
 impl LogStore for Probe {
@@ -23,6 +24,11 @@ impl LogStore for Probe {
     }
     fn matches_state(&self, _: GroupIdentity, _: &GroupLog) -> Result<bool, StorageError> {
         self.comparisons.set(self.comparisons.get() + 1);
+        self.result.clone()
+    }
+    fn matches_checkpoint_state(&mut self, _: CheckpointLog<'_>) -> Result<bool, StorageError> {
+        self.checkpoint_comparisons
+            .set(self.checkpoint_comparisons.get() + 1);
         self.result.clone()
     }
     fn append_batch(&mut self, _: Vec<LogMutation>) -> Result<Vec<LogTicket>, StorageError> {
@@ -79,6 +85,7 @@ fn binding_precedes_comparison_and_comparison_errors_precede_snapshot_work() {
             binding: raft.storage_binding(),
             result: result.clone(),
             comparisons: Cell::new(0),
+            checkpoint_comparisons: Cell::new(0),
             states: Cell::new(0),
         };
         probe.binding.session = StoreSession::new(99).unwrap();
@@ -87,14 +94,56 @@ fn binding_precedes_comparison_and_comparison_errors_precede_snapshot_work() {
             Err(CheckpointError::InvalidBinding)
         );
         assert_eq!(probe.comparisons.get(), 0);
+        assert_eq!(probe.checkpoint_comparisons.get(), 0);
         probe.binding = raft.storage_binding();
         let expected = match result {
             Err(error) => CheckpointError::Storage(error),
             Ok(_) => CheckpointError::InvalidBinding,
         };
         assert_eq!(attempt(&mut raft, &mut probe), Err(expected));
-        assert_eq!(probe.comparisons.get(), 1);
+        assert_eq!(probe.comparisons.get(), 0);
+        assert_eq!(probe.checkpoint_comparisons.get(), 1);
         assert_eq!(probe.states.get(), 0);
         assert_eq!(*raft.state(), before);
     }
+}
+
+#[test]
+fn snapshot_install_verification_keeps_the_full_arbitrary_state_method() {
+    let mut core = committed_core();
+    let probe = Probe {
+        binding: core.storage_binding(),
+        result: Ok(false),
+        comparisons: Cell::new(0),
+        checkpoint_comparisons: Cell::new(0),
+        states: Cell::new(0),
+    };
+    let reference = SnapshotRef {
+        store: identity(1),
+        group: group(1),
+        generation: SnapshotGeneration::new(1).unwrap(),
+        configuration: ConfigurationId::new(1).unwrap(),
+        index: 1,
+        term: 1,
+        application_schema: 1,
+        file_bytes: 100,
+        checksum: 7,
+    };
+    let mut snapshots = HostSnapshots::new();
+    let mut application = Counter::new(20).unwrap();
+    assert_eq!(
+        finish_snapshot_install(
+            &mut core,
+            &probe,
+            &mut snapshots,
+            &mut application,
+            reference
+        ),
+        Err(CheckpointError::InvalidBinding)
+    );
+    assert_eq!(probe.comparisons.get(), 1);
+    assert_eq!(probe.checkpoint_comparisons.get(), 0);
+    assert_eq!(probe.states.get(), 0);
+    assert!(snapshots.pins.is_empty());
+    assert_eq!(application.applied_index(), 0);
 }

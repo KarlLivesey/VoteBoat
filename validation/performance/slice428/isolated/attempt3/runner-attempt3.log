@@ -1,0 +1,40 @@
+test replica_driver::failed_worker_fences_without_applied_and_explicit_cleanup_releases_rejected_work ... ok
+test replica_driver::invalid_accepted_send_ticket_fences_and_external_payload_stays_provider_owned ... ok
+test replica_driver::overloaded_wal_retains_exact_leases_and_written_cannot_publish_applied ... ok
+test replica_driver::public_host_components_drive_exact_applied_and_original_read_with_consumer_credits ... ok
+test replica_driver::snapshot_retry_policy_is_bounded_and_rejects_without_mutation ... ok
+test replica_driver::wrong_binding_clock_and_budget_reject_before_provider_poll_and_can_resume ... ok
+test snapshot_routes::accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard ... ok
+test snapshot_routes::bounded_routing_and_wrong_binding_reject_before_transfer ... ok
+test snapshot_routes::closing_owner_drains_snapshot_wal_and_application_dependencies ... ok
+test snapshot_routes::envelopes::every_altered_snapshot_envelope_retains_the_original_live_lease ... ok
+test snapshot_routes::invalid_accepted_ticket_fences_but_returns_original_lease_for_discard ... ok
+test snapshot_routes::oversized_provider_result_fences_and_releases_only_router_owned_payload ... ok
+test snapshot_routes::recovery_budget::byte_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::checkpoint_publication_and_reconciliation_bypass_full_recovery_quota ... ok
+test snapshot_routes::recovery_budget::count_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::oversized_recovery_and_invalid_limits_are_rejected_before_preparation ... ok
+test snapshot_routes::recovery_budget::provider_refusal_and_failed_owner_discard_release_only_their_credits ... ok
+test snapshot_routes::rejection_retries_keep_exact_lease_and_stale_completions_do_not_release_it ... ok
+test snapshot_routes::reservation::competing_snapshot_leases_release_speculation_and_all_finish ... ok
+test snapshot_routes::reservation::rejected_worker_releases_only_speculation_and_retry_restores_budget ... ok
+test transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers ... ok
+test transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged ... ok
+test transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status ... ok
+test transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits ... ok
+
+failures:
+
+---- native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport stdout ----
+
+thread 'native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport' (1550397) panicked at tests/effect_owner.rs:2352:9:
+effect-owner cluster did not drain: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 754, 737), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 300, 300), (EffectOwnerUsage { active_visits: 16, reserved_bytes: 59222695, leased: 16, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 4, image_bytes: 409600 }), Some(SnapshotWorkUsage { requests: 4, bytes: 427105 }), 437, 454)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport
+
+test result: FAILED. 202 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 243.77s
+
+error: test failed, to rerun pass `--test effect_owner`

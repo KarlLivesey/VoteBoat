@@ -21,6 +21,16 @@ pub(crate) enum PreparedOwnedLog {
     Other(PreparedLog),
 }
 impl OwnedNextLog {
+    pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
+        matches!(
+            &self.0,
+            OwnedChange::Append(_)
+                | OwnedChange::Other {
+                    next: NextLog::Delta(_) | NextLog::Compact(_),
+                    ..
+                }
+        )
+    }
     /// Core needs one independent normalized copy while its original crosses
     /// the public owned provider boundary. Inspect the raw input first.
     pub(crate) fn plan_copy(
@@ -211,6 +221,12 @@ impl OwnedAppend {
     }
 }
 impl PreparedOwnedLog {
+    pub(crate) fn preserves_checkpoint_prefix(&self) -> bool {
+        match self {
+            Self::Append { .. } => true,
+            Self::Other(prepared) => prepared.preserves_checkpoint_prefix(),
+        }
+    }
     pub(crate) fn install(self, current: &mut GroupLog) -> LogSummary {
         match self {
             Self::Append { update, summary } => install_append(current, update, summary),

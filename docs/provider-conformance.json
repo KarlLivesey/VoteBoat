@@ -2321,6 +2321,30 @@
         },
         {
           "names": [
+            "matches_checkpoint_state"
+          ],
+          "obligation": "Protected core-only immutable view comparison is exactly equivalent to full GroupLog equality. Default preserves raw matches_state errors and object safety. Native and owned-state caches are bounded to their exclusive canonical owners and one core lineage; append/metadata may preserve a previously equal prefix, and exact validated compaction transfers only surviving overlap despite storage-generation change. New entries and all metadata compare exactly. Full/replacing histories, new owner/reopen, false comparisons and uncertain fences cannot reuse old proof. Native accepted staging never advances durable verified entries; completed-state/binding error precedence remains unchanged. Only snapshot compaction opts into the seam.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/log_store/default_errors.rs",
+              "symbol": "checkpoint_default_is_object_safe_and_preserves_raw_provider_error_outcomes"
+            },
+            {
+              "file": "tests/snapshot/log_match.rs",
+              "symbol": "binding_precedes_comparison_and_comparison_errors_precede_snapshot_work"
+            },
+            {
+              "file": "tests/snapshot/log_match.rs",
+              "symbol": "snapshot_install_verification_keeps_the_full_arbitrary_state_method"
+            }
+          ],
+          "remaining": [
+            "Generated configuration/snapshot histories and future optimized host-provider implementations require their own ownership/transition proof and conformance; metadata anchors are not runtime certification. Actual algorithm compared/reused counts are private test observations; runtime observer items remain logical retained entries and intervals include fallback/dev oracle work.",
+            "The separate slice428 qualification records four Native library controls in src/native/log_store/accepted/tests/checkpoint.rs for actual compared/reused counts, exact compaction survivors, sticky Full replacement followed by safe updates, combined pending/subset promotion, fresh/reopened owners and fencing. Private core/comparison/OwnedLogState controls and the matched MemoryStore completion/observer control are preserved in the qualification evidence; they are not tests/ integration anchors accepted by this metadata checker. Inspect their executed logs and source inventories separately; they do not certify arbitrary providers or generated histories."
+          ]
+        },
+        {
+          "names": [
             "append_batch"
           ],
           "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait.",

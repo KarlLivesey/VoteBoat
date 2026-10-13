@@ -148,3 +148,19 @@ methods). Equal calls count retained entries as logical units; false/error calls
 count zero, without claiming partial or physical traversal. Compact ordinals use
 the new method, so `state_to_pin` begins after comparison and excludes prior Eq.
 These changed observer scopes require fresh evidence, not renamed old timings.
+
+
+Protected checkpoint verification (slice428): only compaction calls the sealed
+Raft view seam. Exact default fallback and canonical-owner preservation remain
+behind the public contract; raw matches_state still accepts arbitrary expected
+states and compares fully. Native/OwnedLogState own at most one bounded marker
+per group. The new store_checkpoint_state_protected_inclusive_nested phase
+includes its private full fallback and any dev-profile full-Eq oracle, without
+inventing an old raw provider call. Reports have29 phases and15 methods per scope.
+The old clone/exact phases keep their names. Its item count is logical retained
+entries in successful equal states, zero for false/errors; actual algorithm
+compared/reused counts are proven in private tests and are not emitted here.
+state_to_pin begins after the entire protected verification call and cannot be
+compared directly to426's old exact-call scope. Ordinary asserted-release
+assertions/overflow checks remain enabled; its fast path omits the debug-profile
+reference scan. No observer interval is CPU time or an additive phase total.

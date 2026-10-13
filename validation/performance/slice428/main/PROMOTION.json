@@ -1,0 +1,166 @@
+{
+  "before_commit": "2ec502db21f78f5b762ecf7ceadf48fcc592eb79",
+  "frozen_source_manifest_sha256": "baf59a918e3b69ce704a532008fe9014d7b084ec7c2830dbf2870af45b55ca22",
+  "frozen_patch_sha256": "8397fd8f827872be2b3440283f596978f99fed33f90df0d6871f8f77743c6454",
+  "selected_source_files": 1424,
+  "all_selected_main_hashes_match": true,
+  "promoted_paths": {
+    "benchmarks/matched/README.md": {
+      "before": "589c7d3eacfda37ccfafd01403f558e799695bb3e4abfa9bc55ae0b217446dea",
+      "after": "1530aff8293ba846adcc23d61cb43a3806227e30f6b6d3bfd616619df7504397",
+      "new": false
+    },
+    "benchmarks/matched/SCHEMA.md": {
+      "before": "d46b18389385318b064197a922bc4150a137d0620f18df17ca3a436a47db2a53",
+      "after": "999e30701a6e767b25a0ce99d08a9fedf1b288795f06893dab700f25fb046db0",
+      "new": false
+    },
+    "benchmarks/matched/src/attribution.rs": {
+      "before": "b787f90528e5ef0e53bdbda70986ecb58bbbe907ec0ff8d8365dd93966332565",
+      "after": "a2e53fe3546fb633e76b72361beb1887377d50ceff51dfe20e15e1c828f48992",
+      "new": false
+    },
+    "benchmarks/matched/src/attribution/gaps.rs": {
+      "before": "50e419e6bcecf802b2a70a8e279c67f6bd85a3b1ba7bea1345e2028c92b4fd78",
+      "after": "51ca25aa7bc214d7a5411e136851c89f99fb7b63709f3d6e9c89e61c3fde59d5",
+      "new": false
+    },
+    "benchmarks/matched/src/attribution/gaps/tests.rs": {
+      "before": "de81d3cd06bd21846f905a63fbe25ac2faa17f5be29bb345df1e6040d7a04a71",
+      "after": "f7a9a7b3606cf32778f24a839127289a56e91ecac8c8cd10784f8572208b9d4a",
+      "new": false
+    },
+    "benchmarks/matched/src/store.rs": {
+      "before": "c5bd9b98abd84cba01a9989271e06ee0c20de25b75d94d5b896e1c3fa781b834",
+      "after": "aa5bee319c369b22e20be0f87dd0f34d6f9ab5c900ec5300efa0f56357d68637",
+      "new": false
+    },
+    "benchmarks/matched/src/store/tests.rs": {
+      "before": "6c8001360650b3d23416590d98363bf32e613586e236f5f8fff2f969246c6f01",
+      "after": "9a6a28345ce406b9a6deb767d3f1c9fdff7db35ab4385a6fc7732752980478dd",
+      "new": false
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs": {
+      "before": "2999dc8a6e969fb8a1cfee3c643ff1338ca23e0020ecb0e31bd865c3ec7ff6bf",
+      "after": "6a7f26bdcebe98c1fedd47bba8661893c1b2f9387c5f30e72eb2747aa1324b32",
+      "new": false
+    },
+    "benchmarks/matched/src/workload.rs": {
+      "before": "ffff7adb86d821c5feab580912d52595db5691e6845d4b861d4291794ede0d6c",
+      "after": "15fb771a6ba26a00e077e6f768174c8bfb476b7c697bbe4937a93b7e08401709",
+      "new": false
+    },
+    "build.rs": {
+      "before": null,
+      "after": "638888cec000c444d785ea790989dffad8f8250728142132dd0a99c0f89ccc0f",
+      "new": true
+    },
+    "docs/component-contracts.json": {
+      "before": "da5624178cc3cb3d53e68831d74369a894d5403cb4fa0d6bd5083ca75a4f2cfb",
+      "after": "dcbe04ac5ae527d1a7a5a8938466877b3032d2b3051282360971ad1d5ea9eabb",
+      "new": false
+    },
+    "docs/provider-conformance.json": {
+      "before": "2afa29879c871ccaf6967d80c9a609f069b5e470d13cc1ee68aea7a3ddad2169",
+      "after": "bbe337eb38efec84519a88af8f37b685b9eb46b0d9324c5c48c68e1cad682cd7",
+      "new": false
+    },
+    "examples/benchmark/observe.rs": {
+      "before": "99c2de219b044b8871a9c705d820a898612758799c160eb691344038091548ab",
+      "after": "3af9f8e802bbade4eb46a4cde2ea1853168f5af458c834127c1fd5875b048654",
+      "new": false
+    },
+    "src/log.rs": {
+      "before": "ce709b3a56117f7eab60b887871e89eab4f06622d8dc6d7e8e5ac65f7cba34bb",
+      "after": "fa9cd4491bc9a735abd8ad9dafaef321819147d42dc0b280aa6120a267f75537",
+      "new": false
+    },
+    "src/log/comparison.rs": {
+      "before": null,
+      "after": "fb3cfcf70a72df822aa9cff6b6f589f755b219e8c1d9d606da435be6421465cb",
+      "new": true
+    },
+    "src/log/comparison/tests.rs": {
+      "before": null,
+      "after": "eb1795c0debabf2d62cf59eed357eb04b33f07c8041f6a75082351a3d357c993",
+      "new": true
+    },
+    "src/log/owned.rs": {
+      "before": "d5830254356b9256b8bc0a909b648e8ef2e5efac7d9ceaf3d0b441d6911bd3ab",
+      "after": "4a9713e92d2017ceef16e2d539db32da228544ecd6c9df323a1a6354709144a9",
+      "new": false
+    },
+    "src/log/owned/tests.rs": {
+      "before": "b551eb5575eceb4499da277f58b7219f464be0178bca73a674b8337752294ca0",
+      "after": "d3654c6d5bb08d846f9be499da028160d0b82880e83243c1adfc24a7329ccfd1",
+      "new": false
+    },
+    "src/log/owned/tests/checkpoint.rs": {
+      "before": null,
+      "after": "e042c85237c9e422166c0762922daaaec59a78aaea7239f12d95b1f4c265ea23",
+      "new": true
+    },
+    "src/log/transition.rs": {
+      "before": "0934224c0b88e243065443303da91f4d68cccdaf1d7221506781fdc4a303655d",
+      "after": "402396c485c8c366941784c008fa5d6608e535833d98e46916b0091a722d2265",
+      "new": false
+    },
+    "src/log/transition/incoming.rs": {
+      "before": "0851afeb2bdd2044182cf73e55b2e01cbba8f3a0608533223a37e1aa44e4cf3e",
+      "after": "aff2b57b951a34734790de45b88135fe1f95f802fa78475bed9011cd76f84b36",
+      "new": false
+    },
+    "src/native/log_store.rs": {
+      "before": "4c70820cd30ced2fd6338c9076a232044942a3fea80f82399fd63e1d9e043f74",
+      "after": "380bb9fda8a430bfdfdb0e40ca4295649942815186c47dbb9f01f3d5c7d005ea",
+      "new": false
+    },
+    "src/native/log_store/accepted.rs": {
+      "before": "0962af61f2c32b1269cb7353b4741bb7701154f4b73c4a1c869e35681f9c5606",
+      "after": "f2a2e974effb1a1d44d56b8288f04e2aaad792bc4fa6012d3709c4f843926c8e",
+      "new": false
+    },
+    "src/native/log_store/accepted/tests.rs": {
+      "before": "a66d2a13144ca218b970430f1bbda663889273f886048a970549fcb4bbfb3d2d",
+      "after": "38bbe147e8150e7c4fb8454554d72170252ad7c2bf926dd032a28dee0128be43",
+      "new": false
+    },
+    "src/native/log_store/accepted/tests/checkpoint.rs": {
+      "before": null,
+      "after": "84d546bfc934489e3c48fc865aae83229ed88f7e15ba7d8f696768657b22f220",
+      "new": true
+    },
+    "src/raft.rs": {
+      "before": "9fa4263a2eb252b9dd9234ae54568a1ca7c7df5fdfe8e3e1f93f3688e53e6c32",
+      "after": "85f61a6eea28d5a7ae210664503a5f20a7e7613df039a35ed443195690adbf57",
+      "new": false
+    },
+    "src/raft/checkpoint_tests.rs": {
+      "before": null,
+      "after": "17280180c384a3fa6accb2f57e35d91afcabbebae73bfcbb3d1ad996c97e861a",
+      "new": true
+    },
+    "src/snapshot.rs": {
+      "before": "54018238283a79ff3290e08b9c8db579b21fab1b2153c872bbb40a84a9136047",
+      "after": "5ae4df8e09ce573fcd1783dc89ecff88b1bd4318837f7c5301115f34f52079f6",
+      "new": false
+    },
+    "tests/provider_conformance/log_store/default_errors.rs": {
+      "before": "0edd9d31c1c1b26a7a3c8b80e50adc04afa6a68e2adc5388513c075a07da0c88",
+      "after": "3e38962e34e6c5450f55ded38a50d323e7359e6680727b3b5bc28ba6721ea5d3",
+      "new": false
+    },
+    "tests/snapshot/log_match.rs": {
+      "before": "5b35045c0779702919864f0958b9e28a7bbe9bdce42a141b7babfbd8733b2cca",
+      "after": "485607921df0068ed993a802dc4855d4387b5910c7c15d564fe860458941d896",
+      "new": false
+    }
+  },
+  "excluded_inventory_plan_files": [
+    "docs/IMPLEMENTATION.md",
+    "docs/P9.md"
+  ],
+  "production_checks_reused": "isolated/QUALIFICATION.json exact frozen production hashes",
+  "independent_review": "no blocking defect; warmed configured rollback/nonmatching snapshot cache cases explicitly unrun",
+  "publication": "pending enabled hook push"
+}

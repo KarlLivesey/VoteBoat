@@ -24,7 +24,7 @@ impl Fixture {
     fn methods(&self, offset: u64, state_to_pin: u64) {
         let at = |n| self.base + Duration::from_nanos(offset + n);
         self.store
-            .observe(Phase::StoreMatchesState, at(0), at(1), false, 0);
+            .observe(Phase::StoreCheckpointState, at(0), at(1), false, 0);
         self.snapshots.observe(
             Phase::SnapshotPin,
             at(1 + state_to_pin),
@@ -143,9 +143,11 @@ fn missing_prefix_extra_calls_or_failed_methods_cannot_certify_a_successful_help
         let before = fixture.before();
         fixture.methods(0, 7);
         if fault == 1 {
-            let _ = fixture.store.record(Phase::StoreMatchesState, 1, false, 0);
+            let _ = fixture
+                .store
+                .record(Phase::StoreCheckpointState, 1, false, 0);
         } else if fault == 2 {
-            let cell = &fixture.store.intervals[Phase::StoreMatchesState as usize];
+            let cell = &fixture.store.intervals[Phase::StoreCheckpointState as usize];
             cell.set(Interval {
                 failures: 1,
                 ..cell.get()
@@ -201,12 +203,12 @@ fn disabled_mode_ignores_poisoned_marks_counters_and_missing_clock_inputs() {
             ..Interval::default()
         });
     }
-    store.intervals[Phase::StoreMatchesState as usize].set(Interval {
+    store.intervals[Phase::StoreCheckpointState as usize].set(Interval {
         calls: u64::MAX,
         ..Interval::default()
     });
     actor.finish_compact_gaps(None, &store, &snapshots, false);
-    store.finish(Phase::StoreMatchesState, None, true, usize::MAX);
+    store.finish(Phase::StoreCheckpointState, None, true, usize::MAX);
     assert!(Recorder::<false>::start().is_none());
     assert!(actor.report(0, &store, &snapshots).unwrap().is_none());
     assert!(actor

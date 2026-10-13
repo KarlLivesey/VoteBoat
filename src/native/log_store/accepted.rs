@@ -362,11 +362,14 @@ impl Accepted {
     pub(super) fn promote(
         &mut self,
         durable: &mut BTreeMap<GroupIdentity, GroupLog>,
+        comparisons: &mut BTreeMap<GroupIdentity, CheckpointComparison>,
     ) -> Result<(), StorageError> {
         self.check_promotion(durable)?;
         for (group, overlay) in std::mem::take(&mut self.overlays) {
             let summary = match overlay {
                 Overlay::Full(full) => {
+                    // Unclassified/replacing history never transfers old equality proof.
+                    comparisons.remove(&group);
                     durable.insert(group, full.state);
                     full.summary
                 }
@@ -377,6 +380,12 @@ impl Accepted {
                     plain.metadata.install_header(state);
                     if LogMetadata::from_log(state) != plain.metadata {
                         return Err(StorageError::Rejected("promoted log metadata mismatch"));
+                    }
+                    // Plain provenance certifies only append/metadata and exact
+                    // matching-prefix trims, including their combined accepted chain.
+                    // No staged transition advances the durable verified interval.
+                    if let Some(comparison) = comparisons.get_mut(&group) {
+                        comparison.preserve(state);
                     }
                     plain.summary
                 }

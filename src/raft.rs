@@ -322,6 +322,7 @@ pub struct Raft {
     batch_limits: BatchLimits,
     batch_limits_locked: bool,
     durable: GroupLog,
+    checkpoint_lineage: CheckpointLineage,
     log_summary: LogSummary,
     membership: Membership,
     role: Role,
@@ -447,6 +448,7 @@ impl Raft {
             batch_limits_locked: false,
             log_summary: LogSummary::from_validated(&state),
             durable: state,
+            checkpoint_lineage: CheckpointLineage::new(),
             membership,
             role: Role::Follower,
             campaigning_enabled: true,
@@ -623,6 +625,11 @@ impl Raft {
     pub fn state(&self) -> &GroupLog {
         &self.durable
     }
+    /// Immutable checkpoint comparison input from this exact canonical owner.
+    /// Recovered or rewritten owners never share a prior comparison lineage.
+    pub fn checkpoint_log(&self) -> CheckpointLog<'_> {
+        CheckpointLog::new(&self.durable, &self.checkpoint_lineage)
+    }
     /// Latest accepted-log predicate. Pending accepted state can precede its
     /// durable WAL completion; this value is never a durability receipt.
     /// The core processes no other events while that dependency is pending.
@@ -792,6 +799,7 @@ impl Raft {
         &self.durable.entries[..(self.durable.commit_index - self.durable.base_index()) as usize]
     }
     pub fn storage_failed(&mut self) {
+        self.checkpoint_lineage = CheckpointLineage::new();
         self.clear_replication_requests();
         self.transfer = None;
         self.leader_contact = None;
@@ -1105,6 +1113,7 @@ impl Raft {
             .membership
             .as_ref()
             .is_some_and(|membership| membership.id() != self.membership.id());
+        let preserves_checkpoint_prefix = p.next.preserves_checkpoint_prefix();
         self.log_summary = match p.next.install(&mut self.durable) {
             Ok(summary) => summary,
             Err(error) => {
@@ -1112,6 +1121,9 @@ impl Raft {
                 return Err(error.into());
             }
         };
+        if !preserves_checkpoint_prefix {
+            self.checkpoint_lineage = CheckpointLineage::new();
+        }
         if let Some(membership) = p.membership {
             self.membership = membership;
         }
@@ -1883,6 +1895,8 @@ pub fn persist_effect<S: LogStore>(
     result
 }
 
+#[cfg(test)]
+mod checkpoint_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;

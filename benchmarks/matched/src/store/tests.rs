@@ -83,7 +83,7 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() 
     )
     .unwrap();
     let phases = report["phases"].as_array().unwrap();
-    assert_eq!(phases.len(), 28);
+    assert_eq!(phases.len(), 29);
     let comparison = phases
         .iter()
         .find(|p| p["phase"] == "store_matches_state_exact_nested")
@@ -95,7 +95,7 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() 
         .as_array()
         .unwrap()
         .iter()
-        .all(|s| s["methods"].as_array().unwrap().len() == 14));
+        .all(|s| s["methods"].as_array().unwrap().len() == 15));
 }
 #[test]
 fn disabled_comparison_preserves_equality_without_touching_observer_cells() {
@@ -111,4 +111,90 @@ fn disabled_comparison_preserves_equality_without_touching_observer_cells() {
         .report(0, &store.attribution, &Recorder::default())
         .unwrap()
         .is_none());
+}
+
+#[test]
+fn protected_checkpoint_comparison_keeps_completed_gate_and_distinct_phase() {
+    let mut store = store::<true>();
+    let group = GroupIdentity {
+        id: GroupId::new(1).unwrap(),
+        incarnation: GroupIncarnation::new(1).unwrap(),
+    };
+    let core = voteboat::raft::Raft::recover(
+        NodeId::new(1).unwrap(),
+        store.binding(),
+        store.state(group).unwrap(),
+        store.limits(),
+    )
+    .unwrap();
+    assert_eq!(
+        store.matches_checkpoint_state(core.checkpoint_log()),
+        Ok(true)
+    );
+    assert_eq!(
+        store.matches_checkpoint_state(core.checkpoint_log()),
+        Ok(true)
+    );
+    let before = store.state(group).unwrap();
+    let tickets = store
+        .append_batch(vec![LogMutation::Update(LogUpdate {
+            group,
+            expected_revision: before.revision,
+            hard_state: voteboat::contracts::HardState {
+                term: 1,
+                voted_for: None,
+            },
+            commit_index: 0,
+            suffix: None,
+            snapshot: None,
+            snapshot_membership: None,
+        })])
+        .unwrap();
+    assert_eq!(
+        store.matches_checkpoint_state(core.checkpoint_log()),
+        Err(StorageError::Rejected("volatile transition not completed"))
+    );
+    let mut missing_state = before.clone();
+    missing_state.bootstrap.group.id = GroupId::new(99).unwrap();
+    let missing_core = voteboat::raft::Raft::recover(
+        NodeId::new(1).unwrap(),
+        store.binding(),
+        missing_state,
+        store.limits(),
+    )
+    .unwrap();
+    assert_eq!(
+        store.matches_checkpoint_state(missing_core.checkpoint_log()),
+        Err(StorageError::Rejected("volatile transition not completed"))
+    );
+    store.barrier(&tickets).unwrap();
+    assert_eq!(
+        store.matches_checkpoint_state(core.checkpoint_log()),
+        Ok(false)
+    );
+    assert_eq!(
+        store.matches_checkpoint_state(missing_core.checkpoint_log()),
+        Err(StorageError::Rejected("unknown group"))
+    );
+    let report = serde_json::to_value(
+        store
+            .attribution
+            .report(0, &store.attribution, &Recorder::default())
+            .unwrap()
+            .unwrap(),
+    )
+    .unwrap();
+    let phase = report["phases"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|p| p["phase"] == "store_checkpoint_state_protected_inclusive_nested")
+        .unwrap();
+    assert_eq!(phase["calls"], 6);
+    assert_eq!(phase["failures"], 3);
+    assert_eq!(phase["items"], 0);
+    assert!(report["item_units"]
+        .as_str()
+        .unwrap()
+        .contains("not_actual_compared_or_skipped_entries"));
 }

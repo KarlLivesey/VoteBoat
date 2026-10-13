@@ -21,8 +21,11 @@ use crate::{
 };
 use std::collections::BTreeMap;
 
+mod comparison;
 mod owned;
 pub(crate) mod transition;
+pub(crate) use comparison::CheckpointComparison;
+pub use comparison::{CheckpointLineage, CheckpointLog};
 pub use owned::OwnedLogState;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -286,6 +289,16 @@ pub trait LogStore {
         expected: &GroupLog,
     ) -> Result<bool, StorageError> {
         Ok(self.state(group)? == *expected)
+    }
+    /// Exact checkpoint comparison against a core-owned immutable mutation domain.
+    /// Optimized owners may retain bounded verified-prefix evidence; arbitrary
+    /// public `GroupLog` comparisons must still use `matches_state` in full.
+    /// Neither the view nor a successful match is durability or quorum evidence.
+    fn matches_checkpoint_state(
+        &mut self,
+        expected: CheckpointLog<'_>,
+    ) -> Result<bool, StorageError> {
+        self.matches_state(expected.group(), expected.state())
     }
     fn append_batch(&mut self, mutations: Vec<LogMutation>)
         -> Result<Vec<LogTicket>, StorageError>;

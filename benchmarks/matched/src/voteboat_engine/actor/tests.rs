@@ -166,6 +166,9 @@ fn checked_checkpoint_scopes<const TRACE: bool>() {
         return;
     }
     let value = serde_json::to_value(report.unwrap()).unwrap();
+    assert_checkpoint_report(&value);
+}
+fn assert_checkpoint_report(value: &serde_json::Value) {
     let gaps = value["checkpoint_compact_gaps"].as_array().unwrap();
     assert_eq!(gaps.len(), 3);
     for gap in gaps {
@@ -196,7 +199,11 @@ fn checked_checkpoint_scopes<const TRACE: bool>() {
             .unwrap()
     };
     assert_eq!(count("store_state_clone_nested"), 0);
-    assert_eq!(count("store_matches_state_exact_nested"), 2);
+    assert_eq!(count("store_matches_state_exact_nested"), 0);
+    assert_eq!(
+        count("store_checkpoint_state_protected_inclusive_nested"),
+        2
+    );
     assert_eq!(count("store_append_nested"), 2);
     assert_eq!(count("store_barrier_nested"), 2);
     assert_eq!(count("snapshot_pin_for_log_nested"), 2);

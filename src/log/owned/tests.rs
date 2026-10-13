@@ -14,6 +14,7 @@
 // rights and limitations under the RPL.
 //! Consensus log transitions and the host-replaceable storage contract.
 use super::*;
+mod checkpoint;
 mod compact;
 mod incoming;
 use crate::{
@@ -21,7 +22,7 @@ use crate::{
     quorum::{Limits, Tree},
 };
 
-fn setup() -> OwnedLogState {
+pub(in crate::log) fn setup() -> OwnedLogState {
     let node = NodeId::new(1).unwrap();
     let store = StoreIdentity {
         id: StoreId::new(1).unwrap(),

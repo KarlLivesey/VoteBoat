@@ -58,8 +58,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: protected-prefix checkpoint verification428 | Avoid rescanning exactly verified immutable retained entries, the largest measured Linux checkpoint interval | Terminal both-host426 pairs; sealed core view and both canonical owners' mutation provenance; [schema](../validation/performance/slice428-plan/SCHEMA.md) | Raw matches_state stays full Eq; every current header exact; all new entries exact; rewrites/recovery/default providers full fallback; certified compaction survivor transfer; full oracle/adversarial/error/native controls; zero strict profiles | P9.1/P9.3 |
-| Next: measure published protected-prefix implementation | Establish actual useful-rate/latency effect and next remaining cost | Complete checked428, immutable426 and fresh asserted published artifacts; identical within-host profiles/workload | Three rotating singleton/bulk diagnostic pairs on Linux/M2 Max; all originals/frontiers/skipped-versus-compared units, all slower trials; sustained20M/full seven-cell qualification remains distinct | P9.0/P9.1/P9.3 |
+| Current: review and publish checked protected-prefix428 | Avoid rescanning exactly verified immutable retained entries, the largest measured Linux checkpoint interval | [Isolated checked source/schema](../validation/performance/slice428/isolated/README.md), exact426 baseline; final review and complete source promotion pending | Match promoted production hashes, retain raw full Eq/default fallback and all exact oracle/native/error controls; enabled strict hook and metadata checker before publication; Mac qualification and release artifact proof remain explicit | P9.1/P9.3 |
+| Next: qualify and measure published protected-prefix implementation | Establish actual useful-rate/latency effect and remaining cost | Published428, immutable426 and fresh asserted artifacts including build.rs; Mac tests; identical within-host profiles/workload | Three rotating singleton/bulk diagnostic pairs on Linux/M2 Max; all originals/frontiers and actual comparison-work evidence, every regression; sampling/flamegraphs are separate diagnostics; sustained20M/full seven-cell qualification remains distinct | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize barriers and preserve cold-neighbor progress | Both native42136 campaigns, exact publication/ticket ownership, bounded fairness schema | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual shared/independent barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -77,8 +77,43 @@ exactly. Ordinary compaction increments storage generation, so proof must explic
 transfer to its surviving interval; invalidating every generation would retain
 all204 scans. Rewrite/install/rollback/unknown paths and fresh recovery invalidate.
 The marker is never a durability/quorum token, digest or metadata-only shortcut.
-Public raw GroupLog cannot manufacture it. Main remains production426 while this
-isolated API/ownership implementation proceeds.
+Public raw GroupLog cannot manufacture it. The isolated API/ownership implementation is checked and frozen, and its30 changed
+paths are now promoted to main with all1,424 selected input hashes matching.
+Publication through the enabled hook is pending; no428 performance gain is claimed.
+
+[Isolated428 evidence](../validation/performance/slice428/isolated/README.md)
+records1,424 selected inputs,30 changed paths and six new modules/build inputs.
+Covered all-feature library386/effect_owner203/log19/provider32/Raft79/snapshot27,
+core library306/effect_owner195/provider17/Raft29/snapshot12, real TCP/QUIC
+services2 and matched35 pass. Exact production hashes support reuse after two
+new fixture corrections and a matched fixture assertion extraction; this is not
+one repeated full-suite pass. The existing hundred-group transport control first
+exceeded its10s initial drive deadline, then passed the exact quiet rerun37.11s
+without source, limit or timeout changes. Every failure remains archived; no
+cause is asserted. Root fmt/four strict profiles and standalone fmt/strict are
+zero. A ledger-only correction retains valid tests/* integration anchors and
+separate Native/private/matched evidence, with metadata checker0.
+
+New build.rs enables the redundant full-Eq reference in Cargo nonrelease profiles
+and all unit tests; actual dev Cargo JSON/root rustc cfg proof is archived. The
+asserted release performance profile keeps normal assertions/overflow checks,
+but its actual oracle-gate/fresh artifact proof remains pending. Include build.rs
+in future source exports and artifact guards. No428 PUTS/s or latency gain has
+been measured; Mac qualification and main publication remain open.
+[Main promotion proof](../validation/performance/slice428/main/README.md) records
+matching source hashes, independent review and metadata checker0. Warmed-cache
+configured rollback/nonmatching snapshot histories were not explicitly run;
+generic Full reset and existing configured/snapshot histories do not establish
+those narrower cases.
+
+The user also requests actual samply sampling and flamegraphs for the current
+Linux comparison cost. Profile the immutable published426 executable with exact
+workload/artifact identity in a quiet window; preserve sampler startup failures,
+raw captures and flamegraph provenance. Restore any explicitly authorized
+transient host policy after recording. Sampling supports a cost hypothesis and
+cannot replace matched completed PUTS/s/p99, sustained capacity or the full
+performance acceptance. It is a diagnostic direction, not a new prerequisite for
+the checked source publication or a claim of CPU/allocator causality.
 
 The per-entry empty-byte427 experiment is [held unpromoted](../validation/performance/slice427-held/README.md),
 with fmt/compile/351 library passes and21 socket-permission failures recorded;

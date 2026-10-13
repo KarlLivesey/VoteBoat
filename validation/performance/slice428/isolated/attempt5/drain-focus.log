@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.08s
+     Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice428/checks/debug/deps/effect_owner-3b9732cae5c45d5b)
+
+running 1 test
+test native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 37.11s
+
