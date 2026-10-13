@@ -1,0 +1,16 @@
+{
+  "base_commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+  "changes": "cfg(test) per-actor pause acknowledgement plus awaiting leader acknowledgement before preload; release behavior unchanged",
+  "overlays": [
+    {
+      "path": "benchmarks/matched/src/voteboat_engine.rs",
+      "base_sha256": "09f2209a5dd7d43232d47b43111b736eba306291a1fd09616071ad56c93bdae7",
+      "overlay_sha256": "08c08fd19f748da5a6aa7a87ebef7eda6e62c302899828d98fe0bac3f1c12e41"
+    },
+    {
+      "path": "benchmarks/matched/src/voteboat_engine/actor.rs",
+      "base_sha256": "8ba4006fbbbf3ab1f331c3315755187f0fd7a5ad3d93d7ce12806eef393cec92",
+      "overlay_sha256": "fc366f47214310dc281f66ced6a2a647c422aa3d0d879ff11aa2844466447713"
+    }
+  ]
+}

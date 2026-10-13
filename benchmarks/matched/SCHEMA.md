@@ -71,13 +71,22 @@ guards per host. They expose a high-concurrency gap and remain diagnostic. Their
 64/64 VoteBoat baseline source and executables are immutable; the new startup
 batch-limits harness slice has separate qualification evidence.
 
-Startup-limit candidate evidence: seven Linux tests, standalone fmt and strict
+Startup-limit candidate evidence: eight Linux tests, standalone fmt and strict
 all-target Clippy pass. Four separate 1-client/16-server-runtime controls complete
 16384 originals in4096 requests per engine/profile, with all frontiers17409.
 VoteBoat's observed original proposal width reaches4096 in the primary profile
 and64 in Common64; histogram totals include exactly17408 originals with warmup.
 New Mac checks and candidate performance remain pending. Raw checks are separate
 under validation/performance/slice414-harness.
+
+Fixture correction evidence: Mac's initial wide-ready assertion failed because
+live peer-priority scheduling does not guarantee a minimum width. A per-leader
+observed-pause acknowledgement makes preloading explicit, but the live3-voter
+test promises exact receipts/frontiers and the configured upper bound. A separate
+fully preloaded single-voter actor/Core/store test guarantees exact4096/64 widths
+without concurrent peer delivery. Both failed Mac attempts are preserved. Final
+Linux8-test/fmt/strict controls use immutable306b26b production plus the explicit
+cfg(test) overlay; candidate release behavior remains unchanged.
 
 Linked mini plan: current—qualify effective startup batch limits and original-width
 diagnostics (depends on public Core startup API; every original result, wide-ready

@@ -5,6 +5,9 @@ use crate::Maintenance;
 use std::{collections::VecDeque, mem::size_of, time::Instant};
 use voteboat::{application::StateMachine, snapshot::*};
 
+#[cfg(test)]
+mod tests;
+
 pub(super) struct Parts {
     pub slot: usize,
     pub core: Raft,
@@ -21,6 +24,8 @@ pub(super) struct Parts {
     pub paused: Arc<[AtomicBool; 3]>,
     #[cfg(test)]
     pub paused_proposals: Arc<AtomicBool>,
+    #[cfg(test)]
+    pub proposals_pause_observed: Arc<[AtomicBool; 3]>,
     pub frontiers: Arc<[AtomicU64; 3]>,
     pub settings: Settings,
 }
@@ -94,7 +99,9 @@ impl Actor {
     fn accepts_proposals(&self) -> bool {
         #[cfg(test)]
         {
-            !self.parts.paused_proposals.load(Ordering::Acquire)
+            let paused = self.parts.paused_proposals.load(Ordering::Acquire);
+            self.parts.proposals_pause_observed[self.parts.slot].store(paused, Ordering::Release);
+            !paused
         }
         #[cfg(not(test))]
         {

@@ -38,6 +38,8 @@ pub(super) struct Cluster {
     paused: Arc<[AtomicBool; 3]>,
     #[cfg(test)]
     paused_proposals: Arc<AtomicBool>,
+    #[cfg(test)]
+    proposals_pause_observed: Arc<[AtomicBool; 3]>,
 }
 impl Drop for Cluster {
     fn drop(&mut self) {
@@ -68,6 +70,8 @@ impl Cluster {
         let paused = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
         #[cfg(test)]
         let paused_proposals = Arc::new(AtomicBool::new(false));
+        #[cfg(test)]
+        let proposals_pause_observed = Arc::new(std::array::from_fn(|_| AtomicBool::new(false)));
         let batch_limits = settings.envelopes.voteboat_limits();
         let mut parts = Vec::new();
         for (slot, (receiver, peer_receiver)) in
@@ -104,6 +108,8 @@ impl Cluster {
                 paused: paused.clone(),
                 #[cfg(test)]
                 paused_proposals: paused_proposals.clone(),
+                #[cfg(test)]
+                proposals_pause_observed: proposals_pause_observed.clone(),
             });
         }
         // Validate all fallible replica construction before starting any actor.
@@ -123,6 +129,8 @@ impl Cluster {
             paused,
             #[cfg(test)]
             paused_proposals,
+            #[cfg(test)]
+            proposals_pause_observed,
         };
         cluster.wait_frontier(1).await?;
         Ok(cluster)
@@ -266,7 +274,7 @@ mod tests {
         waits
     }
     #[tokio::test(flavor = "multi_thread", worker_threads = 16)]
-    async fn ready_original_batches_use_the_configured_bound_and_keep_every_receipt() {
+    async fn queued_three_voter_originals_keep_every_receipt_and_respect_the_bound() {
         for envelopes in [
             crate::Envelopes::UpstreamDefault,
             crate::Envelopes::Common64,
@@ -284,6 +292,13 @@ mod tests {
             .unwrap();
             let mut cluster = Cluster::new(settings).await.unwrap();
             cluster.paused_proposals.store(true, Ordering::Release);
+            tokio::time::timeout(Duration::from_secs(10), async {
+                while !cluster.proposals_pause_observed[0].load(Ordering::Acquire) {
+                    tokio::time::sleep(Duration::from_millis(1)).await;
+                }
+            })
+            .await
+            .unwrap();
             let waits = preload_originals(&cluster);
             cluster.paused_proposals.store(false, Ordering::Release);
             let checked = tokio::time::timeout(Duration::from_secs(10), async {
@@ -300,10 +315,6 @@ mod tests {
             assert_eq!(leader["proposed_originals"], 4096);
             let width = leader["maximum_proposal_width"].as_u64().unwrap() as usize;
             assert!(width <= settings.envelopes.voteboat_limits().max_proposal_entries);
-            match envelopes {
-                crate::Envelopes::UpstreamDefault => assert!(width > 64),
-                crate::Envelopes::Common64 => assert!(width <= 64),
-            }
             for follower in &diagnostics[1..] {
                 let follower = serde_json::to_value(follower).unwrap();
                 assert_eq!(follower["proposed_originals"], 0);

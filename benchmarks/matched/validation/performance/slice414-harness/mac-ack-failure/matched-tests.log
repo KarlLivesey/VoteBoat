@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/tmp/voteboat-matched414-mac/source-qualified)
+   Compiling voteboat-matched-framework v0.1.0 (/tmp/voteboat-matched414-mac/source-qualified/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.75s
+     Running unittests src/main.rs (/tmp/voteboat-matched414-mac/target-checks/debug/deps/voteboat_matched_framework-887d6fabd128e668)
+
+running 7 tests
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+test voteboat_engine::tests::ready_original_batches_use_the_configured_bound_and_keep_every_receipt ... FAILED
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+
+failures:
+
+---- voteboat_engine::tests::ready_original_batches_use_the_configured_bound_and_keep_every_receipt stdout ----
+
+thread 'voteboat_engine::tests::ready_original_batches_use_the_configured_bound_and_keep_every_receipt' (24175229) panicked at src/voteboat_engine.rs:319:54:
+assertion failed: width > 64
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    voteboat_engine::tests::ready_original_batches_use_the_configured_bound_and_keep_every_receipt
+
+test result: FAILED. 6 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.02s
+
+error: test failed, to rerun pass `--bin voteboat-matched-framework`

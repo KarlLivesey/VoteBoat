@@ -1,0 +1,54 @@
+{
+  "commit": "306b26bd8fc94426dc33fa19ada6203b273dd17f",
+  "source_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source",
+  "source_manifest": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source.sha256",
+  "source_manifest_sha256": "f15719987d90663e6ac5ee9215a5bba73dcddee6f938b46af8285205b02d09ef",
+  "source_guard": "before_build_manifest_after_build_verification_passed",
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+  "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+  "host": "Linux core-karl 7.2.9-2-cachyos #1 SMP PREEMPT_DYNAMIC Thu, 08 Oct 2026 15:06:16 +0000 x86_64 GNU/Linux",
+  "compiler_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source/benchmarks/matched/Cargo.toml",
+    "target": {
+      "kind": [
+        "bin"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "voteboat-matched-framework",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source/benchmarks/matched/src/main.rs",
+      "edition": "2021",
+      "doc": true,
+      "doctest": false,
+      "test": true
+    },
+    "profile": {
+      "opt_level": "3",
+      "debuginfo": 2,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/target-harness/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/target-harness/release/voteboat-matched-framework.dwp"
+    ],
+    "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/target-harness/release/voteboat-matched-framework",
+    "fresh": false
+  },
+  "artifact_sha256": "334b2aaec04cf14877af756710b17ddaf405ba8497dab5da76d57de4ef44e79f",
+  "artifact_bytes": 11486216,
+  "lock_sha256": "e046ca2e60f1da749c7dec66c2c5e0a8b978b10b53863d61ddf50f2b06e1684d",
+  "flags": {
+    "opt_level": 3,
+    "debug_assertions": true,
+    "overflow_checks": true,
+    "lto": "thin",
+    "codegen_units": 1
+  },
+  "comparison": "matched_candidate_unmeasured"
+}

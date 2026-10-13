@@ -22,6 +22,18 @@ four-entry client requests.
 
 Raw compiler/check logs, CLI outputs and exact qualification metadata are under
 `linux`. These are functional debug controls; their rates establish no performance
-claim. The independent frozen baseline artifacts remain unchanged. Candidate
-macOS qualification, asserted-release builds and coordinated performance
-comparison remain pending.
+claim. The independent frozen baseline artifacts remain unchanged. Linux asserted
+release and short paired results are recorded in PAIRED-LINUX.md. New macOS
+qualification and full capacity qualification remain pending.
+
+Final fixture qualification passes eight Linux tests, formatting and strict
+all-target Clippy on immutable306b26b production plus the recorded test-only
+overlay. The three-voter test verifies exact original receipts/frontiers and an
+upper capacity bound. A separate fully preloaded single-voter actor/Core/store
+control guarantees exact4096/64 original widths. The initial Mac fixture and its
+pause-ack-only revision both failed the scheduler-dependent minimum-width
+assertion; raw failures remain under `mac-initial-failure` and `mac-ack-failure`.
+The final fixture waits for the leader's observed pause before live queue preload.
+No release behavior or measured executable was changed by the test-only fix.
+Final raw Linux checks and precise overlay/source hashes are in
+`fixture-final-linux`. New Mac qualification remains pending.

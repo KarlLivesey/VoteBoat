@@ -2,6 +2,13 @@
 
 ## Active P9 plan — 13 October 2026
 
+Latest user requirement: pass OpenRaft with a healthy margin. The working
+acceptance target is sustained1.5x the larger of each published floor or matched
+upstream rate on each supported host, keeping the full curve and existing
+durability/features/security contracts. Batch4/4096 therefore requires at least
+8422500 completed writes/s. [Full margin curve](P9.md). This strengthens the
+active P9 goal; it neither closes P9 nor replaces real durable service acceptance.
+
 The user explicitly requests M2 Max benchmarks alongside Linux. The409 campaign
 is now measured on both hosts:96 valid Mac cases, independent release builds and
 exact source/artifact guards. Framework median ratios1.83–2.00x; native append
@@ -105,6 +112,21 @@ repair inspection; the historical repair regression covers1/64/1024 settings.
 The standalone harness passes7 controls and both-engine/profile original-result
 CLI checks, observes primary4096/Common64 widths and retains upstream defaults.
 Mac qualification and independent paired throughput measurements remain pending.
+
+The first414 Linux paired campaign now passes18/18 exact cases and immutable
+source/artifact guards. Singleton102517→110349 writes/s (+7.64%);4096/batch4
+752128→845112/s (+12.36%), versus untouched upstream3300898/s. Request p99 moves
+19.086→18.134µs and26.842→24.087ms. Actual width4096 is observed, but this short
+rate is only about10% of the strengthened8422500/s acceptance bar.
+[Exact paired evidence](../benchmarks/matched/validation/performance/slice414-harness/PAIRED-LINUX.md).
+Two Mac fixture failures exposed scheduling assumptions, rather than missing
+original results: observing a pause is necessary but queued peer progress can
+still limit a real three-voter batch. The corrected eight-control fixture keeps
+real three-voter results/bounds and verifies collection deterministically through
+an actual preloaded single-voter actor; release behavior is unchanged. Both failed
+attempts and exact cfg(test) overlays are retained. Mac final qualification runs
+against frozen306b production plus the test-only overlay; native code remains
+exact306b, and current415 work is separate.
 
 The user now authorizes P9 planning and implementation. The earlier P8 stop
 boundary below is historical; P10 and Windows remain deferred. No performance

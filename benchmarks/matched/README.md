@@ -2,7 +2,7 @@
 
 Standalone benchmark workspace; comparison dependencies stay outside VoteBoat
 production. The frozen baseline passed Linux/macOS scoped checks and short
-primary diagnostics. The startup batch-limits update passes seven Linux tests,
+primary diagnostics. The startup batch-limits update passes eight Linux tests,
 formatting, strict all-target Clippy and four actual client/server runtime controls.
 New macOS qualification remains pending.
 These controls establish no sustained capacity or minimum-floor win.

@@ -1,0 +1,17 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source-final)
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts414/linux/source-final/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 10.42s
+     Running unittests src/main.rs (target/p9/matched-artifacts414/linux/target-checks/debug/deps/voteboat_matched_framework-a126888ee46e676f)
+
+running 8 tests
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test voteboat_engine::actor::tests::preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.88s
+
