@@ -190,8 +190,11 @@ impl Cluster {
         self.stopping.store(true, Ordering::Release);
         let _ = self.stop.send(true);
         let mut first = None;
-        for actor in self.actors.drain(..) {
-            match actor.await.map_err(Failure::from).and_then(|r| r) {
+        while let Some(actor) = self.actors.first_mut() {
+            // A canceled cleanup must leave each unfinished handle owned for Drop.
+            let joined = actor.await.map_err(Failure::from).and_then(|r| r);
+            self.actors.remove(0);
+            match joined {
                 Ok(Some(attribution)) => self.attribution.push(attribution),
                 Ok(None) => {}
                 Err(error) => {
@@ -303,6 +306,7 @@ mod tests {
                 maintenance: crate::Maintenance::DefaultRetention,
                 envelopes,
                 attribution,
+                campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
             }
             .validate()
             .unwrap();
@@ -357,6 +361,7 @@ mod tests {
                 maintenance: crate::Maintenance::DefaultRetention,
                 envelopes: crate::Envelopes::UpstreamDefault,
                 attribution,
+                campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
             }
             .validate()
             .unwrap();
@@ -396,5 +401,66 @@ mod tests {
                 assert!(helpers["calls"].as_u64().unwrap() >= installed as u64);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod cancellation_tests {
+    use super::*;
+    struct Released(Option<oneshot::Sender<()>>);
+    impl Drop for Released {
+        fn drop(&mut self) {
+            if let Some(sender) = self.0.take() {
+                let _ = sender.send(());
+            }
+        }
+    }
+    #[tokio::test]
+    async fn canceled_cluster_shutdown_keeps_handles_owned_and_drop_aborts_every_actor() {
+        let (_, settings) = Settings::parse_from(
+            ["--clients", "1", "--operations", "4", "--warmup", "0"]
+                .into_iter()
+                .map(String::from),
+        )
+        .unwrap();
+        let mut cluster = Cluster::new(settings).await.unwrap();
+        cluster.shutdown().await.unwrap();
+        assert!(cluster.actors.is_empty());
+        // Refill the same actual Cluster owner with three controlled stalled actors.
+        // Normal Raft shutdown has finished; no protocol task is detached by this fixture.
+        let mut releases = Vec::new();
+        for _ in 0..3 {
+            let (started, observed) = oneshot::channel();
+            let (released, release_observed) = oneshot::channel();
+            cluster.actors.push(tokio::spawn(async move {
+                let _owned = Released(Some(released));
+                started.send(()).unwrap();
+                std::future::pending::<Result<Option<Attribution>, Failure>>().await
+            }));
+            observed.await.unwrap();
+            releases.push(release_observed);
+        }
+        let ids: Vec<_> = cluster.actors.iter().map(JoinHandle::id).collect();
+        let cleanup = crate::guard::bounded("cleanup", Duration::ZERO, cluster.shutdown()).await;
+        assert!(cleanup.is_err());
+        assert_eq!(
+            cluster
+                .actors
+                .iter()
+                .map(JoinHandle::id)
+                .collect::<Vec<_>>(),
+            ids
+        );
+        assert!(cluster.actors.iter().all(|actor| !actor.is_finished()));
+        assert!(crate::guard::finish(Ok(()), cleanup).is_err());
+        drop(cluster);
+        crate::guard::bounded("release observation", Duration::from_secs(1), async {
+            for released in releases {
+                released.await?;
+            }
+            Ok(())
+        })
+        .await
+        .unwrap();
     }
 }

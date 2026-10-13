@@ -36,13 +36,19 @@ formatter/four-strict/standalone hook pass, with19 exact source guards before/af
 [Combined qualification](../validation/performance/slice423/combined/README.md).
 Mac qualification and fresh release timings for this combined source remain open.
 
-The next measurement-correctness slice aligns latency aggregation outside the
-throughput clock and replaces the insufficient400s campaign guard with a finite
-common budget. A full20M slow singleton cannot fit400s. The untouched upstream
-artifact remains separate; any guard-extended reference driver will have its exact
-patch and identity disclosed. Then measure finer maintenance scopes and actual
-native quantum capacity before selecting the next algorithm or pipeline change.
-[Provider/timing audit](../benchmarks/matched/validation/performance/provider-parity-audit/REPORT.md).
+Measurement-correctness424 is now reviewed and qualified on main: throughput
+ends after all client joins before latency flattening/sorting, budgets are finite
+and recorded, and canceled cleanup retains unfinished actor handles for Drop.
+All25 controls, actual original/frontier CLI cases and full strict hook pass.
+[Exact424 qualification](../benchmarks/matched/validation/performance/slice424-campaign/main/README.md).
+The separately named pinned-engine guard-extended reference changes only400→3600
+and passes fresh asserted source/library/driver proof plus small functional controls.
+The original untouched driver remains the published-source anchor.
+[Reference provenance](../validation/performance/upstream-guard424/README.md).
+Native421's same-source/same-artifact16/32/64 comparisons have fresh native Linux
+and Mac artifacts; actual widths, PUTS/s, p99 and physical barriers still need
+measurement. Mac422/423 checks run against frozen82bce5f, separate from424.
+P9's full sustained healthy-margin and real durable acceptance remain open.
 
 Mac418 paired primary18 and diagnostic9 are terminal with exact originals,
 frontiers, policies and source/library/executable guards. Bulk primary medians rise

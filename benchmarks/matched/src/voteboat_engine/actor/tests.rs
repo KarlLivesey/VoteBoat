@@ -23,6 +23,7 @@ fn ready_actor<const TRACE: bool>(
         maintenance: Maintenance::DefaultRetention,
         envelopes,
         attribution: TRACE,
+        campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
     }
     .log_limits()
     .unwrap();
@@ -39,6 +40,7 @@ fn ready_actor<const TRACE: bool>(
         maintenance: Maintenance::DefaultRetention,
         envelopes,
         attribution: TRACE,
+        campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
     }
     .validate()
     .unwrap();

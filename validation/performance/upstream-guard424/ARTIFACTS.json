@@ -1,0 +1,90 @@
+[
+  {
+    "target": "openraft",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/deps/libopenraft-45f0294de532eceb.rlib",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/artifacts/libopenraft-45f0294de532eceb.rlib",
+    "sha256": "f15905869a9507891e06e8db2891d83d93a7d480d0db74aa957c7e00834858ab",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-upstream-guard424-source/openraft#0.10.0-alpha.37",
+      "manifest_path": "/tmp/voteboat-upstream-guard424-source/openraft/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "openraft",
+        "src_path": "/tmp/voteboat-upstream-guard424-source/openraft/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "clap",
+        "default",
+        "runtime-stats",
+        "serde",
+        "tokio-rt",
+        "type-alias"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/deps/libopenraft-45f0294de532eceb.rlib",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/deps/libopenraft-45f0294de532eceb.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "target": "bench",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/bench",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/artifacts/openraft-guard-extended-bench",
+    "sha256": "a5505107e93f05bbe330764bab1dbe8c0a6b52e892281f7296132e8d98266b1e",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-upstream-guard424-source/benchmarks/minimal#bench-minimal@0.1.0",
+      "manifest_path": "/tmp/voteboat-upstream-guard424-source/benchmarks/minimal/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "bench",
+        "src_path": "/tmp/voteboat-upstream-guard424-source/benchmarks/minimal/src/bin/bench.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/bench",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/bench.dwp"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/target-release/release/bench",
+      "fresh": false
+    }
+  }
+]

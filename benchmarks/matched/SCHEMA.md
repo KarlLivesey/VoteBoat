@@ -127,3 +127,15 @@ subtracted. No timing epoch or per-entry trace is introduced. Default false mode
 performs no observer clock, cell or snapshot reads. Invalid observations defer
 failure until successful owned shutdown; original provider/helper errors retain
 precedence. The unknown helper residual remains unattributed, not pure Core.
+
+Campaign/cleanup guards use existing Tokio timeout without new features. Settings
+validates and reports campaign_timeout_secs (default3600, range1..7200); the report
+also records cleanup_timeout_secs=30 and the client-completion timing boundary.
+All client joins finish before elapsed is captured; owned sample vectors are then
+flattened and validated with exact original/request counts. Timeout drops the
+workload JoinSet, then main always attempts bounded owner cleanup. VB shutdown
+keeps unfinished JoinHandles in Cluster until each await completes, preserving
+slot order; canceled cleanup leaves them owned for Drop to abort. Both failures
+retain the campaign as the primary Error source. These are real bounded Tokio
+deadlines, not a paused clock. Setup checks and untouched upstream remain unchanged;
+external process teardown still needs a finite runner watchdog.

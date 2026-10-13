@@ -1,0 +1,78 @@
+[
+  {
+    "case": "vb-default-off",
+    "exit": 0,
+    "completed_originals": 12000,
+    "completed_requests": 3000,
+    "frontiers": [
+      12001,
+      12001,
+      12001
+    ],
+    "campaign_budget_seconds": 3600
+  },
+  {
+    "case": "vb-max-on",
+    "exit": 0,
+    "completed_originals": 12000,
+    "completed_requests": 3000,
+    "frontiers": [
+      12001,
+      12001,
+      12001
+    ],
+    "campaign_budget_seconds": 7200
+  },
+  {
+    "case": "openraft-max",
+    "exit": 0,
+    "completed_originals": 12000,
+    "completed_requests": 3000,
+    "frontiers": [
+      12001,
+      12001,
+      12001
+    ],
+    "campaign_budget_seconds": 7200
+  },
+  {
+    "case": "openraft-default",
+    "exit": 0,
+    "completed_originals": 128,
+    "completed_requests": 128,
+    "frontiers": [
+      133,
+      133,
+      133
+    ],
+    "campaign_budget_seconds": 3600
+  },
+  {
+    "case": "vb-min",
+    "exit": 0,
+    "completed_originals": 128,
+    "completed_requests": 128,
+    "frontiers": [
+      133,
+      133,
+      133
+    ],
+    "campaign_budget_seconds": 1
+  },
+  {
+    "case": "invalid-zero",
+    "exit": 1,
+    "completed_originals": null,
+    "completed_requests": null,
+    "frontiers": null,
+    "campaign_budget_seconds": null
+  },
+  {
+    "case": "invalid-over",
+    "exit": 1,
+    "completed_originals": null,
+    "completed_requests": null,
+    "frontiers": null,
+    "campaign_budget_seconds": null
+  }
+]

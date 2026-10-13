@@ -1,0 +1,49 @@
+{
+  "qualified_base_commit": "82bce5fd1808c73b1c5ea610bd01e2f56ef6a128",
+  "historical_capture_head": "1091610a1d348a473e491c54834ae2fe341da419",
+  "base_input_count": 1404,
+  "base_scope": "source/config/docs/tests/examples; all1404 matched82Git blobs, not all necessarily compiled",
+  "changes": {
+    "benchmarks/matched/README.md": {
+      "before": "d5a4e461676182fe4ef9c7089bc0dbe7a0d6daa8be5f8fa015a09bbbb7df29b1",
+      "after": "2e27ea1f2e35c780e141820b7e7ef0421307c33a44755db624c381fbb06fc91f"
+    },
+    "benchmarks/matched/SCHEMA.md": {
+      "before": "ff9cf779f17e99f5aeb7f72abf15fba5edd294dc189713ab0664bab6793a6175",
+      "after": "aec48881c1fbfd7604bfb05b31405eb72a0302f968dc646980ed6256953ff485"
+    },
+    "benchmarks/matched/src/envelopes/tests.rs": {
+      "before": "5f54e13e983b9b41955abdd5ec23bbdd8752f97d4bb7584017cdcd01df5dfa70",
+      "after": "1f1d9e60400cca4f94eb403e6ab9c0e05b59e2c9958ae888e36da961cf251907"
+    },
+    "benchmarks/matched/src/main.rs": {
+      "before": "11c9f50cdb6f9e19ba58c9d90e572276e19f7e7382b6697498985741295afec5",
+      "after": "cee7b0541b84a69c06a1aafe6e8a1177d6ac37076aad89ce18d47437371e1544"
+    },
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs": {
+      "before": "1cab61f7abefb43563498d44400d76070031a3e57b7629bfadf6973e8be107d6",
+      "after": "d30ef24b874eedf1bd4a888d9064fe37ca314c6b4c4d6deea64e9a2f5d1a7dbe"
+    },
+    "benchmarks/matched/src/voteboat_engine.rs": {
+      "before": "eaa431a5f2f4ea328ccdb73638dedbe966a1ae49af1cf6739a227f55ea6d18b6",
+      "after": "9444a59b230ad07621fb3389ec41c304410a54ac9147f85624ef7359551a8e53"
+    },
+    "benchmarks/matched/src/workload.rs": {
+      "before": "b085b29547786b9ab756149f0fc4bc666663fd6e5bb69cfb93c4426e367d16a8",
+      "after": "6df8d72b8808f12d01fc916bdc01fb8d70c0259b8021cdac46c88b1ce4407344"
+    },
+    "benchmarks/matched/src/guard.rs": {
+      "before": null,
+      "after": "842eba1bf8b13d817d6fbc76c9e6722b4ac7358e2a13c32c0038277680a2395d"
+    },
+    "benchmarks/matched/src/guard/tests.rs": {
+      "before": null,
+      "after": "1fb2bf8ff4c2ea23cf167c73a60c045f397aef7e48ad4116b1995bdf75da3f9c"
+    }
+  },
+  "source_only_patch_sha256": "285c010b01d8023230f45079f8d7601ba8de7f820cbbf4a8f190ae3cae501aaa",
+  "validation": "25 tests; fmt and strict standalone all-target Clippy zero;5 successful actual CLI histories and2 expected parser failures",
+  "profile": "debug functional checks only; no asserted release/timed comparison/performance claim",
+  "upstream_changes": false,
+  "production_changes": false
+}

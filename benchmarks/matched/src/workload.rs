@@ -77,6 +77,8 @@ pub(super) struct Report {
     capacity_contract: crate::envelopes::CapacityContract,
     diagnostics: Option<Vec<voteboat_engine::Diagnostics>>,
     upstream_internal_queues: &'static str,
+    cleanup_timeout_secs: u64,
+    throughput_timing_scope: &'static str,
     completed_originals: usize,
     completed_requests: usize,
     seconds: f64,
@@ -139,17 +141,13 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
     }
     let now = Instant::now();
     start.wait().await;
-    let mut completed = 0;
-    let mut latencies = Vec::with_capacity(settings.operations / settings.batch);
+    let mut client_results = Vec::with_capacity(settings.clients);
     while let Some(result) = tasks.join_next().await {
-        let result = result??;
-        completed += result.originals;
-        latencies.extend(result.latencies);
+        client_results.push(result??);
     }
+    // Same completion boundary as the pinned driver: flatten/sort after elapsed.
     let seconds = now.elapsed().as_secs_f64();
-    if completed != settings.operations || latencies.len() != completed / settings.batch {
-        return Err("global original completion count differs".into());
-    }
+    let (completed, mut latencies) = aggregate(client_results, settings)?;
     let frontiers = cluster.verify(settings).await?;
     latencies.sort_unstable();
     let (engine, diagnostics, capacities) = match cluster {
@@ -183,12 +181,36 @@ pub(super) async fn run(cluster: &mut Cluster, settings: Settings) -> Result<Rep
             super::Maintenance::RetainAll => "snapshots_disabled_both_retain_whole_run",
         },
         diagnostics, upstream_internal_queues: "not_exposed_by_pinned_minimal_provider",
+        cleanup_timeout_secs: crate::guard::CLEANUP_TIMEOUT_SECS,
+        throughput_timing_scope: "ready_client_barrier_to_all_client_joins_excludes_warmup_latency_flatten_sort_follower_verification_and_shutdown",
         completed_originals: completed, completed_requests: latencies.len(), seconds,
         operations_per_second: completed as f64 / seconds,
         request_p50_ns: percentile(&latencies, 50), request_p99_ns: percentile(&latencies, 99),
         applied_frontiers: frontiers,
         attribution: None,
     })
+}
+fn aggregate(results: Vec<Completed>, settings: Settings) -> Result<(usize, Vec<u64>), Failure> {
+    if results.len() != settings.clients {
+        return Err("missing/extra completed client".into());
+    }
+    let mut completed = 0usize;
+    let mut latencies = Vec::with_capacity(settings.operations / settings.batch);
+    for result in results {
+        if result.originals != settings.operations / settings.clients
+            || result.latencies.len() != result.originals / settings.batch
+        {
+            return Err("client original/sample completion count differs".into());
+        }
+        completed = completed
+            .checked_add(result.originals)
+            .ok_or("original count overflow")?;
+        latencies.extend(result.latencies);
+    }
+    if completed != settings.operations || latencies.len() != completed / settings.batch {
+        return Err("global original completion count differs".into());
+    }
+    Ok((completed, latencies))
 }
 fn percentile(sorted: &[u64], percent: usize) -> u64 {
     let rank = (sorted.len() / 100) * percent + ((sorted.len() % 100) * percent).div_ceil(100);
@@ -208,13 +230,18 @@ mod tests {
             maintenance: crate::Maintenance::DefaultRetention,
             envelopes: crate::Envelopes::UpstreamDefault,
             attribution: false,
+            campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
         }
         .validate()
         .unwrap()
     }
     async fn checked_run(engine: &str, settings: Settings) -> Report {
         let mut cluster = Cluster::new(engine, settings).await.unwrap();
-        let result = tokio::time::timeout(crate::TIMEOUT, run(&mut cluster, settings)).await;
+        let result = tokio::time::timeout(
+            std::time::Duration::from_secs(settings.campaign_timeout_secs),
+            run(&mut cluster, settings),
+        )
+        .await;
         cluster.shutdown().await.unwrap();
         let mut report = result.unwrap().unwrap();
         report.attach_attribution(&cluster);
@@ -281,6 +308,7 @@ mod tests {
             "openraft",
             Settings {
                 attribution: true,
+                campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
                 ..settings(1, 128)
             }
         )
@@ -375,5 +403,58 @@ mod tests {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod aggregation_tests {
+    use super::*;
+    #[test]
+    fn post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts() {
+        let (_, mut settings) = Settings::parse_from(
+            [
+                "--clients",
+                "2",
+                "--batch",
+                "4",
+                "--operations",
+                "16",
+                "--warmup",
+                "0",
+            ]
+            .into_iter()
+            .map(String::from),
+        )
+        .unwrap();
+        let make = || {
+            vec![
+                Completed {
+                    originals: 8,
+                    latencies: vec![17, 9],
+                },
+                Completed {
+                    originals: 8,
+                    latencies: vec![21, 5],
+                },
+            ]
+        };
+        assert_eq!(
+            aggregate(make(), settings).unwrap(),
+            (16, vec![17, 9, 21, 5])
+        );
+        let mut missing = make();
+        missing.pop();
+        assert!(aggregate(missing, settings).is_err());
+        let mut malformed = make();
+        malformed[0].latencies.pop();
+        assert!(aggregate(malformed, settings).is_err());
+        let mut missing_original = make();
+        missing_original[0].originals = 4;
+        assert!(aggregate(missing_original, settings).is_err());
+        let mut excessive = make();
+        excessive[0].originals = usize::MAX;
+        assert!(aggregate(excessive, settings).is_err());
+        settings.operations = 15;
+        assert!(aggregate(make(), settings).is_err());
     }
 }

@@ -1,0 +1,1 @@
+["target/p9/campaign424/checks/debug/voteboat-matched-framework", "--engine", "openraft", "--clients", "8", "--batch", "1", "--operations", "128", "--warmup", "4"]

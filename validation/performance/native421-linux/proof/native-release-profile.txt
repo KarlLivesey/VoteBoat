@@ -1,0 +1,1 @@
+opt3 debug_assertions=true overflow_checks=true debuginfo=default0 lto=default codegen_units=default; framework overrides and rustflags/wrappers unset

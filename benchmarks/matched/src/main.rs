@@ -4,6 +4,7 @@
 mod application;
 mod attribution;
 mod envelopes;
+mod guard;
 mod openraft_engine;
 mod snapshots;
 mod store;
@@ -20,7 +21,7 @@ const CHANNEL_CAPACITY: usize = 65_536;
 const COMMON_ENTRY_BATCH_CAPACITY: usize = 64;
 const API_REQUEST_BATCH_CAPACITY: usize = 4096;
 const MAX_PROPOSAL_ENTRIES: usize = 16384;
-const TIMEOUT: Duration = Duration::from_secs(400);
+const DEFAULT_CAMPAIGN_TIMEOUT_SECS: u64 = 3600;
 
 #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -44,9 +45,13 @@ struct Settings {
     maintenance: Maintenance,
     envelopes: Envelopes,
     attribution: bool,
+    campaign_timeout_secs: u64,
 }
 impl Settings {
     fn parse() -> Result<(String, Self), Failure> {
+        Self::parse_from(env::args().skip(1))
+    }
+    fn parse_from(mut args: impl Iterator<Item = String>) -> Result<(String, Self), Failure> {
         let mut engine = String::from("voteboat");
         let mut settings = Self {
             clients: 4096,
@@ -57,12 +62,13 @@ impl Settings {
             maintenance: Maintenance::DefaultRetention,
             envelopes: Envelopes::UpstreamDefault,
             attribution: false,
+            campaign_timeout_secs: DEFAULT_CAMPAIGN_TIMEOUT_SECS,
         };
-        let mut args = env::args().skip(1);
         while let Some(name) = args.next() {
             let value = args.next().ok_or("every option requires a value")?;
             match name.as_str() {
                 "--engine" => engine = value,
+                "--campaign-timeout-secs" => settings.campaign_timeout_secs = value.parse()?,
                 "--attribution" => settings.attribution = value.parse()?,
                 "--clients" => settings.clients = value.parse()?,
                 "--batch" => settings.batch = value.parse()?,
@@ -100,6 +106,9 @@ impl Settings {
         if self.requested_operations > 20_000_000 || self.warmup > 65_536 {
             return Err("run exceeds declared operation/warmup budget".into());
         }
+        if !(1..=7200).contains(&self.campaign_timeout_secs) {
+            return Err("campaign timeout must be1..7200 seconds".into());
+        }
         let round = self
             .clients
             .checked_mul(self.batch)
@@ -134,12 +143,20 @@ fn main() -> Result<(), Failure> {
         .build()?;
     let mut cluster = server.block_on(workload::Cluster::new(&engine, settings))?;
     let result = clients.block_on(async {
-        tokio::time::timeout(TIMEOUT, workload::run(&mut cluster, settings)).await?
+        guard::bounded(
+            "campaign",
+            Duration::from_secs(settings.campaign_timeout_secs),
+            workload::run(&mut cluster, settings),
+        )
+        .await
     });
     // Cleanup runs for successful/failed/timeout campaigns alike.
-    let cleanup = server.block_on(cluster.shutdown());
-    let mut report = result?;
-    cleanup?;
+    let cleanup = server.block_on(guard::bounded(
+        "cleanup",
+        Duration::from_secs(guard::CLEANUP_TIMEOUT_SECS),
+        cluster.shutdown(),
+    ));
+    let mut report = guard::finish(result, cleanup)?;
     report.attach_attribution(&cluster);
     println!("{}", serde_json::to_string(&report)?);
     Ok(())
@@ -159,6 +176,7 @@ mod tests {
             maintenance: Maintenance::DefaultRetention,
             envelopes: Envelopes::UpstreamDefault,
             attribution: false,
+            campaign_timeout_secs: DEFAULT_CAMPAIGN_TIMEOUT_SECS,
         }
         .validate()
         .unwrap();
@@ -179,5 +197,29 @@ mod tests {
             retained.retained_budget(),
             retained.operations + retained.warmup + 2
         );
+    }
+}
+
+#[cfg(test)]
+mod budget_tests {
+    use super::*;
+    fn parse(arguments: &[&str]) -> Result<(String, Settings), Failure> {
+        Settings::parse_from(arguments.iter().map(|s| String::from(*s)))
+    }
+    #[test]
+    fn campaign_cli_default_and_finite_bounds_are_validated() {
+        let (_, defaults) = parse(&[]).unwrap();
+        assert_eq!(defaults.campaign_timeout_secs, 3600);
+        for seconds in ["1", "7200"] {
+            let (_, settings) = parse(&["--campaign-timeout-secs", seconds]).unwrap();
+            assert_eq!(
+                settings.campaign_timeout_secs,
+                seconds.parse::<u64>().unwrap()
+            );
+        }
+        for seconds in ["0", "7201", "18446744073709551615", "-1", "invalid"] {
+            assert!(parse(&["--campaign-timeout-secs", seconds]).is_err());
+        }
+        assert!(parse(&["--campaign-timeout-secs"]).is_err());
     }
 }

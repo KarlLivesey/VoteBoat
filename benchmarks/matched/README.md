@@ -82,3 +82,12 @@ Reconciliation includes its pinned-image load. Helper work outside these provide
 methods stays explicitly unattributed; these intervals are elapsed time, not CPU.
 Disabled mode reads no clocks or observer cells. Counter exhaustion preserves the
 provider outcome and invalidates only the final diagnostic report.
+
+The unified runner's finite campaign guard defaults to 3600 seconds; use
+`--campaign-timeout-secs 1..7200` to select a recorded budget for either engine.
+Owned cleanup has a separate 30-second guard. An incomplete or timed-out campaign
+is a failure, with its original cause retained alongside any cleanup failure.
+Throughput ends after all client joins, before latency-vector flattening/sorting
+and follower verification; every original result and sample is still checked.
+The untouched upstream driver keeps its own 400-second guard, so an outer watchdog
+cannot make its slow 20M singleton cell finish. That limitation remains explicit.

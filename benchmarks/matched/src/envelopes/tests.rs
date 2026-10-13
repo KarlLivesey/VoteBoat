@@ -11,6 +11,7 @@ fn settings(envelopes: Envelopes, batch: usize) -> Settings {
         maintenance: Maintenance::DefaultRetention,
         envelopes,
         attribution: false,
+        campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
     }
 }
 #[test]

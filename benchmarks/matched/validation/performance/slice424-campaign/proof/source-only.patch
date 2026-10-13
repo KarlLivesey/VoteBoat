@@ -1,0 +1,612 @@
+--- a/benchmarks/matched/README.md
++++ b/benchmarks/matched/README.md
+@@ -82,3 +82,12 @@
+ methods stays explicitly unattributed; these intervals are elapsed time, not CPU.
+ Disabled mode reads no clocks or observer cells. Counter exhaustion preserves the
+ provider outcome and invalidates only the final diagnostic report.
++
++The unified runner's finite campaign guard defaults to 3600 seconds; use
++`--campaign-timeout-secs 1..7200` to select a recorded budget for either engine.
++Owned cleanup has a separate 30-second guard. An incomplete or timed-out campaign
++is a failure, with its original cause retained alongside any cleanup failure.
++Throughput ends after all client joins, before latency-vector flattening/sorting
++and follower verification; every original result and sample is still checked.
++The untouched upstream driver keeps its own 400-second guard, so an outer watchdog
++cannot make its slow 20M singleton cell finish. That limitation remains explicit.
+--- a/benchmarks/matched/SCHEMA.md
++++ b/benchmarks/matched/SCHEMA.md
+@@ -127,3 +127,15 @@
+ performs no observer clock, cell or snapshot reads. Invalid observations defer
+ failure until successful owned shutdown; original provider/helper errors retain
+ precedence. The unknown helper residual remains unattributed, not pure Core.
++
++Campaign/cleanup guards use existing Tokio timeout without new features. Settings
++validates and reports campaign_timeout_secs (default3600, range1..7200); the report
++also records cleanup_timeout_secs=30 and the client-completion timing boundary.
++All client joins finish before elapsed is captured; owned sample vectors are then
++flattened and validated with exact original/request counts. Timeout drops the
++workload JoinSet, then main always attempts bounded owner cleanup. VB shutdown
++keeps unfinished JoinHandles in Cluster until each await completes, preserving
++slot order; canceled cleanup leaves them owned for Drop to abort. Both failures
++retain the campaign as the primary Error source. These are real bounded Tokio
++deadlines, not a paused clock. Setup checks and untouched upstream remain unchanged;
++external process teardown still needs a finite runner watchdog.
+--- a/benchmarks/matched/src/envelopes/tests.rs
++++ b/benchmarks/matched/src/envelopes/tests.rs
+@@ -11,6 +11,7 @@
+         maintenance: Maintenance::DefaultRetention,
+         envelopes,
+         attribution: false,
++        campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+     }
+ }
+ #[test]
+--- a/benchmarks/matched/src/main.rs
++++ b/benchmarks/matched/src/main.rs
+@@ -4,6 +4,7 @@
+ mod application;
+ mod attribution;
+ mod envelopes;
++mod guard;
+ mod openraft_engine;
+ mod snapshots;
+ mod store;
+@@ -20,7 +21,7 @@
+ const COMMON_ENTRY_BATCH_CAPACITY: usize = 64;
+ const API_REQUEST_BATCH_CAPACITY: usize = 4096;
+ const MAX_PROPOSAL_ENTRIES: usize = 16384;
+-const TIMEOUT: Duration = Duration::from_secs(400);
++const DEFAULT_CAMPAIGN_TIMEOUT_SECS: u64 = 3600;
+ 
+ #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
+ #[serde(rename_all = "snake_case")]
+@@ -44,9 +45,13 @@
+     maintenance: Maintenance,
+     envelopes: Envelopes,
+     attribution: bool,
++    campaign_timeout_secs: u64,
+ }
+ impl Settings {
+     fn parse() -> Result<(String, Self), Failure> {
++        Self::parse_from(env::args().skip(1))
++    }
++    fn parse_from(mut args: impl Iterator<Item = String>) -> Result<(String, Self), Failure> {
+         let mut engine = String::from("voteboat");
+         let mut settings = Self {
+             clients: 4096,
+@@ -57,12 +62,13 @@
+             maintenance: Maintenance::DefaultRetention,
+             envelopes: Envelopes::UpstreamDefault,
+             attribution: false,
++            campaign_timeout_secs: DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+         };
+-        let mut args = env::args().skip(1);
+         while let Some(name) = args.next() {
+             let value = args.next().ok_or("every option requires a value")?;
+             match name.as_str() {
+                 "--engine" => engine = value,
++                "--campaign-timeout-secs" => settings.campaign_timeout_secs = value.parse()?,
+                 "--attribution" => settings.attribution = value.parse()?,
+                 "--clients" => settings.clients = value.parse()?,
+                 "--batch" => settings.batch = value.parse()?,
+@@ -100,6 +106,9 @@
+         if self.requested_operations > 20_000_000 || self.warmup > 65_536 {
+             return Err("run exceeds declared operation/warmup budget".into());
+         }
++        if !(1..=7200).contains(&self.campaign_timeout_secs) {
++            return Err("campaign timeout must be1..7200 seconds".into());
++        }
+         let round = self
+             .clients
+             .checked_mul(self.batch)
+@@ -134,12 +143,20 @@
+         .build()?;
+     let mut cluster = server.block_on(workload::Cluster::new(&engine, settings))?;
+     let result = clients.block_on(async {
+-        tokio::time::timeout(TIMEOUT, workload::run(&mut cluster, settings)).await?
++        guard::bounded(
++            "campaign",
++            Duration::from_secs(settings.campaign_timeout_secs),
++            workload::run(&mut cluster, settings),
++        )
++        .await
+     });
+     // Cleanup runs for successful/failed/timeout campaigns alike.
+-    let cleanup = server.block_on(cluster.shutdown());
+-    let mut report = result?;
+-    cleanup?;
++    let cleanup = server.block_on(guard::bounded(
++        "cleanup",
++        Duration::from_secs(guard::CLEANUP_TIMEOUT_SECS),
++        cluster.shutdown(),
++    ));
++    let mut report = guard::finish(result, cleanup)?;
+     report.attach_attribution(&cluster);
+     println!("{}", serde_json::to_string(&report)?);
+     Ok(())
+@@ -159,6 +176,7 @@
+             maintenance: Maintenance::DefaultRetention,
+             envelopes: Envelopes::UpstreamDefault,
+             attribution: false,
++            campaign_timeout_secs: DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+         }
+         .validate()
+         .unwrap();
+@@ -181,3 +199,27 @@
+         );
+     }
+ }
++
++#[cfg(test)]
++mod budget_tests {
++    use super::*;
++    fn parse(arguments: &[&str]) -> Result<(String, Settings), Failure> {
++        Settings::parse_from(arguments.iter().map(|s| String::from(*s)))
++    }
++    #[test]
++    fn campaign_cli_default_and_finite_bounds_are_validated() {
++        let (_, defaults) = parse(&[]).unwrap();
++        assert_eq!(defaults.campaign_timeout_secs, 3600);
++        for seconds in ["1", "7200"] {
++            let (_, settings) = parse(&["--campaign-timeout-secs", seconds]).unwrap();
++            assert_eq!(
++                settings.campaign_timeout_secs,
++                seconds.parse::<u64>().unwrap()
++            );
++        }
++        for seconds in ["0", "7201", "18446744073709551615", "-1", "invalid"] {
++            assert!(parse(&["--campaign-timeout-secs", seconds]).is_err());
++        }
++        assert!(parse(&["--campaign-timeout-secs"]).is_err());
++    }
++}
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -23,6 +23,7 @@
+         maintenance: Maintenance::DefaultRetention,
+         envelopes,
+         attribution: TRACE,
++        campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+     }
+     .log_limits()
+     .unwrap();
+@@ -39,6 +40,7 @@
+         maintenance: Maintenance::DefaultRetention,
+         envelopes,
+         attribution: TRACE,
++        campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+     }
+     .validate()
+     .unwrap();
+--- a/benchmarks/matched/src/voteboat_engine.rs
++++ b/benchmarks/matched/src/voteboat_engine.rs
+@@ -190,8 +190,11 @@
+         self.stopping.store(true, Ordering::Release);
+         let _ = self.stop.send(true);
+         let mut first = None;
+-        for actor in self.actors.drain(..) {
+-            match actor.await.map_err(Failure::from).and_then(|r| r) {
++        while let Some(actor) = self.actors.first_mut() {
++            // A canceled cleanup must leave each unfinished handle owned for Drop.
++            let joined = actor.await.map_err(Failure::from).and_then(|r| r);
++            self.actors.remove(0);
++            match joined {
+                 Ok(Some(attribution)) => self.attribution.push(attribution),
+                 Ok(None) => {}
+                 Err(error) => {
+@@ -303,6 +306,7 @@
+                 maintenance: crate::Maintenance::DefaultRetention,
+                 envelopes,
+                 attribution,
++                campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+             }
+             .validate()
+             .unwrap();
+@@ -357,6 +361,7 @@
+                 maintenance: crate::Maintenance::DefaultRetention,
+                 envelopes: crate::Envelopes::UpstreamDefault,
+                 attribution,
++                campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+             }
+             .validate()
+             .unwrap();
+@@ -398,3 +403,64 @@
+         }
+     }
+ }
++
++#[cfg(test)]
++mod cancellation_tests {
++    use super::*;
++    struct Released(Option<oneshot::Sender<()>>);
++    impl Drop for Released {
++        fn drop(&mut self) {
++            if let Some(sender) = self.0.take() {
++                let _ = sender.send(());
++            }
++        }
++    }
++    #[tokio::test]
++    async fn canceled_cluster_shutdown_keeps_handles_owned_and_drop_aborts_every_actor() {
++        let (_, settings) = Settings::parse_from(
++            ["--clients", "1", "--operations", "4", "--warmup", "0"]
++                .into_iter()
++                .map(String::from),
++        )
++        .unwrap();
++        let mut cluster = Cluster::new(settings).await.unwrap();
++        cluster.shutdown().await.unwrap();
++        assert!(cluster.actors.is_empty());
++        // Refill the same actual Cluster owner with three controlled stalled actors.
++        // Normal Raft shutdown has finished; no protocol task is detached by this fixture.
++        let mut releases = Vec::new();
++        for _ in 0..3 {
++            let (started, observed) = oneshot::channel();
++            let (released, release_observed) = oneshot::channel();
++            cluster.actors.push(tokio::spawn(async move {
++                let _owned = Released(Some(released));
++                started.send(()).unwrap();
++                std::future::pending::<Result<Option<Attribution>, Failure>>().await
++            }));
++            observed.await.unwrap();
++            releases.push(release_observed);
++        }
++        let ids: Vec<_> = cluster.actors.iter().map(JoinHandle::id).collect();
++        let cleanup = crate::guard::bounded("cleanup", Duration::ZERO, cluster.shutdown()).await;
++        assert!(cleanup.is_err());
++        assert_eq!(
++            cluster
++                .actors
++                .iter()
++                .map(JoinHandle::id)
++                .collect::<Vec<_>>(),
++            ids
++        );
++        assert!(cluster.actors.iter().all(|actor| !actor.is_finished()));
++        assert!(crate::guard::finish(Ok(()), cleanup).is_err());
++        drop(cluster);
++        crate::guard::bounded("release observation", Duration::from_secs(1), async {
++            for released in releases {
++                released.await?;
++            }
++            Ok(())
++        })
++        .await
++        .unwrap();
++    }
++}
+--- a/benchmarks/matched/src/workload.rs
++++ b/benchmarks/matched/src/workload.rs
+@@ -77,6 +77,8 @@
+     capacity_contract: crate::envelopes::CapacityContract,
+     diagnostics: Option<Vec<voteboat_engine::Diagnostics>>,
+     upstream_internal_queues: &'static str,
++    cleanup_timeout_secs: u64,
++    throughput_timing_scope: &'static str,
+     completed_originals: usize,
+     completed_requests: usize,
+     seconds: f64,
+@@ -139,17 +141,13 @@
+     }
+     let now = Instant::now();
+     start.wait().await;
+-    let mut completed = 0;
+-    let mut latencies = Vec::with_capacity(settings.operations / settings.batch);
++    let mut client_results = Vec::with_capacity(settings.clients);
+     while let Some(result) = tasks.join_next().await {
+-        let result = result??;
+-        completed += result.originals;
+-        latencies.extend(result.latencies);
+-    }
++        client_results.push(result??);
++    }
++    // Same completion boundary as the pinned driver: flatten/sort after elapsed.
+     let seconds = now.elapsed().as_secs_f64();
+-    if completed != settings.operations || latencies.len() != completed / settings.batch {
+-        return Err("global original completion count differs".into());
+-    }
++    let (completed, mut latencies) = aggregate(client_results, settings)?;
+     let frontiers = cluster.verify(settings).await?;
+     latencies.sort_unstable();
+     let (engine, diagnostics, capacities) = match cluster {
+@@ -183,12 +181,36 @@
+             super::Maintenance::RetainAll => "snapshots_disabled_both_retain_whole_run",
+         },
+         diagnostics, upstream_internal_queues: "not_exposed_by_pinned_minimal_provider",
++        cleanup_timeout_secs: crate::guard::CLEANUP_TIMEOUT_SECS,
++        throughput_timing_scope: "ready_client_barrier_to_all_client_joins_excludes_warmup_latency_flatten_sort_follower_verification_and_shutdown",
+         completed_originals: completed, completed_requests: latencies.len(), seconds,
+         operations_per_second: completed as f64 / seconds,
+         request_p50_ns: percentile(&latencies, 50), request_p99_ns: percentile(&latencies, 99),
+         applied_frontiers: frontiers,
+         attribution: None,
+     })
++}
++fn aggregate(results: Vec<Completed>, settings: Settings) -> Result<(usize, Vec<u64>), Failure> {
++    if results.len() != settings.clients {
++        return Err("missing/extra completed client".into());
++    }
++    let mut completed = 0usize;
++    let mut latencies = Vec::with_capacity(settings.operations / settings.batch);
++    for result in results {
++        if result.originals != settings.operations / settings.clients
++            || result.latencies.len() != result.originals / settings.batch
++        {
++            return Err("client original/sample completion count differs".into());
++        }
++        completed = completed
++            .checked_add(result.originals)
++            .ok_or("original count overflow")?;
++        latencies.extend(result.latencies);
++    }
++    if completed != settings.operations || latencies.len() != completed / settings.batch {
++        return Err("global original completion count differs".into());
++    }
++    Ok((completed, latencies))
+ }
+ fn percentile(sorted: &[u64], percent: usize) -> u64 {
+     let rank = (sorted.len() / 100) * percent + ((sorted.len() % 100) * percent).div_ceil(100);
+@@ -208,13 +230,18 @@
+             maintenance: crate::Maintenance::DefaultRetention,
+             envelopes: crate::Envelopes::UpstreamDefault,
+             attribution: false,
++            campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+         }
+         .validate()
+         .unwrap()
+     }
+     async fn checked_run(engine: &str, settings: Settings) -> Report {
+         let mut cluster = Cluster::new(engine, settings).await.unwrap();
+-        let result = tokio::time::timeout(crate::TIMEOUT, run(&mut cluster, settings)).await;
++        let result = tokio::time::timeout(
++            std::time::Duration::from_secs(settings.campaign_timeout_secs),
++            run(&mut cluster, settings),
++        )
++        .await;
+         cluster.shutdown().await.unwrap();
+         let mut report = result.unwrap().unwrap();
+         report.attach_attribution(&cluster);
+@@ -281,6 +308,7 @@
+             "openraft",
+             Settings {
+                 attribution: true,
++                campaign_timeout_secs: crate::DEFAULT_CAMPAIGN_TIMEOUT_SECS,
+                 ..settings(1, 128)
+             }
+         )
+@@ -377,3 +405,56 @@
+         }
+     }
+ }
++
++#[cfg(test)]
++mod aggregation_tests {
++    use super::*;
++    #[test]
++    fn post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts() {
++        let (_, mut settings) = Settings::parse_from(
++            [
++                "--clients",
++                "2",
++                "--batch",
++                "4",
++                "--operations",
++                "16",
++                "--warmup",
++                "0",
++            ]
++            .into_iter()
++            .map(String::from),
++        )
++        .unwrap();
++        let make = || {
++            vec![
++                Completed {
++                    originals: 8,
++                    latencies: vec![17, 9],
++                },
++                Completed {
++                    originals: 8,
++                    latencies: vec![21, 5],
++                },
++            ]
++        };
++        assert_eq!(
++            aggregate(make(), settings).unwrap(),
++            (16, vec![17, 9, 21, 5])
++        );
++        let mut missing = make();
++        missing.pop();
++        assert!(aggregate(missing, settings).is_err());
++        let mut malformed = make();
++        malformed[0].latencies.pop();
++        assert!(aggregate(malformed, settings).is_err());
++        let mut missing_original = make();
++        missing_original[0].originals = 4;
++        assert!(aggregate(missing_original, settings).is_err());
++        let mut excessive = make();
++        excessive[0].originals = usize::MAX;
++        assert!(aggregate(excessive, settings).is_err());
++        settings.operations = 15;
++        assert!(aggregate(make(), settings).is_err());
++    }
++}
+--- /dev/null
++++ b/benchmarks/matched/src/guard.rs
+@@ -0,0 +1,76 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Finite measurement guards preserve owned cleanup and the first failure.
++use crate::Failure;
++use std::{error::Error, fmt, future::Future, time::Duration};
++
++pub(super) const CLEANUP_TIMEOUT_SECS: u64 = 30;
++
++pub(super) async fn bounded<T>(
++    phase: &'static str,
++    budget: Duration,
++    future: impl Future<Output = Result<T, Failure>>,
++) -> Result<T, Failure> {
++    tokio::time::timeout(budget, future)
++        .await
++        .map_err(|source| -> Failure {
++            Box::new(Expired {
++                phase,
++                budget,
++                source,
++            })
++        })?
++}
++#[derive(Debug)]
++struct Expired {
++    phase: &'static str,
++    budget: Duration,
++    source: tokio::time::error::Elapsed,
++}
++impl fmt::Display for Expired {
++    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++        write!(
++            f,
++            "{} timed out after {:?}; incomplete measurement",
++            self.phase, self.budget
++        )
++    }
++}
++impl Error for Expired {
++    fn source(&self) -> Option<&(dyn Error + 'static)> {
++        Some(&self.source)
++    }
++}
++#[derive(Debug)]
++struct BothFailed {
++    campaign: Failure,
++    cleanup: Failure,
++}
++impl fmt::Display for BothFailed {
++    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
++        write!(
++            f,
++            "campaign failed: {}; cleanup also failed: {}",
++            self.campaign, self.cleanup
++        )
++    }
++}
++impl Error for BothFailed {
++    fn source(&self) -> Option<&(dyn Error + 'static)> {
++        Some(self.campaign.as_ref())
++    }
++}
++/// Preserve the original error unchanged unless a second cleanup failure needs retention.
++pub(super) fn finish<T>(
++    campaign: Result<T, Failure>,
++    cleanup: Result<(), Failure>,
++) -> Result<T, Failure> {
++    match (campaign, cleanup) {
++        (Err(campaign), Err(cleanup)) => Err(Box::new(BothFailed { campaign, cleanup })),
++        (Err(campaign), Ok(())) => Err(campaign),
++        (Ok(_), Err(cleanup)) => Err(cleanup),
++        (Ok(value), Ok(())) => Ok(value),
++    }
++}
++#[cfg(test)]
++mod tests;
+--- /dev/null
++++ b/benchmarks/matched/src/guard/tests.rs
+@@ -0,0 +1,97 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use std::sync::{
++    atomic::{AtomicBool, Ordering},
++    Arc,
++};
++
++struct Dropped(Arc<AtomicBool>, Option<tokio::sync::oneshot::Sender<()>>);
++impl Drop for Dropped {
++    fn drop(&mut self) {
++        self.0.store(true, Ordering::Release);
++        if let Some(done) = self.1.take() {
++            let _ = done.send(());
++        }
++    }
++}
++#[tokio::test]
++async fn zero_budget_ready_result_succeeds_without_waiting() {
++    assert_eq!(
++        bounded("campaign", Duration::ZERO, async { Ok(17) })
++            .await
++            .unwrap(),
++        17
++    );
++}
++#[tokio::test]
++async fn timed_out_owned_clients_are_canceled_and_cleanup_still_runs() {
++    let canceled = Arc::new(AtomicBool::new(false));
++    let (started, observed) = tokio::sync::oneshot::channel();
++    let (released, release_observed) = tokio::sync::oneshot::channel();
++    let mut tasks = tokio::task::JoinSet::new();
++    let owned = canceled.clone();
++    tasks.spawn(async move {
++        let _owned = Dropped(owned, Some(released));
++        started.send(()).unwrap();
++        std::future::pending::<Result<(), Failure>>().await
++    });
++    observed.await.unwrap();
++    let campaign = bounded("campaign", Duration::ZERO, async move {
++        while let Some(result) = tasks.join_next().await {
++            result??;
++        }
++        Ok(())
++    })
++    .await;
++    assert!(campaign
++        .as_ref()
++        .unwrap_err()
++        .to_string()
++        .contains("campaign timed out after 0ns"));
++    bounded("cancel observation", Duration::from_secs(1), async {
++        release_observed.await?;
++        Ok(())
++    })
++    .await
++    .unwrap();
++    assert!(canceled.load(Ordering::Acquire));
++    let cleanup_called = AtomicBool::new(false);
++    let cleanup = bounded("cleanup", Duration::ZERO, async {
++        cleanup_called.store(true, Ordering::Release);
++        Err("controlled cleanup failure".into())
++    })
++    .await;
++    let failure = finish(campaign, cleanup).unwrap_err();
++    assert!(cleanup_called.load(Ordering::Acquire));
++    assert!(failure.to_string().contains("controlled cleanup failure"));
++    assert!(failure
++        .source()
++        .unwrap()
++        .to_string()
++        .contains("campaign timed out"));
++}
++#[tokio::test]
++async fn cleanup_expiry_is_finite_and_does_not_substitute_a_success_report() {
++    let cleanup = bounded(
++        "cleanup",
++        Duration::ZERO,
++        std::future::pending::<Result<(), Failure>>(),
++    )
++    .await;
++    let failure = finish(Ok(17), cleanup).unwrap_err();
++    assert!(failure.to_string().contains("cleanup timed out"));
++}
++#[test]
++fn original_failure_type_and_cleanup_only_failure_are_preserved() {
++    let original: Failure = Box::new(std::io::Error::other("original application error"));
++    let error = finish::<()>(Err(original), Ok(())).unwrap_err();
++    assert!(error.downcast_ref::<std::io::Error>().is_some());
++    assert_eq!(error.to_string(), "original application error");
++    assert_eq!(
++        finish::<()>(Ok(()), Err("cleanup only".into()))
++            .unwrap_err()
++            .to_string(),
++        "cleanup only"
++    );
++}

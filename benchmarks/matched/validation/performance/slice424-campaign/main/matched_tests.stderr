@@ -1,0 +1,3 @@
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 4.57s
+     Running unittests src/main.rs (target/p9/slice421-checks/debug/deps/voteboat_matched_framework-74d0de8a287da0e5)

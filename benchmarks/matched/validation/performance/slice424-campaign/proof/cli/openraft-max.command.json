@@ -1,0 +1,1 @@
+["target/p9/campaign424/checks/debug/voteboat-matched-framework", "--engine", "openraft", "--clients", "1", "--batch", "4", "--operations", "12000", "--warmup", "0", "--campaign-timeout-secs", "7200"]

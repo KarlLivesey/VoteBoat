@@ -1,0 +1,8 @@
+{
+  "qualified_published_commit": "82bce5fd1808c73b1c5ea610bd01e2f56ef6a128",
+  "historical_capture_head": "1091610a1d348a473e491c54834ae2fe341da419",
+  "scope": "source/config/docs/test/example inputs, not all necessarily compiled",
+  "matched_git_blob_inputs": 1404,
+  "different_from_commit": [],
+  "not_tracked_at_commit": []
+}

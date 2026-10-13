@@ -1,0 +1,51 @@
+{
+  "source_files": 1357,
+  "changed_paths": [
+    "benchmarks/minimal/src/bin/bench.rs"
+  ],
+  "guard_seconds": 3600,
+  "unchanged_guard_anchor_seconds": 400,
+  "driver_kind": "pinned_engine_guard_extended",
+  "default_features_preserved": true,
+  "source_before_after": "1357/1357 match",
+  "fresh_library_and_driver": true,
+  "profile": "opt3/debuginfo2/assertions/overflow/thinLTO/codegen1",
+  "original_runner": 3353,
+  "build_exit": 0,
+  "functional_controls": [
+    {
+      "batch": 1,
+      "operations": 128,
+      "samples": 128,
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "warmup": 4,
+      "exit": 0,
+      "performance_claim": false
+    },
+    {
+      "batch": 4,
+      "operations": 128,
+      "samples": 32,
+      "members": [
+        0,
+        1,
+        2
+      ],
+      "warmup": 4,
+      "exit": 0,
+      "performance_claim": false
+    }
+  ],
+  "full_logs": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/build.jsonl": "375d54df265c2304272d21619d2d5299a7715428da55479b636a532b192d74de",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/upstream-guard424/build.stderr": "981824a8afb9ac02d0f5b5833315b41bed45d1e8dbf2c04cb8a992eb226248a3"
+  },
+  "preserved_setup_failures": [
+    "nestedworkspace101 beforecompile; moved exact frozen files outsideVoteBoatworkspace",
+    "artifactcopy126 permission; copied original execute mode, bytes/hash unchanged"
+  ]
+}

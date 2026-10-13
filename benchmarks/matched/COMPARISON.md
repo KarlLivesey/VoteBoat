@@ -36,13 +36,15 @@ requests versus originals, hard versus soft limits and source-derived bounds.
 A separately tuned common profile is diagnostic and cannot replace the published
 reference floor. Same-engine418→419 comparisons retain their original envelopes.
 
-The provider/timing audit additionally finds our latency-vector flattening occurs
-inside the throughput clock, unlike the pinned driver's post-clock aggregation.
-Both drivers'400s internal guard can censor the full20M singleton workload.
-The next bounded slice aligns aggregation and records a common finite campaign
-budget. Any reference with an extended guard must be named guard-extended and
-carry its exact patch/artifact proof; the untouched reference stays distinct.
-[Read-only audit and schema](validation/performance/provider-parity-audit/REPORT.md).
+424 now stops the throughput clock after all client joins and before flattening
+or sorting latency vectors, matching the pinned driver's boundary. Its finite
+campaign budget defaults3600s and is recorded; incomplete work is failure. Async
+cleanup has a separate30s guard and retains unfinished actor ownership on cancel.
+The pinned untouched400s driver remains distinct. A separately qualified reference
+changes only its400→3600 constant to permit slow full20M cells; source patch, fresh
+compiler/library/driver identities and original failures are disclosed.
+[424 controls](validation/performance/slice424-campaign/REPORT.md) and
+[guard-extended reference](../../validation/performance/upstream-guard424/README.md).
 
 ## Engine and representation differences
 
