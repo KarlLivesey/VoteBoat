@@ -1,0 +1,49 @@
+{
+  "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/padded-target-checks/debug/examples/native_benchmark",
+  "sha256": "f92ac14325720d9cd8c885b19151cc4d73cc7d6140f106c1d59678ecd8653997",
+  "scope": "Debug command validation only; no capacity measurement",
+  "cases": [
+    {
+      "case": "zero",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"workload group weights must be positive\""
+    },
+    {
+      "case": "count",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"workload group weight count must equal groups\""
+    },
+    {
+      "case": "total",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"workload group weight total exceeds 256\""
+    },
+    {
+      "case": "missing",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"missing --group-weights value\""
+    },
+    {
+      "case": "duplicate",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"duplicate --group-weights\""
+    },
+    {
+      "case": "mode",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"--group-weights requires --offered\""
+    },
+    {
+      "case": "hot-capacity",
+      "exit": 1,
+      "root_created": false,
+      "stderr": "Error: \"workload exceeds default per-group log capacity (including control reserve)\""
+    }
+  ]
+}

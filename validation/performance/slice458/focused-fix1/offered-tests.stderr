@@ -1,0 +1,3 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.23s
+     Running unittests examples/native_benchmark.rs (target/p9/slice455/padded-target-checks/debug/examples/native_benchmark-38789566316d72a1)

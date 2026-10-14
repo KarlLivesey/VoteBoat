@@ -1,0 +1,12 @@
+{
+  "baseline_candidate_sources_fullhash_modes": 0,
+  "baseline_candidate_original_copy_root_example_hashes": 0,
+  "native445_baseline_actualfresh_false": true,
+  "native455_candidate_actualfresh_false": true,
+  "withinhost_compiler_tools_exact": true,
+  "private_control_closure_fullhash_modes": 0,
+  "resources48collector_hashes": 0,
+  "config_driver_sealed": true,
+  "campaign_top_level_not_executed": true,
+  "long_timing_started": false
+}

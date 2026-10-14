@@ -1,0 +1,15 @@
+{
+  "state": "PREPARED_NOT_STARTED",
+  "root_approval": "Focusedconfigonlycausalwavefix approved; launchawaitsroot/reviewerPAUSEDquietgrant",
+  "first_actual_handle": 32499,
+  "first_actual_exit": 1,
+  "new_controller": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/run-pilots-attempt2.py",
+  "new_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/PILOT_CONFIG-ATTEMPT2.json",
+  "source_immutable7a99_verified": true,
+  "private_validator_copies_verified": true,
+  "validator_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/control-tools",
+  "not_using_in_progress_main_validators": true,
+  "no_source_assertion_limit_deadline_changes": true,
+  "new_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/controls-attempt2",
+  "long_campaign_started": false
+}

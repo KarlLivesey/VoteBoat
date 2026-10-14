@@ -1,0 +1,22 @@
+{
+  "original_handle": 79484,
+  "terminal_exit": 0,
+  "rust_tests": {
+    "passed": 17,
+    "filtered": 31,
+    "failed": 0
+  },
+  "format_write": 0,
+  "format_check": 0,
+  "strict_default_all_targets": 0,
+  "js_controls_reused": {
+    "count": 10,
+    "source_unchanged": true,
+    "evidence": "../main/offered-validator-direct.*"
+  },
+  "trigger": "root39145 strictdefault main103/100 afterfix1; runclean; parentretainsactualrootraw/source",
+  "change": "naturalprepare_workload composes existingparse then unchanged capacityvalidation; main retainscapacityforrun; existingtest exercisesentrybranches",
+  "source_guard": "1440 selected hashes;1434 trackedbaseinputsunchanged;physicalmodesexact;only3expectedfix2deltas",
+  "other_strict_profiles": "not rerun; root owns full enabled hook",
+  "live_weighted": "not run"
+}

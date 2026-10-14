@@ -1,0 +1,22 @@
+
+running 17 tests
+test offered::maintenance::tests::checkpoint_admission_or_unfinished_snapshot_never_counts_as_completion ... ok
+test offered::maintenance::tests::checkpoint_rejects_leader_term_store_session_and_reference_scope_changes ... ok
+test offered::maintenance::tests::invalid_or_missed_pause_never_silently_becomes_a_shorter_outage ... ok
+test offered::maintenance::tests::late_start_still_retains_the_full_requested_pause_duration ... ok
+test offered::maintenance::tests::missed_opportunities_are_bounded_skips_and_must_all_be_reported_before_finish ... ok
+test offered::maintenance::tests::reclaim_requires_the_original_full_ticket_and_never_reports_failure_as_freed_bytes ... ok
+test offered::tests::group_window_can_refuse_before_global_window_is_full ... ok
+test offered::tests::missed_schedule_does_not_shift_intended_start_or_drop_due_ids ... ok
+test offered::tests::no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known ... ok
+test offered::tests::refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts ... ok
+test offered::tests::stage_failure_retains_both_work_and_cleanup_errors ... ok
+test offered::tests::weighted_rows_keep_actual_ticket_groups_and_per_group_applied_history ... ok
+test offered::tests::windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot ... ok
+test offered_groups::tests::all_one_weights_preserve_uniform_absolute_phase_including_warmup_offset ... ok
+test offered_groups::tests::exact_weighted_counts_and_log_capacity_include_uniform_warmup_and_control_reserve ... ok
+test offered_groups::tests::weights_are_bounded_positive_workload_inputs_only ... ok
+test offered_groups::tests::workload_option_preserves_other_arguments_and_rejects_incomplete_duplicates ... ok
+
+test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 31 filtered out; finished in 0.00s
+

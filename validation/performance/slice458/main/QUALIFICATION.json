@@ -1,0 +1,27 @@
+{
+  "original_handle": 58520,
+  "original_terminal_exit": 0,
+  "reused_same_checkout_target": "target/p9/slice455/padded-target-checks",
+  "rust_tests": {
+    "passed": 17,
+    "failed": 0,
+    "filtered": 31,
+    "scope": "all-feature native_benchmark offered filter: existingmaintenance6+existingoffered6+newledger1+newschedule4"
+  },
+  "node_test_wrapper": {
+    "exit": 0,
+    "reported_file_tests": 1,
+    "named_control_execution": "not claimed from wrapper-only report"
+  },
+  "node_direct": {
+    "exit": 0,
+    "passed": 10,
+    "scope": "existingfive plus five weighted CSV controls; same unchanged JS source"
+  },
+  "format_write": 0,
+  "format_check": 0,
+  "strict_profiles": "not run; root owns enabled hook scope",
+  "live_workloads": "not run",
+  "errors": [],
+  "source_guard": "1434 unchanged tracked inputs +4 tracked changes+2 new modules; physical modes unchanged"
+}

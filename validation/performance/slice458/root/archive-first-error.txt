@@ -1,0 +1,1 @@
+Archive verification initially compared 0755 to serialized 0o755 text and asserted on .githooks/pre-push. No source-mode mismatch: corrected integer-mode comparison below. Prior copies preserved. Tool command exited1.

@@ -4,6 +4,35 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
+function workloadSchedule(summary, groups, count, warmup) {
+    if (summary.workload_group_weights === undefined) {
+        assert.equal(summary.workload_group_phase, undefined);
+        return operation => (operation - 1) % groups + 1;
+    }
+    assert.equal(summary.workload_group_phase, 'absolute_operation_minus_one');
+    const fields = String(summary.workload_group_weights).split(',');
+    assert.equal(fields.length, groups, 'workload weight count');
+    assert.ok(fields.every(value => /^[1-9]\d*$/.test(value)), 'canonical positive workload weights');
+    const weights = fields.map(Number);
+    assert.ok(weights.every(Number.isSafeInteger));
+    const total = weights.reduce((sum, weight) => sum + weight, 0);
+    assert.ok(Number.isSafeInteger(total) && total <= 256, 'workload weight total');
+    // Independent cumulative ranges, rather than the Rust repeated-slot lookup.
+    const groupOf = operation => {
+        let slot = (operation - 1) % total;
+        for (let group = 0; group < groups; group++) {
+            if (slot < weights[group]) return group + 1;
+            slot -= weights[group];
+        }
+        assert.fail('weighted operation outside schedule');
+    };
+    const retained = Array.from({length: groups}, (_, index) =>
+        Math.floor(warmup / groups) + Number(index < warmup % groups) + 64);
+    for (let offset = 0; offset < count; offset++) retained[groupOf(warmup + offset + 1) - 1]++;
+    assert.ok(retained.every(entries => entries <= 16384), 'weighted workload exceeds default per-group log capacity');
+    return groupOf;
+}
+
 export function validateOffered(label, summary, source) {
     const n = key => Number(summary[key]);
     const count = n('offers'), groups = n('groups'), window = n('window'), warmup = n('warmup');
@@ -13,6 +42,7 @@ export function validateOffered(label, summary, source) {
     assert.ok(Number.isSafeInteger(groups) && groups >= 1 && groups <= 32);
     assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= 64);
     assert.equal(warmup, 64);
+    const groupOf = workloadSchedule(summary, groups, count, warmup);
     assert.equal(horizon, Math.floor(count * 1e9 / rate));
     assert.ok(horizon > 0 && horizon <= 300e9 && Number.isSafeInteger(elapsed) && elapsed >= horizon);
     assert.equal(n('drain_ns'), elapsed - horizon);
@@ -33,7 +63,7 @@ export function validateOffered(label, summary, source) {
         for(const key of fields.filter(k=>!['status','reason'].includes(k))) {
             r[key]=Number(r[key]); assert.ok(Number.isSafeInteger(r[key]) && r[key]>=0,key);
         }
-        assert.equal(r.operation,warmup+i+1); assert.equal(r.group,(r.operation-1)%groups+1);
+        assert.equal(r.operation,warmup+i+1); assert.equal(r.group,groupOf(r.operation));
         assert.equal(r.intended_ns,Math.floor(i*1e9/rate));
         assert.ok(r.dispatched_ns>=r.intended_ns && r.completed_ns>=r.dispatched_ns && r.completed_ns<=elapsed);
         assert.ok(statuses.has(r.status)); statuses.set(r.status,statuses.get(r.status)+1);

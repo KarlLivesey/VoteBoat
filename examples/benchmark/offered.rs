@@ -42,7 +42,7 @@ struct Row {
     value: i64,
 }
 type History = (BTreeMap<GroupIdentity, i64>, BTreeMap<GroupIdentity, u64>);
-struct Ledger {
+struct Ledger<'a> {
     rows: Vec<Row>,
     pending: BTreeMap<(usize, u64), (ClientTicket, usize)>,
     group_pending: BTreeMap<GroupIdentity, usize>,
@@ -51,9 +51,16 @@ struct Ledger {
     rate: usize,
     window: usize,
     groups: usize,
+    schedule: Option<&'a offered_groups::GroupSchedule>,
 }
-impl Ledger {
-    fn new(count: usize, rate: usize, window: usize, groups: usize) -> Self {
+impl<'a> Ledger<'a> {
+    fn new(
+        count: usize,
+        rate: usize,
+        window: usize,
+        groups: usize,
+        schedule: Option<&'a offered_groups::GroupSchedule>,
+    ) -> Self {
         Self {
             rows: Vec::with_capacity(count),
             pending: BTreeMap::new(),
@@ -63,6 +70,7 @@ impl Ledger {
             rate,
             window,
             groups,
+            schedule,
         }
     }
     fn intended(&self, offset: usize) -> u128 {
@@ -79,7 +87,10 @@ impl Ledger {
         let operation = WARMUP + offset + 1;
         self.rows.push(Row {
             operation,
-            group: operation_group(operation, self.groups),
+            group: self.schedule.map_or_else(
+                || operation_group(operation, self.groups),
+                |schedule| schedule.group(operation),
+            ),
             intended: self.intended(offset),
             dispatched: now,
             completed: now,
@@ -235,7 +246,7 @@ impl Ledger {
 fn outputs<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     start: &Instant,
-    ledger: &mut Ledger,
+    ledger: &mut Ledger<'_>,
 ) -> Result<(), Failure> {
     for (replica, n) in replicas.iter_mut().enumerate() {
         while let Some(output) = n.poll_client() {
@@ -250,7 +261,7 @@ fn outputs<L: LogStore + Send + 'static>(
 fn measure<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     clock: &Instant,
-    ledger: &mut Ledger,
+    ledger: &mut Ledger<'_>,
     totals: &mut PollTotals,
     start: &Instant,
     maintenance: &mut Maintenance,
@@ -329,7 +340,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
         ..
     } = config;
     std::fs::create_dir(root)?;
-    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}\n"))?;
+    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}{}\n", config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
     let mut raw = exclusive(&root.join("offers.csv"))?;
     let mut storage = Vec::new();
     let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
@@ -346,7 +357,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
             return Err(error);
         }
     };
-    let mut ledger = Ledger::new(count, rate, window, groups);
+    let mut ledger = Ledger::new(count, rate, window, groups, config.group_schedule.as_ref());
     let mut maintenance = prepare_maintenance(&config, ledger.horizon())?;
     let mut totals = PollTotals::default();
     observe::capture(&mut storage, "before_measurement", &traces);
@@ -447,7 +458,7 @@ fn failed_measurement<L: LogStore + Send + 'static>(
     clock: &Instant,
     root: &Path,
     error: Failure,
-    ledger: &Ledger,
+    ledger: &Ledger<'_>,
 ) -> Result<(), Failure> {
     let mut cancellation_errors = Vec::new();
     for ((replica, _), (ticket, _)) in &ledger.pending {
@@ -483,7 +494,7 @@ fn failed_measurement<L: LogStore + Send + 'static>(
 
 struct CompletedRun<'a> {
     placement: &'a str,
-    ledger: &'a Ledger,
+    ledger: &'a Ledger<'a>,
     totals: &'a PollTotals,
     maintenance: &'a Maintenance,
     elapsed: Duration,
@@ -558,7 +569,11 @@ fn report_offered(
     let dispatch_p99 = percentile(&mut dispatch_lag, 99);
     let maintenance_summary = maintenance.summary(totals);
     let ready_settings = ready_items::settings(config.ready_visit_items);
-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+    let group_settings = config
+        .group_schedule
+        .as_ref()
+        .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
+    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
     let mut file = exclusive(&root.join("summary.txt"))?;
     file.write_all(summary.as_bytes())?;
     file.sync_all()?;
@@ -602,7 +617,7 @@ fn prepare_offered<L: LogStore + Send + 'static>(
 
 struct RecoveryCheck<'a> {
     warmup: &'a Measurement,
-    ledger: &'a Ledger,
+    ledger: &'a Ledger<'a>,
     expected: &'a BTreeMap<GroupIdentity, i64>,
     compacted_bases: &'a BTreeMap<(usize, GroupIdentity), u64>,
     last: &'a BTreeMap<GroupIdentity, u64>,
@@ -626,18 +641,18 @@ fn verify_offered_recovery<L: LogStore + Send + 'static>(
     verify_expected(replicas, clock, expected, last)?;
     let first = warmup.samples.iter().find(|s| s.operation == 1).unwrap();
     let last_success = ledger.rows.iter().rev().find(|r| r.status == "applied");
-    let (operation, value) = last_success
-        .map(|r| (r.operation, r.value))
+    let (operation, value, retry_group_id) = last_success
+        .map(|r| (r.operation, r.value, r.group))
         .unwrap_or_else(|| {
             let s = warmup
                 .samples
                 .iter()
                 .find(|s| s.operation == WARMUP as u128)
                 .unwrap();
-            (WARMUP, s.value)
+            (WARMUP, s.value, s.group)
         });
     let retries = retry(replicas, clock, 1, first.value, groups)?
-        + retry(replicas, clock, operation, value, groups)?;
+        + retry_group(replicas, clock, operation, value, groups, retry_group_id)?;
     let retry_index = boundaries(replicas.iter().flat_map(|n| {
         n.local()
             .applications
@@ -681,7 +696,7 @@ fn prepare_maintenance(config: &RunConfig<'_>, horizon: u128) -> Result<Maintena
 #[cfg(test)]
 mod tests {
     use super::*;
-    fn ticket(l: &Ledger, row: usize, sequence: u64) -> ClientTicket {
+    fn ticket(l: &Ledger<'_>, row: usize, sequence: u64) -> ClientTicket {
         ClientTicket {
             binding: ClientRouterBinding::new(
                 RuntimeAuthorization::physical(RuntimeOwner {
@@ -728,11 +743,38 @@ mod tests {
         }
     }
     #[test]
+    fn weighted_rows_keep_actual_ticket_groups_and_per_group_applied_history() {
+        let schedule = offered_groups::GroupSchedule::parse("1,3", 2).unwrap();
+        let mut ledger = Ledger::new(3, 3, 4, 2, Some(&schedule));
+        for (row, group, value) in [(0, 1, 33), (1, 2, 33), (2, 2, 34)] {
+            assert_eq!(ledger.begin(row as u128), row);
+            assert_eq!(ledger.rows[row].group, group_id(group));
+            let ticket = ticket(&ledger, row, row as u64 + 1);
+            ledger.admit(row, 0, ticket).unwrap();
+            ledger
+                .finish(
+                    0,
+                    ticket,
+                    applied(ticket, 34 + row as u64, value),
+                    row as u128 + 1,
+                )
+                .unwrap();
+        }
+        assert_ne!(
+            ledger.rows[2].group,
+            operation_group(ledger.rows[2].operation, 2)
+        );
+        let (expected, _) = ledger.history(&warmup()).unwrap();
+        assert_eq!(expected[&group_id(1)], 33);
+        assert_eq!(expected[&group_id(2)], 34);
+        assert!(ledger.pending.is_empty());
+    }
+    #[test]
     fn missed_schedule_does_not_shift_intended_start_or_drop_due_ids() {
         assert!(validate(1, 0).is_err());
         assert!(validate(301, 1).is_err());
         assert!(validate(300, 1).is_ok());
-        let mut l = Ledger::new(3, 3, 1, 1);
+        let mut l = Ledger::new(3, 3, 1, 1, None);
         assert_eq!(l.horizon(), 1_000_000_000);
         assert!(l.due(0));
         l.begin(0);
@@ -747,7 +789,7 @@ mod tests {
     }
     #[test]
     fn windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot() {
-        let mut l = Ledger::new(4, 4, 3, 2);
+        let mut l = Ledger::new(4, 4, 3, 2, None);
         let a = l.begin(0);
         let ta = ticket(&l, a, 1);
         l.admit(a, 0, ta).unwrap();
@@ -796,7 +838,7 @@ mod tests {
     }
     #[test]
     fn group_window_can_refuse_before_global_window_is_full() {
-        let mut l = Ledger::new(3, 3, 4, 2);
+        let mut l = Ledger::new(3, 3, 4, 2, None);
         let a = l.begin(0);
         let ta = ticket(&l, a, 1);
         l.admit(a, 0, ta).unwrap();
@@ -811,7 +853,7 @@ mod tests {
     }
     #[test]
     fn refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts() {
-        let mut l = Ledger::new(4, 4, 4, 2);
+        let mut l = Ledger::new(4, 4, 4, 2, None);
         let a = l.begin(0);
         let ta = ticket(&l, a, 1);
         l.admit(a, 0, ta).unwrap();
@@ -835,7 +877,7 @@ mod tests {
     }
     #[test]
     fn no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known() {
-        let mut l = Ledger::new(2, 2, 1, 2);
+        let mut l = Ledger::new(2, 2, 1, 2, None);
         let a = l.begin(0);
         let ta = ticket(&l, a, 1);
         l.admit(a, 0, ta).unwrap();

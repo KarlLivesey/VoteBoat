@@ -1,0 +1,16 @@
+[
+  {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/native-release.jsonl",
+    "archive": "logs/native-release.jsonl.gz",
+    "original_sha256": "5d44284917822bf7c10208904557b0aa875217cc6b146b2af26c5be72f71ee1b",
+    "original_bytes": 3232074,
+    "gzip_sha256": "1fa68e2b5c827d6a2aca79f6dea81a44a13f3b95915665c3e542fedf27f439b7"
+  },
+  {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/logs/symbol-table.log",
+    "archive": "logs/symbol-table.log.gz",
+    "original_sha256": "4da2c9457b7c5ef438d8dd25fc7a94a4b51021c6d35e26a4fc14a925c0d78abb",
+    "original_bytes": 2152623,
+    "gzip_sha256": "d1033982053b40646016c291db1b27d38b660e20ef2ceaba5138adfc0ca344c0"
+  }
+]

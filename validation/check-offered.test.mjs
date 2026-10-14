@@ -45,3 +45,44 @@ test('reject unaccounted applied value and altered pending maximum',()=>{
     assert.throws(()=>check([original[0].replace('70,65','70,66'),original[1]]));
     assert.throws(()=>check(original,{...metadata,max_inflight:2}));
 });
+
+const phase='absolute_operation_minus_one';
+function weightedFixture() {
+    // Absolute operations65..70 start at cycle slots4,5,0,1,2,3 for weights4,1,1.
+    const groups=[2,3,1,1,1,1], values=[22,22,23,24,25,26];
+    const rows=groups.map((group,i)=>{
+        const intended=Math.floor(i*1e9/6);
+        return `${65+i},${group},${intended},${intended},${intended+1},1,${i+1},applied,,${100+i},${values[i]}`;
+    });
+    const summary={...metadata,offers:6,groups:3,window:3,offered_rate:6,
+        workload_group_weights:'4,1,1',workload_group_phase:phase,
+        applied:6,window_refused:0,admitted:6,recovered_value:70,
+        applied_during:6,admitted_during:6,p99_us:0.001,service_p99_us:0.001,
+        offered_ops_s:6,admitted_ops_s:6,applied_during_ops_s:6,applied_total_ops_s:6};
+    return {rows,summary};
+}
+test('explicit all-one weights retain historical uniform phase and validation',()=>{
+    check(original,{...metadata,workload_group_weights:'1',workload_group_phase:phase});
+});
+test('weighted rows retain absolute phase and uniform warmup application history',()=>{
+    const {rows,summary}=weightedFixture();check(rows,summary);
+});
+test('reject altered weighted phase, mapping and applied history',()=>{
+    const {rows,summary}=weightedFixture();
+    assert.throws(()=>check(rows,{...summary,workload_group_phase:'measured_offset'}));
+    assert.throws(()=>check(rows,{...summary,workload_group_weights:'1,1,1'}));
+    assert.throws(()=>check([rows[0].replace('65,2,','65,1,'),...rows.slice(1)],summary));
+    assert.throws(()=>check([rows[0].replace('100,22','100,23'),...rows.slice(1)],summary));
+});
+test('reject invalid or undisclosed workload schedule metadata',()=>{
+    const {rows,summary}=weightedFixture();
+    for(const weights of ['0,1,1','1,1','255,1,1','04,1,1','4,-1,1','4,1.5,1']) {
+        assert.throws(()=>check(rows,{...summary,workload_group_weights:weights}));
+    }
+    assert.throws(()=>check(original,{...metadata,workload_group_phase:phase}));
+});
+test('reject a hot-group retained bound that the old uniform ceiling would admit',()=>{
+    assert.ok(Math.ceil((20000+64)/2)+64<16384);
+    assert.throws(()=>check(original,{...metadata,offers:20000,groups:2,
+        workload_group_weights:'255,1',workload_group_phase:phase}),/weighted workload exceeds/);
+});

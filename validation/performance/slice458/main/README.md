@@ -1,0 +1,11 @@
+# Slice458 focused weighted-offer qualification
+
+Original58520 actually ended0 after format/tool capture/Rust offered tests/JS wrapper/format check. Rust17 passed,31 filtered: six existing maintenance, six existing offered, one new weighted-ledger and four new schedule/parse/capacity controls. No broad suites, strict profiles, performance builds or live workloads were run here; root owns enabled strict hook qualification.
+
+Node24.21.0 `node --test` ended0 but reported only one file-level test with no named controls. Its raw output is retained without claiming ten controls from that report. Unchanged test source was then invoked directly; all ten named controls passed (five prior plus five new weighted validation controls), with separate actual command/exits/raw logs. The wrapper reporting cause is unestablished. An incidental `node -V` diagnostic returned9; actual output is recorded in DIAGNOSTICS.json, and the corrected `--version` identified24.21.0. No source correction or test failure occurred.
+
+SOURCE_BEFORE_FORMAT.json/source-before-format preserve initial unformatted implementation; SOURCE.json/source-final freeze checked bytes. source-base preserves the four tracked prior files; PATCH.diff also includes both new modules. All1440 selected source/config/contracts/validator inputs and physical modes are recorded;1434 other tracked inputs match base exactly. Selection is explicit, not a claim that all repository documentation was compiled. No root/core/provider semantics, defaults or original outcomes changed. Weighted workload input remains distinct from quorum configuration.
+
+Independent validator retains historical uniform metadata and all prior outcome/history/latency/window/recovery checks. Exact per-group preflight charges actual weighted offers plus uniform64 warmup and64 control reserve. Warmups/default mapping stay uniform; recovery's last measured retry uses its retained actual group. The CSV group remains authoritative and independently recomputed from disclosed canonical weights/absolute phase.
+
+SHA256SUMS covers every regular payload below this directory except itself. No binaries, caches, build trees or generated WAL states are archived. This fixture enables future hot/cold/skew measurements and makes no performance/fairness acceptance claim.

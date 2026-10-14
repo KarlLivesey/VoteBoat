@@ -66,6 +66,8 @@ mod failure;
 mod observe;
 #[path = "benchmark/offered.rs"]
 mod offered;
+#[path = "benchmark/offered_groups.rs"]
+mod offered_groups;
 #[path = "benchmark/ready_items.rs"]
 mod ready_items;
 const WARMUP: usize = 64;
@@ -579,21 +581,6 @@ fn verify_expected<L: LogStore + Send + 'static>(
     }
     Ok(())
 }
-fn retry_once<L: LogStore + Send + 'static>(
-    replicas: &mut [Replica<L>],
-    clock: &Instant,
-    operation: usize,
-    expected: i64,
-    groups: usize,
-) -> Result<bool, Failure> {
-    retry_group_once(
-        replicas,
-        clock,
-        operation,
-        expected,
-        operation_group(operation, groups),
-    )
-}
 fn retry_group_once<L: LogStore + Send + 'static>(
     replicas: &mut [Replica<L>],
     clock: &Instant,
@@ -642,9 +629,26 @@ fn retry<L: LogStore + Send + 'static>(
     expected: i64,
     groups: usize,
 ) -> Result<usize, Failure> {
+    retry_group(
+        replicas,
+        clock,
+        operation,
+        expected,
+        groups,
+        operation_group(operation, groups),
+    )
+}
+fn retry_group<L: LogStore + Send + 'static>(
+    replicas: &mut [Replica<L>],
+    clock: &Instant,
+    operation: usize,
+    expected: i64,
+    groups: usize,
+    group: GroupIdentity,
+) -> Result<usize, Failure> {
     for attempt in 0..4 {
         campaign(replicas, clock, groups)?;
-        if retry_once(replicas, clock, operation, expected, groups)? {
+        if retry_group_once(replicas, clock, operation, expected, group)? {
             return Ok(attempt);
         }
         eprintln!("phase=recovery-retry operation={operation} leadership_changed=true");
@@ -701,9 +705,13 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
 fn main() -> Result<(), Failure> {
     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
     let selected_ready_items = ready_items::extract(&mut args)?;
+    let raw_group_weights = offered_groups::extract(&mut args)?;
     if args.first().is_some_and(|arg| arg == "--lanes") {
         if selected_ready_items.is_some() {
             return Err("--ready-items is unsupported with --lanes".into());
+        }
+        if raw_group_weights.is_some() {
+            return Err("--group-weights requires --offered".into());
         }
         return lanes::run(&args[1..]);
     }
@@ -717,7 +725,7 @@ fn main() -> Result<(), Failure> {
     }
     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
         return Err(
-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
                 .into(),
         );
     }
@@ -771,12 +779,13 @@ fn main() -> Result<(), Failure> {
     } else {
         None
     };
+    let group_schedule = offered_groups::prepare_workload(
+        raw_group_weights.as_deref(),
+        groups,
+        offered_rate.is_some(),
+        count,
+    )?;
     let capacity = count + WARMUP;
-    if capacity.div_ceil(groups) + 64 > LogLimits::default().max_entries_per_group {
-        return Err(
-            "workload exceeds default per-group log capacity (including control reserve)".into(),
-        );
-    }
     let root = Path::new(root);
     let clock = Instant::now();
     let config = RunConfig {
@@ -787,6 +796,7 @@ fn main() -> Result<(), Failure> {
         groups,
         shared,
         offered_rate,
+        group_schedule,
         maintenance,
         ready_visit_items,
     };
@@ -836,6 +846,7 @@ struct RunConfig<'a> {
     groups: usize,
     shared: bool,
     offered_rate: Option<usize>,
+    group_schedule: Option<offered_groups::GroupSchedule>,
     maintenance: Option<offered::MaintenanceConfig>,
     ready_visit_items: usize,
 }
@@ -854,9 +865,7 @@ fn run<L: LogStore + Send + 'static>(
         window,
         groups,
         shared,
-        offered_rate: _,
-        maintenance: _,
-        ready_visit_items: _,
+        ..
     } = config;
     let capacity = count + WARMUP;
     std::fs::create_dir(root)?;

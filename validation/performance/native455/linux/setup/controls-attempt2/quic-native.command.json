@@ -1,0 +1,18 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/controls-attempt2/quic-metadata/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/controls-attempt2/quic-storage",
+  "quic",
+  "128",
+  "32",
+  "4",
+  "--offered",
+  "16",
+  "--maintenance",
+  "2",
+  "--pause-follower",
+  "2:3",
+  "--ready-items",
+  "16"
+]

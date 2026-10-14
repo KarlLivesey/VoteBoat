@@ -1,0 +1,21 @@
+{
+  "original_handle": 70386,
+  "terminal_exit": 0,
+  "rust_tests": {
+    "passed": 17,
+    "filtered": 31,
+    "failed": 0
+  },
+  "format_write": 0,
+  "format_check": 0,
+  "js_controls_reused": {
+    "count": 10,
+    "source_unchanged": true,
+    "evidence": "../main/offered-validator-direct.*"
+  },
+  "trigger": "root60615 enabled-hook too_many_lines only main104/100 andrun101/100; preserved at target/p9/slice458/root; no thresholds or lint allows changed",
+  "change": "samecapacity gate extracted into existingoffered_groups helper; run unusedfields ..; boundarytest exercises actual helper branches",
+  "source_guard": "1440 selected hashes;1434 tracked base inputs unchanged;physicalmodes exact;only3 expectedsource changes frominitialchecked candidate",
+  "strict": "not rerun; root owns enabled hook",
+  "live_weighted": "not run"
+}

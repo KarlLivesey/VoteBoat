@@ -1,0 +1,27 @@
+{
+  "final_original_handle": 18597,
+  "terminal_exit": 0,
+  "example_build": 0,
+  "pre_root_cli_cases": 7,
+  "pre_root_control_exit": 0,
+  "full_enabled_hook": 0,
+  "source_inputs": 1440,
+  "source_hashes_and_modes_exact": true,
+  "prior_attempts": [
+    {
+      "handle": 60615,
+      "exit": 101,
+      "cause": "strict Clippy main104/run101 exceed100 function-line budget",
+      "focused_fix": "extract capacity gate and omit unused RunConfig destructuring fields"
+    },
+    {
+      "handle": 39145,
+      "exit": 101,
+      "cause": "strict Clippy main103 still exceeds100; run now clean",
+      "focused_fix": "module prepare_workload composes ordered parsing and capacity validation"
+    }
+  ],
+  "production_test_and_build_inputs_unchanged": "git diff --quiet -- src tests Cargo.toml Cargo.lock build.rs clippy.toml exit0",
+  "reuse": "Unchanged final455 production/core/integration/matched scopes; JS ten named controls exact files from main; focused Rust seventeen from fix2. Full hook actually rerun, no lint weakening.",
+  "live_weighted": "Not yet run; needs fresh published asserted native artifact."
+}

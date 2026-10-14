@@ -1,0 +1,11 @@
+{
+  "node_version": "v24.21.0",
+  "node_env_test_filters": null,
+  "wrapper_only_reporting_cause": "unestablished; direct invocation proves ten named controls",
+  "incidental_readonly_diagnostic": {
+    "command": "node -V",
+    "exit": 9,
+    "tool_output": "node: bad option: -V",
+    "scope": "not a test/build/source failure; command output retained here from actual tool result"
+  }
+}

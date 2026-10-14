@@ -1,0 +1,10 @@
+{
+   "filesystems": [
+      {
+         "target": "/home/karllivesey/Documents/ChatGPT/VoteBoat",
+         "source": "/dev/nvme1n1p2[/@home/karllivesey/Documents/ChatGPT/VoteBoat]",
+         "fstype": "btrfs",
+         "options": "rw,nosuid,nodev,noatime,compress=zstd:1,ssd,discard=async,space_cache=v2,subvolid=257,subvol=/@home"
+      }
+   ]
+}

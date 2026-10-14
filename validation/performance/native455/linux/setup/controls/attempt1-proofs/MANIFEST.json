@@ -1,0 +1,16 @@
+{
+  "original_handle": 32499,
+  "actual_exit": 1,
+  "failed_protocol": "tcp",
+  "quic_started": false,
+  "native_exit": 1,
+  "validator_started": false,
+  "cause": "pause2:2 ends4s;2swave skippedawaitingnewprefix,4swave completed4.271456s afterresume4.000123s, noforcedpostpausecheckpointprefix",
+  "raw_root_preserved": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/controls/tcp-storage",
+  "all_offers_ledger128_applied_not_recovery_success": true,
+  "source_inventory_sha256": "e9c3fa0df75905f1b8ce1e37bff78f059649a6bc58aae6551c194a3237fdb054",
+  "controller_sha256": "04d7c75386dcabdec44214d5ebf3b85d5de6058e61c97a9a5ecc7a7897ddce5c",
+  "config_sha256": "6ec59a7324d2861b9b5255cf0f5abe8f65f60f752645ae81e575298cfccb8002",
+  "control_tools_inventory_sha256": "cb87f5c74b007798e004047f064158814c2f937e500698396e1d7ce37c23fe60",
+  "no_source_protocol_assertion_limit_deadline_change": true
+}

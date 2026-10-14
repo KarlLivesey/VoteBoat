@@ -1,0 +1,780 @@
+diff --git a/examples/benchmark/offered.rs b/examples/benchmark/offered.rs
+index 60af6136..5bc84df5 100644
+--- a/examples/benchmark/offered.rs
++++ b/examples/benchmark/offered.rs
+@@ -42,7 +42,7 @@ struct Row {
+     value: i64,
+ }
+ type History = (BTreeMap<GroupIdentity, i64>, BTreeMap<GroupIdentity, u64>);
+-struct Ledger {
++struct Ledger<'a> {
+     rows: Vec<Row>,
+     pending: BTreeMap<(usize, u64), (ClientTicket, usize)>,
+     group_pending: BTreeMap<GroupIdentity, usize>,
+@@ -51,9 +51,16 @@ struct Ledger {
+     rate: usize,
+     window: usize,
+     groups: usize,
++    schedule: Option<&'a offered_groups::GroupSchedule>,
+ }
+-impl Ledger {
+-    fn new(count: usize, rate: usize, window: usize, groups: usize) -> Self {
++impl<'a> Ledger<'a> {
++    fn new(
++        count: usize,
++        rate: usize,
++        window: usize,
++        groups: usize,
++        schedule: Option<&'a offered_groups::GroupSchedule>,
++    ) -> Self {
+         Self {
+             rows: Vec::with_capacity(count),
+             pending: BTreeMap::new(),
+@@ -63,6 +70,7 @@ impl Ledger {
+             rate,
+             window,
+             groups,
++            schedule,
+         }
+     }
+     fn intended(&self, offset: usize) -> u128 {
+@@ -79,7 +87,10 @@ impl Ledger {
+         let operation = WARMUP + offset + 1;
+         self.rows.push(Row {
+             operation,
+-            group: operation_group(operation, self.groups),
++            group: self.schedule.map_or_else(
++                || operation_group(operation, self.groups),
++                |schedule| schedule.group(operation),
++            ),
+             intended: self.intended(offset),
+             dispatched: now,
+             completed: now,
+@@ -235,7 +246,7 @@ impl Ledger {
+ fn outputs<L: LogStore + Send + 'static>(
+     replicas: &mut [Replica<L>],
+     start: &Instant,
+-    ledger: &mut Ledger,
++    ledger: &mut Ledger<'_>,
+ ) -> Result<(), Failure> {
+     for (replica, n) in replicas.iter_mut().enumerate() {
+         while let Some(output) = n.poll_client() {
+@@ -250,7 +261,7 @@ fn outputs<L: LogStore + Send + 'static>(
+ fn measure<L: LogStore + Send + 'static>(
+     replicas: &mut [Replica<L>],
+     clock: &Instant,
+-    ledger: &mut Ledger,
++    ledger: &mut Ledger<'_>,
+     totals: &mut PollTotals,
+     start: &Instant,
+     maintenance: &mut Maintenance,
+@@ -329,7 +340,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+         ..
+     } = config;
+     std::fs::create_dir(root)?;
+-    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}\n"))?;
++    std::fs::write(root.join("run.txt"), format!("mode=offered protocol={protocol:?} offers={count} offered_rate={rate} window={window} groups={groups} warmup={WARMUP}{}\n", config.group_schedule.as_ref().map_or_else(String::new, offered_groups::GroupSchedule::metadata)))?;
+     let mut raw = exclusive(&root.join("offers.csv"))?;
+     let mut storage = Vec::new();
+     let (mut replicas, traces) = open_cluster(NativeOpenMode::Create)?;
+@@ -346,7 +357,7 @@ pub(super) fn run<L: LogStore + Send + 'static>(
+             return Err(error);
+         }
+     };
+-    let mut ledger = Ledger::new(count, rate, window, groups);
++    let mut ledger = Ledger::new(count, rate, window, groups, config.group_schedule.as_ref());
+     let mut maintenance = prepare_maintenance(&config, ledger.horizon())?;
+     let mut totals = PollTotals::default();
+     observe::capture(&mut storage, "before_measurement", &traces);
+@@ -447,7 +458,7 @@ fn failed_measurement<L: LogStore + Send + 'static>(
+     clock: &Instant,
+     root: &Path,
+     error: Failure,
+-    ledger: &Ledger,
++    ledger: &Ledger<'_>,
+ ) -> Result<(), Failure> {
+     let mut cancellation_errors = Vec::new();
+     for ((replica, _), (ticket, _)) in &ledger.pending {
+@@ -483,7 +494,7 @@ fn failed_measurement<L: LogStore + Send + 'static>(
+ 
+ struct CompletedRun<'a> {
+     placement: &'a str,
+-    ledger: &'a Ledger,
++    ledger: &'a Ledger<'a>,
+     totals: &'a PollTotals,
+     maintenance: &'a Maintenance,
+     elapsed: Duration,
+@@ -558,7 +569,11 @@ fn report_offered(
+     let dispatch_p99 = percentile(&mut dispatch_lag, 99);
+     let maintenance_summary = maintenance.summary(totals);
+     let ready_settings = ready_items::settings(config.ready_visit_items);
+-    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
++    let group_settings = config
++        .group_schedule
++        .as_ref()
++        .map_or_else(String::new, offered_groups::GroupSchedule::metadata);
++    let summary = format!("mode=offered protocol={protocol:?} replicas=3 groups={groups} assembly=shared leader_placement={placement} wal_workers_per_replica=1 snapshot_workers_per_replica=1 peer_endpoints_per_replica=1 heartbeat_ms=50 election_min_ms=10000 election_spread_ms=10000 payload_bytes=8 warmup={WARMUP} offers={count} offered_rate={rate} window={window} max_inflight={} admitted={admitted} admitted_during={admitted_during} late_decisions={late_decisions} dispatch_p99_us={dispatch_p99} applied={applied} applied_during={during} applied_drain={} window_refused={} no_leader={} admission_refused={} not_proposed={} unknown=0 pending=0 horizon_ns={horizon} elapsed_ns={} drain_ns={} backlog_at_horizon={backlog} offered_ops_s={:.3} admitted_ops_s={:.3} applied_during_ops_s={:.3} applied_total_ops_s={:.3} p99_us={p99} service_p99_us={service_p99} recovered_value={recovered_value} recovery_retries={retries} retry_verified=true workers_joined=true poll_rounds={} host_poll_ms={:.3} max_host_poll_ms={:.3}{maintenance_summary} {ready_settings}{group_settings}\n", ledger.max_pending, applied-during, ledger.count_status("window_refused"), ledger.count_status("no_leader"), ledger.count_status("admission_refused"), ledger.count_status("not_proposed"), elapsed.as_nanos(), elapsed.as_nanos().saturating_sub(horizon), count as f64 * 1e9 / horizon as f64, admitted as f64 / elapsed.as_secs_f64(), during as f64 * 1e9 / horizon as f64, applied as f64 / elapsed.as_secs_f64(), totals.rounds, totals.host_ns as f64/1e6, totals.max_host_ns as f64/1e6);
+     let mut file = exclusive(&root.join("summary.txt"))?;
+     file.write_all(summary.as_bytes())?;
+     file.sync_all()?;
+@@ -602,7 +617,7 @@ fn prepare_offered<L: LogStore + Send + 'static>(
+ 
+ struct RecoveryCheck<'a> {
+     warmup: &'a Measurement,
+-    ledger: &'a Ledger,
++    ledger: &'a Ledger<'a>,
+     expected: &'a BTreeMap<GroupIdentity, i64>,
+     compacted_bases: &'a BTreeMap<(usize, GroupIdentity), u64>,
+     last: &'a BTreeMap<GroupIdentity, u64>,
+@@ -626,18 +641,18 @@ fn verify_offered_recovery<L: LogStore + Send + 'static>(
+     verify_expected(replicas, clock, expected, last)?;
+     let first = warmup.samples.iter().find(|s| s.operation == 1).unwrap();
+     let last_success = ledger.rows.iter().rev().find(|r| r.status == "applied");
+-    let (operation, value) = last_success
+-        .map(|r| (r.operation, r.value))
++    let (operation, value, retry_group_id) = last_success
++        .map(|r| (r.operation, r.value, r.group))
+         .unwrap_or_else(|| {
+             let s = warmup
+                 .samples
+                 .iter()
+                 .find(|s| s.operation == WARMUP as u128)
+                 .unwrap();
+-            (WARMUP, s.value)
++            (WARMUP, s.value, s.group)
+         });
+     let retries = retry(replicas, clock, 1, first.value, groups)?
+-        + retry(replicas, clock, operation, value, groups)?;
++        + retry_group(replicas, clock, operation, value, groups, retry_group_id)?;
+     let retry_index = boundaries(replicas.iter().flat_map(|n| {
+         n.local()
+             .applications
+@@ -681,7 +696,7 @@ fn prepare_maintenance(config: &RunConfig<'_>, horizon: u128) -> Result<Maintena
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+-    fn ticket(l: &Ledger, row: usize, sequence: u64) -> ClientTicket {
++    fn ticket(l: &Ledger<'_>, row: usize, sequence: u64) -> ClientTicket {
+         ClientTicket {
+             binding: ClientRouterBinding::new(
+                 RuntimeAuthorization::physical(RuntimeOwner {
+@@ -728,11 +743,38 @@ mod tests {
+         }
+     }
+     #[test]
++    fn weighted_rows_keep_actual_ticket_groups_and_per_group_applied_history() {
++        let schedule = offered_groups::GroupSchedule::parse("1,3", 2).unwrap();
++        let mut ledger = Ledger::new(3, 3, 4, 2, Some(&schedule));
++        for (row, group, value) in [(0, 1, 33), (1, 2, 33), (2, 2, 34)] {
++            assert_eq!(ledger.begin(row as u128), row);
++            assert_eq!(ledger.rows[row].group, group_id(group));
++            let ticket = ticket(&ledger, row, row as u64 + 1);
++            ledger.admit(row, 0, ticket).unwrap();
++            ledger
++                .finish(
++                    0,
++                    ticket,
++                    applied(ticket, 34 + row as u64, value),
++                    row as u128 + 1,
++                )
++                .unwrap();
++        }
++        assert_ne!(
++            ledger.rows[2].group,
++            operation_group(ledger.rows[2].operation, 2)
++        );
++        let (expected, _) = ledger.history(&warmup()).unwrap();
++        assert_eq!(expected[&group_id(1)], 33);
++        assert_eq!(expected[&group_id(2)], 34);
++        assert!(ledger.pending.is_empty());
++    }
++    #[test]
+     fn missed_schedule_does_not_shift_intended_start_or_drop_due_ids() {
+         assert!(validate(1, 0).is_err());
+         assert!(validate(301, 1).is_err());
+         assert!(validate(300, 1).is_ok());
+-        let mut l = Ledger::new(3, 3, 1, 1);
++        let mut l = Ledger::new(3, 3, 1, 1, None);
+         assert_eq!(l.horizon(), 1_000_000_000);
+         assert!(l.due(0));
+         l.begin(0);
+@@ -747,7 +789,7 @@ mod tests {
+     }
+     #[test]
+     fn windows_are_global_and_per_group_and_unknown_only_releases_its_exact_slot() {
+-        let mut l = Ledger::new(4, 4, 3, 2);
++        let mut l = Ledger::new(4, 4, 3, 2, None);
+         let a = l.begin(0);
+         let ta = ticket(&l, a, 1);
+         l.admit(a, 0, ta).unwrap();
+@@ -796,7 +838,7 @@ mod tests {
+     }
+     #[test]
+     fn group_window_can_refuse_before_global_window_is_full() {
+-        let mut l = Ledger::new(3, 3, 4, 2);
++        let mut l = Ledger::new(3, 3, 4, 2, None);
+         let a = l.begin(0);
+         let ta = ticket(&l, a, 1);
+         l.admit(a, 0, ta).unwrap();
+@@ -811,7 +853,7 @@ mod tests {
+     }
+     #[test]
+     fn refused_id_holes_preserve_applied_value_history_and_reject_wrong_receipts() {
+-        let mut l = Ledger::new(4, 4, 4, 2);
++        let mut l = Ledger::new(4, 4, 4, 2, None);
+         let a = l.begin(0);
+         let ta = ticket(&l, a, 1);
+         l.admit(a, 0, ta).unwrap();
+@@ -835,7 +877,7 @@ mod tests {
+     }
+     #[test]
+     fn no_applied_outcomes_have_no_latency_percentile_and_not_proposed_is_known() {
+-        let mut l = Ledger::new(2, 2, 1, 2);
++        let mut l = Ledger::new(2, 2, 1, 2, None);
+         let a = l.begin(0);
+         let ta = ticket(&l, a, 1);
+         l.admit(a, 0, ta).unwrap();
+diff --git a/examples/native_benchmark.rs b/examples/native_benchmark.rs
+index 600778a5..976890d5 100644
+--- a/examples/native_benchmark.rs
++++ b/examples/native_benchmark.rs
+@@ -66,6 +66,8 @@ mod failure;
+ mod observe;
+ #[path = "benchmark/offered.rs"]
+ mod offered;
++#[path = "benchmark/offered_groups.rs"]
++mod offered_groups;
+ #[path = "benchmark/ready_items.rs"]
+ mod ready_items;
+ const WARMUP: usize = 64;
+@@ -579,21 +581,6 @@ fn verify_expected<L: LogStore + Send + 'static>(
+     }
+     Ok(())
+ }
+-fn retry_once<L: LogStore + Send + 'static>(
+-    replicas: &mut [Replica<L>],
+-    clock: &Instant,
+-    operation: usize,
+-    expected: i64,
+-    groups: usize,
+-) -> Result<bool, Failure> {
+-    retry_group_once(
+-        replicas,
+-        clock,
+-        operation,
+-        expected,
+-        operation_group(operation, groups),
+-    )
+-}
+ fn retry_group_once<L: LogStore + Send + 'static>(
+     replicas: &mut [Replica<L>],
+     clock: &Instant,
+@@ -641,10 +628,27 @@ fn retry<L: LogStore + Send + 'static>(
+     operation: usize,
+     expected: i64,
+     groups: usize,
++) -> Result<usize, Failure> {
++    retry_group(
++        replicas,
++        clock,
++        operation,
++        expected,
++        groups,
++        operation_group(operation, groups),
++    )
++}
++fn retry_group<L: LogStore + Send + 'static>(
++    replicas: &mut [Replica<L>],
++    clock: &Instant,
++    operation: usize,
++    expected: i64,
++    groups: usize,
++    group: GroupIdentity,
+ ) -> Result<usize, Failure> {
+     for attempt in 0..4 {
+         campaign(replicas, clock, groups)?;
+-        if retry_once(replicas, clock, operation, expected, groups)? {
++        if retry_group_once(replicas, clock, operation, expected, group)? {
+             return Ok(attempt);
+         }
+         eprintln!("phase=recovery-retry operation={operation} leadership_changed=true");
+@@ -701,10 +705,14 @@ fn exclusive(path: &Path) -> Result<File, Failure> {
+ fn main() -> Result<(), Failure> {
+     let mut args = std::env::args().skip(1).collect::<Vec<_>>();
+     let selected_ready_items = ready_items::extract(&mut args)?;
++    let raw_group_weights = offered_groups::extract(&mut args)?;
+     if args.first().is_some_and(|arg| arg == "--lanes") {
+         if selected_ready_items.is_some() {
+             return Err("--ready-items is unsupported with --lanes".into());
+         }
++        if raw_group_weights.is_some() {
++            return Err("--group-weights requires --offered".into());
++        }
+         return lanes::run(&args[1..]);
+     }
+     let ready_visit_items = selected_ready_items.unwrap_or(16);
+@@ -717,7 +725,7 @@ fn main() -> Result<(), Failure> {
+     }
+     if !matches!(args.len(), 4 | 5 | 7 | 9 | 11) {
+         return Err(
+-            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
++            "usage: native_benchmark FRESH_DIRECTORY tcp|quic OPERATIONS(1..50000) WINDOW(1..64) [--ready-items 1|16|32|64] [--journal-timings (startup only)] [GROUPS(1..32) [--offered RATE(1..100000) [--group-weights POSITIVE_CSV(total<=256)] [--maintenance SECONDS(1..60) [--pause-follower START:DURATION]]]]"
+                 .into(),
+         );
+     }
+@@ -771,12 +779,13 @@ fn main() -> Result<(), Failure> {
+     } else {
+         None
+     };
++    let group_schedule = offered_groups::prepare_workload(
++        raw_group_weights.as_deref(),
++        groups,
++        offered_rate.is_some(),
++        count,
++    )?;
+     let capacity = count + WARMUP;
+-    if capacity.div_ceil(groups) + 64 > LogLimits::default().max_entries_per_group {
+-        return Err(
+-            "workload exceeds default per-group log capacity (including control reserve)".into(),
+-        );
+-    }
+     let root = Path::new(root);
+     let clock = Instant::now();
+     let config = RunConfig {
+@@ -787,6 +796,7 @@ fn main() -> Result<(), Failure> {
+         groups,
+         shared,
+         offered_rate,
++        group_schedule,
+         maintenance,
+         ready_visit_items,
+     };
+@@ -836,6 +846,7 @@ struct RunConfig<'a> {
+     groups: usize,
+     shared: bool,
+     offered_rate: Option<usize>,
++    group_schedule: Option<offered_groups::GroupSchedule>,
+     maintenance: Option<offered::MaintenanceConfig>,
+     ready_visit_items: usize,
+ }
+@@ -854,9 +865,7 @@ fn run<L: LogStore + Send + 'static>(
+         window,
+         groups,
+         shared,
+-        offered_rate: _,
+-        maintenance: _,
+-        ready_visit_items: _,
++        ..
+     } = config;
+     let capacity = count + WARMUP;
+     std::fs::create_dir(root)?;
+diff --git a/validation/check-offered.mjs b/validation/check-offered.mjs
+index 8ebe1314..457bb265 100644
+--- a/validation/check-offered.mjs
++++ b/validation/check-offered.mjs
+@@ -4,6 +4,35 @@
+ import assert from 'node:assert/strict';
+ import fs from 'node:fs';
+ 
++function workloadSchedule(summary, groups, count, warmup) {
++    if (summary.workload_group_weights === undefined) {
++        assert.equal(summary.workload_group_phase, undefined);
++        return operation => (operation - 1) % groups + 1;
++    }
++    assert.equal(summary.workload_group_phase, 'absolute_operation_minus_one');
++    const fields = String(summary.workload_group_weights).split(',');
++    assert.equal(fields.length, groups, 'workload weight count');
++    assert.ok(fields.every(value => /^[1-9]\d*$/.test(value)), 'canonical positive workload weights');
++    const weights = fields.map(Number);
++    assert.ok(weights.every(Number.isSafeInteger));
++    const total = weights.reduce((sum, weight) => sum + weight, 0);
++    assert.ok(Number.isSafeInteger(total) && total <= 256, 'workload weight total');
++    // Independent cumulative ranges, rather than the Rust repeated-slot lookup.
++    const groupOf = operation => {
++        let slot = (operation - 1) % total;
++        for (let group = 0; group < groups; group++) {
++            if (slot < weights[group]) return group + 1;
++            slot -= weights[group];
++        }
++        assert.fail('weighted operation outside schedule');
++    };
++    const retained = Array.from({length: groups}, (_, index) =>
++        Math.floor(warmup / groups) + Number(index < warmup % groups) + 64);
++    for (let offset = 0; offset < count; offset++) retained[groupOf(warmup + offset + 1) - 1]++;
++    assert.ok(retained.every(entries => entries <= 16384), 'weighted workload exceeds default per-group log capacity');
++    return groupOf;
++}
++
+ export function validateOffered(label, summary, source) {
+     const n = key => Number(summary[key]);
+     const count = n('offers'), groups = n('groups'), window = n('window'), warmup = n('warmup');
+@@ -13,6 +42,7 @@ export function validateOffered(label, summary, source) {
+     assert.ok(Number.isSafeInteger(groups) && groups >= 1 && groups <= 32);
+     assert.ok(Number.isSafeInteger(window) && window >= 1 && window <= 64);
+     assert.equal(warmup, 64);
++    const groupOf = workloadSchedule(summary, groups, count, warmup);
+     assert.equal(horizon, Math.floor(count * 1e9 / rate));
+     assert.ok(horizon > 0 && horizon <= 300e9 && Number.isSafeInteger(elapsed) && elapsed >= horizon);
+     assert.equal(n('drain_ns'), elapsed - horizon);
+@@ -33,7 +63,7 @@ export function validateOffered(label, summary, source) {
+         for(const key of fields.filter(k=>!['status','reason'].includes(k))) {
+             r[key]=Number(r[key]); assert.ok(Number.isSafeInteger(r[key]) && r[key]>=0,key);
+         }
+-        assert.equal(r.operation,warmup+i+1); assert.equal(r.group,(r.operation-1)%groups+1);
++        assert.equal(r.operation,warmup+i+1); assert.equal(r.group,groupOf(r.operation));
+         assert.equal(r.intended_ns,Math.floor(i*1e9/rate));
+         assert.ok(r.dispatched_ns>=r.intended_ns && r.completed_ns>=r.dispatched_ns && r.completed_ns<=elapsed);
+         assert.ok(statuses.has(r.status)); statuses.set(r.status,statuses.get(r.status)+1);
+diff --git a/validation/check-offered.test.mjs b/validation/check-offered.test.mjs
+index 8279f05b..7a5f4669 100644
+--- a/validation/check-offered.test.mjs
++++ b/validation/check-offered.test.mjs
+@@ -45,3 +45,44 @@ test('reject unaccounted applied value and altered pending maximum',()=>{
+     assert.throws(()=>check([original[0].replace('70,65','70,66'),original[1]]));
+     assert.throws(()=>check(original,{...metadata,max_inflight:2}));
+ });
++
++const phase='absolute_operation_minus_one';
++function weightedFixture() {
++    // Absolute operations65..70 start at cycle slots4,5,0,1,2,3 for weights4,1,1.
++    const groups=[2,3,1,1,1,1], values=[22,22,23,24,25,26];
++    const rows=groups.map((group,i)=>{
++        const intended=Math.floor(i*1e9/6);
++        return `${65+i},${group},${intended},${intended},${intended+1},1,${i+1},applied,,${100+i},${values[i]}`;
++    });
++    const summary={...metadata,offers:6,groups:3,window:3,offered_rate:6,
++        workload_group_weights:'4,1,1',workload_group_phase:phase,
++        applied:6,window_refused:0,admitted:6,recovered_value:70,
++        applied_during:6,admitted_during:6,p99_us:0.001,service_p99_us:0.001,
++        offered_ops_s:6,admitted_ops_s:6,applied_during_ops_s:6,applied_total_ops_s:6};
++    return {rows,summary};
++}
++test('explicit all-one weights retain historical uniform phase and validation',()=>{
++    check(original,{...metadata,workload_group_weights:'1',workload_group_phase:phase});
++});
++test('weighted rows retain absolute phase and uniform warmup application history',()=>{
++    const {rows,summary}=weightedFixture();check(rows,summary);
++});
++test('reject altered weighted phase, mapping and applied history',()=>{
++    const {rows,summary}=weightedFixture();
++    assert.throws(()=>check(rows,{...summary,workload_group_phase:'measured_offset'}));
++    assert.throws(()=>check(rows,{...summary,workload_group_weights:'1,1,1'}));
++    assert.throws(()=>check([rows[0].replace('65,2,','65,1,'),...rows.slice(1)],summary));
++    assert.throws(()=>check([rows[0].replace('100,22','100,23'),...rows.slice(1)],summary));
++});
++test('reject invalid or undisclosed workload schedule metadata',()=>{
++    const {rows,summary}=weightedFixture();
++    for(const weights of ['0,1,1','1,1','255,1,1','04,1,1','4,-1,1','4,1.5,1']) {
++        assert.throws(()=>check(rows,{...summary,workload_group_weights:weights}));
++    }
++    assert.throws(()=>check(original,{...metadata,workload_group_phase:phase}));
++});
++test('reject a hot-group retained bound that the old uniform ceiling would admit',()=>{
++    assert.ok(Math.ceil((20000+64)/2)+64<16384);
++    assert.throws(()=>check(original,{...metadata,offers:20000,groups:2,
++        workload_group_weights:'255,1',workload_group_phase:phase}),/weighted workload exceeds/);
++});
+diff --git a/examples/benchmark/offered_groups.rs b/examples/benchmark/offered_groups.rs
+new file mode 100644
+index 00000000..b94703a7
+--- /dev/null
++++ b/examples/benchmark/offered_groups.rs
+@@ -0,0 +1,167 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Bounded offered-workload weights; these never change quorum configuration.
++use super::*;
++
++pub(super) struct GroupSchedule {
++    weights: Vec<usize>,
++    slots: Vec<GroupIdentity>,
++}
++
++pub(super) fn prepare_workload(
++    raw: Option<&str>,
++    groups: usize,
++    offered: bool,
++    count: usize,
++) -> Result<Option<GroupSchedule>, Failure> {
++    let schedule = GroupSchedule::from_cli(raw, groups, offered)?;
++    validate_capacity(
++        schedule.as_ref(),
++        count,
++        groups,
++        LogLimits::default().max_entries_per_group,
++    )?;
++    Ok(schedule)
++}
++
++pub(super) fn validate_capacity(
++    schedule: Option<&GroupSchedule>,
++    count: usize,
++    groups: usize,
++    max_entries: usize,
++) -> Result<(), Failure> {
++    if let Some(schedule) = schedule {
++        schedule.validate_capacity(count, max_entries)
++    } else if (count + WARMUP).div_ceil(groups) + 64 > max_entries {
++        Err("workload exceeds default per-group log capacity (including control reserve)".into())
++    } else {
++        Ok(())
++    }
++}
++
++pub(super) fn extract(args: &mut Vec<String>) -> Result<Option<String>, Failure> {
++    let Some(position) = args.iter().position(|arg| arg == "--group-weights") else {
++        return Ok(None);
++    };
++    if args
++        .iter()
++        .skip(position + 1)
++        .any(|arg| arg == "--group-weights")
++    {
++        return Err("duplicate --group-weights".into());
++    }
++    let raw = args
++        .get(position + 1)
++        .filter(|value| !value.starts_with("--"))
++        .ok_or("missing --group-weights value")?
++        .clone();
++    args.drain(position..position + 2);
++    Ok(Some(raw))
++}
++
++impl GroupSchedule {
++    pub(super) fn parse(raw: &str, groups: usize) -> Result<Self, Failure> {
++        if !(1..=32).contains(&groups) {
++            return Err("group count out of bounds".into());
++        }
++        let mut weights = Vec::with_capacity(groups);
++        let mut total = 0usize;
++        for value in raw.split(',') {
++            if value.is_empty() || !value.bytes().all(|byte| byte.is_ascii_digit()) {
++                return Err("workload group weights must be positive decimal integers".into());
++            }
++            let weight = value.parse::<usize>()?;
++            if weight == 0 {
++                return Err("workload group weights must be positive".into());
++            }
++            total = total
++                .checked_add(weight)
++                .ok_or("workload group weight total overflow")?;
++            if total > 256 {
++                return Err("workload group weight total exceeds 256".into());
++            }
++            weights.push(weight);
++            if weights.len() > groups {
++                return Err("workload group weight count must equal groups".into());
++            }
++        }
++        if weights.len() != groups {
++            return Err("workload group weight count must equal groups".into());
++        }
++        let mut slots = Vec::with_capacity(total);
++        for (index, &weight) in weights.iter().enumerate() {
++            slots.extend(std::iter::repeat_n(group_id(index + 1), weight));
++        }
++        Ok(Self { weights, slots })
++    }
++
++    pub(super) fn from_cli(
++        raw: Option<&str>,
++        groups: usize,
++        offered: bool,
++    ) -> Result<Option<Self>, Failure> {
++        raw.map(|value| {
++            if !offered {
++                return Err("--group-weights requires --offered".into());
++            }
++            Self::parse(value, groups)
++        })
++        .transpose()
++    }
++
++    pub(super) fn group(&self, operation: usize) -> GroupIdentity {
++        self.slots[(operation - 1) % self.slots.len()]
++    }
++
++    fn offer_counts(&self, count: usize) -> Vec<usize> {
++        let cycles = count / self.slots.len();
++        let mut counts = self
++            .weights
++            .iter()
++            .map(|weight| weight * cycles)
++            .collect::<Vec<_>>();
++        for offset in 0..count % self.slots.len() {
++            let group = self.group(WARMUP + offset + 1);
++            counts[group.id.get() as usize - 1] += 1;
++        }
++        counts
++    }
++
++    pub(super) fn validate_capacity(
++        &self,
++        count: usize,
++        max_entries: usize,
++    ) -> Result<(), Failure> {
++        let groups = self.weights.len();
++        for (index, offers) in self.offer_counts(count).into_iter().enumerate() {
++            let warmup = WARMUP / groups + usize::from(index < WARMUP % groups);
++            let retained = offers
++                .checked_add(warmup)
++                .and_then(|value| value.checked_add(64))
++                .ok_or("weighted workload log capacity overflow")?;
++            if retained > max_entries {
++                return Err(
++                    "workload exceeds default per-group log capacity (including control reserve)"
++                        .into(),
++                );
++            }
++        }
++        Ok(())
++    }
++
++    pub(super) fn metadata(&self) -> String {
++        let weights = self
++            .weights
++            .iter()
++            .map(usize::to_string)
++            .collect::<Vec<_>>()
++            .join(",");
++        format!(
++            " workload_group_weights={weights} workload_group_phase=absolute_operation_minus_one"
++        )
++    }
++}
++
++#[cfg(test)]
++#[path = "offered_groups/tests.rs"]
++mod tests;
+diff --git a/examples/benchmark/offered_groups/tests.rs b/examples/benchmark/offered_groups/tests.rs
+new file mode 100644
+index 00000000..b392cc00
+--- /dev/null
++++ b/examples/benchmark/offered_groups/tests.rs
+@@ -0,0 +1,125 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++
++fn args(values: &[&str]) -> Vec<String> {
++    values.iter().map(|value| (*value).to_owned()).collect()
++}
++
++#[test]
++fn workload_option_preserves_other_arguments_and_rejects_incomplete_duplicates() {
++    let mut input = args(&[
++        "root",
++        "tcp",
++        "50",
++        "32",
++        "3",
++        "--group-weights",
++        "2,1,1",
++        "--offered",
++        "10",
++    ]);
++    assert_eq!(extract(&mut input).unwrap().as_deref(), Some("2,1,1"));
++    assert_eq!(
++        input,
++        args(&["root", "tcp", "50", "32", "3", "--offered", "10"])
++    );
++    assert_eq!(extract(&mut input).unwrap(), None);
++    for values in [
++        vec!["--group-weights"],
++        vec!["--group-weights", "--offered"],
++        vec!["--group-weights", "1", "--group-weights", "1"],
++    ] {
++        let mut input = args(&values);
++        let before = input.clone();
++        assert!(extract(&mut input).is_err());
++        assert_eq!(input, before);
++    }
++}
++
++#[test]
++fn weights_are_bounded_positive_workload_inputs_only() {
++    for raw in [
++        "",
++        "0,1",
++        "1,0",
++        "-1,1",
++        "+1,1",
++        "1.5,1",
++        "1,,1",
++        "1",
++        "1,1,1",
++        "256,1",
++        "184467440737095516160,1",
++    ] {
++        assert!(GroupSchedule::parse(raw, 2).is_err(), "{raw}");
++    }
++    assert!(GroupSchedule::parse("1", 0).is_err());
++    assert!(GroupSchedule::parse("1", 33).is_err());
++    assert!(GroupSchedule::from_cli(Some("1"), 1, false).is_err());
++    assert!(GroupSchedule::from_cli(None, 1, false).unwrap().is_none());
++    let schedule = GroupSchedule::parse("0255,01", 2).unwrap();
++    assert_eq!(schedule.slots.len(), 256);
++    assert_eq!(
++        schedule.metadata(),
++        " workload_group_weights=255,1 workload_group_phase=absolute_operation_minus_one"
++    );
++}
++
++#[test]
++fn all_one_weights_preserve_uniform_absolute_phase_including_warmup_offset() {
++    for groups in 1..=32 {
++        let raw = std::iter::repeat_n("1", groups)
++            .collect::<Vec<_>>()
++            .join(",");
++        let schedule = GroupSchedule::parse(&raw, groups).unwrap();
++        for operation in 1..=WARMUP + 500 {
++            assert_eq!(
++                schedule.group(operation),
++                operation_group(operation, groups)
++            );
++        }
++    }
++    let skew = GroupSchedule::parse("2,1", 2).unwrap();
++    assert_eq!(
++        (65..=70)
++            .map(|op| skew.group(op).id.get())
++            .collect::<Vec<_>>(),
++        vec![1, 2, 1, 1, 2, 1]
++    );
++}
++
++#[test]
++fn exact_weighted_counts_and_log_capacity_include_uniform_warmup_and_control_reserve() {
++    for raw in ["1,1,1", "7,1,2", "1,255"] {
++        let groups = raw.split(',').count();
++        let schedule = GroupSchedule::parse(raw, groups).unwrap();
++        for count in [1, 2, 3, 255, 256, 257, 15000, 50000] {
++            let mut literal = vec![0usize; groups];
++            for operation in WARMUP + 1..=WARMUP + count {
++                literal[schedule.group(operation).id.get() as usize - 1] += 1;
++            }
++            assert_eq!(schedule.offer_counts(count), literal);
++        }
++    }
++    let uniform = GroupSchedule::parse("1,1,1", 3).unwrap();
++    for count in [1usize, 15000, 48000] {
++        let bound = (count + WARMUP).div_ceil(3) + 64;
++        for schedule in [None, Some(&uniform)] {
++            assert!(validate_capacity(schedule, count, 3, bound).is_ok());
++            assert!(validate_capacity(schedule, count, 3, bound - 1).is_err());
++        }
++    }
++    let skew = GroupSchedule::parse("255,1", 2).unwrap();
++    assert!((20000usize + WARMUP).div_ceil(2) + 64 < 16384);
++    assert!(validate_capacity(None, 20000, 2, 16384).is_ok());
++    assert!(validate_capacity(Some(&skew), 20000, 2, 16384).is_err());
++    assert!(prepare_workload(None, 2, true, 20000).unwrap().is_none());
++    assert!(prepare_workload(Some("1,1"), 2, true, 20000).is_ok());
++    assert!(prepare_workload(Some("255,1"), 2, true, 20000).is_err());
++    assert!(prepare_workload(Some("1,1"), 2, false, 20000).is_err());
++    let offers = skew.offer_counts(15000);
++    let exact = offers.into_iter().max().unwrap() + WARMUP / 2 + 64;
++    assert!(skew.validate_capacity(15000, exact).is_ok());
++    assert!(skew.validate_capacity(15000, exact - 1).is_err());
++}
