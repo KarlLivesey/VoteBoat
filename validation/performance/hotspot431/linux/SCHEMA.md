@@ -1,0 +1,7 @@
+# Linux431 CPU diagnostic preparation
+
+Use the existing published431 capacity artifact unchanged, guardedsource1427/fourfresh:false libraries/executable/buildscript/releaseoracle/DWP. Record only attributionOFF bulk4096/batch4 with20,000,000 requested originals (rounded19,988,480) and singleton1/batch1 with1,048,576, each1024 warmups. Same default-retention/upstream-default, volatile one-group three-voter empty payload, clientruntime1/server16, campaign3600. Keep every original completion. perf cycles:u1000Hz/DWARF16KiB/mmap128 and kernel2/2/516 remain unchanged; no sudo/sysctl or profile/compiler flags.
+
+Wait root quietSTART. No builds/checks/copies/archive/symbolication on the same host while recording. Poll original handle, preserve errors and refuse output overwrite; no recapture merely for polling timeout. Send actualEND before import/analysis. These are CPU-sampling diagnostics, separate from unprofiled capacity/sustained acceptance.
+
+Import lossless perf data to new saved Samply JSON using --save-only --no-open. Only afterward perform headless localhost JSON symbolication with new431 ELF+DWP module identifiers/RVAs. Copy no430 profiles/ADDRESS_SYMBOLS/responses. Report selected sample denominators, nulls/loss/synthetic names and overlapping inclusive costs, targeted receive-clone context and remaining costs. No browser, SVG reading, external symbol server or allocator/IO inference.

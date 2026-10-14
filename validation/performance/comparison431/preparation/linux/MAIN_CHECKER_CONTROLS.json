@@ -1,0 +1,94 @@
+{
+  "scope": "actual16384 CLI checker qualification and negative in-memory copies; no new benchmarks, checker-only actual CLI qualification; artifact proof is separate; no sustained performance claim",
+  "actual": [
+    {
+      "mode": "off",
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/logs/off.json",
+      "sha256": "3171835c945af39dc54ac5975cecd1fe8b9b8bb9b192ac7485a6a0f127bfea94",
+      "completed_originals": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "result": "pass"
+    },
+    {
+      "mode": "on",
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/logs/on.json",
+      "sha256": "f5253c09f5c6a8687522b09b2a790d674d807554823caa8ba0931fc347ff2ef2",
+      "completed_originals": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "result": "pass"
+    },
+    {
+      "mode": "openraft",
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/logs/openraft.json",
+      "sha256": "bf7f06731719bfaeb430e45f1ffb8e02cce49c478ecd6ff4c2f60a891d138a87",
+      "completed_originals": 16384,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "result": "pass"
+    }
+  ],
+  "negative_controls": [
+    {
+      "control": "missing_original",
+      "result": "correctly rejected",
+      "reason": "wrong original completion"
+    },
+    {
+      "control": "missing_frontier",
+      "result": "correctly rejected",
+      "reason": "wrong follower frontier"
+    },
+    {
+      "control": "missing_protected_phase",
+      "result": "correctly rejected",
+      "reason": "wrong phase count"
+    },
+    {
+      "control": "missing_scoped_method",
+      "result": "correctly rejected",
+      "reason": "wrong provider method count"
+    },
+    {
+      "control": "duplicate_phase",
+      "result": "correctly rejected",
+      "reason": "wrong/duplicate phase names"
+    },
+    {
+      "control": "misleading_protected_units",
+      "result": "correctly rejected",
+      "reason": "protected comparison units absent/misleading"
+    },
+    {
+      "control": "invented_gap_units",
+      "result": "correctly rejected",
+      "reason": "gap observations do not certify exactly each successful compaction"
+    },
+    {
+      "control": "invented_scoped_maximum",
+      "result": "correctly rejected",
+      "reason": "invented scoped maximum"
+    },
+    {
+      "control": "historical_gap_scope",
+      "result": "correctly rejected",
+      "reason": "historical gap scope reused"
+    },
+    {
+      "control": "unexpected_owned_compaction",
+      "result": "correctly rejected",
+      "reason": "borrowed compaction unexpectedly materializes state"
+    }
+  ],
+  "checker_sha256": "0f44bec9ebbe1628d03ca3b7e23641289a249b358c6436fb977d46dfd572e755"
+}

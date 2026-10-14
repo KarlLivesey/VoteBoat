@@ -1,0 +1,45 @@
+{
+  "commit": "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+  "source_inputs": 1427,
+  "source_inventory": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/SOURCE.json",
+    "sha256": "a56f152ead8f074de2db71b60da719a21503b057eff513d64873733a88182ab4"
+  },
+  "guard_pair": {
+    "baseline": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1426
+    },
+    "candidate": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1427
+    }
+  },
+  "guard_config_sha256": "67006dc5191a41d6ff4b427fcd780e5210e64833be4eefc2b3174714f614c2a4",
+  "binary_sha256": "a2a6e905e2a478be1081265cfaa13879675e0c6227d5ce1a25be57df5a7d92d6",
+  "dwp_sha256": "3d04aaab009302b9b5f78803f3a1dc893db2fb5f98e219c5ce496c8c9cf09d4f",
+  "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+  "perf_version": "perf version 7.2.10-1",
+  "settings": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "runner_sha256": "32aeab6082a0777ec41e2c3301e0f4dcc09d7888eb9e9bf071bf9e8df85a0fc5",
+  "fresh_symbolication": true,
+  "not_started": "rootQUIET_START required afteralllocaloperationsfinished"
+}

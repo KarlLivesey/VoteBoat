@@ -1,0 +1,25 @@
+{
+  "baseline_commit": "9d2b7852862a633e188afb38de8e2d3578efb5ca",
+  "candidate_commit": "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+  "source_counts": [
+    1426,
+    1427
+  ],
+  "config_sha256": "67006dc5191a41d6ff4b427fcd780e5210e64833be4eefc2b3174714f614c2a4",
+  "same_compiler_cargo_protoc_locks_profile": true,
+  "fresh_original_handle": 41231,
+  "actual_build_terminal": 0,
+  "actual_small_cli_controls": 3,
+  "checker_negative_controls": 10,
+  "artifact_negative_controls": 8,
+  "guard_control_syntax_status": 0,
+  "timing": "NOTRUN, rootquietauthorization required",
+  "driver_sha256": {
+    "artifact-guard.py": "25379495c18d97ccb002d71fdfddfdb86ae1625216e9e4c7f86722a40e1f0e5c",
+    "phase-diagnostic-check.py": "0f44bec9ebbe1628d03ca3b7e23641289a249b358c6436fb977d46dfd572e755",
+    "phase-diagnostic.sh": "9ac42a992d2195cdffd6e8b8cad5bbd94718f3f63b043dc1f33612dfbbe56f54",
+    "prepare-pair.py": "56ab840e326edfa7774e80202d5c8f6dd7d740252b43c88eaf9de0e7d71322d6",
+    "linux-run.sh": "7933d2115ee88b5ee92e4b772804dfc1ae40a9bea0ed3de98d973338ca8e348e"
+  },
+  "source_scope": "one new owned Append fixture +receive/module registration; no benchmark driver/source/interface/profile/dependency changes"
+}

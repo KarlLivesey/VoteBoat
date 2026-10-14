@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-14T00:45:54.813013+00:00",
+  "passed": true,
+  "source_count": 1357,
+  "artifacts": {
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/bench": "30146a5688ea4c287f17dfa5c4926ea8212f0b2a11524bf1b2df24e236a0e7dd"
+  },
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+  "errors": []
+}

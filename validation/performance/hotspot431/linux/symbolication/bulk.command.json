@@ -1,0 +1,7 @@
+[
+  "python3",
+  "target/p9/profile431/linux/symbolication/symbolize-full-json.py",
+  "target/p9/profile431/linux/perf-quiet/bulk.json.gz",
+  "http://127.0.0.1:38475/117vbin13yy0w20nl4wjjaf8f98lwdrmdsb4b9h/symbolicate/v5",
+  "target/p9/profile431/linux/symbolication/bulk-symbolicated"
+]

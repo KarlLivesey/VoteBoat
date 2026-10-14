@@ -1,0 +1,45 @@
+[
+  {
+    "case": "off",
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": null,
+    "guarded_output_sha256": "3171835c945af39dc54ac5975cecd1fe8b9b8bb9b192ac7485a6a0f127bfea94",
+    "meaning": "small functional control; CLI rates not sustained or paired capacity evidence"
+  },
+  {
+    "case": "on",
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": [
+      29,
+      4,
+      15
+    ],
+    "guarded_output_sha256": "f5253c09f5c6a8687522b09b2a790d674d807554823caa8ba0931fc347ff2ef2",
+    "meaning": "small functional control; CLI rates not sustained or paired capacity evidence"
+  },
+  {
+    "case": "openraft",
+    "completed_originals": 16384,
+    "completed_requests": 4096,
+    "applied_frontiers": [
+      17409,
+      17409,
+      17409
+    ],
+    "phase_scope_method_counts": null,
+    "guarded_output_sha256": "bf7f06731719bfaeb430e45f1ffb8e02cce49c478ecd6ff4c2f60a891d138a87",
+    "meaning": "small functional control; CLI rates not sustained or paired capacity evidence"
+  }
+]

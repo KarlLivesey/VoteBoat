@@ -1,0 +1,32 @@
+Load a profile from a file and display it
+
+Usage: samply load [OPTIONS] <FILE>
+
+Arguments:
+  <FILE>  Path to the file that should be loaded
+
+Options:
+  -n, --no-open
+          Do not open the profiler UI
+      --address <ADDRESS>
+          The address to use for the local web server [default: 127.0.0.1]
+  -P, --port <PORT>
+          The port to use for the local web server [default: 3000+]
+  -v, --verbose
+          Print debugging output
+      --symbol-dir <SYMBOL_DIR>
+          Extra directories containing symbol files
+      --windows-symbol-server <WINDOWS_SYMBOL_SERVER>
+          Additional URLs of symbol servers serving PDB / DLL / EXE files
+      --windows-symbol-cache <WINDOWS_SYMBOL_CACHE>
+          Overrides the default cache directory for Windows symbol files which were downloaded from a symbol server
+      --breakpad-symbol-server <BREAKPAD_SYMBOL_SERVER>
+          Additional URLs of symbol servers serving Breakpad .sym files
+      --breakpad-symbol-dir <BREAKPAD_SYMBOL_DIR>
+          Additional local directories containing Breakpad .sym files
+      --breakpad-symbol-cache <BREAKPAD_SYMBOL_CACHE>
+          Overrides the default cache directory for Breakpad symbol files
+      --simpleperf-binary-cache <SIMPLEPERF_BINARY_CACHE>
+          Extra directory containing symbol files, with the directory structure used by simpleperf's scripts
+  -h, --help
+          Print help

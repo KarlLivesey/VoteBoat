@@ -1,0 +1,11 @@
+[
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+  "import",
+  "--save-only",
+  "--no-open",
+  "--symbol-dir",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/target-matched-release/release",
+  "--output",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile431/linux/perf-quiet/singleton.json.gz",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile431/linux/perf-quiet/singleton.data"
+]

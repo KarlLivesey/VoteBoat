@@ -1,0 +1,8 @@
+{
+  "initial_publication_command_exit": 2,
+  "commit_or_push_executed": false,
+  "reason": "extra broad git whitespace check includes preserved raw command/log bytes (trailing printf whitespace and terminal blank lines); no source/docs whitespace error",
+  "all_diff_status": 2,
+  "source_docs_diff_status": 0,
+  "action": "Preserve raw evidence byte-for-byte and scope optional git diff check to authored source/docs; formatter/Clippy configurations and enabled hook unchanged"
+}

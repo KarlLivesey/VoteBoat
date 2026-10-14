@@ -1,0 +1,11 @@
+# Linux431 paired framework diagnostics
+
+Original54853 completed0/DONE. All24 exact original/frontier/envelope/observer cases and before/after source/artifact/driver guards pass. Three rotating trials per4096-client/batch4 and1-client/batch1 cell each used1,048,576 originals plus1024 singleton warmups. Published430 baseline9d2b785 and431 candidateebcacbbb match hardware, compiler, locks, asserted release profile, payload, runtime, batching, maintenance and timer boundaries. Fresh root/library/executable/pinned upstream, buildscript release-oracle and original/copied DWP proofs are included.
+
+Bulk medians430OFF/431OFF/431ON/OpenRaft:5,047,787 /5,140,875 /5,390,624 /3,150,951 completed originals/s; p995.068510 /4.939567 /4.859997 /7.623954ms. OFF paired rate ratios0.957751 /1.237041 /0.986828 include two regressions, so this is no repeatable gain. Paired p99 ratios1.074320 /0.765599 /0.986794 preserve the trial1 latency regression. ON exceededOFF in trials1/3 but regressed in trial2.
+
+Singleton medians:112,017 /110,029 /93,987 /20,285 originals/s; p990.017073 /0.017243 /0.018856 /0.124744ms. OFF rate ratios0.987988 /1.004198 /0.960244 include two regressions; all three p99 ratios regress1.027477 /1.009957 /1.018192. ON regresses againstOFF in all singleton trials. All rates, latencies, raw commands/stdout/stderr/exits/timers and slower tails remain in PAIRED.json/RESULTS.json and per-case files.
+
+ON leader admission61.996–72.033ms, results55.629–61.408ms, protected comparison1.646–1.885ms and compaction12.290–13.595ms are inclusive elapsed wall scopes, often nested/overlapping. Do not sum them as CPU or infer allocator/IO causes. Native/durable results and CPU sampling remain separate.
+
+MedianOFF5.141M remains below the published batch4 floor5.615M and current minimum8.4225M. Short volatile diagnostics do not qualify sustained20M runs, both-host floors, real quorum-durable application throughput, headroom/fairness/skew or P8. No outcome channels, failures or regressions were removed. Root authorized the quiet window before launch; all known same-host setup/check/copy/archive work and Mac transfers stayed paused until actual terminal. No browser or profile/security settings changed.

@@ -1,0 +1,1 @@
+/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo build --locked --offline --release --manifest-path /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/source/benchmarks/matched/Cargo.toml --bin voteboat-matched-framework --message-format=json -vv 

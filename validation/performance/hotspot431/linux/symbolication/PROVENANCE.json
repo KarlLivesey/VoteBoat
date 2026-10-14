@@ -1,0 +1,237 @@
+{
+  "created_utc": "2026-10-14T00:44:24.066074+00:00",
+  "prep": {
+    "commit": "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+    "source_inputs": 1427,
+    "source_inventory": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/SOURCE.json",
+      "sha256": "a56f152ead8f074de2db71b60da719a21503b057eff513d64873733a88182ab4"
+    },
+    "guard_pair": {
+      "baseline": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1426
+      },
+      "candidate": {
+        "artifacts": [
+          "bench_minimal",
+          "openraft",
+          "voteboat",
+          "voteboat-matched-framework"
+        ],
+        "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+        "mode": "asserted_release",
+        "source_inputs": 1427
+      }
+    },
+    "guard_config_sha256": "67006dc5191a41d6ff4b427fcd780e5210e64833be4eefc2b3174714f614c2a4",
+    "binary_sha256": "a2a6e905e2a478be1081265cfaa13879675e0c6227d5ce1a25be57df5a7d92d6",
+    "dwp_sha256": "3d04aaab009302b9b5f78803f3a1dc893db2fb5f98e219c5ce496c8c9cf09d4f",
+    "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+    "perf_version": "perf version 7.2.10-1",
+    "settings": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    },
+    "runner_sha256": "32aeab6082a0777ec41e2c3301e0f4dcc09d7888eb9e9bf071bf9e8df85a0fc5",
+    "fresh_symbolication": true,
+    "not_started": "rootQUIET_START required afteralllocaloperationsfinished"
+  },
+  "recording": {
+    "binary": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework",
+    "binary_sha256": "a2a6e905e2a478be1081265cfaa13879675e0c6227d5ce1a25be57df5a7d92d6",
+    "perf": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "perf_sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+    "perf_version": "perf version 7.2.10-1",
+    "settings_before": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    },
+    "scope": "CPU-sampling diagnostic; not unprofiled capacity or acceptance",
+    "events": "cycles:u",
+    "frequency": 1000,
+    "call_graph": "dwarf,16384",
+    "mmap_pages": 128,
+    "cases": [
+      {
+        "name": "bulk",
+        "start_unix": 1791938030.2872722,
+        "end_unix": 1791938033.725509,
+        "exit": 0,
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+          "record",
+          "-e",
+          "cycles:u",
+          "-F",
+          "1000",
+          "--call-graph",
+          "dwarf,16384",
+          "-m",
+          "128",
+          "-o",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile431/linux/perf-quiet/bulk.data",
+          "--",
+          "/usr/bin/env",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework",
+          "--engine",
+          "voteboat",
+          "--clients",
+          "4096",
+          "--batch",
+          "4",
+          "--operations",
+          "20000000",
+          "--warmup",
+          "1024",
+          "--maintenance",
+          "default-retention",
+          "--envelopes",
+          "upstream-default",
+          "--attribution",
+          "false",
+          "--campaign-timeout-secs",
+          "3600"
+        ]
+      },
+      {
+        "name": "singleton",
+        "start_unix": 1791938033.725679,
+        "end_unix": 1791938043.7201319,
+        "exit": 0,
+        "command": [
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+          "record",
+          "-e",
+          "cycles:u",
+          "-F",
+          "1000",
+          "--call-graph",
+          "dwarf,16384",
+          "-m",
+          "128",
+          "-o",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile431/linux/perf-quiet/singleton.data",
+          "--",
+          "/usr/bin/env",
+          "-u",
+          "LD_LIBRARY_PATH",
+          "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched431-linux/artifacts/matched/voteboat-matched-framework",
+          "--engine",
+          "voteboat",
+          "--clients",
+          "1",
+          "--batch",
+          "1",
+          "--operations",
+          "1048576",
+          "--warmup",
+          "1024",
+          "--maintenance",
+          "default-retention",
+          "--envelopes",
+          "upstream-default",
+          "--attribution",
+          "false",
+          "--campaign-timeout-secs",
+          "3600"
+        ]
+      }
+    ],
+    "settings_after": {
+      "perf_event_paranoid": 2,
+      "kptr_restrict": 2,
+      "perf_event_mlock_kb": 516
+    }
+  },
+  "after_source_artifact_release_oracle_guard": {
+    "baseline": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1426
+    },
+    "candidate": {
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass",
+      "mode": "asserted_release",
+      "source_inputs": 1427
+    }
+  },
+  "original_capture_session": 6720,
+  "capture_terminal_exit": 0,
+  "imports_terminal_exit": {
+    "bulk": 0,
+    "singleton": 0
+  },
+  "symbolication_terminal_exit": {
+    "bulk": 0,
+    "singleton": 0
+  },
+  "owned_server": {
+    "pid": 1400749,
+    "original_session": 11242,
+    "stop_signal": "SIGINT",
+    "terminal_exit": 0,
+    "browser_opened": false,
+    "external_symbol_requests": false
+  },
+  "capture_loss": {
+    "bulk": {
+      "reported_lost_chunks": 2,
+      "reported_perf_samples": 6764,
+      "import_warning": "bad timestamp ordering; 0 is earlier but arrived after 109543452256826"
+    },
+    "singleton": {
+      "reported_lost_chunks": 0,
+      "reported_perf_samples": 17832
+    },
+    "scope": "Exact stderr retained. No missing/lost samples reconstructed; sample counts are not a complete CPU census."
+  },
+  "quiet_window": "Explicit root QUIET_START after preparation/archive completion; parent and agents held Linux builds/checks/copies/archive throughout recording; QUIET_END sent before imports/analysis. Mac qualification separate host only, transfers held.",
+  "fresh_symbols": "New431 ELF build IDs, current packed DWP and actual per-RVA inline/source API responses. No430 ADDRESS_SYMBOLS or raw profile samples reused; generic analysis code copied and old address-specific label removed. Synthetic FDE names remain unknown.",
+  "cleanup_attempt": {
+    "tool_chunk": "f9fc83",
+    "exit": 1,
+    "reported_error": "AssertionError: [] while normal sandbox ps could not see escalated Samply server",
+    "raw_file_available": false,
+    "correction": "Escalated ps selected only owned samply --port38475 PID1400749; SIGINT; original11242 actualterminal0. No unrelated process killed."
+  },
+  "no_browser_SVG_extra_builds_frameflags_or_kernel_changes": true,
+  "inputs": {
+    "perf-quiet/bulk.data": "a7ad895afc63fc51984794f526b4f9640e566312c0821cceec7e72f96a94c056",
+    "perf-quiet/singleton.data": "c2d1e1f8734e54442151e347d5c35aed63b2560d796f42da4769b423d1f61b99",
+    "perf-quiet/bulk.json.gz": "daeeb16283c7abebba499487b74cb609dc57d626b207d96000d1bde1e043726a",
+    "perf-quiet/singleton.json.gz": "96c925bff7d87cc693fe190ef60bd3864737d2ef10f939cb6c7cfe8ba54fe5c9"
+  },
+  "limits": [
+    "Saved sample-count weights are not raw perf period cycles or CPU microseconds.",
+    "Launch-to-exit sampling includes warmups, verification, latency sorting and shutdown.",
+    "Inclusive and intersection contexts overlap; do not sum as CPU time or infer allocator causality.",
+    "Source/inline optimized frame omissions prevent exhaustive Client.write partition or allocation/wake counts.",
+    "Thread labels do not identify leader/follower CPU ownership.",
+    "Paired431 short capacity results have two bulk regressions; no repeatable gain claim.",
+    "No existing original outcome or per-operation channel removed."
+  ]
+}

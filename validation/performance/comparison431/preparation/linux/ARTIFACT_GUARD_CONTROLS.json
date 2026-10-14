@@ -1,0 +1,69 @@
+{
+  "scope": "actual published430/431 pair artifact guards and8 refusal controls; prior unpublished controls retained in prepublication",
+  "actual_pair": {
+    "baseline": {
+      "source_inputs": 1426,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    },
+    "candidate": {
+      "source_inputs": 1427,
+      "artifacts": [
+        "bench_minimal",
+        "openraft",
+        "voteboat",
+        "voteboat-matched-framework"
+      ],
+      "mode": "asserted_release",
+      "checks": "all frozen source, artifact, driver and applicable compiler guards pass"
+    }
+  },
+  "negative_controls": [
+    {
+      "control": "unpublished_commit",
+      "result": "correctly rejected",
+      "reason": "candidate not yet qualified/published"
+    },
+    {
+      "control": "missing_build_rs",
+      "result": "correctly rejected",
+      "reason": "source inventory differs"
+    },
+    {
+      "control": "missing_owned_append_module",
+      "result": "correctly rejected",
+      "reason": "source inventory differs"
+    },
+    {
+      "control": "missing_release_oracle_evidence",
+      "result": "correctly rejected",
+      "reason": "essential release oracle proof absent"
+    },
+    {
+      "control": "reused_root_library",
+      "result": "correctly rejected",
+      "reason": "reused compiler record: voteboat"
+    },
+    {
+      "control": "assertions_disabled",
+      "result": "correctly rejected",
+      "reason": "wrong actual compiler profile: voteboat"
+    },
+    {
+      "control": "wrong_dwp_hash",
+      "result": "correctly rejected",
+      "reason": "changed packed DWP: original"
+    },
+    {
+      "control": "changed_oracle_receipt",
+      "result": "correctly rejected",
+      "reason": "changed release oracle proof"
+    }
+  ]
+}

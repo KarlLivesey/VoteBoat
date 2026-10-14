@@ -1,0 +1,9 @@
+{
+  "commit": "ebcacbbb755d8069a084837fdc0f4920426c61b7",
+  "actual_push_original_session": 45791,
+  "exit": 0,
+  "full_enabled_hook": "root formatting, four strict configurations, standalone formatting/strict: zero",
+  "log_sha256": "524e0a9e028cf7a096bf4ea8ea932af629396369e09d1b011f6700fa2d3b9a3d",
+  "scope": "all original native and fixture failures preserved separately; publication does not establish431 performance gain or close P9",
+  "earlier_optional_whitespace_gate": "authored source/docs clean; raw logs retain original trailing whitespace/blank terminal lines; no formatter/Clippy configuration or hook changed"
+}

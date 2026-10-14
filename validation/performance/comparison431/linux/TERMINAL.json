@@ -1,0 +1,12 @@
+{
+  "original_handle": 54853,
+  "actual_terminal_exit": 0,
+  "linux_status": "0",
+  "linux_stage": "DONE",
+  "last_case_stage": "candidate-c1-b1-t3",
+  "cases": 24,
+  "failures": [],
+  "checks": "24 exactoriginal/frontier/envelope/observercases pass; before/aftersourceartifactdriverguards0",
+  "quiet_window": "rootauthorizedbeforelaunch, allknownsamehostarchive/check/build/helperworkpauseduntilactualterminal; Macremotequalificationonly,nocollection/transfers",
+  "no_restart": true
+}

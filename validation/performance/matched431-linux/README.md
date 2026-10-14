@@ -1,0 +1,7 @@
+# Fresh Linux431 framework qualification
+
+Published ebcacbbb supplies1,427 exact selected inputs with Git modes preserved. Three source paths change from430, including one new owned Append test module. Original41231 built in a genuinely fresh target and completed0/DONE in1m16s. Four root/executable/pinned OpenRaft+bench_minimal compiler records and the root buildscript are fresh:false. Compiler, Cargo, protoc, locks and profile match430 within this host: opt3/debug2/assertions/overflow/thinLTO/codegen1/packed; inherited flags/wrappers unset. Actual Cargo JSON and rustc invocations, source guards and original/copied artifacts plus DWP provenance are retained. PROFILErelease omits only the reference oracle, preserving ordinary assertions/overflow.
+
+Actual off/on/OpenRaft controls completed16,384 originals/4,096 requests with all three frontiers17,409. ON retains29 phases, four scopes,15 methods and three successful gaps per replica. These CLI rates are functional controls, not capacity acceptance. Source qualification and its original errors/controlled native cases remain separately in slice431 evidence. No unchanged source suites repeated for artifact setup.
+
+Only the incoming Append clone is conditionally replaced by owned transfer after existing gates; independent pending/provider copies remain. No performance gain is claimed. Candidate capacity timing awaits the coordinated root quiet window. No browser, security or framework profile changes.

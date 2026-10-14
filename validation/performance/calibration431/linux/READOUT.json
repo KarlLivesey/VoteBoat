@@ -1,0 +1,116 @@
+{
+  "scope": "untouched pinned upstream400s calibration, separate from matched P9 acceptance",
+  "host": "linux",
+  "original_exec_handle": 81347,
+  "terminal_exit": 0,
+  "completed_cases": 6,
+  "guards_before_after": "passed1357sources/originalartifact/compiler/proofs",
+  "trials_in_launch_order": [
+    {
+      "case": "trial1-latency-off",
+      "latency_enabled": false,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 5.352302393,
+      "completed_originals_per_second": 3734557.3049351433,
+      "printed_integer_ns_per_original": 267,
+      "printed_integer_originals_per_ms": 3734,
+      "count_evidence": "source-certified rounded count conditional on exit0/all successful client joins; no frontier verification",
+      "exit": 0
+    },
+    {
+      "case": "trial1-latency-on",
+      "latency_enabled": true,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 5.6541431410000005,
+      "completed_originals_per_second": 3535191.7172130183,
+      "request_p50_ms": 4.594624,
+      "request_p95_ms": 5.897282,
+      "request_p99_ms": 6.73249,
+      "request_mean_ms": 4.631661,
+      "samples": 4997120,
+      "count_evidence": "exact upstream latency JSON after all joins",
+      "exit": 0
+    },
+    {
+      "case": "trial2-latency-on",
+      "latency_enabled": true,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 5.802125745,
+      "completed_originals_per_second": 3445027.026038713,
+      "request_p50_ms": 4.717825,
+      "request_p95_ms": 5.942566,
+      "request_p99_ms": 6.852856,
+      "request_mean_ms": 4.752652,
+      "samples": 4997120,
+      "count_evidence": "exact upstream latency JSON after all joins",
+      "exit": 0
+    },
+    {
+      "case": "trial2-latency-off",
+      "latency_enabled": false,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 5.445779547,
+      "completed_originals_per_second": 3670453.3900957047,
+      "printed_integer_ns_per_original": 272,
+      "printed_integer_originals_per_ms": 3670,
+      "count_evidence": "source-certified rounded count conditional on exit0/all successful client joins; no frontier verification",
+      "exit": 0
+    },
+    {
+      "case": "trial3-latency-off",
+      "latency_enabled": false,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 5.585878728,
+      "completed_originals_per_second": 3578394.908540521,
+      "printed_integer_ns_per_original": 279,
+      "printed_integer_originals_per_ms": 3578,
+      "count_evidence": "source-certified rounded count conditional on exit0/all successful client joins; no frontier verification",
+      "exit": 0
+    },
+    {
+      "case": "trial3-latency-on",
+      "latency_enabled": true,
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup_originals": 1024,
+      "seconds": 5.686251002,
+      "completed_originals_per_second": 3515229.980697219,
+      "request_p50_ms": 4.626894,
+      "request_p95_ms": 5.739675,
+      "request_p99_ms": 6.721209,
+      "request_mean_ms": 4.657928,
+      "samples": 4997120,
+      "count_evidence": "exact upstream latency JSON after all joins",
+      "exit": 0
+    }
+  ],
+  "summary": {
+    "off": {
+      "median_completed_originals_per_second": 3670453.3900957047,
+      "minimum_completed_originals_per_second": 3578394.908540521,
+      "maximum_completed_originals_per_second": 3734557.3049351433
+    },
+    "on": {
+      "median_completed_originals_per_second": 3515229.980697219,
+      "minimum_completed_originals_per_second": 3445027.026038713,
+      "maximum_completed_originals_per_second": 3535191.7172130183,
+      "median_request_p99_ms": 6.73249
+    }
+  },
+  "median_off_over_on_gain_percent": 4.415739802256091,
+  "limitations": [
+    "Not matched acceptance: independent196-package lock/default upstream runtime-stats/default driver; published5.615M hardware differs.",
+    "OFF reports no latency and no machine-readable completion counter; rounded count derives from unchanged source/all client joins/exit0.",
+    "No added follower frontier verification. No inference that latency collection explains whole reference gap."
+  ]
+}

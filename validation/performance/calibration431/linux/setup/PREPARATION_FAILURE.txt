@@ -1,0 +1,1 @@
+Initial preparation exited1: old Linux records have compiler text in artifact-guards.json, not logs/rustc.txt. No benchmark launched. Focused correction uses recorded artifact-guards compiler.

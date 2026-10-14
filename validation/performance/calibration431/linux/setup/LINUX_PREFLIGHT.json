@@ -1,0 +1,76 @@
+{
+  "passed": true,
+  "source_root": "/tmp/voteboat-openraft230-linux",
+  "source_count": 1357,
+  "source_verified": 1357,
+  "artifact_sha256": "30146a5688ea4c287f17dfa5c4926ea8212f0b2a11524bf1b2df24e236a0e7dd",
+  "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8",
+  "compiler_artifacts": [
+    {
+      "name": "bench_minimal",
+      "fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "target": "/tmp/voteboat-openraft230-linux/benchmarks/minimal/src/lib.rs",
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/deps/libbench_minimal-f27baf88e5d5acde.rlib",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/deps/libbench_minimal-f27baf88e5d5acde.rmeta"
+      ]
+    },
+    {
+      "name": "openraft",
+      "fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "clap",
+        "default",
+        "runtime-stats",
+        "serde",
+        "tokio-rt",
+        "type-alias"
+      ],
+      "target": "/tmp/voteboat-openraft230-linux/openraft/src/lib.rs",
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/deps/libopenraft-ee8c117f63669d65.rlib",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/deps/libopenraft-ee8c117f63669d65.rmeta"
+      ]
+    },
+    {
+      "name": "bench",
+      "fresh": false,
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "target": "/tmp/voteboat-openraft230-linux/benchmarks/minimal/src/bin/bench.rs",
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/bench",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched-artifacts230/linux/target-upstream/release/bench.dwp"
+      ]
+    }
+  ],
+  "original_cargo_json": "target/p9/matched-artifacts230/linux/logs/upstream-release.jsonl",
+  "errors": []
+}

@@ -1,0 +1,143 @@
+validation/performance/comparison430-mac/results/baseline-c1-b1-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac429-832479d-4o73Bl/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/baseline-c1-b1-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac429-832479d-4o73Bl/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/baseline-c1-b1-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac429-832479d-4o73Bl/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/baseline-c4096-b4-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac429-832479d-4o73Bl/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/baseline-c4096-b4-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac429-832479d-4o73Bl/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/baseline-c4096-b4-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac429-832479d-4o73Bl/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/candidate-c1-b1-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/candidate-c1-b1-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/candidate-c1-b1-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/candidate-c4096-b4-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/candidate-c4096-b4-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/candidate-c4096-b4-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/on-c1-b1-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution true --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/on-c1-b1-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution true --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/on-c1-b1-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution true --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/on-c4096-b4-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution true --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/on-c4096-b4-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution true --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/on-c4096-b4-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution true --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/openraft-c1-b1-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine openraft --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/openraft-c1-b1-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine openraft --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/openraft-c1-b1-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine openraft --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/openraft-c4096-b4-t1.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine openraft --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/openraft-c4096-b4-t2.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine openraft --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/comparison430-mac/results/openraft-c4096-b4-t3.command:1: trailing whitespace.
++/private/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine openraft --clients 4096 --batch 4 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/hotspot430/mac/bulk.command:1: trailing whitespace.
++/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply record --save-only --rate 1000 --unstable-presymbolicate --symbol-dir /tmp/voteboat-mac430-9d2b785-w7Fwdz/target-matched-release/release --output /tmp/voteboat-samply430-1F3Muv/bulk-profile.json.gz -- /tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 4096 --batch 4 --operations 20000000 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/hotspot430/mac/singleton.command:1: trailing whitespace.
++/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply record --save-only --rate 1000 --unstable-presymbolicate --symbol-dir /tmp/voteboat-mac430-9d2b785-w7Fwdz/target-matched-release/release --output /tmp/voteboat-samply430-1F3Muv/singleton-profile.json.gz -- /tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework --engine voteboat --clients 1 --batch 1 --operations 1048576 --warmup 1024 --maintenance default-retention --envelopes upstream-default --attribution false --campaign-timeout-secs 3600 
+validation/performance/slice431/isolated/PATCH.diff:587: trailing whitespace.
++ 
+validation/performance/slice431/isolated/actual-services.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --test counter_service three_ -- --test-threads=1 
+validation/performance/slice431/isolated/actual-services.log:10: new blank line at EOF.
+validation/performance/slice431/isolated/affected-all.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --lib --test log_store --test provider_conformance --test snapshot --test raft --test effect_owner --message-format=json -vv -- --test-threads=1 
+validation/performance/slice431/isolated/affected-core.command:1: trailing whitespace.
++cargo +stable test --locked --offline --no-default-features --lib --test log_store --test provider_conformance --test snapshot --test raft --test effect_owner -- --test-threads=1 
+validation/performance/slice431/isolated/affected-core.log:606: new blank line at EOF.
+validation/performance/slice431/isolated/attempt1/PATCH.diff:581: trailing whitespace.
++ 
+validation/performance/slice431/isolated/attempt1/fmt-initial.command:1: trailing whitespace.
++cargo +stable fmt --all -- --check 
+validation/performance/slice431/isolated/attempt1/focused-owned-append.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --lib owned_appends -- --test-threads=1 
+validation/performance/slice431/isolated/attempt1/source-before.command:1: trailing whitespace.
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source.sha256 
+validation/performance/slice431/isolated/attempt2/PATCH.diff:581: trailing whitespace.
++ 
+validation/performance/slice431/isolated/attempt2/fmt-initial.command:1: trailing whitespace.
++cargo +stable fmt --all -- --check 
+validation/performance/slice431/isolated/attempt2/focused-owned-append.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --lib owned_appends -- --test-threads=1 
+validation/performance/slice431/isolated/attempt2/source-before.command:1: trailing whitespace.
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source.sha256 
+validation/performance/slice431/isolated/attempt3/PATCH.diff:587: trailing whitespace.
++ 
+validation/performance/slice431/isolated/attempt3/affected-all.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --lib --test log_store --test provider_conformance --test snapshot --test raft --test effect_owner --message-format=json -vv -- --test-threads=1 
+validation/performance/slice431/isolated/attempt3/clippy-all.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings 
+validation/performance/slice431/isolated/attempt3/clippy-core.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings 
+validation/performance/slice431/isolated/attempt3/clippy-default.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings 
+validation/performance/slice431/isolated/attempt3/clippy-native.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings 
+validation/performance/slice431/isolated/attempt3/fmt-initial.command:1: trailing whitespace.
++cargo +stable fmt --all -- --check 
+validation/performance/slice431/isolated/attempt3/focused-owned-append.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --lib owned_appends -- --test-threads=1 
+validation/performance/slice431/isolated/attempt3/focused-owned-append.log:14: new blank line at EOF.
+validation/performance/slice431/isolated/attempt3/source-before.command:1: trailing whitespace.
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source.sha256 
+validation/performance/slice431/isolated/baseline430-pressure/logs/build.command:1: trailing whitespace.
++/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo test --manifest-path /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml --locked --offline --all-features --test effect_owner --no-run --message-format=json -vv 
+validation/performance/slice431/isolated/baseline430-pressure/logs/pressure.command:1: trailing whitespace.
++/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/effect_owner-3b9732cae5c45d5b native::native_shared_peer_quota_pressure_reconnect_restart_and_retry --exact --nocapture --test-threads=1 
+validation/performance/slice431/isolated/baseline430-pressure/logs/pressure.log:6: new blank line at EOF.
+validation/performance/slice431/isolated/candidate-pressure/logs/pressure.command:1: trailing whitespace.
++/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b native::native_shared_peer_quota_pressure_reconnect_restart_and_retry --exact --nocapture --test-threads=1 
+validation/performance/slice431/isolated/candidate-pressure/logs/pressure.log:6: new blank line at EOF.
+validation/performance/slice431/isolated/clippy-all.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets --all-features -- -D warnings 
+validation/performance/slice431/isolated/clippy-core.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features -- -D warnings 
+validation/performance/slice431/isolated/clippy-default.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets -- -D warnings 
+validation/performance/slice431/isolated/clippy-native.command:1: trailing whitespace.
++cargo +stable clippy --locked --offline --keep-going --all-targets --no-default-features --features native -- -D warnings 
+validation/performance/slice431/isolated/fmt-final.command:1: trailing whitespace.
++cargo +stable fmt --all -- --check 
+validation/performance/slice431/isolated/fmt-initial.command:1: trailing whitespace.
++cargo +stable fmt --all -- --check 
+validation/performance/slice431/isolated/focused-hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --test effect_owner native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport -- --exact --nocapture --test-threads=1 
+validation/performance/slice431/isolated/focused-hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport.log:8: new blank line at EOF.
+validation/performance/slice431/isolated/focused-native_shared_peer_quota_pressure_reconnect_restart_and_retry.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --test effect_owner native::native_shared_peer_quota_pressure_reconnect_restart_and_retry -- --exact --nocapture --test-threads=1 
+validation/performance/slice431/isolated/focused-native_shared_peer_quota_pressure_reconnect_restart_and_retry.log:5: trailing whitespace.
++test native::native_shared_peer_quota_pressure_reconnect_restart_and_retry ... 
+validation/performance/slice431/isolated/focused-owned-append.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --lib owned_appends -- --test-threads=1 
+validation/performance/slice431/isolated/focused-owned-append.log:14: new blank line at EOF.
+validation/performance/slice431/isolated/focused-timeouts-runner.log:5: trailing whitespace.
++test native::native_shared_peer_quota_pressure_reconnect_restart_and_retry ... 
+validation/performance/slice431/isolated/matched-clippy.command:1: trailing whitespace.
++cargo +stable clippy --manifest-path benchmarks/matched/Cargo.toml --locked --offline --keep-going --all-targets -- -D warnings 
+validation/performance/slice431/isolated/matched-fmt.command:1: trailing whitespace.
++cargo +stable fmt --manifest-path benchmarks/matched/Cargo.toml --all -- --check 
+validation/performance/slice431/isolated/matched-tests.command:1: trailing whitespace.
++cargo +stable test --manifest-path benchmarks/matched/Cargo.toml --locked --offline -- --test-threads=1 
+validation/performance/slice431/isolated/matched-tests.log:52: new blank line at EOF.
+validation/performance/slice431/isolated/remaining-all.command:1: trailing whitespace.
++cargo +stable test --locked --offline --all-features --test log_store --test provider_conformance --test snapshot --test raft -- --test-threads=1 
+validation/performance/slice431/isolated/remaining-all.log:185: new blank line at EOF.
+validation/performance/slice431/isolated/source-after.command:1: trailing whitespace.
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source.sha256 
+validation/performance/slice431/isolated/source-before.command:1: trailing whitespace.
++sha256sum -c /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source.sha256 

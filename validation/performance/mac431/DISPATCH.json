@@ -1,0 +1,8 @@
+{
+  "remote_job": "/tmp/voteboat-mac431-ebcacbb-9qhZ59",
+  "original_remote_pid": 32574,
+  "setup_handle": 16445,
+  "setup_exit": 0,
+  "source_inputs": 1430,
+  "scope": "full scoped root checks and fresh asserted framework build, no root reuse or timing"
+}

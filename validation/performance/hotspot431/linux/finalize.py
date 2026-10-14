@@ -1,0 +1,45 @@
+from pathlib import Path
+from datetime import datetime,timezone
+import hashlib,json,gzip,shutil
+P=Path(__file__).resolve().parent
+R=Path('/home/karllivesey/Documents/ChatGPT/VoteBoat')
+def read(p):return json.loads(p.read_text())
+def write(p,d):p.write_text(json.dumps(d,indent=2)+'\n')
+def sha(p):
+ h=hashlib.sha256()
+ with p.open('rb') as f:
+  for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
+ return h.hexdigest()
+readout={}
+for cell in ['bulk','singleton']:
+ d=P/'symbolication'/(cell+'-symbolicated');s=read(d/'SUMMARY.json');a=read(d/'SUBSETS.json');c=read(d/'CLIENT_CONTEXTS.json');v=read(P/'perf-quiet'/(cell+'.stdout'));n=s['denominator']
+ readout[cell]={'selected_sample_weight':n,'unit':s['weight'],'totals':s['totals'],'threads':s['threads'],'physical_depth_sample_weights':s['physical_depth_sample_weights'],'physical_depth_le2_percent':100*sum(v for k,v in s['physical_depth_sample_weights'].items() if int(k)<=2)/n,'unresolved_leaf_percent':100*s['totals']['unresolved_leaf_sample_weight']/n,'any_unresolved_percent':100*s['totals']['any_unresolved_stack_sample_weight']/n,'top5_native_self':s['self_native'][:5],'top5_inline_self':s['self_including_inlines'][:5],'inclusive_contexts':a['subsets'],'entry_clone_top5_project_ancestries':a['entry_clone_top5_project_ancestries'],'client_contexts':c,'profiled_workload':{'completed_originals':v['completed_originals'],'completed_requests':v['completed_requests'],'originals_per_second':v['operations_per_second'],'p99_ms':v['request_p99_ns']/1e6,'applied_frontiers':v['applied_frontiers'],'not_unprofiled_capacity_or_acceptance':True},'libraries':s['libraries'],'unique_symbol_queries':s['unique_symbol_queries'],'limits':s['limits']+a['limitations']}
+write(P/'symbolication/READOUT.json',readout)
+prov={'created_utc':datetime.now(timezone.utc).isoformat(),'prep':read(P/'PREP.json'),'recording':read(P/'perf-quiet/RECORDING.json'),'after_source_artifact_release_oracle_guard':read(P/'guard-after.log'),'original_capture_session':6720,'capture_terminal_exit':0,'imports_terminal_exit':{x:int((P/'perf-quiet'/(x+'.import.exit')).read_text()) for x in ['bulk','singleton']},'symbolication_terminal_exit':{x:int((P/'symbolication'/(x+'.exit')).read_text()) for x in ['bulk','singleton']},'owned_server':{'pid':int((P/'symbolication/server.pid').read_text()),'original_session':11242,'stop_signal':'SIGINT','terminal_exit':0,'browser_opened':False,'external_symbol_requests':False},'capture_loss':{'bulk':{'reported_lost_chunks':2,'reported_perf_samples':6764,'import_warning':'bad timestamp ordering; 0 is earlier but arrived after 109543452256826'},'singleton':{'reported_lost_chunks':0,'reported_perf_samples':17832},'scope':'Exact stderr retained. No missing/lost samples reconstructed; sample counts are not a complete CPU census.'},'quiet_window':'Explicit root QUIET_START after preparation/archive completion; parent and agents held Linux builds/checks/copies/archive throughout recording; QUIET_END sent before imports/analysis. Mac qualification separate host only, transfers held.','fresh_symbols':'New431 ELF build IDs, current packed DWP and actual per-RVA inline/source API responses. No430 ADDRESS_SYMBOLS or raw profile samples reused; generic analysis code copied and old address-specific label removed. Synthetic FDE names remain unknown.','cleanup_attempt':{'tool_chunk':'f9fc83','exit':1,'reported_error':'AssertionError: [] while normal sandbox ps could not see escalated Samply server','raw_file_available':False,'correction':'Escalated ps selected only owned samply --port38475 PID1400749; SIGINT; original11242 actualterminal0. No unrelated process killed.'},'no_browser_SVG_extra_builds_frameflags_or_kernel_changes':True,'inputs':{str(p.relative_to(P)):sha(p) for p in (P/'perf-quiet').iterdir() if p.suffix in ['.data','.gz']},'limits':['Saved sample-count weights are not raw perf period cycles or CPU microseconds.','Launch-to-exit sampling includes warmups, verification, latency sorting and shutdown.','Inclusive and intersection contexts overlap; do not sum as CPU time or infer allocator causality.','Source/inline optimized frame omissions prevent exhaustive Client.write partition or allocation/wake counts.','Thread labels do not identify leader/follower CPU ownership.','Paired431 short capacity results have two bulk regressions; no repeatable gain claim.','No existing original outcome or per-operation channel removed.']}
+write(P/'symbolication/PROVENANCE.json',prov)
+(P/'README.md').write_text('''Linux431 CPU sampling used published ebcacbbb755d8069a084837fdc0f4920426c61b7 and the existing asserted release artifact a2a6e905…d92d6, with four fresh compiled artifacts, 1,427 source inputs and packed DWP provenance. Guards pass before/after. Capture original6720 and both imports/symbolication terminal0; owned headless Samply server11242 stopped0. Kernel settings2/2/516 unchanged; perf cycles:u1000Hz, DWARF16KiB, mmap128. No browser, SVG, external symbol service, new build or profile flags.\n\nBulk selected6,758 application-thread sample weights: native Client.write wrapper10.121%, entry to_vec9.515%, original oneshot sender8.686%. Inclusive overlapping result delivery13.421%, original oneshot send12.859%, Actor.collect12.977%, entry clone10.255%. Clone parents include durable completion4.084%, independent plan_copy4.927% (including snapshot materialization), and direct incoming suffix fallback0.755%. The latter was2.325% in a different430 capture; sampling loss and unpaired captures prevent a speedup/transfer-fraction claim. Extending incoming moves is a smaller remaining measured context.\n\nClient.write union20.213% differs from native wrapper10.121% because inline and ancestor views differ. Sampled client allocation/deallocation context6.822%, Proposal Vec constructor4.276%, reply Vec2.279%, oneshot constructor3.655%, receiver polling5.653%, bounded request send4.143%. These overlap and are not an exhaustive partition; one observed wait-Vec constructor sample does not imply negligible allocation. Actual current-RVA source lines and all responses are in CLIENT_CONTEXTS.json. No wake/re-poll counts, bytes, allocation cause or blocked CPU time inferred. Actor.collect allocation intersection4.380%; borrowed core completion remains4.084% and retains independent ownership obligations.\n\nProfiled bulk19,988,480 completed originals at6,357,855 originals/s, p993.692ms; singleton1,048,576 at107,287/s, p9919.387us. These are profiled diagnostics, not unprofiled capacity or acceptance. Bulk perf reports two lost chunks, and Samply reports a bad timestamp ordering warning; raw errors retained and no recapture/missing sample reconstruction. Selected unresolved leaf weights1.820% bulk/1.257% singleton, shallow physical depth<=2 about0.681% bulk. Synthetic FDE names remain unknown. A failed normal-namespace server cleanup probe is recorded as a tool-reported failure (raw file unavailable); exact owned process was then stopped through its original escalated namespace.\n\nREADOUT.json and PROVENANCE.json hold numeric/source context. Raw perf data are losslessly compressed in the archive alongside saved Samply JSON, per-RVA requests/responses, commands, failures and fresh-artifact/source/compiler proof. Inclusive scopes overlap and must not be added. Full P9 sustained/fairness/durable/composition floors remain open.\n''')
+A=R/'validation/performance/hotspot431/linux';assert not A.exists(),str(A);A.mkdir(parents=True)
+containers=[]
+for src in sorted(P.rglob('*')):
+ if not src.is_file() or '__pycache__' in src.parts:continue
+ assert not src.is_symlink(),str(src)
+ rel=src.relative_to(P);dst=A/rel;dst.parent.mkdir(parents=True,exist_ok=True)
+ compress=src.suffix=='.data' or src.stat().st_size>1024*1024 and src.suffix!='.gz'
+ if compress:
+  dst=Path(str(dst)+'.gz')
+  with src.open('rb') as i,dst.open('wb') as o,gzip.GzipFile(filename='',mode='wb',fileobj=o,mtime=0,compresslevel=5) as z:shutil.copyfileobj(i,z)
+  h=hashlib.sha256()
+  with gzip.open(dst,'rb') as f:
+   for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
+  assert h.hexdigest()==sha(src)
+  containers.append({'archive':str(dst.relative_to(A)),'original':str(rel),'original_bytes':src.stat().st_size,'original_sha256':h.hexdigest(),'encoding':'gzip lossless'})
+ else:shutil.copy2(src,dst)
+shutil.copytree(R/'validation/performance/matched431-linux',A/'artifact-identity')
+for name in ['CONFIG_PAIR.linux.json','artifact-guard.py']:
+ shutil.copy2(R/'target/p9/comparison431'/name,A/name)
+write(A/'LOSSLESS_CONTAINERS.json',containers)
+files=sorted(x for x in A.rglob('*') if x.is_file());assert not any(x.is_symlink() for x in A.rglob('*'))
+(A/'SHA256SUMS').write_text(''.join(sha(x)+'  '+str(x.relative_to(A))+'\n' for x in files))
+for line in (A/'SHA256SUMS').read_text().splitlines():
+ expected,name=line.split('  ',1);assert sha(A/name)==expected,name
+print(json.dumps({'archive':str(A),'regular_files':len(files)+1,'bytes':sum(x.stat().st_size for x in A.rglob('*') if x.is_file()),'all_hashes_verified':True,'lossless_containers':len(containers),'capture_terminal':0,'analysis_terminal':0}))

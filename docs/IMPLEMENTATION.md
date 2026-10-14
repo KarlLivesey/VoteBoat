@@ -2,6 +2,11 @@
 
 ## Active P9 plan — 14 October 2026
 
+The1.5× larger published/matched sustained requirement is a minimum acceptance
+bar, not a target or stopping ceiling. The user wants that capacity and
+substantially more. Keep profiling, removing measured work and comparing both
+hosts; crossing a diagnostic or individual floor does not close P9.
+
 Slice425 is published and qualified on main: 32 controls, three actual
 16,384-original CLI histories and the complete strict hook pass. Linux's fresh
 asserted nine-case diagnostic also passes every original/frontier, source,
@@ -58,7 +63,7 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: publish431 and qualify/measure on both hosts | Establish actual benefit of transferring owned append input after existing checks | Frozen431 controls and honest native replay scopes;430 immutable baselines and both-host exported CPU data | Enabled strict hook, fresh asserted libraries/executables, Mac root/standalone checks; rotating bulk/singleton rates/p99 and new profiles with every failure/regression retained | P9.0/P9.1/P9.3 |
+| Current: qualify/measure/profile published431 on both hosts | Establish actual benefit of transferring owned append input after existing checks | Published431 and fresh Linux artifacts; honest native replay scopes, immutable430 baselines and exported CPU data | Mac full root/standalone checks and fresh artifacts; rotating bulk/singleton rates/p99 and new profiles with every failure/regression retained. Linux paired timing is terminal without repeatable bulk gain. | P9.0/P9.1/P9.3 |
 | Next: reduce the next measured limiting stage | Remove remaining work while respecting asynchronous owners and effect order | Both-host431 measurements and compact profiles; synchronous completion exploration remains unselected | Small usable schema, owned asynchronous fallback, queue/preflight/error/receipt ordering and restart checks, strict publication and both-host measurement; sustained acceptance stays distinct | P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
@@ -113,7 +118,7 @@ provider/codec/recovery histories and actual network services, then fresh assert
 both-host measurements. Mac may gain less or regress; retain every result. Held427
 is an unqualified earlier experiment, not validation of429.
 
-### Slice431 schema — reuse owned ordinary append input (planned)
+### Slice431 schema — reuse owned ordinary append input
 
 430 Linux saved stack data records entry cloning910/8,085samples (11.255%):
 core durable completion287 (3.550%), independent pending plan340 (4.205%),
@@ -159,6 +164,12 @@ profiles decide whether the guard's work yields an actual gain.
 
 ### Slice431 source-frozen qualification
 
+Published ebcacbb through the enabled full strict hook, actual45791exit0;
+[publication receipt](../validation/performance/slice431/publication/PUBLICATION.json).
+Fresh Linux artifacts and paired timing are terminal, recorded below; Mac full
+qualification is running separately from the scoped checks below. Linux establishes
+no repeatable431 throughput gain.
+
 Six owned incoming controls and the final1,427-input source compare pass. Full
 all-feature library392 passes; owner suite original96474 ends101 with201passes
 and two progress timeouts. Exact-source individual replay original13664 passes
@@ -196,6 +207,107 @@ InvalidMessage rejection, then uses the existing internal transition fixture for
 configuration payload fallback/membership; no production admission gate changed.
 All failed source snapshots and original logs remain. Publication/qualification
 metadata must retain every distinct scope and individual native replay.
+
+### Slice431 fresh Linux artifacts and paired results
+
+[Actual fresh artifact proof](../validation/performance/matched431-linux/README.md)
+ends0/DONE, original41231:1,427 committed source hashes/modes, four fresh:false
+root/executable/pinned upstream compiler records plus root buildscript, unchanged
+within-host toolchain/locks and opt3/debug2/assertions/overflow/thinLTO/codegen1
+profile. Release omits only the independent debug reference oracle; ordinary
+assertions remain on. Original/copy executable and DWP identities pass. Actual
+off/on/OpenRaft CLI controls each complete16,384 originals/4,096 requests and all
+three frontiers17,409; ON29 phases/four scopes/15 methods and three gaps pass.
+
+[Paired Linux timing](../validation/performance/comparison431/linux/README.md)
+ends0/DONE, original54853, all24 cases/source/artifact/completion guards passing.
+Bulk430OFF/431OFF/ON/OpenRaft medians5,047,787/5,140,875/5,390,624/3,150,951
+completed originals/s, p995.068510/4.939567/4.859997/7.623954ms. OFF pair ratios
+0.957751/1.237041/0.986828 retain two rate regressions and trial1's1.074320×
+worse p99. Singleton112,017/110,029/93,987/20,285, p99
+0.017073/0.017243/0.018856/0.124744ms; OFF0.987988/1.004198/0.960244 retains
+two rate and all three p99 regressions. ON singleton regresses all three trials.
+There is no repeatable Linux throughput gain; every original raw tail is retained.
+Leader ON admission61.996–72.033ms/results55.629–61.408ms and protected
+comparison1.646–1.885ms inside compaction12.290–13.595ms are inclusive elapsed
+scopes, not additive CPU fractions. Short volatile5.141M OFF is below5.615M and
+8.4225M; all sustained/full-curve/durable/fairness/composition acceptance remains
+open. New structured profiles and Mac measurement remain current before selecting
+the next optimization. No native performance benefit is claimed.
+
+### Slice431 Mac full qualification
+
+[Mac431 actual checks and fresh artifacts](../validation/performance/mac431/README.md)
+end0/DONE, original32574, exact1,430 source hashes/modes and publishedebcacbb.
+All root scopes execute anew: all-feature library392/log19/provider35/Raft79/
+snapshot27, core312/log0/provider20/Raft29/snapshot12, effect-owner203all/195core,
+actual TCP/QUIC services2; root fmt/four strict and matched43/fmt/strict all0.
+Shared-peer pressure and compacted-group catch-up controls pass on Mac. No Mac
+check/build failure, repeated scope or root429/430 reuse is claimed. Linux's
+original failed203-case run remains separate and does not become green.
+
+Fresh asserted framework compilation proves four actual fresh:false artifacts,
+ordinary assertions/overflow, opt3/debug2/thinLTO/codegen1, actual dev reference
+oracle present/release extra oracle absent, complete original/copied dSYMs and
+unchanged within-host1.98.0 compiler/3.21.12 protoc/locks. Candidate executable
+SHAa211af458233d4d719298436ba4bb138af4230eddb1ef7b26615332307ccf400.
+Actual post-release off/on/OpenRaft CLI controls each complete16,384 originals/
+4,096 requests and all three frontiers17,409; ON29/4/15 phase/scope/method controls
+pass. All copies/setup/checks terminate before paired timing. Functional rates
+qualify no capacity, and both-host sustained/full P9 acceptance stays open.
+
+### Slice431 Linux structured profile and next measured work
+
+[Actual CPU data and source contexts](../validation/performance/hotspot431/linux/README.md)
+are terminal0: original6720/perf captures, both headless imports, fresh431
+per-address symbolication and owned server shutdown. Kernel paranoid2/kptr2/
+mlock516 remain unchanged. All1,427 source/artifact/compiler/profile/DWP guards
+pass before/after; old430 address maps are not reused. Bulk6,758 selected sample
+weights: native client write10.121%, entry-to-Vec9.515%, oneshot send8.686%.
+Inclusive results13.421%, collect12.977%, oneshot12.859% and entry clone10.255%
+overlap. Durable completion clone4.084% and independent plan4.927% including
+snapshot materialization remain; direct incoming fallback0.755% is a smaller
+remaining context. Different captures with loss do not prove a transfer fraction
+or431 speedup. Protected checkpoint comparison is1.199% of sampled work.
+
+Fresh client source contexts expose union20.213%, allocation/deallocation6.822%,
+proposal Vec construction4.276%, reply Vec2.279%, channel construction3.655%,
+receiver polling5.653%, request send4.143%; these are overlapping sampled
+contexts, not exhaustive partitions or allocation/wake counts. Actor collect
+allocation4.380% overlaps its12.977% total. Consider reducing request buffer
+construction while retaining every original channel/outcome; synchronous borrowed
+completion remains a separate candidate requiring queue/preflight/error ordering.
+No next implementation is selected before Mac measurements/profile review.
+
+Profiled19,988,480 bulk originals complete6,357,855/s/p993.691969ms; singleton
+1,048,576 at107,287/s/p990.019387ms with exact frontiers. Two lost bulk chunks,
+timestamp-order warning and unresolved leaf1.820%/1.257% remain; the normal-
+namespace cleanup probe failed before the owned server was stopped0 in its
+original namespace. The probe raw file was unavailable and is explicitly a
+tool-reported annotation. Six raw/folded lossless gzip containers verify against
+originals,175 archived records hash correctly. No recapture, browser or image
+analysis; these profiled rates qualify no capacity or P9 completion.
+
+### Untouched upstream431 Linux calibration
+
+The user asked to calibrate the published M1 Max reference on current machines.
+[Existing untouched400s artifact measurement](../validation/performance/calibration431/linux/README.md)
+ends0, original81347, six rotating latencyOFF/ON20M-requested bulk cases,
+19,988,480 originals plus1,024 warmups. All1,357 original source identities,
+artifact/current compiler and original fresh-build/profile proofs pass before/
+after. No rebuild, source/dependency/security change or retried recording. The
+independent196-package lock differs from the matched workspace's comparison lock.
+
+Default latencyOFF rates3,734,557/3,670,453/3,578,395 originals/s; ON
+3,535,192/3,445,027/3,515,230. Medians3,670,453/3,515,230, ONp996.732ms.
+The4.42% median gap does not explain the whole difference from published5.615M.
+ON reports exactly4,997,120 samples; OFF completed count is source-certified
+after all-successful client joins/exit0 and has no latency/frontier report. No
+added follower verification is claimed. Default stats/config/rate/delays,
+per-original outcomes and driver timer boundary remain unchanged. All57 archived
+records hash correctly, raw errors/commands/output retained. These are calibration
+results, not matched sustained acceptance, and do not change any P9 floor. Mac
+calibration waits for original431 pair termination and current artifact guard.
 
 ### Slice430 schema — unordered pending reply lookup
 
@@ -443,9 +555,12 @@ correction all remain; recordings were not repeated. Raw JSON/symbols and verifi
 lossless folded-stack containers preserve every observation, with no browser.
 
 430 evidence/plans are published at6d3f5d3 through the enabled full strict hook,
-original82349exit0.431's bounded ownership change is undergoing source-frozen
-qualification; new same-host native progress failures are retained separately
-from completed scopes and controlled standalone passes. Both hosts remain below
+original82349exit0.431 is published at[ebcacbb](https://github.com/KarlLivesey/VoteBoat/commit/ebcacbbb755d8069a084837fdc0f4920426c61b7)
+through the enabled full strict hook, original45791exit0.
+[Exact publication and earlier optional raw-log whitespace check](../validation/performance/slice431/publication/PUBLICATION.json)
+retain untouched evidence and zero formatter/Clippy configurations. Same-host
+native progress failures remain separately recorded from completed scopes and
+controlled standalone passes; no cause or431 performance gain is claimed. Both hosts remain below
 the5.615M published bulk floor and8.4225M healthy minimum; all macro acceptance
 remains active and unmet.
 
