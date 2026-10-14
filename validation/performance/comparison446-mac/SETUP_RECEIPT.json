@@ -1,0 +1,19 @@
+{
+  "original_qualification_handle": 76485,
+  "qualification_actual_terminal_tool": "76e569",
+  "qualification_exit": 0,
+  "initial_pair_handle": 63642,
+  "initial_pair_exit": 1,
+  "focused_pair_handle": 43205,
+  "focused_pair_actual_terminal_tool": "954551",
+  "focused_pair_exit": 0,
+  "qualification_copy_handle": 20853,
+  "qualification_copy_exit": 0,
+  "prepared_copy_handle": 45662,
+  "prepared_copy_exit": 0,
+  "qualification_archive_sha256": "cd2b57be96596040eb4981385bae50fd7b630474e8f17fd6cf519270d021f54c",
+  "prepared_archive_sha256": "6d606fb69af579f3f56329672fa1c21938d755d1a0c9a95db67afd3bf8670214",
+  "source_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "no_workload_reruns": true,
+  "timing_not_started": true
+}

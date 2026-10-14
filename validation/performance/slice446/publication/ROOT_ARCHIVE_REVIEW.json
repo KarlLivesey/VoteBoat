@@ -1,0 +1,39 @@
+{
+  "publication_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "publication_original_handle": 83377,
+  "publication_actual_exit": 0,
+  "linux_fresh_archive": {
+    "payloads": 69,
+    "exit": 0
+  },
+  "linux_setup_archive": {
+    "payloads": 18,
+    "exit": 0
+  },
+  "linux_bulk_archive": {
+    "payloads": 91,
+    "exit": 0
+  },
+  "linux_singleton_archive": {
+    "payloads": 91,
+    "exit": 0
+  },
+  "mac_qualification_archive": {
+    "payloads": 64,
+    "exit": 0
+  },
+  "mac_final_archive": {
+    "payloads": 198,
+    "exit": 0
+  },
+  "root_archive_check_attempt1": {
+    "exit": 1,
+    "reason": "Root mistakenly invoked relative SHA256SUMS from repository cwd;197 missing paths and1wrong-rootREADME mismatch. Saved stdout/tool stderr retained in tool record. This was an invalid archive invocation, not an artifact/workload failure."
+  },
+  "root_archive_check_attempt2": {
+    "exit": 0,
+    "workdir": "validation/performance/comparison446-mac",
+    "payloads": 198
+  },
+  "retention": "Measured bulk throughput/latency/memory tradeoff; Mac singleton repeatable debt and Linux mixed tails remain; no full P9 acceptance."
+}

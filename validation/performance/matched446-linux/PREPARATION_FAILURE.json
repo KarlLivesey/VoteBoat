@@ -1,0 +1,10 @@
+{
+  "actual_tool": "381aeb",
+  "before_any_export_or_build": true,
+  "git_ls_remote_exit": 128,
+  "error": "sandboxSSHBadownerorpermissions/etc/ssh/ssh_config.d/20-systemd-ssh-proxy.conf",
+  "outer_missing_runner_exit": 127,
+  "source_unchanged": true,
+  "fresh_target_not_started": true,
+  "system_config_not_changed": true
+}

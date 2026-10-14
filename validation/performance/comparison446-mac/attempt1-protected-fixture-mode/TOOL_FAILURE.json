@@ -1,0 +1,8 @@
+{
+  "original_setup_handle": 63642,
+  "original_actual_exit": 1,
+  "cause": "old440source mode guard rejected deliberatelyprotected600fixture keys; no source/artifact/qualification failure",
+  "old_guard_sha256": "0a69719bb939a148070b42768b9732e98e3437d122f340bc4466fcb205647bc9",
+  "new_guard_sha256": "a8c0fca6bb04500f23493606b50e659cc4d62ba1d126bcf5533203b91411152d",
+  "scope": "Only seven explicit SOURCE.protected_fixture_keys tests/fixtures/*-key.der at600 permitted; allotherfullmodechecksretained. Existingreleaseoracle reused only if exactdictmatchesactualCargoJSON/vv. Nochmod/source/binary/test/build/CLI repeat."
+}

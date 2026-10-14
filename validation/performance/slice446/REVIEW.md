@@ -19,3 +19,10 @@ measured tradeoff. No performance gain is inferred from source review.
 The reviewer performed no builds, tests or edits. Executed qualification is
 recorded separately under main/; paired Linux/Mac measurement is required before
 retention. No public provider, persistent format or durability authority changes.
+
+Independent measurement review supports retention as a tradeoff: all six bulk
+rate pairs improve, unlike436 small/mixed gains. Mac singleton remains repeatable
+debt (all three rate and p99 losses), Linux tails/singleton remain mixed, and
+extra sparse storage is a cost. Diagnostic singleton floor headroom does not
+establish sustained acceptance or clear that debt. No universal/all-cell gain or
+macro closure is claimed. Full raw measured scopes are linked in docs/P9.md.

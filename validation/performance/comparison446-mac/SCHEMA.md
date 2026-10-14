@@ -1,0 +1,7 @@
+# Matched446 Mac pair setup
+
+Candidate6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19 is the private four-slot pending reply cohort change;69 tests/fmt/strict, fresh asserted4/buildscript/dSYM and actual threeCLI controls qualify separately. Baseline remains immutable4355c2390cb98d11901163e143815f5fa17199dc0f2. No root/runtime/provider/wire/storage change; no channel/outcome/ordering deletion.
+
+Match within-host compiler/locks/opt3/debug2/packed/assertions+overflow/thinLTO/cgu1, one group/three voters/empty payload/volatile stores/inprocessRPC, clientruntime1/server16,1024singletonwarmups, default-retention maintenance/upstream-default envelopes. Timer ends afterallclientjoins beforelatencyflatten/sort/followerverification/shutdown. Each original keepscompletionchannel; appendcapacityupstream is softmerge threshold, different snapshotrepresentations remain documented.
+
+Three rotations baselineOFF/candidateOFF/candidateON/OpenRaft for bulk4096/batch4/requested20M (actual19,988,480) andsingleton1/batch1/1,048,576 originals. Bothcells prepared, no timing beforeexplicitquietgrant andallbuilds/copies/archive/check jobsEND. Preservefailures/regressions/slowtails; no timeoutrestart/reruns. Newcohortmoduleabsence refusals execute; unchanged13checkercontrols reused through exactphasecheckerhash/sealed435proof. Actualcurrent positive source/artifact/compiler/symbol/profile/CLI guardsrequired. These two cells do not establishfullcurve/durable/headroom/fairness/physicalmemory orP9healthy-margin acceptance.

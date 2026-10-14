@@ -1,0 +1,25 @@
+{
+  "build_original_handle": 1523,
+  "build_exit": 0,
+  "CLI_exit": 0,
+  "source_inputs": 1439,
+  "compiled_inputs": 1430,
+  "actual_four_fresh_false": true,
+  "phase_scope_method_counts": [
+    29,
+    4,
+    15
+  ],
+  "executable_sha256": "e766c9c558733261e0b86c6fb280bb980aef2f9a6db84a77b25b8f067c5d34ea",
+  "DWP_sha256": "5e6916d86d14779230f1b3a982e8c5beec5eac703bdd5d75c6c0dae14a7409d9",
+  "actual_pair_guards_exit": 0,
+  "candidate_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "timing_started": false,
+  "publication_guard": "parentfullhook833770; actualpublication-ref65570",
+  "CONFIG_PAIR": "target/p9/comparison446/CONFIG_PAIR.linux.json",
+  "bulk_requested": 20000000,
+  "bulk_actual": 19988480,
+  "singleton_requested_actual": 1048576,
+  "cases_per_cell": 12,
+  "root_quiet_authorization_pending": true
+}

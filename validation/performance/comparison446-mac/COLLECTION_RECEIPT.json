@@ -1,0 +1,18 @@
+{
+  "original_campaign_handle": 63802,
+  "actual_terminal_tool": "b0ae9f",
+  "actual_exit": 0,
+  "summary_handle": 61528,
+  "summary_actual_exit": 0,
+  "remote_package_handle": 48224,
+  "remote_package_actual_exit": 0,
+  "copy_handle": 29463,
+  "copy_actual_exit": 0,
+  "archive_sha256": "ae82fa221a64e2234753d35c5181dcde3f24ad7f79c5e34e337afe951e78d560",
+  "remote_payloads_independently_verified": 179,
+  "initial_setup_payloads_unchanged": 44,
+  "all24_rawcases_preserved": true,
+  "collected_after_joint_quiet_release": true,
+  "no_timed_reruns": true,
+  "no_source_build_profile_or_new_benchmark": true
+}

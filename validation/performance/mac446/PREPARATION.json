@@ -1,0 +1,34 @@
+{
+  "status": "PUBLISHED_SOURCE_ASSEMBLED_READY_FOR_AUTHORIZED_REMOTE_QUALIFICATION",
+  "candidate_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "expected_matched_tests": 69,
+  "schema": "validation/performance/slice446/SCHEMA.md",
+  "source": "fresh committed archive/allbenchmodules/config/locks/fixtures/contracts; protectedfixturekeys0600/exacthash+fullmode inventory; no assembly before publication authorization",
+  "new_required_modules": [
+    "benchmarks/matched/src/voteboat_engine/actor/pending_replies.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_replies/tests.rs"
+  ],
+  "removed_waits_and_pending_key_modules_absent": true,
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "baseline_remote": "/tmp/voteboat-mac435-5c2390c-2oTYYa",
+  "scope": "actual entire standalone matched suite/fmt/alltargetstrict once; genuinelyfreshassertedrelease4+rootbuildscript/CargoJSON-vv/currentdSYM/UUID/originalcopy; threeactual16384+1024 CLI off/on/OpenRaft29/4/15; no timing",
+  "root_reuse": "Exact435 root src/tests/build/config/contracts/lock functional scopes; nativeexample changed443 covered by actualMac443 rootfmt/default+allstrict/control receipt and currentcommitted444 source proof. Fixturephysicalmode differences explicitlyexcluded from435 mode scope; bytes unchanged. No broadunrelatedrootrerun or oldmatchedresultreuse. Supplementaryreuse confinedexactscopedinputs/tool/log hashes.",
+  "profile": "opt3/debug2/packed/assertions+overflow/thinLTO/cgu1; flags/wrappersunset; trulyfresh target/rootlib/upstream/executable",
+  "template_sha256": {
+    "run.sh": "31e9f76d19c806540ae5de728107c89a960a7ef85c6ef3cc1bf82a29f62a8b1f",
+    "collect.py": "d553e85edc945a1fd4594f9be9ba0c933a214e1decd41b90698f00c7155e8ea4",
+    "prepare-source.py": "300d56af56e378e1ecba7f38e1787aa047827b74a8a3fdec789f7d4be573783b",
+    "verify-source.py": "b221aa8282e45385122e18c3f96d14572a9a2a538a3bba3373f3faa138649730"
+  },
+  "adapted_sha256": {
+    "run.sh": "31e9f76d19c806540ae5de728107c89a960a7ef85c6ef3cc1bf82a29f62a8b1f",
+    "collect.py": "02b38d449359acb12ea60313f7adab74197cb4afda566a624a773da194faf5f7",
+    "prepare-source.py": "daae49e1ebfc8143087311258d5aa78f6b9d155a4ae90a1e262de17bec88d88d",
+    "verify-source.py": "df5467573f4ee1086309a09a07fc3cd0d59f04c1208e1cb7a03dac8e77733615"
+  },
+  "no_remote_commands_source_copy_build_or_timing": true,
+  "validation": "bash-n and3PythonAST0; unpublishedassemblyrefuses before archive",
+  "unpublished_refusal_exit": 1,
+  "source_inputs": 1439,
+  "root_reuse_actual": "1405 exact435hash+mode inputs/7unchangedfixturebytes(nowprivate600),1413 exact443hash+mode supplementalrootfmt/default+allstrictinputs; originaltool/command/results hashes guarded"
+}

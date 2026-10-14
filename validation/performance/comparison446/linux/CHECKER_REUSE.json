@@ -1,0 +1,9 @@
+{
+  "comparison_invariant_body_identical": true,
+  "body_sha256": "6db8a52a52c2c620eaef6fc2f3216e59503368d0146021831e36c2a17c579a79",
+  "historical_controls_sha256": "e0eb8c3913e7deaebf84802b3f8ed3468f457e741b27c5010c83beff0c5e3a72",
+  "historical_controls_source": "target/p9/comparison435/ACTUAL435_CHECKER_CONTROLS.json",
+  "current_fixture_count": 3,
+  "no_old_negative_control_rerun": true,
+  "newessential_source_guard": "pending_replies.rs +pending_replies/tests.rs requiredcandidateonly"
+}

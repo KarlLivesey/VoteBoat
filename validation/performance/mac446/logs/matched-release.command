@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable build --locked --offline --release --manifest-path /tmp/voteboat-mac446-6c7f09b-pTKRWg/source/benchmarks/matched/Cargo.toml --bin voteboat-matched-framework --message-format=json -vv 

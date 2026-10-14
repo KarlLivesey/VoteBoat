@@ -460,11 +460,34 @@ available capacity is reported separately and is not physical RSS. Independent
 review finds no blocker; paired performance remains unmeasured.
 [Main proof](../validation/performance/slice446/main/README.md),
 [review](../validation/performance/slice446/REVIEW.md).
+Publication is6c7f09b2; original83377 ends0 through the complete enabled hook.
+[Push evidence](../validation/performance/slice446/publication/README.md).
+
+
+446 measured retention: Linux original17101 and Mac original63802 both terminate0,
+24 cases each (three rotating baseline435/OFF446/ON446/OpenRaft per cell). Bulk
+requests20M and completes19,988,480 originals/4,997,120requests, frontiers19,989,505×3;
+singleton completes1,048,576/frontiers1,049,601×3. All output/artifact/identity guards
+pass. Linux bulk medians5,589,112→5,958,464 completed originals/s, p994.821831→
+4.931697ms; all three rates improve but two p99 pairs regress. Mac bulk medians
+5,405,801→6,513,577/s, p993.575125→3.281709ms improve in all three pairs.
+
+Mac singleton is repeatable debt: all three rate and p99 pairs regress, median
+66,006→65,651/s and29.167→31.458µs. Linux singleton119,097→119,682/s and
+15.029→15.189µs is mixed; do not claim a repeatable gain. OpenRaft bulk medians
+Linux2,873,279/Mac2,213,079/s and singleton21,964/11,555/s are matched within each
+host. Retain the meaningful six bulk rate wins with explicit singleton/tail and
+bounded extra arena/free storage costs; independent review agrees. No universal
+speedup, physical RSS/refusal/debt proof, native-service gain or full P9 acceptance
+follows. All seven healthy-margin cells and durable/headroom/fairness/placement/P8
+requirements remain active. [Linux bulk](../validation/performance/comparison446/linux/README.md),
+[Linux singleton](../validation/performance/comparison446-singleton/linux/README.md),
+[Mac cells](../validation/performance/comparison446-mac/MEASUREMENTS.md).
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:446 four-slot pending reply cohorts | Reduce measured per-original lookup work while preserving every outcome | Retained435 profiles and [446 ownership/bounds schema](../validation/performance/slice446/SCHEMA.md);445 and stopped Pi evidence published at5a5a866b | Independent HashMap oracle, full128-bit IDs, duplicates/error prefixes/cache reuse/drop ownership and sparse backing-capacity bounds; matched controls/strict checks zero; publish, then fresh Linux/Mac artifacts and paired20M bulk/1M singleton; retain or reject from measured tradeoffs | P9.0/P9.1 |
-| Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide native measurements,446 decision and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
+| Current: profile retained446 and choose the next limiting stage | Remove the largest remaining measured cost while addressing singleton/tail debt | Qualified current446 artifacts/symbols and completed both-host paired outcomes; headless saved profiling workflow | Raw JSON/text/folded stacks and explicit timer/sample scope on Linux/Mac; rank actual costs, sketch ownership/order/partial-progress plan before one bounded change; exact outcomes and paired rates/tails, all strict checks zero | P9.0/P9.1 |
+| Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide native measurements, retained446 profiles/decision and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
 | Following: bounded persistence overlap and full qualification | Reduce remaining serial waits and test all P9 requirements | Measured barrier/batching limits and typed partial-progress/durability plan | All seven framework cells on both hosts, real durable headroom/placement/shared barriers and P8 costs; original outcomes/crash/retry/fencing preserved | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

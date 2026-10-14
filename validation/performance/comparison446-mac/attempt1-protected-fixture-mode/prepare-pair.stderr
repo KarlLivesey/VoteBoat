@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/tmp/voteboat-comparison446-0LuWYB/prepare-pair.py", line 132, in <module>
+    main()
+  File "/tmp/voteboat-comparison446-0LuWYB/prepare-pair.py", line 120, in main
+    guard.verify(candidate)
+  File "/tmp/voteboat-comparison446-0LuWYB/artifact-guard.py", line 159, in verify
+    need(source_mode in ('0o664', '0o775'), 'unsupported committed Mac source mode')
+  File "/tmp/voteboat-comparison446-0LuWYB/artifact-guard.py", line 14, in need
+    raise ValueError(label)
+ValueError: unsupported committed Mac source mode

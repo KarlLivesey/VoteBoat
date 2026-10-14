@@ -1,0 +1,135 @@
+{
+  "cell": "singleton",
+  "cases": 12,
+  "all_counts_frontiers_pass": true,
+  "completed_originals_each": 1048576,
+  "completed_requests_each": 1048576,
+  "warmup": 1024,
+  "frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "guard_before_after_and_output_checker": 0,
+  "stderr_nonempty": [],
+  "failures": [],
+  "no_separate_refusal_counter": true,
+  "maximum_RSS_measured": false,
+  "median_variants": {
+    "baseline": {
+      "rates": [
+        67307.09740172434,
+        66005.68649410806,
+        65143.18574310765
+      ],
+      "median_completed_originals_per_second": 66005.68649410806,
+      "median_request_p50_ms": 0.014625,
+      "median_request_p99_ms": 0.029167
+    },
+    "candidate": {
+      "rates": [
+        65650.61897252244,
+        65936.64427088709,
+        63954.16078499522
+      ],
+      "median_completed_originals_per_second": 65650.61897252244,
+      "median_request_p50_ms": 0.014625,
+      "median_request_p99_ms": 0.031458
+    },
+    "on": {
+      "rates": [
+        60735.86257324846,
+        60769.64523524917,
+        60938.35283247337
+      ],
+      "median_completed_originals_per_second": 60769.64523524917,
+      "median_request_p50_ms": 0.015875,
+      "median_request_p99_ms": 0.030709
+    },
+    "openraft": {
+      "rates": [
+        11904.000907385085,
+        11555.30363721576,
+        11312.774466444787
+      ],
+      "median_completed_originals_per_second": 11555.30363721576,
+      "median_request_p50_ms": 0.085667,
+      "median_request_p99_ms": 0.120417
+    }
+  },
+  "off_pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 67307.09740172434,
+      "candidate_originals_per_second": 65650.61897252244,
+      "rate_ratio": 0.9753892458128871,
+      "baseline_p99_ms": 0.028875,
+      "candidate_p99_ms": 0.031458,
+      "p99_ratio": 1.0894545454545455
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 66005.68649410806,
+      "candidate_originals_per_second": 65936.64427088709,
+      "rate_ratio": 0.9989539958314481,
+      "baseline_p99_ms": 0.029167,
+      "candidate_p99_ms": 0.0295,
+      "p99_ratio": 1.0114170123770014
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 65143.18574310765,
+      "candidate_originals_per_second": 63954.16078499522,
+      "rate_ratio": 0.9817475159596684,
+      "baseline_p99_ms": 0.030042,
+      "candidate_p99_ms": 0.032292,
+      "p99_ratio": 1.0748951467944876
+    }
+  ],
+  "on_rates": [
+    60735.86257324846,
+    60769.64523524917,
+    60938.35283247337
+  ],
+  "on_p99_ms": [
+    0.0325,
+    0.030709,
+    0.030292
+  ],
+  "candidate_logical_diagnostics": {
+    "retained_entries": {
+      "min": 5601,
+      "max": 5601
+    },
+    "peak_retained_entries": {
+      "min": 6000,
+      "max": 6000
+    },
+    "peak_peer_queue": {
+      "min": 1,
+      "max": 3
+    },
+    "peak_client_queue": {
+      "min": 0,
+      "max": 1
+    },
+    "checkpoint_count": {
+      "min": 209,
+      "max": 209
+    },
+    "snapshot_installs": {
+      "min": 0,
+      "max": 0
+    },
+    "maximum_proposal_width": {
+      "min": 0,
+      "max": 1
+    }
+  },
+  "disposition": "Pending root both-host retention decision; no retune or acceptance claim",
+  "limits": [
+    "Logicalqueues/retention notphysicalmemory/debt proof.",
+    "Attributionnestedinclusivewall notsummedCPU.",
+    "No fullP9acceptance; no allocation/probing/hashcause isolated."
+  ]
+}

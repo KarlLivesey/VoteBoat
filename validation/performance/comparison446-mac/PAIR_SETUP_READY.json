@@ -1,0 +1,16 @@
+{
+  "status": "BOTH_CELLS_SETUP_READY_NO_TIMING",
+  "config_sha256": "ab4fec0deccb7ea40d28a986d1f1f2849ff0e71d109b15b76b3844f7d95aad8d",
+  "baseline_inputs": 1436,
+  "candidate_inputs": 1439,
+  "candidate_exe_sha256": "244f9ce1623e03e5bc9a2277b4afd22f48bade3b9a6505364d69fed5a78825f9",
+  "candidate_UUID": "UUID: 663BBAB1-AE48-3165-A8C3-8E9252D06BAA (arm64) /private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/matched/voteboat-matched-framework\nUUID: 663BBAB1-AE48-3165-A8C3-8E9252D06BAA (arm64) /private/tmp/voteboat-mac446-6c7f09b-pTKRWg/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-02dde9b640a44fba\n",
+  "positiveguards": 0,
+  "actualCLI3_and_cohort_modules_refusals": 0,
+  "unchanged4CLI9artifactnegativecontrols": "reusedsealed435hashscope, notrerun",
+  "bulk_cases": 12,
+  "singleton_cases": 12,
+  "outputs_absent": true,
+  "no_live_build_benchmark_profiler": true,
+  "next": "Waitrootquietauthorizationafterallarchive/copy/check workEND"
+}

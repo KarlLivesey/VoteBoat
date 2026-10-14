@@ -1,0 +1,25 @@
+{
+  "baseline_inputs": 1433,
+  "candidate_inputs": 1439,
+  "candidate_only": [
+    "benchmarks/matched/src/voteboat_engine/actor/pending_replies.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_replies/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs",
+    "docs/PERFORMANCE.md",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-offered.mjs"
+  ],
+  "baseline_only": [],
+  "candidate_compiled_inputs": 1430,
+  "candidate_supplemental_inputs": [
+    "AGENTS.md",
+    "benchmarks/matched/COMPARISON.md",
+    "benchmarks/matched/README.md",
+    "benchmarks/matched/SCHEMA.md",
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "docs/PERFORMANCE.md",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-offered.mjs"
+  ]
+}

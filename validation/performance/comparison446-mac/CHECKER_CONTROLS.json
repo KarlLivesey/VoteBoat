@@ -1,0 +1,113 @@
+{
+  "scope": "actual new16384 CLI inputs checked; two current cohort module refusals executed; unchanged fourCLI/nineartifact refusal scopes reused from sealed435 proof, identity/source/profile positives validated separately; no timing claim",
+  "reused_controls": {
+    "proof": "/tmp/voteboat-comparison435-x3SbiM/CHECKER_CONTROLS.json",
+    "sha256": "448f6b48dd8f604a8521274a713cb614a51ea2f9e2a8f92c61d2f126cd02c2d7",
+    "cli_refusals": [
+      {
+        "control": "missing_original",
+        "result": "correctly rejected",
+        "reason": "wrong original completion"
+      },
+      {
+        "control": "missing_frontier",
+        "result": "correctly rejected",
+        "reason": "wrong follower frontier"
+      },
+      {
+        "control": "missing_protected_phase",
+        "result": "correctly rejected",
+        "reason": "wrong phase count"
+      },
+      {
+        "control": "historical_gap_scope",
+        "result": "correctly rejected",
+        "reason": "historical gap scope reused"
+      }
+    ],
+    "artifact_refusals": [
+      {
+        "control": "missing_dsym_file",
+        "result": "correctly rejected",
+        "reason": "changed dSYM inventory: original"
+      },
+      {
+        "control": "changed_dsym_hash",
+        "result": "correctly rejected",
+        "reason": "changed dSYM file: original/Contents/Info.plist"
+      },
+      {
+        "control": "reused_root_compilation",
+        "result": "correctly rejected",
+        "reason": "reused compiler record: voteboat"
+      },
+      {
+        "control": "missing_build_input",
+        "result": "correctly rejected",
+        "reason": "source inventory differs"
+      },
+      {
+        "control": "missing_original_buffer_module",
+        "result": "correctly rejected",
+        "reason": "434 private request/outcome modules absent"
+      },
+      {
+        "control": "missing_client_outcome_module",
+        "result": "correctly rejected",
+        "reason": "434 private request/outcome modules absent"
+      },
+      {
+        "control": "missing_completion_module",
+        "result": "correctly rejected",
+        "reason": "source inventory differs"
+      },
+      {
+        "control": "missing_core_completion_controls",
+        "result": "correctly rejected",
+        "reason": "source inventory differs"
+      },
+      {
+        "control": "missing_host_completion_controls",
+        "result": "correctly rejected",
+        "reason": "source inventory differs"
+      }
+    ],
+    "scope": "unchanged predicate behavior; requiredcommit/baseline identity+new cohort modules added, no check level weakening"
+  },
+  "actual": [
+    {
+      "mode": "off",
+      "fixture": "off.json",
+      "original": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/logs/cli-off.log",
+      "sha256": "9cd9ba7a56ec4a28b24a507248900d6306fe7654e650b033c7901d1d4ea88604",
+      "result": "pass"
+    },
+    {
+      "mode": "on",
+      "fixture": "on.json",
+      "original": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/logs/cli-on.log",
+      "sha256": "ed967645670aef1fca6e9873aea3a11669a3588b7febdb43481c0cd4a4e4bd9f",
+      "result": "pass"
+    },
+    {
+      "mode": "openraft",
+      "fixture": "openraft.json",
+      "original": "/private/tmp/voteboat-mac446-6c7f09b-pTKRWg/logs/cli-openraft.log",
+      "sha256": "3914cc45490c35be998c5d6bd0c51054ac3fbcf6f8b605e28e8b06d0ec037498",
+      "result": "pass"
+    }
+  ],
+  "cli_negative": [],
+  "artifact_negative": [
+    {
+      "control": "missing_pending_replies",
+      "result": "correctly rejected",
+      "reason": "446 lossless full128 pending-reply cohort modules absent"
+    },
+    {
+      "control": "missing_pending_replies_tests",
+      "result": "correctly rejected",
+      "reason": "446 lossless full128 pending-reply cohort modules absent"
+    }
+  ]
+}
