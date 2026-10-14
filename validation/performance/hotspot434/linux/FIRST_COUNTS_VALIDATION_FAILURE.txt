@@ -1,0 +1,1 @@
+Post-capture parser exited1 KeyError clients: original matched CLI uses settings.clients rather than top-level clients. No capture/import rerun, source or output changes; focused parser correction reads actual schema. Original counts/frontiers already exact in reported output.

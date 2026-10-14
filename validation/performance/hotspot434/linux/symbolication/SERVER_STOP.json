@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-14T02:57:43.568194+00:00",
+  "pid": 3920365,
+  "owned_command_verified": [
+    "target/p9/hotspot-tools/samply-linux/samply-x86_64-unknown-linux-gnu/samply",
+    "load",
+    "target/p9/profile434/linux/perf-quiet/bulk.json.gz",
+    "--no-open",
+    "--address",
+    "127.0.0.1",
+    "--port",
+    "38478",
+    "--symbol-dir",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release",
+    ""
+  ],
+  "signal": "SIGINT",
+  "original_session": 91109,
+  "browser_opened": false,
+  "only_owned_process": true
+}

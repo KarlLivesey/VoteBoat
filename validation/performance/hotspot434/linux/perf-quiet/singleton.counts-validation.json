@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "expected": {
+    "completed_originals": 1048576,
+    "completed_requests": 1048576,
+    "applied_frontiers": [
+      1049601,
+      1049601,
+      1049601
+    ]
+  },
+  "settings": {
+    "clients": 1,
+    "batch": 1,
+    "requested_operations": 1048576,
+    "operations": 1048576,
+    "warmup": 1024,
+    "maintenance": "default_retention",
+    "envelopes": "upstream_default",
+    "attribution": false,
+    "campaign_timeout_secs": 3600
+  },
+  "source": "actualoriginalCLI alloutcomes/quorumapply/followerverification",
+  "scope": "CPUdiagnosticnotunprofiledcapacity"
+}

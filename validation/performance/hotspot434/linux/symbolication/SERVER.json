@@ -1,0 +1,10 @@
+{
+  "original_session": 91109,
+  "pid": 3920365,
+  "endpoint": "http://127.0.0.1:38478/2bzmbjz3fnc1s8db594rfklc0rgkpyfdga67vjx/symbolicate/v5",
+  "profile": "new434bulk",
+  "no_open": true,
+  "address": "127.0.0.1",
+  "port": 38478,
+  "state": "RUNNING_FOR_SYMBOLICATION_ONLY"
+}

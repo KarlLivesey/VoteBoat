@@ -1,0 +1,108 @@
+{
+  "commit": "04049e2b3f00ccfa7390cf92b0ace448b35ff62b",
+  "source_inputs": 1430,
+  "changed_inputs": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/originals.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs",
+    "benchmarks/matched/src/voteboat_engine/client_requests.rs",
+    "tests/provider_conformance/log_store.rs",
+    "tests/provider_conformance/log_store/entry_clone.rs"
+  ],
+  "new_inputs": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/originals.rs",
+    "benchmarks/matched/src/voteboat_engine/client_requests.rs",
+    "tests/provider_conformance/log_store/entry_clone.rs"
+  ],
+  "unchanged_existing_inputs": 1422,
+  "source_inventory_difference": "4311427\u21924341430: production build sources exactly431 (433 restored derived Clone); one retained root Clone oracle+registration and six private flat request harness paths including two new test modules, dependencies/profile unchanged",
+  "original_build_handle": 80626,
+  "original_terminal_exit": 0,
+  "original_stage": "DONE",
+  "fresh_records": "four root/library/executable/pinned upstream records plus root buildscript fresh:false actualCargoJSON",
+  "profile": "unchanged431 opt3/debug2/assertions/overflow/thinLTO/codegen1/packed flagswrappersunset",
+  "within_host_compiler_cargo_protoc_profile_identical431": true,
+  "release_gate": "actualPROFILErelease omits only referencecfg; ordinaryassertions/overflowon",
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/deps/libvoteboat-6f788f5d27895a3b.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/artifacts/matched/libvoteboat-6f788f5d27895a3b.rlib",
+      "sha256": "0ba2b714db73e0f950bed4a14dfaf79d8bce50531a61efc2c5eb848c77322213"
+    },
+    {
+      "target": "voteboat-matched-framework",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/artifacts/matched/voteboat-matched-framework",
+      "sha256": "abc33ba8477a4742911c17fde099064253e22ffa981e366058e963e64d88f36b"
+    },
+    {
+      "target": "openraft",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/deps/libopenraft-5a9af487d2dbc148.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/artifacts/matched/libopenraft-5a9af487d2dbc148.rlib",
+      "sha256": "ed30c328b2ac979fc7f8e6f0c84f269f2f820907b1ac378ddc5e9de5c2240d83"
+    },
+    {
+      "target": "bench_minimal",
+      "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/deps/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/artifacts/matched/libbench_minimal-6c87ebf8dbd5d8ad.rlib",
+      "sha256": "dabdc9107023a8b2b78641e088f5698782f003d095844d4e72abd35856384225"
+    }
+  ],
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "2d8095ccca07f17f98471b62737dd322abb160443277bcc5728317ba03b64f6f",
+    "bytes": 34673024,
+    "executable_sha256": "abc33ba8477a4742911c17fde099064253e22ffa981e366058e963e64d88f36b",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched434-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "controls": [
+    {
+      "case": "off",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 2120120.400685157,
+      "p99_ms": 4.389484,
+      "scope": "functional control only; no paired/sustained capacity"
+    },
+    {
+      "case": "on",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 2234258.3923103544,
+      "p99_ms": 4.592825,
+      "scope": "functional control only; no paired/sustained capacity"
+    },
+    {
+      "case": "openraft",
+      "completed_originals": 16384,
+      "completed_requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ],
+      "PUTS_per_second": 1621646.1252218825,
+      "p99_ms": 6.443862,
+      "scope": "functional control only; no paired/sustained capacity"
+    }
+  ],
+  "cli_exit": 0,
+  "capacity_campaign": "not authorized/run; waitrootquiet"
+}

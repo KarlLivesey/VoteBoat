@@ -1,0 +1,21 @@
+{
+  "remote_job": "/tmp/voteboat-samply434-qhYMhE",
+  "setup_handle": 91797,
+  "setup_exit": 0,
+  "ready": true,
+  "recording_launched": false,
+  "samply_version": "0.13.1",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "converter_sha256": "b4d85920f686bd055816184afeae04dd6bc240737ed49c3d6947fd7ca1bf35a1",
+  "qualified_source_commit": "04049e2b3f00ccfa7390cf92b0ace448b35ff62b",
+  "source_inputs": 1433,
+  "compiler": "sameMacstable1.98.0",
+  "qualified_executable_sha256": "80f3d9af474d5c3988e28fc61fc3c2741c6f3b6eafb4eb8552b7e288ac1af5de",
+  "new_exe_dsym_uuid": "BEC866A0-8846-317B-868B-9F941D61719A",
+  "guard_exit": 0,
+  "no_old_symbol_addresses_or_sidecar_reused": true,
+  "quiet_preparation_empty": true,
+  "runner_sha256": "b3e90343d73573570db3ac73676bef4f3f4593c9d1bce0c1faecd467d941a07b",
+  "schema_sha256": "99b2d96823255b1985fb213b249d3740e02ddc085c6f5adb799363b8db18ab3a",
+  "scope": "Known431 serial20Mbulk+1Msingleton OFF save-only runner minimal434paths; setup only; root must separately authorize recording quiet window. No builds/settings/browser."
+}

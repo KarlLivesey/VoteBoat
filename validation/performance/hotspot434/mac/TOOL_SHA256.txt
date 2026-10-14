@@ -1,0 +1,3 @@
+/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply: OK
+/tmp/voteboat-mac434-04049e2-SFfZ8B/artifacts/matched/voteboat-matched-framework: OK
+samply-collapse.py: OK

@@ -1,0 +1,17 @@
+{
+  "host": "Linux",
+  "actual_record": {
+    "old_proposal_bytes": 48,
+    "old_reply_bytes": 8,
+    "old_element_sum": 56,
+    "old_two_vec_header_bytes": 48,
+    "flat_original_bytes": 48,
+    "flat_request_header_bytes": 24,
+    "originals": 4,
+    "original_capacity": 4,
+    "completion_channels": 4
+  },
+  "scope": "Actualuntimedqueueboundary fixture, not portablelayoutguarantee/allocationcount/bytescause; oldheader equivalenttwoVec layout type; all4individualchannels delivercorrectfull128IDs",
+  "capacity_semantics": "availableVecelementcapacity, not physicalallocationmemoryproof",
+  "original_output": "layout-report.log"
+}

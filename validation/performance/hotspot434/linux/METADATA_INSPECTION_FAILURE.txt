@@ -1,0 +1,1 @@
+Tool e8c021 metadatainspection exited1: AttributeError list object has no attribute items while reading ARTIFACTS.json as a dict. Focused list-schema read corrected. No build/capture/source change. Original full tool output retained in session transcript; no separate rawfile available.

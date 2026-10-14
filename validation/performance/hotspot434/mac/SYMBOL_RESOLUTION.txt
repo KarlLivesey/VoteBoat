@@ -1,0 +1,4 @@
+Existing Samply0.13.1 adjacent-dSYM lookup workaround points only to qualified434 copied bundle, no artifact bytes or source modified, no earlier symbol responses/addresses reused.
+/tmp/voteboat-mac434-04049e2-SFfZ8B/artifacts/symbols/voteboat-matched-framework.dSYM
+UUID: BEC866A0-8846-317B-868B-9F941D61719A (arm64) /tmp/voteboat-mac434-04049e2-SFfZ8B/artifacts/matched/voteboat-matched-framework
+UUID: BEC866A0-8846-317B-868B-9F941D61719A (arm64) /tmp/voteboat-mac434-04049e2-SFfZ8B/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-99be8fed005ba8d1

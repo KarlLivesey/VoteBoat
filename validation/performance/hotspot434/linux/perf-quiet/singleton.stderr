@@ -1,0 +1,7 @@
+[ perf record: Woken up 1109 times to write data ]
+Warning:
+Processed 19079 events and lost 1 chunks!
+
+Check IO/CPU overload!
+
+[ perf record: Captured and wrote 279.852 MB /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/profile434/linux/perf-quiet/singleton.data (17663 samples) ]

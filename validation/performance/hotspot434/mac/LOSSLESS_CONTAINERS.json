@@ -1,0 +1,37 @@
+{
+  "scope": "Only derived folded outputs compressed; raw profilegzipJSON and currentUUID plain symbol sidecars unchanged. Original uncompressed outputs remain target+remote complete archive.",
+  "files": [
+    {
+      "path": "bulk-analysis/cpu.folded",
+      "original_bytes": 14903827,
+      "original_sha256": "63716936d0875edb9f8b42c826ca20d813bdaeac95d8b38054d07d541d11e8b0",
+      "container": "bulk-analysis/cpu.folded.gz",
+      "container_sha256": "d87ee770230653a557c444b7aecab6f533327897d906f03cde8929813cb0034c",
+      "decompression_verified": true
+    },
+    {
+      "path": "bulk-analysis/wall-sample-weights.folded",
+      "original_bytes": 14900970,
+      "original_sha256": "6801b993ba0e57eb1836e96aa059018f791bb02624b596a0b128fbc0b5af1c1e",
+      "container": "bulk-analysis/wall-sample-weights.folded.gz",
+      "container_sha256": "5ca81cf78a28716d01fececb7e1d635010650e0587fafed75e1cf4c9aab1ab45",
+      "decompression_verified": true
+    },
+    {
+      "path": "singleton-analysis/cpu.folded",
+      "original_bytes": 23866345,
+      "original_sha256": "954ba1b73b9e31e5763ea41fe55728cdae6842b003d13878670d4ad8b0fb2455",
+      "container": "singleton-analysis/cpu.folded.gz",
+      "container_sha256": "24e04357ed6dc6e843c8f92f3fb217d271a174a84307e67e346cd563eeae69fb",
+      "decompression_verified": true
+    },
+    {
+      "path": "singleton-analysis/wall-sample-weights.folded",
+      "original_bytes": 23859903,
+      "original_sha256": "838acaf36c7e1b630e2fb4d399d3fcc96221ef16697b191fefcf588e8c05acad",
+      "container": "singleton-analysis/wall-sample-weights.folded.gz",
+      "container_sha256": "8fe306b199dee666d69647593a824f0e39ad16be6f772a35d7dc7ea2cdac8e9e",
+      "decompression_verified": true
+    }
+  ]
+}

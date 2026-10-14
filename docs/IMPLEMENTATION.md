@@ -69,8 +69,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: profile retained434 | Locate the current limiting work after fewer request buffers | Published434, exact outcomes/zero checks/fresh artifacts, positive20M bulk and mixed1M singleton pairs on each host | Current source/artifact-bound CPU/text/JSON profiles, unknown/lost/wait-bias limits preserved; no browser or instruction/allocator-cause guesses | P9.0/P9.1/P9.3 |
-| Next: remove the next measured request/result or transition cost | Improve the remaining limiting stage with one ordering/ownership change | Current434 singleton/profile disposition and unchanged full outcome/durability contracts | Explicit schema, bounded tested checked publication and both-host completed rates/p99 before retention; full curve/memory-debt/durable acceptance remains separate | P9.0/P9.1/P9.3 |
+| Current:435 borrowed synchronous completion | Remove the measured committed-output copy for immediate hosts | Fresh434 profiles and the linked435 schema; preserve exact tickets, late-error behavior and FIFO ownership | Borrowed/owned conformance, real durable histories, all strict checks and checked publication; fresh paired Linux/Mac rates and p99 decide retention | P9.0/P9.1/P9.3 |
+| Next: remaining measured copying/admission work | Reduce the next limiting stage after435's disposition | Current candidate qualified and measured; current source-bound profiles and public ownership contracts | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -123,6 +123,27 @@ payload tuple oracle across all variants and differing fields, existing native/
 provider/codec/recovery histories and actual network services, then fresh asserted
 both-host measurements. Mac may gain less or regress; retain every result. Held427
 is an unqualified earlier experiment, not validation of429.
+
+### Fresh434 profiles and selected435 ownership change
+
+Fresh [Linux](../validation/performance/hotspot434/linux/README.md) and
+[Mac](../validation/performance/hotspot434/mac/README.md) recordings ended before
+analysis/collection. Current artifacts/symbols only; saved JSON/folded data and
+all warnings/unknowns remain. Linux entry copying is10.442% inclusive,4.705%
+under completion and5.084% under pending planning; original-result send13.750%
+intersects delivery. Mac physical HashMap insertion5.593%, memmove4.300%, clone
+2.540%; completion includes clone1.457% and memmove2.005%. These are diagnostic
+sample/interval observations, not additive wall time, allocator causes or a
+capacity result. Linux singleton loses one reported chunk; Mac waiting is biased.
+
+Select435's opt-in borrowed committed completion, preserving the owned path for
+queued/asynchronous hosts. The [schema](P9.md#fresh434-profile-decision-and435-schema)
+records data shape, lifetime, exact durability checks, late-error suppression,
+retirement/snapshot ordering and the matched FIFO fallback before editing.
+Independent source review confirms that immediate application with an existing
+FIFO tail would reorder effects; that case must materialize owned output.
+No435 implementation or performance improvement is claimed yet. The full macro
+plan stays active; the current deliverable and next two are updated above.
 
 ### Slice434 schema — one owned original/request buffer
 
