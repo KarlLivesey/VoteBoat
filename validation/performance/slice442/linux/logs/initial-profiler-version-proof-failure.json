@@ -1,0 +1,8 @@
+{
+  "actual_tool_chunk": "3730bf",
+  "actual_tool_exit": 1,
+  "raw_output": "Traceback (most recent call last):\n  File \"<stdin>\", line 4, in <module>\nAssertionError\n",
+  "cause": "Metadata-onlyperf --version waspassedwrong extracted/lib instead of extracted/usr/lib LD_LIBRARY_PATH. Capture runner alreadyhascorrectpath; noCLI/profile executed.",
+  "raw_subprocess_stderr": "Unavailable frominitialtool becauseassertionprecededoutputwrite; nofabricatedrawcapture.",
+  "focused_fix": "Useexisting extracted/usr/lib path forversionmetadata."
+}

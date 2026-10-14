@@ -1,0 +1,289 @@
+{
+  "scope": "Existing native442 raw physical stack unions weighted by observed threadCPUDelta us. Native Counter generic iterator type distinguishes ready versus submission monomorph; missing/inlined/unresolved frames mean this is resolved evidence, not a bound on all admission cost. Whole launch includes warmup/recovery or invalid singleton cleanup; intervals attributed to wait stacks are biased, not instruction costs.",
+  "cases": {
+    "bulk": {
+      "cpu_denominator_us": 8474526,
+      "unions_nonadditive": {
+        "recovery_storage_union": {
+          "cpu_us": 637591,
+          "percent_observed_CPU": 7.523618430104527
+        },
+        "manifest_publication_union": {
+          "cpu_us": 1422330,
+          "percent_observed_CPU": 16.783593560276998
+        },
+        "park_wait_stack_union": {
+          "cpu_us": 3230861,
+          "percent_observed_CPU": 38.12438595385748
+        },
+        "workload_physical_union": {
+          "cpu_us": 5565279,
+          "percent_observed_CPU": 65.67068175848419
+        },
+        "Counter_validate_physical_union": {
+          "cpu_us": 9633,
+          "percent_observed_CPU": 0.11367007429088069
+        },
+        "Counter_ready_iterator_union": {
+          "cpu_us": 5073,
+          "percent_observed_CPU": 0.05986175509993125
+        },
+        "Counter_under_workload": {
+          "cpu_us": 9633,
+          "percent_observed_CPU": 0.11367007429088069
+        },
+        "Counter_submit_iterator_union": {
+          "cpu_us": 4560,
+          "percent_observed_CPU": 0.053808319190949444
+        },
+        "Counter_apply_union": {
+          "cpu_us": 6043,
+          "percent_observed_CPU": 0.07130782299800602
+        },
+        "log_stage_union": {
+          "cpu_us": 298849,
+          "percent_observed_CPU": 3.526439118836853
+        },
+        "log_apply_union": {
+          "cpu_us": 577124,
+          "percent_observed_CPU": 6.810103597534541
+        },
+        "verify_recovered_union": {
+          "cpu_us": 27032,
+          "percent_observed_CPU": 0.31897949218634764
+        }
+      },
+      "threads": {
+        "26339774": {
+          "name": "native_benchmark",
+          "cpu_us": 6695231,
+          "unions": {
+            "recovery_storage_union": 637591,
+            "manifest_publication_union": 9501,
+            "park_wait_stack_union": 3230861,
+            "workload_physical_union": 5565279,
+            "Counter_validate_physical_union": 9633,
+            "Counter_ready_iterator_union": 5073,
+            "Counter_under_workload": 9633,
+            "Counter_submit_iterator_union": 4560,
+            "Counter_apply_union": 6043,
+            "log_stage_union": 298849,
+            "log_apply_union": 577124,
+            "verify_recovered_union": 27032
+          }
+        },
+        "26339789": {
+          "name": "voteboat-dial",
+          "cpu_us": 578,
+          "unions": {}
+        },
+        "26339788": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 168,
+          "unions": {}
+        },
+        "26339787": {
+          "name": "voteboat-wal",
+          "cpu_us": 854094,
+          "unions": {
+            "manifest_publication_union": 687115
+          }
+        },
+        "26339796": {
+          "name": "voteboat-dial",
+          "cpu_us": 255,
+          "unions": {}
+        },
+        "26339795": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 59,
+          "unions": {}
+        },
+        "26339794": {
+          "name": "voteboat-wal",
+          "cpu_us": 457370,
+          "unions": {
+            "manifest_publication_union": 359344
+          }
+        },
+        "26339799": {
+          "name": "voteboat-dial",
+          "cpu_us": 65,
+          "unions": {}
+        },
+        "26339798": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 57,
+          "unions": {}
+        },
+        "26339797": {
+          "name": "voteboat-wal",
+          "cpu_us": 456204,
+          "unions": {
+            "manifest_publication_union": 358228
+          }
+        },
+        "26340444": {
+          "name": "voteboat-dial",
+          "cpu_us": 147,
+          "unions": {}
+        },
+        "26340443": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 11,
+          "unions": {}
+        },
+        "26340442": {
+          "name": "voteboat-wal",
+          "cpu_us": 3650,
+          "unions": {
+            "manifest_publication_union": 2939
+          }
+        },
+        "26340447": {
+          "name": "voteboat-dial",
+          "cpu_us": 72,
+          "unions": {}
+        },
+        "26340446": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 10,
+          "unions": {}
+        },
+        "26340445": {
+          "name": "voteboat-wal",
+          "cpu_us": 3152,
+          "unions": {
+            "manifest_publication_union": 2546
+          }
+        },
+        "26340450": {
+          "name": "voteboat-dial",
+          "cpu_us": 6,
+          "unions": {}
+        },
+        "26340449": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 10,
+          "unions": {}
+        },
+        "26340448": {
+          "name": "voteboat-wal",
+          "cpu_us": 3387,
+          "unions": {
+            "manifest_publication_union": 2657
+          }
+        }
+      }
+    },
+    "singleton": {
+      "cpu_denominator_us": 21307037,
+      "unions_nonadditive": {
+        "recovery_storage_union": {
+          "cpu_us": 16966,
+          "percent_observed_CPU": 0.07962627558209995
+        },
+        "manifest_publication_union": {
+          "cpu_us": 2901916,
+          "percent_observed_CPU": 13.619519222686852
+        },
+        "park_wait_stack_union": {
+          "cpu_us": 13065778,
+          "percent_observed_CPU": 61.32142165050917
+        },
+        "workload_physical_union": {
+          "cpu_us": 11197208,
+          "percent_observed_CPU": 52.55168984781882
+        },
+        "Counter_validate_physical_union": {
+          "cpu_us": 1400,
+          "percent_observed_CPU": 0.006570599187489091
+        },
+        "Counter_ready_iterator_union": {
+          "cpu_us": 952,
+          "percent_observed_CPU": 0.004468007447492582
+        },
+        "Counter_under_workload": {
+          "cpu_us": 1400,
+          "percent_observed_CPU": 0.006570599187489091
+        },
+        "Counter_apply_union": {
+          "cpu_us": 265,
+          "percent_observed_CPU": 0.0012437205604890066
+        },
+        "Counter_submit_iterator_union": {
+          "cpu_us": 448,
+          "percent_observed_CPU": 0.002102591739996509
+        }
+      },
+      "threads": {
+        "26340539": {
+          "name": "native_benchmark",
+          "cpu_us": 17695685,
+          "unions": {
+            "recovery_storage_union": 16966,
+            "manifest_publication_union": 5319,
+            "park_wait_stack_union": 13065778,
+            "workload_physical_union": 11197208,
+            "Counter_validate_physical_union": 1400,
+            "Counter_ready_iterator_union": 952,
+            "Counter_under_workload": 1400,
+            "Counter_apply_union": 265,
+            "Counter_submit_iterator_union": 448
+          }
+        },
+        "26340548": {
+          "name": "voteboat-dial",
+          "cpu_us": 5152,
+          "unions": {}
+        },
+        "26340547": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 35,
+          "unions": {}
+        },
+        "26340546": {
+          "name": "voteboat-wal",
+          "cpu_us": 1309932,
+          "unions": {
+            "manifest_publication_union": 1068879
+          }
+        },
+        "26340551": {
+          "name": "voteboat-dial",
+          "cpu_us": 266,
+          "unions": {}
+        },
+        "26340550": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 59,
+          "unions": {}
+        },
+        "26340549": {
+          "name": "voteboat-wal",
+          "cpu_us": 1154272,
+          "unions": {
+            "manifest_publication_union": 919213
+          }
+        },
+        "26340554": {
+          "name": "voteboat-dial",
+          "cpu_us": 77,
+          "unions": {}
+        },
+        "26340553": {
+          "name": "voteboat-snapshot",
+          "cpu_us": 62,
+          "unions": {}
+        },
+        "26340552": {
+          "name": "voteboat-wal",
+          "cpu_us": 1141497,
+          "unions": {
+            "manifest_publication_union": 908505
+          }
+        }
+      }
+    }
+  }
+}

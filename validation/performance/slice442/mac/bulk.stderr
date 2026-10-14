@@ -1,0 +1,4 @@
+phase=warmup protocol=TcpTls window=32
+phase=measurement operations=15000 groups=1 leaders=1:1
+phase=recovery-verification
+All tasks terminated.

@@ -1,0 +1,142 @@
+{
+  "source_commit": "590f6e787aa27e5d4752ee34109f09566c9b3fd9",
+  "source_inputs": 1405,
+  "actual_fresh_build_handle": 5226,
+  "actual_fresh_build_terminal_tool": "fd0e02",
+  "actual_fresh_build_exit": 0,
+  "root_example_fresh_false": true,
+  "profile": "opt3/debug2/assertions+overflow/native DEFAULTLTO/codegen/defaultsplit; no framework overrides",
+  "profiling_debug_difference": "Nativeacceptance debug0 versus profilingdebug2; allrates here remaindiagnostic",
+  "source_before_after_sha_and_physical_modes": true,
+  "symbols": {
+    "executable_sha256": "6e1482a67f7c1e31addf4cc4e884322de8e088e823294bc00d6841838ae6b2a4",
+    "symbol_form": "EmbeddednativeLinuxDWARFdebug2 andsymboltable; defaultsplit-debuginfo/noDWP requirement, native defaultLTO/codegen preserved.",
+    "elf_notes_sha256": "d341a13f32e136f9bb3bf1470c20affa08c2860f85368a77c99aabcdf31deb3d",
+    "elf_sections_sha256": "c257cb81b118ae92186992ba40cf8562e61736948d697039b8d3e0d3fd5a983d",
+    "symbol_table_sha256": "6a8ec84a21248da8d4eb0adb37902eed49a548c757a936f6749c4dcf467a37f0",
+    "reference_oracle_cfg_absent_PROFILErelease": true,
+    "root_buildscript_record": {
+      "reason": "build-script-executed",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source#voteboat@0.1.0",
+      "linked_libs": [],
+      "linked_paths": [],
+      "cfgs": [],
+      "env": [],
+      "out_dir": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/target-native-release-profiling/release/build/voteboat-9d8f4067854d49f7/out"
+    },
+    "root_buildscript_fresh_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "custom-build"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "build-script-build",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source/build.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/target-native-release-profiling/release/build/voteboat-90e5e0c256ef507e/build-script-build"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  "binary": {
+    "kind": "native",
+    "target": "native_benchmark",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/target-native-release-profiling/release/examples/native_benchmark",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/artifacts/native/native_benchmark",
+    "sha256": "6e1482a67f7c1e31addf4cc4e884322de8e088e823294bc00d6841838ae6b2a4",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "example"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "native_benchmark",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/source/examples/native_benchmark.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/target-native-release-profiling/release/examples/native_benchmark"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/target-native-release-profiling/release/examples/native_benchmark",
+      "fresh": false
+    }
+  },
+  "profiler": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+    "sha256": "f0fe2b92d280391fa7efa55616f098ba683b9682cf145275d5eda136125f2a64",
+    "version": "perf version 7.2.10-1"
+  },
+  "kernel_settings": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "record_runner_sha256": "648129c10ce6bdd281fbbc2603512b39e815772f09e1392a586ebc6f87604f34",
+  "current_schema": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice442/SCHEMA.md",
+  "cases": [
+    {
+      "operations": 15000,
+      "window": 32
+    },
+    {
+      "operations": 4096,
+      "window": 1
+    }
+  ],
+  "warmup": 64,
+  "ready_quantum": 16,
+  "core_proposal_entries": 64,
+  "transport": "TCP/TLS",
+  "application_payload_bytes": 8,
+  "durability": "FileLogIo synchronizedWAL+manifestpublication",
+  "no_test_or_cli_execution": true,
+  "no_profile_recording_yet": true
+}

@@ -1,0 +1,231 @@
+{
+  "valid_measurement": false,
+  "cpu_denominator_us": 21307037,
+  "sample_records": 385274,
+  "totals": {
+    "samples": 385274,
+    "cpu_us": 21307037,
+    "wall_sample_weight": 1729010,
+    "positive_cpu_samples": 334149,
+    "null_stack_cpu_us": 0,
+    "unresolved_leaf_cpu_us": 512551,
+    "any_unresolved_stack_cpu_us": 13786546,
+    "malformed_stack_cpu_us": 0,
+    "zero_cpu_delta_samples": 51125
+  },
+  "threads": [
+    {
+      "name": "native_benchmark",
+      "tid": "26340539",
+      "pid": "51604",
+      "samples": 244929,
+      "cpu_us": 17695685,
+      "wall_sample_weight": 245000,
+      "positive_cpu_samples": 244886,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 511888,
+      "any_unresolved_stack_cpu_us": 13651061,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 43
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26340548",
+      "pid": "51604",
+      "samples": 49,
+      "cpu_us": 5152,
+      "wall_sample_weight": 244939,
+      "positive_cpu_samples": 30,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 3460,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 19
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26340547",
+      "pid": "51604",
+      "samples": 2,
+      "cpu_us": 35,
+      "wall_sample_weight": 244939,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 35,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26340546",
+      "pid": "51604",
+      "samples": 45723,
+      "cpu_us": 1309932,
+      "wall_sample_weight": 244939,
+      "positive_cpu_samples": 29147,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 342,
+      "any_unresolved_stack_cpu_us": 46384,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 16576
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26340551",
+      "pid": "51604",
+      "samples": 5,
+      "cpu_us": 266,
+      "wall_sample_weight": 124895,
+      "positive_cpu_samples": 3,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 225,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 2
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26340550",
+      "pid": "51604",
+      "samples": 2,
+      "cpu_us": 59,
+      "wall_sample_weight": 124895,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 59,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26340549",
+      "pid": "51604",
+      "samples": 47287,
+      "cpu_us": 1154272,
+      "wall_sample_weight": 124895,
+      "positive_cpu_samples": 30047,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 56,
+      "any_unresolved_stack_cpu_us": 41755,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 17240
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26340554",
+      "pid": "51604",
+      "samples": 2,
+      "cpu_us": 77,
+      "wall_sample_weight": 124836,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 77,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26340553",
+      "pid": "51604",
+      "samples": 2,
+      "cpu_us": 62,
+      "wall_sample_weight": 124836,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 62,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26340552",
+      "pid": "51604",
+      "samples": 47273,
+      "cpu_us": 1141497,
+      "wall_sample_weight": 124836,
+      "positive_cpu_samples": 30032,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 265,
+      "any_unresolved_stack_cpu_us": 43428,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 17241
+    }
+  ],
+  "top5_physical_self": [
+    {
+      "function": "semaphore_timedwait_trap",
+      "cpu_us": 13050937,
+      "percent_of_observed_selected_thread_cpu": 61.25176860583665
+    },
+    {
+      "function": "__fcntl",
+      "cpu_us": 3134770,
+      "percent_of_observed_selected_thread_cpu": 14.712369439260842
+    },
+    {
+      "function": "__recvfrom",
+      "cpu_us": 837692,
+      "percent_of_observed_selected_thread_cpu": 3.9315274104043656
+    },
+    {
+      "function": "__accept",
+      "cpu_us": 283694,
+      "percent_of_observed_selected_thread_cpu": 1.3314568327825216
+    },
+    {
+      "function": "__rename",
+      "cpu_us": 174748,
+      "percent_of_observed_selected_thread_cpu": 0.8201421905823884
+    }
+  ],
+  "stack_unions_nonadditive": {
+    "recovery_storage_union": {
+      "cpu_us": 16966,
+      "percent_observed_CPU": 0.07962627558209995
+    },
+    "manifest_publication_union": {
+      "cpu_us": 2901916,
+      "percent_observed_CPU": 13.619519222686852
+    },
+    "park_wait_stack_union": {
+      "cpu_us": 13065778,
+      "percent_observed_CPU": 61.32142165050917
+    },
+    "workload_physical_union": {
+      "cpu_us": 11197208,
+      "percent_observed_CPU": 52.55168984781882
+    },
+    "Counter_validate_physical_union": {
+      "cpu_us": 1400,
+      "percent_observed_CPU": 0.006570599187489091
+    },
+    "Counter_ready_iterator_union": {
+      "cpu_us": 952,
+      "percent_observed_CPU": 0.004468007447492582
+    },
+    "Counter_under_workload": {
+      "cpu_us": 1400,
+      "percent_observed_CPU": 0.006570599187489091
+    },
+    "Counter_apply_union": {
+      "cpu_us": 265,
+      "percent_observed_CPU": 0.0012437205604890066
+    },
+    "Counter_submit_iterator_union": {
+      "cpu_us": 448,
+      "percent_observed_CPU": 0.002102591739996509
+    }
+  },
+  "limits": [
+    "Launch-to-exit native profile includes setup, warmup, measurement, recovery/retry verification, latency sorting and shutdown; not the throughput timer boundary.",
+    "CPU deltas are interval observations assigned to sampled stacks, not instruction-level cost or elapsed wall percentages.",
+    "Samply 0.13.1 sidecar coalesces inline/source chains by native symbol start address; inline lines are representative, not per-RVA precise.",
+    "Sampled stack unwinder truncation not explicitly marked in these files cannot be quantified; null/malformed/unresolved observations are retained and counted.",
+    "Native thread names do not identify leader/follower ownership; main-owner versus WAL/network worker CPU split remains per actual names only.",
+    "Inclusive function shares overlap and must not be summed; self native-function shares sum to the observed CPU denominator."
+  ]
+}

@@ -1,0 +1,7 @@
+stage,replica,append_calls,append_units,append_commands,append_ns,append_max_ns,barrier_calls,barrier_tickets,barrier_ns,barrier_max_ns,errors,encoded_bytes,io_append_calls,io_append_ns,sync_calls,sync_ns,publish_calls,publish_ns,batch_histogram,group_units
+before_measurement,1,0,0,0,0,0,0,0,0,0,0,0,132,628410,133,1791198326,133,3400206315,,
+before_measurement,2,0,0,0,0,0,0,0,0,0,0,0,118,553176,119,1785358316,119,3406603674,,
+before_measurement,3,0,0,0,0,0,0,0,0,0,0,0,117,605588,118,1845316948,118,3581955099,,
+measurement_failure,1,0,0,0,0,0,0,0,0,0,0,0,2010,10176698,2011,27243126048,2011,52535712861,,
+measurement_failure,2,0,0,0,0,0,0,0,0,0,0,0,1767,8780378,1768,26274687289,1768,53059396024,,
+measurement_failure,3,0,0,0,0,0,0,0,0,0,0,0,1769,8923188,1770,27096529399,1770,54414977135,,

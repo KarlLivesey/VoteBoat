@@ -1,0 +1,5 @@
+phase=warmup protocol=TcpTls window=1
+phase=measurement operations=4096 groups=1 leaders=1:1
+cleanup failure: native progress timed out; retained run is invalid; original failure: native progress timed out; retained run is invalid
+Error: "native progress timed out; retained run is invalid"
+Stopping profile.

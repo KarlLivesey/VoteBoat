@@ -1,0 +1,5 @@
+phase=warmup protocol=TcpTls window=32
+phase=measurement operations=15000 groups=1 leaders=1:1
+phase=recovery-verification
+[ perf record: Woken up 742 times to write data ]
+[ perf record: Captured and wrote 187.019 MB /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/recording/bulk.data ]

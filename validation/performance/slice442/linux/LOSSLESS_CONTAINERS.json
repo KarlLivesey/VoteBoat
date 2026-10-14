@@ -1,0 +1,51 @@
+[
+  {
+    "original_path": "logs/native-release.jsonl",
+    "container_path": "logs/native-release.jsonl.gz",
+    "original_sha256": "cff74a0c635af8c6ad6bbe2884ef4e16313baca4c04027f07180da4dc2931447",
+    "original_bytes": 3237420,
+    "codec": "gzip lossless"
+  },
+  {
+    "original_path": "logs/symbol-table.log",
+    "container_path": "logs/symbol-table.log.gz",
+    "original_sha256": "6a8ec84a21248da8d4eb0adb37902eed49a548c757a936f6749c4dcf467a37f0",
+    "original_bytes": 2142403,
+    "codec": "gzip lossless"
+  },
+  {
+    "original_path": "recording/bulk.flat.txt",
+    "container_path": "recording/bulk.flat.txt.gz",
+    "original_sha256": "c473a2602f43215c42aea0ac0fdf638261249ebed0ba4cfaff6f1e507219c160",
+    "original_bytes": 5326492,
+    "codec": "gzip lossless"
+  },
+  {
+    "original_path": "recording/bulk.inline-stacks.txt",
+    "container_path": "recording/bulk.inline-stacks.txt.gz",
+    "original_sha256": "80d2d57b015520c2c2648fd2eaef3afcc9038cf863afe6a83e81bcd3fb1d8cf8",
+    "original_bytes": 1158682,
+    "codec": "gzip lossless"
+  },
+  {
+    "original_path": "recording/singleton.flat.txt",
+    "container_path": "recording/singleton.flat.txt.gz",
+    "original_sha256": "3ddde937d9b6de33217f55a209261f8cc206bc065880d158863aee610d150139",
+    "original_bytes": 8187998,
+    "codec": "gzip lossless"
+  },
+  {
+    "original_path": "recording/singleton.stacks.txt",
+    "container_path": "recording/singleton.stacks.txt.gz",
+    "original_sha256": "b716ca6e28c8eb4f721125b93865de0b30ed281474faf0f4c3c5aace670e3ba0",
+    "original_bytes": 1517211,
+    "codec": "gzip lossless"
+  },
+  {
+    "original_path": "recording/singleton.inline-stacks.txt",
+    "container_path": "recording/singleton.inline-stacks.txt.gz",
+    "original_sha256": "9e31df3231a55c3994d24535dd0d91241828c38f6f0fde3c27c09c4fc2d89d54",
+    "original_bytes": 1994193,
+    "codec": "gzip lossless"
+  }
+]

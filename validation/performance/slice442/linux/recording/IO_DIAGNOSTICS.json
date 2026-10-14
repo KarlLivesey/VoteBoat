@@ -1,0 +1,169 @@
+{
+  "bulk_measurement_per_replica_deltas": [
+    {
+      "replica": 1,
+      "journal_delta": {
+        "io_append_calls": 1875,
+        "io_append_ns": 10129544,
+        "sync_calls": 1875,
+        "sync_ns": 24586224324,
+        "publish_calls": 1875,
+        "publish_ns": 51781757260
+      },
+      "publication_step_delta": {
+        "directory_sync": {
+          "calls": 1875,
+          "errors": 0,
+          "elapsed_ns": 25886265758,
+          "manifest_calls": 1875,
+          "manifest_errors": 0,
+          "manifest_ns": 51781757260
+        },
+        "file_sync": {
+          "calls": 1875,
+          "errors": 0,
+          "elapsed_ns": 25465128977,
+          "manifest_calls": 1875,
+          "manifest_errors": 0,
+          "manifest_ns": 51781757260
+        },
+        "open": {
+          "calls": 1875,
+          "errors": 0,
+          "elapsed_ns": 34138172,
+          "manifest_calls": 1875,
+          "manifest_errors": 0,
+          "manifest_ns": 51781757260
+        },
+        "rename": {
+          "calls": 1875,
+          "errors": 0,
+          "elapsed_ns": 381431682,
+          "manifest_calls": 1875,
+          "manifest_errors": 0,
+          "manifest_ns": 51781757260
+        },
+        "write": {
+          "calls": 1875,
+          "errors": 0,
+          "elapsed_ns": 10674650,
+          "manifest_calls": 1875,
+          "manifest_errors": 0,
+          "manifest_ns": 51781757260
+        }
+      }
+    },
+    {
+      "replica": 2,
+      "journal_delta": {
+        "io_append_calls": 938,
+        "io_append_ns": 5940106,
+        "sync_calls": 938,
+        "sync_ns": 13681387856,
+        "publish_calls": 938,
+        "publish_ns": 27534628018
+      },
+      "publication_step_delta": {
+        "directory_sync": {
+          "calls": 938,
+          "errors": 0,
+          "elapsed_ns": 13631724748,
+          "manifest_calls": 938,
+          "manifest_errors": 0,
+          "manifest_ns": 27534628018
+        },
+        "file_sync": {
+          "calls": 938,
+          "errors": 0,
+          "elapsed_ns": 13626766875,
+          "manifest_calls": 938,
+          "manifest_errors": 0,
+          "manifest_ns": 27534628018
+        },
+        "open": {
+          "calls": 938,
+          "errors": 0,
+          "elapsed_ns": 17620142,
+          "manifest_calls": 938,
+          "manifest_errors": 0,
+          "manifest_ns": 27534628018
+        },
+        "rename": {
+          "calls": 938,
+          "errors": 0,
+          "elapsed_ns": 250969426,
+          "manifest_calls": 938,
+          "manifest_errors": 0,
+          "manifest_ns": 27534628018
+        },
+        "write": {
+          "calls": 938,
+          "errors": 0,
+          "elapsed_ns": 5295214,
+          "manifest_calls": 938,
+          "manifest_errors": 0,
+          "manifest_ns": 27534628018
+        }
+      }
+    },
+    {
+      "replica": 3,
+      "journal_delta": {
+        "io_append_calls": 931,
+        "io_append_ns": 5546597,
+        "sync_calls": 931,
+        "sync_ns": 14094003930,
+        "publish_calls": 931,
+        "publish_ns": 28312659199
+      },
+      "publication_step_delta": {
+        "directory_sync": {
+          "calls": 931,
+          "errors": 0,
+          "elapsed_ns": 14046579335,
+          "manifest_calls": 931,
+          "manifest_errors": 0,
+          "manifest_ns": 28312659199
+        },
+        "file_sync": {
+          "calls": 931,
+          "errors": 0,
+          "elapsed_ns": 13981671473,
+          "manifest_calls": 931,
+          "manifest_errors": 0,
+          "manifest_ns": 28312659199
+        },
+        "open": {
+          "calls": 931,
+          "errors": 0,
+          "elapsed_ns": 17313288,
+          "manifest_calls": 931,
+          "manifest_errors": 0,
+          "manifest_ns": 28312659199
+        },
+        "rename": {
+          "calls": 931,
+          "errors": 0,
+          "elapsed_ns": 259730038,
+          "manifest_calls": 931,
+          "manifest_errors": 0,
+          "manifest_ns": 28312659199
+        },
+        "write": {
+          "calls": 931,
+          "errors": 0,
+          "elapsed_ns": 5126362,
+          "manifest_calls": 931,
+          "manifest_errors": 0,
+          "manifest_ns": 28312659199
+        }
+      }
+    }
+  ],
+  "actual_measurement_proposal_widths": {
+    "8": 1,
+    "16": 937
+  },
+  "histogram_originals": 15000,
+  "limit": "Journal/publication durations are inclusive elapsedwallintervals, concurrentbetweenreplicas/nested; do not sum asCPU orinferIOcause fromCPU profile. FileSync/directorySync remainmandatorydurabilitybarriers."
+}

@@ -1,0 +1,29 @@
+{
+  "shared_native_inputs": 1405,
+  "sha256_identical": true,
+  "linux_current_bytes_and_modes_verified": true,
+  "executable_bits_identical": true,
+  "each_host_before_after_physical_modes_verified_by_original_guards": true,
+  "physical_modes_identical_across_hosts": false,
+  "initial_root_overstrict_cross_host_mode_assertion": "failed on .githooks/pre-push, Linux0o755/Mac0o775; corrected to report source mode differences, preserving within-host exact guards; no source/artifact/run changes",
+  "unused_mac_additional_selected_inputs": 32,
+  "physical_mode_difference_count": 1398,
+  "mode_pairs": [
+    {
+      "linux": "0o755",
+      "mac": "0o775",
+      "mac_committed_archive": "0o775",
+      "paths": 1
+    },
+    {
+      "linux": "0o644",
+      "mac": "0o664",
+      "mac_committed_archive": "0o664",
+      "paths": 1397
+    }
+  ],
+  "full_source_mode_maps": [
+    "linux/SOURCE.json",
+    "mac/SOURCE.json"
+  ]
+}

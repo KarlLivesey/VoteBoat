@@ -1,0 +1,13 @@
+{
+  "schema": "validation/performance/slice442/SCHEMA.md",
+  "bulk_originals": 15000,
+  "window": 32,
+  "singleton_originals": 4096,
+  "singleton_window": 1,
+  "warmup": 64,
+  "ready_visit_items": 16,
+  "core_proposal_entries": 64,
+  "default_log_limit_entries": 16384,
+  "reserve": 64,
+  "reason": "15000+64warmup+64reserve fits existingdefaultLogLimits;20000 rejectedbyread-onlysourcepreflight beforeanyCLI execution. No limits/default/checkpointchanges."
+}

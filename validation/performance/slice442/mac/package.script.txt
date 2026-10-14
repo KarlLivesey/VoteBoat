@@ -1,0 +1,31 @@
+import gzip,hashlib,json,shutil,tarfile
+from pathlib import Path
+j=Path('/tmp/voteboat-native442-590f6e7-Il5nTW');dest=j/'archive-data';dest.mkdir();h=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+excluded={'source','target-native-release','artifacts','test-tmp','record-tmp','archive-data','__pycache__','bulk-workload','singleton-workload'}
+for f in j.rglob('*'):
+ if not f.is_file()or f.relative_to(j).parts[0]in excluded or '__pycache__'in f.parts or f.name in{'source.tar','qualification.tgz','native442.tgz'}:continue
+ rel=f.relative_to(j);out=dest/rel;out.parent.mkdir(parents=True,exist_ok=True);assert not f.is_symlink();shutil.copy2(f,out)
+for cell in ['bulk','singleton']:
+ for f in(j/(cell+'-workload')).iterdir():
+  if f.is_file()and f.suffix in{'.csv','.txt','.json'}:
+   out=dest/(cell+'-workload')/f.name;out.parent.mkdir(exist_ok=True);shutil.copy2(f,out)
+compressed=[]
+for f in sorted(dest.rglob('*.folded')):
+ original=j/f.relative_to(dest);out=Path(str(f)+'.gz')
+ with f.open('rb')as src,out.open('wb')as sink:
+  with gzip.GzipFile(filename='',mode='wb',fileobj=sink,compresslevel=6,mtime=0)as z:shutil.copyfileobj(src,z)
+ digest=hashlib.sha256()
+ with gzip.open(out,'rb')as src:
+  for chunk in iter(lambda:src.read(1048576),b''):digest.update(chunk)
+ assert digest.hexdigest()==h(original)
+ compressed.append({'original':str(original.relative_to(j)),'original_bytes':original.stat().st_size,'original_sha256':h(original),'archive':str(out.relative_to(dest)),'compressed_bytes':out.stat().st_size,'compressed_sha256':h(out),'independent_decompress_hash_verified':True});f.unlink()
+(dest/'COMPRESSION.json').write_text(json.dumps(compressed,indent=2)+'\n')
+for cell in ['bulk','singleton']:
+ s=json.loads((j/(cell+'-analysis/SUMMARY.json')).read_text());ctx=json.loads((j/'NATIVE_CONTEXTS.json').read_text())['cases'][cell]
+ row={'valid_measurement':cell=='bulk','cpu_denominator_us':s['cpu_denominator_us'],'sample_records':s['totals']['samples'],'totals':s['totals'],'threads':s['threads'],'top5_physical_self':s['self_native_functions'][:5],'stack_unions_nonadditive':ctx['unions_nonadditive'],'limits':s['limits']}
+ (dest/(cell+'-COMPACT_CPU.json')).write_text(json.dumps(row,indent=2)+'\n')
+(dest/'ACTUAL_EXECUTION.json').write_text(json.dumps({'source_commit':'590f6e787aa27e5d4752ee34109f09566c9b3fd9','build_original_handle':9297,'build_terminal_tool':'74b54d','build_exit':0,'setup_original_handle':33052,'setup_terminal_tool':'c65ed0','setup_exit':0,'record_original_handle':16772,'record_terminal_tool':'6daf41','record_exit':1,'bulk_exit':0,'singleton_exit':1,'whole_quiet_END_before_analysis':True,'postcapture_source_artifact_guard_handle':85444,'postcapture_guards_exit':0,'converter_handle':85177,'converter_exit':0,'physical_contexts_handle':44878,'physical_contexts_exit':0,'native_output_readout_handle':67912,'native_output_readout_exit':0,'no_recaptures_build_restarts_or_tests':True,'no_symbol_server_browser_or_policy_change':True},indent=2)+'\n')
+with tarfile.open(j/'native442.tgz','w:gz')as t:
+ for f in sorted(dest.rglob('*')):
+  if f.is_file():assert not f.is_symlink();t.add(f,arcname=str(f.relative_to(dest)),recursive=False)
+print(json.dumps({'regular_files':sum(f.is_file()for f in dest.rglob('*')),'archive_bytes':(j/'native442.tgz').stat().st_size,'lossless_folded_files':len(compressed),'all_decompress_verified':True}))

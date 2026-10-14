@@ -1,0 +1,2 @@
+fresh source/compiler/native profile and original/copied artifact guards passed
+embeddednativeprofiling debug2 symbols andrelease-profilecfg proven; no acceptancebuild orCLI run

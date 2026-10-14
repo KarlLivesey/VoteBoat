@@ -1,0 +1,2 @@
+UUID: 430CB0E2-33FC-3172-A3CD-3BDBA243A42D (arm64) /tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark
+UUID: 430CB0E2-33FC-3172-A3CD-3BDBA243A42D (arm64) /private/tmp/voteboat-native442-590f6e7-Il5nTW/artifacts/symbols/native_benchmark.dSYM/Contents/Resources/DWARF/native_benchmark-65dc46caa59ba5dd

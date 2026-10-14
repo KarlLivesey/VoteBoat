@@ -1,0 +1,168 @@
+{
+  "source_commit": "590f6e787aa27e5d4752ee34109f09566c9b3fd9",
+  "source_inputs": 1437,
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/deps/libvoteboat-0210d4ab72b0c4e2.rlib",
+      "copy": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/artifacts/native/libvoteboat-0210d4ab72b0c4e2.rlib",
+      "sha256": "b75026fba004057e399ce7c2e6c6e96a8604f2c5600e38c71b5fb6480873efc7",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///private/tmp/voteboat-native442-590f6e7-Il5nTW/source#voteboat@0.1.0",
+        "manifest_path": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/source/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/deps/libvoteboat-0210d4ab72b0c4e2.rlib",
+          "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/deps/libvoteboat-0210d4ab72b0c4e2.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      }
+    },
+    {
+      "target": "native_benchmark",
+      "original": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark",
+      "copy": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/artifacts/native/native_benchmark",
+      "sha256": "eb0fc932503f3a1605b0b254681eae9df39062ff82c7f7c238912955681e3db6",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///private/tmp/voteboat-native442-590f6e7-Il5nTW/source#voteboat@0.1.0",
+        "manifest_path": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "native_benchmark",
+          "src_path": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/source/examples/native_benchmark.rs",
+          "edition": "2021",
+          "required-features": [
+            "tls"
+          ],
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark",
+          "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark.dSYM"
+        ],
+        "executable": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark",
+        "fresh": false
+      }
+    }
+  ],
+  "symbols": [
+    {
+      "original": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark.dSYM/Contents/Info.plist",
+      "copy": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/artifacts/symbols/native_benchmark.dSYM/Contents/Info.plist",
+      "sha256": "40f5b6c18d9e94185737d089b921e1dd189895aa4e37fc874f530c75692ae4b3"
+    },
+    {
+      "original": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark.dSYM/Contents/Resources/DWARF/native_benchmark-65dc46caa59ba5dd",
+      "copy": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/artifacts/symbols/native_benchmark.dSYM/Contents/Resources/DWARF/native_benchmark-65dc46caa59ba5dd",
+      "sha256": "dc997e6b7fd0b5d86d7a1bf9a2a158ace983aadec1f99e7c3aaf4e7f8db430d3"
+    },
+    {
+      "original": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/examples/native_benchmark.dSYM/Contents/Resources/Relocations/aarch64/native_benchmark-65dc46caa59ba5dd.yml",
+      "copy": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/artifacts/symbols/native_benchmark.dSYM/Contents/Resources/Relocations/aarch64/native_benchmark-65dc46caa59ba5dd.yml",
+      "sha256": "8c28ba1076fb8f5e71d46113bbe3ce79a7b04faebf683583c8d294122333ee05"
+    }
+  ],
+  "UUID": "430CB0E2-33FC-3172-A3CD-3BDBA243A42D",
+  "root_build_script_fresh": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///private/tmp/voteboat-native442-590f6e7-Il5nTW/source#voteboat@0.1.0",
+    "manifest_path": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/private/tmp/voteboat-native442-590f6e7-Il5nTW/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/build/voteboat-144c352af1f8c517/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "root_build_script_executed": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///private/tmp/voteboat-native442-590f6e7-Il5nTW/source#voteboat@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/tmp/voteboat-native442-590f6e7-Il5nTW/target-native-release/release/build/voteboat-0b7eedcb3910c9b7/out"
+  },
+  "compiler_lines": "ROOT_NATIVE_RUSTC.txt",
+  "profile": "native defaultLTO/codegen; opt3/debug2/packed/assertions+overflow; no framework override",
+  "source_modes": "SOURCE.json physical modes; seven existing fixture keys0600",
+  "tool_identities_equal435": true,
+  "samply_path": "/tmp/voteboat-samply0131-IDCfdm/extracted/samply-aarch64-apple-darwin/samply",
+  "samply_sha256": "dcf042115dd8a9e8582510f403365cbee1a2025405d0f3ebe95162f31943123b",
+  "scope": "fresh root/example native profiling build only; no tests, controls or rate claim"
+}

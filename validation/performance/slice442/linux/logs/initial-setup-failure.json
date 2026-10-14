@@ -1,0 +1,7 @@
+{
+  "tool_chunk": "cbee29",
+  "exit": 1,
+  "raw_output": "Traceback (most recent call last):\n  File \"<stdin>\", line 3, in <module>\nAssertionError\n",
+  "cause": "Jobdirectory already existed empty; sourceexport init guarded nonexistentdirectory instead of emptydirectory. No source or build created by failedattempt.",
+  "focused_fix": "Acceptexistingemptyjobdirectory, continueonce; stillrequirefreshsource andfreshbuildtarget."
+}

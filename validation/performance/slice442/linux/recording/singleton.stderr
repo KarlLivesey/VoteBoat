@@ -1,0 +1,6 @@
+phase=warmup protocol=TcpTls window=1
+phase=measurement operations=4096 groups=1 leaders=1:1
+cleanup failure: native progress timed out; retained run is invalid; original failure: native progress timed out; retained run is invalid
+Error: "native progress timed out; retained run is invalid"
+[ perf record: Woken up 1016 times to write data ]
+[ perf record: Captured and wrote 255.461 MB /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/recording/singleton.data ]

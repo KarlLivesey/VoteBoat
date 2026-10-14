@@ -321,11 +321,41 @@ suite, performance build, CLI, profile or benchmark rerun. This completes the
 checked restoration; immutable435 remains the measured baseline and no441 rate is
 claimed. Full P9 minimum margins/durable/headroom/fairness/placement/P8 remain open.
 
+442 gathers current native Counter profiles without changing source.
+[Both-host evidence and decision](../validation/performance/slice442/README.md).
+Fresh asserted native profiling builds keep default LTO/codegen; debug2/symbols
+are a profiling difference from native acceptance debug0. Linux bulk15,000/window32
+completes187.789 PUTS/s and455.628494ms p99; Mac271.967 PUTS/s and161.817500ms.
+Both pass exact original CSV/recovery/retry/join guards. Actual widths on both are
+16×937 plus8×1. Linux leader manifest publication reports51.781757 seconds during
+79.876685-second measurement; Mac37.396576 seconds. WAL sync is a separate scope;
+publication file/directory sync intervals nest and are not additive CPU time.
+
+Both4096/window1 attempts hit the unchanged120-second progress deadline, then
+cleanup also times out. Linux retains938 completed originals/unresolved1003; Mac
+retains1,456 completed/one unresolved. Both remain invalid partial runs with
+workers_joined=false, no complete rate/recovery claim, and no retry/deadline or
+limit change. The initial20,000 request was corrected to15,000 by source preflight
+before invoking either workload, preserving log/control capacity. All raw failures
+and slow tails remain; these are profiled durable diagnostics, not framework or
+sustained acceptance rates.
+
+Counter admission context is postponed. Linux caller unwinding is incomplete
+(77.004% empty chains/18.362% unresolved leaves); resolved Counter unions are lower
+bounds. Mac observed CPU deltas attributed to sample stacks also have unresolved
+ancestry and wait/wakeup bias. Neither source complexity nor these partial CPU
+contexts supports selecting admission as the largest drain. Publication waiting
+and actual barriers/widths are direct evidence. Preserve the publication protocol,
+default quantum16 and prior421 singleton regressions. Next make configured64-wide
+ready batching measurable: current native CLI window cap32 cannot exercise its
+existing64-command quantum. No new storage format, weakened sync, provider seam
+or default-policy change is selected; all P9 macro requirements remain active.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: measured Counter ready admission work | Remove repeated reservation scans if the native profile confirms material cost | Checked441 restoration, actual440 admission audit, compact native CPU data and separate optional/default-fallback application schema before editing | Serial-equivalent errors/receipts/partial prefixes and conformance; checked publication and paired real durable/hot-cold rates/latency on both hosts | P9.1/P9.2/P9.3 |
-| Next: bounded persistence overlap and placement | Expand sustained useful capacity across existing composition contracts | Measured batching/fairness and a typed partial-progress/durability dependency plan | Exact original outcomes, crash/retry/fencing and active maintenance; shared barriers, placement and P8 costs remain required | P9.1/P9.2/P9.3/P9.4 |
-| Following: full framework curve and offered-load qualification | Test remaining minimum cells and sustainable headroom | Qualified measured optimizations, immutable pinned reference, matching host/build/workload boundaries | All seven cells on both hosts, repeated sustained rates and p99, bounded physical memory/debt, refusals and hot/cold fairness; preserve raw losses | P9.0/P9.1/P9.3 |
+| Current: existing64-command durable batching measurement | Put more originals behind each existing physical barrier | Current442 IO/width evidence and separate443 CLI/validator schema; existing ready64/Core64 contracts | Exact64-wide original histories/recovery/retries/join on both hosts; unchanged defaults/format/checks; paired native-policy rates/p99/publications at matched window/build | P9.0/P9.1/P9.3 |
+| Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide measurements and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
+| Following: bounded persistence overlap and full qualification | Reduce remaining serial waits and test all P9 requirements | Measured barrier/batching limits and typed partial-progress/durability plan | All seven framework cells on both hosts, real durable headroom/placement/shared barriers and P8 costs; original outcomes/crash/retry/fencing preserved | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
 comparison or short diagnostics. All seven one-group healthy-margin cells on

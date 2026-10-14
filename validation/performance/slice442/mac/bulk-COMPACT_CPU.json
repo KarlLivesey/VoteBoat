@@ -1,0 +1,369 @@
+{
+  "valid_measurement": true,
+  "cpu_denominator_us": 8474526,
+  "sample_records": 126974,
+  "totals": {
+    "samples": 126974,
+    "cpu_us": 8474526,
+    "wall_sample_weight": 566262,
+    "positive_cpu_samples": 101346,
+    "null_stack_cpu_us": 0,
+    "unresolved_leaf_cpu_us": 582056,
+    "any_unresolved_stack_cpu_us": 3914865,
+    "malformed_stack_cpu_us": 0,
+    "zero_cpu_delta_samples": 25628
+  },
+  "threads": [
+    {
+      "name": "native_benchmark",
+      "tid": "26339774",
+      "pid": "51572",
+      "samples": 57126,
+      "cpu_us": 6695231,
+      "wall_sample_weight": 57237,
+      "positive_cpu_samples": 57066,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 581807,
+      "any_unresolved_stack_cpu_us": 3848408,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 60
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26339789",
+      "pid": "51572",
+      "samples": 5,
+      "cpu_us": 578,
+      "wall_sample_weight": 56141,
+      "positive_cpu_samples": 3,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 499,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 2
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26339788",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 168,
+      "wall_sample_weight": 56142,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 168,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26339787",
+      "pid": "51572",
+      "samples": 30912,
+      "cpu_us": 854094,
+      "wall_sample_weight": 56142,
+      "positive_cpu_samples": 19832,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 58,
+      "any_unresolved_stack_cpu_us": 26391,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 11080
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26339796",
+      "pid": "51572",
+      "samples": 5,
+      "cpu_us": 255,
+      "wall_sample_weight": 56081,
+      "positive_cpu_samples": 3,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 115,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 2
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26339795",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 59,
+      "wall_sample_weight": 56082,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 59,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26339794",
+      "pid": "51572",
+      "samples": 19300,
+      "cpu_us": 457370,
+      "wall_sample_weight": 56082,
+      "positive_cpu_samples": 12120,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 80,
+      "any_unresolved_stack_cpu_us": 19124,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 7180
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26339799",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 65,
+      "wall_sample_weight": 56020,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 65,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26339798",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 57,
+      "wall_sample_weight": 56021,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 57,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26339797",
+      "pid": "51572",
+      "samples": 19221,
+      "cpu_us": 456204,
+      "wall_sample_weight": 56021,
+      "positive_cpu_samples": 12071,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 111,
+      "any_unresolved_stack_cpu_us": 19117,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 7150
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26340444",
+      "pid": "51572",
+      "samples": 4,
+      "cpu_us": 147,
+      "wall_sample_weight": 668,
+      "positive_cpu_samples": 2,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 147,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 2
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26340443",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 11,
+      "wall_sample_weight": 668,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 11,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26340442",
+      "pid": "51572",
+      "samples": 103,
+      "cpu_us": 3650,
+      "wall_sample_weight": 668,
+      "positive_cpu_samples": 63,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 200,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 40
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26340447",
+      "pid": "51572",
+      "samples": 4,
+      "cpu_us": 72,
+      "wall_sample_weight": 476,
+      "positive_cpu_samples": 2,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 72,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 2
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26340446",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 10,
+      "wall_sample_weight": 476,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 10,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26340445",
+      "pid": "51572",
+      "samples": 134,
+      "cpu_us": 3152,
+      "wall_sample_weight": 476,
+      "positive_cpu_samples": 85,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 168,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 49
+    },
+    {
+      "name": "voteboat-dial",
+      "tid": "26340450",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 6,
+      "wall_sample_weight": 287,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 6,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-snapshot",
+      "tid": "26340449",
+      "pid": "51572",
+      "samples": 2,
+      "cpu_us": 10,
+      "wall_sample_weight": 287,
+      "positive_cpu_samples": 1,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 10,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 1
+    },
+    {
+      "name": "voteboat-wal",
+      "tid": "26340448",
+      "pid": "51572",
+      "samples": 144,
+      "cpu_us": 3387,
+      "wall_sample_weight": 287,
+      "positive_cpu_samples": 91,
+      "null_stack_cpu_us": 0,
+      "unresolved_leaf_cpu_us": 0,
+      "any_unresolved_stack_cpu_us": 238,
+      "malformed_stack_cpu_us": 0,
+      "zero_cpu_delta_samples": 53
+    }
+  ],
+  "top5_physical_self": [
+    {
+      "function": "semaphore_timedwait_trap",
+      "cpu_us": 3227942,
+      "percent_of_observed_selected_thread_cpu": 38.08994154953327
+    },
+    {
+      "function": "__fcntl",
+      "cpu_us": 1491739,
+      "percent_of_observed_selected_thread_cpu": 17.602624618769237
+    },
+    {
+      "function": "__recvfrom",
+      "cpu_us": 587464,
+      "percent_of_observed_selected_thread_cpu": 6.932116321314018
+    },
+    {
+      "function": "write",
+      "cpu_us": 485490,
+      "percent_of_observed_selected_thread_cpu": 5.728815983336413
+    },
+    {
+      "function": "__accept",
+      "cpu_us": 140600,
+      "percent_of_observed_selected_thread_cpu": 1.659089841720941
+    }
+  ],
+  "stack_unions_nonadditive": {
+    "recovery_storage_union": {
+      "cpu_us": 637591,
+      "percent_observed_CPU": 7.523618430104527
+    },
+    "manifest_publication_union": {
+      "cpu_us": 1422330,
+      "percent_observed_CPU": 16.783593560276998
+    },
+    "park_wait_stack_union": {
+      "cpu_us": 3230861,
+      "percent_observed_CPU": 38.12438595385748
+    },
+    "workload_physical_union": {
+      "cpu_us": 5565279,
+      "percent_observed_CPU": 65.67068175848419
+    },
+    "Counter_validate_physical_union": {
+      "cpu_us": 9633,
+      "percent_observed_CPU": 0.11367007429088069
+    },
+    "Counter_ready_iterator_union": {
+      "cpu_us": 5073,
+      "percent_observed_CPU": 0.05986175509993125
+    },
+    "Counter_under_workload": {
+      "cpu_us": 9633,
+      "percent_observed_CPU": 0.11367007429088069
+    },
+    "Counter_submit_iterator_union": {
+      "cpu_us": 4560,
+      "percent_observed_CPU": 0.053808319190949444
+    },
+    "Counter_apply_union": {
+      "cpu_us": 6043,
+      "percent_observed_CPU": 0.07130782299800602
+    },
+    "log_stage_union": {
+      "cpu_us": 298849,
+      "percent_observed_CPU": 3.526439118836853
+    },
+    "log_apply_union": {
+      "cpu_us": 577124,
+      "percent_observed_CPU": 6.810103597534541
+    },
+    "verify_recovered_union": {
+      "cpu_us": 27032,
+      "percent_observed_CPU": 0.31897949218634764
+    }
+  },
+  "limits": [
+    "Launch-to-exit native profile includes setup, warmup, measurement, recovery/retry verification, latency sorting and shutdown; not the throughput timer boundary.",
+    "CPU deltas are interval observations assigned to sampled stacks, not instruction-level cost or elapsed wall percentages.",
+    "Samply 0.13.1 sidecar coalesces inline/source chains by native symbol start address; inline lines are representative, not per-RVA precise.",
+    "Sampled stack unwinder truncation not explicitly marked in these files cannot be quantified; null/malformed/unresolved observations are retained and counted.",
+    "Native thread names do not identify leader/follower ownership; main-owner versus WAL/network worker CPU split remains per actual names only.",
+    "Inclusive function shares overlap and must not be summed; self native-function shares sum to the observed CPU denominator."
+  ]
+}

@@ -1,0 +1,7 @@
+[
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/hotspot-tools/perf-linux/extracted/usr/bin/perf",
+  "script",
+  "-i",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native442-linux/recording/bulk.data",
+  "--header-only"
+]

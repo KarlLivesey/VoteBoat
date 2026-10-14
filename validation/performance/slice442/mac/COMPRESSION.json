@@ -1,0 +1,38 @@
+[
+  {
+    "original": "bulk-analysis/cpu.folded",
+    "original_bytes": 6582038,
+    "original_sha256": "e5741c0ee4f02c1b9f9f352039a41c8dcd2c6f49e78dc087db94766b77be4f2e",
+    "archive": "bulk-analysis/cpu.folded.gz",
+    "compressed_bytes": 107894,
+    "compressed_sha256": "6a6dbb03db40d014c4337eaba28da4fa7fa128c6d4fe374eedb2d325fdf6d24b",
+    "independent_decompress_hash_verified": true
+  },
+  {
+    "original": "bulk-analysis/wall-sample-weights.folded",
+    "original_bytes": 6579631,
+    "original_sha256": "df73ca69a74f6ae7648bb35d7bea108f0b4ad33ce1ef9721911ad8a1f7792aec",
+    "archive": "bulk-analysis/wall-sample-weights.folded.gz",
+    "compressed_bytes": 105686,
+    "compressed_sha256": "43f3858c01e4836540cd7bcc85492b236f621dd04e0db3192c915076a21a7ee6",
+    "independent_decompress_hash_verified": true
+  },
+  {
+    "original": "singleton-analysis/cpu.folded",
+    "original_bytes": 9949423,
+    "original_sha256": "c8c11e7b30f3bf4cc5834184a91ac626c966033bfff6d068ca035953ef1b5767",
+    "archive": "singleton-analysis/cpu.folded.gz",
+    "compressed_bytes": 143206,
+    "compressed_sha256": "dc2148a218ef85f8b391778f5d3e27ed04ca18ba30b3ee63b02361731f2a0b82",
+    "independent_decompress_hash_verified": true
+  },
+  {
+    "original": "singleton-analysis/wall-sample-weights.folded",
+    "original_bytes": 9946425,
+    "original_sha256": "5d53af25a9050faac1e7f0b78734447a347677ecbfcf6c1e0c3c0148e27e8850",
+    "archive": "singleton-analysis/wall-sample-weights.folded.gz",
+    "compressed_bytes": 140646,
+    "compressed_sha256": "0520bd4e3b308d5c3a562cac682674f4c8d781d3436b85310083cd13950c321e",
+    "independent_decompress_hash_verified": true
+  }
+]

@@ -1,0 +1,33 @@
+{
+  "build_original_handle": 5226,
+  "build_terminal_tool": "fd0e02",
+  "build_terminal_exit": 0,
+  "capture_original_handle": 49551,
+  "capture_START_tool": "40ca1f",
+  "capture_terminal_tool": "6de405",
+  "capture_actual_exit": 1,
+  "bulk_actual_exit": 0,
+  "singleton_actual_exit": 1,
+  "perf_extraction_original_handle": 60558,
+  "perf_extraction_actual_terminal_tool": "b6f9ad",
+  "perf_extraction_exit": 0,
+  "numeric_cycle_folded_and_io_analysis_actual_tool": "349bad",
+  "numeric_analysis_exit": 0,
+  "semantic_receipt_histogram_partial_guard_tool": "117f44",
+  "saved_before_after_kernel_settings": {
+    "perf_event_paranoid": 2,
+    "kptr_restrict": 2,
+    "perf_event_mlock_kb": 516
+  },
+  "source_after_capture_guard_exit": 0,
+  "quiet_scope": "Root stoppedlocalbuild/check/copy/archive operations throughouttwoonce-onlycaptures. No knowncompetingjob startedbyagent; recordingsownedallnativeworker descendants.",
+  "preserved_failures": [
+    "logs/initial-setup-failure.json",
+    "logs/initial-profiler-version-proof-failure.json",
+    "recording/singleton.stderr",
+    "wal-singleton/measurement-failure.txt",
+    "wal-singleton/failure-cleanup.txt"
+  ],
+  "method": "Adaptedexistingperf-collapse approach: alignflat/physical/inline eventtuples, sumcycles:u sampleperiods, retainemptychains+flatleaf, explicitresolvedsymbolpredicate unions, no inventedcaller. Header/command/stderr/rawtext outputs preserved. Cumulativejournal/publicationdeltas comparebefore/aftermeasurement withinreplica only.",
+  "profile_limits": "Wholeprocesscaptures startup/warmup/measurement+successrecovery orfailedcleanup; no measurementonlyCPUclaim. Callerunwindpoor; missingancestors meanunioncounts lowerbounds. Physicalnames mayalias optimizedcode; avoidsourcecause fromlabel alone. No reruns/limits/default changes/source mutation/browser/server/install/sysctl/sudo."
+}

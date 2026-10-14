@@ -1,0 +1,17 @@
+{
+  "status": "BUILD_AND_CAPTURE_SETUP_READY_NO_RECORDING",
+  "original_build_ssh_handle": 9297,
+  "actual_terminal_tool": "74b54d",
+  "build_exit": 0,
+  "source_inputs": 1437,
+  "source_sha_modes": true,
+  "private_keys0600": 7,
+  "root_example_fresh_false": true,
+  "UUID": "430CB0E2-33FC-3172-A3CD-3BDBA243A42D",
+  "exe_sha256": "eb0fc932503f3a1605b0b254681eae9df39062ff82c7f7c238912955681e3db6",
+  "profile": "native defaultLTO/codegen; opt3/debug2/packed/assertions+overflow; no framework override",
+  "samply": "samply 0.13.1",
+  "quiet_inventory_empty": true,
+  "preflight_count": "15000/window32 instead of20000 before recording; default log16384/64warmup/64control reserve unchanged; no failed timing case",
+  "next": "Wait parent quiet authorization; two serial whole-launch cases once; no acceptance claim"
+}

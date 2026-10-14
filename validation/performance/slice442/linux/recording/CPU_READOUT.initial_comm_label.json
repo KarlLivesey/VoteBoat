@@ -1,0 +1,831 @@
+{
+  "bulk": {
+    "unit": "cycles:u sampledperiodweight, wholeprocess including startup/warmup/measurement/verification/recovery_or_failedcleanup; not CPUmicroseconds/walltime/callcounts",
+    "denominator": 34553863665,
+    "sample_events": 11812,
+    "main_owner_tid": "541286",
+    "threads": [
+      {
+        "tid": "541286",
+        "comm": "env",
+        "period_weight": 34107032334,
+        "samples": 11545,
+        "flat_unresolved_weight": 6284447765,
+        "empty_chain_weight": 26326848100,
+        "percent_selected_user_cycle_periods": 98.7068556635749
+      },
+      {
+        "tid": "541295",
+        "comm": "voteboat-wal",
+        "period_weight": 227686079,
+        "samples": 130,
+        "flat_unresolved_weight": 20065399,
+        "empty_chain_weight": 159899935,
+        "percent_selected_user_cycle_periods": 0.6589308831203898
+      },
+      {
+        "tid": "541299",
+        "comm": "voteboat-wal",
+        "period_weight": 109913098,
+        "samples": 78,
+        "flat_unresolved_weight": 14004502,
+        "empty_chain_weight": 64772857,
+        "percent_selected_user_cycle_periods": 0.31809206364187925
+      },
+      {
+        "tid": "541322",
+        "comm": "voteboat-wal",
+        "period_weight": 109203683,
+        "samples": 48,
+        "flat_unresolved_weight": 26183243,
+        "empty_chain_weight": 56335840,
+        "percent_selected_user_cycle_periods": 0.3160389936671934
+      },
+      {
+        "tid": "541296",
+        "comm": "native_benchmar",
+        "period_weight": 27897,
+        "samples": 6,
+        "flat_unresolved_weight": 481,
+        "empty_chain_weight": 0,
+        "percent_selected_user_cycle_periods": 8.073482106215864e-05
+      },
+      {
+        "tid": "541297",
+        "comm": "voteboat-dial",
+        "period_weight": 574,
+        "samples": 5,
+        "flat_unresolved_weight": 556,
+        "empty_chain_weight": 0,
+        "percent_selected_user_cycle_periods": 1.6611745811262523e-06
+      }
+    ],
+    "physical_self": [
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::get::<u64>",
+        "cycle_period_weight": 2386568714,
+        "percent_selected_user_cycle_periods": 6.9068071146480285
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64,",
+        "cycle_period_weight": 2079981851,
+        "percent_selected_user_cycle_periods": 6.019534808510683
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82be099]",
+        "cycle_period_weight": 1758059667,
+        "percent_selected_user_cycle_periods": 5.087881586975058
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert_entry",
+        "cycle_period_weight": 1042843210,
+        "percent_selected_user_cycle_periods": 3.0180220079304987
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82be0b3]",
+        "cycle_period_weight": 1017596753,
+        "percent_selected_user_cycle_periods": 2.944957944111863
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::reconcile::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 886606558,
+        "percent_selected_user_cycle_periods": 2.5658680794589515
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82bc70d]",
+        "cycle_period_weight": 881722797,
+        "percent_selected_user_cycle_periods": 2.5517343170312587
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::PeerNetwork>::poll::<voteboat::native::outbound::NativeOutbound, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 806561360,
+        "percent_selected_user_cycle_periods": 2.3342146852798265
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>::get::<voteboat::identity::GroupIdentity>",
+        "cycle_period_weight": 797710323,
+        "percent_selected_user_cycle_periods": 2.3085994976822515
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82bc6f4]",
+        "cycle_period_weight": 793302656,
+        "percent_selected_user_cycle_periods": 2.2958435667023402
+      },
+      {
+        "function": "<voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::poll",
+        "cycle_period_weight": 785551862,
+        "percent_selected_user_cycle_periods": 2.2734125179630618
+      },
+      {
+        "function": "malloc",
+        "cycle_period_weight": 585048630,
+        "percent_selected_user_cycle_periods": 1.6931496740047696
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_upper_bound_index::<u64>",
+        "cycle_period_weight": 533715424,
+        "percent_selected_user_cycle_periods": 1.5445897141181535
+      },
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>",
+        "cycle_period_weight": 497931631,
+        "percent_selected_user_cycle_periods": 1.4410302588082518
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::configuration::PeerNetworkConfiguration>::reconcile_planned_membership::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>",
+        "cycle_period_weight": 442529944,
+        "percent_selected_user_cycle_periods": 1.2806959832056164
+      },
+      {
+        "function": "<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_with_configuration_authorization::<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>",
+        "cycle_period_weight": 429716925,
+        "percent_selected_user_cycle_periods": 1.2436146914455333
+      },
+      {
+        "function": "<voteboat::transport::membership::PeerAssignments>::from_cores::<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#0}>>",
+        "cycle_period_weight": 386857935,
+        "percent_selected_user_cycle_periods": 1.1195793869843065
+      },
+      {
+        "function": "cfree",
+        "cycle_period_weight": 358831729,
+        "percent_selected_user_cycle_periods": 1.0384706395755816
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce83b7ad3]",
+        "cycle_period_weight": 356253719,
+        "percent_selected_user_cycle_periods": 1.0310097951820463
+      },
+      {
+        "function": "<std::sync::mpmc::Receiver<voteboat::dial::DialCompletion<std::net::tcp::TcpStream>>>::try_recv",
+        "cycle_period_weight": 353559990,
+        "percent_selected_user_cycle_periods": 1.0232140562565364
+      },
+      {
+        "function": "std::thread::functions::park_timeout",
+        "cycle_period_weight": 353028013,
+        "percent_selected_user_cycle_periods": 1.0216744975977494
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>, alloc::alloc::Global>",
+        "cycle_period_weight": 339203920,
+        "percent_selected_user_cycle_periods": 0.9816671249518863
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::cleanup",
+        "cycle_period_weight": 337109459,
+        "percent_selected_user_cycle_periods": 0.9756056870174608
+      },
+      {
+        "function": "<voteboat::runtime::ingress::IngressRouter>::receive::<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>",
+        "cycle_period_weight": 334625627,
+        "percent_selected_user_cycle_periods": 0.9684173968045897
+      },
+      {
+        "function": "<alloc::collections::btree::navigate::LeafRange<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::perform_next_checked::<<alloc::collections::btree::navigate::LeafRange<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::next_checked::{closure#0},",
+        "cycle_period_weight": 314382567,
+        "percent_selected_user_cycle_periods": 0.9098333258704197
+      },
+      {
+        "function": "<alloc::collections::btree::map::IntoIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::dying_next",
+        "cycle_period_weight": 310999023,
+        "percent_selected_user_cycle_periods": 0.9000412400047015
+      },
+      {
+        "function": "<voteboat::raft::Raft>::connection_replicas",
+        "cycle_period_weight": 284793624,
+        "percent_selected_user_cycle_periods": 0.8242019669958665
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "cycle_period_weight": 284460104,
+        "percent_selected_user_cycle_periods": 0.8232367493193905
+      },
+      {
+        "function": "[unresolved [unknown]+ip=ffffffffbb200080]",
+        "cycle_period_weight": 278655340,
+        "percent_selected_user_cycle_periods": 0.8064375743956331
+      },
+      {
+        "function": "<std::sync::mpmc::array::Channel<voteboat::worker::ReclaimEvent>>::try_recv",
+        "cycle_period_weight": 267820082,
+        "percent_selected_user_cycle_periods": 0.7750799869922448
+      }
+    ],
+    "inclusive_available_physical": [
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::get::<u64>",
+        "cycle_period_weight": 2386568714,
+        "percent_selected_user_cycle_periods": 6.9068071146480285
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64,",
+        "cycle_period_weight": 2079981851,
+        "percent_selected_user_cycle_periods": 6.019534808510683
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82be099]",
+        "cycle_period_weight": 1758059667,
+        "percent_selected_user_cycle_periods": 5.087881586975058
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert_entry",
+        "cycle_period_weight": 1044954328,
+        "percent_selected_user_cycle_periods": 3.024131651762133
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82be0b3]",
+        "cycle_period_weight": 1017596753,
+        "percent_selected_user_cycle_periods": 2.944957944111863
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::reconcile::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 892185103,
+        "percent_selected_user_cycle_periods": 2.5820125692737057
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82bc70d]",
+        "cycle_period_weight": 881722797,
+        "percent_selected_user_cycle_periods": 2.5517343170312587
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::PeerNetwork>::poll::<voteboat::native::outbound::NativeOutbound, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 813896865,
+        "percent_selected_user_cycle_periods": 2.35544387420966
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>::get::<voteboat::identity::GroupIdentity>",
+        "cycle_period_weight": 797710323,
+        "percent_selected_user_cycle_periods": 2.3085994976822515
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82bc6f4]",
+        "cycle_period_weight": 793302656,
+        "percent_selected_user_cycle_periods": 2.2958435667023402
+      },
+      {
+        "function": "<voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::poll",
+        "cycle_period_weight": 785551862,
+        "percent_selected_user_cycle_periods": 2.2734125179630618
+      },
+      {
+        "function": "malloc",
+        "cycle_period_weight": 585048630,
+        "percent_selected_user_cycle_periods": 1.6931496740047696
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce82b6132]",
+        "cycle_period_weight": 572807493,
+        "percent_selected_user_cycle_periods": 1.6577234272652501
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_upper_bound_index::<u64>",
+        "cycle_period_weight": 533715424,
+        "percent_selected_user_cycle_periods": 1.5445897141181535
+      },
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>",
+        "cycle_period_weight": 497931631,
+        "percent_selected_user_cycle_periods": 1.4410302588082518
+      },
+      {
+        "function": "recv",
+        "cycle_period_weight": 444541251,
+        "percent_selected_user_cycle_periods": 1.286516770772239
+      },
+      {
+        "function": "<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_with_configuration_authorization::<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>",
+        "cycle_period_weight": 443374433,
+        "percent_selected_user_cycle_periods": 1.2831399617088233
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::configuration::PeerNetworkConfiguration>::reconcile_planned_membership::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>",
+        "cycle_period_weight": 442529944,
+        "percent_selected_user_cycle_periods": 1.2806959832056164
+      },
+      {
+        "function": "<voteboat::transport::membership::PeerAssignments>::from_cores::<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#0}>>",
+        "cycle_period_weight": 394672735,
+        "percent_selected_user_cycle_periods": 1.1421956711595425
+      },
+      {
+        "function": "cfree",
+        "cycle_period_weight": 358831729,
+        "percent_selected_user_cycle_periods": 1.0384706395755816
+      },
+      {
+        "function": "clock_gettime",
+        "cycle_period_weight": 357835996,
+        "percent_selected_user_cycle_periods": 1.03558895604041
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7f6ce83b7ad3]",
+        "cycle_period_weight": 356253719,
+        "percent_selected_user_cycle_periods": 1.0310097951820463
+      },
+      {
+        "function": "<std::sync::mpmc::Receiver<voteboat::dial::DialCompletion<std::net::tcp::TcpStream>>>::try_recv",
+        "cycle_period_weight": 353559990,
+        "percent_selected_user_cycle_periods": 1.0232140562565364
+      },
+      {
+        "function": "std::thread::functions::park_timeout",
+        "cycle_period_weight": 353028013,
+        "percent_selected_user_cycle_periods": 1.0216744975977494
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>, alloc::alloc::Global>",
+        "cycle_period_weight": 339203920,
+        "percent_selected_user_cycle_periods": 0.9816671249518863
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::cleanup",
+        "cycle_period_weight": 337109459,
+        "percent_selected_user_cycle_periods": 0.9756056870174608
+      },
+      {
+        "function": "<voteboat::runtime::ingress::IngressRouter>::receive::<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>",
+        "cycle_period_weight": 334625627,
+        "percent_selected_user_cycle_periods": 0.9684173968045897
+      },
+      {
+        "function": "<alloc::collections::btree::map::IntoIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::dying_next",
+        "cycle_period_weight": 314925256,
+        "percent_selected_user_cycle_periods": 0.9114038854039682
+      },
+      {
+        "function": "<alloc::collections::btree::navigate::LeafRange<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::perform_next_checked::<<alloc::collections::btree::navigate::LeafRange<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::next_checked::{closure#0},",
+        "cycle_period_weight": 314382567,
+        "percent_selected_user_cycle_periods": 0.9098333258704197
+      },
+      {
+        "function": "[unresolved [unknown]+ip=ffffffffbb20012f]",
+        "cycle_period_weight": 285816661,
+        "percent_selected_user_cycle_periods": 0.8271626691909042
+      }
+    ],
+    "explicit_resolved_context_unions": {
+      "publication": {
+        "cycle_period_weight": 24284360,
+        "percent_selected_user_cycle_periods": 0.07027972395630508
+      },
+      "recovery": {
+        "cycle_period_weight": 30,
+        "percent_selected_user_cycle_periods": 8.682097113900273e-08
+      },
+      "polling": {
+        "cycle_period_weight": 4377698162,
+        "percent_selected_user_cycle_periods": 12.66920019260891
+      },
+      "encoding": {
+        "cycle_period_weight": 90974143,
+        "percent_selected_user_cycle_periods": 0.26328211479328356
+      },
+      "workload_including_warmup": {
+        "cycle_period_weight": 85851158,
+        "percent_selected_user_cycle_periods": 0.24845603036559877
+      },
+      "log_staging_or_copy": {
+        "cycle_period_weight": 13627719,
+        "percent_selected_user_cycle_periods": 0.0394390599329813
+      },
+      "result_delivery": {
+        "cycle_period_weight": 33267770,
+        "percent_selected_user_cycle_periods": 0.09627800330096603
+      },
+      "counter_apply": {
+        "cycle_period_weight": 14114868,
+        "percent_selected_user_cycle_periods": 0.04084888490862777
+      },
+      "ready_preflight": {
+        "cycle_period_weight": 8376180,
+        "percent_selected_user_cycle_periods": 0.024240936067836394
+      },
+      "counter_admission": {
+        "cycle_period_weight": 6703955,
+        "percent_selected_user_cycle_periods": 0.0194014627857391
+      }
+    },
+    "empty_recorded_chain_percent": 77.00399871332304,
+    "at_most_two_recorded_frames_percent": 97.88055415423253,
+    "flat_unresolved_percent": 18.361772817974682,
+    "flat_vs_chain_leaf_mismatch_percent": 0.0,
+    "loss": "No lostchunk/truncation warning in record/script stderr; absence of warning is not proof of zero hardware loss. Original headers/stderr preserved.",
+    "ancestry_limit": "Many physical+inline chains empty; union counts are lowerbounds of resolvedsymbolcontexts, zero/nonobserved does not establish zero cost. No distinctionwarmup/measurement by identical workloadframe without timestamps; no fabricated phase timing. Threadrole beyond mainowner inferredonlyif exactworkerfunction present."
+  },
+  "singleton": {
+    "unit": "cycles:u sampledperiodweight, wholeprocess including startup/warmup/measurement/verification/recovery_or_failedcleanup; not CPUmicroseconds/walltime/callcounts",
+    "denominator": 60110685527,
+    "sample_events": 16144,
+    "main_owner_tid": "558926",
+    "threads": [
+      {
+        "tid": "558926",
+        "comm": "env",
+        "period_weight": 59488145377,
+        "samples": 15808,
+        "flat_unresolved_weight": 3533593948,
+        "empty_chain_weight": 51395074928,
+        "percent_selected_user_cycle_periods": 98.9643436195377
+      },
+      {
+        "tid": "558927",
+        "comm": "voteboat-wal",
+        "period_weight": 249787993,
+        "samples": 118,
+        "flat_unresolved_weight": 44765673,
+        "empty_chain_weight": 158756024,
+        "percent_selected_user_cycle_periods": 0.4155467381715392
+      },
+      {
+        "tid": "558930",
+        "comm": "native_benchmar",
+        "period_weight": 194364945,
+        "samples": 101,
+        "flat_unresolved_weight": 28346116,
+        "empty_chain_weight": 121151064,
+        "percent_selected_user_cycle_periods": 0.3233450813211851
+      },
+      {
+        "tid": "558933",
+        "comm": "voteboat-wal",
+        "period_weight": 178322141,
+        "samples": 99,
+        "flat_unresolved_weight": 43621136,
+        "empty_chain_weight": 114350569,
+        "percent_selected_user_cycle_periods": 0.2966563090016712
+      },
+      {
+        "tid": "558932",
+        "comm": "native_benchmar",
+        "period_weight": 29773,
+        "samples": 6,
+        "flat_unresolved_weight": 621,
+        "empty_chain_weight": 0,
+        "percent_selected_user_cycle_periods": 4.9530295219519365e-05
+      },
+      {
+        "tid": "558935",
+        "comm": "native_benchmar",
+        "period_weight": 21732,
+        "samples": 6,
+        "flat_unresolved_weight": 435,
+        "empty_chain_weight": 0,
+        "percent_selected_user_cycle_periods": 3.615330587144711e-05
+      },
+      {
+        "tid": "558929",
+        "comm": "voteboat-dial",
+        "period_weight": 13566,
+        "samples": 6,
+        "flat_unresolved_weight": 12844,
+        "empty_chain_weight": 722,
+        "percent_selected_user_cycle_periods": 2.25683668071071e-05
+      }
+    ],
+    "physical_self": [
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::reconcile::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 3153747098,
+        "percent_selected_user_cycle_periods": 5.246566513674889
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64,",
+        "cycle_period_weight": 2510780377,
+        "percent_selected_user_cycle_periods": 4.17692853606241
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert_entry",
+        "cycle_period_weight": 2266196953,
+        "percent_selected_user_cycle_periods": 3.7700401070656384
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::get::<u64>",
+        "cycle_period_weight": 2180813711,
+        "percent_selected_user_cycle_periods": 3.6279967394822688
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>::get::<voteboat::identity::GroupIdentity>",
+        "cycle_period_weight": 2121245854,
+        "percent_selected_user_cycle_periods": 3.5288997877876422
+      },
+      {
+        "function": "<voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::poll",
+        "cycle_period_weight": 1883705373,
+        "percent_selected_user_cycle_periods": 3.133727982779191
+      },
+      {
+        "function": "malloc",
+        "cycle_period_weight": 1463505666,
+        "percent_selected_user_cycle_periods": 2.4346847040076347
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::PeerNetwork>::poll::<voteboat::native::outbound::NativeOutbound, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 1415150215,
+        "percent_selected_user_cycle_periods": 2.354240685484039
+      },
+      {
+        "function": "std::thread::functions::park_timeout",
+        "cycle_period_weight": 1011188528,
+        "percent_selected_user_cycle_periods": 1.6822109399264846
+      },
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>",
+        "cycle_period_weight": 998208064,
+        "percent_selected_user_cycle_periods": 1.6606166694798938
+      },
+      {
+        "function": "<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_with_configuration_authorization::<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>",
+        "cycle_period_weight": 966279743,
+        "percent_selected_user_cycle_periods": 1.607500787137047
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::configuration::PeerNetworkConfiguration>::reconcile_planned_membership::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>",
+        "cycle_period_weight": 949132343,
+        "percent_selected_user_cycle_periods": 1.5789744114192092
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "cycle_period_weight": 907064352,
+        "percent_selected_user_cycle_periods": 1.5089901970799728
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>, alloc::alloc::Global>",
+        "cycle_period_weight": 842692580,
+        "percent_selected_user_cycle_periods": 1.401901463295551
+      },
+      {
+        "function": "<voteboat::transport::membership::PeerAssignments>::from_cores::<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#0}>>",
+        "cycle_period_weight": 807570859,
+        "percent_selected_user_cycle_periods": 1.3434730479612684
+      },
+      {
+        "function": "<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}> as core::iter::traits::iterator::Iterator>::try_fold::<(), <core::iter::adapters::GenericShunt<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}>, core::result::Result<core::convert::Infallible, voteboat::runtime::peers::PeerDriverError>> as core::iter::traits::iterator::Iterator>::try_fold<(), core::iter::traits::iterator::Iterator::try_for_each::call<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>), core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>, core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>::Break>::{closure#0}, core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>::{closure#0}, core::ops::control_flow::ControlFlow<core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>>",
+        "cycle_period_weight": 730629256,
+        "percent_selected_user_cycle_periods": 1.2154731718569776
+      },
+      {
+        "function": "<alloc::collections::btree::map::IntoIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::dying_next",
+        "cycle_period_weight": 711921650,
+        "percent_selected_user_cycle_periods": 1.1843512409789856
+      },
+      {
+        "function": "<std::sync::mpmc::Receiver<voteboat::dial::DialCompletion<std::net::tcp::TcpStream>>>::try_recv",
+        "cycle_period_weight": 691170500,
+        "percent_selected_user_cycle_periods": 1.1498296749411483
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_upper_bound_index::<u64>",
+        "cycle_period_weight": 686846892,
+        "percent_selected_user_cycle_periods": 1.1426369304863244
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::cleanup",
+        "cycle_period_weight": 661631579,
+        "percent_selected_user_cycle_periods": 1.100688793014703
+      },
+      {
+        "function": "<std::sync::mpmc::array::Channel<voteboat::worker::ReclaimEvent>>::try_recv",
+        "cycle_period_weight": 634120242,
+        "percent_selected_user_cycle_periods": 1.0549209952283298
+      },
+      {
+        "function": "<voteboat::raft::Raft>::connection_replicas",
+        "cycle_period_weight": 616581505,
+        "percent_selected_user_cycle_periods": 1.0257435921655713
+      },
+      {
+        "function": "cfree",
+        "cycle_period_weight": 592818579,
+        "percent_selected_user_cycle_periods": 0.9862116424104378
+      },
+      {
+        "function": "<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::transport::peers::Peer<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>> as core::iter::traits::iterator::Iterator>::next",
+        "cycle_period_weight": 566995294,
+        "percent_selected_user_cycle_periods": 0.9432520840996264
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)>>, alloc::alloc::Global>",
+        "cycle_period_weight": 564533239,
+        "percent_selected_user_cycle_periods": 0.9391562149901416
+      },
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::bindings::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound>",
+        "cycle_period_weight": 554915102,
+        "percent_selected_user_cycle_periods": 0.9231555041087462
+      },
+      {
+        "function": "<voteboat::log::GroupLog>::entry_at",
+        "cycle_period_weight": 554065244,
+        "percent_selected_user_cycle_periods": 0.9217416822690031
+      },
+      {
+        "function": "<voteboat::runtime::ingress::IngressRouter>::receive::<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>",
+        "cycle_period_weight": 540050327,
+        "percent_selected_user_cycle_periods": 0.8984264981596739
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7feaeb3b7ad3]",
+        "cycle_period_weight": 537420650,
+        "percent_selected_user_cycle_periods": 0.8940517734714671
+      },
+      {
+        "function": "<alloc::vec::Vec<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)> as alloc::vec::spec_from_iter::SpecFromIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity), core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::transport::membership::PeerAssignments>::peers::{closure#0}>>>::from_iter",
+        "cycle_period_weight": 510120647,
+        "percent_selected_user_cycle_periods": 0.8486355504477958
+      }
+    ],
+    "inclusive_available_physical": [
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::reconcile::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 3176723482,
+        "percent_selected_user_cycle_periods": 5.284789973944161
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_leaf_edges_spanning_range::<u64,",
+        "cycle_period_weight": 2510780377,
+        "percent_selected_user_cycle_periods": 4.17692853606241
+      },
+      {
+        "function": "<alloc::collections::btree::map::entry::VacantEntry<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::insert_entry",
+        "cycle_period_weight": 2280131450,
+        "percent_selected_user_cycle_periods": 3.79322150464551
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>>>::get::<u64>",
+        "cycle_period_weight": 2180813711,
+        "percent_selected_user_cycle_periods": 3.6279967394822688
+      },
+      {
+        "function": "<alloc::collections::btree::map::BTreeMap<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>::get::<voteboat::identity::GroupIdentity>",
+        "cycle_period_weight": 2121245854,
+        "percent_selected_user_cycle_periods": 3.5288997877876422
+      },
+      {
+        "function": "<voteboat::native::connect::NativePeerConnector as voteboat::connect::PeerConnector>::poll",
+        "cycle_period_weight": 1899968786,
+        "percent_selected_user_cycle_periods": 3.160783759730353
+      },
+      {
+        "function": "malloc",
+        "cycle_period_weight": 1463505666,
+        "percent_selected_user_cycle_periods": 2.4346847040076347
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::PeerNetwork>::poll::<voteboat::native::outbound::NativeOutbound, voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy>",
+        "cycle_period_weight": 1445437203,
+        "percent_selected_user_cycle_periods": 2.404626049973679
+      },
+      {
+        "function": "clock_gettime",
+        "cycle_period_weight": 1116221385,
+        "percent_selected_user_cycle_periods": 1.8569433624220195
+      },
+      {
+        "function": "std::thread::functions::park_timeout",
+        "cycle_period_weight": 1023791303,
+        "percent_selected_user_cycle_periods": 1.7031768878099756
+      },
+      {
+        "function": "<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_with_configuration_authorization::<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>",
+        "cycle_period_weight": 1021505067,
+        "percent_selected_user_cycle_periods": 1.6993735107898065
+      },
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::poll_inner::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, <voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll_inner<<voteboat::runtime::node::NetworkNode<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound, voteboat::native::snapshot_worker::NativeSnapshotWorker<voteboat::native::snapshot_store::NativeSnapshotStore<voteboat::native::snapshot_store::FileSnapshotIo>>, voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>>::poll::{closure#0}>::{closure#1}>",
+        "cycle_period_weight": 998208064,
+        "percent_selected_user_cycle_periods": 1.6606166694798938
+      },
+      {
+        "function": "[unresolved libc.so.6+ip=7feaeb2b6132]",
+        "cycle_period_weight": 993918328,
+        "percent_selected_user_cycle_periods": 1.6534802744073853
+      },
+      {
+        "function": "<voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>> as voteboat::runtime::peer_network::configuration::PeerNetworkConfiguration>::reconcile_planned_membership::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>",
+        "cycle_period_weight": 949132379,
+        "percent_selected_user_cycle_periods": 1.5789744713087275
+      },
+      {
+        "function": "__vdso_clock_gettime",
+        "cycle_period_weight": 907064352,
+        "percent_selected_user_cycle_periods": 1.5089901970799728
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>, alloc::alloc::Global>",
+        "cycle_period_weight": 842692580,
+        "percent_selected_user_cycle_periods": 1.401901463295551
+      },
+      {
+        "function": "<voteboat::transport::membership::PeerAssignments>::from_cores::<core::iter::adapters::map::Map<core::iter::adapters::copied::Copied<alloc::collections::btree::map::Keys<voteboat::identity::GroupIdentity, voteboat::runtime::Group>>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#0}>>",
+        "cycle_period_weight": 813775005,
+        "percent_selected_user_cycle_periods": 1.3537942511643384
+      },
+      {
+        "function": "<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}> as core::iter::traits::iterator::Iterator>::try_fold::<(), <core::iter::adapters::GenericShunt<core::iter::adapters::map::Map<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>, <voteboat::runtime::peers::PeerDriver<voteboat::native::connect::NativeServiceConnector, voteboat::native::transport::NativeTransportFactory<voteboat::wire_format::NativeWireCodec>>>::reconcile_planned_membership<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::native::outbound::NativeOutbound>::{closure#1}>, core::result::Result<core::convert::Infallible, voteboat::runtime::peers::PeerDriverError>> as core::iter::traits::iterator::Iterator>::try_fold<(), core::iter::traits::iterator::Iterator::try_for_each::call<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>), core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>, core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>::Break>::{closure#0}, core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>::{closure#0}, core::ops::control_flow::ControlFlow<core::ops::control_flow::ControlFlow<(voteboat::identity::NodeId, voteboat::connect::ConnectDirection<core::net::socket_addr::SocketAddr>)>>>",
+        "cycle_period_weight": 734422753,
+        "percent_selected_user_cycle_periods": 1.221784024855478
+      },
+      {
+        "function": "<alloc::collections::btree::map::IntoIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity>>::dying_next",
+        "cycle_period_weight": 718300140,
+        "percent_selected_user_cycle_periods": 1.1949624824647194
+      },
+      {
+        "function": "<std::sync::mpmc::Receiver<voteboat::dial::DialCompletion<std::net::tcp::TcpStream>>>::try_recv",
+        "cycle_period_weight": 691170500,
+        "percent_selected_user_cycle_periods": 1.1498296749411483
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Immut, u64, voteboat::runtime::clients::Pending<voteboat::application::CounterReceipt>, alloc::collections::btree::node::marker::LeafOrInternal>>::find_upper_bound_index::<u64>",
+        "cycle_period_weight": 686846892,
+        "percent_selected_user_cycle_periods": 1.1426369304863244
+      },
+      {
+        "function": "recv",
+        "cycle_period_weight": 676821978,
+        "percent_selected_user_cycle_periods": 1.125959506311055
+      },
+      {
+        "function": "<voteboat::runtime::clients::ClientRouter<voteboat::application::CounterReceipt>>::cleanup",
+        "cycle_period_weight": 661631579,
+        "percent_selected_user_cycle_periods": 1.100688793014703
+      },
+      {
+        "function": "<std::sync::mpmc::array::Channel<voteboat::worker::ReclaimEvent>>::try_recv",
+        "cycle_period_weight": 634120242,
+        "percent_selected_user_cycle_periods": 1.0549209952283298
+      },
+      {
+        "function": "<voteboat::raft::Raft>::connection_replicas",
+        "cycle_period_weight": 617814536,
+        "percent_selected_user_cycle_periods": 1.0277948597383662
+      },
+      {
+        "function": "cfree",
+        "cycle_period_weight": 592818579,
+        "percent_selected_user_cycle_periods": 0.9862116424104378
+      },
+      {
+        "function": "accept4",
+        "cycle_period_weight": 574495995,
+        "percent_selected_user_cycle_periods": 0.9557302332577007
+      },
+      {
+        "function": "<voteboat::runtime::replica::ReplicaDriver<voteboat::application::CounterReceipt>>::bindings::<voteboat::native::runtime::FairScheduler, voteboat::native::runtime::DeadlineQueue, voteboat::native::runtime::JitterEntropy, voteboat::application::Counter, voteboat::native::worker::NativeLogWorker<voteboat::native::log_store::NativeLogStore<voteboat::native::log_store::file::FileLogIo>>, voteboat::native::outbound::NativeOutbound>",
+        "cycle_period_weight": 573781823,
+        "percent_selected_user_cycle_periods": 0.9545421383395696
+      },
+      {
+        "function": "<alloc::collections::btree::map::Iter<voteboat::identity::NodeId, voteboat::transport::peers::Peer<voteboat::native::transport::NativePeerTransport<alloc::boxed::Box<dyn voteboat::secure::SecureSession>, voteboat::wire_format::NativeWireCodec>>> as core::iter::traits::iterator::Iterator>::next",
+        "cycle_period_weight": 566995294,
+        "percent_selected_user_cycle_periods": 0.9432520840996264
+      },
+      {
+        "function": "<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Owned, voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::collections::btree::node::marker::LeafOrInternal>>::bulk_push::<alloc::collections::btree::dedup_sorted_iter::DedupSortedIter<voteboat::identity::NodeId, voteboat::identity::StoreIdentity, alloc::vec::into_iter::IntoIter<(voteboat::identity::NodeId, voteboat::identity::StoreIdentity)>>, alloc::alloc::Global>",
+        "cycle_period_weight": 566450929,
+        "percent_selected_user_cycle_periods": 0.9423464797212576
+      }
+    ],
+    "explicit_resolved_context_unions": {
+      "publication": {
+        "cycle_period_weight": 38041252,
+        "percent_selected_user_cycle_periods": 0.06328534047896187
+      },
+      "polling": {
+        "cycle_period_weight": 9146900377,
+        "percent_selected_user_cycle_periods": 15.216762705012695
+      },
+      "workload_including_warmup": {
+        "cycle_period_weight": 163742813,
+        "percent_selected_user_cycle_periods": 0.2724021720338748
+      },
+      "log_staging_or_copy": {
+        "cycle_period_weight": 6304406,
+        "percent_selected_user_cycle_periods": 0.010487995511493944
+      },
+      "encoding": {
+        "cycle_period_weight": 61435468,
+        "percent_selected_user_cycle_periods": 0.10220390511501477
+      },
+      "counter_admission": {
+        "cycle_period_weight": 2524569,
+        "percent_selected_user_cycle_periods": 0.004199867257986994
+      },
+      "ready_preflight": {
+        "cycle_period_weight": 2524569,
+        "percent_selected_user_cycle_periods": 0.004199867257986994
+      },
+      "result_delivery": {
+        "cycle_period_weight": 32889963,
+        "percent_selected_user_cycle_periods": 0.05471566779125613
+      }
+    },
+    "empty_recorded_chain_percent": 86.15661733509546,
+    "at_most_two_recorded_frames_percent": 97.82579505367151,
+    "flat_unresolved_percent": 6.072698624207789,
+    "flat_vs_chain_leaf_mismatch_percent": 0.0,
+    "loss": "No lostchunk/truncation warning in record/script stderr; absence of warning is not proof of zero hardware loss. Original headers/stderr preserved.",
+    "ancestry_limit": "Many physical+inline chains empty; union counts are lowerbounds of resolvedsymbolcontexts, zero/nonobserved does not establish zero cost. No distinctionwarmup/measurement by identical workloadframe without timestamps; no fabricated phase timing. Threadrole beyond mainowner inferredonlyif exactworkerfunction present."
+  }
+}
