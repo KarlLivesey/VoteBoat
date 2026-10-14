@@ -29,6 +29,9 @@ use std::collections::{BTreeMap, BTreeSet};
 mod admitted_replication;
 mod batch_limits;
 pub use batch_limits::BatchLimits;
+mod completion;
+use completion::PreparedCompletion;
+pub use completion::{persist_effect_borrowed, CompletionEffects};
 mod leadership;
 use admitted_replication::{AdmittedRange, EmptyAppendAlias};
 mod log_staging;
@@ -1099,6 +1102,13 @@ impl Raft {
         Ok(())
     }
     pub fn complete(&mut self, completion: &DurableLog) -> Result<Vec<Effect>, RaftError> {
+        self.complete_borrowed(completion)
+            .map(CompletionEffects::into_owned)
+    }
+    fn finish_completion(
+        &mut self,
+        completion: &DurableLog,
+    ) -> Result<PreparedCompletion, RaftError> {
         if self.fenced {
             return Err(RaftError::Fenced);
         }
@@ -1154,22 +1164,26 @@ impl Raft {
             self.progress.clear();
             self.next_index.clear();
         }
-        let mut effects = Vec::new();
-        if self.durable.commit_index > previous_commit
+        let committed = if self.durable.commit_index > previous_commit
             && !matches!(p.after, After::SnapshotInstall(_))
         {
-            effects.push(Effect::Committed(
-                self.durable.entries[(previous_commit - self.durable.base_index()) as usize
-                    ..(self.durable.commit_index - self.durable.base_index()) as usize]
-                    .to_vec(),
-            ));
-        }
+            Some(
+                (previous_commit - self.durable.base_index()) as usize
+                    ..(self.durable.commit_index - self.durable.base_index()) as usize,
+            )
+        } else {
+            None
+        };
+        let mut effects = Vec::new();
         effects.extend(retirement);
         self.after_durable(p.after, p.reply, &mut effects)?;
         if self.remember_granted_vote(&effects) {
             self.reset_election()?;
         }
-        Ok(effects)
+        Ok(PreparedCompletion {
+            committed,
+            following: effects,
+        })
     }
     fn after_durable(
         &mut self,
@@ -1869,34 +1883,13 @@ pub fn persist_effect<S: LogStore>(
     store: &mut S,
     update: LogUpdate,
 ) -> Result<Vec<Effect>, RaftError> {
-    let result = (|| {
-        if store.binding() != raft.binding {
-            return Err(RaftError::WrongIdentity);
-        }
-        if raft
-            .pending
-            .as_ref()
-            .is_none_or(|p| !p.next.matches_update(&update))
-        {
-            return Err(RaftError::WrongCompletion);
-        }
-        let tickets = store.append_batch(vec![LogMutation::Update(update)])?;
-        if tickets.len() != 1 {
-            return Err(RaftError::WrongCompletion);
-        }
-        // The exact update was checked before submission above.
-        raft.admitted(tickets[0])?;
-        let completion = store.barrier(&tickets)?;
-        raft.complete(&completion)
-    })();
-    if result.is_err() {
-        raft.storage_failed();
-    }
-    result
+    persist_effect_borrowed(raft, store, update).map(CompletionEffects::into_owned)
 }
 
 #[cfg(test)]
 mod checkpoint_tests;
+#[cfg(test)]
+mod completion_tests;
 #[cfg(test)]
 #[path = "raft/membership_tests.rs"]
 mod membership_tests;

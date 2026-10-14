@@ -259,17 +259,7 @@ impl<const TRACE: bool> Actor<TRACE> {
         let mut effects = VecDeque::from(initial);
         while let Some(effect) = effects.pop_front() {
             match effect {
-                Effect::Persist(update) => {
-                    self.parts.stats[self.parts.slot]
-                        .persistence_units
-                        .fetch_add(1, Ordering::Relaxed);
-                    let started = Recorder::<TRACE>::start();
-                    let result =
-                        persist_effect(&mut self.parts.core, &mut self.parts.store, update);
-                    self.attribution
-                        .finish(Phase::PersistHelper, started, result.is_err(), 0);
-                    effects.extend(result.map_err(debug_error)?);
-                }
+                Effect::Persist(update) => self.persist(update, &mut effects)?,
                 Effect::Send(message) => self.send(message)?,
                 Effect::Committed(entries) => self.apply(entries)?,
                 snapshot @ (Effect::SnapshotRequired { .. }
@@ -288,6 +278,40 @@ impl<const TRACE: bool> Actor<TRACE> {
                 }
                 _ => return Err("unexpected read/configuration effect in framework run".into()),
             }
+        }
+        Ok(())
+    }
+    fn persist(
+        &mut self,
+        update: LogUpdate,
+        effects: &mut VecDeque<Effect>,
+    ) -> Result<(), Failure> {
+        self.parts.stats[self.parts.slot]
+            .persistence_units
+            .fetch_add(1, Ordering::Relaxed);
+        let started = Recorder::<TRACE>::start();
+        if effects.is_empty() {
+            let result =
+                persist_effect_borrowed(&mut self.parts.core, &mut self.parts.store, update);
+            self.attribution
+                .finish(Phase::PersistHelper, started, result.is_err(), 0);
+            let (committed, following) = result.map_err(debug_error)?.into_parts();
+            if let Some(entries) = committed {
+                Self::apply_entries(
+                    &mut self.parts.application,
+                    &mut self.pending,
+                    &self.attribution,
+                    self.parts.slot,
+                    entries,
+                )?;
+            }
+            effects.extend(following);
+        } else {
+            // Existing FIFO work precedes every newly completed effect.
+            let result = persist_effect(&mut self.parts.core, &mut self.parts.store, update);
+            self.attribution
+                .finish(Phase::PersistHelper, started, result.is_err(), 0);
+            effects.extend(result.map_err(debug_error)?);
         }
         Ok(())
     }
@@ -312,29 +336,49 @@ impl<const TRACE: bool> Actor<TRACE> {
         Ok(())
     }
     fn apply(&mut self, entries: Vec<LogEntry>) -> Result<(), Failure> {
+        Self::apply_entries(
+            &mut self.parts.application,
+            &mut self.pending,
+            &self.attribution,
+            self.parts.slot,
+            &entries,
+        )
+    }
+    fn apply_entries(
+        application: &mut Noop,
+        pending: &mut HashMap<OperationId, Reply>,
+        attribution: &Recorder<TRACE>,
+        slot: usize,
+        entries: &[LogEntry],
+    ) -> Result<(), Failure> {
         let started = Recorder::<TRACE>::start();
-        let results = self.parts.application.apply_batch(&entries);
-        self.attribution.finish(
+        let results = application.apply_batch(entries);
+        attribution.finish(
             Phase::Application,
             started,
             results.is_err(),
             results.as_ref().map_or(0, Vec::len),
         );
         let results = results.map_err(debug_error)?;
-        if self.parts.slot == 0 {
+        if slot == 0 {
             let started = Recorder::<TRACE>::start();
             let count = results.len();
-            let result = self.deliver(results);
-            self.attribution
-                .finish(Phase::Results, started, result.is_err(), count);
+            let result = Self::deliver_results(pending, results);
+            attribution.finish(Phase::Results, started, result.is_err(), count);
             result?;
         }
         Ok(())
     }
+    #[cfg(test)]
     fn deliver(&mut self, results: Vec<OperationId>) -> Result<(), Failure> {
+        Self::deliver_results(&mut self.pending, results)
+    }
+    fn deliver_results(
+        pending: &mut HashMap<OperationId, Reply>,
+        results: Vec<OperationId>,
+    ) -> Result<(), Failure> {
         for operation in results {
-            let reply = self
-                .pending
+            let reply = pending
                 .remove(&operation)
                 .ok_or("missing/duplicate original applied result")?;
             reply

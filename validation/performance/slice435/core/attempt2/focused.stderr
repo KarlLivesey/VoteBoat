@@ -1,0 +1,4 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.96s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-ebeb84c4129d638f)
+error: test failed, to rerun pass `--lib`

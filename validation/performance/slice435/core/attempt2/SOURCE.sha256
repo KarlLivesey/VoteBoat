@@ -1,0 +1,3 @@
+2c6f6539f830a7e6b5745e5eb741236f2ee4cfb43176049d667bb1c19c563ec8  src/raft.rs
+db6ece2ad1fea8caa21892ed894a4aae95bb9f41caf7b38eced3554c57f90edf  src/raft/completion.rs
+f9f9b2d5f11c29068a376fb82f35cc16f9f2e4dbbcef6014354fd692ea626152  src/raft/completion_tests.rs

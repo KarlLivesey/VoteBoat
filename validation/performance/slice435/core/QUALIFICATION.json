@@ -1,0 +1,38 @@
+{
+  "scope": "focused core435 only; broader qualification separate",
+  "performance_claim": false,
+  "attempts": [
+    {
+      "original_handle": 29683,
+      "exit": 101,
+      "stage": "fixture compile",
+      "archive": "attempt1",
+      "cause": "two unspecified array conversion target types and modeled-store argument borrow conflict"
+    },
+    {
+      "original_handle": 25155,
+      "exit": 101,
+      "stage": "focused core tests",
+      "passed": 7,
+      "failed": 1,
+      "archive": "attempt2",
+      "cause": "retirement fixture Joint/Final operation identity mismatch rejected by unchanged journal validation"
+    },
+    {
+      "original_handle": 93517,
+      "exit": 0,
+      "terminal": "DONE",
+      "stage": "all-feature library completion_tests and formatting",
+      "passed": 8,
+      "failed": 0,
+      "filtered": 392,
+      "formatter": 0,
+      "format_check": 0
+    }
+  ],
+  "source_scope": ["src/raft.rs", "src/raft/completion.rs", "src/raft/completion_tests.rs"],
+  "source_identity": "FINAL_SOURCE.sha256",
+  "physical_modes": "FINAL_MODES.txt",
+  "fixtures_report_disk_or_quorum_durability": false,
+  "production_changes_during_fixture_correction": false
+}

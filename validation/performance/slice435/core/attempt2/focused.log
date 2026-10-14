@@ -1,0 +1,25 @@
+
+running 8 tests
+test raft::completion_tests::borrowed_and_owned_completion_preserve_full_entries_configuration_and_reply_order ... ok
+test raft::completion_tests::borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_independent ... ok
+test raft::completion_tests::borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_fencing ... ok
+test raft::completion_tests::borrowed_retirement_keeps_committed_first_and_all_announcements_afterward ... FAILED
+test raft::completion_tests::borrowed_wrong_delayed_and_stale_tickets_preserve_pending_and_fence_order ... ok
+test raft::completion_tests::late_after_durable_failure_exposes_no_borrow_or_owned_output ... ok
+test raft::completion_tests::late_vote_reset_failure_exposes_no_output_and_preserves_original_mutations ... ok
+test raft::completion_tests::snapshot_install_completion_suppresses_committed_output_until_application_install ... ok
+
+failures:
+
+---- raft::completion_tests::borrowed_retirement_keeps_committed_first_and_all_announcements_afterward stdout ----
+
+thread 'raft::completion_tests::borrowed_retirement_keeps_committed_first_and_all_announcements_afterward' (319) panicked at src/raft/completion_tests.rs:386:14:
+called `Result::unwrap()` on an `Err` value: Storage(Rejected("invalid configuration journal"))
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    raft::completion_tests::borrowed_retirement_keeps_committed_first_and_all_announcements_afterward
+
+test result: FAILED. 7 passed; 1 failed; 0 ignored; 0 measured; 392 filtered out; finished in 0.00s
+

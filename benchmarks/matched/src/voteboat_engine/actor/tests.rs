@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+mod completion;
 mod originals;
 mod replies;
 

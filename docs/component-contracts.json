@@ -11,6 +11,28 @@
   ],
   "contracts": [
     {
+      "design_id": "C01/C03/C10",
+      "public_contract": "Raft completion effects / CompletionEffects",
+      "operations": [
+        "complete",
+        "complete_borrowed",
+        "persist_effect",
+        "persist_effect_borrowed",
+        "committed",
+        "following",
+        "into_parts",
+        "into_owned"
+      ],
+      "native": "Deterministic Raft over the selected LogStore, with synchronous borrowed output or owned queue output.",
+      "conformance": [
+        "src/raft/completion_tests.rs",
+        "tests/raft.rs",
+        "tests/snapshot.rs",
+        "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs"
+      ],
+      "scope": "Exact admitted store/group/revision/generation ticket checks and all existing completion transitions precede returned output. Newly committed contiguous canonical entries precede the owned following effects; snapshot installation suppresses committed output. The immutable interval borrows the core through an exclusive completion call, preventing another mutation while it is used. Owned completion remains available for FIFO/asynchronous hosts. Dropping the output does not cancel accepted storage, add durability authority or persist new state. Borrowed persistence errors fence exactly as in the owned helper. The matched synchronous host uses borrowing only with an empty remaining FIFO; earlier queued effects retain the owned path and their original error/receipt order. Qualification and both-host performance disposition are recorded separately in docs/P9.md; no measured435 gain is claimed by this inventory."
+    },
+    {
       "design_id": "C03/C04/C10",
       "public_contract": "raft::BatchLimits / Raft::configure_batch_limits / Raft::batch_limits / Raft::propose_batch",
       "operations": [

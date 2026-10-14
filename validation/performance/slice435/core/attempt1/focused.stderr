@@ -1,0 +1,41 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0282]: type annotations needed
+  --> src/raft/completion_tests.rs:73:45
+   |
+73 |     let [Effect::Persist(update)] = effects.try_into().unwrap() else {
+   |         -------------------------           ^^^^^^^^
+   |         |
+   |         type must be known at this point
+   |
+help: try using a fully qualified path to specify the expected types
+   |
+73 -     let [Effect::Persist(update)] = effects.try_into().unwrap() else {
+73 +     let [Effect::Persist(update)] = <Vec<raft::Effect> as TryInto<T>>::try_into(effects).unwrap() else {
+   |
+
+error[E0282]: type annotations needed
+   --> src/raft/completion_tests.rs:161:69
+    |
+161 |     let [Effect::Committed(mut materialized)] = result.into_owned().try_into().unwrap() else {
+    |         -------------------------------------                       ^^^^^^^^
+    |         |
+    |         type must be known at this point
+    |
+help: try using a fully qualified path to specify the expected types
+    |
+161 -     let [Effect::Committed(mut materialized)] = result.into_owned().try_into().unwrap() else {
+161 +     let [Effect::Committed(mut materialized)] = <Vec<raft::Effect> as TryInto<T>>::try_into(result.into_owned()).unwrap() else {
+    |
+
+error[E0502]: cannot borrow `*self` as immutable because it is also borrowed as mutable
+   --> src/raft/completion_tests.rs:450:51
+    |
+450 |         apply_batch(&mut self.states, &mutations, self.limits())?;
+    |         ----------- ----------------              ^^^^ immutable borrow occurs here
+    |         |           |
+    |         |           mutable borrow occurs here
+    |         mutable borrow later used by call
+
+Some errors have detailed explanations: E0282, E0502.
+For more information about an error, try `rustc --explain E0282`.
+error: could not compile `voteboat` (lib test) due to 3 previous errors

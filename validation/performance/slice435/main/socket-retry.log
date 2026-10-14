@@ -1,0 +1,26 @@
+
+running 21 tests
+test logical_voter::bridge::enrollment::tests::native_quic_candidate_original_unknown_and_owned_recovery_fresh_reads ... ok
+test logical_voter::bridge::enrollment::tests::native_tcp_candidate_original_applied_and_fresh_enrollment_image_snapshot ... ok
+test native::quic_socket::tests::routed_datagrams_are_charged_bounded_and_discarded_with_the_retired_lease ... ok
+test program_transaction::driver::tests::history::actual_commit_then_version_refusal_preserves_original_first_positions ... ok
+test program_transaction::driver::tests::history::actual_lifetime_quota_refuses_new_start_but_original_controls_still_finish ... ok
+test program_transaction::driver::tests::history::real_exported_completion_is_rejected_intact_by_fresh_driver ... ok
+test program_transaction::driver::tests::history::unconsumed_actual_start_cannot_supply_prepare_then_fresh_resume_finishes ... ok
+test program_transaction::driver::tests::native::real_applied_output_rejects_wrong_original_command ... ok
+test program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_node ... ok
+test program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_operation ... ok
+test program_transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_ticket ... ok
+test program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_original_query ... ok
+test program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node ... ok
+test program_transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket ... ok
+test transaction::driver::tests::native::real_applied_output_rejects_wrong_original_command ... ok
+test transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_node ... ok
+test transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_operation ... ok
+test transaction::driver::tests::native::real_applied_output_rejects_wrong_retained_ticket ... ok
+test transaction::driver::tests::native::real_quorum_output_rejects_wrong_original_query ... ok
+test transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_node ... ok
+test transaction::driver::tests::native::real_quorum_output_rejects_wrong_retained_ticket ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 379 filtered out; finished in 0.67s
+

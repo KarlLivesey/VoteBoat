@@ -1,0 +1,38 @@
+{
+  "results": [
+    {
+      "label": "off",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    {
+      "label": "on",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    {
+      "label": "openraft",
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    }
+  ],
+  "phase_count": 29,
+  "provider_methods": 15,
+  "scopes": 4,
+  "source_sha256": "a2e53fe3546fb633e76b72361beb1887377d50ceff51dfe20e15e1c828f48992"
+}

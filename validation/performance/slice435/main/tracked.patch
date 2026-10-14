@@ -1,0 +1,270 @@
+diff --git a/benchmarks/matched/src/voteboat_engine/actor.rs b/benchmarks/matched/src/voteboat_engine/actor.rs
+index a564ef6..674f870 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor.rs
+@@ -259,17 +259,7 @@ impl<const TRACE: bool> Actor<TRACE> {
+         let mut effects = VecDeque::from(initial);
+         while let Some(effect) = effects.pop_front() {
+             match effect {
+-                Effect::Persist(update) => {
+-                    self.parts.stats[self.parts.slot]
+-                        .persistence_units
+-                        .fetch_add(1, Ordering::Relaxed);
+-                    let started = Recorder::<TRACE>::start();
+-                    let result =
+-                        persist_effect(&mut self.parts.core, &mut self.parts.store, update);
+-                    self.attribution
+-                        .finish(Phase::PersistHelper, started, result.is_err(), 0);
+-                    effects.extend(result.map_err(debug_error)?);
+-                }
++                Effect::Persist(update) => self.persist(update, &mut effects)?,
+                 Effect::Send(message) => self.send(message)?,
+                 Effect::Committed(entries) => self.apply(entries)?,
+                 snapshot @ (Effect::SnapshotRequired { .. }
+@@ -291,6 +281,40 @@ impl<const TRACE: bool> Actor<TRACE> {
+         }
+         Ok(())
+     }
++    fn persist(
++        &mut self,
++        update: LogUpdate,
++        effects: &mut VecDeque<Effect>,
++    ) -> Result<(), Failure> {
++        self.parts.stats[self.parts.slot]
++            .persistence_units
++            .fetch_add(1, Ordering::Relaxed);
++        let started = Recorder::<TRACE>::start();
++        if effects.is_empty() {
++            let result =
++                persist_effect_borrowed(&mut self.parts.core, &mut self.parts.store, update);
++            self.attribution
++                .finish(Phase::PersistHelper, started, result.is_err(), 0);
++            let (committed, following) = result.map_err(debug_error)?.into_parts();
++            if let Some(entries) = committed {
++                Self::apply_entries(
++                    &mut self.parts.application,
++                    &mut self.pending,
++                    &self.attribution,
++                    self.parts.slot,
++                    entries,
++                )?;
++            }
++            effects.extend(following);
++        } else {
++            // Existing FIFO work precedes every newly completed effect.
++            let result = persist_effect(&mut self.parts.core, &mut self.parts.store, update);
++            self.attribution
++                .finish(Phase::PersistHelper, started, result.is_err(), 0);
++            effects.extend(result.map_err(debug_error)?);
++        }
++        Ok(())
++    }
+     fn send(&mut self, message: Message) -> Result<(), Failure> {
+         let started = Recorder::<TRACE>::start();
+         let result = self.send_inner(message);
+@@ -312,29 +336,49 @@ impl<const TRACE: bool> Actor<TRACE> {
+         Ok(())
+     }
+     fn apply(&mut self, entries: Vec<LogEntry>) -> Result<(), Failure> {
++        Self::apply_entries(
++            &mut self.parts.application,
++            &mut self.pending,
++            &self.attribution,
++            self.parts.slot,
++            &entries,
++        )
++    }
++    fn apply_entries(
++        application: &mut Noop,
++        pending: &mut HashMap<OperationId, Reply>,
++        attribution: &Recorder<TRACE>,
++        slot: usize,
++        entries: &[LogEntry],
++    ) -> Result<(), Failure> {
+         let started = Recorder::<TRACE>::start();
+-        let results = self.parts.application.apply_batch(&entries);
+-        self.attribution.finish(
++        let results = application.apply_batch(entries);
++        attribution.finish(
+             Phase::Application,
+             started,
+             results.is_err(),
+             results.as_ref().map_or(0, Vec::len),
+         );
+         let results = results.map_err(debug_error)?;
+-        if self.parts.slot == 0 {
++        if slot == 0 {
+             let started = Recorder::<TRACE>::start();
+             let count = results.len();
+-            let result = self.deliver(results);
+-            self.attribution
+-                .finish(Phase::Results, started, result.is_err(), count);
++            let result = Self::deliver_results(pending, results);
++            attribution.finish(Phase::Results, started, result.is_err(), count);
+             result?;
+         }
+         Ok(())
+     }
++    #[cfg(test)]
+     fn deliver(&mut self, results: Vec<OperationId>) -> Result<(), Failure> {
++        Self::deliver_results(&mut self.pending, results)
++    }
++    fn deliver_results(
++        pending: &mut HashMap<OperationId, Reply>,
++        results: Vec<OperationId>,
++    ) -> Result<(), Failure> {
+         for operation in results {
+-            let reply = self
+-                .pending
++            let reply = pending
+                 .remove(&operation)
+                 .ok_or("missing/duplicate original applied result")?;
+             reply
+diff --git a/benchmarks/matched/src/voteboat_engine/actor/tests.rs b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+index f94c88a..e06d8e7 100644
+--- a/benchmarks/matched/src/voteboat_engine/actor/tests.rs
++++ b/benchmarks/matched/src/voteboat_engine/actor/tests.rs
+@@ -2,6 +2,7 @@
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+ 
++mod completion;
+ mod originals;
+ mod replies;
+ 
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index f43e5a5..e498db6 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -10,6 +10,28 @@
+     "transitive versions pinned in Cargo.lock"
+   ],
+   "contracts": [
++    {
++      "design_id": "C01/C03/C10",
++      "public_contract": "Raft completion effects / CompletionEffects",
++      "operations": [
++        "complete",
++        "complete_borrowed",
++        "persist_effect",
++        "persist_effect_borrowed",
++        "committed",
++        "following",
++        "into_parts",
++        "into_owned"
++      ],
++      "native": "Deterministic Raft over the selected LogStore, with synchronous borrowed output or owned queue output.",
++      "conformance": [
++        "src/raft/completion_tests.rs",
++        "tests/raft.rs",
++        "tests/snapshot.rs",
++        "benchmarks/matched/src/voteboat_engine/actor/tests/completion.rs"
++      ],
++      "scope": "Exact admitted store/group/revision/generation ticket checks and all existing completion transitions precede returned output. Newly committed contiguous canonical entries precede the owned following effects; snapshot installation suppresses committed output. The immutable interval borrows the core through an exclusive completion call, preventing another mutation while it is used. Owned completion remains available for FIFO/asynchronous hosts. Dropping the output does not cancel accepted storage, add durability authority or persist new state. Borrowed persistence errors fence exactly as in the owned helper. The matched synchronous host uses borrowing only with an empty remaining FIFO; earlier queued effects retain the owned path and their original error/receipt order. Qualification and both-host performance disposition are recorded separately in docs/P9.md; no measured435 gain is claimed by this inventory."
++    },
+     {
+       "design_id": "C03/C04/C10",
+       "public_contract": "raft::BatchLimits / Raft::configure_batch_limits / Raft::batch_limits / Raft::propose_batch",
+diff --git a/src/raft.rs b/src/raft.rs
+index d40fff6..e3941da 100644
+--- a/src/raft.rs
++++ b/src/raft.rs
+@@ -29,6 +29,9 @@ use std::collections::{BTreeMap, BTreeSet};
+ mod admitted_replication;
+ mod batch_limits;
+ pub use batch_limits::BatchLimits;
++mod completion;
++use completion::PreparedCompletion;
++pub use completion::{persist_effect_borrowed, CompletionEffects};
+ mod leadership;
+ use admitted_replication::{AdmittedRange, EmptyAppendAlias};
+ mod log_staging;
+@@ -1099,6 +1102,13 @@ impl Raft {
+         Ok(())
+     }
+     pub fn complete(&mut self, completion: &DurableLog) -> Result<Vec<Effect>, RaftError> {
++        self.complete_borrowed(completion)
++            .map(CompletionEffects::into_owned)
++    }
++    fn finish_completion(
++        &mut self,
++        completion: &DurableLog,
++    ) -> Result<PreparedCompletion, RaftError> {
+         if self.fenced {
+             return Err(RaftError::Fenced);
+         }
+@@ -1154,22 +1164,26 @@ impl Raft {
+             self.progress.clear();
+             self.next_index.clear();
+         }
+-        let mut effects = Vec::new();
+-        if self.durable.commit_index > previous_commit
++        let committed = if self.durable.commit_index > previous_commit
+             && !matches!(p.after, After::SnapshotInstall(_))
+         {
+-            effects.push(Effect::Committed(
+-                self.durable.entries[(previous_commit - self.durable.base_index()) as usize
+-                    ..(self.durable.commit_index - self.durable.base_index()) as usize]
+-                    .to_vec(),
+-            ));
+-        }
++            Some(
++                (previous_commit - self.durable.base_index()) as usize
++                    ..(self.durable.commit_index - self.durable.base_index()) as usize,
++            )
++        } else {
++            None
++        };
++        let mut effects = Vec::new();
+         effects.extend(retirement);
+         self.after_durable(p.after, p.reply, &mut effects)?;
+         if self.remember_granted_vote(&effects) {
+             self.reset_election()?;
+         }
+-        Ok(effects)
++        Ok(PreparedCompletion {
++            committed,
++            following: effects,
++        })
+     }
+     fn after_durable(
+         &mut self,
+@@ -1869,35 +1883,14 @@ pub fn persist_effect<S: LogStore>(
+     store: &mut S,
+     update: LogUpdate,
+ ) -> Result<Vec<Effect>, RaftError> {
+-    let result = (|| {
+-        if store.binding() != raft.binding {
+-            return Err(RaftError::WrongIdentity);
+-        }
+-        if raft
+-            .pending
+-            .as_ref()
+-            .is_none_or(|p| !p.next.matches_update(&update))
+-        {
+-            return Err(RaftError::WrongCompletion);
+-        }
+-        let tickets = store.append_batch(vec![LogMutation::Update(update)])?;
+-        if tickets.len() != 1 {
+-            return Err(RaftError::WrongCompletion);
+-        }
+-        // The exact update was checked before submission above.
+-        raft.admitted(tickets[0])?;
+-        let completion = store.barrier(&tickets)?;
+-        raft.complete(&completion)
+-    })();
+-    if result.is_err() {
+-        raft.storage_failed();
+-    }
+-    result
++    persist_effect_borrowed(raft, store, update).map(CompletionEffects::into_owned)
+ }
+ 
+ #[cfg(test)]
+ mod checkpoint_tests;
+ #[cfg(test)]
++mod completion_tests;
++#[cfg(test)]
+ #[path = "raft/membership_tests.rs"]
+ mod membership_tests;
+ 

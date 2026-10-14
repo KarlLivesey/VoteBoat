@@ -1,0 +1,76 @@
+{
+  "source_inputs": 1430,
+  "all_feature_library": {
+    "initial_pass": 379,
+    "sandbox_socket_failures": 21,
+    "same_executable_exact_socket_retry_pass": 21,
+    "initial_exit": 101,
+    "retry_exit": 0
+  },
+  "all_feature": {
+    "effect_owner": 203,
+    "log_owned": 5,
+    "log_store": 19,
+    "membership": 32,
+    "provider": 37,
+    "raft": 79,
+    "snapshot": 27
+  },
+  "core": {
+    "library": 320,
+    "effect_owner": 195,
+    "log_owned": 5,
+    "log_store": 0,
+    "membership": 18,
+    "provider": 22,
+    "raft": 29,
+    "snapshot": 12
+  },
+  "tcp_quic_services": 2,
+  "standalone_final": 56,
+  "root_fmt": 0,
+  "root_all_feature_clippy": 0,
+  "standalone_fmt": 0,
+  "standalone_clippy": 0,
+  "metadata_checker": 0,
+  "cli": {
+    "results": [
+      {
+        "label": "off",
+        "originals": 16384,
+        "requests": 4096,
+        "frontiers": [
+          17409,
+          17409,
+          17409
+        ]
+      },
+      {
+        "label": "on",
+        "originals": 16384,
+        "requests": 4096,
+        "frontiers": [
+          17409,
+          17409,
+          17409
+        ]
+      },
+      {
+        "label": "openraft",
+        "originals": 16384,
+        "requests": 4096,
+        "frontiers": [
+          17409,
+          17409,
+          17409
+        ]
+      }
+    ],
+    "phase_count": 29,
+    "provider_methods": 15,
+    "scopes": 4,
+    "source_sha256": "a2e53fe3546fb633e76b72361beb1887377d50ceff51dfe20e15e1c828f48992"
+  },
+  "performance": "unmeasured; checked candidate only",
+  "review": "No blocking defect. Owned tail capacity can differ, but reachable fanout remains within existing effect reservation metadata bound."
+}

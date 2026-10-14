@@ -69,7 +69,7 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:435 borrowed synchronous completion | Remove the measured committed-output copy for immediate hosts | Fresh434 profiles and the linked435 schema; preserve exact tickets, late-error behavior and FIFO ownership | Borrowed/owned conformance, real durable histories, all strict checks and checked publication; fresh paired Linux/Mac rates and p99 decide retention | P9.0/P9.1/P9.3 |
+| Current:435 artifact/measurement qualification | Decide whether borrowed synchronous completion improves useful throughput | Checked435 ownership slice, exact tickets/late errors/FIFO outcomes, retained434 immutable baselines | Fresh asserted artifacts, Mac qualification and repeated paired completed rates/p99 on both hosts; retain or reject before another optimization | P9.0/P9.1/P9.3 |
 | Next: remaining measured copying/admission work | Reduce the next limiting stage after435's disposition | Current candidate qualified and measured; current source-bound profiles and public ownership contracts | One explicit schema and focused checked slice; publish and measure both hosts before selecting another change | P9.0/P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
@@ -142,7 +142,20 @@ records data shape, lifetime, exact durability checks, late-error suppression,
 retirement/snapshot ordering and the matched FIFO fallback before editing.
 Independent source review confirms that immediate application with an existing
 FIFO tail would reorder effects; that case must materialize owned output.
-No435 implementation or performance improvement is claimed yet. The full macro
+435 is implemented and checked in the [focused core](../validation/performance/slice435/core/README.md)
+and [main](../validation/performance/slice435/main/README.md) evidence:8 core
+controls/56 matched, all-feature owner203/Raft79/membership32/log-store19/
+log-owned5/provider37/snapshot27, core library320/owner195 and actual TCP/QUIC
+three-service retry/replacement/recovery2 pass. All-feature library379 passes;
+21 sandbox socket refusals are preserved and pass on the same executable in
+an exact scoped retry outside the sandbox. Root all-feature and standalone
+strict/fmt checks pass; the enabled four-profile hook qualifies publication.
+The observer remains29 phases/four scopes/15 methods, as current source defines;
+the stale426 postprocessor assumption is corrected without rerunning successful
+off/on controls. Three CLI engines each finish16384 originals/4096 requests and
+frontiers17409×3. Independent review finds no blocking semantic defect and
+confirms completion vector growth remains within existing reservation bounds.
+No435 performance improvement or retention decision is claimed yet. The full macro
 plan stays active; the current deliverable and next two are updated above.
 
 ### Slice434 schema — one owned original/request buffer
