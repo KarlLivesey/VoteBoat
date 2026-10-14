@@ -1,0 +1,33 @@
+{
+  "baseline": "3793b9655511551fd4fec7fe0c0cc3a7276263a1",
+  "candidate": "b4875d9be56f20f32f1e9d05df724823825f6b97",
+  "changed_common": [
+    "docs/component-contracts.json",
+    "docs/provider-conformance.json",
+    "src/application.rs",
+    "src/log/transition/tests/compact.rs",
+    "src/raft.rs",
+    "src/raft/admitted_replication.rs",
+    "src/raft/proposals.rs",
+    "src/runtime.rs",
+    "src/runtime/clients.rs",
+    "src/runtime/effects.rs",
+    "src/runtime/effects/ready.rs",
+    "src/runtime/ready_batch.rs",
+    "src/runtime/timed.rs",
+    "tests/client_admission/ready_batch.rs",
+    "tests/provider_conformance/application.rs"
+  ],
+  "new": [
+    "src/log/transition/tests/compact/smaller.rs",
+    "src/raft/combine_ready.rs",
+    "src/raft/combine_ready/tests.rs",
+    "src/raft/combine_ready/tests/native.rs",
+    "src/runtime/ready_batch/commit.rs",
+    "tests/client_admission/ready_batch/commit_append.rs",
+    "tests/provider_conformance/application/commit_batch.rs"
+  ],
+  "all_examples_build_config_locks_tools_validators_fixtures_identical": true,
+  "baseline_production455": true,
+  "no_unrelated_performance_change_claim": "Changes include cfg(test)459 oracle additions; production optimization461 only. All benchmark/default workload source is exact between458 and461."
+}

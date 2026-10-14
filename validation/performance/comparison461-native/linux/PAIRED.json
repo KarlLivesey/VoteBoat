@@ -1,0 +1,80 @@
+[
+  {
+    "protocol": "tcp",
+    "trial": 1,
+    "total_completed_originals_per_second_ratio": 0.9796342889462417,
+    "p99_ms_ratio": 1.5607407841110112,
+    "commands_per_leader_unit_ratio": 1.016924298439322,
+    "leader_barrier_calls_per_applied_original_ratio": 0.9833573664575663,
+    "leader_barrier_ms_per_applied_original_ratio": 1.0083019185240676,
+    "baseline_completed_originals_per_second": 162.49131080525592,
+    "candidate_completed_originals_per_second": 159.18205972064965,
+    "baseline_p99_ms": 1119.165689,
+    "candidate_p99_ms": 1746.727535
+  },
+  {
+    "protocol": "tcp",
+    "trial": 2,
+    "total_completed_originals_per_second_ratio": 1.2110962389431958,
+    "p99_ms_ratio": 0.2841465167903604,
+    "commands_per_leader_unit_ratio": 1.0026469976993726,
+    "leader_barrier_calls_per_applied_original_ratio": 0.9973599903999649,
+    "leader_barrier_ms_per_applied_original_ratio": 0.8794108552688252,
+    "baseline_completed_originals_per_second": 126.59379834368161,
+    "candidate_completed_originals_per_second": 153.31727304756618,
+    "baseline_p99_ms": 3652.534994,
+    "candidate_p99_ms": 1037.855096
+  },
+  {
+    "protocol": "tcp",
+    "trial": 3,
+    "total_completed_originals_per_second_ratio": 1.0327785607590358,
+    "p99_ms_ratio": 1.409991264762908,
+    "commands_per_leader_unit_ratio": 1.0066315325795638,
+    "leader_barrier_calls_per_applied_original_ratio": 0.9934121549296493,
+    "leader_barrier_ms_per_applied_original_ratio": 0.9830657053525719,
+    "baseline_completed_originals_per_second": 137.67218867537213,
+    "candidate_completed_originals_per_second": 142.18488487669725,
+    "baseline_p99_ms": 1631.371862,
+    "candidate_p99_ms": 2300.220075
+  },
+  {
+    "protocol": "quic",
+    "trial": 1,
+    "total_completed_originals_per_second_ratio": 0.8334021746649223,
+    "p99_ms_ratio": 2.4826179111745823,
+    "commands_per_leader_unit_ratio": 0.9677303041100235,
+    "leader_barrier_calls_per_applied_original_ratio": 1.0333457532051282,
+    "leader_barrier_ms_per_applied_original_ratio": 1.1425481443784948,
+    "baseline_completed_originals_per_second": 155.30821003248894,
+    "candidate_completed_originals_per_second": 129.4341999843928,
+    "baseline_p99_ms": 1304.441844,
+    "candidate_p99_ms": 3238.430686
+  },
+  {
+    "protocol": "quic",
+    "trial": 2,
+    "total_completed_originals_per_second_ratio": 1.2666678321669975,
+    "p99_ms_ratio": 0.6335714177281944,
+    "commands_per_leader_unit_ratio": 1.0351980438688102,
+    "leader_barrier_calls_per_applied_original_ratio": 0.9659987341772152,
+    "leader_barrier_ms_per_applied_original_ratio": 0.8672639478141247,
+    "baseline_completed_originals_per_second": 124.19851276958538,
+    "candidate_completed_originals_per_second": 157.31826092821586,
+    "baseline_p99_ms": 1898.4188370000002,
+    "candidate_p99_ms": 1202.783914
+  },
+  {
+    "protocol": "quic",
+    "trial": 3,
+    "total_completed_originals_per_second_ratio": 1.437111074637496,
+    "p99_ms_ratio": 1.2410220984458153,
+    "commands_per_leader_unit_ratio": 0.390638494933719,
+    "leader_barrier_calls_per_applied_original_ratio": 2.5599115626576268,
+    "leader_barrier_ms_per_applied_original_ratio": 0.6964321801267215,
+    "baseline_completed_originals_per_second": 158.50601227531286,
+    "candidate_completed_originals_per_second": 227.79074563747898,
+    "baseline_p99_ms": 1144.4651000000001,
+    "candidate_p99_ms": 1420.30648
+  }
+]

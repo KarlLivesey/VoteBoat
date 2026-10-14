@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Karl Livesey
 //! Opt-in collection of bounded already-ready ordinary original proposals.
 use super::*;
-mod commit;
 pub(crate) struct ReadyProposal {
     pub(crate) admission: AdmissionTicket,
     pub(crate) command: Proposal,
@@ -23,15 +22,6 @@ fn routine_control(queued: &Queued, term: u64) -> bool {
     }
 }
 fn window(group: &Group, limits: ShardLimits, now: MonoTime, max_items: usize) -> Option<Window> {
-    window_at_least(group, limits, now, max_items, 2)
-}
-fn window_at_least(
-    group: &Group,
-    limits: ShardLimits,
-    now: MonoTime,
-    max_items: usize,
-    minimum: usize,
-) -> Option<Window> {
     let (turn, class) = group.next_queued(limits, now)?;
     if class != Class::Data as usize
         // Inspect only: routine replies remain queued and untrusted until the
@@ -94,7 +84,7 @@ fn window_at_least(
         cost = next_cost;
         payload = next_payload;
     }
-    (count >= minimum).then(|| Window {
+    (count > 1).then(|| Window {
         turn,
         count,
         input_bytes: proposal_input(count, payload).unwrap(),

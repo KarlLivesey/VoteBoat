@@ -1,46 +1,7 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
+// Independent admission reference retained after rejecting fusion461.
 use super::*;
-
-struct BatchOnly(Counter);
-impl StateMachine for BatchOnly {
-    type Receipt = CounterReceipt;
-    fn applied_index(&self) -> u64 {
-        self.0.applied_index()
-    }
-    fn apply_batch(
-        &mut self,
-        entries: &[LogEntry],
-    ) -> Result<Vec<CounterReceipt>, ApplicationError> {
-        self.0.apply_batch(entries)
-    }
-}
-impl BoundedStateMachine for BatchOnly {
-    fn receipt_bytes_bound(&self, entries: &[LogEntry]) -> Result<usize, ApplicationError> {
-        self.0.receipt_bytes_bound(entries)
-    }
-}
-impl ProposalAdmission for BatchOnly {
-    fn supports_ready_batch(&self) -> bool {
-        true
-    }
-    fn validate_proposal<'a>(
-        &self,
-        operation: OperationId,
-        bytes: &[u8],
-        pending: impl Iterator<Item = (OperationId, &'a [u8])>,
-    ) -> Result<usize, ApplicationError> {
-        self.0.validate_proposal(operation, bytes, pending)
-    }
-}
-
-#[test]
-fn unchanged_context_batch_opt_in_does_not_imply_commit_append_opt_in() {
-    let app = BatchOnly(Counter::new(4).unwrap());
-    assert!(app.supports_ready_batch());
-    assert!(!app.supports_commit_append_batch());
-    assert!(app.0.supports_commit_append_batch());
-}
 
 fn pending(entries: &[LogEntry]) -> impl Iterator<Item = (OperationId, &[u8])> {
     entries.iter().filter_map(|entry| match &entry.payload {

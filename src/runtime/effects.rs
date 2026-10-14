@@ -558,13 +558,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         limit: usize,
         mut check: impl FnMut(&Raft, &Event) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(
-            now,
-            limit,
-            |_| false,
-            |_| false,
-            |core, event, _| check(core, event),
-        );
+        let result = self.advance_inner(now, limit, |_| false, |core, event, _| check(core, event));
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -577,10 +571,9 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         limit: usize,
         eligible: impl FnMut(GroupIdentity) -> bool,
-        combine: impl FnMut(GroupIdentity) -> bool,
         check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
-        let result = self.advance_inner(now, limit, eligible, combine, check);
+        let result = self.advance_inner(now, limit, eligible, check);
         match result {
             Err(error @ (EffectOwnerError::Runtime(_) | EffectOwnerError::ReservationTooLarge)) => {
                 self.fail(error)
@@ -593,7 +586,6 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
         now: MonoTime,
         limit: usize,
         mut eligible: impl FnMut(GroupIdentity) -> bool,
-        mut combine: impl FnMut(GroupIdentity) -> bool,
         mut check: impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
     ) -> Result<Vec<OwnerStep>, EffectOwnerError> {
         self.check()?;
@@ -636,16 +628,7 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> EffectOwner<Q, T, E
                 .runtime
                 .step_ready_checked(visit, now, max_items, &mut check)
                 .map_err(EffectOwnerError::Runtime)?;
-            if let Some(mut step) = stepped {
-                if control && combine(visit.group) {
-                    self.try_combine_ready_commit(
-                        visit,
-                        now,
-                        (limit - steps.len()).saturating_sub(1),
-                        &mut step,
-                        &mut check,
-                    )?;
-                }
+            if let Some(step) = stepped {
                 self.install_ready_steps(visit, step, &mut steps)?;
             } else {
                 self.refresh(visit.group)?;

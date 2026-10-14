@@ -29,7 +29,6 @@ use std::collections::{BTreeMap, BTreeSet};
 mod admitted_replication;
 mod batch_limits;
 pub use batch_limits::BatchLimits;
-mod combine_ready;
 mod completion;
 use completion::PreparedCompletion;
 pub use completion::{persist_effect_borrowed, CompletionEffects};
@@ -649,10 +648,7 @@ impl Raft {
     /// Conservative output reservation for one event and its dependent durable
     /// completions. The owner must bound input retention by `input_bytes`, drain
     /// each output batch before another completion, and run only one event in
-    /// the visit. The private combined-ready path instead reserves its leading
-    /// control input, bounded commands, temporary plans and every observation
-    /// for one atomic transition before consuming that ready prefix.
-    /// Core/log memory and host snapshot-worker buffers are separate.
+    /// the visit. Core/log memory and host snapshot-worker buffers are separate.
     /// Covers the accepted head and every configuration reachable by truncating
     /// its uncommitted suffix. Use `event_effect_reservation` for incoming growth.
     pub fn effect_reservation(&self, input_bytes: usize) -> Option<usize> {

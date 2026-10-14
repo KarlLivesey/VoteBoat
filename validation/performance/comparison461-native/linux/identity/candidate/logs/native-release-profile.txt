@@ -1,0 +1,1 @@
+opt3 debug_assertions=true overflow_checks=true debuginfo=0 acceptance native-default split/lto/codegen lto=default codegen_units=default; framework overrides and rustflags/wrappers unset

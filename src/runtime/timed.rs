@@ -513,37 +513,6 @@ impl<Q: ReadyScheduler, T: TimerService, E: ElectionEntropy> TimedShard<Q, T, E>
         }
         Ok(step)
     }
-    pub(super) fn ready_commit_reservation(
-        &mut self,
-        visit: VisitTicket,
-        now: MonoTime,
-        max_items: usize,
-        step: &Stepped,
-    ) -> Result<Option<usize>, RuntimeError> {
-        self.check()?;
-        if self.authorization.is_logical() {
-            return Ok(None);
-        }
-        self.shard
-            .ready_commit_reservation(visit, now, max_items, step)
-    }
-    pub(super) fn combine_ready_commit(
-        &mut self,
-        visit: VisitTicket,
-        now: MonoTime,
-        max_items: usize,
-        step: &mut Stepped,
-        check: &mut impl FnMut(&Raft, &Event, &[ReadyProposal]) -> Result<(), RaftError>,
-    ) -> Result<bool, RuntimeError> {
-        self.check()?;
-        if self.authorization.is_logical() {
-            return Ok(false);
-        }
-        // The leading control step already refreshed timers. Replacing only
-        // its pending ordinary log plan changes no timer or role state.
-        self.shard
-            .combine_ready_commit(visit, now, max_items, step, check)
-    }
     pub fn next_effect_reservation(
         &mut self,
         visit: VisitTicket,

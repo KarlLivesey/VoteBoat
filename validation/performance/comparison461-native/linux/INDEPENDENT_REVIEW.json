@@ -1,0 +1,31 @@
+{
+  "reviewer": "linux426 independent raw-data collection",
+  "scope": "Read actual per-case summary.txt, storage.csv and RESOURCES.json; no new workloads or file writes by reviewer.",
+  "result": "Agrees with root; reject without retuning justified by lack of consistent intended barrier reduction and two paired p99 regressions per protocol. Higher medians alone are insufficient; no causal code/host/device explanation established.",
+  "cases": 12,
+  "process_validator_resource_exits": 0,
+  "applied_range": [
+    3747,
+    6933
+  ],
+  "window_refused_range": [
+    8067,
+    11253
+  ],
+  "recovered": "64+applied each case; retries and joins true; unknown/pending/no-leader/admission-refused/not-proposed zero",
+  "leader_elapsed_fraction_ranges": {
+    "barrier": [
+      0.7983,
+      0.8863
+    ],
+    "publication": [
+      0.5254,
+      0.5827
+    ],
+    "sync": [
+      0.2727,
+      0.3034
+    ]
+  },
+  "attribution": "Nested/overlapping elapsed wall scopes; not additive CPU. Aggregate counters do not expose fusion hit rate."
+}

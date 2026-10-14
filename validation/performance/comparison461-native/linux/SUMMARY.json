@@ -1,0 +1,222 @@
+{
+  "cells": [
+    {
+      "protocol": "tcp",
+      "variant": "baseline",
+      "trials": 3,
+      "median_total_completed_originals_per_second": 137.67218867537213,
+      "median_during_horizon_completed_originals_per_second": 138.6,
+      "median_p99_ms": 1631.371862,
+      "median_service_p99_ms": 1631.333912,
+      "median_dispatch_p99_ms": 0.221309,
+      "median_commands_per_leader_unit": 7.2492625368731565,
+      "median_leader_barrier_calls_per_applied_original": 0.13794506612410987,
+      "median_leader_barrier_ms_per_applied_original": 6.1080802648034105,
+      "median_leader_barrier_elapsed_fraction": 0.840912778660332,
+      "median_leader_publish_elapsed_fraction": 0.5545230655673824,
+      "median_leader_sync_elapsed_fraction": 0.2861807694273967,
+      "median_host_poll_elapsed_fraction": 0.10611138827544375,
+      "applied_range": [
+        3863,
+        4915
+      ],
+      "window_refused_range": [
+        10085,
+        11137
+      ],
+      "backlog_at_horizon_range": [
+        64,
+        64
+      ],
+      "max_inflight_range": [
+        64,
+        64
+      ],
+      "drain_ms_range": [
+        247.771254,
+        667.050772
+      ],
+      "checkpoints_range": [
+        13,
+        14
+      ],
+      "reclaims_range": [
+        39,
+        42
+      ],
+      "follower_snapshot_installs_range": [
+        3,
+        8
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        15736,
+        16604
+      ]
+    },
+    {
+      "protocol": "tcp",
+      "variant": "candidate",
+      "trials": 3,
+      "median_total_completed_originals_per_second": 153.31727304756618,
+      "median_during_horizon_completed_originals_per_second": 153.23333333333332,
+      "median_p99_ms": 1746.727535,
+      "median_service_p99_ms": 1746.688297,
+      "median_dispatch_p99_ms": 0.22645500000000002,
+      "median_commands_per_leader_unit": 7.294209702660407,
+      "median_leader_barrier_calls_per_applied_original": 0.1370950439819781,
+      "median_leader_barrier_ms_per_applied_original": 5.78061246384896,
+      "median_leader_barrier_elapsed_fraction": 0.8611442554143021,
+      "median_leader_publish_elapsed_fraction": 0.5676623643726527,
+      "median_leader_sync_elapsed_fraction": 0.302494796054649,
+      "median_host_poll_elapsed_fraction": 0.10298120341132364,
+      "applied_range": [
+        4293,
+        4836
+      ],
+      "window_refused_range": [
+        10164,
+        10707
+      ],
+      "backlog_at_horizon_range": [
+        45,
+        64
+      ],
+      "max_inflight_range": [
+        64,
+        64
+      ],
+      "drain_ms_range": [
+        193.082786,
+        401.010319
+      ],
+      "checkpoints_range": [
+        14,
+        14
+      ],
+      "reclaims_range": [
+        42,
+        42
+      ],
+      "follower_snapshot_installs_range": [
+        3,
+        6
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        15992,
+        16964
+      ]
+    },
+    {
+      "protocol": "quic",
+      "variant": "baseline",
+      "trials": 3,
+      "median_total_completed_originals_per_second": 155.30821003248894,
+      "median_during_horizon_completed_originals_per_second": 154.7,
+      "median_p99_ms": 1304.441844,
+      "median_service_p99_ms": 1304.4224080000001,
+      "median_dispatch_p99_ms": 0.237434,
+      "median_commands_per_leader_unit": 7.3140625,
+      "median_leader_barrier_calls_per_applied_original": 0.13672292245246742,
+      "median_leader_barrier_ms_per_applied_original": 5.544540785943175,
+      "median_leader_barrier_elapsed_fraction": 0.8611127049169639,
+      "median_leader_publish_elapsed_fraction": 0.5674725941038189,
+      "median_leader_sync_elapsed_fraction": 0.29342509985113613,
+      "median_host_poll_elapsed_fraction": 0.10271070168557857,
+      "applied_range": [
+        3747,
+        4778
+      ],
+      "window_refused_range": [
+        10222,
+        11253
+      ],
+      "backlog_at_horizon_range": [
+        40,
+        64
+      ],
+      "max_inflight_range": [
+        64,
+        64
+      ],
+      "drain_ms_range": [
+        140.067927,
+        169.443389
+      ],
+      "checkpoints_range": [
+        14,
+        14
+      ],
+      "reclaims_range": [
+        42,
+        42
+      ],
+      "follower_snapshot_installs_range": [
+        2,
+        6
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        16768,
+        17952
+      ]
+    },
+    {
+      "protocol": "quic",
+      "variant": "candidate",
+      "trials": 3,
+      "median_total_completed_originals_per_second": 157.31826092821586,
+      "median_during_horizon_completed_originals_per_second": 155.86666666666667,
+      "median_p99_ms": 1420.30648,
+      "median_service_p99_ms": 1420.2432039999999,
+      "median_dispatch_p99_ms": 0.245832,
+      "median_commands_per_leader_unit": 7.078039927404719,
+      "median_leader_barrier_calls_per_applied_original": 0.1412820512820513,
+      "median_leader_barrier_ms_per_applied_original": 5.574224105274262,
+      "median_leader_barrier_elapsed_fraction": 0.8694351352374424,
+      "median_leader_publish_elapsed_fraction": 0.5693782537657582,
+      "median_leader_sync_elapsed_fraction": 0.2989436902475843,
+      "median_host_poll_elapsed_fraction": 0.1074355610644528,
+      "applied_range": [
+        3900,
+        6933
+      ],
+      "window_refused_range": [
+        8067,
+        11100
+      ],
+      "backlog_at_horizon_range": [
+        64,
+        64
+      ],
+      "max_inflight_range": [
+        64,
+        64
+      ],
+      "drain_ms_range": [
+        130.005074,
+        435.828201
+      ],
+      "checkpoints_range": [
+        14,
+        14
+      ],
+      "reclaims_range": [
+        42,
+        42
+      ],
+      "follower_snapshot_installs_range": [
+        2,
+        9
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        16632,
+        20232
+      ]
+    }
+  ],
+  "scope": "Published458 baseline (production455, identical workload fixture) versus published461 private commit+append fusion;12 rotated15000-offer500/sonegroup3voter8byteCounter TCP/TLS+QUIC cases,window64/ready16/warm64/maintenance2s/noPause. Finite disk-backed diagnostic; no framework-floor, sustained memory/debt, headroom or fairness acceptance.",
+  "cases": 12,
+  "process_and_validator_successes": 12,
+  "failures": 0,
+  "attribution": "Leader storage counters are after_measurement minus before_measurement. Elapsed scopes overlap/nest, not CPU or additive critical-path time. Peak RSS is whole process, not continuous plateau.",
+  "acceptance": "Finite disk-backed offered-load diagnostic, not framework floors, sustained memory/debt/headroom/fairness/Mac qualification."
+}

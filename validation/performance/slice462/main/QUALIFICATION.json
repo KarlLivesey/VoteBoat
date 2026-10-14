@@ -1,0 +1,19 @@
+{
+  "original_handle": 69762,
+  "actual_exit": 0,
+  "stage": "DONE",
+  "provider_conformance_all": 42,
+  "provider_conformance_core": 27,
+  "full_enabled_formatter_four_strict_profiles_standalone_hook": 0,
+  "provider_metadata": 0,
+  "source_inputs": 1445,
+  "exact_hashes_modes_before_after": true,
+  "reused_production": "All production src exact455/7a99; only prior cfg(test)459 accounting oracle loader/module differ. Exact previously checked455/460 production/protocol/service/recovery scopes reused. No whole unchanged suite rerun.",
+  "new_reference": "One retained Counter admission invariant across moving pending prefix into applied; removed fusion capability and runtime/Core modules/tests.",
+  "decision": "Reject461: no consistent barrier-stage reduction; two paired p99 losses and one rate loss each protocol. No repeat successful runs, guard retuning, Mac461 job or cause/acceptance claim.",
+  "comparison_original": 16863,
+  "comparison_all_process_and_validator_successes": 12,
+  "comparison_archive_payloads": 327,
+  "comparison_compressed_originals": 29,
+  "goal": "P9 active/incomplete; default16 and original Mac455 qualification remain."
+}

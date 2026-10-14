@@ -103,11 +103,6 @@ impl Raft {
     fn early_suffix(&self) -> Option<&Suffix> {
         let pending = self.pending.as_ref()?;
         let next = pending.next.metadata();
-        let old_commit = self.durable.commit_index;
-        let ordinary = self.durable.last_index() == old_commit
-            && self.durable.term_at(old_commit) == Some(self.durable.hard_state.term)
-            && pending.next.update().commit_index == old_commit;
-        let combined = self.ready_commit_tip(pending.next.update().commit_index);
         if self.fenced
             || self.role != Role::Leader
             || !self.local_voter()
@@ -116,10 +111,12 @@ impl Raft {
             || !pending.next.is_append()
             || pending.membership.is_some()
             || !matches!(pending.after, After::LeaderAppend)
-            || !(ordinary || combined)
+            || self.durable.last_index() != self.durable.commit_index
+            || self.durable.term_at(self.durable.commit_index) != Some(self.durable.hard_state.term)
             || pending.next.update().hard_state != self.durable.hard_state
             || next.ballot_origin != self.durable.ballot_origin
             || next.generation != self.durable.generation
+            || pending.next.update().commit_index != self.durable.commit_index
         {
             return None;
         }

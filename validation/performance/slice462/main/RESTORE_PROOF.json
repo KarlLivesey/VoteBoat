@@ -1,0 +1,11 @@
+{
+  "parent461": "b4875d9be56f20f32f1e9d05df724823825f6b97",
+  "restored_pre461": "2a05034fd59985a552ec27469a849ddd8b3e0060",
+  "production_reference": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "reference_src_files": 630,
+  "different_reference_src_paths": [
+    "src/log/transition/tests/compact.rs"
+  ],
+  "only_new_src": "src/log/transition/tests/compact/smaller.rs",
+  "scope": "Only cfg(test)459 accounting oracles differ from455; all production source exact. Counter admission oracle retained without removed capabilities. Existing passed455/460 full production/recovery scopes apply by exact source; new checks pending."
+}

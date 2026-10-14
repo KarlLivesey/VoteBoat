@@ -1,0 +1,11 @@
+{
+  "timestamp_unix": 1792018510.1867096,
+  "reviewed_config_sha256": "bfa44400718196dba6492007dd2b23554403f674cd8dd30df1dd7e842d8c2b80",
+  "timing_config_sha256": "88c64043544a11fb711b93ae4c1368c9de6370506e3c98b17da9f7f0bf52bf9d",
+  "only_config_change_after_review": "timing_authorized false->true; cases/artifacts/args/limits unchanged",
+  "independent_review": "linux426 REVIEW_END: no material issue; actual73 workload/config/lock/fixture entries+physical modes match, profile/tool hashes exact, original timer reviewed. No workloads/writes by reviewer.",
+  "user_authorization": "Thread instructions explicitly authorize local Linux/Mac benchmarks; no new permission requested.",
+  "coordination": "Macagent HOLD Linux copies/checks/archives/builds; Linux agents idle, no competing builds/benchmarks; root single original controller.",
+  "actual_preflight": "PREFLIGHT.json actual IPv4/IPv6 TCP/UDP bind/listen0 and12roots absent/parents exist.",
+  "duration": "12 finite15000offers500/s cases; until original controller terminal, no samehost builds/checks/copies/archives/profiles/other benchmarks."
+}

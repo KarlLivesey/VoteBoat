@@ -382,10 +382,8 @@ pub struct Stepped {
     /// A consumed live expiration. Stale queued timers produce no core effects.
     pub timer: Option<TimerToken>,
     pub result: Result<Vec<Effect>, RaftError>,
-    /// Original invocations sharing this step's ordered persistence batch.
-    /// An ordinary proposal step retains its first invocation in the singular
-    /// fields above. A fused commit retains the leading control observation
-    /// there (including received_from), with every proposal listed here.
+    /// Later original invocations sharing this step's ordered persistence batch.
+    /// The first invocation retains the singular fields above.
     pub batch_members: Vec<SteppedProposal>,
 }
 #[derive(Clone, Debug)]

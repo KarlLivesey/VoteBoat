@@ -1,0 +1,9 @@
+{
+  "exact_runner_sha256": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "exact_collector_sha256": "25dcdcee67c84d322972861ed35b4cc90779d6cc89954e357cd3fca260603ada",
+  "config_sha256": "bfa44400718196dba6492007dd2b23554403f674cd8dd30df1dd7e842d8c2b80",
+  "guard_source_boundary": "Only existing driver prefix through guards(); no active-process query, campaign creation or workload execution.",
+  "source_artifact_compiler_validator_guards": 0,
+  "all_12_absent_roots_have_existing_parent": true,
+  "independent_review_and_actual_socket_preflight_pending": true
+}

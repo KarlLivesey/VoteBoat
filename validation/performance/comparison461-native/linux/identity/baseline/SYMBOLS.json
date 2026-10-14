@@ -1,0 +1,54 @@
+{
+  "executable_sha256": "bb2dbb6595dfdbf9a6c7d835a14665de5cdced4e7d4eec7f0b31710fa0c0ca61",
+  "symbol_form": "NativeLinuxELF debug0 acceptance/symboltable; no DWARF/DWP requirement, native defaultLTO/codegen preserved.",
+  "elf_notes_sha256": "a293a32c85e6fd97ab6ab71fb62e539b75ccc4929a257febac9b0630a8d63dc5",
+  "elf_sections_sha256": "cc9e190130cc1084557ad760df36082a63e42e6e1b9b554815fd6e3b052f6bfa",
+  "symbol_table_sha256": "211666d02b28fb644a6dbf48cf1602a1efc61cd5c53efa80800b5c29157e5a6a",
+  "reference_oracle_cfg_absent_PROFILErelease": true,
+  "root_buildscript_record": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/source#voteboat@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/target-native-release/release/build/voteboat-15a02fc41a295d95/out"
+  },
+  "root_buildscript_fresh_record": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/source#voteboat@0.1.0",
+    "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native458-linux/target-native-release/release/build/voteboat-d2572b14cedfc02c/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  }
+}

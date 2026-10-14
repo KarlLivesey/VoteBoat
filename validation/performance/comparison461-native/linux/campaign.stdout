@@ -1,0 +1,24 @@
+START g1-tcp-r500-w64-q16-t1-baseline
+END g1-tcp-r500-w64-q16-t1-baseline 0
+START g1-tcp-r500-w64-q16-t1-candidate
+END g1-tcp-r500-w64-q16-t1-candidate 0
+START g1-tcp-r500-w64-q16-t2-candidate
+END g1-tcp-r500-w64-q16-t2-candidate 0
+START g1-tcp-r500-w64-q16-t2-baseline
+END g1-tcp-r500-w64-q16-t2-baseline 0
+START g1-tcp-r500-w64-q16-t3-baseline
+END g1-tcp-r500-w64-q16-t3-baseline 0
+START g1-tcp-r500-w64-q16-t3-candidate
+END g1-tcp-r500-w64-q16-t3-candidate 0
+START g1-quic-r500-w64-q16-t1-baseline
+END g1-quic-r500-w64-q16-t1-baseline 0
+START g1-quic-r500-w64-q16-t1-candidate
+END g1-quic-r500-w64-q16-t1-candidate 0
+START g1-quic-r500-w64-q16-t2-candidate
+END g1-quic-r500-w64-q16-t2-candidate 0
+START g1-quic-r500-w64-q16-t2-baseline
+END g1-quic-r500-w64-q16-t2-baseline 0
+START g1-quic-r500-w64-q16-t3-baseline
+END g1-quic-r500-w64-q16-t3-baseline 0
+START g1-quic-r500-w64-q16-t3-candidate
+END g1-quic-r500-w64-q16-t3-candidate 0
