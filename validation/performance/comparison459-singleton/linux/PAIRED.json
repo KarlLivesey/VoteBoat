@@ -1,0 +1,600 @@
+{
+  "cases": 12,
+  "failures": [],
+  "variants": {
+    "baseline": {
+      "rates": [
+        102881.53894190537,
+        114251.7209668316,
+        110654.48148434972
+      ],
+      "median_completed_originals_per_second": 110654.48148434972,
+      "median_request_p50_ms": 0.007795,
+      "median_request_p99_ms": 0.018404
+    },
+    "candidate": {
+      "rates": [
+        112420.6191924743,
+        109239.19601556084,
+        106318.6776551765
+      ],
+      "median_completed_originals_per_second": 109239.19601556084,
+      "median_request_p50_ms": 0.007745,
+      "median_request_p99_ms": 0.019106
+    },
+    "on": {
+      "rates": [
+        94125.02354758183,
+        92167.87744357271,
+        87894.35249710504
+      ],
+      "median_completed_originals_per_second": 92167.87744357271,
+      "median_request_p50_ms": 0.009838,
+      "median_request_p99_ms": 0.020258
+    },
+    "openraft": {
+      "rates": [
+        19329.619795914605,
+        20613.17155506671,
+        20249.182988078363
+      ],
+      "median_completed_originals_per_second": 20249.182988078363,
+      "median_request_p50_ms": 0.04237,
+      "median_request_p99_ms": 0.130826
+    }
+  },
+  "paired": [
+    {
+      "trial": 1,
+      "OFF_rate_ratio": 1.092719066497979,
+      "OFF_p99_ratio": 0.9053418911406479,
+      "baseline_rate": 102881.53894190537,
+      "candidate_rate": 112420.6191924743,
+      "baseline_p99_ms": 0.019787,
+      "candidate_p99_ms": 0.017914,
+      "ON_rate_ratio_to_candidate": 0.8372576509868821,
+      "ON_p99_ratio_to_candidate": 1.100089315619069
+    },
+    {
+      "trial": 2,
+      "OFF_rate_ratio": 0.9561273571299118,
+      "OFF_p99_ratio": 1.074169658886894,
+      "baseline_rate": 114251.7209668316,
+      "candidate_rate": 109239.19601556084,
+      "baseline_p99_ms": 0.017824,
+      "candidate_p99_ms": 0.019146,
+      "ON_rate_ratio_to_candidate": 0.843725336741252,
+      "ON_p99_ratio_to_candidate": 1.058080016713674
+    },
+    {
+      "trial": 3,
+      "OFF_rate_ratio": 0.9608167353819607,
+      "OFF_p99_ratio": 1.0381438817648336,
+      "baseline_rate": 110654.48148434972,
+      "candidate_rate": 106318.6776551765,
+      "baseline_p99_ms": 0.018404,
+      "candidate_p99_ms": 0.019106,
+      "ON_rate_ratio_to_candidate": 0.8267065997770673,
+      "ON_p99_ratio_to_candidate": 1.1457657280435465
+    }
+  ],
+  "counts": [
+    [
+      1048576,
+      1048576,
+      [
+        1049601,
+        1049601,
+        1049601
+      ]
+    ]
+  ],
+  "maintenance_scope": {
+    "logical_counts_only": true,
+    "physical_memory_or_debt_bound_proven": false,
+    "refusal_count_unavailable": true,
+    "cases": [
+      {
+        "variant": "baseline",
+        "trial": 1,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1884479,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 2006934,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "candidate",
+        "trial": 1,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 4,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1916679,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 2,
+            "peak_client_queue": 0,
+            "persistence_units": 2011265,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "on",
+        "trial": 1,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1946740,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 2003607,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "openraft",
+        "trial": 1,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "baseline",
+        "trial": 2,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1913054,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 2009937,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "candidate",
+        "trial": 2,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1900591,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 2009129,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "on",
+        "trial": 2,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1935877,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1996718,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "openraft",
+        "trial": 2,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "baseline",
+        "trial": 3,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1913094,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 2010479,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "candidate",
+        "trial": 3,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 3,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 1895855,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 1,
+            "peak_client_queue": 0,
+            "persistence_units": 2006735,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "on",
+        "trial": 3,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 4,
+            "peak_client_queue": 1,
+            "persistence_units": 2099203,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 1049600,
+            "proposed_originals": 1049600,
+            "maximum_proposal_width": 1
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 2,
+            "peak_client_queue": 0,
+            "persistence_units": 1904422,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          },
+          {
+            "retained_entries": 5601,
+            "peak_retained_entries": 6000,
+            "peak_peer_queue": 2,
+            "peak_client_queue": 0,
+            "persistence_units": 1994761,
+            "checkpoint_count": 209,
+            "snapshot_installs": 0,
+            "proposal_batches": 0,
+            "proposed_originals": 0,
+            "maximum_proposal_width": 0
+          }
+        ],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      },
+      {
+        "variant": "openraft",
+        "trial": 3,
+        "completed_originals": 1048576,
+        "completed_requests": 1048576,
+        "applied_frontiers": [
+          1049601,
+          1049601,
+          1049601
+        ],
+        "maintenance": [],
+        "RSS_reported": false,
+        "refusal_count_reported": false
+      }
+    ]
+  }
+}

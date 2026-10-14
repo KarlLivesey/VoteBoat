@@ -1,0 +1,5 @@
+# Slice460 reject459 and restore455 production
+
+Original26594 ends0/DONE: all-feature/core log46 each (including both new oracle controls) and full enabled formatter/four strict root profiles/standalone formatter+strict0. Exactly one source file changes from459; compact.rs is byte-identical to checked455. The entire src tree differs from455 only in the cfg(test) loader and new oracle test module. All1441 hashes/modes are frozen. Existing455 full production qualification and unchanged459 affected native crash/provider/snapshot/service/matched scopes are reused; no broad unchanged rerun or new artifact/profile required for the restored source.
+
+459 has no established improvement: two paired bulk rate losses, two singleton rate/tail losses and both rate medians below baseline. Reject the algorithm change; retain its tests, schema, all24 outcome-valid capacity outputs, slow tails and honest setup failure history. No causal attribution, further tuning, successful-run replacement, Mac459 campaign or acceptance claim. Full P9 remains active. Run the prepared real durable native455 load campaign after publication/all setup ends.

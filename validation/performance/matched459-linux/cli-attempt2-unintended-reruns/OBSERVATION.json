@@ -1,0 +1,170 @@
+{
+  "actual_controller_session_handle": 9198,
+  "actual_terminal_exit": 0,
+  "initial_result_chunk_id": "04de5e",
+  "terminal_result_chunk_id": "14cd53",
+  "not_a_timeout": true,
+  "events": [
+    "Repairgenerator raised IndentationError during ast.parse before writingcli.py; oldtop-levelscriptremainedunchanged.",
+    "Shellwithoutfailfastcontinued: importoldcli self-executedoff/on/openraft; then AttributeError validate_cli absent.",
+    "Shellcontinued oldsetup-after-build: off/on/openraftexecutedagain, pairsetupactual0."
+  ],
+  "extra_runtime_cycles": 2,
+  "first_original_OFF_ON_authoritative": "../cli-attempt1-fixed-count/logs/",
+  "last_extra_cycle_files_retained_here": true,
+  "intervening_extra_cycle_raw_overwritten_by_final_cycle": true,
+  "raw_generator_and_import_exception_output_location": "Onlyoriginaltooloutputchunk04de5e; no rawfilecapture, no reconstructionfabricated.",
+  "generated_failed_repair_not_written": true,
+  "current_cli_sha256": "647f2aafeae4c09c0e02581f7cf68a1adf63801b38ecdf6fd8f02e767aeca7b2",
+  "current_cli_still_original_top_level": true,
+  "no_source_artifact_changes": true,
+  "no_further_workload_imports_or_repairs_after_root_pause": true,
+  "timing_started": false,
+  "files": [
+    {
+      "original": "target/p9/matched459-linux/cli.py",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/cli.py",
+      "sha256": "647f2aafeae4c09c0e02581f7cf68a1adf63801b38ecdf6fd8f02e767aeca7b2"
+    },
+    {
+      "original": "target/p9/matched459-linux/cli-run.sh",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/cli-run.sh",
+      "sha256": "3ab75b55d47ee09732d6eed1ecc8865f32ef7143cebc3f38dfbc2f87e195ebdb"
+    },
+    {
+      "original": "target/p9/matched459-linux/setup-after-build.sh",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/setup-after-build.sh",
+      "sha256": "1783eff7b91eda5f07d65564c716a52fd9375947a7d7f84c3c1dcea67f054ea1"
+    },
+    {
+      "original": "target/p9/matched459-linux/setup.stdout",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/setup.stdout",
+      "sha256": "670b0135e2b0d3233d1257473d11b7a6834f3054efe83fe5e21230e1febae6ef"
+    },
+    {
+      "original": "target/p9/matched459-linux/setup.stderr",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/setup.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "target/p9/matched459-linux/SETUP_STATUS",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/SETUP_STATUS",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original": "target/p9/matched459-linux/SETUP_STAGE",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/SETUP_STAGE",
+      "sha256": "895ee5243c2e1cec572fcbbc619ef147581a1d333ac8432528234f264de633f5"
+    },
+    {
+      "original": "target/p9/matched459-linux/CLI.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/CLI.json",
+      "sha256": "e11b10ab39a1fda89fc63f8270bae6c87a90a8d066bc88ed920e0846bd5fe5b2"
+    },
+    {
+      "original": "target/p9/matched459-linux/CLI_STATUS",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/CLI_STATUS",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original": "target/p9/matched459-linux/CLI_STAGE",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/CLI_STAGE",
+      "sha256": "8221ac66be71558c921fb44cfb66f7997699aea754d917763882d6d9eddc836e"
+    },
+    {
+      "original": "target/p9/matched459-linux/SETUP_READY.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/SETUP_READY.json",
+      "sha256": "9d75b06dffbd46664b62d188cb2bd7baa148e7a077a221927bcffa79e9cb780e"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/off.command",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/off.command",
+      "sha256": "e5de7208f7c3ed3db58a59bd611de374a8a726623dfa902e1c62a836fa8c8b0f"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/off.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/off.json",
+      "sha256": "ce0b9689d1ac690be70b7212b7bd85024a25f706454f9c0e0318dd178e19a055"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/off.stderr",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/off.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/off.status",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/off.status",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/on.command",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/on.command",
+      "sha256": "205290dc9198750f8a4ea296ec82ed98084dd18eba3718c0d2936290a245a81f"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/on.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/on.json",
+      "sha256": "698838261f97e83c5cc0abc88bf4ea2b0b16bfd8908b22583991d87e27b62fbf"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/on.stderr",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/on.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/on.status",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/on.status",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/openraft.command",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/openraft.command",
+      "sha256": "e1895c488cb6e0bea8dccd72c337f1cfbea625ca489f2b1466ddb425ea1064b1"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/openraft.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/openraft.json",
+      "sha256": "b8ed94ad2f498639546f08a45c612ce6b1f5fb2290c1efbbe6efaf5a72b87230"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/openraft.stderr",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/openraft.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "target/p9/matched459-linux/logs/openraft.status",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/logs/openraft.status",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original": "target/p9/comparison459/CONFIG_PAIR.linux.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/pair-setup/CONFIG_PAIR.linux.json",
+      "sha256": "15b769a26991f8fab697d39600e7a10a121e35391c7b9e22a1a38a821552653a"
+    },
+    {
+      "original": "target/p9/comparison459/prepare-pair.log",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/pair-setup/prepare-pair.log",
+      "sha256": "5bac9a009a17333f571d5fba865f74c77d121e8b5929191835afe1ede49826bb"
+    },
+    {
+      "original": "target/p9/comparison459/prepare-pair.stderr",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/pair-setup/prepare-pair.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "target/p9/comparison459/prepare-pair.exit",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/pair-setup/prepare-pair.exit",
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa"
+    },
+    {
+      "original": "target/p9/comparison459/CURRENT_CLI_CHECKER.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/pair-setup/CURRENT_CLI_CHECKER.json",
+      "sha256": "22ea65d1d1f2aa483fa72a1664846ba05a1d49f6c3b09dc704125bf4cd9159a4"
+    },
+    {
+      "original": "target/p9/comparison459/PAIR_SETUP_READY.json",
+      "copy": "target/p9/matched459-linux/cli-attempt2-unintended-reruns/pair-setup/PAIR_SETUP_READY.json",
+      "sha256": "e54733eb26c6431d759389c05d4ce5e0953f7ff4d75db7c14bc83a624faa5a16"
+    }
+  ]
+}

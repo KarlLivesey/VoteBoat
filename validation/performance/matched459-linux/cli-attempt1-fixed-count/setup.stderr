@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched459-linux/cli.py", line 45, in <module>
+    assert methods['store_checkpoint_state_protected_inclusive_nested']['calls']==3
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

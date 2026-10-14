@@ -1,0 +1,7 @@
+{
+  "scope": "Exact455existingchecker/summarizerbytehashes; current29/4/15; prioractualpositive/negativecontrolsreusedwithoutredundantnegativereruns",
+  "sha256": {
+    "phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "summarize.py": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e"
+  }
+}

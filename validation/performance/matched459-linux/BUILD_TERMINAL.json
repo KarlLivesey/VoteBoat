@@ -1,0 +1,9 @@
+{
+  "original_handle": 30727,
+  "actual_exit": 0,
+  "stage": "DONE",
+  "source_commit": "c024541ca353ab05f2e75dc9a3654e3b747d77a3",
+  "four_fresh_false": true,
+  "root_buildscript_fresh_false": true,
+  "source_before_after_exit0": true
+}

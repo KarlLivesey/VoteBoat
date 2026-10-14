@@ -1,0 +1,10 @@
+{
+  "legacy_receipt": "CLI.json",
+  "superseded_by": "ROOT_REUSED_CLI_CHECKER.json",
+  "first_OFF_ON": "cli-attempt1-fixed-count/logs",
+  "last_OR": "logs/openraft.json",
+  "raw_outputs_not_rewritten": true,
+  "intervening_extra_cycle_unrecoverable": true,
+  "exception_raw_only_in_tool_chunk": "04de5e",
+  "do_not_execute_or_import_old_cli_py": true
+}

@@ -1,0 +1,13 @@
+{
+  "build_original": 30727,
+  "actual_exit": 0,
+  "fresh_four_artifacts": true,
+  "CLI_three_exit0": true,
+  "phase_scope_methods": [
+    29,
+    4,
+    15
+  ],
+  "pair_positive_guards_exit0": true,
+  "timing_started": false
+}

@@ -1,0 +1,10 @@
+{
+  "actual_tool": "fe1f99",
+  "actual_setup_exit": 1,
+  "OFF_process_exit": 0,
+  "ON_process_exit": 0,
+  "OpenRaft_started": false,
+  "cause": "IgnoredCLIcheckerhardcodes3localcheckpoints; actualreplica2has2successfullocalcheckpoints+2snapshots, protected/gaps2correlate; alloriginals/frontierscorrect",
+  "source_changes": false,
+  "reruns": false
+}

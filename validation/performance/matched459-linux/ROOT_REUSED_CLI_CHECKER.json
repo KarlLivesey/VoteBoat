@@ -1,0 +1,48 @@
+{
+  "checker": "target/p9/comparison459/phase-diagnostic-check.py",
+  "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "scope": "Existing complete campaign case checker reused on first retained OFF/ON and last retained upstream CLI output. Data-only validation; no workload/subprocess launched. Old fixed-count checker failure and extra-cycle/overwritten-intermediate limitations remain.",
+  "positive": [
+    {
+      "case": "off",
+      "path": "target/p9/matched459-linux/cli-attempt1-fixed-count/logs/off.json",
+      "sha256": "77e52d893a5892df616cbe55a72986365cc003fe2e32cbe5522c952a1ced57e0",
+      "exit": 0,
+      "checkpoint_counts": [
+        3,
+        3,
+        3
+      ]
+    },
+    {
+      "case": "on",
+      "path": "target/p9/matched459-linux/cli-attempt1-fixed-count/logs/on.json",
+      "sha256": "670e38bebacb514af51e77fb8824eb1d50c38345d777ba8696c49214161d68d7",
+      "exit": 0,
+      "checkpoint_counts": [
+        3,
+        3,
+        2
+      ]
+    },
+    {
+      "case": "openraft",
+      "path": "target/p9/matched459-linux/logs/openraft.json",
+      "sha256": "b8ed94ad2f498639546f08a45c612ce6b1f5fb2290c1efbbe6efaf5a72b87230",
+      "exit": 0,
+      "checkpoint_counts": null
+    }
+  ],
+  "negative": [
+    {
+      "mutation": "checkpoint_count_mismatch",
+      "rejected": true,
+      "reason": "checkpoint count correlation: checkpoint_reserve_inclusive"
+    },
+    {
+      "mutation": "gap_calls_mismatch",
+      "rejected": true,
+      "reason": "gap observations do not certify exactly each successful compaction"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "initial_summary_attempt": "tool38c330 exit1 TypeError: NoneType object is not iterable; OpenRaft diagnostics is null",
+  "focused_fix": "Use diagnostics or [] for absent upstream provider diagnostic list; no workload or raw report changed",
+  "final_summary_tool": "8eb2af exit0",
+  "raw_exception_location": "tool output only, not reconstructed"
+}

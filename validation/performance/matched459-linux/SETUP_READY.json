@@ -1,0 +1,74 @@
+{
+  "build_original": 30727,
+  "actual_exit": 0,
+  "fresh_four_artifacts": true,
+  "CLI_three_exit0": true,
+  "phase_scope_methods": [
+    29,
+    4,
+    15
+  ],
+  "pair_positive_guards_exit0": true,
+  "timing_started": false,
+  "authoritative_cli_checker": {
+    "proof": "target/p9/matched459-linux/ROOT_REUSED_CLI_CHECKER.json",
+    "proof_sha256": "21e85986f07a7ef6f118703f170424df72ee43a1960f3636a3d81d4d997c3179",
+    "checker": "target/p9/comparison459/phase-diagnostic-check.py",
+    "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "authoritative_outputs": [
+      {
+        "case": "off",
+        "path": "target/p9/matched459-linux/cli-attempt1-fixed-count/logs/off.json",
+        "sha256": "77e52d893a5892df616cbe55a72986365cc003fe2e32cbe5522c952a1ced57e0",
+        "exit": 0,
+        "checkpoint_counts": [
+          3,
+          3,
+          3
+        ]
+      },
+      {
+        "case": "on",
+        "path": "target/p9/matched459-linux/cli-attempt1-fixed-count/logs/on.json",
+        "sha256": "670e38bebacb514af51e77fb8824eb1d50c38345d777ba8696c49214161d68d7",
+        "exit": 0,
+        "checkpoint_counts": [
+          3,
+          3,
+          2
+        ]
+      },
+      {
+        "case": "openraft",
+        "path": "target/p9/matched459-linux/logs/openraft.json",
+        "sha256": "b8ed94ad2f498639546f08a45c612ce6b1f5fb2290c1efbbe6efaf5a72b87230",
+        "exit": 0,
+        "checkpoint_counts": null
+      }
+    ],
+    "negative_controls": [
+      {
+        "mutation": "checkpoint_count_mismatch",
+        "rejected": true,
+        "reason": "checkpoint count correlation: checkpoint_reserve_inclusive"
+      },
+      {
+        "mutation": "gap_calls_mismatch",
+        "rejected": true,
+        "reason": "gap observations do not certify exactly each successful compaction"
+      }
+    ],
+    "legacy_CLI_json_superseded": true,
+    "legacy_CLI_json": "target/p9/matched459-linux/CLI.json",
+    "legacy_CLI_json_sha256": "e11b10ab39a1fda89fc63f8270bae6c87a90a8d066bc88ed920e0846bd5fe5b2",
+    "historical_attempts": [
+      "cli-attempt1-fixed-count",
+      "cli-attempt2-unintended-reruns"
+    ],
+    "no_new_workloads": true
+  },
+  "legacy_CLI_json_superseded": true,
+  "remaining_setup_guard_exit": 0,
+  "pair_config_sha256": "2f931844cc09ac314e009761c85c3f7e6c0052de58b021348e9c688dd114ec50",
+  "original_setup_session": 9198
+}
