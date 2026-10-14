@@ -1,0 +1,567 @@
+{
+  "scope": "Existing immutable435 saved onCPU sample weights. Physical and expandedperRVA views overlap; do not add them. ExactOperationId hash_one; genericHasher write not alloc/cause. Admission/delivery context intersects optimized aliases/missingframes, not exhaustive. No new capture/helper/source/symbolresponses.",
+  "cases": {
+    "bulk": {
+      "selected_sample_weight": 6498,
+      "groups": {
+        "physical_any": {
+          "hash_one": {
+            "all": {
+              "sample_weight": 113,
+              "percent_selected": 1.7389966143428748
+            },
+            "admission": {
+              "sample_weight": 111,
+              "percent_selected": 1.7082179132040627
+            },
+            "delivery": {
+              "sample_weight": 2,
+              "percent_selected": 0.030778701138811943
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Hasher_write": {
+            "all": {
+              "sample_weight": 61,
+              "percent_selected": 0.9387503847337643
+            },
+            "admission": {
+              "sample_weight": 61,
+              "percent_selected": 0.9387503847337643
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_insert": {
+            "all": {
+              "sample_weight": 333,
+              "percent_selected": 5.124653739612189
+            },
+            "admission": {
+              "sample_weight": 333,
+              "percent_selected": 5.124653739612189
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_remove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "admission": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "hashing_union": {
+            "all": {
+              "sample_weight": 335,
+              "percent_selected": 5.155432440751
+            },
+            "admission": {
+              "sample_weight": 333,
+              "percent_selected": 5.124653739612189
+            },
+            "delivery": {
+              "sample_weight": 2,
+              "percent_selected": 0.030778701138811943
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          }
+        },
+        "expanded_perRVA_any": {
+          "hash_one": {
+            "all": {
+              "sample_weight": 113,
+              "percent_selected": 1.7389966143428748
+            },
+            "admission": {
+              "sample_weight": 111,
+              "percent_selected": 1.7082179132040627
+            },
+            "delivery": {
+              "sample_weight": 2,
+              "percent_selected": 0.030778701138811943
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Hasher_write": {
+            "all": {
+              "sample_weight": 65,
+              "percent_selected": 1.0003077870113881
+            },
+            "admission": {
+              "sample_weight": 65,
+              "percent_selected": 1.0003077870113881
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_insert": {
+            "all": {
+              "sample_weight": 340,
+              "percent_selected": 5.23237919359803
+            },
+            "admission": {
+              "sample_weight": 340,
+              "percent_selected": 5.23237919359803
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_remove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "admission": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "hashing_union": {
+            "all": {
+              "sample_weight": 342,
+              "percent_selected": 5.2631578947368425
+            },
+            "admission": {
+              "sample_weight": 340,
+              "percent_selected": 5.23237919359803
+            },
+            "delivery": {
+              "sample_weight": 2,
+              "percent_selected": 0.030778701138811943
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          }
+        },
+        "physical_leaf": {
+          "hash_one": {
+            "all": {
+              "sample_weight": 52,
+              "percent_selected": 0.8002462296091105
+            },
+            "admission": {
+              "sample_weight": 50,
+              "percent_selected": 0.7694675284702985
+            },
+            "delivery": {
+              "sample_weight": 2,
+              "percent_selected": 0.030778701138811943
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Hasher_write": {
+            "all": {
+              "sample_weight": 61,
+              "percent_selected": 0.9387503847337643
+            },
+            "admission": {
+              "sample_weight": 61,
+              "percent_selected": 0.9387503847337643
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_insert": {
+            "all": {
+              "sample_weight": 221,
+              "percent_selected": 3.4010464758387196
+            },
+            "admission": {
+              "sample_weight": 221,
+              "percent_selected": 3.4010464758387196
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_remove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "admission": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "hashing_union": {
+            "all": {
+              "sample_weight": 334,
+              "percent_selected": 5.140043090181594
+            },
+            "admission": {
+              "sample_weight": 332,
+              "percent_selected": 5.1092643890427825
+            },
+            "delivery": {
+              "sample_weight": 2,
+              "percent_selected": 0.030778701138811943
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          }
+        }
+      }
+    },
+    "singleton": {
+      "selected_sample_weight": 16873,
+      "groups": {
+        "physical_any": {
+          "hash_one": {
+            "all": {
+              "sample_weight": 20,
+              "percent_selected": 0.11853256682273455
+            },
+            "admission": {
+              "sample_weight": 4,
+              "percent_selected": 0.02370651336454691
+            },
+            "delivery": {
+              "sample_weight": 16,
+              "percent_selected": 0.09482605345818763
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Hasher_write": {
+            "all": {
+              "sample_weight": 11,
+              "percent_selected": 0.065192911752504
+            },
+            "admission": {
+              "sample_weight": 3,
+              "percent_selected": 0.017779885023410182
+            },
+            "delivery": {
+              "sample_weight": 8,
+              "percent_selected": 0.04741302672909382
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_insert": {
+            "all": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "admission": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_remove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "admission": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "hashing_union": {
+            "all": {
+              "sample_weight": 38,
+              "percent_selected": 0.22521187696319564
+            },
+            "admission": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "delivery": {
+              "sample_weight": 16,
+              "percent_selected": 0.09482605345818763
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          }
+        },
+        "expanded_perRVA_any": {
+          "hash_one": {
+            "all": {
+              "sample_weight": 20,
+              "percent_selected": 0.11853256682273455
+            },
+            "admission": {
+              "sample_weight": 4,
+              "percent_selected": 0.02370651336454691
+            },
+            "delivery": {
+              "sample_weight": 16,
+              "percent_selected": 0.09482605345818763
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Hasher_write": {
+            "all": {
+              "sample_weight": 11,
+              "percent_selected": 0.065192911752504
+            },
+            "admission": {
+              "sample_weight": 3,
+              "percent_selected": 0.017779885023410182
+            },
+            "delivery": {
+              "sample_weight": 8,
+              "percent_selected": 0.04741302672909382
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_insert": {
+            "all": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "admission": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_remove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "admission": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "hashing_union": {
+            "all": {
+              "sample_weight": 38,
+              "percent_selected": 0.22521187696319564
+            },
+            "admission": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "delivery": {
+              "sample_weight": 16,
+              "percent_selected": 0.09482605345818763
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          }
+        },
+        "physical_leaf": {
+          "hash_one": {
+            "all": {
+              "sample_weight": 9,
+              "percent_selected": 0.05333965507023054
+            },
+            "admission": {
+              "sample_weight": 1,
+              "percent_selected": 0.005926628341136727
+            },
+            "delivery": {
+              "sample_weight": 8,
+              "percent_selected": 0.04741302672909382
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "Hasher_write": {
+            "all": {
+              "sample_weight": 11,
+              "percent_selected": 0.065192911752504
+            },
+            "admission": {
+              "sample_weight": 3,
+              "percent_selected": 0.017779885023410182
+            },
+            "delivery": {
+              "sample_weight": 8,
+              "percent_selected": 0.04741302672909382
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_insert": {
+            "all": {
+              "sample_weight": 18,
+              "percent_selected": 0.10667931014046109
+            },
+            "admission": {
+              "sample_weight": 18,
+              "percent_selected": 0.10667931014046109
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "HashMap_remove": {
+            "all": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "admission": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "delivery": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          },
+          "hashing_union": {
+            "all": {
+              "sample_weight": 38,
+              "percent_selected": 0.22521187696319564
+            },
+            "admission": {
+              "sample_weight": 22,
+              "percent_selected": 0.130385823505008
+            },
+            "delivery": {
+              "sample_weight": 16,
+              "percent_selected": 0.09482605345818763
+            },
+            "both_contexts": {
+              "sample_weight": 0,
+              "percent_selected": 0.0
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "scope": "437 checkedrejection436/restoration435 plus retained8cfg(test)clientoutcomes",
+  "original_handle": 3701,
+  "exit": 0,
+  "terminal": "DONE",
+  "full_standalone_tests": {
+    "passed": 64,
+    "failed": 0,
+    "existing435_controls": 56,
+    "retained436_independent_controls": 8,
+    "whole_suite_executed_once": true
+  },
+  "formatter": 0,
+  "strict_all_targets_clippy": 0,
+  "source_guard": 0,
+  "inputs": 1434,
+  "source_identity": "SOURCE.json",
+  "physical_modes": "SOURCE.json physical_modes",
+  "unchanged_selected435_inputs": 1432,
+  "engine_projection_byte_identical435": true,
+  "engine_projection": "ENGINE_LOADER.json",
+  "new_cfg_test_only_modules": [
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "deleted_private436_modules": [
+    "benchmarks/matched/src/voteboat_engine/waits.rs",
+    "benchmarks/matched/src/voteboat_engine/waits/tests.rs"
+  ],
+  "production_root_core_actor_payload_dependencies_profiles_capacities_timers_observer_changed": false,
+  "failures_or_retries_this_qualification": [],
+  "immutable_performance_baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "new_performance_artifact_or_rate_claim": false,
+  "history": "436 rejected after measured bothhostbulk/singleton regressions; all raw436 evidence remains separatelyarchived; no representationretuning"
+}

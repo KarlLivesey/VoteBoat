@@ -1,0 +1,1086 @@
+{
+  "scope": "Immutable435 UUID2872CD3B physical sampled native frame intersections only. Mach CPU intervals/wait bias and coalesced aliases/unresolved limits retained; Hasher write is generic, OperationId hash_one exact. Admission and delivery union intersections overlap; do not add shares. Missing physical remove is not proof absent inlined work. No source/capture/tool/binary changes.",
+  "cases": {
+    "bulk": {
+      "cpu_denominator_us": 8564928,
+      "groups": {
+        "hash_one_leaf": {
+          "cpu_us": 249869,
+          "percent_observed_cpu": 2.9173508522196565,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 150510,
+              "percent_observed_cpu": 1.757282723217288,
+              "percent_group": 60.23556343524007
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 99359,
+              "percent_observed_cpu": 1.1600681290023687,
+              "percent_group": 39.76443656475993
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 99359,
+              "percent_observed_cpu": 1.1600681290023687,
+              "percent_group": 39.76443656475993
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 150510,
+              "percent_observed_cpu": 1.757282723217288,
+              "percent_group": 60.23556343524007
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 150510,
+              "percent_group": 60.23556343524007
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 97228,
+              "percent_group": 38.91158967298865
+            },
+            {
+              "function": "<hashbrown::raw::RawTable<(voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>)>>::reserve_rehash::<hashbrown::map::make_hasher<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>::{closure#0}>",
+              "cpu_us": 2131,
+              "percent_group": 0.8528468917712881
+            }
+          ]
+        },
+        "hash_one_any": {
+          "cpu_us": 532599,
+          "percent_observed_cpu": 6.218371012575938,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 304764,
+              "percent_observed_cpu": 3.5582785984890943,
+              "percent_group": 57.222037593010874
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 227835,
+              "percent_observed_cpu": 2.6600924140868436,
+              "percent_group": 42.777962406989126
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 227835,
+              "percent_observed_cpu": 2.6600924140868436,
+              "percent_group": 42.777962406989126
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 304764,
+              "percent_observed_cpu": 3.5582785984890943,
+              "percent_group": 57.222037593010874
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 282730,
+              "percent_group": 53.08496636306114
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 150510,
+              "percent_group": 28.25953484704252
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 97228,
+              "percent_group": 18.25538538375025
+            },
+            {
+              "function": "<hashbrown::raw::RawTable<(voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>)>>::reserve_rehash::<hashbrown::map::make_hasher<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>::{closure#0}>",
+              "cpu_us": 2131,
+              "percent_group": 0.40011340614608737
+            }
+          ]
+        },
+        "Hasher_write_leaf": {
+          "cpu_us": 282730,
+          "percent_observed_cpu": 3.301020160356281,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 154254,
+              "percent_observed_cpu": 1.800995875271806,
+              "percent_group": 54.55876631415131
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 128476,
+              "percent_observed_cpu": 1.5000242850844747,
+              "percent_group": 45.44123368584869
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 128476,
+              "percent_observed_cpu": 1.5000242850844747,
+              "percent_group": 45.44123368584869
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 154254,
+              "percent_observed_cpu": 1.800995875271806,
+              "percent_group": 54.55876631415131
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 282730,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "Hasher_write_any": {
+          "cpu_us": 282730,
+          "percent_observed_cpu": 3.301020160356281,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 154254,
+              "percent_observed_cpu": 1.800995875271806,
+              "percent_group": 54.55876631415131
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 128476,
+              "percent_observed_cpu": 1.5000242850844747,
+              "percent_group": 45.44123368584869
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 128476,
+              "percent_observed_cpu": 1.5000242850844747,
+              "percent_group": 45.44123368584869
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 154254,
+              "percent_observed_cpu": 1.800995875271806,
+              "percent_group": 54.55876631415131
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 282730,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "HashMap_insert_leaf": {
+          "cpu_us": 597007,
+          "percent_observed_cpu": 6.970367993753129,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 597007,
+              "percent_observed_cpu": 6.970367993753129,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 597007,
+              "percent_observed_cpu": 6.970367993753129,
+              "percent_group": 100.0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 597007,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "HashMap_insert_any": {
+          "cpu_us": 826380,
+          "percent_observed_cpu": 9.648417359725617,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 826380,
+              "percent_observed_cpu": 9.648417359725617,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 826380,
+              "percent_observed_cpu": 9.648417359725617,
+              "percent_group": 100.0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 597007,
+              "percent_group": 72.24364094000339
+            },
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 128476,
+              "percent_group": 15.546842856797115
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 98766,
+              "percent_group": 11.951644521890655
+            },
+            {
+              "function": "<hashbrown::raw::RawTable<(voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>)>>::reserve_rehash::<hashbrown::map::make_hasher<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>::{closure#0}>",
+              "cpu_us": 2131,
+              "percent_group": 0.25787168130884097
+            }
+          ]
+        },
+        "HashMap_remove_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "admission_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "HashMap_remove_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "admission_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "hashing_union_leaf": {
+          "cpu_us": 1129606,
+          "percent_observed_cpu": 13.188739006329067,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 304764,
+              "percent_observed_cpu": 3.5582785984890943,
+              "percent_group": 26.979672558396466
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 824842,
+              "percent_observed_cpu": 9.630460407839973,
+              "percent_group": 73.02032744160353
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 824842,
+              "percent_observed_cpu": 9.630460407839973,
+              "percent_group": 73.02032744160353
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 304764,
+              "percent_observed_cpu": 3.5582785984890943,
+              "percent_group": 26.979672558396466
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 597007,
+              "percent_group": 52.85090553697484
+            },
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 282730,
+              "percent_group": 25.02908093618483
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 150510,
+              "percent_group": 13.324114779843592
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 97228,
+              "percent_group": 8.607248899173694
+            },
+            {
+              "function": "<hashbrown::raw::RawTable<(voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>)>>::reserve_rehash::<hashbrown::map::make_hasher<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>::{closure#0}>",
+              "cpu_us": 2131,
+              "percent_group": 0.18864984782304628
+            }
+          ]
+        },
+        "hashing_union_any": {
+          "cpu_us": 1131144,
+          "percent_observed_cpu": 13.20669595821471,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 304764,
+              "percent_observed_cpu": 3.5582785984890943,
+              "percent_group": 26.94298869109503
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 826380,
+              "percent_observed_cpu": 9.648417359725617,
+              "percent_group": 73.05701130890496
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 826380,
+              "percent_observed_cpu": 9.648417359725617,
+              "percent_group": 73.05701130890496
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 304764,
+              "percent_observed_cpu": 3.5582785984890943,
+              "percent_group": 26.94298869109503
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 597007,
+              "percent_group": 52.77904493150297
+            },
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 282730,
+              "percent_group": 24.99504925986435
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 150510,
+              "percent_group": 13.305998175298635
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 98766,
+              "percent_group": 8.731514289957778
+            },
+            {
+              "function": "<hashbrown::raw::RawTable<(voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>)>>::reserve_rehash::<hashbrown::map::make_hasher<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>::{closure#0}>",
+              "cpu_us": 2131,
+              "percent_group": 0.18839334337626332
+            }
+          ]
+        }
+      }
+    },
+    "singleton": {
+      "cpu_denominator_us": 34639599,
+      "groups": {
+        "hash_one_leaf": {
+          "cpu_us": 5589,
+          "percent_observed_cpu": 0.016134713337761213,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 3150,
+              "percent_observed_cpu": 0.00909363875719231,
+              "percent_group": 56.36070853462158
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 2439,
+              "percent_observed_cpu": 0.007041074580568903,
+              "percent_group": 43.63929146537842
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 2439,
+              "percent_observed_cpu": 0.007041074580568903,
+              "percent_group": 43.63929146537842
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 3150,
+              "percent_observed_cpu": 0.00909363875719231,
+              "percent_group": 56.36070853462158
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 3150,
+              "percent_group": 56.36070853462158
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 2439,
+              "percent_group": 43.63929146537842
+            }
+          ]
+        },
+        "hash_one_any": {
+          "cpu_us": 13651,
+          "percent_observed_cpu": 0.03940865481728007,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 6327,
+              "percent_observed_cpu": 0.01826522298944627,
+              "percent_group": 46.34825287524723
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 7324,
+              "percent_observed_cpu": 0.021143431827833802,
+              "percent_group": 53.65174712475277
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 7324,
+              "percent_observed_cpu": 0.021143431827833802,
+              "percent_group": 53.65174712475277
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 6327,
+              "percent_observed_cpu": 0.01826522298944627,
+              "percent_group": 46.34825287524723
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 8062,
+              "percent_group": 59.057944472932384
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 3150,
+              "percent_group": 23.075232583693502
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 2439,
+              "percent_group": 17.86682294337411
+            }
+          ]
+        },
+        "Hasher_write_leaf": {
+          "cpu_us": 8062,
+          "percent_observed_cpu": 0.023273941479518858,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 3177,
+              "percent_observed_cpu": 0.009171584232253959,
+              "percent_group": 39.40709501364426
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 4885,
+              "percent_observed_cpu": 0.0141023572472649,
+              "percent_group": 60.59290498635574
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 4885,
+              "percent_observed_cpu": 0.0141023572472649,
+              "percent_group": 60.59290498635574
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 3177,
+              "percent_observed_cpu": 0.009171584232253959,
+              "percent_group": 39.40709501364426
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 8062,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "Hasher_write_any": {
+          "cpu_us": 8062,
+          "percent_observed_cpu": 0.023273941479518858,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 3177,
+              "percent_observed_cpu": 0.009171584232253959,
+              "percent_group": 39.40709501364426
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 4885,
+              "percent_observed_cpu": 0.0141023572472649,
+              "percent_group": 60.59290498635574
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 4885,
+              "percent_observed_cpu": 0.0141023572472649,
+              "percent_group": 60.59290498635574
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 3177,
+              "percent_observed_cpu": 0.009171584232253959,
+              "percent_group": 39.40709501364426
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 8062,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "HashMap_insert_leaf": {
+          "cpu_us": 1070,
+          "percent_observed_cpu": 0.003088950307998658,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 1070,
+              "percent_observed_cpu": 0.003088950307998658,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 1070,
+              "percent_observed_cpu": 0.003088950307998658,
+              "percent_group": 100.0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 1070,
+              "percent_group": 100.0
+            }
+          ]
+        },
+        "HashMap_insert_any": {
+          "cpu_us": 8394,
+          "percent_observed_cpu": 0.02423238213583246,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 8394,
+              "percent_observed_cpu": 0.02423238213583246,
+              "percent_group": 100.0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 8394,
+              "percent_observed_cpu": 0.02423238213583246,
+              "percent_group": 100.0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 4885,
+              "percent_group": 58.196330712413626
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 2439,
+              "percent_group": 29.056468906361687
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 1070,
+              "percent_group": 12.747200381224685
+            }
+          ]
+        },
+        "HashMap_remove_leaf": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "admission_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "HashMap_remove_any": {
+          "cpu_us": 0,
+          "percent_observed_cpu": 0.0,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "admission_include_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0
+            }
+          },
+          "top_immediate_leaf_callers": []
+        },
+        "hashing_union_leaf": {
+          "cpu_us": 14721,
+          "percent_observed_cpu": 0.04249760512527873,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 6327,
+              "percent_observed_cpu": 0.01826522298944627,
+              "percent_group": 42.979417159160384
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 8394,
+              "percent_observed_cpu": 0.02423238213583246,
+              "percent_group": 57.020582840839616
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 8394,
+              "percent_observed_cpu": 0.02423238213583246,
+              "percent_group": 57.020582840839616
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 6327,
+              "percent_observed_cpu": 0.01826522298944627,
+              "percent_group": 42.979417159160384
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 8062,
+              "percent_group": 54.76530127029414
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 3150,
+              "percent_group": 21.398002853067048
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 2439,
+              "percent_group": 16.56816792337477
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 1070,
+              "percent_group": 7.268527953264044
+            }
+          ]
+        },
+        "hashing_union_any": {
+          "cpu_us": 14721,
+          "percent_observed_cpu": 0.04249760512527873,
+          "physical_contexts_nonadditive": {
+            "Actor_apply_entries": {
+              "cpu_us": 6327,
+              "percent_observed_cpu": 0.01826522298944627,
+              "percent_group": 42.979417159160384
+            },
+            "Actor_deliver_results": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "Actor_include_true_alias": {
+              "cpu_us": 8394,
+              "percent_observed_cpu": 0.02423238213583246,
+              "percent_group": 57.020582840839616
+            },
+            "Actor_include": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            },
+            "admission_include_union": {
+              "cpu_us": 8394,
+              "percent_observed_cpu": 0.02423238213583246,
+              "percent_group": 57.020582840839616
+            },
+            "delivery_apply_or_results_union": {
+              "cpu_us": 6327,
+              "percent_observed_cpu": 0.01826522298944627,
+              "percent_group": 42.979417159160384
+            },
+            "plan_copy": {
+              "cpu_us": 0,
+              "percent_observed_cpu": 0.0,
+              "percent_group": 0.0
+            }
+          },
+          "top_immediate_leaf_callers": [
+            {
+              "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+              "cpu_us": 8062,
+              "percent_group": 54.76530127029414
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::apply_entries",
+              "cpu_us": 3150,
+              "percent_group": 21.398002853067048
+            },
+            {
+              "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+              "cpu_us": 2439,
+              "percent_group": 16.56816792337477
+            },
+            {
+              "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+              "cpu_us": 1070,
+              "percent_group": 7.268527953264044
+            }
+          ]
+        }
+      }
+    }
+  }
+}

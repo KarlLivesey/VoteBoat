@@ -1,0 +1,7 @@
+{
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "path": "benchmarks/matched/src/voteboat_engine.rs",
+  "appended_loader": "\n#[cfg(test)]\nmod client_outcomes;\n",
+  "baseline_sha256": "4d34c1b8f26f87d8ef9aff24b1eff9141bd18079e622c8dfce8e77045a5257d5",
+  "loader_scope": "cfg(test) only; stripping exactsuffix mustrestore byte-identical435 source"
+}

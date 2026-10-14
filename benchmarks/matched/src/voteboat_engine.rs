@@ -2,7 +2,6 @@
 // Copyright (c) 2026 Karl Livesey
 mod actor;
 mod stats;
-mod waits;
 use super::{application::Noop, snapshots::MemorySnapshots, store::MemoryStore, Failure, Settings};
 use crate::{attribution::Attribution, CHANNEL_CAPACITY};
 pub(crate) use stats::Diagnostics;
@@ -19,7 +18,6 @@ use tokio::{
     task::JoinHandle,
 };
 use voteboat::{identity::*, log::*, quorum::*, raft::*};
-use waits::Waits;
 
 type Reply = oneshot::Sender<OperationId>;
 struct Original {
@@ -214,8 +212,8 @@ impl Cluster {
 impl Client {
     pub async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
         let mut entries = Vec::with_capacity(originals.len());
-        let mut waits = Waits::new(originals.len());
-        for (index, &original) in originals.iter().enumerate() {
+        let mut waits = Vec::with_capacity(originals.len());
+        for &original in originals {
             let operation = OperationId::new(original).ok_or("zero original identity")?;
             let (reply, wait) = oneshot::channel();
             entries.push(Original {
@@ -223,12 +221,11 @@ impl Client {
                 bytes: Vec::new(),
                 reply,
             });
-            waits.push(index, wait);
+            waits.push((operation, wait));
         }
         self.0.send(Request { originals: entries }).await?;
-        for (&original, wait) in originals.iter().zip(waits.slots()) {
-            let wait = wait.take().expect("one receiver per original");
-            if wait.await?.get() != original {
+        for (operation, wait) in waits {
+            if wait.await? != operation {
                 return Err("VoteBoat original applied result differs".into());
             }
         }
@@ -470,3 +467,6 @@ mod cancellation_tests {
 
 #[cfg(test)]
 mod client_requests;
+
+#[cfg(test)]
+mod client_outcomes;

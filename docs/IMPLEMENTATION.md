@@ -26,6 +26,15 @@ suite, old benchmark or old profile recapture. Immutable435 artifacts/profiles
 remain the measured baseline after source restoration; next selection follows
 current measured work and explicit ownership contracts. Macro scope is unchanged.
 
+437 restores435 production byte-for-byte with only a trailing cfg(test) outcome
+module loader. [Proof](../validation/performance/slice437/main/README.md) original3701
+ends0:64 matched tests, formatter/strict all-target checks and1,434 source/mode
+guards. Both unused Waits files/layout replica are removed,8 independent controls
+retained,1,432 other435 inputs unchanged; independent review has no blocker.
+Immutable435 artifacts/profiles remain the measured baseline. No new437 rate,
+prototype win, native-service speedup or macro acceptance is inferred. Publication
+through the full enabled hook follows these checks.
+
 Latest retained source is435 (`5c2390cb`), with qualified both-host20M bulk
 measurements published in`fe7f28c6`: Linux6,546,243→7,061,531 originals/s,
 p99 3.729967→3.289318ms; Mac4,461,961→4,719,331 originals/s,

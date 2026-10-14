@@ -1,0 +1,9 @@
+{
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "unchanged_prior_inputs": 1432,
+  "production_restored_to435": true,
+  "engine_projection_byte_identical": true,
+  "root_library_core_actor_payload_inputs_changed": false,
+  "new_loader_is_cfg_test_only": true,
+  "scope": "source identity reuse only; no baselineperformance/profile rerun; no throughputclaim"
+}

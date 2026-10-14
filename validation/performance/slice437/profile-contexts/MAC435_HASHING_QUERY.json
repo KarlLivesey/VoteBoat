@@ -1,0 +1,9 @@
+{
+  "existing_query_sha256": "b1e4e9b7ea1fd5ac0cb68ec03f16692df4b5d1ccc245ec99dee95f95edd3f988",
+  "inmemory_adapted_query_sha256": "dc6924e8e794deb82b7ae3eceee2bc4ab3458f51b82dda426d3fdee5059cfa05",
+  "source": "validation/performance/hotspot435/mac/current435 rawprofiles+sidecars",
+  "uuid": "2872CD3B-5BC0-3F36-BF69-6E14EC1C82A1",
+  "new_helper_file": false,
+  "recapture": false,
+  "raw_modified": false
+}

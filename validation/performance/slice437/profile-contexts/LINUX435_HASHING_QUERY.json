@@ -1,0 +1,11 @@
+{
+  "existing_query_sha256": "d516365cf25ed4338a7c6d78573e172929c323a68267eb4b378432d33f3c40fa",
+  "inmemory_adapted_query_sha256": "d41a17daf103617f6ab4453bc5de8dc8e07694ba6ac72131790b11707874c54d",
+  "source": "immutable archived435 rawprofiles/currentperRVA addressresponses",
+  "executable_sha256": "6b0309401476870859fc2d7e8e4fe5836c0c5530c0e84fcc81589185940147b3",
+  "recapture": false,
+  "new_helper_file": false,
+  "raw_modified": false,
+  "initial_restricted_predicates_retained": true,
+  "focused_correction": "generic remove::<OperationId> frame shape and actualwrite_u128/Sip13write family, detected by currentaddresslabelaudit"
+}
