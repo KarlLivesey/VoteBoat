@@ -1,0 +1,3 @@
+phase=warmup protocol=Quic mode=offered
+phase=offering operations=3 rate=1 groups=2 leaders=1:1,2:1
+phase=recovery-verification mode=offered

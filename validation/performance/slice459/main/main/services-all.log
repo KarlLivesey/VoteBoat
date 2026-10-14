@@ -1,0 +1,25 @@
+
+running 2 tests
+test three_quic_service_processes_retry_replace_leader_and_recover_native_files ... FAILED
+test three_service_processes_retry_replace_leader_and_recover_native_files ... FAILED
+
+failures:
+
+---- three_quic_service_processes_retry_replace_leader_and_recover_native_files stdout ----
+
+thread 'three_quic_service_processes_retry_replace_leader_and_recover_native_files' (3579) panicked at tests/counter_service.rs:146:10:
+available independent port block
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- three_service_processes_retry_replace_leader_and_recover_native_files stdout ----
+
+thread 'three_service_processes_retry_replace_leader_and_recover_native_files' (3580) panicked at tests/counter_service.rs:146:10:
+available independent port block
+
+
+failures:
+    three_quic_service_processes_retry_replace_leader_and_recover_native_files
+    three_service_processes_retry_replace_leader_and_recover_native_files
+
+test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 201 filtered out; finished in 0.00s
+

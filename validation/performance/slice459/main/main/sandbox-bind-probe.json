@@ -1,0 +1,15 @@
+{
+  "first_probe": "Socket construction itself raisedPermissionError1 outside first try; raw tool error retained. Corrected observation encloses construction and bind.",
+  "results": [
+    {
+      "kind": 1,
+      "errno": 1,
+      "error": "[Errno 1] Operation not permitted"
+    },
+    {
+      "kind": 2,
+      "errno": 1,
+      "error": "[Errno 1] Operation not permitted"
+    }
+  ]
+}

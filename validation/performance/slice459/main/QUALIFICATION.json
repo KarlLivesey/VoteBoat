@@ -1,0 +1,27 @@
+{
+  "initial_original_handle": 18336,
+  "initial_exit": 101,
+  "initial_passed": {
+    "log_all": 46,
+    "raft_compact_all": 1,
+    "log_store_all": 19,
+    "providers_all": 41,
+    "snapshot_all": 27,
+    "log_core": 46,
+    "raft_compact_core": 1,
+    "log_store_core": 0,
+    "providers_core": 26,
+    "snapshot_core": 12
+  },
+  "initial_services": "Both fail before workload: socket construction EPERM1, independent TCP/UDP probe confirms; original failures retained.",
+  "resume_original_handle": 52714,
+  "resume_exit": 0,
+  "resume_passed": {
+    "actual_tcp_quic_three_service_retry_replacement_native_recovery": 2,
+    "matched": 70,
+    "full_enabled_hook": 0
+  },
+  "format_and_clippy": "zero; root four profiles plus standalone checks actually run",
+  "independent_review": "Read-only review426 finds no blocker; no data/ownership/cache/API/format changes; immutable plain history permits exact charge; existing tie control and new exhaustive boundaries/trimmed overlay checked.",
+  "performance": "Not measured; no win/retention/acceptance claim. Fresh asserted artifacts and paired both-host comparisons remain required."
+}

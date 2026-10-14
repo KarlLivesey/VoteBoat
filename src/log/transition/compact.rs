@@ -135,17 +135,20 @@ fn retained_after(
     removed: usize,
     left: usize,
 ) -> Option<usize> {
-    let removed_bytes = removed
-        .checked_mul(size_of::<LogEntry>())
-        .and_then(|bytes| {
-            view.entries().take(removed).try_fold(bytes, |sum, entry| {
-                sum.checked_add(entry.retained_payload_bytes())
-            })
-        });
-    if let Some(bytes) = retained.and_then(|bytes| bytes.checked_sub(removed_bytes?)) {
-        return Some(bytes);
+    if retained.is_some() && removed <= left {
+        let removed_bytes = removed
+            .checked_mul(size_of::<LogEntry>())
+            .and_then(|bytes| {
+                view.entries().take(removed).try_fold(bytes, |sum, entry| {
+                    sum.checked_add(entry.retained_payload_bytes())
+                })
+            });
+        if let Some(bytes) = retained.and_then(|bytes| bytes.checked_sub(removed_bytes?)) {
+            return Some(bytes);
+        }
     }
-    // Trimming can turn a previous accounting overflow into a representable charge.
+    // Count the smaller surviving range directly. Trimming can also turn a
+    // previous accounting overflow into a representable charge.
     view.entries()
         .skip(removed)
         .try_fold(left.checked_mul(size_of::<LogEntry>())?, |sum, entry| {

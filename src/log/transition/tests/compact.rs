@@ -2,6 +2,8 @@
 // Copyright (c) 2026 Karl Livesey
 use super::*;
 
+mod smaller;
+
 pub(super) fn compact(state: &GroupLog, index: u64) -> LogUpdate {
     let mut change = update(state, state.hard_state.term, state.commit_index, None);
     change.hard_state = state.hard_state;

@@ -1,0 +1,53 @@
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 26 tests
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test cases::command_bytes::construction_reads_and_default_expose_exact_content ... ok
+test cases::command_bytes::every_retained_clone_is_charged_without_source_spare_capacity ... ok
+test cases::command_bytes::independent_content_and_complete_entry_fields_determine_equality ... ok
+test cases::command_bytes::shared_clone_survives_source_drop_and_replacement_is_independent ... ok
+test cases::default_errors::checkpoint_default_is_object_safe_and_preserves_raw_provider_error_outcomes ... ok
+test cases::default_errors::default_comparison_never_turns_provider_errors_into_a_mismatch ... ok
+test cases::entry_clone::clone_from_matches_derived_replacement_and_independent_ownership ... ok
+test cases::entry_clone::fieldwise_clone_matches_independent_derived_top_level_for_every_payload ... ok
+test cases::entry_equality::converted_spare_capacity_and_every_command_field_follow_content_equality ... ok
+test cases::entry_equality::full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries ... ok
+test cases::entry_equality::generated_entries_match_independent_tuple_equality_in_both_directions ... ok
+test cases::matches::default_is_object_safe_and_preserves_complete_snapshot_and_configuration_equality ... ok
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+
+test result: ok. 26 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+
+running 12 tests
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test durable_pin_switch_conformance_with_host_provider ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test log_match::binding_precedes_comparison_and_comparison_errors_precede_snapshot_work ... ok
+test log_match::snapshot_install_verification_keeps_the_full_arbitrary_state_method ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

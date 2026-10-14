@@ -1,0 +1,14 @@
+{
+  "profile_source_commit": "7a99ae5e3b8452f9d0f448f8edfb2500774c6ba8",
+  "folded_source": "validation/performance/hotspot455/linux/symbolication/bulk-symbolicated/full-inline.folded.gz",
+  "sha256": "6b7f8fdad7eee31b67a6cc6f5de00809b13370aa41c722c4bc2f54fa77ee6d7f",
+  "selected_samples": 8395,
+  "retained_payload_bytes_contexts": {
+    "compaction_retained_after": 131,
+    "append_summary": 166,
+    "outbound_message_cost": 65
+  },
+  "units": "Saved on-CPU sample weights, whole launch; not elapsed CPU microseconds or only throughput window. Contexts selected here are disjoint by explicit precedence; all broader profile quality limitations remain.",
+  "bulk_lost_chunks": 5,
+  "unmeasured": "No prediction of removed CPU share, candidate rate or cross-host benefit."
+}

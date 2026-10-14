@@ -1,0 +1,51 @@
+
+running 46 tests
+test log::command_bytes::tests::current_and_legacy_representation_layouts_are_diagnostic_only ... ok
+test log::command_bytes::tests::empty_values_normalize_without_backing_or_charge ... ok
+test log::command_bytes::tests::every_nonempty_retained_clone_is_charged_without_sharing_discount ... ok
+test log::command_bytes::tests::historical_checkpoint_command_at_batch_limit_decodes_and_recovers_unchanged ... ok
+test log::command_bytes::tests::independent_buffers_compare_full_contents_and_all_original_fields ... ok
+test log::command_bytes::tests::retained_charge_includes_requested_allocation_alignment_padding ... ok
+test log::command_bytes::tests::shared_content_survives_other_owners_and_mutable_copies_are_independent ... ok
+test log::comparison::tests::certified_append_and_compaction_compare_only_unverified_survivors ... ok
+test log::comparison::tests::empty_nonoverlap_and_overflowed_bounds_never_grant_skipped_entries ... ok
+test log::comparison::tests::every_header_field_stays_exact_and_false_clears_the_previous_interval ... ok
+test log::comparison::tests::false_tail_and_uncertified_versions_clear_or_refuse_cached_evidence ... ok
+test log::comparison::tests::fresh_and_alternating_owners_never_reuse_another_mutation_domain ... ok
+test log::comparison::tests::reference_oracle_detects_test_only_violation_of_private_mutation_ownership - should panic ... ok
+test log::owned::tests::checkpoint::failed_owner_changes_lineage_and_arbitrary_same_revision_mutations_remain_visible ... ok
+test log::owned::tests::checkpoint::genuine_core_and_owned_plans_preserve_append_compact_and_metadata_but_reset_restart ... ok
+test log::owned::tests::compact::compaction_batch_is_atomic_and_retains_surviving_payload_allocation ... ok
+test log::owned::tests::incoming::invalid_later_owned_unit_never_installs_an_earlier_moved_append ... ok
+test log::owned::tests::incoming::owned_input_moves_new_payload_after_whole_batch_admission ... ok
+test log::owned::tests::revision_exhaustion_after_an_earlier_valid_unit_has_no_partial_progress ... ok
+test log::owned::tests::stale_later_private_summary_is_refused_before_any_canonical_install ... ok
+test log::transition::tests::compact::compact_plan_rejects_stale_summary_predecessor_and_altered_reference ... ok
+test log::transition::tests::compact::compaction_preserves_surviving_payloads_origin_and_exact_charge ... ok
+test log::transition::tests::compact::immutable_command_shape_compacts_and_overflow_charge_recomputes_remaining_slice ... ok
+test log::transition::tests::compact::smaller::every_trim_boundary_preserves_exact_charge_with_known_or_overflowed_total ... ok
+test log::transition::tests::compact::smaller::repeated_trim_of_base_and_unpublished_tail_matches_materialized_oracle ... ok
+test log::transition::tests::compact::snapshot_boundary_ballot_commit_and_overflow_errors_match_full_oracle ... ok
+test log::transition::tests::compact::trimmed_overlay_terms_materialization_and_configured_fallback_are_exact ... ok
+test log::transition::tests::configured::changed_ballots_use_accepted_electorate_and_full_fallback ... ok
+test log::transition::tests::configured::configured_delta_preserves_old_payload_and_checkpoint_allocations ... ok
+test log::transition::tests::configured::configured_limits_stale_versions_and_exhaustion_keep_original_refusals ... ok
+test log::transition::tests::configured::configured_matching_checkpoint_retains_full_membership_validator ... ok
+test log::transition::tests::configured::configured_overlay_tail_supports_unpublished_deltas_and_full_ballot_fallback ... ok
+test log::transition::tests::configured::configured_replacement_configuration_and_snapshot_keep_full_fallback ... ok
+test log::transition::tests::configured::stable_joint_final_and_compacted_histories_match_original_validator ... ok
+test log::transition::tests::incoming::copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation ... ok
+test log::transition::tests::incoming::owned_append_moves_new_input_and_retains_canonical_prefix_and_exact_charge ... ok
+test log::transition::tests::incoming::owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_payload_changes ... ok
+test log::transition::tests::incoming::owned_preparation_rejects_stale_predecessor_without_installation ... ok
+test log::transition::tests::incoming::owned_validation_and_terms_match_borrowed_oracle_for_valid_invalid_and_compact_updates ... ok
+test log::transition::tests::oracle::checked_index_and_revision_exhaustion_matches_fallback_without_arithmetic_panic ... ok
+test log::transition::tests::oracle::configuration_replacement_fall_back_and_plain_matching_snapshot_uses_compact ... ok
+test log::transition::tests::oracle::finite_plain_ballot_commit_suffix_and_budget_cases_match_original_validator ... ok
+test log::transition::tests::oracle::retained_historical_ballot_origin_and_new_votes_match_original_validator ... ok
+test log::transition::tests::overlay::virtual_accepted_prefix_and_tail_preserve_multiple_unpublished_updates ... ok
+test log::transition::tests::plain_install_keeps_old_payloads_and_normalizes_only_new_allocations ... ok
+test log::transition::tests::stale_summary_or_wrong_install_payload_and_predecessor_cannot_mutate_log ... ok
+
+test result: ok. 46 passed; 0 failed; 0 ignored; 0 measured; 290 filtered out; finished in 0.01s
+
