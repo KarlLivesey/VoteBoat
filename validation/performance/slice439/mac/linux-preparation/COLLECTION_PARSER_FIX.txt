@@ -1,0 +1,1 @@
+Initialmetadata collector asserted contiguous passed/failed/filtered words; Rust inserts ignored/measured counts betweenfailed andfiltered. Originalqualified33848 remains0/DONE, no functional failures orretests. Match bothcanonical substrings; initialmetadata failure/rawscript retained.

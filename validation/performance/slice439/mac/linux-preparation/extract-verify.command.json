@@ -1,0 +1,1 @@
+["ssh", "karllivesey@192.168.192.76", "mkdir '/tmp/voteboat-mac439-75f6093-bYVQBW/source' && tar -xpf '/tmp/voteboat-mac439-75f6093-bYVQBW/source.tar' -C '/tmp/voteboat-mac439-75f6093-bYVQBW/source' && /usr/bin/python3 '/tmp/voteboat-mac439-75f6093-bYVQBW/verify-source.py'"]

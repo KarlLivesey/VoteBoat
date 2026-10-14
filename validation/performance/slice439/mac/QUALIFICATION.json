@@ -1,0 +1,20 @@
+{
+  "commit": "75f6093f9f988f6c5c27cb94fa4f110e36acfab3",
+  "source_inputs": 1437,
+  "actual_reply_tests": 8,
+  "failed": 0,
+  "filtered": 56,
+  "matched_fmt": 0,
+  "matched_strict_alltargets": 0,
+  "source_hash_fullmodes_beforeafter": true,
+  "exact435Actor_and_engine_projection": true,
+  "435root_unaffectedoldcontrols_plus437client8_reused_exactly": true,
+  "same435and437compiler_tool_protoc": true,
+  "originalSSH": 33848,
+  "actual_terminal_tool": "315c35",
+  "actual_terminal_exit": 0,
+  "stage": "DONE",
+  "new_performance_artifact_or_rate_claim": false,
+  "failures_or_retries": [],
+  "capacity_diagnostics": "CAPACITY_DIAGNOSTICS.txt; stdavailableinsertioncapacity, notphysicalbucket/RSS/performancecause"
+}

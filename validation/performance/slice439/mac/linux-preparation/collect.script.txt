@@ -1,0 +1,12 @@
+from pathlib import Path
+import json,tarfile
+j=Path('/tmp/voteboat-mac439-75f6093-bYVQBW');assert(j/'STATUS').read_text().strip()=='0'and(j/'STAGE').read_text().strip()=='DONE'
+for name in['reuse_preflight','replies','matched_fmt','matched_strict','final_guards']:assert(j/'logs'/f'{name}.exit').read_text().strip()=='0',name
+log=(j/'logs/replies.log').read_text();assert'8 passed; 0 failed'in log and'56 filtered out'in log
+capacity=[line for line in log.splitlines()if any(term in line for term in['available','capacity','churn','scope='])]
+(j/'CAPACITY_DIAGNOSTICS.txt').write_text('\n'.join(capacity)+'\n')
+q={'commit':(j/'REQUIRED_COMMIT').read_text().strip(),'source_inputs':1437,'actual_reply_tests':8,'failed':0,'filtered':56,'matched_fmt':0,'matched_strict_alltargets':0,'source_hash_fullmodes_beforeafter':True,'exact435Actor_and_engine_projection':True,'435root_unaffectedoldcontrols_plus437client8_reused_exactly':True,'same435and437compiler_tool_protoc':True,'originalSSH':33848,'actual_terminal_tool':'315c35','actual_terminal_exit':0,'stage':'DONE','new_performance_artifact_or_rate_claim':False,'failures_or_retries':[],'capacity_diagnostics':'CAPACITY_DIAGNOSTICS.txt; stdavailableinsertioncapacity, notphysicalbucket/RSS/performancecause'}
+(j/'QUALIFICATION.json').write_text(json.dumps(q,indent=2)+'\n');files=[p for p in j.rglob('*')if p.is_file()and p.relative_to(j).parts[0]not in{'source','target-matched-checks','test-tmp','__pycache__'}and p.name not in{'source.tar','qualification.tgz'}and'__pycache__'not in p.parts]
+with tarfile.open(j/'qualification.tgz','w:gz')as t:
+ for p in sorted(files):assert not p.is_symlink();t.add(p,arcname=str(p.relative_to(j)),recursive=False)
+print(json.dumps(q));print('capacityactual',capacity)

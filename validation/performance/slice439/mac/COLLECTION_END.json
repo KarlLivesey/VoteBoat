@@ -1,0 +1,16 @@
+{
+  "qualification_original": 33848,
+  "qualification_actual_terminal_tool": "315c35",
+  "actual_exit": 0,
+  "initial_metadata_collection_original": 19057,
+  "initial_metadata_actual_terminal_tool": "143569",
+  "initial_metadata_exit": 1,
+  "actual_cause": "Rustsummary ignored/measured counts breakcontiguouspassed/failed/filtered words",
+  "focused_package_retry_original": 5588,
+  "focused_actual_terminal_tool": "20cefe",
+  "focused_package_exit": 0,
+  "no_tests_fmt_strict_or_build_rerun": true,
+  "transport_sha256": "efa306a88545d680d3b2e9eacabffd676dde9ec3e26b097f3a90a010ff4c6f6b",
+  "sourcearchive_sha256": "5d84a300d011c3b326638f5000bf16e1469a906a640e2db7ee83daa89d188451",
+  "allcopies_and_jobs_ended": true
+}

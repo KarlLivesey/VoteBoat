@@ -1,0 +1,1 @@
+["scp", "target/p9/mac439/source.tar", "target/p9/mac439/SOURCE.json", "target/p9/mac439/source.sha256", "target/p9/mac439/ROOT_REUSE.json", "target/p9/mac439/REQUIRED_COMMIT", "target/p9/mac439/SCHEMA.md", "target/p9/mac439/run.sh", "target/p9/mac439/verify-source.py", "karllivesey@192.168.192.76:/tmp/voteboat-mac439-75f6093-bYVQBW/"]
