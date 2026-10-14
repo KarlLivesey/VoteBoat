@@ -1,0 +1,14 @@
+448 is rejected: all three Mac bulk rates regress; Linux also regresses in every paired bulk and singleton rate trial. No variants were retuned or cases repeated. Full P9 acceptance remains incomplete.
+
+| Mac median | 446 OFF originals/s | 448 OFF originals/s | 446 p99 ms | 448 p99 ms | 448 ON originals/s / p99 ms | OpenRaft originals/s / p99 ms |
+|---|---:|---:|---:|---:|---:|---:|
+| bulk | 6,047,999.244 | 5,933,475.164 | 3.455500 | 3.582542 | 5,881,861.955 / 3.546916 | 2,188,070.026 / 9.549584 |
+| singleton | 64,211.845 | 63,940.191 | 0.030041 | 0.030125 | 59,227.239 / 0.031000 | 11,035.598 / 0.124375 |
+
+Bulk OFF rate ratios (448/446) are 0.925809, 0.994488, 0.985092; p99 ratios 1.036765, 0.981244, 1.042088. Singleton rate ratios are 1.001010, 0.995769, 1.103719; p99 ratios 0.988836, 1.002796, 0.814518. Singleton baseline trial3 is a retained slow tail (57,854.956 originals/s, p99 0.037292ms); the mixed singleton data does not establish a repeatable improvement. All individual rates/p99 values and ON tails remain in READOUT.json and original per-case reports.
+
+All24 process exits and case validation pass. Bulk completes19,988,480 originals/4,997,120 requests plus1,024 warmups, frontiers19,989,505 on all three replicas. Singleton completes1,048,576 originals/requests plus1,024 warmups, frontiers1,049,601. Active maintenance is retained: candidate bulk ~3,900–3,902 checkpoints per replica and follower catch-up snapshot installs; logical peaks22144 retained entries,24 peerqueue,4050 clientqueue. Singleton209 checkpoints per replica,6000 peak retained,3 peerqueue,1 clientqueue. These logical counts do not measure physical RSS/debt; no offered-load refusal study was performed. Attribution is inclusive elapsed wall time with overlapping scopes, not CPU time.
+
+Fresh grouped-channel development layouts (mac448 logs) show Group224/MutexGroup240/Slot48 bytes; these are not release layouts or RSS. They do not establish an allocation or contention cause. Timer ends after all client joins before flattening/sorting, follower verification and shutdown. Framework volatile results are separate from native disk/network tests and full acceptance.
+
+Original combined SSH57752/PID75249 started13:36:34UTC; bulk ended0 at13:37:36, singleton/whole controller ended0 at13:44:55. Status-only SSH29688 observed DONE and original PID gone; its ps exit1 was expected after termination. Summary35878 ended0. Postprocess64778 failed1 on upstream diagnostics=null; this actual error is retained in postprocess-attempt1.txt. Focused metadata correction69150 ended0; no workloads/guards repeated. Copy9606 ended0. Every initial setup payload remains byteidentical and is covered by SETUP_ORIGINAL.sha256; current archive has SHA256SUMS. No binaries/build trees or generated states are archived.

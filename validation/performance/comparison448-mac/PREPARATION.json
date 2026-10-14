@@ -1,0 +1,24 @@
+{
+  "status": "PUBLISHED_WAIT_ACTUAL_MAC78_FRESH_ARTIFACTS",
+  "candidate_commit": "8186d4fb7aac01d67aa83b2a3048a3f9bb95fe34",
+  "baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "baseline_job": "/tmp/voteboat-mac446-6c7f09b-pTKRWg",
+  "baseline_exe_sha256": "244f9ce1623e03e5bc9a2277b4afd22f48bade3b9a6505364d69fed5a78825f9",
+  "baseline_UUID": "663BBAB1-AE48-3165-A8C3-8E9252D06BAA",
+  "baseline_source_inputs": 1439,
+  "baseline_config_sha256": "342b4dcf5693e99a02a44bb5047121601aee5ab9357edd05f0008b5e932daeb7",
+  "baseline_extracted_from": "validation/performance/comparison446-mac/CONFIG_PAIR.mac.json candidate446 (not oldbaseline435)",
+  "baseline_record_scope": "actual446 source/locks/compiler/originalcopy4freshfalse/dSYM/releaseoracle/archive provenance retained; candidate must qualify fresh beforeconfig",
+  "current_missing_module_controls": [
+    "missing_reply_module",
+    "missing_reply_tests"
+  ],
+  "unchanged_13controls": "reuse oldsealedpredicate/hash proof only; no rerun or newframework",
+  "phase_checker_sha256": "a584d3df73a342494b4bb1400d904225132b54b82d1384d09acae665eacfb7b5",
+  "rotation_cells": "446OFF/448OFF/448ON/OpenRaft;3rotating bulk20Mactual19988480+1024 then singleton1048576+1024; timerafterjoins beforelatencysort/verification/shutdown",
+  "source_settings": "onegroup3voters/empty/volatile/inprocess/clientruntime1server16/maintenance+envelopes+capacity+peroriginaloutcomesunchanged",
+  "syntax_checks": 7,
+  "no_remote_source_copy_build_test_timing": true,
+  "actual_unpublished_guard_refusal_exit": 1,
+  "candidate_job": "/tmp/voteboat-mac448-8186d4f-sivzDi"
+}

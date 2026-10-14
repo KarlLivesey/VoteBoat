@@ -1,0 +1,22 @@
+{
+  "original_ssh_handle": 57752,
+  "remote_pid": 75249,
+  "start_utc": "2026-10-14T13:36:34Z",
+  "bulk_end_utc": "2026-10-14T13:37:36Z",
+  "bulk_exit": 0,
+  "singleton_end_utc": "2026-10-14T13:44:55Z",
+  "singleton_exit": 0,
+  "whole_terminal_chunk": "4fa673",
+  "whole_exit": 0,
+  "status_only_29688": {
+    "chunk": "d0f5d8",
+    "exit": 1,
+    "stdout": "stage=DONE",
+    "reason": "ps original PID absent after actual termination"
+  },
+  "original_summary": 35878,
+  "failed_metadata_postprocess": 64778,
+  "corrected_metadata_postprocess": 69150,
+  "raw_copy": 9606,
+  "no_workload_repeats": true
+}

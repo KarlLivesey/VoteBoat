@@ -60,17 +60,12 @@ OpenRaft's result stream consumes those individual receivers. VoteBoat additiona
 uses its operation-ID pending map, while upstream indexes responders by log position.
 Removing results is not parity. Any cheaper ownership structure must preserve exact
 IDs, partial-prefix outcomes, failure/cancellation and the original completion boundary.
-448's private VoteBoat host groups allocation for per-original completion channels:
-each original still has its own sender, receiver Future, value, liveness flags and
-waker. One shared Arc/mutex group provides four inline slot states; widths above4
-use overflow storage, and width0 allocates no group. Notifications remain immediate
-after unlocking, with independent cancellation/closed/error outcomes and the same
-input-order waits, full128-bit receipt checks and per-original Tokio cooperative
-budget. OpenRaft retains its pinned Tokio oneshot allocation per original. This is
-an allocation/ownership difference, not removal or aggregation of original outcomes.
-Larger singleton groups, mutex/refcount contention and retention until the last
-endpoint/factory Drop are explicit tradeoffs; qualification alone establishes no
-speedup. Keep this disclosure in fresh source/artifact and paired measurements.
+448 experimentally shared backing allocation across independent per-original
+channels. It regressed every bulk rate trial on Linux and Mac and was rejected
+in449; the retained446 path uses pinned Tokio oneshots per original. Keep the
+[448 Linux](../../validation/performance/comparison448/linux/README.md) and
+[Mac](../../validation/performance/comparison448-mac/MEASUREMENTS.md) raw results
+and its separate artifact/representation disclosure when examining that experiment.
 
 Election/scheduling, operation identity and engine-owned application-worker choices
 are recorded engine differences; existing features are preserved.

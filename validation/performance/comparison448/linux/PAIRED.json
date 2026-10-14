@@ -1,0 +1,323 @@
+{
+  "cell": "bulk",
+  "cases": 12,
+  "failures": [],
+  "median_variants": {
+    "baseline": {
+      "rates": [
+        7897857.462966526,
+        8282390.8501366405,
+        7712662.275236451
+      ],
+      "median_completed_originals_per_second": 7897857.462966526,
+      "median_request_p50_ms": 2.05512,
+      "median_request_p99_ms": 3.010805
+    },
+    "candidate": {
+      "rates": [
+        7686264.9122994235,
+        7307421.807631296,
+        7610472.519438035
+      ],
+      "median_completed_originals_per_second": 7610472.519438035,
+      "median_request_p50_ms": 2.120603,
+      "median_request_p99_ms": 3.127274
+    },
+    "on": {
+      "rates": [
+        7414809.140277332,
+        7291279.792196396,
+        7636324.997628739
+      ],
+      "median_completed_originals_per_second": 7414809.140277332,
+      "median_request_p50_ms": 2.186627,
+      "median_request_p99_ms": 3.070257
+    },
+    "openraft": {
+      "rates": [
+        3577642.9608182437,
+        3504794.223133596,
+        3573569.619872609
+      ],
+      "median_completed_originals_per_second": 3573569.619872609,
+      "median_request_p50_ms": 4.582037,
+      "median_request_p99_ms": 6.472407
+    }
+  },
+  "paired_candidate_OFF_rate_ratios": [
+    0.9732088668782298,
+    0.8822841061057557,
+    0.9867503914794087
+  ],
+  "paired_candidate_OFF_p99_ratios": [
+    0.9495334304280749,
+    1.1636933415930928,
+    0.9655167516526889
+  ],
+  "paired_observer_ON_to_candidate_OFF_rate_ratios": [
+    0.9646830059698159,
+    0.9977910108572023,
+    1.0033969609803695
+  ],
+  "paired_observer_ON_to_candidate_OFF_p99_ratios": [
+    1.0739445093498807,
+    1.0489250136347952,
+    0.935487264627276
+  ],
+  "trial_tails_ms": {
+    "baseline": [
+      3.010805,
+      2.831398,
+      3.238964
+    ],
+    "candidate": [
+      2.85886,
+      3.294879,
+      3.127274
+    ],
+    "on": [
+      3.070257,
+      3.456081,
+      2.925525
+    ],
+    "openraft": [
+      6.421001,
+      6.472407,
+      6.575121
+    ]
+  },
+  "per_case_completed_counts": [
+    {
+      "case": "baseline-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "candidate-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "on-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "openraft-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "baseline-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "candidate-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "on-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "openraft-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "baseline-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "candidate-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "on-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "case": "openraft-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    }
+  ],
+  "maintenance_logical_ranges": {
+    "baseline": {
+      "retained_entries": {
+        "minimum": 1000,
+        "maximum": 5204
+      },
+      "peak_retained_entries": {
+        "minimum": 8008,
+        "maximum": 22376
+      },
+      "peak_peer_queue": {
+        "minimum": 11,
+        "maximum": 35
+      },
+      "peak_client_queue": {
+        "minimum": 0,
+        "maximum": 4096
+      },
+      "persistence_units": {
+        "minimum": 22089,
+        "maximum": 64767
+      },
+      "checkpoint_count": {
+        "minimum": 3859,
+        "maximum": 3882
+      },
+      "snapshot_installs": {
+        "minimum": 0,
+        "maximum": 1751
+      },
+      "maximum_proposal_width": {
+        "minimum": 0,
+        "maximum": 16384
+      }
+    },
+    "candidate": {
+      "retained_entries": {
+        "minimum": 1176,
+        "maximum": 5700
+      },
+      "peak_retained_entries": {
+        "minimum": 8020,
+        "maximum": 22272
+      },
+      "peak_peer_queue": {
+        "minimum": 22,
+        "maximum": 45
+      },
+      "peak_client_queue": {
+        "minimum": 0,
+        "maximum": 4093
+      },
+      "persistence_units": {
+        "minimum": 21487,
+        "maximum": 65299
+      },
+      "checkpoint_count": {
+        "minimum": 3875,
+        "maximum": 3895
+      },
+      "snapshot_installs": {
+        "minimum": 0,
+        "maximum": 1680
+      },
+      "maximum_proposal_width": {
+        "minimum": 0,
+        "maximum": 16384
+      }
+    },
+    "on": {
+      "retained_entries": {
+        "minimum": 1044,
+        "maximum": 4808
+      },
+      "peak_retained_entries": {
+        "minimum": 8016,
+        "maximum": 22096
+      },
+      "peak_peer_queue": {
+        "minimum": 16,
+        "maximum": 125
+      },
+      "peak_client_queue": {
+        "minimum": 0,
+        "maximum": 4093
+      },
+      "persistence_units": {
+        "minimum": 22119,
+        "maximum": 65633
+      },
+      "checkpoint_count": {
+        "minimum": 3871,
+        "maximum": 3893
+      },
+      "snapshot_installs": {
+        "minimum": 0,
+        "maximum": 1548
+      },
+      "maximum_proposal_width": {
+        "minimum": 0,
+        "maximum": 16384
+      }
+    }
+  },
+  "decision": "REJECT448: every Linux bulk/singleton rate pair regresses; Mac three bulk pairs also regress. Root independently confirmed rejection. No variants or tuning.",
+  "limits": [
+    "Two framework cells only; not full seven-cell healthy-margin acceptance or native durability/P8/fairness/headroom.",
+    "Logical retained/queue counts are not physical RSS, byte-memory or maintenance-debt proof. No explicit refusal/RSS counter in this CLI output; all completed outcomes/cleanup guards passed.",
+    "Native owned payload/durable barrier/completion semantics unchanged; harness allocation experiments do not prove native service speed.",
+    "Observer phases are inclusive elapsed wall scopes, nested/overlapping; old SUMMARY leader_on_phases_ms field refers to replica0 attribution, not CPU time.",
+    "All observer rates/tails and shell elapsed/user/system times remain raw; no allocator/mutex causality inferred."
+  ]
+}

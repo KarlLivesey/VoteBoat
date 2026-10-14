@@ -1,0 +1,2 @@
+UUID: 774E1600-D9D4-3117-86C8-427E1782329B (arm64) /private/tmp/voteboat-mac448-8186d4f-sivzDi/artifacts/matched/voteboat-matched-framework
+UUID: 774E1600-D9D4-3117-86C8-427E1782329B (arm64) /private/tmp/voteboat-mac448-8186d4f-sivzDi/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-77ae6ee05ef66363

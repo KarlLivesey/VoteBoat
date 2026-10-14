@@ -1,0 +1,1 @@
+/Users/karllivesey/.cargo/bin/cargo +stable clippy --locked --offline --keep-going --all-targets --manifest-path /tmp/voteboat-mac448-8186d4f-sivzDi/source/benchmarks/matched/Cargo.toml -- -D warnings 

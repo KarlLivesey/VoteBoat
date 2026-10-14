@@ -1,0 +1,19 @@
+{
+  "commit": "8186d4fb7aac01d67aa83b2a3048a3f9bb95fe34",
+  "source_inputs": 1441,
+  "compiled_inputs": 1432,
+  "changed_inputs": [
+    "benchmarks/matched/COMPARISON.md",
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/reply.rs",
+    "benchmarks/matched/src/voteboat_engine/reply/tests.rs"
+  ],
+  "publication_original_handle": 73054,
+  "publication_actual_exit": 0,
+  "source_archive_sha256": "932b17862ffc991a075169b203ebfddbd05e52524a93411836f6003453f290f4",
+  "qualified_physical_modes_preserved_before_guards": true,
+  "functional_checks_reused": true,
+  "fresh_target_absent": true,
+  "profile": "opt3/debug2/packed/assertions+overflow/thinLTO/cgu1; unset flags/wrappers; same within host as446",
+  "build_started": false
+}

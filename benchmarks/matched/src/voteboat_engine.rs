@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
 mod actor;
-mod reply;
 mod stats;
 use super::{application::Noop, snapshots::MemorySnapshots, store::MemoryStore, Failure, Settings};
 use crate::{attribution::Attribution, CHANNEL_CAPACITY};
-#[cfg(test)]
-use reply as oneshot;
 pub(crate) use stats::Diagnostics;
 use std::{
     collections::BTreeMap,
@@ -17,12 +14,12 @@ use std::{
     time::Duration,
 };
 use tokio::{
-    sync::{mpsc, watch},
+    sync::{mpsc, oneshot, watch},
     task::JoinHandle,
 };
 use voteboat::{identity::*, log::*, quorum::*, raft::*};
 
-type Reply = reply::Sender<OperationId>;
+type Reply = oneshot::Sender<OperationId>;
 struct Original {
     operation: OperationId,
     bytes: Vec<u8>,
@@ -216,10 +213,9 @@ impl Client {
     pub async fn write(&self, originals: &[u128]) -> Result<usize, Failure> {
         let mut entries = Vec::with_capacity(originals.len());
         let mut waits = Vec::with_capacity(originals.len());
-        let mut replies = reply::channels(originals.len());
         for &original in originals {
             let operation = OperationId::new(original).ok_or("zero original identity")?;
-            let (reply, wait) = replies.next().expect("one reply pair per original");
+            let (reply, wait) = oneshot::channel();
             entries.push(Original {
                 operation,
                 bytes: Vec::new(),
@@ -227,7 +223,6 @@ impl Client {
             });
             waits.push((operation, wait));
         }
-        drop(replies);
         self.0.send(Request { originals: entries }).await?;
         for (operation, wait) in waits {
             if wait.await? != operation {

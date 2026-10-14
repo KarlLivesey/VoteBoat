@@ -1,0 +1,9 @@
+[
+  {
+    "archive": "RESULTS.json.gz",
+    "original": "RESULTS.json",
+    "original_sha256": "e32cbf12f457cc3b65933902ab4f6ea31d9f28b476c5a447c18de02ca917bf22",
+    "original_bytes": 1108675,
+    "compressed_sha256": "b22e19c52035645c6328d98d99e1371226a1b31a057f1dbf4ef74d2db1d780eb"
+  }
+]

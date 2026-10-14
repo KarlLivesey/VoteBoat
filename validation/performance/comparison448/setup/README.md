@@ -1,0 +1,9 @@
+# Linux448 versus immutable446 prepared comparison
+
+Baseline6c7f09b2 existing fresh ELF e766…34ea/DWP5e69…09d9 versus published4488186d4fb fresh ELF3c22…126f/DWP0488…0789. Full source/artifact/compiler/lock/actual flags/root release cfg/original-copy symbols and physical modes pass actual positive guards. Inventories1439→1441 add only private reply modules; engine and comparison-disclosure common inputs change. No dependency/profile/runtime/payload/upstream configuration/timer/observer changes.
+
+Current3 CLI outputs pass the unchanged checker. Prior negative/rounding controls are reused only by exact checker byte hash; no old refusal reruns or invented outputs. Grouped allocation preserves every per-original sender/value/waker/receiver Future/outcome. Standard original admission gates, partial-prefix errors, full identities and cooperative budget remain; source contract discloses singleton/layout/mutex/refcount/group-retention tradeoffs. No speedup or P9 acceptance follows from setup.
+
+Prepared original launcher `bash target/p9/comparison448/linux-run.sh` executes12 rotating bulk cases then12 singleton cases serially, with no interim analysis/copy/archive. Bulk requested20M/allfour variants actual19,988,480; singleton1,048,576;1024 warmups; same client1/server16/envelopes/active checkpoints and all-client-joins-before-sort/verification/shutdown boundary. Each cell uses3 unchanged variant rotations baselineOFF/candidateOFF/candidateON/OpenRaft. Actual identity/output guards run outside timers. Both hosts setup must END and root must grant JOINT_QUIET before launch. Timing remains unstarted; actual failures/tails must be preserved and never restarted merely for timeout.
+
+SHA256SUMS covers every regular setup file except itself; no nested manifests/symlinks/binaries/build trees. Baseline raw artifacts/qualification are referenced rather than duplicated.

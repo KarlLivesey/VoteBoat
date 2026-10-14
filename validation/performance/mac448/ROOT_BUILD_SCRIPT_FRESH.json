@@ -1,0 +1,35 @@
+{
+  "compiler_artifact": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///tmp/voteboat-mac448-8186d4f-sivzDi/source#voteboat@0.1.0",
+    "manifest_path": "/tmp/voteboat-mac448-8186d4f-sivzDi/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/tmp/voteboat-mac448-8186d4f-sivzDi/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [],
+    "filenames": [
+      "/tmp/voteboat-mac448-8186d4f-sivzDi/target-matched-release/release/build/voteboat-ca0ae4e1fb1ddf12/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "PROFILE_release_invocation": "     Running `CARGO=/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/cargo CARGO_CFG_DEBUG_ASSERTIONS='' CARGO_CFG_FEATURE='' CARGO_CFG_PANIC=unwind CARGO_CFG_TARGET_ABI='' CARGO_CFG_TARGET_ARCH=aarch64 CARGO_CFG_TARGET_ENDIAN=little CARGO_CFG_TARGET_ENV='' CARGO_CFG_TARGET_FAMILY=unix CARGO_CFG_TARGET_FEATURE=aes,crc,dit,dotprod,dpb,dpb2,fcma,fhm,flagm,fp16,frintts,jsconv,lor,lse,neon,paca,pacg,pan,pmuv3,ras,rcpc,rcpc2,rdm,sb,sha2,sha3,ssbs,vh CARGO_CFG_TARGET_HAS_ATOMIC=128,16,32,64,8,ptr CARGO_CFG_TARGET_HAS_ATOMIC_PRIMITIVE_ALIGNMENT=128,16,32,64,8,ptr CARGO_CFG_TARGET_OS=macos CARGO_CFG_TARGET_POINTER_WIDTH=64 CARGO_CFG_TARGET_VENDOR=apple CARGO_CFG_UNIX='' CARGO_ENCODED_RUSTFLAGS='' CARGO_MANIFEST_DIR=/tmp/voteboat-mac448-8186d4f-sivzDi/source CARGO_MANIFEST_PATH=/tmp/voteboat-mac448-8186d4f-sivzDi/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README=README.md CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' DEBUG=true DYLD_FALLBACK_LIBRARY_PATH='/tmp/voteboat-mac448-8186d4f-sivzDi/target-matched-release/release:/tmp/voteboat-mac448-8186d4f-sivzDi/target-matched-release/release/deps:/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib/rustlib/aarch64-apple-darwin/lib:/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/lib:/Users/karllivesey/lib:/usr/local/lib:/usr/lib' HOST=aarch64-apple-darwin NUM_JOBS=2 OPT_LEVEL=3 OUT_DIR=/tmp/voteboat-mac448-8186d4f-sivzDi/target-matched-release/release/build/voteboat-71c6982b4a58668c/out PROFILE=release RUSTC=/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustc RUSTDOC=/Users/karllivesey/.rustup/toolchains/stable-aarch64-apple-darwin/bin/rustdoc TARGET=aarch64-apple-darwin /tmp/voteboat-mac448-8186d4f-sivzDi/target-matched-release/release/build/voteboat-ca0ae4e1fb1ddf12/build-script-build`"
+}

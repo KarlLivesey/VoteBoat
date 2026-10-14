@@ -1,0 +1,25 @@
+{
+  "source": "Committed source export already frozen by matched448-linux; actualpublication73054 proof used, no optional remote guard.",
+  "build": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched448-linux/run.sh"
+  ],
+  "functional": [
+    "bash",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched448-linux/cli-run.sh"
+  ],
+  "prepare_actual_pair": [
+    "python3",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison448/prepare-pair.py",
+    "--baseline-config",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison448/BASELINE_CONFIG.linux.json",
+    "--baseline-job",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched446-linux",
+    "--candidate-job",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched448-linux",
+    "--output",
+    "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison448/CONFIG_PAIR.linux.json"
+  ],
+  "bulk_and_singleton": "After actual current build/CLI/positiveguards/setupEND and JOINT_QUIET grant only; same phase-diagnostic.sh with cells bulk then singleton, no interim analyses.",
+  "timing_allowed": false
+}

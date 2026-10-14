@@ -1,0 +1,1 @@
+Original postprocess SSH64778 terminal bcd416 exit1: TypeError: NoneType object is not iterable at diagnostics iteration. OpenRaft diagnostics=null. Focused metadata-only fix treats absent upstream diagnostics as empty; no workloads or guards repeated.

@@ -1,0 +1,2 @@
+{"archive_sha256": "34e97d2a7003335aed18916d34b432b490631c617e236c0af06e6e70fc1eaaad", "build_rs_present": true, "commit": "8186d4fb7aac01d67aa83b2a3048a3f9bb95fe34", "exact_sha256_and_modes": true, "inputs": 1441, "source_inventory_scope": "Selected committed production/harness source, fixtures, locks, build/config/hooks and contract documents; no builds/WAL states; not a claim every input compiled."}
+exact435 rootfunctional/tool/command receipt reuse before new448 tests; no old tests rerun

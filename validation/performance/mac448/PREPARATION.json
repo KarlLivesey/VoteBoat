@@ -1,0 +1,24 @@
+{
+  "status": "EXACT_PUBLISHED1441_SOURCE_ASSEMBLED",
+  "schema": "validation/performance/slice448/SCHEMA.md",
+  "candidate_commit": "8186d4fb7aac01d67aa83b2a3048a3f9bb95fe34",
+  "expected_tests": 78,
+  "required_new_modules": [
+    "benchmarks/matched/src/voteboat_engine/reply.rs",
+    "benchmarks/matched/src/voteboat_engine/reply/tests.rs"
+  ],
+  "root_scope": "root production/Cargo/dependencies unchanged; reuse exact446 inputs/qualification chain to435 functional and443 nativeexample scope only. Do not rerun unrelated root checks; actual full new standalone suite/fmt/strict. Assemble explicit ROOT_REUSE after publication, retaining historical435 only for functional receipt history.",
+  "functional_template": "target/p9/mac446",
+  "artifact_profile": "fresh opt3/debug2/packed/assertions+overflow/thinLTO/cgu1 flagsunset; fourfresh:false/CargoJSON-vv/rootbuildscript/devvsreleaseoracle/currentdSYM/tool/originalcopy/source/fixture600 guards; threeactual CLI29/4/15",
+  "comparison_baseline_commit": "6c7f09b2c7d14606bc1d4308b83b5a5974f3ab19",
+  "comparison_baseline_job": "/tmp/voteboat-mac446-6c7f09b-pTKRWg",
+  "comparison_baseline_exe_sha256": "244f9ce1623e03e5bc9a2277b4afd22f48bade3b9a6505364d69fed5a78825f9",
+  "comparison_baseline_UUID": "663BBAB1-AE48-3165-A8C3-8E9252D06BAA",
+  "syntax_checks": 4,
+  "unpublished_refusal_exit": 1,
+  "no_remote_copy_test_build_or_timing": true,
+  "root_reuse_template": "ROOT_REUSE.json fromqualified446 with candidatecommitUNSET and current446 evidence hashes; exactcandidate comparison/commit set onlyafterpublished source assembly",
+  "source_inputs": 1441,
+  "legacy_root_mode_inputs": 1404,
+  "supplemental443_root_inputs": 1412
+}

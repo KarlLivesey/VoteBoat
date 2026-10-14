@@ -1,0 +1,1 @@
+["/usr/bin/python3", "/tmp/voteboat-comparison448-T6S644/prepare-pair.py", "--baseline-config", "/tmp/voteboat-comparison448-T6S644/BASELINE_CONFIG.mac.json", "--baseline-job", "/tmp/voteboat-mac446-6c7f09b-pTKRWg", "--candidate-job", "/tmp/voteboat-mac448-8186d4f-sivzDi", "--output", "/tmp/voteboat-comparison448-T6S644/CONFIG_PAIR.mac.json"]
