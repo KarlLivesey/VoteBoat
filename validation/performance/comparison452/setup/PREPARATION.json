@@ -1,0 +1,17 @@
+{
+  "baseline_commit": "d6395be7ec56af68f346a72308e90a20200fb731",
+  "candidate_commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "baseline_config": "actual comparison450 CONFIG_PAIR candidate unchanged",
+  "cells": [
+    "4096/b4 requested20M actual19988480",
+    "1/b1 originals1048576"
+  ],
+  "rotations": 3,
+  "variants": [
+    "baselineOFF",
+    "candidateOFF",
+    "candidateON",
+    "OpenRaft"
+  ],
+  "timing_authorized": false
+}

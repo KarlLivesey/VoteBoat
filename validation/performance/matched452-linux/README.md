@@ -1,0 +1,9 @@
+# Fresh asserted452 Linux framework setup
+
+Published source5201bfeae8f891b8c3ea71aa75717c691a61fd50 exported from exact Git inputs1440, compiled-scope1431. Physical fixture permissions, including seven0600 keys, were restored to the qualified modes before freeze and proved unchanged afterward. Only two private matched files differ from450; actual full70/fmt/strict source scopes are reused, root450 functional scopes remain hash-identical. Publication original22883 actual0/full enabled hook was confirmed by root; no test repetition or optional remote query.
+
+Fresh build original85095 actually terminated0/DONE in1m12s. Actual CargoJSON/vv records prove root library, executable and pinned OpenRaft/bench_minimal fresh:false, plus fresh root buildscript. opt3/debug2/packed/assertions+overflow/thinLTO/codegen1, compiler/protoc/locks and unset flags/wrappers match450 within-host. Release removes only the redundant reference-oracle cfg; normal assertions and overflow checks stay enabled. ELF and DWP original/copy hashes are recorded separately in ARTIFACTS/SYMBOLS.
+
+Setup original9723 actually terminated0. OFF/ON/OpenRaft CLI each completed16384 originals/4096requests/frontiers[17409;3]. ON source-derived29phases/fourscopes/15methods and protected checkpoint gaps passed. These are functional controls, not sustained performance evidence. Current outputs also pass the unchanged paired checker. Immutable baseline is450 ELF70ae8c2751b3c12e697bc93ee9c83bef5f833fe2b00f22cbb3623e31c9c76945; no446 baseline substitution. No failures or timing campaign occurred during this setup.
+
+All files regular; SHA256SUMS includes every regular payload recursively except itself. No nested manifests, fullsource archive, binary/rlib/DWP/buildtrees or WAL states copied. Immutable artifact and original perf-capacity binaries remain at declared ignored paths.

@@ -1,0 +1,3 @@
+Copied exception excerpt from completed tool chunk1deead (not a full reconstructed tool dump):
+FileNotFoundError: [Errno 2] No such file or directory: '/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice452/main/source-final/.githooks/pre-push'
+Actual exit1; no archive writes occurred in that attempt.

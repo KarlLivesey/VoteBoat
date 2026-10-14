@@ -1,0 +1,6 @@
+{
+  "scope": "actual Mac dev current452 future and literal450 source replica; no portable/release/RSS inference",
+  "diagnostic": "scope=actual_current_dev_future_vs_literal450_source_replica unpolled_current_future_bytes=296 unpolled_literal450_future_bytes=304 receiver_bytes=8 old_wait_tuple_bytes=32 receiver_vec_header_bytes=24 old_wait_vec_header_bytes=24",
+  "source": "logs/matched_tests.log",
+  "test": "receiver_only_wait_layout_diagnostic_against_literal450_write"
+}

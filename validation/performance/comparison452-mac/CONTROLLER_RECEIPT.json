@@ -1,0 +1,17 @@
+{
+  "original_ssh": 99649,
+  "pid": 34649,
+  "start_utc": "2026-10-14T15:57:37Z",
+  "bulk_end_utc": "2026-10-14T15:58:38Z",
+  "bulk_exit": 0,
+  "singleton_end_utc": "2026-10-14T16:06:00Z",
+  "singleton_exit": 0,
+  "whole_terminal_chunk": "236ff6",
+  "whole_exit": 0,
+  "summary_package_original_handle": 36480,
+  "summary_package_exit": 0,
+  "copy_original_handle": 7259,
+  "copy_exit": 0,
+  "workload_repeats": 0,
+  "decision": "RETAIN boundedtradeoff, firstMacbulk/singlerate and firstsingletail debt preserved, no uniform gain/full P9 qualification"
+}

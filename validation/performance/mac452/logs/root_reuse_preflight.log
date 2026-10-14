@@ -1,0 +1,2 @@
+{"archive_sha256": "8260496c30d94855a676d2cbea60595b389b81527676b0842c0f94fa4436ff56", "build_rs_present": true, "commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50", "exact_sha256_and_modes": true, "inputs": 1440, "source_inventory_scope": "Selected committed production/harness source, fixtures, locks, build/config/hooks and contract documents; no builds/WAL states; not a claim every input compiled."}
+Exact450 root1438source/mode/tool/command scopes reused; actual new matched70 follows

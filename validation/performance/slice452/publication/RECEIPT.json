@@ -1,0 +1,42 @@
+{
+  "source_commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "observed_HEAD": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "observed_upstream": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "upstream_scope": "Local configured upstream ref after actual successful GitHub push; no extra network query",
+  "original_push_controller": 22883,
+  "actual_push_exit": 0,
+  "enabled_hooksPath": ".githooks",
+  "hook_scope": "Root fmt/four strict configurations plus standalone fmt/strict; actual raw push log retained",
+  "pre_receipt_worktree": "Observed clean in first read-only attempt; this receipt adds untracked evidence",
+  "source_scope": {
+    "selected_inputs": 1440,
+    "before_final_SHA_modes_equal": true,
+    "current_SHA_modes_all_match_frozen_inventory": true,
+    "committed_HEAD_all1440_exact": true,
+    "committed_comparison_scope": "First receipt attempt successfully read Git tar streams and compared HEAD to all checked1440 SHA and baseline450:exact before encountering only a missing duplicate snapshot path; no Git/source mutation intervened. Those passed archive comparisons reused, not repeated.",
+    "baseline450": "d6395be7ec56af68f346a72308e90a20200fb731",
+    "only_changed_paths": [
+      "benchmarks/matched/src/voteboat_engine.rs",
+      "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+    ],
+    "unchanged_selected_inputs": 1438,
+    "source_final_byte_copies": "Only the two changed source files are duplicated in source-final; both SHA/modes exact. Other inputs are retained by full checked SHA/mode inventories.",
+    "SOURCE_sha256": "d3a77ea1b0354e0228e0f450ec4532611704db0165ae94f1da7ecbcf6d94fc63",
+    "qualified_original_runner": 48609,
+    "qualified_matched_controls": 70,
+    "QUALIFICATION_sha256": "e66f471c8ce11c8781672de8597216203c4539458df7a5bcc1db0b3967b85630",
+    "root_inputs_unchanged": true
+  },
+  "earlier_sandbox_git_index_failure": {
+    "evidence": "Parent report; no original local raw supplied",
+    "fact": "Earlier sandbox Git-index access failed; subsequent authorized escalated commit/push reportedly exited0. Actual commit identity and push exit0/raw retained. Original failure detail remains parent conversation and is not fabricated here."
+  },
+  "receipt_preparation_failure": {
+    "tool_chunk": "1deead",
+    "exit": 1,
+    "cause": "Incorrectly assumed source-final duplicated all1440 checked files; it stores only the two changed files. FileNotFoundError for source-final/.githooks/pre-push occurred after all committed/baseline1440 SHA comparisons passed.",
+    "correction": "Metadata/source-copy scope corrected only; current1440 SHA/modes and actual two stored source copies now verified, no source/test/build changes."
+  },
+  "no_new_build_test_benchmark_timing_or_git_mutation": true,
+  "P9_acceptance_not_established": true
+}

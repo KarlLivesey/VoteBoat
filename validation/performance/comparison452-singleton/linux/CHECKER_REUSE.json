@@ -1,0 +1,26 @@
+{
+  "scope": "exact unchanged checker/scripts reused450 currentactualcontrols and originalnegative cases; current452 CLI outputs will be checked, no oldnegative rerun",
+  "actual_driver_sha256": {
+    "phase-diagnostic-check.py": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "phase-diagnostic.sh": "388f3a20a9061df8b6bf213082abd53942c70dfd83678ce9f14f14b97f8d5ce1",
+    "summarize.py": "13eb3858fedb077357b867dc13aadab6658408baf74ed50b72e34a250b8fdc6e"
+  },
+  "prior_reuse_record": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/CHECKER_REUSE.json",
+  "prior_reuse_sha256": "2180124c0e168d374b5da727100a11b8cedb8419a3475f9a246fa6ccd25a3619",
+  "prior_record": {
+    "checker_original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison448/phase-diagnostic-check.py",
+    "checker_original_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "checker_current": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison450/phase-diagnostic-check.py",
+    "checker_current_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+    "unchanged_checker_bytes": true,
+    "prior_checks": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison446/CHECKER_REUSE.json",
+      "sha256": "09d66c86117bb8153244de9c306387ee00da76f8074102697d168c1c35d25cdf"
+    },
+    "prior_rounding_controls": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison446/HISTORICAL_CHECKER_CONTROLS.json",
+      "sha256": "e0eb8c3913e7deaebf84802b3f8ed3468f457e741b27c5010c83beff0c5e3a72"
+    },
+    "reuse_only": "Existing unchanged13checker/rounding controls exacthash reused; actualcurrent450 smallCLI outputs stillmustpass. No old negative reruns."
+  }
+}

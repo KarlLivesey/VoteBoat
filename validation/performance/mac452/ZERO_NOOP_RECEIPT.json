@@ -1,0 +1,11 @@
+{
+  "original_handle": 78115,
+  "terminal_chunk": "21af59",
+  "exit": 0,
+  "stdout": "",
+  "observed_local_REMOTE_after_exit": "absent",
+  "scope": "not treated as source transfer or qualification success; no START/job output or launch marker was observed",
+  "focused_path": "separate freshallocation18380,sourceSCP61237,qualification53307; no suite/build repeated",
+  "actual_source_transfer_exit": 0,
+  "actual_qualification_exit": 0
+}

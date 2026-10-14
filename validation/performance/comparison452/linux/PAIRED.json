@@ -1,0 +1,242 @@
+{
+  "variants": {
+    "baseline": {
+      "rates": [
+        8331295.737589673,
+        6152856.971416708,
+        8118521.088963771
+      ],
+      "median_completed_originals_per_second": 8118521.088963771,
+      "median_request_p50_ms": 1.985198,
+      "median_request_p99_ms": 3.068032
+    },
+    "candidate": {
+      "rates": [
+        8388245.344415941,
+        8161386.7386881,
+        8231366.520504848
+      ],
+      "median_completed_originals_per_second": 8231366.520504848,
+      "median_request_p50_ms": 1.977624,
+      "median_request_p99_ms": 2.804126
+    },
+    "on": {
+      "rates": [
+        8110199.260546603,
+        8220579.498229045,
+        8092971.033260168
+      ],
+      "median_completed_originals_per_second": 8110199.260546603,
+      "median_request_p50_ms": 2.019332,
+      "median_request_p99_ms": 2.812772
+    },
+    "openraft": {
+      "rates": [
+        3660758.5185940084,
+        3455254.941425434,
+        3411519.572387562
+      ],
+      "median_completed_originals_per_second": 3455254.941425434,
+      "median_request_p50_ms": 4.658458,
+      "median_request_p99_ms": 7.391271
+    }
+  },
+  "pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 8331295.737589673,
+      "candidate_originals_per_second": 8388245.344415941,
+      "rate_ratio": 1.0068356242078071,
+      "baseline_p99_ms": 2.606956,
+      "candidate_p99_ms": 2.628416,
+      "p99_ratio": 1.0082318228616056,
+      "on_originals_per_second": 8110199.260546603,
+      "on_p99_ms": 2.812772,
+      "on_vs_candidate_rate_ratio": 0.9668528908665704,
+      "on_vs_candidate_p99_ratio": 1.0701395821665978
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 6152856.971416708,
+      "candidate_originals_per_second": 8161386.7386881,
+      "rate_ratio": 1.3264385596158144,
+      "baseline_p99_ms": 5.135415,
+      "candidate_p99_ms": 2.850072,
+      "p99_ratio": 0.5549837744369248,
+      "on_originals_per_second": 8220579.498229045,
+      "on_p99_ms": 2.764822,
+      "on_vs_candidate_rate_ratio": 1.0072527820866948,
+      "on_vs_candidate_p99_ratio": 0.9700884749578256
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 8118521.088963771,
+      "candidate_originals_per_second": 8231366.520504848,
+      "rate_ratio": 1.0138997522214332,
+      "baseline_p99_ms": 3.068032,
+      "candidate_p99_ms": 2.804126,
+      "p99_ratio": 0.9139819923651383,
+      "on_originals_per_second": 8092971.033260168,
+      "on_p99_ms": 2.952274,
+      "on_vs_candidate_rate_ratio": 0.9831868151053742,
+      "on_vs_candidate_p99_ratio": 1.0528321480561145
+    }
+  ],
+  "counts": [
+    {
+      "label": "baseline-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "candidate-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "on-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "openraft-c4096-b4-t1",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "baseline-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "candidate-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "on-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "openraft-c4096-b4-t2",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "baseline-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "candidate-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "on-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    },
+    {
+      "label": "openraft-c4096-b4-t3",
+      "completed_originals": 19988480,
+      "completed_requests": 4997120,
+      "frontiers": [
+        19989505,
+        19989505,
+        19989505
+      ]
+    }
+  ],
+  "failures": [],
+  "original_handle": 34561,
+  "actual_terminal_exit": 0,
+  "scope": "Linux-only results; no final bothhost decision yet; no RSS/refusal/allocator causality claim",
+  "candidate_OFF_logical_diagnostics": {
+    "retained_entries": {
+      "min": 1136,
+      "max": 5408
+    },
+    "peak_retained_entries": {
+      "min": 8040,
+      "max": 22268
+    },
+    "peak_peer_queue": {
+      "min": 8,
+      "max": 23
+    },
+    "peak_client_queue": {
+      "min": 0,
+      "max": 4096
+    },
+    "checkpoint_count": {
+      "min": 3864,
+      "max": 3891
+    },
+    "snapshot_installs": {
+      "min": 0,
+      "max": 2035
+    },
+    "maximum_proposal_width": {
+      "min": 0,
+      "max": 16384
+    }
+  },
+  "diagnostic_limits": "Observed logical queue/retained/checkpoint counts; no explicit RSS/refusal/maintenance byte debt fields. All process/outcome/cleanup controls pass; do not infer zero internal refusals or physical bounded debt."
+}

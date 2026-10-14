@@ -1,0 +1,8 @@
+{
+  "status": "PUBLISHED_SOURCE_ASSEMBLED_START_AUTHORIZED",
+  "required_commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "expected_matched_tests": 70,
+  "scope": "new fullmatched70 with actualfuturelayout diagnostic in nocapture output,fmtstrict/freshasserted4+rootbuildscript/currentdSYM/CargoJSONvv/3CLI; exactunchanged450 root1438functional/tool/fmtstrict reuse no root/native repeat",
+  "baseline": "retained450 exactd639,638c300...,UUID1AAB3496",
+  "no_timing_until_jointgrant": true
+}

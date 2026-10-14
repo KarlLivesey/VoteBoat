@@ -1,0 +1,242 @@
+{
+  "variants": {
+    "baseline": {
+      "rates": [
+        113761.48150727141,
+        120820.15347634618,
+        119399.33607512366
+      ],
+      "median_completed_originals_per_second": 119399.33607512366,
+      "median_request_p50_ms": 0.007624,
+      "median_request_p99_ms": 0.015299
+    },
+    "candidate": {
+      "rates": [
+        121296.39948598263,
+        118842.64087477978,
+        122703.90475041991
+      ],
+      "median_completed_originals_per_second": 121296.39948598263,
+      "median_request_p50_ms": 0.007574,
+      "median_request_p99_ms": 0.014948
+    },
+    "on": {
+      "rates": [
+        97523.24517333384,
+        98121.75357020528,
+        97425.75982049986
+      ],
+      "median_completed_originals_per_second": 97523.24517333384,
+      "median_request_p50_ms": 0.009728,
+      "median_request_p99_ms": 0.017713
+    },
+    "openraft": {
+      "rates": [
+        22145.470429938134,
+        22601.41190995802,
+        22839.30938079767
+      ],
+      "median_completed_originals_per_second": 22601.41190995802,
+      "median_request_p50_ms": 0.039023,
+      "median_request_p99_ms": 0.091582
+    }
+  },
+  "pairs": [
+    {
+      "trial": 1,
+      "baseline_originals_per_second": 113761.48150727141,
+      "candidate_originals_per_second": 121296.39948598263,
+      "rate_ratio": 1.0662343517232553,
+      "baseline_p99_ms": 0.016451,
+      "candidate_p99_ms": 0.014948,
+      "p99_ratio": 0.9086377727797702,
+      "on_originals_per_second": 97523.24517333384,
+      "on_p99_ms": 0.017743,
+      "on_vs_candidate_rate_ratio": 0.804007749501286,
+      "on_vs_candidate_p99_ratio": 1.186981535991437
+    },
+    {
+      "trial": 2,
+      "baseline_originals_per_second": 120820.15347634618,
+      "candidate_originals_per_second": 118842.64087477978,
+      "rate_ratio": 0.9836325932001605,
+      "baseline_p99_ms": 0.014778,
+      "candidate_p99_ms": 0.015138,
+      "p99_ratio": 1.0243605359317904,
+      "on_originals_per_second": 98121.75357020528,
+      "on_p99_ms": 0.017433,
+      "on_vs_candidate_rate_ratio": 0.8256443381596732,
+      "on_vs_candidate_p99_ratio": 1.1516052318668253
+    },
+    {
+      "trial": 3,
+      "baseline_originals_per_second": 119399.33607512366,
+      "candidate_originals_per_second": 122703.90475041991,
+      "rate_ratio": 1.0276766084630242,
+      "baseline_p99_ms": 0.015299,
+      "candidate_p99_ms": 0.014848,
+      "p99_ratio": 0.9705209490816393,
+      "on_originals_per_second": 97425.75982049986,
+      "on_p99_ms": 0.017713,
+      "on_vs_candidate_rate_ratio": 0.7939907048489137,
+      "on_vs_candidate_p99_ratio": 1.1929552801724137
+    }
+  ],
+  "counts": [
+    {
+      "label": "baseline-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "candidate-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "on-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "openraft-c1-b1-t1",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "baseline-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "candidate-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "on-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "openraft-c1-b1-t2",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "baseline-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "candidate-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "on-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    },
+    {
+      "label": "openraft-c1-b1-t3",
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ]
+    }
+  ],
+  "failures": [],
+  "original_handle": 34561,
+  "actual_terminal_exit": 0,
+  "scope": "Linux-only results; no final bothhost decision yet; no RSS/refusal/allocator causality claim",
+  "candidate_OFF_logical_diagnostics": {
+    "retained_entries": {
+      "min": 5601,
+      "max": 5601
+    },
+    "peak_retained_entries": {
+      "min": 6000,
+      "max": 6000
+    },
+    "peak_peer_queue": {
+      "min": 1,
+      "max": 3
+    },
+    "peak_client_queue": {
+      "min": 0,
+      "max": 1
+    },
+    "checkpoint_count": {
+      "min": 209,
+      "max": 209
+    },
+    "snapshot_installs": {
+      "min": 0,
+      "max": 0
+    },
+    "maximum_proposal_width": {
+      "min": 0,
+      "max": 1
+    }
+  },
+  "diagnostic_limits": "Observed logical queue/retained/checkpoint counts; no explicit RSS/refusal/maintenance byte debt fields. All process/outcome/cleanup controls pass; do not infer zero internal refusals or physical bounded debt."
+}

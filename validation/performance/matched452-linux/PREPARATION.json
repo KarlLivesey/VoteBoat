@@ -1,0 +1,15 @@
+{
+  "commit": "5201bfeae8f891b8c3ea71aa75717c691a61fd50",
+  "source_inputs": 1440,
+  "compiled_inputs": 1431,
+  "changed_inputs": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "publication_original_handle": 22883,
+  "publication_actual_exit": 0,
+  "qualification_reused_original": 48609,
+  "physical_modes_set_before_freeze": true,
+  "fresh_target_absent": true,
+  "build_started": false
+}
