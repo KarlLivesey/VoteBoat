@@ -1,0 +1,1 @@
+/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo test --manifest-path /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml --locked --offline --all-features --test effect_owner --no-run --message-format=json -vv 

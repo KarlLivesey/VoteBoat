@@ -1,0 +1,9 @@
+{
+  "source": "docs/IMPLEMENTATION.md",
+  "section": "Slice431 schema \u2014 reuse owned ordinary append input",
+  "document_sha256_at_collection_preparation": "a8f5c2d1e0783a95b6b44868589e5727ec3633e1996e653b9d7b543881909bec",
+  "excerpt_sha256": "0a24e1479c115f9b3adde475d8ab89c74e8ef8e6cf9ee453899e57a941ce739d",
+  "schema_written_by_root_before_production_edits": true,
+  "excerpt_captured_by_collector_during_live_qualification": "no source/doc modifications or coverage/archive claim",
+  "extra_paragraph": "records final corrected configured fallback fixture scope"
+}

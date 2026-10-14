@@ -1,0 +1,38 @@
+{
+  "scope": "rootreportedactualoriginalhandleterminations pluschildownedbaseline/candidatehandles; no restarts/statusreplacement",
+  "attempts": [
+    {
+      "original_handle": 96474,
+      "actual_terminal_exit": 101,
+      "scope": "392libpass;201ownerpass+2deadlinefailures"
+    },
+    {
+      "original_handle": 13664,
+      "actual_terminal_exit": 101,
+      "scope": "hundredpass57.83s;pressurefailure46.14s"
+    },
+    {
+      "original_handle": 96016,
+      "actual_terminal_exit": 0,
+      "scope": "remaining-all/core/services/matched/format/standalonestrict/sourceguards0,DONE"
+    },
+    {
+      "original_handle": 16659,
+      "actual_terminal_exit": 0,
+      "scope": "fresh distinct baseline430 debugeffectowner+requiredbinsbuild"
+    },
+    {
+      "original_handle": 34328,
+      "actual_terminal_exit": 0,
+      "scope": "controlledbaselineexactpressurepass8.68s"
+    },
+    {
+      "original_handle": 47583,
+      "actual_terminal_exit": 0,
+      "scope": "controlledsame431binaryexactpressurepass9.49s"
+    }
+  ],
+  "candidate_pressure": "candidate-pressure/PRESSURE_RESULT.json",
+  "pressure_cause": "unestablished; knownruntimeenvironment/controlcomparison, no source/deadlinechanges",
+  "coverage": "checkedindividualcasecoverage; neverclaimwhole203ownerbroadsuitepass"
+}

@@ -1,0 +1,227 @@
+[
+  {
+    "target": "voteboat",
+    "kind": "lib",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib",
+    "sha256": "3420a3a991de3728d2187c0146dc1d003240c3abaebd736a874305a7ff1fc5fa",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/libvoteboat-676f9e8fe1db37b5.rlib",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/libvoteboat-676f9e8fe1db37b5.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    }
+  },
+  {
+    "target": "effect_owner",
+    "kind": "test",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+    "sha256": "25f1b5241a1bc2b98cbd4eb7a9d8f02d9dc925ecd7f928c620b72e6f55606cff",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "effect_owner",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/tests/effect_owner.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/effect_owner-3b9732cae5c45d5b"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+      "fresh": false
+    }
+  },
+  {
+    "target": "voteboat-counter",
+    "kind": "bin",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-counter",
+    "sha256": "d6ee324589cb962d79ceac670d652b374eaf67e236a89fb1573dd4a138a0ade7",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-counter",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/src/bin/counter_service.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-counter"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-counter",
+      "fresh": false
+    }
+  },
+  {
+    "target": "voteboat-directory",
+    "kind": "bin",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-directory",
+    "sha256": "9d88a3322c6240902936f6e62d665eb590009bd7ab93c64c11d12e11f5d14a44",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-directory",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/src/bin/directory_service.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-directory"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-directory",
+      "fresh": false
+    }
+  },
+  {
+    "target": "voteboat-transfer",
+    "kind": "bin",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-transfer",
+    "sha256": "bbef18e585b30e1b9de85ab1c1966107456ab657d28890c7d1f3a6faa877bcf4",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-transfer",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/source/src/bin/transfer_service.rs",
+        "edition": "2021",
+        "required-features": [
+          "tls"
+        ],
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-transfer"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/baseline430-pressure/target-checks/debug/voteboat-transfer",
+      "fresh": false
+    }
+  }
+]

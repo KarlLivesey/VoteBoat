@@ -1,0 +1,12 @@
+{
+  "state": "prepared only; waitrootquietauthorization",
+  "args": "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry --exact --nocapture --test-threads=1",
+  "matching_known_env": {
+    "RUST_BACKTRACE": "1",
+    "TMPDIR": "fresh directory, same filesystemdevice asbaseline"
+  },
+  "filesystem_device": 55,
+  "baseline_full_environment_capture": "unavailable historically; no claimofcompleteambientenvidentity",
+  "small_environment_counters": "/proc/loadavg,meminfo,stat,diskstats,pressure/{cpu,memory,io} before/after; no causality inference",
+  "no_build_or_rerun": true
+}

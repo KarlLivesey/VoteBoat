@@ -22,6 +22,8 @@ mod authenticated_sources;
 mod configured_deltas;
 #[path = "leadership_membership_tests.rs"]
 mod leadership;
+#[path = "owned_append_tests.rs"]
+mod owned_appends;
 #[path = "progress_broadcast/membership_tests.rs"]
 mod progress_broadcasts;
 #[cfg(feature = "native")]

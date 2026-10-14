@@ -1,0 +1,35 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b)
+
+running 1 test
+test native::native_shared_peer_quota_pressure_reconnect_restart_and_retry ... 
+thread 'native::native_shared_peer_quota_pressure_reconnect_restart_and_retry' (704153) panicked at tests/support/native_pressure.rs:177:5:
+facade progress timed out: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (2, 2)), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (2, 2)), (EffectOwnerUsage { active_visits: 14, reserved_bytes: 59210880, leased: 14, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 4, image_bytes: 409600 }, SnapshotWorkUsage { requests: 4, bytes: 428226 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 10, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (0, 0))]
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/std/src/panicking.rs:679:5
+   1: core::panicking::panic_fmt
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/panicking.rs:80:14
+   2: effect_owner::native::facade_drive_at::<voteboat::native::transport::NativeSharedTransportFactory<voteboat::wire_format::NativeWireCodec, effect_owner::native::ObservedPool>, &mut effect_owner::native::native_shared_peer_quota_pressure_reconnect_restart_and_retry::{closure#0}>
+             at ./tests/support/native_node.rs:104:9
+   3: effect_owner::native::facade_drive::<voteboat::native::transport::NativeSharedTransportFactory<voteboat::wire_format::NativeWireCodec, effect_owner::native::ObservedPool>, effect_owner::native::native_shared_peer_quota_pressure_reconnect_restart_and_retry::{closure#0}>
+             at ./tests/support/native_node.rs:72:5
+   4: effect_owner::native::native_shared_peer_quota_pressure_reconnect_restart_and_retry
+             at ./tests/support/native_pressure.rs:177:5
+   5: effect_owner::native::native_shared_peer_quota_pressure_reconnect_restart_and_retry::{closure#0}
+             at ./tests/support/native_pressure.rs:168:67
+   6: <effect_owner::native::native_shared_peer_quota_pressure_reconnect_restart_and_retry::{closure#0} as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+   7: <fn() -> core::result::Result<(), alloc::string::String> as core::ops::function::FnOnce<()>>::call_once
+             at /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+FAILED
+
+failures:
+
+failures:
+    native::native_shared_peer_quota_pressure_reconnect_restart_and_retry
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 202 filtered out; finished in 46.14s
+
+error: test failed, to rerun pass `--test effect_owner`

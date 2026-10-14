@@ -1,0 +1,22 @@
+{
+  "baseline_inputs": 1428,
+  "candidate_inputs": 1429,
+  "added": [
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "removed": [],
+  "changed": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs"
+  ],
+  "essential_committed_inputs": 1422,
+  "all_essential_exact_published_commit_sha256": true,
+  "actual_guards": 0,
+  "actual_cli_controls": 3,
+  "negative_cli_controls": 4,
+  "negative_artifact_controls": 4,
+  "same_rustc_binary_version_sha": true,
+  "root_checked_inputs": 1401,
+  "unchanged_nonmatched_inventory_inputs": 1404,
+  "scope": "Exact committed source/build/config/fixtures/contracts inventory; root check scopes reused from429 on unchanged inputs, not rerun; matched43 and fresh current artifact+CLI checks executed"
+}

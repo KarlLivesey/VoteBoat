@@ -1,0 +1,27 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 17.12s
+     Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-ebeb84c4129d638f)
+
+running 6 tests
+test raft::membership_tests::owned_appends::configuration_payload_always_clones_and_preserves_full_membership ... FAILED
+test raft::membership_tests::owned_appends::failed_ownership_fences_without_install_and_restart_retries_original ... ok
+test raft::membership_tests::owned_appends::matching_prefix_clones_only_the_unmatched_suffix_and_replay_has_no_persist ... ok
+test raft::membership_tests::owned_appends::spare_outer_or_command_allocations_keep_normalized_clone_fallback ... ok
+test raft::membership_tests::owned_appends::tight_owned_append_matches_forced_clone_with_independent_delayed_completion ... ok
+test raft::membership_tests::owned_appends::uncommitted_rewrite_has_the_same_atomic_term_commit_and_reply_as_clone ... ok
+
+failures:
+
+---- raft::membership_tests::owned_appends::configuration_payload_always_clones_and_preserves_full_membership stdout ----
+
+thread 'raft::membership_tests::owned_appends::configuration_payload_always_clones_and_preserves_full_membership' (405459) panicked at src/raft/owned_append_tests.rs:242:58:
+called `Result::unwrap()` on an `Err` value: InvalidMessage
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    raft::membership_tests::owned_appends::configuration_payload_always_clones_and_preserves_full_membership
+
+test result: FAILED. 5 passed; 1 failed; 0 ignored; 0 measured; 386 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `--lib`

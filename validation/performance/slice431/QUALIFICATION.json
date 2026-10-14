@@ -1,0 +1,362 @@
+{
+  "source_files": 1427,
+  "changed_files": [
+    "src/raft/membership_tests.rs",
+    "src/raft/owned_append_tests.rs",
+    "src/raft/receive.rs"
+  ],
+  "new_files": [
+    "src/raft/owned_append_tests.rs"
+  ],
+  "patch_sha256": "9db76f92c1b3db306f570773e1eb10314e6c3c73f25090cc40dc0a5b283979ab",
+  "actual_terminals": {
+    "scope": "rootreportedactualoriginalhandleterminations pluschildownedbaseline/candidatehandles; no restarts/statusreplacement",
+    "attempts": [
+      {
+        "original_handle": 96474,
+        "actual_terminal_exit": 101,
+        "scope": "392libpass;201ownerpass+2deadlinefailures"
+      },
+      {
+        "original_handle": 13664,
+        "actual_terminal_exit": 101,
+        "scope": "hundredpass57.83s;pressurefailure46.14s"
+      },
+      {
+        "original_handle": 96016,
+        "actual_terminal_exit": 0,
+        "scope": "remaining-all/core/services/matched/format/standalonestrict/sourceguards0,DONE"
+      },
+      {
+        "original_handle": 16659,
+        "actual_terminal_exit": 0,
+        "scope": "fresh distinct baseline430 debugeffectowner+requiredbinsbuild"
+      },
+      {
+        "original_handle": 34328,
+        "actual_terminal_exit": 0,
+        "scope": "controlledbaselineexactpressurepass8.68s"
+      },
+      {
+        "original_handle": 47583,
+        "actual_terminal_exit": 0,
+        "scope": "controlledsame431binaryexactpressurepass9.49s"
+      }
+    ],
+    "candidate_pressure": "candidate-pressure/PRESSURE_RESULT.json",
+    "pressure_cause": "unestablished; knownruntimeenvironment/controlcomparison, no source/deadlinechanges",
+    "coverage": "checkedindividualcasecoverage; neverclaimwhole203ownerbroadsuitepass"
+  },
+  "successful_stage_statuses": {
+    "source-before": 0,
+    "fmt-initial": 0,
+    "focused-owned-append": 0,
+    "clippy-all": 0,
+    "clippy-default": 0,
+    "clippy-core": 0,
+    "clippy-native": 0,
+    "remaining-all": 0,
+    "affected-core": 0,
+    "actual-services": 0,
+    "fmt-final": 0,
+    "matched-tests": 0,
+    "matched-fmt": 0,
+    "matched-clippy": 0,
+    "source-after": 0
+  },
+  "actual_test_summaries": {
+    "focused-owned-append": [
+      {
+        "result": "ok",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 386,
+        "log_line": 13,
+        "preceding_execution_line": "Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-ebeb84c4129d638f)"
+      }
+    ],
+    "remaining-all": [
+      {
+        "result": "ok",
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 25,
+        "preceding_execution_line": "Running tests/log_store.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/log_store-7ebe8448ce0d9035)"
+      },
+      {
+        "result": "ok",
+        "passed": 35,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 66,
+        "preceding_execution_line": "Running tests/provider_conformance.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/provider_conformance-a6834a5dbc2f6607)"
+      },
+      {
+        "result": "ok",
+        "passed": 79,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 151,
+        "preceding_execution_line": "Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/raft-8b84ec38cb2b49f7)"
+      },
+      {
+        "result": "ok",
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 184,
+        "preceding_execution_line": "Running tests/snapshot.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/snapshot-02c9fd3d90f42471)"
+      }
+    ],
+    "affected-core": [
+      {
+        "result": "ok",
+        "passed": 312,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 319,
+        "preceding_execution_line": "Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-2a5d52f7d7c87717)"
+      },
+      {
+        "result": "ok",
+        "passed": 195,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 520,
+        "preceding_execution_line": "Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-32c31e5c4ab15e4b)"
+      },
+      {
+        "result": "ok",
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 526,
+        "preceding_execution_line": "Running tests/log_store.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/log_store-873b8ca2c81b5cc5)"
+      },
+      {
+        "result": "ok",
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 552,
+        "preceding_execution_line": "Running tests/provider_conformance.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/provider_conformance-b5f1fe56e0c02439)"
+      },
+      {
+        "result": "ok",
+        "passed": 29,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 587,
+        "preceding_execution_line": "Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/raft-3fbd1a477b13e9a4)"
+      },
+      {
+        "result": "ok",
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 605,
+        "preceding_execution_line": "Running tests/snapshot.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/snapshot-3ee735058de34715)"
+      }
+    ],
+    "actual-services": [
+      {
+        "result": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 201,
+        "log_line": 9,
+        "preceding_execution_line": "Running tests/counter_service.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/counter_service-a30382866c6eb540)"
+      }
+    ],
+    "matched-tests": [
+      {
+        "result": "ok",
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 51,
+        "preceding_execution_line": "Running unittests src/main.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/matched-checks/debug/deps/voteboat_matched_framework-76e51d1e5c426dbe)"
+      }
+    ],
+    "original96474-affected-all": [
+      {
+        "result": "ok",
+        "passed": 392,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 1585,
+        "preceding_execution_line": "Running `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README='' CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/ring-b4b4d2c63cd52e10/out:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/voteboat-e18197108413e629/out /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-ebeb84c4129d638f --test-threads=1`"
+      },
+      {
+        "result": "FAILED",
+        "passed": 201,
+        "failed": 2,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 1812,
+        "preceding_execution_line": "Running `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_BIN_EXE_voteboat-counter=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/voteboat-counter CARGO_BIN_EXE_voteboat-directory=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/voteboat-directory CARGO_BIN_EXE_voteboat-transfer=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/voteboat-transfer CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README='' CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/ring-b4b4d2c63cd52e10/out:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/voteboat-e18197108413e629/out /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b --test-threads=1`"
+      }
+    ],
+    "original13664-hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport": [
+      {
+        "result": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 202,
+        "log_line": 7,
+        "preceding_execution_line": "Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b)"
+      }
+    ],
+    "original13664-native_shared_peer_quota_pressure_reconnect_restart_and_retry": [
+      {
+        "result": "FAILED",
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 202,
+        "log_line": 33,
+        "preceding_execution_line": "Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b)"
+      }
+    ]
+  },
+  "owner_coverage": "201 passing cases from original96474 plus separate same-source hundred-compacted13664 and controlled pressure47583 passes; never a whole203-case broad pass",
+  "baseline_pressure": {
+    "original_handle": 34328,
+    "actual_terminal_exit": 0,
+    "status": "0",
+    "stage": "DONE",
+    "test": "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+    "scope": "oneexactdefaultdebugallfeaturebaseline430case, no othertests",
+    "passed": 1,
+    "failed": 0,
+    "filtered_out": 202,
+    "fixture_deadline_seconds": 15,
+    "libtest_seconds": 8.68,
+    "wall_seconds": 8.679,
+    "user_seconds": 4.49,
+    "system_seconds": 0.846,
+    "quiet": "rootauthorized afterremaining96016 actualterminal0/MacarchivesDONE; no samehostbuild/check/copy/archiveoperationsduringcase",
+    "native_network_approval": "explicitrootauthorizedcase plusapprovedrequire_escalated realTCP/QUIC",
+    "source_inputs": 1426,
+    "source_and_binary_before_after_guards": 0,
+    "binary_sha256": "25f1b5241a1bc2b98cbd4eb7a9d8f02d9dc925ecd7f928c620b72e6f55606cff",
+    "commands_and_logs": {
+      "pressure.command": "84a24fa33d4247885bd5d258d60b01d3f261063996f3c52de376af4da5f76992",
+      "pressure.log": "5d1daca7e914783e8bb98499b433e11ed2daacb0554c235257b266b8daf00ebd",
+      "pressure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pressure.time": "ce8842a8ccbf04057384a4cf166ebf74f51b4dfc03521296f583a562eb9e416e",
+      "pressure.status": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "pressure-source-before.log": "b8446f6af0bf668a992b207278d4832fb84f3f2fce5e72d170110ddbf19223e0",
+      "pressure-source-after.log": "b8446f6af0bf668a992b207278d4832fb84f3f2fce5e72d170110ddbf19223e0",
+      "pressure-artifact-before.log": "64274f57d5c72c740fcd5c6a300a535b6002c62e4a13e9a5ee854f005d229078",
+      "pressure-artifact-after.log": "64274f57d5c72c740fcd5c6a300a535b6002c62e4a13e9a5ee854f005d229078"
+    },
+    "contrast": "431 original96474 broadsuite pressurefailure, focused13664 pressurefailure46.14s;baselineonepassdoesnotestablishcausality",
+    "rerun": false
+  },
+  "controlled_candidate_pressure": {
+    "original_handle": 47583,
+    "actual_terminal_exit": 0,
+    "status": "0",
+    "stage": "DONE",
+    "passed": 1,
+    "failed": 0,
+    "filtered_out": 202,
+    "test": "native::native_shared_peer_quota_pressure_reconnect_restart_and_retry",
+    "fixture_deadline_seconds": 15,
+    "libtest_seconds": 9.49,
+    "wall_seconds": 9.489,
+    "user_seconds": 4.557,
+    "system_seconds": 0.885,
+    "source_inputs": 1427,
+    "source_and_executable_before_after_guards": 0,
+    "source_patch_sha256": "9db76f92c1b3db306f570773e1eb10314e6c3c73f25090cc40dc0a5b283979ab",
+    "binary_sha256": "855e553ffb7e5d53874c8d03f699d06763bdf37207fe1a9426369238449a1e2c",
+    "quiet": "rootauthorized afterremaining43196016 terminal0/Macarchivecompleted, allknownsamehostoperationspauseduntilactualterminal",
+    "process_condition": "directsamebinary/defaultdebug/allfeatures/samebaselineargs,knownRUST_BACKTRACE1,freshTMPDIRsamefilesystem; baselinefullambientenvnotcaptured",
+    "initial_failures_preserved": "original96474 owner201/203; original13664 hundred_compactedpass andsamepressurefailure; no recompilation/source/deadlinechangebeforecontrolledpass",
+    "causality": "unestablished; controlledstandalonepassdoesnotidentifypriorfailurecause ordeclarewhole203suitepass",
+    "logs_sha256": {
+      "pressure.command": "7898203a263c26a0e873e940f40d2b84d4cf51c4e41676e6ef61f894d0fb6abe",
+      "pressure.log": "f1638b6e503c3811be9f76a52dc7ecd5042c607116d8a3fe1fea801770aebcbf",
+      "pressure.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "pressure.time": "af7bbcf237de38407bc7a8c4b702cbba8ea4405128e0272782a6ac75227dc6a3",
+      "pressure.status": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "pressure-source-before.log": "73f9ee22ab79efe56cc2f88ed5877575a690e3cac72d33de7aaced1ec3c23ac9",
+      "pressure-source-after.log": "73f9ee22ab79efe56cc2f88ed5877575a690e3cac72d33de7aaced1ec3c23ac9",
+      "pressure-artifact-before.log": "fa4368d8ae5e2a0cef37655f85a8f6c10e2d29994e6f9b779211fea6a9a215d7",
+      "pressure-artifact-after.log": "fa4368d8ae5e2a0cef37655f85a8f6c10e2d29994e6f9b779211fea6a9a215d7",
+      "environment-before.json": "e58aba0641943ac7998b2f4e04e56b9016c8bf14bd5f5bf4580b12603f6d1c9f",
+      "environment-after.json": "a7fa8ae15214bc7802e611967e28f22fa82f78f1fbd8f83325e18ab48169769b"
+    },
+    "additional_rerun": false
+  },
+  "initial_failures": [
+    {
+      "attempt": 1,
+      "terminal": 101,
+      "cause": "typed LogRevision has no AddAssign; fixture constructor correction"
+    },
+    {
+      "attempt": 2,
+      "terminal": 101,
+      "passed": 5,
+      "failed": 1,
+      "cause": "public config gate correctly rejects; fixture explicitly asserts InvalidMessage then tests internal receive fallback"
+    },
+    {
+      "attempt": 3,
+      "original_handle": 96474,
+      "terminal": 101,
+      "passed_lib": 392,
+      "passed_owner": 201,
+      "failed_owner": 2,
+      "cause": "two unchanged-deadline native progress timeouts; causal mechanism unestablished"
+    },
+    {
+      "original_handle": 13664,
+      "terminal": 101,
+      "hundred_compacted": "pass57.83s",
+      "pressure": "fail46.14s; same initial campaign/catch-up point, cause unestablished"
+    }
+  ],
+  "dependency_cache": "root431 debug/check targets reuse terminal429 dependencies; actual current root compilation captured in original96474 Cargo JSON; fresh default-debug430 contrast uses a distinct target. Framework performance artifacts remain separate postpublication.",
+  "configuration_fixture_scope": "public step rejects unadmitted configuration; internal membership fixture tests fallback, not public protocol admission",
+  "durability_scope": "unit tickets model completion; separate actual TCP/QUIC retry/recovery controls passed",
+  "ambient_limitations": "baseline complete ambient environment was not captured; known direct arguments/RUST_BACKTRACE1/default debug/compiler/temporary filesystem matched. Candidate whole-host proc counters are not causal or per-test CPU/IO measurements.",
+  "performance_gain_measured": false,
+  "publication": "pending enabled root hook/publication receipt"
+}

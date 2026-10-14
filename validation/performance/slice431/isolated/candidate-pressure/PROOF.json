@@ -1,0 +1,60 @@
+{
+  "source_inputs": 1427,
+  "source_patch_sha256": "9db76f92c1b3db306f570773e1eb10314e6c3c73f25090cc40dc0a5b283979ab",
+  "frozen_and_main_hashes_match": true,
+  "source_record_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/SOURCE.json",
+  "source_record_sha256": "41f12643f5fd0e4da382a16c5c14fe0a6b6169e1fee50e8bc43615e1ddf93383",
+  "compiler_records_log": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/affected-all.log",
+  "compiler_records_log_sha256": "160f39535183070221c5f3a56875d70943bd311f555f35affc14cefeac2e3b98",
+  "root_and_effect_owner_fresh_false": true,
+  "profile": "defaultdebug allfeature opt0/debug2/assertionsoverflowtrue;debugreferenceoraclepresent",
+  "compiler_version_matches_baseline": true,
+  "original_compile_handle": 96474,
+  "original_compile_suite_terminal": 101,
+  "compile_scope": "compilationpassed and392libpassed;201ownerpassed/2timeouts preserved, notoverall0",
+  "comparison_process": "directsameexactcaseargsasbaseline; matchingknownRUST_BACKTRACE1 andfreshTMPDIRsamefilesystem; baselinefullambientenvnotcapturedsohistoricalcompleteenvidentitynotclaimed",
+  "test_run": "NOTRUN; rootmustauthorizequiet",
+  "artifact": {
+    "target": "effect_owner",
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+    "sha256": "855e553ffb7e5d53874c8d03f699d06763bdf37207fe1a9426369238449a1e2c",
+    "compiled_source_sha256": "81da0653b0de90f40c957d8534b8cdfb7ca8a6ec033fb607c1b86037ef4daed9",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "test"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "effect_owner",
+        "src_path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/tests/effect_owner.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": true
+      },
+      "features": [
+        "default",
+        "native",
+        "quic",
+        "tls"
+      ],
+      "filenames": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b"
+      ],
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b",
+      "fresh": false
+    }
+  }
+}

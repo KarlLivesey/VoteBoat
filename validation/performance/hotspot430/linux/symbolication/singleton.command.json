@@ -1,0 +1,7 @@
+[
+  "python3",
+  "target/p9/profile430/linux/symbolication/symbolize-full-json.py",
+  "target/p9/profile430/linux/perf-quiet/singleton.json.gz",
+  "http://127.0.0.1:38474/3k562qkhazmbbpirwbg1dpvxa2vn584i9q35ygi/symbolicate/v5",
+  "target/p9/profile430/linux/symbolication/singleton-symbolicated"
+]

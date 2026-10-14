@@ -1,0 +1,256 @@
+{
+  "bulk": [
+    {
+      "function": "tokio::runtime::task::raw::poll::<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>>, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+      "cpu_us": 4659927,
+      "percent_of_observed_selected_thread_cpu": 48.60635774860586
+    },
+    {
+      "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+      "cpu_us": 4652094,
+      "percent_of_observed_selected_thread_cpu": 48.5246539793741
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+      "cpu_us": 2688729,
+      "percent_of_observed_selected_thread_cpu": 28.045358578160403
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+      "cpu_us": 2399386,
+      "percent_of_observed_selected_thread_cpu": 25.027304997051758
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+      "cpu_us": 1377958,
+      "percent_of_observed_selected_thread_cpu": 14.37308342181185
+    },
+    {
+      "function": "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+      "cpu_us": 1122311,
+      "percent_of_observed_selected_thread_cpu": 11.7065031214428
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::include",
+      "cpu_us": 916803,
+      "percent_of_observed_selected_thread_cpu": 9.562908303712717
+    },
+    {
+      "function": "tokio::runtime::task::raw::poll::<voteboat_matched_framework::workload::client_loop::{closure#0}, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+      "cpu_us": 858694,
+      "percent_of_observed_selected_thread_cpu": 8.956790044260641
+    },
+    {
+      "function": "voteboat_matched_framework::workload::client_loop::{closure#0}",
+      "cpu_us": 836542,
+      "percent_of_observed_selected_thread_cpu": 8.725728905996649
+    },
+    {
+      "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+      "cpu_us": 747418,
+      "percent_of_observed_selected_thread_cpu": 7.79610210540798
+    },
+    {
+      "function": "<hashbrown::map::HashMap<voteboat::identity::OperationId, tokio::sync::oneshot::Sender<voteboat::identity::OperationId>, std::hash::random::RandomState>>::insert",
+      "cpu_us": 620145,
+      "percent_of_observed_selected_thread_cpu": 6.468554062329556
+    },
+    {
+      "function": "<voteboat_matched_framework::workload::Client>::write::{closure#0}",
+      "cpu_us": 596673,
+      "percent_of_observed_selected_thread_cpu": 6.223724383865649
+    },
+    {
+      "function": "<voteboat::raft::Raft>::complete",
+      "cpu_us": 586596,
+      "percent_of_observed_selected_thread_cpu": 6.118614096294041
+    },
+    {
+      "function": "<std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&voteboat::identity::OperationId>",
+      "cpu_us": 509026,
+      "percent_of_observed_selected_thread_cpu": 5.309503745303703
+    },
+    {
+      "function": "<voteboat::log::transition::incoming::PreparedOwnedLog>::install",
+      "cpu_us": 447677,
+      "percent_of_observed_selected_thread_cpu": 4.669589978088203
+    },
+    {
+      "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+      "cpu_us": 432875,
+      "percent_of_observed_selected_thread_cpu": 4.51519457502827
+    },
+    {
+      "function": "<voteboat::raft::Raft>::step",
+      "cpu_us": 412087,
+      "percent_of_observed_selected_thread_cpu": 4.298360928304186
+    },
+    {
+      "function": "core::ptr::drop_glue::<alloc::vec::drain::Drain<voteboat::log::LogEntry>>",
+      "cpu_us": 351486,
+      "percent_of_observed_selected_thread_cpu": 3.6662493338686373
+    },
+    {
+      "function": "<voteboat::raft::Raft>::receive_inner",
+      "cpu_us": 326762,
+      "percent_of_observed_selected_thread_cpu": 3.408360403639359
+    },
+    {
+      "function": "<voteboat::log::LogEntry as core::clone::Clone>::clone",
+      "cpu_us": 317636,
+      "percent_of_observed_selected_thread_cpu": 3.3131697234390516
+    },
+    {
+      "function": "<voteboat::raft::Raft>::append_for",
+      "cpu_us": 303372,
+      "percent_of_observed_selected_thread_cpu": 3.1643860435818105
+    },
+    {
+      "function": "<voteboat::raft::Raft>::persist_update",
+      "cpu_us": 272289,
+      "percent_of_observed_selected_thread_cpu": 2.8401682140106788
+    },
+    {
+      "function": "<std::hash::random::DefaultHasher as core::hash::Hasher>::write",
+      "cpu_us": 255745,
+      "percent_of_observed_selected_thread_cpu": 2.6676025101717697
+    },
+    {
+      "function": "core::ptr::drop_glue::<voteboat::log::EntryPayload>",
+      "cpu_us": 194544,
+      "percent_of_observed_selected_thread_cpu": 2.029232488372624
+    },
+    {
+      "function": "<voteboat::raft::Raft>::receive_append",
+      "cpu_us": 191100,
+      "percent_of_observed_selected_thread_cpu": 1.9933091153055786
+    }
+  ],
+  "singleton": [
+    {
+      "function": "tokio::runtime::task::raw::poll::<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>>, alloc::sync::Arc<tokio::runtime::scheduler::multi_thread::handle::Handle>>",
+      "cpu_us": 8483250,
+      "percent_of_observed_selected_thread_cpu": 23.073759600976885
+    },
+    {
+      "function": "<core::pin::Pin<alloc::boxed::Box<<voteboat_matched_framework::voteboat_engine::actor::Actor>::run::{closure#0}>> as core::future::future::Future>::poll",
+      "cpu_us": 8430288,
+      "percent_of_observed_selected_thread_cpu": 22.929707208793825
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::step",
+      "cpu_us": 5676559,
+      "percent_of_observed_selected_thread_cpu": 15.43978519161427
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::effects",
+      "cpu_us": 4992392,
+      "percent_of_observed_selected_thread_cpu": 13.578905825225025
+    },
+    {
+      "function": "voteboat::raft::persist_effect::<voteboat_matched_framework::store::MemoryStore>",
+      "cpu_us": 2384002,
+      "percent_of_observed_selected_thread_cpu": 6.484294231131712
+    },
+    {
+      "function": "<voteboat::raft::Raft>::step",
+      "cpu_us": 1613262,
+      "percent_of_observed_selected_thread_cpu": 4.387943248329493
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor>::requests",
+      "cpu_us": 1324005,
+      "percent_of_observed_selected_thread_cpu": 3.6011874081857074
+    },
+    {
+      "function": "<voteboat::log::owned::OwnedLogState>::apply_batch",
+      "cpu_us": 1133416,
+      "percent_of_observed_selected_thread_cpu": 3.082800614375483
+    },
+    {
+      "function": "<voteboat::raft::Raft>::receive_inner",
+      "cpu_us": 1119017,
+      "percent_of_observed_selected_thread_cpu": 3.043636489247205
+    },
+    {
+      "function": "<voteboat::raft::Raft>::complete",
+      "cpu_us": 975127,
+      "percent_of_observed_selected_thread_cpu": 2.6522672299439236
+    },
+    {
+      "function": "<tokio::sync::oneshot::Sender<voteboat::identity::OperationId>>::send",
+      "cpu_us": 945443,
+      "percent_of_observed_selected_thread_cpu": 2.5715291307489925
+    },
+    {
+      "function": "<tokio::sync::mpsc::bounded::Sender<voteboat::raft::Message>>::try_send",
+      "cpu_us": 846468,
+      "percent_of_observed_selected_thread_cpu": 2.302325069038364
+    },
+    {
+      "function": "<voteboat::raft::Raft>::persist_update",
+      "cpu_us": 676046,
+      "percent_of_observed_selected_thread_cpu": 1.8387908977340077
+    },
+    {
+      "function": "<voteboat::raft::Raft>::receive_append",
+      "cpu_us": 553882,
+      "percent_of_observed_selected_thread_cpu": 1.5065146158970064
+    },
+    {
+      "function": "<voteboat::raft::Raft>::persist",
+      "cpu_us": 449620,
+      "percent_of_observed_selected_thread_cpu": 1.2229303382301864
+    },
+    {
+      "function": "<voteboat::raft::Raft>::receive_appended",
+      "cpu_us": 434995,
+      "percent_of_observed_selected_thread_cpu": 1.183151511228237
+    },
+    {
+      "function": "<voteboat::log::transition::incoming::OwnedNextLog>::prepare_install",
+      "cpu_us": 308119,
+      "percent_of_observed_selected_thread_cpu": 0.8380589673171718
+    },
+    {
+      "function": "<voteboat_matched_framework::voteboat_engine::actor::Actor<true>>::reserve",
+      "cpu_us": 286643,
+      "percent_of_observed_selected_thread_cpu": 0.7796459697996425
+    },
+    {
+      "function": "<tokio::sync::mpsc::bounded::Receiver<voteboat::raft::Message>>::recv::{closure#0}",
+      "cpu_us": 273067,
+      "percent_of_observed_selected_thread_cpu": 0.7427203386626535
+    },
+    {
+      "function": "<voteboat::raft::Raft>::maybe_commit",
+      "cpu_us": 229494,
+      "percent_of_observed_selected_thread_cpu": 0.624205273434897
+    },
+    {
+      "function": "<alloc::collections::vec_deque::VecDeque<voteboat::raft::Effect> as alloc::collections::vec_deque::spec_extend::SpecExtend<voteboat::raft::Effect, alloc::vec::into_iter::IntoIter<voteboat::raft::Effect>>>::spec_extend",
+      "cpu_us": 226654,
+      "percent_of_observed_selected_thread_cpu": 0.6164807012170825
+    },
+    {
+      "function": "<voteboat::log::transition::view::LogMetadata as core::cmp::PartialEq>::eq",
+      "cpu_us": 226549,
+      "percent_of_observed_selected_thread_cpu": 0.616195109638607
+    },
+    {
+      "function": "<voteboat::raft::Raft>::broadcast_ready_peers",
+      "cpu_us": 209379,
+      "percent_of_observed_selected_thread_cpu": 0.5694940867583697
+    },
+    {
+      "function": "<voteboat::raft::Raft>::rollback_replicas",
+      "cpu_us": 207035,
+      "percent_of_observed_selected_thread_cpu": 0.5631185947588777
+    },
+    {
+      "function": "<alloc::collections::btree::map::IntoIter<voteboat::identity::GroupIdentity, voteboat::log::owned::Plan>>::dying_next",
+      "cpu_us": 173026,
+      "percent_of_observed_selected_thread_cpu": 0.4706168424505498
+    }
+  ]
+}

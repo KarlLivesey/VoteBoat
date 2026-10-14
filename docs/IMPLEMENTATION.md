@@ -58,8 +58,8 @@ diagnostics do not qualify sustained floors. [Every Linux trial and scope](../va
 
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: remove the owned incoming append copy431; finish430 Mac diagnostics | Transfer already-owned input after existing checks rather than clone it | Linux430 exported copy contexts; exact ownership/allocation schema below;430 Mac source/artifacts qualified | Differential outcomes/errors/capacities/partial progress, root/standalone strict checks and checked publication; retain both-host430 pairs/profiles | P9.0/P9.1/P9.3 |
-| Next: measure431 and reduce the next limiting stage | Establish actual gain and select remaining avoidable work | Published431 fresh asserted artifacts, Mac qualification, compact both-host CPU data and immutable430 baselines | Rotating bulk/singleton rates/p99 with every regression; schema/ownership/restart coverage for the next change; sustained acceptance stays distinct | P9.1/P9.3 |
+| Current: publish431 and qualify/measure on both hosts | Establish actual benefit of transferring owned append input after existing checks | Frozen431 controls and honest native replay scopes;430 immutable baselines and both-host exported CPU data | Enabled strict hook, fresh asserted libraries/executables, Mac root/standalone checks; rotating bulk/singleton rates/p99 and new profiles with every failure/regression retained | P9.0/P9.1/P9.3 |
+| Next: reduce the next measured limiting stage | Remove remaining work while respecting asynchronous owners and effect order | Both-host431 measurements and compact profiles; synchronous completion exploration remains unselected | Small usable schema, owned asynchronous fallback, queue/preflight/error/receipt ordering and restart checks, strict publication and both-host measurement; sustained acceptance stays distinct | P9.1/P9.3 |
 | Following: bounded durable batching/overlap under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 barrier evidence and unchanged publication/ticket contracts; bounded fairness schema after current measured framework stage | Sustained/mixed/hot-cold/skew, recovery/retries, bounded debt and actual placement/barriers before changing defaults | P9.1/P9.2/P9.3 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed
@@ -131,7 +131,8 @@ Transitions: retain retirement_commit before ordinary authentication and all
 existing term, entry, prefix, configuration and matching checks. Find the first
 missing/replaced offset, compute matching/commit and build its reply before taking
 anything. Only offset0, exact entry capacity==len and Noop/Command payloads with
-bytes capacity==len permit moving the whole Vec into Suffix. Configuration,
+bytes capacity==len permit moving the whole Vec into Suffix. Payload eligibility
+is computed during existing entry validation, with no extra scan. Configuration,
 overlapping offset>0 and spare allocation cases keep exact slice.to_vec behavior.
 This guard preserves the current cloned update's advertised raw allocation shape
 and effect reservation; it does not normalize a formerly inadmissible request.
@@ -155,6 +156,46 @@ configuration rollback, core/provider/snapshot and actual TCP/QUIC retry/recover
 histories stay enabled. Root format/four strict plus standalone checks must remain
 zero; publish the checked slice, then fresh both-host paired rates/p99 and new
 profiles decide whether the guard's work yields an actual gain.
+
+### Slice431 source-frozen qualification
+
+Six owned incoming controls and the final1,427-input source compare pass. Full
+all-feature library392 passes; owner suite original96474 ends101 with201passes
+and two progress timeouts. Exact-source individual replay original13664 passes
+hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport in
+57.83s, but native_shared_peer_quota_pressure_reconnect_restart_and_retry fails
+again46.14s at initial campaign/catch-up. Its15s deadline remains unchanged; the
+first control's10s drain limit remains unchanged. Outstanding snapshot requests4
+are accepted work (queued/executing/completed awaiting poll), not physical queue
+depth or proof of starvation. No persistence failure or failed-result counter is
+reported; cause is not established.
+
+Pristine published430 default-debug comparison original34328 passes that exact
+pressure case1/0 in8.68s, with1,426 source/tool/binary guards. Controlled standalone
+431 original47583 also passes1/0 in9.49s, unchanged executable/source/deadline,
+fresh TMPDIR on the same filesystem and matching known arguments/environment.
+Historical ambient environment was not fully captured, and whole-host pressure
+counters do not establish test-specific blocked time or cause. No source or
+native timing fix was made. Neither original failure is discarded or relabeled;
+these successful individual checks do not turn the failed broad203-case run green
+or establish a native performance benefit.
+
+Remaining original96016 ends0/DONE: all-feature log19/provider35/Raft79/snapshot27;
+core library312/owner195/log0/provider20/Raft29/snapshot12; actual TCP/QUIC
+three-service retry/replacement/recovery2; standalone matched43, fmt/strict zero.
+Root fmt and all four strict configurations pass on identical final source. Check
+target reuses429 dependency caches only; source is recompiled, and this is not
+fresh performance artifact provenance. Source hashes remain identical in main
+and the frozen checkout. Actual commands/exits/full failure diagnostics are kept in
+[431 qualification](../validation/performance/slice431/README.md).
+
+Fixture attempt1 compile101 used += on typed LogRevision, corrected through its
+constructor. Attempt2 passes5/6 but incorrectly expects unadmitted configuration
+public ingress to succeed. The focused correction asserts its original public
+InvalidMessage rejection, then uses the existing internal transition fixture for
+configuration payload fallback/membership; no production admission gate changed.
+All failed source snapshots and original logs remain. Publication/qualification
+metadata must retain every distinct scope and individual native replay.
 
 ### Slice430 schema — unordered pending reply lookup
 
@@ -356,10 +397,57 @@ are inclusive overlapping wall scopes, not additive CPU costs. Every raw case,
 tail and failure is retained. Short OFF5.232M remains below published5.615M and
 healthy8.4225M; ON5.784M is not a sustained acceptance result.
 
-Current work completes Mac430 rotating pairs and both-host exported430 CPU
-profiles before selecting the next limiting stage. Linux user-only perf retains
-paranoid2/kptr2/mlock516, actual430 records terminate0/0 with no known overlap.
-No browser or image analysis is used. Macro acceptance remains active and unmet.
+[Mac430 paired measurements](../validation/performance/comparison430-mac/README.md)
+end0/DONE, original97258, all24 cases and guards passing. Bulk429OFF/430OFF/ON/
+OpenRaft medians2,838,807/4,302,495/4,429,382/2,183,750 completed PUTS/s;
+p996.490833/4.679459/4.734083/9.137250ms. All OFF bulk pairs improve
+1.408068/1.515600/1.598636. Singleton55,494/55,021/51,032/10,037 PUTS/s;
+p990.031459/0.033167/0.033125/0.134958ms. Ratios1.009506/0.974642/0.994265
+retain trial2/3 regressions and10.328%/1.600% worse p99. These short volatile
+results establish a repeatable bulk benefit on both hosts, not sustained floors.
+All originals, exact frontiers, slow tails, observer regressions and raw data remain.
+
+[Linux430 exported CPU data](../validation/performance/hotspot430/linux/README.md)
+uses8,085 selected bulk samples. LogEntry-to-Vec native self10.056%, client write
+9.153%, original oneshot send8.089%; inclusive cloning11.255%, persistence16.265%,
+collect13.160%, results13.309% and pending HashMap6.296% overlap. Exact cloning
+parents are core complete287samples (3.550%), pending plan340 (4.205%), incoming
+Append188 (2.325%), materialization46 (0.569%) and other49. Core effects and
+provider submission require the first two independent owners under current
+contracts.431 targets the already-owned received vector; eligibility fraction and
+actual gain remain unmeasured. Empty byte cloning is only4samples (0.049%), with
+no sampled overlap between entry clone and the libc comparison leaf, so no analog
+of429's empty-byte comparison shortcut is inferred. Sampling does not establish
+allocator causes or copy bytes/calls. Profiled19,988,480 bulk originals complete
+5,242,504 PUTS/s/p994.801ms; singleton1,048,576 at87,771/p9923.554us are diagnostic,
+not capacity acceptance. Original74679/captures/import/symbolication/server shutdown
+all end0, no reported lost chunks or known overlap, kernel paranoid2/kptr2/mlock516
+unchanged. Raw profile JSON, exact per-address symbols and lossless verified
+compressed captures/folded stacks remain; no browser or image analysis is used.
+
+[Mac430 exported CPU data](../validation/performance/hotspot430/mac/README.md)
+ends0/DONE, original13810, both recordings and source/artifact/dSYM/tool guards0.
+Bulk observed selected-thread CPU delta9,587,073us: physical self map insert4.414%,
+memmove4.340%, LogEntry clone3.313%, effects3.122%; inclusive step28.045%,
+effects25.027%, requests14.373%, persistence11.707% and oneshot send7.796% overlap.
+Sampled cvwait38.951%/70.933% bulk/singleton illustrates strong interval-to-stack
+wait bias, not CPU spent blocking. Native/inline aliases are representative after
+coalescing; no per-RVA precision or leader attribution is inferred. Unresolved
+leaf6.511%/2.687% remains explicit. Exact receive_append clone self0.652% bulk is
+separate from overlapping completion/memmove contexts; eligibility and actual431
+gain remain unmeasured. Normalized19,988,480 originals complete4,226,449 PUTS/s/
+p995.031ms; singleton1,048,576 at54,085/p990.039292ms are profiled diagnostics.
+The initial postprocess requested-count error, corrected normalization-aware
+validator/six refusal controls, broad-name caller misclassification and exact-name
+correction all remain; recordings were not repeated. Raw JSON/symbols and verified
+lossless folded-stack containers preserve every observation, with no browser.
+
+430 evidence/plans are published at6d3f5d3 through the enabled full strict hook,
+original82349exit0.431's bounded ownership change is undergoing source-frozen
+qualification; new same-host native progress failures are retained separately
+from completed scopes and controlled standalone passes. Both hosts remain below
+the5.615M published bulk floor and8.4225M healthy minimum; all macro acceptance
+remains active and unmet.
 
 [Mac428 qualification](../validation/performance/mac428/README.md) passes on
 1,427 exact inputs, all affected/actual service/standalone checks, zero four strict

@@ -1,0 +1,4 @@
+Samply0.13.1 presymbolicate does not forward symbol_dir to SymbolManager; adjacent dSYM symlink resolves only to the already qualified UUID-matched copied bundle. No source/executable/dSYM bytes changed.
+/tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/symbols/voteboat-matched-framework.dSYM
+UUID: C18FB2E2-D783-381F-8C5E-5F33E5C7801E (arm64) /tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework
+UUID: C18FB2E2-D783-381F-8C5E-5F33E5C7801E (arm64) /tmp/voteboat-mac430-9d2b785-w7Fwdz/artifacts/matched/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-346eef53051d05ae

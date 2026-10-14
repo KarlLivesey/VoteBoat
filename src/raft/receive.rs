@@ -87,19 +87,7 @@ impl Raft {
                 last_term,
             } => self.receive_vote(&m, hard, *last_index, *last_term),
             Rpc::Voted { granted } => self.receive_voted(&m, hard, *granted),
-            Rpc::Append {
-                previous_index,
-                previous_term,
-                entries,
-                leader_commit,
-            } => self.receive_append(
-                &m,
-                hard,
-                *previous_index,
-                *previous_term,
-                entries,
-                *leader_commit,
-            ),
+            Rpc::Append { .. } => self.receive_append(m, hard),
             Rpc::Appended {
                 success,
                 matching_index,
@@ -234,13 +222,20 @@ impl Raft {
     }
     fn receive_append(
         &mut self,
-        m: &Message,
+        mut m: Message,
         hard: HardState,
-        previous_index: u64,
-        previous_term: u64,
-        entries: &[LogEntry],
-        leader_commit: u64,
     ) -> Result<Vec<Effect>, RaftError> {
+        let Rpc::Append {
+            previous_index,
+            previous_term,
+            entries,
+            leader_commit,
+        } = &m.rpc
+        else {
+            unreachable!()
+        };
+        let (previous_index, previous_term, leader_commit) =
+            (*previous_index, *previous_term, *leader_commit);
         let old = self.durable.hard_state;
         if previous_term > m.term
             || ((previous_index == 0) != (previous_term == 0))
@@ -252,7 +247,7 @@ impl Raft {
         }
         if m.term < old.term {
             return Ok(vec![Effect::Send(self.reply(
-                m,
+                &m,
                 Rpc::Appended {
                     success: false,
                     matching_index: self.durable.last_index(),
@@ -264,10 +259,11 @@ impl Raft {
         self.vote_context = None;
         self.clear_replication_requests();
         self.repair_requests.clear();
-        self.validate_append_entries(m, previous_index, previous_term, entries)?;
+        let tight_payloads =
+            self.validate_append_entries(&m, previous_index, previous_term, entries)?;
         if self.durable.term_at(previous_index) != Some(previous_term) {
             let mut reply = self.reply(
-                m,
+                &m,
                 if previous_index < self.durable.base_index() {
                     Rpc::Compacted {
                         index: self.durable.base_index(),
@@ -293,7 +289,7 @@ impl Raft {
                 Ok(vec![Effect::Send(reply)])
             };
         }
-        let mut suffix = None;
+        let mut suffix_offset = None;
         for (offset, entry) in entries.iter().enumerate() {
             match self.durable.entry_at(entry.index) {
                 Some(old_entry) if old_entry.term == entry.term => {
@@ -302,10 +298,7 @@ impl Raft {
                     }
                 }
                 _ => {
-                    suffix = Some(Suffix {
-                        from: entry.index,
-                        entries: entries[offset..].to_vec(),
-                    });
+                    suffix_offset = Some(offset);
                     break;
                 }
             }
@@ -313,18 +306,40 @@ impl Raft {
         let matching = entries.last().map_or(previous_index, |e| e.index);
         let commit = self.durable.commit_index.max(leader_commit.min(matching));
         let mut reply = self.reply(
-            m,
+            &m,
             Rpc::Appended {
                 success: true,
                 matching_index: matching,
             },
         );
         reply.term = hard.term;
+        // All checks and reply metadata precede consuming the original input.
+        let suffix = suffix_offset.map(|offset| {
+            let Rpc::Append { entries, .. } = &mut m.rpc else {
+                unreachable!()
+            };
+            Self::take_append_suffix(entries, offset, tight_payloads)
+        });
         if hard != old || suffix.is_some() || commit != self.durable.commit_index {
             self.persist(hard, commit, suffix, After::Reply, Some(reply))
         } else {
             Ok(vec![Effect::Send(reply)])
         }
+    }
+    fn take_append_suffix(
+        entries: &mut Vec<LogEntry>,
+        offset: usize,
+        tight_payloads: bool,
+    ) -> Suffix {
+        let from = entries[offset].index;
+        // Transfer only the allocation shape produced by the previous clone.
+        // Other shapes retain that clone's raw admission/accounting behavior.
+        let entries = if offset == 0 && entries.capacity() == entries.len() && tight_payloads {
+            std::mem::take(entries)
+        } else {
+            entries[offset..].to_vec()
+        };
+        Suffix { from, entries }
     }
     fn validate_append_entries(
         &self,
@@ -332,18 +347,26 @@ impl Raft {
         previous_index: u64,
         previous_term: u64,
         entries: &[LogEntry],
-    ) -> Result<(), RaftError> {
+    ) -> Result<bool, RaftError> {
         let mut previous = previous_term;
+        let mut tight_payloads = true;
         for (i, e) in entries.iter().enumerate() {
-            if let EntryPayload::Configuration(record) = &e.payload {
-                let activated = match &record.change {
-                    crate::membership::ConfigurationChange::Learners(next) => next.id(),
-                    crate::membership::ConfigurationChange::Joint { id, .. }
-                    | crate::membership::ConfigurationChange::Final { id } => *id,
-                };
-                if activated > m.configuration {
-                    return Err(RaftError::InvalidMessage);
+            match &e.payload {
+                EntryPayload::Configuration(record) => {
+                    let activated = match &record.change {
+                        crate::membership::ConfigurationChange::Learners(next) => next.id(),
+                        crate::membership::ConfigurationChange::Joint { id, .. }
+                        | crate::membership::ConfigurationChange::Final { id } => *id,
+                    };
+                    if activated > m.configuration {
+                        return Err(RaftError::InvalidMessage);
+                    }
+                    tight_payloads = false;
                 }
+                EntryPayload::Command { bytes, .. } => {
+                    tight_payloads &= bytes.capacity() == bytes.len();
+                }
+                EntryPayload::Noop => {}
             }
             if previous_index.checked_add(i as u64 + 1) != Some(e.index)
                 || e.term == 0
@@ -355,7 +378,7 @@ impl Raft {
             }
             previous = e.term;
         }
-        Ok(())
+        Ok(tight_payloads)
     }
 
     fn receive_appended(

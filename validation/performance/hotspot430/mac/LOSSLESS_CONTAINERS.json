@@ -1,0 +1,34 @@
+[
+  {
+    "original": "bulk-analysis/cpu.folded",
+    "original_sha256": "e72efdd279ceffe4e7bb92e433d59f70d084178278db265d4ee8e5f9b3d9c73f",
+    "original_bytes": 16409162,
+    "lossless_gzip": "bulk-analysis/cpu.folded.gz",
+    "gzip_sha256": "6178744b272be2b446142b976cef040c9f45859f876daaeb738df6a80fdea745",
+    "scope": "derived folded output, losslessly stored; original uncompressed files and original inventory remain in complete archive/target"
+  },
+  {
+    "original": "bulk-analysis/wall-sample-weights.folded",
+    "original_sha256": "3f49a67e4b63fb166817763d3880f772f06b1e9179f1d55834b6a64877a6cd8d",
+    "original_bytes": 16406028,
+    "lossless_gzip": "bulk-analysis/wall-sample-weights.folded.gz",
+    "gzip_sha256": "6fa7af486f4bc36f169e65f828c9a05b8d150ef340446b2615fed8eefca54886",
+    "scope": "derived folded output, losslessly stored; original uncompressed files and original inventory remain in complete archive/target"
+  },
+  {
+    "original": "singleton-analysis/cpu.folded",
+    "original_sha256": "6e5b97a3d7ab32a000ec02a77dc71160e16dba3fa8e7f166d80dae0f5249dfd1",
+    "original_bytes": 25646735,
+    "lossless_gzip": "singleton-analysis/cpu.folded.gz",
+    "gzip_sha256": "20ccebff79701e896b24ba8eb2cd44e80ba3d1fd02aaed5b7b10ecbe546de3b3",
+    "scope": "derived folded output, losslessly stored; original uncompressed files and original inventory remain in complete archive/target"
+  },
+  {
+    "original": "singleton-analysis/wall-sample-weights.folded",
+    "original_sha256": "937bdde01ff774230dd2e18c60b0abb1d4f029c29eb7de6e54f5563dd99858ed",
+    "original_bytes": 25639763,
+    "lossless_gzip": "singleton-analysis/wall-sample-weights.folded.gz",
+    "gzip_sha256": "02216b3a497aed56f44a06a9354aa6b374f3d3bc1069bf8a9517b2230468f2d6",
+    "scope": "derived folded output, losslessly stored; original uncompressed files and original inventory remain in complete archive/target"
+  }
+]

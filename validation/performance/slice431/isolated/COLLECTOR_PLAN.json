@@ -1,0 +1,9 @@
+{
+  "state": "prepared only; original96474 live, no archive/testcoverageclaim",
+  "collector": "collect.py --archive --terminal-receipt ACTUAL_TERMINAL.json --promotion ROOT_PROMOTION.json",
+  "guards": "actualoriginal96474 terminal0; DONE/CHECKSTATUS0; finalallstages0/testsummariesok;1427frozen+mainhashesmatch;3paths/PATCH9db76f;noexistingarchive",
+  "archive": "validation/performance/slice431",
+  "retain": "allregularcommands/logs/statuses/originalattempt1typedRevision101/attempt2configuredpublicInvalidMessage101/scopes/schema/hashinventories/PATCH/3changedsourcecopies+attemptsnapshots",
+  "exclude": "sourcefull,testtmp,buildtargets,binaries",
+  "check_target_reuse": "429debugdependencies only; currentrootcompiled/checks, freshperformanceartifactsremainseparatepostpublication"
+}

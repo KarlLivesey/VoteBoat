@@ -1,0 +1,13 @@
+{
+  "source_files_verified": 1427,
+  "all_selected_hashes_match": true,
+  "all_selected_modes_match": true,
+  "only_changed_files": [
+    "src/raft/membership_tests.rs",
+    "src/raft/owned_append_tests.rs",
+    "src/raft/receive.rs"
+  ],
+  "patch_sha256": "9db76f92c1b3db306f570773e1eb10314e6c3c73f25090cc40dc0a5b283979ab",
+  "qualification": "392allfeaturelib+201owner fromoriginal96474broad; separatehundredpass13664 andcontrolledpressurepass47583; remaining96016checks0/DONE; nooriginalstatusreplacement",
+  "publication": "pending root enabledhook; no performanceclaim"
+}

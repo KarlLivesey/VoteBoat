@@ -1,0 +1,40 @@
+test snapshot_routes::accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard ... ok
+test snapshot_routes::bounded_routing_and_wrong_binding_reject_before_transfer ... ok
+test snapshot_routes::closing_owner_drains_snapshot_wal_and_application_dependencies ... ok
+test snapshot_routes::envelopes::every_altered_snapshot_envelope_retains_the_original_live_lease ... ok
+test snapshot_routes::invalid_accepted_ticket_fences_but_returns_original_lease_for_discard ... ok
+test snapshot_routes::oversized_provider_result_fences_and_releases_only_router_owned_payload ... ok
+test snapshot_routes::recovery_budget::byte_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::checkpoint_publication_and_reconciliation_bypass_full_recovery_quota ... ok
+test snapshot_routes::recovery_budget::count_quota_retains_credit_until_router_delivery_and_retries_exact_lease ... ok
+test snapshot_routes::recovery_budget::oversized_recovery_and_invalid_limits_are_rejected_before_preparation ... ok
+test snapshot_routes::recovery_budget::provider_refusal_and_failed_owner_discard_release_only_their_credits ... ok
+test snapshot_routes::rejection_retries_keep_exact_lease_and_stale_completions_do_not_release_it ... ok
+test snapshot_routes::reservation::competing_snapshot_leases_release_speculation_and_all_finish ... ok
+test snapshot_routes::reservation::rejected_worker_releases_only_speculation_and_retry_restores_budget ... ok
+test transaction_driver_conformance::host_components_commit_reverse_and_retry_without_native_providers ... ok
+test transaction_driver_conformance::host_durable_refusal_aborts_absent_peer_and_leaves_balances_unchanged ... ok
+test transaction_driver_conformance::lost_actual_start_output_cancels_observation_then_resumes_from_quorum_status ... ok
+test transaction_driver_conformance::original_driver_output_cannot_release_a_new_drivers_credits ... ok
+
+failures:
+
+---- native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport stdout ----
+
+thread 'native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport' (579908) panicked at tests/effect_owner.rs:2352:9:
+effect-owner cluster did not drain: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 728, 634), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 0, image_bytes: 0 }), Some(SnapshotWorkUsage { requests: 0, bytes: 0 }), 300, 300), (EffectOwnerUsage { active_visits: 9, reserved_bytes: 74007106, leased: 8, persistence_requests: 1 }, WorkerUsage { requests: 1, units: 1, bytes: 944 }, OutboundUsage { batches: 0, messages: 0, bytes: 0 }, Some(SnapshotRouterUsage { requests: 4, image_bytes: 409600 }), Some(SnapshotWorkUsage { requests: 4, bytes: 430468 }), 334, 358)]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- native::native_shared_peer_quota_pressure_reconnect_restart_and_retry stdout ----
+
+thread 'native::native_shared_peer_quota_pressure_reconnect_restart_and_retry' (591700) panicked at tests/support/native_pressure.rs:177:5:
+facade progress timed out: [(EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (2, 2)), (EffectOwnerUsage { active_visits: 0, reserved_bytes: 0, leased: 0, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 0, image_bytes: 0 }, SnapshotWorkUsage { requests: 0, bytes: 0 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 0, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (2, 2)), (EffectOwnerUsage { active_visits: 13, reserved_bytes: 59209792, leased: 13, persistence_requests: 0 }, WorkerUsage { requests: 0, units: 0, bytes: 0 }, Some((SnapshotRouterUsage { requests: 4, image_bytes: 409600 }, SnapshotWorkUsage { requests: 4, bytes: 429347 })), OutboundUsage { batches: 0, messages: 0, bytes: 0 }, ReplicaDriverUsage { control_persists: 0, data_persists: 0, retries: 9, failed_results: 0, reclaims: 0 }, Some(PeerDriverUsage { attempts: 0, staged_batches: 0, quarantined_batches: 0, failed_send: false, failed_receive: false }), (0, 0))]
+
+
+failures:
+    native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport
+    native::native_shared_peer_quota_pressure_reconnect_restart_and_retry
+
+test result: FAILED. 201 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 386.98s
+
+error: test failed, to rerun pass `--test effect_owner`

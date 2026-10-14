@@ -1,0 +1,52 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source)
+   Compiling voteboat-matched-framework v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/benchmarks/matched)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.48s
+     Running unittests src/main.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/matched-checks/debug/deps/voteboat_matched_framework-76e51d1e5c426dbe)
+
+running 43 tests
+test application::tests::historical_noop_checkpoint_restores_only_its_exact_boundary ... ok
+test application::tests::partial_prefix_error_keeps_original_application_frontier ... ok
+test attribution::gaps::tests::complete_ordinals_produce_exact_gaps_and_actual_whole_gap_maxima ... ok
+test attribution::gaps::tests::disabled_mode_ignores_poisoned_marks_counters_and_missing_clock_inputs ... ok
+test attribution::gaps::tests::missing_prefix_extra_calls_or_failed_methods_cannot_certify_a_successful_helper ... ok
+test attribution::gaps::tests::missing_stale_and_backward_marks_invalidate_only_the_final_diagnostics ... ok
+test attribution::gaps::tests::overflow_is_checked_before_any_gap_counter_advances ... ok
+test attribution::gaps::tests::partial_helper_error_does_not_read_or_fabricate_a_completed_gap ... ok
+test attribution::tests::disabled_recorder_reads_no_clock_cells_or_snapshots ... ok
+test attribution::tests::exhausted_real_snapshot_observer_preserves_successful_provider_outcome ... ok
+test attribution::tests::interval_accounting_is_checked_and_overflow_is_atomic ... ok
+test attribution::tests::invalid_observation_does_not_interrupt_a_provider_and_is_rejected_at_report ... ok
+test attribution::tests::scoped_provider_deltas_exclude_setup_and_do_not_invent_maxima ... ok
+test budget_tests::campaign_cli_default_and_finite_bounds_are_validated ... ok
+test envelopes::tests::empty_owned_budget_is_derived_before_launch_without_changing_native_defaults ... ok
+test envelopes::tests::fixed_request_profiles_derive_equal_original_bounds_and_independent_replication ... ok
+test guard::tests::cleanup_expiry_is_finite_and_does_not_substitute_a_success_report ... ok
+test guard::tests::original_failure_type_and_cleanup_only_failure_are_preserved ... ok
+test guard::tests::timed_out_owned_clients_are_canceled_and_cleanup_still_runs ... ok
+test guard::tests::zero_budget_ready_result_succeeds_without_waiting ... ok
+test store::tests::completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes ... ok
+test store::tests::disabled_comparison_preserves_equality_without_touching_observer_cells ... ok
+test store::tests::protected_checkpoint_comparison_keeps_completed_gate_and_distinct_phase ... ok
+test tests::rounding_matches_equal_upstream_client_batches ... ok
+test voteboat_engine::actor::tests::checkpoint_scopes_observe_actual_helpers_and_nested_retention ... ok
+test voteboat_engine::actor::tests::partial_compact_helper_error_keeps_original_failure_without_gap_success ... ok
+test voteboat_engine::actor::tests::preloaded_actor_admits_the_exact_wide_bound_and_completes_all_originals ... ok
+test voteboat_engine::actor::tests::provider_failures_keep_original_outcomes_and_are_scoped ... ok
+test voteboat_engine::actor::tests::replies::actor_drop_cancels_all_admitted_and_deferred_original_waits ... ok
+test voteboat_engine::actor::tests::replies::bounded_churn_preserves_receipts_and_reuses_retained_capacity ... ok
+test voteboat_engine::actor::tests::replies::dropped_client_and_missing_result_stop_delivery_in_input_order ... ok
+test voteboat_engine::actor::tests::replies::duplicate_existing_replaces_old_wait_and_keeps_only_admitted_prefix ... ok
+test voteboat_engine::actor::tests::replies::duplicate_within_batch_replaces_first_wait_and_cancels_unvisited_tail ... ok
+test voteboat_engine::actor::tests::replies::near_bound_partial_rotation_completes_every_original_and_reports_capacity ... ok
+test voteboat_engine::actor::tests::replies::nonmonotonic_full_width_ids_commit_in_proposal_order_with_every_receipt ... ok
+test voteboat_engine::actor::tests::replies::shape_and_budget_gates_preserve_prior_pending_and_proposal_prefix ... ok
+test voteboat_engine::cancellation_tests::canceled_cluster_shutdown_keeps_handles_owned_and_drop_aborts_every_actor ... ok
+test voteboat_engine::tests::compacted_prefix_reaches_a_lagging_follower_through_actual_snapshot_install ... ok
+test voteboat_engine::tests::queued_three_voter_originals_keep_every_receipt_and_respect_the_bound ... ok
+test workload::aggregation_tests::post_clock_aggregation_preserves_each_original_sample_and_rejects_malformed_counts ... ok
+test workload::tests::actual_maintenance_keeps_original_results_and_all_follower_prefixes ... ok
+test workload::tests::both_engines_finish_every_original_for_single_and_four_entry_requests ... ok
+test workload::tests::unavailable_upstream_attribution_is_rejected_explicitly ... ok
+
+test result: ok. 43 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.88s
+

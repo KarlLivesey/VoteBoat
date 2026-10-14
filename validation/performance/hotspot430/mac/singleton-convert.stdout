@@ -1,0 +1,1 @@
+{"cpu_us": 36765790, "folded_stacks": 3050, "output": "singleton-analysis", "threads": 18, "totals": {"any_unresolved_stack_cpu_us": 1904594, "cpu_us": 36765790, "malformed_stack_cpu_us": 0, "null_stack_cpu_us": 0, "positive_cpu_samples": 86827, "samples": 91745, "unresolved_leaf_cpu_us": 987736, "wall_sample_weight": 349542, "zero_cpu_delta_samples": 4918}}

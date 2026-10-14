@@ -1,0 +1,29 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source)
+error[E0368]: binary assignment operation `+=` cannot be applied to type `identity::LogRevision`
+   --> src/raft/owned_append_tests.rs:103:5
+    |
+103 |     wrong.revision += 1;
+    |     --------------^^^^^
+    |     |
+    |     cannot use `+=` on type `identity::LogRevision`
+    |
+note: an implementation of `AddAssign<{integer}>` might be missing for `identity::LogRevision`
+   --> src/identity.rs:21:9
+    |
+ 21 |           pub struct $name(NonZeroU64);
+    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ must implement `AddAssign<{integer}>`
+...
+ 42 | / id64!(
+ 43 | |     NodeId,
+ 44 | |     FailureDomainId,
+ 45 | |     GroupIncarnation,
+...   |
+ 68 | |     ReadInvocationGeneration
+ 69 | | );
+    | |_- in this macro invocation
+note: the trait `AddAssign` must be implemented
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/core/src/ops/arith.rs:768:0
+    = note: this error originates in the macro `id64` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+For more information about this error, try `rustc --explain E0368`.
+error: could not compile `voteboat` (lib test) due to 1 previous error

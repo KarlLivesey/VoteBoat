@@ -1,0 +1,9 @@
+{
+  "command": "initial completion validation: frozen pair case(report, off, 20000000, 4096, 4)",
+  "exit": 1,
+  "error": "wrong original completion",
+  "cause": "original Settings normalizes requested_operations down to clients*batch multiple; frozen pair helper assumes power-of-two equal requested/actual",
+  "focused_fix": "validate raw requested and normalization formula first, then check all other invariants with normalized requested field in a separate deep copy only",
+  "recordings_repeated": false,
+  "raw_outputs_modified": false
+}

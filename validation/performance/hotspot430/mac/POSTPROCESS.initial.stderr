@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "/tmp/voteboat-comparison430-LDd4qx/phase-diagnostic-check.py", line 119, in case
+    need(settings['operations'] == settings['requested_operations'] == report['completed_originals'] == originals, 'wrong original completion')
+  File "/tmp/voteboat-comparison430-LDd4qx/artifact-guard.py", line 14, in need
+    raise ValueError(label)
+ValueError: wrong original completion

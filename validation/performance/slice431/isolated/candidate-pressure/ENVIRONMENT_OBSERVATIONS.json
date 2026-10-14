@@ -1,0 +1,31 @@
+{
+  "loadavg_before": "6.66 7.34 8.17 11/4127 997886",
+  "loadavg_after": "6.99 7.39 8.18 5/4092 1000705",
+  "cpu_jiffy_deltas": {
+    "user": 2331,
+    "nice": 3038,
+    "system": 1603,
+    "idle": 5427,
+    "iowait": 2865,
+    "irq": 60,
+    "softirq": 27,
+    "steal": 0,
+    "guest": 0,
+    "guest_nice": 0
+  },
+  "pressure_total_microsecond_deltas": {
+    "/proc/pressure/cpu": {
+      "some": 171188,
+      "full": 0
+    },
+    "/proc/pressure/memory": {
+      "some": 566,
+      "full": 557
+    },
+    "/proc/pressure/io": {
+      "some": 3965640,
+      "full": 2490891
+    }
+  },
+  "scope": "whole-hostbefore/afterobservations, includescaptureoverhead; nottestCPU/blockedtime, no causal orallocator/IOattribution; rawdiskstatsretainedwithoutsumdoublecountingpartitions"
+}

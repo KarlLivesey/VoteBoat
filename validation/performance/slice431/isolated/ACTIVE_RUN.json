@@ -1,0 +1,7 @@
+{
+  "original_session": 96474,
+  "attempt": 3,
+  "stage_at_cleanup": "clippy-native",
+  "prior_status": "101 from terminal fixture attempt2, archived there; removed stale status while original run remains live",
+  "runner_pid": 429833
+}

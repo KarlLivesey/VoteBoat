@@ -1,0 +1,194 @@
+{
+  "archive": "/home/karllivesey/Documents/ChatGPT/VoteBoat/validation/performance/slice431",
+  "regular_files": 249,
+  "bytes": 13733077,
+  "hashes_verified": true,
+  "coverage": {
+    "focused-owned-append": [
+      {
+        "result": "ok",
+        "passed": 6,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 386,
+        "log_line": 13,
+        "preceding_execution_line": "Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-ebeb84c4129d638f)"
+      }
+    ],
+    "remaining-all": [
+      {
+        "result": "ok",
+        "passed": 19,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 25,
+        "preceding_execution_line": "Running tests/log_store.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/log_store-7ebe8448ce0d9035)"
+      },
+      {
+        "result": "ok",
+        "passed": 35,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 66,
+        "preceding_execution_line": "Running tests/provider_conformance.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/provider_conformance-a6834a5dbc2f6607)"
+      },
+      {
+        "result": "ok",
+        "passed": 79,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 151,
+        "preceding_execution_line": "Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/raft-8b84ec38cb2b49f7)"
+      },
+      {
+        "result": "ok",
+        "passed": 27,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 184,
+        "preceding_execution_line": "Running tests/snapshot.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/snapshot-02c9fd3d90f42471)"
+      }
+    ],
+    "affected-core": [
+      {
+        "result": "ok",
+        "passed": 312,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 319,
+        "preceding_execution_line": "Running unittests src/lib.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-2a5d52f7d7c87717)"
+      },
+      {
+        "result": "ok",
+        "passed": 195,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 520,
+        "preceding_execution_line": "Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-32c31e5c4ab15e4b)"
+      },
+      {
+        "result": "ok",
+        "passed": 0,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 526,
+        "preceding_execution_line": "Running tests/log_store.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/log_store-873b8ca2c81b5cc5)"
+      },
+      {
+        "result": "ok",
+        "passed": 20,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 552,
+        "preceding_execution_line": "Running tests/provider_conformance.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/provider_conformance-b5f1fe56e0c02439)"
+      },
+      {
+        "result": "ok",
+        "passed": 29,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 587,
+        "preceding_execution_line": "Running tests/raft.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/raft-3fbd1a477b13e9a4)"
+      },
+      {
+        "result": "ok",
+        "passed": 12,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 605,
+        "preceding_execution_line": "Running tests/snapshot.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/snapshot-3ee735058de34715)"
+      }
+    ],
+    "actual-services": [
+      {
+        "result": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 201,
+        "log_line": 9,
+        "preceding_execution_line": "Running tests/counter_service.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/counter_service-a30382866c6eb540)"
+      }
+    ],
+    "matched-tests": [
+      {
+        "result": "ok",
+        "passed": 43,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 51,
+        "preceding_execution_line": "Running unittests src/main.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/matched-checks/debug/deps/voteboat_matched_framework-76e51d1e5c426dbe)"
+      }
+    ],
+    "original96474-affected-all": [
+      {
+        "result": "ok",
+        "passed": 392,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 1585,
+        "preceding_execution_line": "Running `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README='' CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/ring-b4b4d2c63cd52e10/out:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/voteboat-e18197108413e629/out /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/voteboat-ebeb84c4129d638f --test-threads=1`"
+      },
+      {
+        "result": "FAILED",
+        "passed": 201,
+        "failed": 2,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 0,
+        "log_line": 1812,
+        "preceding_execution_line": "Running `CARGO=/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/bin/cargo CARGO_BIN_EXE_voteboat-counter=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/voteboat-counter CARGO_BIN_EXE_voteboat-directory=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/voteboat-directory CARGO_BIN_EXE_voteboat-transfer=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/voteboat-transfer CARGO_MANIFEST_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source CARGO_MANIFEST_PATH=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice431/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README='' CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' LD_LIBRARY_PATH='/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/ring-b4b4d2c63cd52e10/out:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug:/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib/rustlib/x86_64-unknown-linux-gnu/lib:/home/karllivesey/.rustup/toolchains/stable-x86_64-unknown-linux-gnu/lib:/opt/t3code-bin/usr/lib' OUT_DIR=/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/build/voteboat-e18197108413e629/out /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b --test-threads=1`"
+      }
+    ],
+    "original13664-hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport": [
+      {
+        "result": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 202,
+        "log_line": 7,
+        "preceding_execution_line": "Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b)"
+      }
+    ],
+    "original13664-native_shared_peer_quota_pressure_reconnect_restart_and_retry": [
+      {
+        "result": "FAILED",
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0,
+        "measured": 0,
+        "filtered_out": 202,
+        "log_line": 33,
+        "preceding_execution_line": "Running tests/effect_owner.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice429/checks/debug/deps/effect_owner-3b9732cae5c45d5b)"
+      }
+    ]
+  }
+}
