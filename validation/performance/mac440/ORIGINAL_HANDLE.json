@@ -1,0 +1,13 @@
+{
+  "original_ssh_handle": 11390,
+  "actual_terminal_tool": "0d3e62",
+  "exit": 0,
+  "remote_pid": 15845,
+  "remote_job": "/tmp/voteboat-mac440-fc4be25-7YJQl3",
+  "status": "DONE",
+  "setup_handle": 58822,
+  "setup_exit": 0,
+  "collection_handle": 68103,
+  "collection_exit": 0,
+  "no_restarts_or_repeated_tests_builds": true
+}

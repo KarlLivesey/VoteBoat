@@ -263,10 +263,54 @@ session must preserve default fallback, per-candidate gates, errors/receipt mini
 and partial-prefix ownership. Neither audit is an implemented speedup or a new
 prerequisite for this complete private-key experiment. Full macro scope is unchanged.
 
+440 is globally rejected after all48 Linux/Mac cases actually terminate0,
+with exact original counts/frontiers and source/artifact guards. Bulk requested20M
+completes19,988,480 originals per case with maintenance/catch-up active. Paired
+435→440 OFF medians are Linux6,681,363→6,660,744 originals/s and
+p99 3.618368→3.901289ms; Mac4,707,438→4,718,780 originals/s and
+4.124000→4.065667ms. Two of three bulk rate pairs regress on each host.
+Linux singleton improves110,880→116,829/s and17.744→16.812µs in all three
+pairs; Mac56,679→56,527/s and30.625→31.000µs has two rate/p99 losses.
+The tuple reduction32→24 bytes is verified, but useful both-host throughput
+improvement is not. No layout/hash/reserve variants are selected.
+[Linux bulk](../validation/performance/comparison440/linux/README.md),
+[Linux singleton](../validation/performance/comparison440-singleton/linux/README.md),
+[Mac full campaign](../validation/performance/comparison440-mac/RESULTS_README.md).
+
+Published440 isfc4be25b with the full enabled hook at zero.
+[Linux artifact qualification](../validation/performance/matched440-linux/README.md)
+and [Mac qualification](../validation/performance/mac440/README.md) prove current
+source, compiler, asserted profile, freshly compiled root/upstream/executable and
+ELF/debug symbols; Mac67 tests/fmt/strict and actual three CLI controls pass.
+Root verifies every220 Linux and195 Mac completed-campaign payload hash. Both
+hosts finish timing before collection; initial setup-guard refusal and status-only
+poll failure remain, with no successful-case reruns. Logical queue/retention
+counters do not prove physical memory/debt bounds or zero refusals. All latency
+tails, observer perturbations and raw errors remain. No minimum acceptance or
+native-service gain is inferred.
+
+[441 schema](../validation/performance/slice441/SCHEMA.md) precedes editing:
+restore the retained435 Actor and checked439 replies diagnostic, remove only the
+two private compact-key modules, and preserve the independent64 controls plus
+frozen rejected440 source/tests. Reuse exact unchanged435 qualification/artifacts;
+run focused replies8/formatter/strict/source projections and the full publication
+hook. Fresh committed-source Mac scoped checks follow publication; no unchanged
+performance build, old CLI/profile/benchmark or unrelated full suite is needed.
+
+441 is locally checked: original18713 actually ends0/DONE with eight existing
+replies/budget/churn controls, matched formatting/strict all-target Clippy and
+exact source/projection guards. All1,434 remaining inputs match checked439 hashes
+and modes; Actor matches435, engine differs only by the existing cfg(test) client
+outcomes loader, and two compact-key modules are absent. Root verifies all37
+archive payloads and source restoration. [441 main evidence](../validation/performance/slice441/main/README.md).
+Unchanged root scopes and immutable435 performance artifacts/profiles are reused;
+no441 rate or native-service gain is claimed. Full hook publication and focused
+Mac qualification remain the final rollback steps.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current:440 compact full-width pending key | Remove unused bucket padding in the measured admission table | Checked439 restoration, saved435 map profiles and [440 schema](../validation/performance/slice440/SCHEMA.md) | Full-ID/Hash/layout equivalence plus unchanged outcomes, strict publication, fresh artifacts and one paired bulk/singleton decision on both hosts | P9.0/P9.1/P9.3 |
-| Next: bounded durable batching under mixed load | Amortize physical barriers while preserving cold-neighbor progress | Native421 evidence and existing publication/ticket contracts; explicit ready/admission/fairness schema | Real applications with sustained hot/cold/skew, retries/recovery, latency and bounded debt before changing defaults | P9.1/P9.2/P9.3 |
+| Current:441 checked restoration | Restore retained435 after440 has no useful both-host tradeoff | Completed48 paired cases and [441 schema](../validation/performance/slice441/SCHEMA.md) | Exact production/test projection, focused replies/strict/full hook and targeted Mac checks; preserve every440 result and failure | P9.0/P9.1/P9.3 |
+| Next: bounded Counter ready admission context | Build pending reservation state once per collected batch | Checked441 restoration and actual440 admission audit; separate optional/default-fallback application schema | Serial-equivalent errors/receipts/partial prefixes and conformance; checked publication and measured real durable/hot-cold workloads on both hosts | P9.1/P9.2/P9.3 |
 | Following: bounded persistence overlap and placement | Expand sustained useful capacity across existing composition contracts | Measured batching/fairness and a typed partial-progress/durability dependency plan | Exact original outcomes, crash/retry/fencing and active maintenance; offered-load/headroom, shared barriers, placement and P8 costs remain required | P9.1/P9.2/P9.3/P9.4 |
 
 The macro plan is reviewed and unchanged: no milestone closes from borrowed

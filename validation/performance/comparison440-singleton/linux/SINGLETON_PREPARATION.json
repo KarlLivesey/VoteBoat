@@ -1,0 +1,25 @@
+{
+  "scope": "preparedsingle diagnostic only; no capacitytiming",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "candidate_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "pair_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/CONFIG_PAIR.linux.json",
+  "pair_config_sha256": "4e033d96381c8e302094875ebba6ef3f4669d4bfa12c3a13b79fffcf7e596585",
+  "runner_sha256": "0460076ab8ad70c108effd33f5081ee26661ca65c412d20f75187cd3e0b5e11f",
+  "phase_driver_sha256": "2c8033614b0a6a0f63ddf2e36c0b1c44acdea0368725dd55de404eec196c821e",
+  "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "clients": 1,
+  "batch": 1,
+  "requested_operations": 1048576,
+  "actual_originals": 1048576,
+  "requests": 1048576,
+  "warmup": 1024,
+  "expected_frontiers": [
+    1049601,
+    1049601,
+    1049601
+  ],
+  "cases": 12,
+  "same_immutable_artifacts_compiler_flags_timers_maintenance": true,
+  "separate_fresh_output": "linux-singleton-results",
+  "timing_authorized": false
+}

@@ -1,0 +1,296 @@
+{
+  "scope": "Three rotating Linux20Mrequested bulk c4096/b4 framework diagnostics with active maintenance; actual19,988,480 originals per case; not fullP9 acceptance.",
+  "raw_results_scope_label": "paired20Mrequested bulk diagnostic with active maintenance; only two selected cells/no complete sustained/fullcurve/durable qualification",
+  "case_count": 12,
+  "failures": [],
+  "variants": {
+    "baseline": {
+      "cases": [
+        {
+          "trial": 1,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 7317384.230756053,
+          "p99_ms": 3.288998
+        },
+        {
+          "trial": 2,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6231146.431988847,
+          "p99_ms": 4.988932
+        },
+        {
+          "trial": 3,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6681362.874135946,
+          "p99_ms": 3.618368
+        }
+      ],
+      "diagnostic_ranges": {
+        "retained_entries": [
+          1000,
+          4108
+        ],
+        "peak_retained_entries": [
+          8036,
+          22320
+        ],
+        "peak_peer_queue": [
+          5,
+          33
+        ],
+        "peak_client_queue": [
+          0,
+          4096
+        ],
+        "checkpoint_count": [
+          3831,
+          3876
+        ],
+        "snapshot_installs": [
+          0,
+          1689
+        ],
+        "maximum_proposal_width": [
+          0,
+          16384
+        ],
+        "persistence_units": [
+          23873,
+          81725
+        ]
+      }
+    },
+    "candidate": {
+      "cases": [
+        {
+          "trial": 1,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 7244144.778173288,
+          "p99_ms": 3.067904
+        },
+        {
+          "trial": 2,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6660744.1472648075,
+          "p99_ms": 4.001597
+        },
+        {
+          "trial": 3,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6402542.501451185,
+          "p99_ms": 3.901289
+        }
+      ],
+      "diagnostic_ranges": {
+        "retained_entries": [
+          1004,
+          4048
+        ],
+        "peak_retained_entries": [
+          8032,
+          22284
+        ],
+        "peak_peer_queue": [
+          5,
+          26
+        ],
+        "peak_client_queue": [
+          0,
+          4096
+        ],
+        "checkpoint_count": [
+          3844,
+          3881
+        ],
+        "snapshot_installs": [
+          0,
+          1698
+        ],
+        "maximum_proposal_width": [
+          0,
+          16384
+        ],
+        "persistence_units": [
+          23076,
+          74739
+        ]
+      }
+    },
+    "on": {
+      "cases": [
+        {
+          "trial": 1,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6329401.727083096,
+          "p99_ms": 4.677166
+        },
+        {
+          "trial": 2,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6503427.764875646,
+          "p99_ms": 3.833832
+        },
+        {
+          "trial": 3,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 6725185.525767659,
+          "p99_ms": 3.547825
+        }
+      ],
+      "diagnostic_ranges": {
+        "retained_entries": [
+          1732,
+          5184
+        ],
+        "peak_retained_entries": [
+          8000,
+          22380
+        ],
+        "peak_peer_queue": [
+          7,
+          34
+        ],
+        "peak_client_queue": [
+          0,
+          4096
+        ],
+        "checkpoint_count": [
+          3846,
+          3879
+        ],
+        "snapshot_installs": [
+          0,
+          1731
+        ],
+        "maximum_proposal_width": [
+          0,
+          16384
+        ],
+        "persistence_units": [
+          23363,
+          78702
+        ]
+      }
+    },
+    "openraft": {
+      "cases": [
+        {
+          "trial": 1,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 3437502.03090733,
+          "p99_ms": 7.709604
+        },
+        {
+          "trial": 2,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 3779263.4186351416,
+          "p99_ms": 5.574553
+        },
+        {
+          "trial": 3,
+          "completed_originals": 19988480,
+          "completed_requests": 4997120,
+          "applied_frontiers": [
+            19989505,
+            19989505,
+            19989505
+          ],
+          "originals_per_second": 3201713.1292404197,
+          "p99_ms": 8.22964
+        }
+      ],
+      "diagnostic_ranges": {}
+    }
+  },
+  "pairs": [
+    {
+      "trial": 1,
+      "candidate_off_rate_ratio": 0.9899910336435623,
+      "candidate_off_p99_ratio": 0.9327777031180925,
+      "on_rate_ratio_to_candidate_off": 0.8737265641285461,
+      "on_p99_ratio_to_candidate_off": 1.5245477042306408
+    },
+    {
+      "trial": 2,
+      "candidate_off_rate_ratio": 1.068943607723698,
+      "candidate_off_p99_ratio": 0.8020949173089551,
+      "on_rate_ratio_to_candidate_off": 0.9763815605417357,
+      "on_p99_ratio_to_candidate_off": 0.9580754883612718
+    },
+    {
+      "trial": 3,
+      "candidate_off_rate_ratio": 0.9582689373504775,
+      "candidate_off_p99_ratio": 1.0781902227744662,
+      "on_rate_ratio_to_candidate_off": 1.0503929531499938,
+      "on_p99_ratio_to_candidate_off": 0.9093981502011258
+    }
+  ],
+  "refusals": "No separate refusal counter exposed; no invented zero refusals. All cases returned exit0 and exact completed counts.",
+  "memory": "Only logical retained/queue/proposal counts are exposed. No RSS/bucket/debt-bytes time series captured; GNU time files contain elapsed/user/system only. Available capacity diagnostic is separate dev evidence, not physical-memory proof."
+}

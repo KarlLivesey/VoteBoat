@@ -1,0 +1,15 @@
+import json,subprocess
+from pathlib import Path
+j=Path('/tmp/voteboat-comparison440-UZB9aq');outputs={}
+for cell,originals,requests,frontier in [('bulk',19988480,4997120,19989505),('singleton',1048576,1048576,1049601)]:
+ p=j/(cell+'-results');assert(j/(cell+'-STATUS')).read_text().strip()=='0'and(j/(cell+'-STAGE')).read_text().strip()=='DONE'
+ with(j/(cell+'-summary.log')).open('w')as o:subprocess.run(['/usr/bin/python3',str(j/'summarize.py'),str(p)],stdout=o,check=True)
+ d=json.loads((p/'RESULTS.json').read_text());s=json.loads((p/'SUMMARY.json').read_text());assert len(d['cases'])==12and not d['failures'];rows=d['cases']
+ for v in rows:r=v['report'];assert r['completed_originals']==originals and r['completed_requests']==requests and r['applied_frontiers']==[frontier]*3
+ pairs=[]
+ for t in [1,2,3]:
+  b=next(v['report']for v in rows if v['trial']==t and v['variant']=='baseline');c=next(v['report']for v in rows if v['trial']==t and v['variant']=='candidate');pairs.append({'trial':t,'baseline_originals_per_second':b['operations_per_second'],'candidate_originals_per_second':c['operations_per_second'],'rate_ratio':c['operations_per_second']/b['operations_per_second'],'baseline_p99_ms':b['request_p99_ns']/1e6,'candidate_p99_ms':c['request_p99_ns']/1e6})
+ diags=[q for v in rows if v['variant']=='candidate'for q in(v['report'].get('diagnostics')or[])];limits={k:{'min':min(q[k]for q in diags),'max':max(q[k]for q in diags)}for k in['retained_entries','peak_retained_entries','peak_peer_queue','peak_client_queue','checkpoint_count','snapshot_installs','maximum_proposal_width']};stderr=[str(f.name)for f in p.glob('*.stderr')if f.stat().st_size];assert all(f.read_text().strip()=='0'for f in p.glob('*.exit'))
+ out={'cell':cell,'cases':12,'all_counts_frontiers_pass':True,'completed_originals_each':originals,'completed_requests_each':requests,'warmup':1024,'frontiers':[frontier]*3,'guard_before_after_and_output_checker':0,'stderr_nonempty':stderr,'failures':[],'no_separate_refusal_counter':True,'maximum_RSS_measured':False,'median_variants':s['cells'][0]['variants'],'off_pairs':pairs,'on_p99_ms':[v['report']['request_p99_ns']/1e6for v in rows if v['variant']=='on'],'candidate_logical_diagnostics':limits,'disposition':'Decision pending both-host utility; no variant retune or acceptance claim','limits':['Logicalqueues/retention notphysicalmemory/debt proof.','Attributionnestedinclusivewall notsummedCPU.','No fullP9acceptance; no allocation/probing/hashcause isolated.']};(p/'COMPACT_READOUT.json').write_text(json.dumps(out,indent=2)+'\n');outputs[cell]=out
+(j/'CAMPAIGN_END.json').write_text(json.dumps({'bulk_originalSSH':27475,'bulk_actual_terminal_tool':'cc0c9e','bulk_actual_exit':0,'singleton_originalSSH':17036,'singleton_actual_terminal_tool':'b03848','singleton_actual_exit':0,'all24_once':True,'no_interimcopies_analysis_archive':True,'disposition':'Pending root both-host decision'},indent=2)+'\n')
+print(json.dumps(outputs))

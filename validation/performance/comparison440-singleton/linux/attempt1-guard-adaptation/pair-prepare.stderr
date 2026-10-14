@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/prepare-pair.py", line 92, in <module>
+    main()
+    ~~~~^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/prepare-pair.py", line 79, in main
+    guard.verify(baseline)
+    ~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/artifact-guard.py", line 26, in verify
+    need(config['source_commit'] in (REQUIRED_BASELINE_COMMIT, REQUIRED_CANDIDATE_COMMIT), 'wrong published source')
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/artifact-guard.py", line 15, in need
+    raise ValueError(label)
+ValueError: wrong published source

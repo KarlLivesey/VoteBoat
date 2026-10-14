@@ -1,0 +1,7 @@
+# Slice441 checked rollback
+
+Restored Actor byte-exact retained435 (5c2390cb) and replies diagnostic byte-exact439 (75f6093f), deleting only the two rejected pending_key modules. Existing64 original-outcome/client controls remain. Engine matches435 plus the sole cfg(test) client_outcomes loader. Complete1436-before/1434-after selected SHA/mode inventories, PROJECTION and frozen changed/deleted source files prove all1432 other selected inputs unchanged and every remaining input exact439. Rejected440 source/tests remain independently preserved in slice440.
+
+Original runner18713 exited0/DONE. Eight existing replies/budget/churn/rotation tests passed (56 filtered), standalone formatting and strict all-target Clippy passed, exact final source/projection/mode/deletion guard passed. Raw commands/stdout/stderr/exits and compiler records are retained; actual compiler/Cargo equal435 artifact records. No failures or retries occurred. No full64/root functional suite, fresh release artifact, old CLI/profile/benchmark or Mac work ran. ROOT_REUSE records the unchanged1410 selected inputs outside matched/src; no new root execution is claimed.
+
+Actual dev available-insertion-capacity diagnostics are retained without memory/RSS or rate claims. SHA256SUMS covers every regular archive file except itself. No binaries/build trees/WAL states/full source duplication. The parent owns commit/push with the enabled full hook and fresh committed Mac focused rollback qualification; those are not claimed here.

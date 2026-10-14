@@ -1,0 +1,7 @@
+{
+  "actual_tool_chunk": "d3c34a",
+  "actual_tool_exit": 1,
+  "actual_inner_pair_prepare_exit": 1,
+  "cause": "Ignoring baselinecommitembedded438substring duringbroad slice-labelreplacement changed1438\u21921440; honestpublishedsourceguard refusedbeforetiming.",
+  "repair": "Restoreexact immutable435 requiredbaselinecommit5c2390cb98d11901163e143815f5fa17199dc0f2 only. Actualsource/artifacts/config/compiler/checker unchanged."
+}

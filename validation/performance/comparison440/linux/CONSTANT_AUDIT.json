@@ -1,0 +1,14 @@
+{
+  "baseline_guard_constants": {
+    "REQUIRED_BASELINE_COMMIT": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+    "REQUIRED_CANDIDATE_COMMIT": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+    "UPSTREAM_COMMIT": "e88bb40707f2e511d8ecc44d31edcb1d814a11a8"
+  },
+  "immutable_baseline_config_bytehash_equal_to438": true,
+  "immutable_baseline_artifact_source_symbols_compiler_identity_equal_to438": true,
+  "phase_checker_bytehash_equal": true,
+  "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "current_positive_guard_status": "0",
+  "initial_guard_failure": "attempt1-guard-adaptation/pair-prepare.stderr",
+  "no_build_cli_or_negative_controls_repeated": true
+}

@@ -1,0 +1,14 @@
+{
+  "commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "original_session": 31578,
+  "actual_terminal_tool": "f01b23",
+  "exit": 0,
+  "full_enabled_hook_all_zero": true,
+  "github_main_verified_exact": true,
+  "checked_tests": 67,
+  "actual_linux_layout_tuple_bytes": [
+    32,
+    24
+  ],
+  "performance_status": "candidate only; paired runs pending"
+}

@@ -1,0 +1,16 @@
+{
+  "status": "LOCAL_DRIVERS_PREPARED_WAIT_QUALIFIED_ARTIFACTS",
+  "candidate_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "baseline_config_sha256": "3c95bf277078a83f8867321e5ab4ed1122cf78e5d21991d0214126df79fa63ba",
+  "baseline_config_copied_byte_exact": true,
+  "phase_checker_sha256": "a584d3df73a342494b4bb1400d904225132b54b82d1384d09acae665eacfb7b5",
+  "phase_checker_byte_exact_438": true,
+  "syntax": "five Python AST + two shell bash-n pass",
+  "actual_refusals_after_qualification": [
+    "missing_pending_key",
+    "missing_pending_key_tests"
+  ],
+  "no_old_refusals_rerun": true,
+  "no_remote_setup_or_timing": true
+}

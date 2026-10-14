@@ -1,0 +1,46 @@
+{
+  "source_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "source_inputs": 1436,
+  "compiled_inputs": 1430,
+  "changed_inputs_vs435": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key/tests.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs",
+    "benchmarks/matched/src/voteboat_engine/client_outcomes.rs"
+  ],
+  "fresh_build_original_handle": 59010,
+  "fresh_build_actual_terminal_tool": "c2f9cb",
+  "fresh_build_exit": 0,
+  "fresh_build_stage": "DONE",
+  "actual_cli_terminal_tool": "9edaf8",
+  "actual_cli_exit": 0,
+  "same_linux435_compiler_tools_profile": true,
+  "four_fresh_false": true,
+  "root_buildscript_fresh_false": true,
+  "ordinary_assertions_overflow_enabled": true,
+  "release_reference_oracle_absent": true,
+  "source_derived_observer": [
+    29,
+    4,
+    15
+  ],
+  "original_copy_artifact_hashes_verified": true,
+  "symbols": {
+    "original": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "1294553ab38d3c579f696bb488e12a92de439bfa29dffbaa8828295265efe808",
+    "bytes": 34694088,
+    "executable_sha256": "256936e1d53e23ac3a54566d08340771fe5783dc41d80aa0326764deac2b3f30",
+    "cargo_filenames": [
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "functional_reuse_metadata_sha256": "178416d8ed6f361aab5d22a7026a593b3e3168f2536e76d84b4d3db1e98974e8",
+  "source_inventory_sha256": "0d435d4d384491b531205b7a34c772bcf35a3b2208f4f42bc17b1a68f8ecc59e",
+  "artifact_receipt_sha256": "c395878b89e6119ced1593d93acc6d33e7aeba54d3cfadc7dd113f0998db22b0",
+  "physical_modes": "exactqualified1436modes including7private0600keys; no readonlychmod mutation",
+  "no_capacity_or_profile_run": true
+}

@@ -1,0 +1,11 @@
+{
+  "bulk_originalSSH": 27475,
+  "bulk_actual_terminal_tool": "cc0c9e",
+  "bulk_actual_exit": 0,
+  "singleton_originalSSH": 17036,
+  "singleton_actual_terminal_tool": "b03848",
+  "singleton_actual_exit": 0,
+  "all24_once": true,
+  "no_interimcopies_analysis_archive": true,
+  "disposition": "Pending root both-host decision"
+}

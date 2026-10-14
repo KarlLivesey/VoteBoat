@@ -1,0 +1,55 @@
+{
+  "scope": "441 checkedrollback rejected440key toexactretained435/439 source",
+  "original_handle": 18713,
+  "original_pid": 2,
+  "exit": 0,
+  "terminal": "DONE",
+  "focused_existing_replies": {
+    "passed": 8,
+    "failed": 0,
+    "filtered": 56,
+    "nocapture": true
+  },
+  "formatter": 0,
+  "strict_all_targets_clippy": 0,
+  "source_guard": 0,
+  "before_source_inputs": 1436,
+  "after_source_inputs": 1434,
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+  ],
+  "deleted_modules": [
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key/tests.rs"
+  ],
+  "new": [],
+  "other_selected_inputs_unchanged": 1432,
+  "all1434_selectedsource_hashes_modes_exact439": true,
+  "projection": "PROJECTION.json",
+  "exact435_actor": true,
+  "exact439_replies": true,
+  "exact435_engine_plus_cfg_test_client_outcomes_loader": true,
+  "root_input_reuse": "ROOT_REUSE.json",
+  "root_functional_or_full64_tests_executed": false,
+  "release_cli_profile_benchmark_mac_executed": false,
+  "compiler_exact435": true,
+  "failures_or_retries": [],
+  "performance_claim": false,
+  "capacity_diagnostic": {
+    "clients1": {
+      "initial": 7,
+      "partial_rotations": 1024,
+      "minimum": 7,
+      "high_water": 7
+    },
+    "clients4096": {
+      "initial": 28672,
+      "partial_rotations": 65540,
+      "minimum": 13907,
+      "high_water": 28672
+    },
+    "scope": "Availableinsertioncapacity underactualRandomState devcontrol, notphysicalallocation/RSS orcausalpairedbenchmark"
+  },
+  "publication_pending_parent_enabled_full_hook": true
+}

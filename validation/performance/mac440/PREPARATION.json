@@ -1,0 +1,38 @@
+{
+  "status": "PREPARED_UNPUBLISHED_REFUSED",
+  "required_commit": "UNSET",
+  "expected_matched_test_count": "UNSET; fill only from actual published checked receipts",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "baseline_remote": "/tmp/voteboat-mac435-5c2390c-2oTYYa",
+  "new_required_modules": [
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key/tests.rs"
+  ],
+  "scope": "Private matched pending key; logical P, full128 conversion, std RandomState and original completion channels unchanged by task contract; verify actual published source before assembly.",
+  "source": "Fresh committed git archive, full hashes/modes, tar-xpf; client_outcomes present and deleted Waits absent. No assembly until published and root authorization.",
+  "root_reuse": "Only exact compiled-root/config/lock/examples/fixtures/contracts hash+mode and 435/439 command/tool receipts. Assemble current proof after publication; no unrelated root rerun. Current standalone suite/fmt/strict actual once.",
+  "artifacts": "Genuinely fresh asserted opt3/debug2/packed/thinLTO/cgu1 flags/wrappers unset; CargoJSON-vv four fresh:false plus exact root buildscript executable invocation/package selector; current dSYM+UUID and original/copy SHA.",
+  "cli": "Actual off/on/OpenRaft16384+1024 maintenance-active controls;29 phases/four scopes/15methods. No timing authorized.",
+  "pair": "435 immutable baseline; existing pair scripts/checker and unchanged refusal controls reused by exact hashes after artifacts qualify; no new framework or old-control reruns.",
+  "template_proof": {
+    "run.sh": {
+      "template_sha256": "88c19479a43a694eb86861625c904c067d73ae201552fcdcb8c7204ddf76d6fd",
+      "adapted_sha256": "31e9f76d19c806540ae5de728107c89a960a7ef85c6ef3cc1bf82a29f62a8b1f"
+    },
+    "collect.py": {
+      "template_sha256": "0fc243d6a06ab2536aa2df112f193a2b9451d6e73965e5e5dfa8e20ec06eef07",
+      "adapted_sha256": "d553e85edc945a1fd4594f9be9ba0c933a214e1decd41b90698f00c7155e8ea4"
+    },
+    "prepare-source.py": {
+      "template_sha256": "9e201bab33d68a3fc2d87ce5e4c30e7df2f748c64c07d83553464c3d310f4442",
+      "adapted_sha256": "300d56af56e378e1ecba7f38e1787aa047827b74a8a3fdec789f7d4be573783b"
+    },
+    "verify-source.py": {
+      "template_sha256": "1a3aeff26f4e057bd740536f9ea6c3f9e26fdf1e48923077b07e3a219d2743b4",
+      "adapted_sha256": "b221aa8282e45385122e18c3f96d14572a9a2a538a3bba3373f3faa138649730"
+    }
+  },
+  "validation": "three Python AST parses and bash-n pass; unpublished prepare-source refused with no archive written",
+  "unpublished_refusal_exit": 1,
+  "no_remote_commands_source_copy_build_or_timing": true
+}

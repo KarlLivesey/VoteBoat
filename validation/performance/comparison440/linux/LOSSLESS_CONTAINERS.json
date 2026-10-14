@@ -1,0 +1,9 @@
+[
+  {
+    "original_path": "results/RESULTS.json",
+    "container_path": "results/RESULTS.json.gz",
+    "original_sha256": "891f287810fd04e29f35025c6c101fb164ddec59951e6273ec2970889d38df7c",
+    "original_bytes": 1170026,
+    "codec": "gzip lossless"
+  }
+]

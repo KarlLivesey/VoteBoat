@@ -1,0 +1,10 @@
+{
+  "scope": "Scripts only; no source export/build/CLI/timing until exact440 checked publication.",
+  "required_commit": "UNPUBLISHED_CANDIDATE_NOT_AUTHORIZED_FOR_TIMING",
+  "baseline": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "runner_origin": "target/p9/matched438-linux",
+  "profile": "unchanged opt3/debug2/assertions+overflow/thinLTO/cgu1/packed, four fresh:false records/rootbuildscript/DWP/currentCLI29/4/15",
+  "source_scope": "Actual440 input set/hashes/modes and functional-reuse receipts assembled only after checked publication. No435 Actor-exact assumption; newkey inputs must be inventoried.",
+  "source_exported": false,
+  "build_started": false
+}

@@ -160,7 +160,7 @@ fn checked_budget(clients: usize) {
     received(admitted_waits, &ids);
     assert!(actor.pending.is_empty());
     println!(
-        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} available_insert_capacity={} legacy_operation_key_bytes={} reply_bytes={} legacy_operation_reply_tuple_bytes={}",
+        "layout_scope=actual_standalone_dev_test clients={clients} logical_bound={bound} available_insert_capacity={} key_bytes={} reply_bytes={} key_reply_tuple_bytes={}",
         actor.pending.capacity(),
         size_of::<OperationId>(),
         size_of::<Reply>(),

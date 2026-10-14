@@ -1,0 +1,51 @@
+{
+  "checker_sha256": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "actual_current_cli_positive_controls": [
+    {
+      "fixture": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/logs/off.json",
+      "sha256": "44a9b116e33b1aaca43b78e97a4ab966b4019ecf6029dcce636c492f722d3520",
+      "variant": "off",
+      "exit": 0,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    {
+      "fixture": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/logs/on.json",
+      "sha256": "6a6f1f7b7c0f3418b19dc850364d5feffa4e1d2db97721c7f962be26060f369e",
+      "variant": "on",
+      "exit": 0,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    },
+    {
+      "fixture": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched440-linux/logs/openraft.json",
+      "sha256": "61e579d3d2c5dbc61b0502d114a9caee7864111421657e36fe2426c00404b225",
+      "variant": "openraft",
+      "exit": 0,
+      "originals": 16384,
+      "requests": 4096,
+      "frontiers": [
+        17409,
+        17409,
+        17409
+      ]
+    }
+  ],
+  "phase_scope_method_counts": [
+    29,
+    4,
+    15
+  ],
+  "negative_controls": "13 existingnegativecontrols reusedbyexactcheckerhash; not rerun",
+  "exit": 0
+}

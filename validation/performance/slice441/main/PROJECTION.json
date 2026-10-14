@@ -1,0 +1,37 @@
+{
+  "actor": {
+    "published_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+    "command": [
+      "git",
+      "show",
+      "5c2390cb98d11901163e143815f5fa17199dc0f2:benchmarks/matched/src/voteboat_engine/actor.rs"
+    ],
+    "actual_after_sha256": "6920665e97259926b36c7d2b1f4f2abe98882e31823d7840c2ebdec739593ff2",
+    "published_blob_bytes_equal": true
+  },
+  "replies_diagnostic": {
+    "published_commit": "75f6093f9f988f6c5c27cb94fa4f110e36acfab3",
+    "command": [
+      "git",
+      "show",
+      "75f6093f9f988f6c5c27cb94fa4f110e36acfab3:benchmarks/matched/src/voteboat_engine/actor/tests/replies.rs"
+    ],
+    "actual_after_sha256": "ea0986ae89b861b58ce872a6a122f906f44663b91be487ea5e4317d4af443bfa",
+    "published_blob_bytes_equal": true
+  },
+  "engine": {
+    "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+    "baseline_sha256": "4d34c1b8f26f87d8ef9aff24b1eff9141bd18079e622c8dfce8e77045a5257d5",
+    "actual_after_sha256": "f8cb89cc31590efd7d527eb0b835bcebde69bd0e8b293d39531fba9dfbd0d9c6",
+    "sole_addition": "\n#[cfg(test)]\nmod client_outcomes;\n",
+    "byte_projection_equal": true
+  },
+  "all1434_selected439_inputs_and_modes_equal": true,
+  "all1432_other440_inputs_and_modes_unchanged": true,
+  "deleted_modules_absent": [
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/pending_key/tests.rs"
+  ],
+  "retained_client_outcome_controls": "benchmarks/matched/src/voteboat_engine/client_outcomes.rs",
+  "exact_same_compiler_cargo_as_435_artifact": true
+}

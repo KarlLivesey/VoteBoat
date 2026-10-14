@@ -1,0 +1,19 @@
+{
+  "source_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "pair_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/CONFIG_PAIR.linux.json",
+  "pair_config_sha256": "4e033d96381c8e302094875ebba6ef3f4669d4bfa12c3a13b79fffcf7e596585",
+  "actual_positive_guard_exit": 0,
+  "actual_cli_controls": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/ACTUAL440_CHECKER_CONTROLS.json",
+  "checker_hash_reuse_verified": true,
+  "bulk_runner": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/linux-run.sh",
+  "singleton_runner": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/linux-singleton-run.sh",
+  "singleton_preparation": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/SINGLETON_PREPARATION.json",
+  "cases": [
+    12,
+    12
+  ],
+  "timing_authorized": false,
+  "no_capacity_run": true,
+  "initial_guard_adaptation_failure_preserved": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/attempt1-guard-adaptation"
+}

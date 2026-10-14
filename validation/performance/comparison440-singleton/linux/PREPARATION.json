@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "5c2390cb98d11901163e143815f5fa17199dc0f2",
+  "candidate_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "candidate_fresh_artifact_metadata": "original59010 actuallyterminal0; PROOF/SETUP_READY complete; current3CLI0 andpairguards0",
+  "timing_authorized": false,
+  "cells": {
+    "bulk": {
+      "clients": 4096,
+      "batch": 4,
+      "requested_operations": 20000000,
+      "actual_originals": 19988480,
+      "requests": 4997120
+    },
+    "singleton": {
+      "clients": 1,
+      "batch": 1,
+      "requested_operations": 1048576,
+      "actual_originals": 1048576,
+      "requests": 1048576
+    }
+  },
+  "checker_exact_hash_reuse": "dcc9cda8776f04a457362d5bde3132f334684e3f5df7c55453b7c5ee9f85b7c0",
+  "no_new_negative_framework": true,
+  "pair_config": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/comparison440/CONFIG_PAIR.linux.json",
+  "pair_config_sha256": "4e033d96381c8e302094875ebba6ef3f4669d4bfa12c3a13b79fffcf7e596585"
+}

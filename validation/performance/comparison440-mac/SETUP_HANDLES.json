@@ -1,0 +1,20 @@
+{
+  "source_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "original_qualification_handle": 11390,
+  "qualification_terminal_tool": "0d3e62",
+  "qualification_exit": 0,
+  "setup_handle": 58822,
+  "setup_terminal_tool": "0f1c7b",
+  "setup_exit": 0,
+  "collection_handle": 68103,
+  "collection_terminal_tool": "a2f3cd",
+  "collection_exit": 0,
+  "quiet_inventory_handle": 61370,
+  "quiet_inventory_terminal_tool": "bfc784",
+  "quiet_inventory_exit": 0,
+  "quiet_inventory_stdout": "ALL_MAC_SETUP_END_READY_NO_TIMING\n",
+  "matching_process_inventory_empty": true,
+  "all_copies_hashes_archives_checks_builds_terminal": true,
+  "no_benchmark_started": true,
+  "initial_metadata_errors": []
+}

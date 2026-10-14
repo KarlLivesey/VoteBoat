@@ -1,0 +1,13 @@
+{
+  "scope": "status-only polling command path error; no campaign failure or restart",
+  "handle": 66438,
+  "terminal_tool": "bd1d3d",
+  "exit": 1,
+  "stdout": "RUNNING\nRUNNING\n",
+  "stderr": "cat: /tmp/voteboat-comparison440-UZB9aq/STAGE: No such file or directory\n",
+  "cause": "optional pair-root STAGE absent; actual marker is singleton-results/STAGE",
+  "corrected_handle": 81387,
+  "corrected_terminal_tool": "6609d0",
+  "corrected_exit": 0,
+  "corrected_stdout": "RUNNING\nRUNNING\nopenraft-c1-b1-t3\n"
+}

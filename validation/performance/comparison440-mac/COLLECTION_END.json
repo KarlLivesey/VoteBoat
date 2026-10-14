@@ -1,0 +1,15 @@
+{
+  "analysis_original_handle": 37505,
+  "analysis_terminal_tool": "a1847f",
+  "analysis_exit": 0,
+  "package_original_handle": 38613,
+  "package_terminal_tool": "674cfb",
+  "package_exit": 0,
+  "copy_original_handle": 17661,
+  "copy_terminal_tool": "74ba91",
+  "copy_exit": 0,
+  "all24_counts_frontiers_and_case_exits_verified": true,
+  "sealed_prepared_files_unchanged": 37,
+  "source_commit": "fc4be25b63eac6620307ef0859284f1fd83bb594",
+  "no_restarts_or_reruns": true
+}
