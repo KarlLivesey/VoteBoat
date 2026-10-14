@@ -1,0 +1,6 @@
+{
+  "storage_histogram_first_parse": "tool53b5fb exit1 assumed semicolon separator, actual existing CSV uses verticalbar; no outputs/runs/source changed; focused parser delimiter fix ec3f2c exit0",
+  "tool_only_exception": "Original exact exception remains tooloutput, not fabricated as captured stderr",
+  "original_failure_archive": "../campaign-attempt1",
+  "initial_missing_parent_corrected_only_in_attempt2_paths": true
+}

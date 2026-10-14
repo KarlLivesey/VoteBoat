@@ -1,0 +1,1988 @@
+[
+  {
+    "case": "g1-tcp-r125-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "f5dc15aaf17d79c99bbbefcf1b0a2cbaedf4631a23fc7af50684908e47da2e58",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "5442ea1f309a890e091a8049754768359496c996eb6026b3cb996f215db4d93f",
+        "bytes": 1026954
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "c9a2bc1871b10cc9610ea0f26b6cdc7f6fbc774032ee95729f2d6d6c7ba63c5d",
+        "bytes": 20570
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "865c51f72504e45844631e3672a247c21ff17c8b65a6ffa3acca05e31735261a",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "02579c3dcf28bac0c10c9fb5b94113ff931447494f100e06a9293b1db4a2c8b8",
+        "bytes": 1804
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "99e78beb4bcdd0d04e98c03245e6e56cae0b6ffc163652fc0c41b1fa13188094",
+        "bytes": 1411
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r125-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "f5dc15aaf17d79c99bbbefcf1b0a2cbaedf4631a23fc7af50684908e47da2e58",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "6e8561d3fca5f67094985ef6d89c0a48bce2783a8858402f6a7a29b6ec1a57ea",
+        "bytes": 1026548
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "45cfbb486762ce03f92616db7c9eb602d6ae88caf92a62bcb86677701918f54e",
+        "bytes": 20546
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "f7ad5564ad7f6884a01e20d8077a1743b7689fe161e51b6a827f5455f6947cba",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "c868ee66e1857e9ed0dd0dcac8b1e37a2ed0a28dd541cc9ddb562b1c118e0d7a",
+        "bytes": 1817
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "656ae5885bd2025744565adde68367082c5524d965058f0f19a2425ac9ab21c3",
+        "bytes": 1411
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r125-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "f5dc15aaf17d79c99bbbefcf1b0a2cbaedf4631a23fc7af50684908e47da2e58",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "11ec1cfd9e875f21b49e6a2015206b1a5d6a713c9ec4f1462e13589ea43317b1",
+        "bytes": 1026358
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "81cad7324cc75915d0efc9a385354d0dd17288f7b0a122180bd21e612f852e95",
+        "bytes": 20302
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "fac8ab20d30d41d2fc31ab5c72fa13f370bce7439c1323c5acd01f8195bd9cf8",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "4cde8f678f754e4e1c53a6e7aecb4b717c83309f327e49f4c4d7f6db6af2a205",
+        "bytes": 1812
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "c7675ac6694b329e2f154ee7c144c3a29ff3ab72ddd5350b785597df4fd5b52b",
+        "bytes": 1411
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r125-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "f5dc15aaf17d79c99bbbefcf1b0a2cbaedf4631a23fc7af50684908e47da2e58",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "e1c7e5b8877bc392c5482bf888d93e985d82dd7f517d1da5dd3416cabb9460d2",
+        "bytes": 1026062
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "b0a86b6ded200c675ecf0bc2525544dbe05dea474c4b4dd40eec21655869193a",
+        "bytes": 20544
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "8ea68054ac0667f267883aa29a6c7000080c5978986020a523efc30f358ce515",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "64bc6593941ea113339b44f474af15dae54611b1eed2cf98e22269c525e1ca24",
+        "bytes": 1817
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "f1e1b5ea399771b53bc13d88e036cfcfb89334d6c8ba64600c286413958eca72",
+        "bytes": 1411
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r125-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "f5dc15aaf17d79c99bbbefcf1b0a2cbaedf4631a23fc7af50684908e47da2e58",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "4b8de34e4cf4f355e2037790b4410dd92b8b1d1f419b950d51b74917ad248b04",
+        "bytes": 1025794
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "24acbab63a67ff87af651a560aeb7331f01c7053d7e92f2fd5173d04c9366e08",
+        "bytes": 20525
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "73c91ec324d4ebceb56ae590d5ac6c390a2c21589d4e229cd5029f9e151b2a7a",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "2f7d0e55c275adf7981679308b40ba69385bf51cfa18cedafd311b226791053e",
+        "bytes": 1817
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "d45318e445b66cb00f579ed033f1fc72228db55325eac2a021a4e04dcdc2f511",
+        "bytes": 1411
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r125-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "f5dc15aaf17d79c99bbbefcf1b0a2cbaedf4631a23fc7af50684908e47da2e58",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "f57dc476501fc688d25b21cdcbe15b54cfeabd0cdbf8e39b074a89377a616044",
+        "bytes": 1025738
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "3aebd53b2bc82a9853f56b57a9323612627364161afec947e68318cbf0ca66c3",
+        "bytes": 20518
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "d61b81ad546cdf11bf664087d3e1532fe8267e7e95d93be2f3b67aabaf7bff60",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "515a350ac93cc6fa1b9e23f36c3288749c3c5598806bab04abf84d6d9ac22bb8",
+        "bytes": 1821
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "16906cac563dfaa574c7a0ca77acccf9ee220154c5eed4d14a44978f4dcf1c07",
+        "bytes": 1411
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "185393dcb8c579fb4cf2da5c4551a436dc705f0c17b1bb633a1fa455960cb858",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "a36afc370f7f8b64abce37f18f57891fae80ad0dd2d6a0e22e6169166c6362f5",
+        "bytes": 995421
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "132985fb34495129d82a8fdf416063a15eb9500d852f285f05a63099f4214e49",
+        "bytes": 4897
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "df2fd70aecb3ef091e27dedf9a2361388d4154afd67000bbb916c870bec2db4f",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "425aea8dcf201b4a4585f980862a91cae9fadfd244e434bf771623e0ac60f178",
+        "bytes": 1784
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "b50e26c6d3570fffe9090afe6e2e7fe26ff368e16004914b0cf407419d0828a8",
+        "bytes": 1404
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "185393dcb8c579fb4cf2da5c4551a436dc705f0c17b1bb633a1fa455960cb858",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "d45f07d9b625b4160e57c5c16d65b77dc1b8af2d98233bff31b7e625e10bc49f",
+        "bytes": 994353
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "a859cc4a7db7e08a7a03f6ba61f3b56dc4ed6cce43a65b8527d6b5304e6ba94d",
+        "bytes": 4890
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "b7440884b7bd19bea9f344b3e9219a12e3f7537e1d2a254b5231a9d16b8f88e1",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "2e903b8a70e8c1f0be3b0223a50da85c33832d74cbc3513611c37ec14bdbde33",
+        "bytes": 1781
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "5b8fed360ebed4e406a9753076e4cf69b4a26373d8d3dac86fa4d6ab7ec7ce37",
+        "bytes": 1404
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "185393dcb8c579fb4cf2da5c4551a436dc705f0c17b1bb633a1fa455960cb858",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "8411afdbacff8fbaf770f35ea1ca4949d88be43439c33305bd423650e58e1877",
+        "bytes": 994741
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "f2706daa8f5ccf26b01828f006fd8a58e7d3d2311de0047a57d0793af40c8e09",
+        "bytes": 4889
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "80e64e44d065d9db26eeb6dc313f2d14d5c3ca8b9704d521254c851febe72699",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "7a6bd7696eba317481b186da050999c32cc9f326ccb049b78754448f0e067a02",
+        "bytes": 1786
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "6cf1d03c689865268d856759118b9ffab0ab73b19e7d4ef3a9786d5af0f81942",
+        "bytes": 1405
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "185393dcb8c579fb4cf2da5c4551a436dc705f0c17b1bb633a1fa455960cb858",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "7f29a46a206478e2e52fd31d37f5d387a0327f54387db6655875552f82becb02",
+        "bytes": 994393
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "6b698137c40b67dc179857af8f875ca970c62a960eaef5f6908416dfbce4a2c7",
+        "bytes": 4885
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "4e338951492885e98ea9421c15bd792d5256bac14c290d20e9f4c406eec02e9e",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "979650faaaf600e1a08c03db8e3d99de6eb95097b62b52a0055b191df35c893a",
+        "bytes": 1779
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "fe6bcb8b08b973dc650d04611a0e72dd04d4e8b2117cc636cbb4da1ccf6c56ee",
+        "bytes": 1406
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "185393dcb8c579fb4cf2da5c4551a436dc705f0c17b1bb633a1fa455960cb858",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "49be30d367288aa5352dca2b23ba69a4b62f1ae3bc2ae01e1fc7b009d3de97da",
+        "bytes": 995205
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "3f4ca53fefe160eaff4b2143fb361ae885b8168a4022ee895f3479eb8ef50576",
+        "bytes": 4896
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "0859a2930593e2c9c8181666101c2825a9dfb3e12c9d2f037d593f8ee950e730",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "674dad6ed4918b4d9736da4bc9a5e22db01292554cad866c449b066ee0e7fbaa",
+        "bytes": 1779
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "c10f566315bc6b303c1479bfc94d9285cfb59f3aaa2529acd6903ca128fd3980",
+        "bytes": 1404
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r500-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "185393dcb8c579fb4cf2da5c4551a436dc705f0c17b1bb633a1fa455960cb858",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "0698bec91877d78165e817fed57053157e8a95172df1a25b6b43caf266ec6f50",
+        "bytes": 994863
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "1318ada9d7166b41892cb7b44da69bfada2dcf62529264648530349e80c404ff",
+        "bytes": 4876
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "14a3388cf224f26ee0036517ffbd67c1574f41edec38ad6792dd8aff4d7f87e1",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "8a07ce635c0e1a0166865be46240dbdb0c9586d7d2df65ce9b519e7ab5e43233",
+        "bytes": 1777
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "d0a967b00e079dd36ab2a1a3a282354028ee178612efb03aad23540ba6ba646e",
+        "bytes": 1405
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r2000-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e09da1a9f3a86776d77455705e3cf93570d19c505958fe9fc70be228907e5180",
+        "bytes": 89
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "cd910c218a372ab05009a712f3f55c7849520c8b866585c550f4aa041be060f7",
+        "bytes": 956674
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "a71bdcd6a50a0cd6361fb73125f2596126deab528d23a7e4755f56a1f36fd6f7",
+        "bytes": 1148
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "479e6adc9ce2f4558431e12215ca4558dad826510f40116559ed697d90fe6666",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "2edf460897d677f9fe2b421fe58b3fb9708693730600edbdb103e03149900fa7",
+        "bytes": 1712
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "4df4863abfe9495a5bcd70bd2a932edc7c0f5934eb636e8b3443e62898e57191",
+        "bytes": 1395
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r2000-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e09da1a9f3a86776d77455705e3cf93570d19c505958fe9fc70be228907e5180",
+        "bytes": 89
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "9672ab161ca4ea2c79f21869ff1c065467bb9fbe9a80cc2696bb43bc5fff6859",
+        "bytes": 956826
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "de00b0b9eb38e848c1d149023ceda7b44df4144a0685d6c527b3a038582b2ca9",
+        "bytes": 1148
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "e38f0a7528bcd62f34e87bdb2b5831a38e0583334346d0e3aca868854ffd7b58",
+        "bytes": 156
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "967d9d32108ce5e5758489753b6304043fb95dbf9cfe22dc8b7a7f7ef16d8fdc",
+        "bytes": 1712
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "6a7a4792b6b04fcffc1ae5448cc5b34c27b5a2f2862638ce17177baf6e56aac0",
+        "bytes": 1394
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r2000-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e09da1a9f3a86776d77455705e3cf93570d19c505958fe9fc70be228907e5180",
+        "bytes": 89
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "7acbafd54afb79ffc507ef62dc205d6431ae9b11f7cd411c94c4cdc155da5e0b",
+        "bytes": 957067
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "df08a01c0821e61caf7125070c8d31c763358f2183c54047e4fbc19976e606e5",
+        "bytes": 1145
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "de49e17ca5b1cf0578089757a4bfcfddf4a7d170847adf5c151400fa83f3e77e",
+        "bytes": 156
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "7659c57d5c5d3540356a8c37b741867672e191d7b56cfb60d5a8790f9a0bac40",
+        "bytes": 1712
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "aa3b5497ae961b351187d0a8a6cc5f2e0c2e5fa797b54c7826f5ce0f0c57b751",
+        "bytes": 1394
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r2000-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e09da1a9f3a86776d77455705e3cf93570d19c505958fe9fc70be228907e5180",
+        "bytes": 89
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "d0e45733feefda780138516efdd1c2f3cfa2d9d0df5231b714950f5b68bc20a4",
+        "bytes": 956662
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "89355f08b0b719ef5a5b674e61c02b592ace02d0be788276958bf1297e20505d",
+        "bytes": 1150
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "06c8b8db6e21d3ae73d8043556eae3e759d47821325cb8c3040910d725c96db2",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "09b51505bb992d58b635a22550e925b239cff8121d11940b2ea7e3a4d3047d46",
+        "bytes": 1713
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "7bf46a87119984ef10811454b9fe16a26f1a24256c165cefb01f8fc90be8c90c",
+        "bytes": 1396
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r2000-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e09da1a9f3a86776d77455705e3cf93570d19c505958fe9fc70be228907e5180",
+        "bytes": 89
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "b6b4c7227e2ea63e302246f9e4f1a6b04731318cce710f9cc81eb0254e63b0e4",
+        "bytes": 956950
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "6358bab943998b045dcce0615e87c31e288f47897e49a830b0004fd902c440ca",
+        "bytes": 1147
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "8f35964ac02909d37c6a791aa36ccfa7bd24045ddcdd9399c7c5f6c9a538737a",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "e5d7a2184d186f49619b395af13aa7c764b71fb7fb75c099b341bdd28e6e8728",
+        "bytes": 1712
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "51476288d014edb05e0e87697d1e97a141868a4ef73267087174f44df39d5d24",
+        "bytes": 1394
+      }
+    ]
+  },
+  {
+    "case": "g1-tcp-r2000-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e09da1a9f3a86776d77455705e3cf93570d19c505958fe9fc70be228907e5180",
+        "bytes": 89
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "ae8fce8d921b4d398b75d56951784b8c545b07676bc809afeea8f6d0baa445ea",
+        "bytes": 956880
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "9f2269722176cdcd897bdcd2b09274cd349721c43d9d983652c235c20526f7c4",
+        "bytes": 1147
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "4ca786835a22afb4c61690fc653d8563a19f38af9c307b3912a11176e5ac5dcf",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "8ff41e213e5bd181854ed50d25f718a95ac667b458591fbb4f1a9865250bb92f",
+        "bytes": 1707
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "3a4349625ceeb4760e3c7cfe6a3c8a3cd175a40e879e4fa3f78a5eb2478117cf",
+        "bytes": 1394
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r125-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "05f8f027f0128eb7a3ccc86bd290d94e3f45055ab29aecc18660b09947ce7c90",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "f86f026d30faaee501e97f1d42589d62b468a9a1ec5b6bc4e5da18bc19e4db23",
+        "bytes": 1025744
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "9d7325a7a65d4e477ee6cc9544ff01c46f67f3925f9756d2cbc7c620f33cf256",
+        "bytes": 20287
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "b8533cec7a5eec64ebb6c193f8bbc4681b970a49c0921690a8e69caa187d2161",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "2dff21367534db65272e74f0f491633311e1bda89badac7249baa1bea110bb96",
+        "bytes": 1813
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "7f44e484ca6b03fe745699a35e38724953163b2992880d7f438eba6a3852593a",
+        "bytes": 1409
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r125-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "05f8f027f0128eb7a3ccc86bd290d94e3f45055ab29aecc18660b09947ce7c90",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "faa880251b2d723fa13593c3c000db77908c3bab7c5abe3cf8c280449a9cbc94",
+        "bytes": 1025731
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "ef0004b430448506d062c5c513f7c9b421b953e3a55233285d31eafa86bdcc05",
+        "bytes": 20550
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "d356f3ff0bf102849904c981376c9425e89d8923867f0ac4bb6913e1514ad147",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "060bbe7e5b93925c32f8ae39537f71ad4043964370061736f336bc175c2ed46a",
+        "bytes": 1821
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "a4aa135f3df49cd204ff340c56892cf6b1f723f060355eb2f454cae36449d0a7",
+        "bytes": 1409
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r125-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "05f8f027f0128eb7a3ccc86bd290d94e3f45055ab29aecc18660b09947ce7c90",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "db5e9b19d22a4efa0f21dc696a8244a3b41c5026a6b2c15384dc1d1289553e9c",
+        "bytes": 1025857
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "cc990d5142c8b86c270eaa2985d80763ee75a27a5a8405388d66e89e6dec4cf9",
+        "bytes": 20302
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "d6297c8c32b373e0e21246b9f5c0c1f1080a14ee4c35ce2b2b0da50e53990e99",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "7e98d351a911c44e822d123423c476d06bcb3570f55ee7004735254d09853b61",
+        "bytes": 1816
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "f86f7b72a03663521a2e7b03f0de009866a3c7ad0d1014db94e21a39b0746f82",
+        "bytes": 1409
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r125-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "05f8f027f0128eb7a3ccc86bd290d94e3f45055ab29aecc18660b09947ce7c90",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "4cb5d570ac6a73b49cd795b2a57ea7447a0585b8330526e6b60aedf862944ae8",
+        "bytes": 1025639
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "5eb3dfb51824dbba096729d9f21de7a00877401990b5044b6b9141c0ad9bf16a",
+        "bytes": 20040
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "06baf16a7d858638e0969613c068c1dca2e983321e713c10f8961a2bc261f0d3",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "86d6d7c86bdbe788853ef83fec86684f959a67a73eb57b519e2965a044644489",
+        "bytes": 1815
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "39ed0f65de74136f9ed08b0765bcc52216d1bb469d4350c7aba07bdecb999be1",
+        "bytes": 1409
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r125-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "05f8f027f0128eb7a3ccc86bd290d94e3f45055ab29aecc18660b09947ce7c90",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "93e1412a17c0d694db700a2aae96838ccac9a77f6bb95fbf4e726baa83306b45",
+        "bytes": 1026835
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "a64125a5d354a8ba2b296073fb0bd12886d4897b810e661ac91706bfb2bf6c4b",
+        "bytes": 20522
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "630e81ac97f8293d5730f0000e397e9751326eb94cc315020f5d7c9d48b9d97d",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "0b146f80c7e29f9dd230bb689a88615bfcafbc00374322de22a7270457ecf1f2",
+        "bytes": 1817
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "d3c7cdfee7cba766bac0a9bb66ebdbfdc77fed02369f5ef089aac23ca2e8f341",
+        "bytes": 1409
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r125-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "05f8f027f0128eb7a3ccc86bd290d94e3f45055ab29aecc18660b09947ce7c90",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "5591d827677da5eb0777cd7da200093607d5dd7ccc3be46c755742ce3c6db2fc",
+        "bytes": 1025028
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "eea7ab577cd9c5e3b61cd33c6350fefef15709ad95d3e3e4df63395ece569991",
+        "bytes": 20524
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "8b54d55be58d95ed10b2096bd9ecb871fc51f454d9e20e4d595789e2962b4f2f",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "3c1b494ef3c3a1570f38d587ec4631853d9eaf20fbc4b8a5703fa50443d9a3db",
+        "bytes": 1821
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "58f955aa91756790bda4a2d2638a404e18d3a820bf78165236fe179ef1f805d8",
+        "bytes": 1410
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "8d2ca30d67041ee2e6793f0957c4b517009942697c9342e87720277c3e68dbc8",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "750f87bf36af541bcf689e43b32cd2e71902d445162d2552099bf2147b8b455d",
+        "bytes": 995597
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "57c77d326cd3d4626788131dd4adc430b9266ff7d2cb2865afcdb0807c06bded",
+        "bytes": 4899
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "5293b2328f311bedd51ba9a94f9d48d5e6d22482cc4334ab3edc90ace365f762",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "f6c3ad1105c83d632cbde7623af165d88ef0e2d1e56599e1b0b7da3a27e5e5bc",
+        "bytes": 1781
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "1f6a52aa7b17685e81cf50f0011ff918d136d01717765da3f6fcab0936d056dd",
+        "bytes": 1402
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "8d2ca30d67041ee2e6793f0957c4b517009942697c9342e87720277c3e68dbc8",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "5d290384701407c5ec1861ecec36c3c7a924d8cf092008c309b476b3f865cb83",
+        "bytes": 994725
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "f3f5e64016b428d1e71be863d848145d86c61e4719c2ea9948a2faa8f294e20e",
+        "bytes": 4886
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "8c07306745fc147c6f989fe1a7900f18c71aaec480aa58459e4e2c915c06545a",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "67e639247e4868d370bf7e1560f80163139e9756963810a2d6d3b3104ed93984",
+        "bytes": 1774
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "ea523999b2e4a302d7ff1f7ec125a96c94ba610554732cbddf8ccf4362d263e9",
+        "bytes": 1403
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "8d2ca30d67041ee2e6793f0957c4b517009942697c9342e87720277c3e68dbc8",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "518cc1d7d8730e934886bc0ffaeb2a749f28fbbd9bea9e065c9098179dcb1c06",
+        "bytes": 995154
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "463fab46eb104a16e94efccef57925ca357c2a5f0ab6037f34942339c8157bc5",
+        "bytes": 4896
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "a6fc0edc216d209409ccea73928e45641237f469628ca11e347dd997c25ef7f0",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "2e9151fb1a8e8948b2b5e9cb565eb0115cc19f853f285cb56921ec685f3011a6",
+        "bytes": 1775
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "b033dd62e05b8e4ad6085b53cfb117c5f057a46d57b9a223a7bff6bb9b4b0751",
+        "bytes": 1403
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "8d2ca30d67041ee2e6793f0957c4b517009942697c9342e87720277c3e68dbc8",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "15337cfae0ca9520e11dc7f47c2b4d1418e4269f6972f921b51876d4fd5722ff",
+        "bytes": 993861
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "1ecc82292f0739f1713bd10f24f14c59420729ffa8ef6241cddcb89f7548cf80",
+        "bytes": 4882
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "3b38e27c7bd320516f2cb60c584ecb49ac63da2028beb1b7f9169dd2ad48d793",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "39ebd28ff6d5e7fc6c2fece576904f1bf5414f3e37dc96237818f709a09d0578",
+        "bytes": 1776
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "3b854c4cf403de0b21b3ba8d557dd030dec8cfecd1185621d869523c31f70a0a",
+        "bytes": 1402
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "8d2ca30d67041ee2e6793f0957c4b517009942697c9342e87720277c3e68dbc8",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "afad176db2a6c48a0bd46102f5d1a57b4c511ace18a840a40e6f7ae37aea57e5",
+        "bytes": 995713
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "08d62d1033e273b3a390f2de948a1e4fd3f046c9e61996de6473708ad1dd3a5a",
+        "bytes": 4895
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "a4927987af66c70ac41bd49a0191e64992a1576605271cb3f7bba110d69cc30a",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "fbf4f27f54862cf3a159f8223c971dc0dbbada64224dbbf808fbbd7082d37726",
+        "bytes": 1782
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "a4205b5d0be6df594d57d54260da76833e29bba5a5e89afd3b9a0be4b78a5f6d",
+        "bytes": 1403
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r500-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "8d2ca30d67041ee2e6793f0957c4b517009942697c9342e87720277c3e68dbc8",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "8ccb0afdaf7038c334597f0848134a93da66a541adb2a8b356dc7f4c83d147f3",
+        "bytes": 994873
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "acfa601cdb150b0415c7b9ccabb556225679b65086751351112cb8121db27999",
+        "bytes": 4886
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "2b2cf993a3372d7b43eb141b8f427d66545ebbb32028f1c76cb990ba14541382",
+        "bytes": 166
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "9cc86365dc53a3efb65a7038c58a21495daac8cb846bf6a9a9ea72e6433a3ceb",
+        "bytes": 1781
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "ccfca39a8eff6307d3ee69154199f361faeb203b6dff42b3051ce0c7939ae56b",
+        "bytes": 1402
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r2000-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e66ba30fe37c87dd4f3357346bc247975cb41e8d12454ad292a0e65880bfa628",
+        "bytes": 87
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "bdc9bde25ff7133424299e062f5da425a040332012149f7061d229b15de17fb6",
+        "bytes": 956631
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "abd2ff6165d6bb5806ecbe02a13d7860cc97815b8f10e9afe6cf8aff8fc3ab14",
+        "bytes": 1150
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "097b3935c1ae0fe2a0827bc294bc7a7c907047c8445fab5aceb01f015dc61ce5",
+        "bytes": 156
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "a4021214e683fd487d6a2d012dd32a3fc2ab14bf6fdfe250056252dece831440",
+        "bytes": 1711
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "d7bef7ef17d2c71ba15b57db57c21e4e495d6efbef9526083764437a6fac6604",
+        "bytes": 1392
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r2000-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e66ba30fe37c87dd4f3357346bc247975cb41e8d12454ad292a0e65880bfa628",
+        "bytes": 87
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "c3e42baf1e377fda23103b5e6833b096d942874843f2226245bde63d80e0775c",
+        "bytes": 956938
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "3c119918aad077720b06258da1526e56afca006137bbc09bd8dfc2bed1466730",
+        "bytes": 1147
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "6b0148c13df490e400fd3bdc62d537f380745458e9ee591bcc7f1c6a6c4597f5",
+        "bytes": 156
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "4382f56fe548ff44620f90153faf0b235368d262b0e135814903852a6a1d55ec",
+        "bytes": 1707
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "bc1d081a8c744def7804d6e010ba91393456ed08bb33f4e52d9f0c53f9a6e60e",
+        "bytes": 1392
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r2000-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e66ba30fe37c87dd4f3357346bc247975cb41e8d12454ad292a0e65880bfa628",
+        "bytes": 87
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "43acc152df0186af240a646d6c8f4691c72edda4ed2802275d6d0dc86572c786",
+        "bytes": 956829
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "d91f2a4b590cec28dfa41cb1b7d9180bf4395fe94e4cf7c6f91313058768b776",
+        "bytes": 1148
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "c9f002ccc022ed82da34c4e86480848c1b4181060854837ca6a7aca6e0507cfd",
+        "bytes": 156
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "fe386d9a77ae4aa100149fae64236ee6ebd83ac6658908a665a3419850433b29",
+        "bytes": 1708
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "ce9740af800b70aef068944fec2c7cb0795c0511db08288096b0a33bc298f292",
+        "bytes": 1391
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r2000-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e66ba30fe37c87dd4f3357346bc247975cb41e8d12454ad292a0e65880bfa628",
+        "bytes": 87
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "c78f2c4b8d4a742f162432348b783322d9f6973cf5207b5baf04a8c2f6b44216",
+        "bytes": 956848
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "4dea9c72e0f0bab1c47759e9db89859a7306bc6321311363b5f50dac3fe56598",
+        "bytes": 1147
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "d0f84205d334c98279754ccc1cb72b1668588c9e836c6fb5e5df2c024fd70c64",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "b87ff7d33c796d6eddaa24265935e48bdf0d6a51397f6a1f31b0a5ba876fd6e0",
+        "bytes": 1712
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "7a34fe3afb1c35516ddea4e96e608e2c351bb4f4ccd2ecf8a5fe55bbe2431826",
+        "bytes": 1390
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r2000-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e66ba30fe37c87dd4f3357346bc247975cb41e8d12454ad292a0e65880bfa628",
+        "bytes": 87
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "e1a89a5ee4bf3732b834d825e007377a234bd5f6635e6e70573a0ca6c467cbac",
+        "bytes": 956805
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "87e7dba27735e0f33376b1249bb3fadefbf7298e7eaa57a74e5618f7240698e2",
+        "bytes": 1147
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "6d26238bea3e78365d428e679c4cf1c60d8a26c2516a5a616a4860ec88bc3ca8",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "939917ad75ce267180f6977f84d5ffcce897f17d2b12c67ab6813ba8c4b6f46a",
+        "bytes": 1711
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "1faba7801468a3a96056d5fdc9c34907ba6012c9ccff860d74697751a5ed44c8",
+        "bytes": 1392
+      }
+    ]
+  },
+  {
+    "case": "g1-quic-r2000-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "e66ba30fe37c87dd4f3357346bc247975cb41e8d12454ad292a0e65880bfa628",
+        "bytes": 87
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "6107ae0aa3d4a300170b6d82ae4cea1d66e9b4ca5095a2d51335aab44b4295d0",
+        "bytes": 956853
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "e7a7d029e86d222db43023f4c72bb32cacb22fdd7efa775ad679f5675ebc5fb5",
+        "bytes": 333
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "9f4d7aef31cb581c6877d536bd12c43d5d376f64d6e9b227d328dcd8a6193e1f",
+        "bytes": 1145
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "ed24ae3da5eb2f913284b0f9366c289f9eedc0e579a644e624686d10394b4d58",
+        "bytes": 160
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "f3769a40e96d259e4797d8cf1c1fbf9fe38490c5f564d4d166d2449a527c3163",
+        "bytes": 1722
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "c501b1aff90c262de0b124d3dcb280a5d2c4e097ec38da15520d52bf6813ce8a",
+        "bytes": 1392
+      }
+    ]
+  },
+  {
+    "case": "g4-tcp-r500-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "50865ea180e3300da5013153fadff3f869e8a2fb6daf789f8bf5fb6e945baf50",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "76db976b4e5627cf7deb44fe1108fbbcefce990975b374a1f733023448d80a21",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "06b38090667fd11df3d4735a08b563c80ac71baf79fde28f7595bc4b5fa7e814",
+        "bytes": 4772
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "0fcee8c4faa0cdfdd9c5951667a8da213ef917e084cd5ca065ac0260eeaa2318",
+        "bytes": 539
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "625e29ae00ae0feaff26ad3241099b479cd7af7d85e7b4e7a9d235b2e9d6075b",
+        "bytes": 2101
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "54ad70aad13a6c08dca2f4f6e30e67b2625995ca61c8b6462a1074767d24eaa4",
+        "bytes": 1454
+      }
+    ]
+  },
+  {
+    "case": "g4-tcp-r500-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "50865ea180e3300da5013153fadff3f869e8a2fb6daf789f8bf5fb6e945baf50",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "62bdb8046d96c9177a3c7b61c04fee85c7a64a51d9a5b005736c13dd72ed872a",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "ff60c58d2eda6541c14ee96bb508660f7f98df37b987af44ced0ec1ba9bb91d4",
+        "bytes": 4769
+      },
+      {
+        "file": "failure.txt",
+        "sha256": "e91256ed589490cc8de97bdbcdd5b2cbf9481a3fa7eafbbff9a2199a4a4e5554",
+        "bytes": 134
+      }
+    ]
+  },
+  {
+    "case": "g4-tcp-r500-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "50865ea180e3300da5013153fadff3f869e8a2fb6daf789f8bf5fb6e945baf50",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "686efb00f291ffab584365bd0df28ae61ece909318bec14ee3df6ef5d17213b3",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "17bf47776f5e2aa4bd6ba8f5ebf90d76d4daeed0670b1f86947731e2d6d15551",
+        "bytes": 4773
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "5659b661ab9ba5a0c16151648724d43d976deec6c20a63dbbf519cf188289da3",
+        "bytes": 543
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "13cbf0f03c4455256d98a44a138a1becdac4383f6e7fd6aa40d0219f76744a30",
+        "bytes": 2107
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "4ca1c615cb629ba19deade849cf84a8e7c5d804eed09e4719e3ebf95cefa58cc",
+        "bytes": 1456
+      }
+    ]
+  },
+  {
+    "case": "g4-tcp-r500-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "50865ea180e3300da5013153fadff3f869e8a2fb6daf789f8bf5fb6e945baf50",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "83a12b0a88c52370429c1440e4db65188f737ad77e6927da8b9f10f330489ae9",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "f804f5fc3fa1259a2b04314f3e3d06a2154b20541fbc0b76da41ab16667e383a",
+        "bytes": 4781
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "ed700c16ba2d8147df7b06518e948990087682d0716d3cf29b9f879adc8fd6d2",
+        "bytes": 547
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "90762f49b5647afb7caf5aea170bdf0e4bf54bd7aafeaa90318ebf013b6b8fdf",
+        "bytes": 2128
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "e4e3538b759acd3c6594874826b7d0c15f2b97bef482d73a12531a74571b27ba",
+        "bytes": 1456
+      }
+    ]
+  },
+  {
+    "case": "g4-tcp-r500-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "50865ea180e3300da5013153fadff3f869e8a2fb6daf789f8bf5fb6e945baf50",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "f56e78806fc1dac61ca4b10c8314dc851a20aaee60c8743c674d61cfd7c89251",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "9c2d361e211143859c70b88a4b611958bf2bad9ad1b003a4f9fdb8b5b6a194e7",
+        "bytes": 4505
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "e5e106e87f9681bb5c36dec62d631a6a7b1fc57dd25d011b91aeddd2bc0c9169",
+        "bytes": 531
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "2f9135fd833c7ac568debbcfc9f5bd6d314ee5d94962a58d199fa58a8af096cc",
+        "bytes": 2108
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "3bd1a8fff524ee022765dad83bfa73caa73575bc01f65b105b4677ef35d64e49",
+        "bytes": 1455
+      }
+    ]
+  },
+  {
+    "case": "g4-tcp-r500-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "50865ea180e3300da5013153fadff3f869e8a2fb6daf789f8bf5fb6e945baf50",
+        "bytes": 88
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "1289df9c0e7c1dff6ddd98fec1ce492a8b273b278549c1f64ca328571895c588",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "4bce4ce791c8b507ca15ff148edcc1476120daaa4e8202c19f2752ee64533e6a",
+        "bytes": 4782
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "8185d2a2ffc2baef2df8c9728c054b9058a922c84aa88b270e8b200203fe8cdc",
+        "bytes": 535
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "fdbaf55321866d1db4f55f929039f24b96794a774cd91ec3482dcd511d13a37f",
+        "bytes": 2133
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "37ab218cee39d0fb5e08e2532defe016e82d36279a197df3fcd7cf0b7cba52fe",
+        "bytes": 1455
+      }
+    ]
+  },
+  {
+    "case": "g4-quic-r500-t1-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t1-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "9c4545f77a265b3dab3376cae167f0b528957a74e1ff05751a7d9b8e324c0325",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "4be49f9cf2cb1834bbb0bcaa36facf4573b2b18bd6b1b3de72aaa349ef62df5e",
+        "bytes": 990997
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "b7edc22f9571c8e116902d7e11edee7f96d362ba392e0a8692eb89f4f0d27def",
+        "bytes": 4773
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "8014e7319050da9b40e13aecd7fb1d2a0dea16fa8286a3769b6046f98804b78e",
+        "bytes": 531
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "df9c0d23a9a2999b01b965bdb5c0722b4bfa167dbf7f107087b9018934e4a6ae",
+        "bytes": 2130
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "e3c2b7a394a60b2598c8d018c09481d79e81bb01983a3fbb851f8848982c538b",
+        "bytes": 1452
+      }
+    ]
+  },
+  {
+    "case": "g4-quic-r500-t1-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t1-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "9c4545f77a265b3dab3376cae167f0b528957a74e1ff05751a7d9b8e324c0325",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "6143737ea6b60ba6855735202496da710152d055a5bbdb4b7da44ad088e5d58f",
+        "bytes": 990999
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "6de57c66c068b59c757895c6f8cf7ac45daf9a2dce85f6fa5346c0145008ae9e",
+        "bytes": 4778
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "24d97409a428c631412bb8aaad53455f19ee40b2aea14448fe4a89b02c7841fb",
+        "bytes": 533
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "c597fd7e98b6c76fd3ccb65bc4466233cbb9ad7553201b5104409b95a8c4ead3",
+        "bytes": 2114
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "0756306a36f1f56db607fddfa704545bba0c0ca651bdf2414d09d5157ee3311b",
+        "bytes": 1452
+      }
+    ]
+  },
+  {
+    "case": "g4-quic-r500-t2-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t2-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "9c4545f77a265b3dab3376cae167f0b528957a74e1ff05751a7d9b8e324c0325",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "e9631e8035951542cf60ddb1525e2fd0973b4c896651cd01f117881c279aeda2",
+        "bytes": 990989
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "f3480417c978bea8ef29117a839c660116cc9965ffa062de0f4af6ef2f89dc3d",
+        "bytes": 4771
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "42e1a66aa065bcaf3b62bf32d0c66cad8972c478761f1c977a7c53a7fb83f9a5",
+        "bytes": 529
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "f221c48738565c6d5326315c5d756a576211dd0e9d803fa6f19fed702ca21274",
+        "bytes": 2114
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "8518599cbe0febf1f503b2fd819e23f60fc4ab3f5a2da7c52379abb0769ab9a7",
+        "bytes": 1452
+      }
+    ]
+  },
+  {
+    "case": "g4-quic-r500-t2-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t2-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "9c4545f77a265b3dab3376cae167f0b528957a74e1ff05751a7d9b8e324c0325",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "00999754da92f1ed3964c8df4eb12bd49195fc705fef7cf6e1afa4b311cafa59",
+        "bytes": 990993
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "d24c34675aadc0b82687131cbce614f48060995d50d6538ba716666aaa6f4f84",
+        "bytes": 4757
+      },
+      {
+        "file": "failure.txt",
+        "sha256": "e91256ed589490cc8de97bdbcdd5b2cbf9481a3fa7eafbbff9a2199a4a4e5554",
+        "bytes": 134
+      }
+    ]
+  },
+  {
+    "case": "g4-quic-r500-t3-baseline",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t3-baseline",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "9c4545f77a265b3dab3376cae167f0b528957a74e1ff05751a7d9b8e324c0325",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "1c62c40a5463e2d854571cc860f05534fbefc329efb44378882c189c6622114c",
+        "bytes": 990998
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "ccacc84d9a3f3c2a520c257b774efa331d228182646b1a2b42dd394df24ff6a3",
+        "bytes": 4755
+      },
+      {
+        "file": "failure.txt",
+        "sha256": "e91256ed589490cc8de97bdbcdd5b2cbf9481a3fa7eafbbff9a2199a4a4e5554",
+        "bytes": 134
+      }
+    ]
+  },
+  {
+    "case": "g4-quic-r500-t3-candidate",
+    "original_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t3-candidate",
+    "only_top_level_text_CSV_copied": true,
+    "files": [
+      {
+        "file": "run.txt",
+        "sha256": "9c4545f77a265b3dab3376cae167f0b528957a74e1ff05751a7d9b8e324c0325",
+        "bytes": 86
+      },
+      {
+        "file": "offers.csv",
+        "sha256": "70ea56537793bdaae57f9182a56afff11af2fa8179387953a1463826db7472ba",
+        "bytes": 990993
+      },
+      {
+        "file": "maintenance-config.txt",
+        "sha256": "5dc93828cdb918b94d357a42d3198a724205933f4e72e405a25e67b0d40da134",
+        "bytes": 351
+      },
+      {
+        "file": "maintenance.csv",
+        "sha256": "fe73670c481945fa5e415a0199e5574135b34fe2ae0fc7795659707f3b3b664c",
+        "bytes": 4772
+      },
+      {
+        "file": "bases.csv",
+        "sha256": "50a42b595b695ef57efa8be810abc84a5eeb9e6b237d732f7537fda287ea8430",
+        "bytes": 531
+      },
+      {
+        "file": "storage.csv",
+        "sha256": "8388588dc210f0af68f15253e716a88ff4e9b5afa4ba9b8dbc43b33126d278a7",
+        "bytes": 2125
+      },
+      {
+        "file": "summary.txt",
+        "sha256": "7809fa664efabdacd12c27541818ac386699cfbccb06fb7a67367cea32ee7e35",
+        "bytes": 1453
+      }
+    ]
+  }
+]

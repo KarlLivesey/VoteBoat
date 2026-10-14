@@ -1,0 +1,1 @@
+mode=offered protocol=TcpTls offers=15000 offered_rate=125 window=32 groups=1 warmup=64

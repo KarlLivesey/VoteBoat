@@ -1,0 +1,17 @@
+{
+  "original_session": 41919,
+  "actual_exit": 1,
+  "terminal_tool_chunk": "b25f5e",
+  "stage": "ALL_TIMING_END",
+  "require_escalated_localhost_access": true,
+  "command": "python3 target/p9/native455-linux/attempt2/campaign.py --authorized-quiet",
+  "workload_cases": 48,
+  "process_and_validator_zero": 45,
+  "failed_workload_cases": 3,
+  "failed_case_validators_skipped": true,
+  "all_workloads_terminated_before_validation": true,
+  "post_workload_source_artifact_compiler_validator_guard_succeeded": "Existing controller reached validator loop and ALL_TIMING_END after guards()",
+  "no_reruns_or_case_changes": true,
+  "source_identity": "candidate7a99 versus445ab091ea1, notrelabeled460",
+  "all_original_failed_case_roots_preserved_ignored": true
+}

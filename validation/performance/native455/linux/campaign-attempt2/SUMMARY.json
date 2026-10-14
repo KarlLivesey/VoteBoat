@@ -1,0 +1,823 @@
+{
+  "workload_cases": 48,
+  "valid_cases": 45,
+  "failed_cases": 3,
+  "rows": [
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 125,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 66.687,
+      "median_horizon_completed_originals_per_second": 66.6,
+      "median_p99_ms": 1550.200106,
+      "median_service_p99_ms": 1550.0804520000002,
+      "applied_range": [
+        7967.0,
+        8566.0
+      ],
+      "window_refused_range": [
+        6434.0,
+        7033.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        17.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        118.459211,
+        688.189705
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        21200,
+        21728
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 125,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 66.654,
+      "median_horizon_completed_originals_per_second": 66.608,
+      "median_p99_ms": 1864.793588,
+      "median_service_p99_ms": 1864.682886,
+      "applied_range": [
+        7659.0,
+        8080.0
+      ],
+      "window_refused_range": [
+        6920.0,
+        7341.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        16.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        113.691521,
+        1280.382599
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        20420,
+        21288
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 500,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 97.673,
+      "median_horizon_completed_originals_per_second": 96.933,
+      "median_p99_ms": 1430.8733419999999,
+      "median_service_p99_ms": 1430.576945,
+      "applied_range": [
+        2070.0,
+        2998.0
+      ],
+      "window_refused_range": [
+        12002.0,
+        12930.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        27.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        100.545927,
+        296.737502
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        14972,
+        16000
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 500,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 85.45,
+      "median_horizon_completed_originals_per_second": 84.933,
+      "median_p99_ms": 1603.955781,
+      "median_service_p99_ms": 1603.8437450000001,
+      "applied_range": [
+        2502.0,
+        2720.0
+      ],
+      "window_refused_range": [
+        12280.0,
+        12498.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        17.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        137.1968,
+        388.862338
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        15460,
+        15484
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 2000,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 92.783,
+      "median_horizon_completed_originals_per_second": 89.867,
+      "median_p99_ms": 924.056409,
+      "median_service_p99_ms": 923.949103,
+      "applied_range": [
+        663.0,
+        880.0
+      ],
+      "window_refused_range": [
+        14120.0,
+        14337.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        32.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        109.123676,
+        416.151847
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        13176,
+        13616
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 2000,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 85.963,
+      "median_horizon_completed_originals_per_second": 83.467,
+      "median_p99_ms": 1199.9419129999999,
+      "median_service_p99_ms": 1199.8808319999998,
+      "applied_range": [
+        573.0,
+        682.0
+      ],
+      "window_refused_range": [
+        14318.0,
+        14427.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        32.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        121.788167,
+        168.444161
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        13048,
+        13304
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 125,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 68.119,
+      "median_horizon_completed_originals_per_second": 68.017,
+      "median_p99_ms": 1552.532569,
+      "median_service_p99_ms": 1552.503887,
+      "applied_range": [
+        8043.0,
+        8628.0
+      ],
+      "window_refused_range": [
+        6372.0,
+        6957.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        23.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        158.12963,
+        395.268455
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        20276,
+        21480
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 125,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 69.178,
+      "median_horizon_completed_originals_per_second": 69.058,
+      "median_p99_ms": 1740.3936,
+      "median_service_p99_ms": 1740.379306,
+      "applied_range": [
+        8021.0,
+        8413.0
+      ],
+      "window_refused_range": [
+        6587.0,
+        6979.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        31.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        254.541935,
+        600.98604
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        19352,
+        21320
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 500,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 90.283,
+      "median_horizon_completed_originals_per_second": 90.333,
+      "median_p99_ms": 1137.7157379999999,
+      "median_service_p99_ms": 1137.68434,
+      "applied_range": [
+        2341.0,
+        2850.0
+      ],
+      "window_refused_range": [
+        12150.0,
+        12659.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        27.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        127.811266,
+        371.100548
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        14604,
+        15476
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 500,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 83.256,
+      "median_horizon_completed_originals_per_second": 83.167,
+      "median_p99_ms": 1712.334198,
+      "median_service_p99_ms": 1712.328214,
+      "applied_range": [
+        2316.0,
+        2571.0
+      ],
+      "window_refused_range": [
+        12429.0,
+        12684.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        15.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        112.150452,
+        198.284551
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        14516,
+        15068
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 2000,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 108.483,
+      "median_horizon_completed_originals_per_second": 107.333,
+      "median_p99_ms": 919.401208,
+      "median_service_p99_ms": 919.38766,
+      "applied_range": [
+        561.0,
+        849.0
+      ],
+      "window_refused_range": [
+        14151.0,
+        14439.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        32.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        156.877115,
+        414.711502
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        12968,
+        13324
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 2000,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 82.399,
+      "median_horizon_completed_originals_per_second": 79.867,
+      "median_p99_ms": 1825.0971610000001,
+      "median_service_p99_ms": 1824.935667,
+      "applied_range": [
+        444.0,
+        685.0
+      ],
+      "window_refused_range": [
+        14315.0,
+        14556.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        32.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        157.823983,
+        249.743194
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        13188,
+        13324
+      ]
+    },
+    {
+      "groups": 4,
+      "protocol": "quic",
+      "offered_rate": 500,
+      "variant": "baseline",
+      "valid_trials": 1,
+      "median_completed_originals_per_second": 45.911,
+      "median_horizon_completed_originals_per_second": 45.6,
+      "median_p99_ms": 2265.072904,
+      "median_service_p99_ms": 2265.071109,
+      "applied_range": [
+        1399.0,
+        1399.0
+      ],
+      "window_refused_range": [
+        13601.0,
+        13601.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        31.0,
+        31.0
+      ],
+      "drain_ms_range": [
+        471.823526,
+        471.823526
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        15100,
+        15100
+      ]
+    },
+    {
+      "groups": 4,
+      "protocol": "quic",
+      "offered_rate": 500,
+      "variant": "candidate",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 48.542,
+      "median_horizon_completed_originals_per_second": 48.267,
+      "median_p99_ms": 1489.145033,
+      "median_service_p99_ms": 1489.0170460000002,
+      "applied_range": [
+        1338.0,
+        1483.0
+      ],
+      "window_refused_range": [
+        13517.0,
+        13662.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        27.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        344.963221,
+        392.838907
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        15000,
+        15092
+      ]
+    },
+    {
+      "groups": 4,
+      "protocol": "tcp",
+      "offered_rate": 500,
+      "variant": "baseline",
+      "valid_trials": 3,
+      "median_completed_originals_per_second": 44.855,
+      "median_horizon_completed_originals_per_second": 44.167,
+      "median_p99_ms": 1387.393768,
+      "median_service_p99_ms": 1387.286125,
+      "applied_range": [
+        1316.0,
+        1604.0
+      ],
+      "window_refused_range": [
+        13396.0,
+        13684.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        32.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        228.202515,
+        539.968704
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        13676,
+        14076
+      ]
+    },
+    {
+      "groups": 4,
+      "protocol": "tcp",
+      "offered_rate": 500,
+      "variant": "candidate",
+      "valid_trials": 2,
+      "median_completed_originals_per_second": 49.061499999999995,
+      "median_horizon_completed_originals_per_second": 50.5,
+      "median_p99_ms": 2088.8194935,
+      "median_service_p99_ms": 2088.7200305,
+      "applied_range": [
+        1418.0,
+        1676.0
+      ],
+      "window_refused_range": [
+        13324.0,
+        13582.0
+      ],
+      "admission_refused_range": [
+        0.0,
+        0.0
+      ],
+      "no_leader_range": [
+        0.0,
+        0.0
+      ],
+      "not_proposed_range": [
+        0.0,
+        0.0
+      ],
+      "unknown_range": [
+        0.0,
+        0.0
+      ],
+      "pending_range": [
+        0.0,
+        0.0
+      ],
+      "backlog_range": [
+        32.0,
+        32.0
+      ],
+      "drain_ms_range": [
+        570.320604,
+        2749.035708
+      ],
+      "wholeprocess_peak_RSS_KiB_range": [
+        13960,
+        14392
+      ]
+    }
+  ]
+}

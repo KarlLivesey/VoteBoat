@@ -1,0 +1,16 @@
+[
+  "python3",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t1-baseline/resources.py",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+  "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t1-baseline",
+  "quic",
+  "15000",
+  "32",
+  "1",
+  "--offered",
+  "500",
+  "--maintenance",
+  "2",
+  "--ready-items",
+  "16"
+]

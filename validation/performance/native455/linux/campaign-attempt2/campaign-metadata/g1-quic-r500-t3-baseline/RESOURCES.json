@@ -1,0 +1,15 @@
+{
+  "pid": 2056297,
+  "exit": 0,
+  "elapsed_seconds": 32.66267438797513,
+  "user_seconds": 3.04528,
+  "system_seconds": 1.064856,
+  "max_rss_raw": 15756,
+  "max_rss_unit": "KiB",
+  "max_rss_bytes": 16134144,
+  "voluntary_context_switches": 220136,
+  "involuntary_context_switches": 8464,
+  "block_inputs": 0,
+  "block_outputs": 436328,
+  "scope": "Linux native benchmark wholeprocess and children; includes campaign/warmup/horizon/drain/maintenance/recovery/cleanup; not measurement-only or continuous RSS plateau. Block I/O counts are not bytes."
+}

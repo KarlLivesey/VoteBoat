@@ -1,0 +1,5 @@
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t2-candidate: 15000 scheduled offers, 682 admissions, 682 applied; outcome/history/window/horizon/drain/latency/rate arithmetic pass
+load rates: offered=2000.000 admitted_during=90.933 applied_during=86.667 applied_drain=262.751 applied_total=89.480 ops/s; window_refused=14318 backlog_at_horizon=32
+/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t2-candidate: 3 durable checkpoint boundaries, 9 exact-scope reclamation rows, 0 explicit skips; maintenance schedule/bytes/recovery-base and optional catch-up arithmetic pass
+maintenance observed latency sums: checkpoint_ms=772.879 reclaim_ms=2306.565 reclaimed_bytes=75106 pending_at_horizon=0; concurrent/queued durations are not a critical path
+storage measured deltas: append_calls=249 units=249 commands=2046 mean_units=1.000 append_ms=4.223 barriers=249 mean_appends_per_barrier=1.000 mean_units_per_barrier=1.000 barrier_ms=11886.567 sync_ms=3801.566 publish_ms=8082.651 histogram=1:249

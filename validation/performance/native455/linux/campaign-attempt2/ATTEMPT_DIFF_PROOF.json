@@ -1,0 +1,354 @@
+{
+  "only_changed_config_fields": [
+    "cases[*].metadata",
+    "cases[*].wal_root",
+    "cases[*].command[1]",
+    "cases[*].resource_command[1]",
+    "cases[*].resource_command[3]"
+  ],
+  "all_other_configuration_exact": true,
+  "byte_identical_campaign_py": "ccf030dc00facd2db18e708fd80fc475779fb071966a1f7a8a47e75805b0f9ea",
+  "byte_identical_collectors": true,
+  "common_wal_parent_exists": true,
+  "all_case_roots_nonexistent": true,
+  "cases": [
+    {
+      "name": "g1-tcp-r125-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r125-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r125-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r125-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t1-baseline"
+    },
+    {
+      "name": "g1-tcp-r125-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r125-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r125-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r125-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t1-candidate"
+    },
+    {
+      "name": "g1-tcp-r125-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r125-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r125-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r125-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t2-candidate"
+    },
+    {
+      "name": "g1-tcp-r125-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r125-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r125-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r125-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t2-baseline"
+    },
+    {
+      "name": "g1-tcp-r125-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r125-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r125-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r125-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t3-baseline"
+    },
+    {
+      "name": "g1-tcp-r125-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r125-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r125-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r125-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r125-t3-candidate"
+    },
+    {
+      "name": "g1-tcp-r500-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r500-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r500-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r500-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t1-baseline"
+    },
+    {
+      "name": "g1-tcp-r500-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r500-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r500-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r500-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t1-candidate"
+    },
+    {
+      "name": "g1-tcp-r500-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r500-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r500-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r500-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t2-candidate"
+    },
+    {
+      "name": "g1-tcp-r500-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r500-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r500-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r500-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t2-baseline"
+    },
+    {
+      "name": "g1-tcp-r500-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r500-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r500-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r500-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t3-baseline"
+    },
+    {
+      "name": "g1-tcp-r500-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r500-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r500-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r500-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r500-t3-candidate"
+    },
+    {
+      "name": "g1-tcp-r2000-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r2000-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r2000-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r2000-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t1-baseline"
+    },
+    {
+      "name": "g1-tcp-r2000-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r2000-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r2000-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r2000-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t1-candidate"
+    },
+    {
+      "name": "g1-tcp-r2000-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r2000-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r2000-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r2000-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t2-candidate"
+    },
+    {
+      "name": "g1-tcp-r2000-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r2000-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r2000-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r2000-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t2-baseline"
+    },
+    {
+      "name": "g1-tcp-r2000-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r2000-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r2000-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r2000-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t3-baseline"
+    },
+    {
+      "name": "g1-tcp-r2000-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-tcp-r2000-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-tcp-r2000-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-tcp-r2000-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-tcp-r2000-t3-candidate"
+    },
+    {
+      "name": "g1-quic-r125-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r125-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r125-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r125-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t1-baseline"
+    },
+    {
+      "name": "g1-quic-r125-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r125-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r125-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r125-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t1-candidate"
+    },
+    {
+      "name": "g1-quic-r125-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r125-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r125-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r125-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t2-candidate"
+    },
+    {
+      "name": "g1-quic-r125-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r125-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r125-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r125-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t2-baseline"
+    },
+    {
+      "name": "g1-quic-r125-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r125-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r125-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r125-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t3-baseline"
+    },
+    {
+      "name": "g1-quic-r125-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r125-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r125-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r125-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r125-t3-candidate"
+    },
+    {
+      "name": "g1-quic-r500-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r500-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r500-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t1-baseline"
+    },
+    {
+      "name": "g1-quic-r500-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r500-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r500-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t1-candidate"
+    },
+    {
+      "name": "g1-quic-r500-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r500-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r500-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t2-candidate"
+    },
+    {
+      "name": "g1-quic-r500-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r500-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r500-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t2-baseline"
+    },
+    {
+      "name": "g1-quic-r500-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r500-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r500-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t3-baseline"
+    },
+    {
+      "name": "g1-quic-r500-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r500-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r500-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r500-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r500-t3-candidate"
+    },
+    {
+      "name": "g1-quic-r2000-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r2000-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r2000-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r2000-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t1-baseline"
+    },
+    {
+      "name": "g1-quic-r2000-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r2000-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r2000-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r2000-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t1-candidate"
+    },
+    {
+      "name": "g1-quic-r2000-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r2000-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r2000-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r2000-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t2-candidate"
+    },
+    {
+      "name": "g1-quic-r2000-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r2000-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r2000-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r2000-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t2-baseline"
+    },
+    {
+      "name": "g1-quic-r2000-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r2000-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r2000-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r2000-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t3-baseline"
+    },
+    {
+      "name": "g1-quic-r2000-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g1-quic-r2000-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g1-quic-r2000-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g1-quic-r2000-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g1-quic-r2000-t3-candidate"
+    },
+    {
+      "name": "g4-tcp-r500-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-tcp-r500-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-tcp-r500-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-tcp-r500-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t1-baseline"
+    },
+    {
+      "name": "g4-tcp-r500-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-tcp-r500-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-tcp-r500-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-tcp-r500-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t1-candidate"
+    },
+    {
+      "name": "g4-tcp-r500-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-tcp-r500-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-tcp-r500-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-tcp-r500-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t2-candidate"
+    },
+    {
+      "name": "g4-tcp-r500-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-tcp-r500-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-tcp-r500-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-tcp-r500-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t2-baseline"
+    },
+    {
+      "name": "g4-tcp-r500-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-tcp-r500-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-tcp-r500-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-tcp-r500-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t3-baseline"
+    },
+    {
+      "name": "g4-tcp-r500-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-tcp-r500-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-tcp-r500-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-tcp-r500-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-tcp-r500-t3-candidate"
+    },
+    {
+      "name": "g4-quic-r500-t1-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t1-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-quic-r500-t1-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t1-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t1-baseline"
+    },
+    {
+      "name": "g4-quic-r500-t1-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t1-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-quic-r500-t1-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t1-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t1-candidate"
+    },
+    {
+      "name": "g4-quic-r500-t2-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t2-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-quic-r500-t2-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t2-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t2-candidate"
+    },
+    {
+      "name": "g4-quic-r500-t2-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t2-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-quic-r500-t2-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t2-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t2-baseline"
+    },
+    {
+      "name": "g4-quic-r500-t3-baseline",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t3-baseline",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-quic-r500-t3-baseline",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t3-baseline",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t3-baseline"
+    },
+    {
+      "name": "g4-quic-r500-t3-candidate",
+      "old_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-metadata/g4-quic-r500-t3-candidate",
+      "new_metadata": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-metadata/g4-quic-r500-t3-candidate",
+      "old_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/campaign-wal/g4-quic-r500-t3-candidate",
+      "new_wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native455-linux/attempt2/campaign-wal/g4-quic-r500-t3-candidate"
+    }
+  ],
+  "config_sha256": "45ffa5fd911c2e95b26d4c4d0ac91b0427bd92c37cd511b08f5f9a71f52b0a35",
+  "source_artifact_compiler_validator_guard_exit": 0
+}

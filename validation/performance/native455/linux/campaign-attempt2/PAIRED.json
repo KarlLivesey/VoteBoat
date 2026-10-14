@@ -1,0 +1,179 @@
+{
+  "cells": [
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 125,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 0.9995057926659021,
+          "p99_ratio": 1.0970235709685858
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 1.0142237630977649,
+          "p99_ratio": 0.8178830254201339
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 0.8897504455290064,
+          "p99_ratio": 1.3093132100656424
+        }
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 500,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 0.842946293803855,
+          "p99_ratio": 1.1759400721297386
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 1.314699177025049,
+          "p99_ratio": 0.8350992523023621
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 0.8635253232514757,
+          "p99_ratio": 1.5292463921821076
+        }
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "quic",
+      "offered_rate": 2000,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 0.6497796628933602,
+          "p99_ratio": 1.3078039617253003
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 1.0683857535104644,
+          "p99_ratio": 1.4099583524451265
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 0.9264949647620637,
+          "p99_ratio": 0.9181584389486446
+        }
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 125,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 0.9746075402056837,
+          "p99_ratio": 1.4262326960808482
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 1.0155565503325577,
+          "p99_ratio": 0.747727676658515
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 0.9936163192291969,
+          "p99_ratio": 1.121002956556978
+        }
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 500,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 0.814059902972261,
+          "p99_ratio": 1.5050632955206604
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 1.0714768003551742,
+          "p99_ratio": 0.5627414843713258
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 0.9456999893131406,
+          "p99_ratio": 1.6050852897956602
+        }
+      ]
+    },
+    {
+      "groups": 1,
+      "protocol": "tcp",
+      "offered_rate": 2000,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 0.8217091468189096,
+          "p99_ratio": 1.9850932814958844
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 0.5167014088052995,
+          "p99_ratio": 3.200198948141874
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 1.16250868810701,
+          "p99_ratio": 1.0063396857276055
+        }
+      ]
+    },
+    {
+      "groups": 4,
+      "protocol": "quic",
+      "offered_rate": 500,
+      "trials": [
+        {
+          "trial": 1,
+          "completed_rate_ratio": 1.0572913326181326,
+          "p99_ratio": 0.6443215101035882
+        },
+        {
+          "trial": 2,
+          "comparison_unavailable_failed_case": true
+        },
+        {
+          "trial": 3,
+          "comparison_unavailable_failed_case": true
+        }
+      ]
+    },
+    {
+      "groups": 4,
+      "protocol": "tcp",
+      "offered_rate": 500,
+      "trials": [
+        {
+          "trial": 1,
+          "comparison_unavailable_failed_case": true
+        },
+        {
+          "trial": 2,
+          "completed_rate_ratio": 0.8159915722205714,
+          "p99_ratio": 2.137837472973282
+        },
+        {
+          "trial": 3,
+          "completed_rate_ratio": 1.2722917741506399,
+          "p99_ratio": 0.41725183747670447
+        }
+      ]
+    }
+  ],
+  "all45valid_cases_recovered_exact_and_retry_join_true": true,
+  "no_failed_case_recovery_claim": true
+}
