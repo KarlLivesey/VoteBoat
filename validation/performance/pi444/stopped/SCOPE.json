@@ -1,0 +1,446 @@
+{
+  "planned_cases": 63,
+  "complete_guarded_cases": 8,
+  "interrupted_case": "off-c1-b1-t3",
+  "unrun_cells": [
+    [
+      64,
+      1
+    ],
+    [
+      256,
+      1
+    ],
+    [
+      512,
+      1
+    ],
+    [
+      1024,
+      1
+    ],
+    [
+      4096,
+      1
+    ],
+    [
+      4096,
+      4
+    ]
+  ],
+  "current_foreground_exit": 255,
+  "raw_remote_STATUS": "0-not-success-under-signal",
+  "manual_stop": true,
+  "after_end_guards_not_run": true,
+  "case_diagnostics": [
+    {
+      "case": "off-c1-b1-t1",
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 3,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1,
+          "proposal_widths": [
+            {
+              "original_entries": 1,
+              "batches": 1049600
+            }
+          ]
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1822655,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1871045,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        }
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 4096,
+          "proposal_input_bytes": 196632,
+          "proposal_and_staged_entries_bytes": 458776,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 459576,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "seconds": 81.732619308,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "off-c1-b1-t2",
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 5,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1,
+          "proposal_widths": [
+            {
+              "original_entries": 1,
+              "batches": 1049600
+            }
+          ]
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1810231,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1841627,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        }
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 4096,
+          "proposal_input_bytes": 196632,
+          "proposal_and_staged_entries_bytes": 458776,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 459576,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "seconds": 81.788970558,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "on-c1-b1-t1",
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 4,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1,
+          "proposal_widths": [
+            {
+              "original_entries": 1,
+              "batches": 1049600
+            }
+          ]
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1845583,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1839220,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        }
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 4096,
+          "proposal_input_bytes": 196632,
+          "proposal_and_staged_entries_bytes": 458776,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 459576,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "seconds": 91.236482845,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "on-c1-b1-t2",
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 4,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1,
+          "proposal_widths": [
+            {
+              "original_entries": 1,
+              "batches": 1049600
+            }
+          ]
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1837279,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1830247,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        }
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 4096,
+          "proposal_input_bytes": 196632,
+          "proposal_and_staged_entries_bytes": 458776,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 459576,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "seconds": 90.73153063,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "on-c1-b1-t3",
+      "diagnostics": [
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 4,
+          "peak_client_queue": 1,
+          "persistence_units": 2099203,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 1049600,
+          "proposed_originals": 1049600,
+          "maximum_proposal_width": 1,
+          "proposal_widths": [
+            {
+              "original_entries": 1,
+              "batches": 1049600
+            }
+          ]
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 2,
+          "peak_client_queue": 0,
+          "persistence_units": 1831654,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        },
+        {
+          "retained_entries": 5601,
+          "peak_retained_entries": 6000,
+          "peak_peer_queue": 1,
+          "peak_client_queue": 0,
+          "persistence_units": 1829066,
+          "checkpoint_count": 209,
+          "snapshot_installs": 0,
+          "proposal_batches": 0,
+          "proposed_originals": 0,
+          "maximum_proposal_width": 0,
+          "proposal_widths": []
+        }
+      ],
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "original_entries",
+        "api_capacity_semantics": "hard_original_and_allocated_element_count_ceiling",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "hard_proposal_original_ceiling_owned_staging_still_checked",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound",
+        "voteboat_empty_owned_envelope": {
+          "original_capacity": 4096,
+          "proposal_input_bytes": 196632,
+          "proposal_and_staged_entries_bytes": 458776,
+          "update_and_mutation_metadata_bytes": 800,
+          "complete_empty_envelope_bytes": 459576,
+          "selected_log_batch_bytes": 1048576
+        }
+      },
+      "seconds": 90.156029296,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "openraft-c1-b1-t1",
+      "diagnostics": null,
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "seconds": 487.43173948,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "openraft-c1-b1-t2",
+      "diagnostics": null,
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "seconds": 490.150537579,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    },
+    {
+      "case": "openraft-c1-b1-t3",
+      "diagnostics": null,
+      "capacity_contract": {
+        "legacy_capacity_fields": "configuration_values_use_this_contract_for_units_and_hard_or_soft_meaning",
+        "api_capacity_unit": "client_write_request_messages",
+        "api_capacity_semantics": "consecutive_request_merge_count_fixed_workload_original_bound",
+        "api_merge_original_bound_for_fixed_request_batch": 4096,
+        "append_capacity_unit": "original_entries",
+        "append_capacity_semantics": "additional_append_merge_threshold_does_not_split_first_command",
+        "replication_capacity_unit": "original_entries_per_ordinary_replication_rpc",
+        "common_profile_unit": "common64_means64_api_request_messages_fixed_request_batch_derives_original_bound"
+      },
+      "seconds": 489.555754073,
+      "refusals": "not separately exposed; completedallrequestedoriginals/processandoutputguards0",
+      "physical_RSS": "not measured",
+      "debt": "no explicit debt counter; logicalpeakretention/queues are diagnostics, not physicalproof"
+    }
+  ]
+}

@@ -1,0 +1,4070 @@
+[
+  {
+    "name": "trial1-tcp-q16",
+    "protocol": "tcp",
+    "q": 16,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 2828.653,
+    "elapsed_s": 5.302877,
+    "p99_ms": 51.714173,
+    "max_ms": 65.71230100000001,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 8,
+        "visits": 1,
+        "original_proposals": 8
+      },
+      {
+        "replica": "1",
+        "width": 16,
+        "visits": 937,
+        "original_proposals": 14992
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 1464,
+        "errors": 0,
+        "elapsed_ns": 18772109,
+        "manifest_calls": 1464,
+        "manifest_errors": 0,
+        "manifest_ns": 3106923794
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 1464,
+        "errors": 0,
+        "elapsed_ns": 6437650,
+        "manifest_calls": 1464,
+        "manifest_errors": 0,
+        "manifest_ns": 3106923794
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 1464,
+        "errors": 0,
+        "elapsed_ns": 1476141184,
+        "manifest_calls": 1464,
+        "manifest_errors": 0,
+        "manifest_ns": 3106923794
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 1464,
+        "errors": 0,
+        "elapsed_ns": 88538202,
+        "manifest_calls": 1464,
+        "manifest_errors": 0,
+        "manifest_ns": 3106923794
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 1464,
+        "errors": 0,
+        "elapsed_ns": 1514850424,
+        "manifest_calls": 1464,
+        "manifest_errors": 0,
+        "manifest_ns": 3106923794
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 496,
+        "errors": 0,
+        "elapsed_ns": 6760925,
+        "manifest_calls": 496,
+        "manifest_errors": 0,
+        "manifest_ns": 1429271214
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 496,
+        "errors": 0,
+        "elapsed_ns": 2119942,
+        "manifest_calls": 496,
+        "manifest_errors": 0,
+        "manifest_ns": 1429271214
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 496,
+        "errors": 0,
+        "elapsed_ns": 679953285,
+        "manifest_calls": 496,
+        "manifest_errors": 0,
+        "manifest_ns": 1429271214
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 496,
+        "errors": 0,
+        "elapsed_ns": 43116478,
+        "manifest_calls": 496,
+        "manifest_errors": 0,
+        "manifest_ns": 1429271214
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 496,
+        "errors": 0,
+        "elapsed_ns": 696570850,
+        "manifest_calls": 496,
+        "manifest_errors": 0,
+        "manifest_ns": 1429271214
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 490,
+        "errors": 0,
+        "elapsed_ns": 6848883,
+        "manifest_calls": 490,
+        "manifest_errors": 0,
+        "manifest_ns": 1387989376
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 490,
+        "errors": 0,
+        "elapsed_ns": 1991047,
+        "manifest_calls": 490,
+        "manifest_errors": 0,
+        "manifest_ns": 1387989376
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 490,
+        "errors": 0,
+        "elapsed_ns": 658530152,
+        "manifest_calls": 490,
+        "manifest_errors": 0,
+        "manifest_ns": 1387989376
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 490,
+        "errors": 0,
+        "elapsed_ns": 39738646,
+        "manifest_calls": 490,
+        "manifest_errors": 0,
+        "manifest_ns": 1387989376
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 490,
+        "errors": 0,
+        "elapsed_ns": 680124916,
+        "manifest_calls": 490,
+        "manifest_errors": 0,
+        "manifest_ns": 1387989376
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 1464,
+        "io_append_ns": 5580586,
+        "sync_calls": 1464,
+        "sync_ns": 1693280649,
+        "publish_calls": 1464,
+        "publish_ns": 3106923794,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 496,
+        "io_append_ns": 1967134,
+        "sync_calls": 496,
+        "sync_ns": 790953002,
+        "publish_calls": 496,
+        "publish_ns": 1429271214,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 490,
+        "io_append_ns": 1839988,
+        "sync_calls": 490,
+        "sync_ns": 790612406,
+        "publish_calls": 490,
+        "publish_ns": 1387989376,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial1-tcp-q32",
+    "protocol": "tcp",
+    "q": 32,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 701.279,
+    "elapsed_s": 21.3895,
+    "p99_ms": 354.30030300000004,
+    "max_ms": 503.458923,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 32,
+        "visits": 468,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 14786691,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 13372843710
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 4589632,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 13372843710
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 6324495093,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 13372843710
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 94109784,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 13372843710
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 6933246637,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 13372843710
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 458,
+        "errors": 0,
+        "elapsed_ns": 7463460,
+        "manifest_calls": 458,
+        "manifest_errors": 0,
+        "manifest_ns": 7565364845
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 458,
+        "errors": 0,
+        "elapsed_ns": 2228392,
+        "manifest_calls": 458,
+        "manifest_errors": 0,
+        "manifest_ns": 7565364845
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 458,
+        "errors": 0,
+        "elapsed_ns": 3578859533,
+        "manifest_calls": 458,
+        "manifest_errors": 0,
+        "manifest_ns": 7565364845
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 458,
+        "errors": 0,
+        "elapsed_ns": 87596920,
+        "manifest_calls": 458,
+        "manifest_errors": 0,
+        "manifest_ns": 7565364845
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 458,
+        "errors": 0,
+        "elapsed_ns": 3888366747,
+        "manifest_calls": 458,
+        "manifest_errors": 0,
+        "manifest_ns": 7565364845
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 444,
+        "errors": 0,
+        "elapsed_ns": 7422737,
+        "manifest_calls": 444,
+        "manifest_errors": 0,
+        "manifest_ns": 7000835923
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 444,
+        "errors": 0,
+        "elapsed_ns": 2107792,
+        "manifest_calls": 444,
+        "manifest_errors": 0,
+        "manifest_ns": 7000835923
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 444,
+        "errors": 0,
+        "elapsed_ns": 3235181572,
+        "manifest_calls": 444,
+        "manifest_errors": 0,
+        "manifest_ns": 7000835923
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 444,
+        "errors": 0,
+        "elapsed_ns": 48534405,
+        "manifest_calls": 444,
+        "manifest_errors": 0,
+        "manifest_ns": 7000835923
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 444,
+        "errors": 0,
+        "elapsed_ns": 3706796450,
+        "manifest_calls": 444,
+        "manifest_errors": 0,
+        "manifest_ns": 7000835923
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 938,
+        "io_append_ns": 4361647,
+        "sync_calls": 938,
+        "sync_ns": 6734512452,
+        "publish_calls": 938,
+        "publish_ns": 13372843710,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 458,
+        "io_append_ns": 2355249,
+        "sync_calls": 458,
+        "sync_ns": 3779688820,
+        "publish_calls": 458,
+        "publish_ns": 7565364845,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 444,
+        "io_append_ns": 2276474,
+        "sync_calls": 444,
+        "sync_ns": 3704793912,
+        "publish_calls": 444,
+        "publish_ns": 7000835923,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial1-tcp-q64",
+    "protocol": "tcp",
+    "q": 64,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 547.911,
+    "elapsed_s": 27.376689,
+    "p99_ms": 280.593372,
+    "max_ms": 622.3626019999999,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 64,
+        "visits": 234,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 7873409,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11409942616
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2556252,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11409942616
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5287978758,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11409942616
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 108439984,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11409942616
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 6002174615,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11409942616
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 7081932,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11083469657
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 2128641,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11083469657
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 5395273320,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11083469657
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 68391922,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11083469657
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 5609736775,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11083469657
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 6922232,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 11030229348
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 2074260,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 11030229348
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 5355394586,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 11030229348
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 58035852,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 11030229348
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 5607017684,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 11030229348
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 470,
+        "io_append_ns": 2768154,
+        "sync_calls": 470,
+        "sync_ns": 6178751636,
+        "publish_calls": 470,
+        "publish_ns": 11409942616,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 412,
+        "io_append_ns": 2368362,
+        "sync_calls": 412,
+        "sync_ns": 5339380331,
+        "publish_calls": 412,
+        "publish_ns": 11083469657,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 399,
+        "io_append_ns": 2387300,
+        "sync_calls": 399,
+        "sync_ns": 5484956489,
+        "publish_calls": 399,
+        "publish_ns": 11030229348,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial1-quic-q16",
+    "protocol": "quic",
+    "q": 16,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 230.169,
+    "elapsed_s": 65.169407,
+    "p99_ms": 1041.719354,
+    "max_ms": 1501.795754,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 8,
+        "visits": 1,
+        "original_proposals": 8
+      },
+      {
+        "replica": "1",
+        "width": 16,
+        "visits": 937,
+        "original_proposals": 14992
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 1644,
+        "errors": 0,
+        "elapsed_ns": 43923837,
+        "manifest_calls": 1644,
+        "manifest_errors": 0,
+        "manifest_ns": 42308759243
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 1644,
+        "errors": 0,
+        "elapsed_ns": 9031420,
+        "manifest_calls": 1644,
+        "manifest_errors": 0,
+        "manifest_ns": 42308759243
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 1644,
+        "errors": 0,
+        "elapsed_ns": 20407129914,
+        "manifest_calls": 1644,
+        "manifest_errors": 0,
+        "manifest_ns": 42308759243
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 1644,
+        "errors": 0,
+        "elapsed_ns": 266688922,
+        "manifest_calls": 1644,
+        "manifest_errors": 0,
+        "manifest_ns": 42308759243
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 1644,
+        "errors": 0,
+        "elapsed_ns": 21578512153,
+        "manifest_calls": 1644,
+        "manifest_errors": 0,
+        "manifest_ns": 42308759243
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 574,
+        "errors": 0,
+        "elapsed_ns": 10217453,
+        "manifest_calls": 574,
+        "manifest_errors": 0,
+        "manifest_ns": 15761026084
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 574,
+        "errors": 0,
+        "elapsed_ns": 3037543,
+        "manifest_calls": 574,
+        "manifest_errors": 0,
+        "manifest_ns": 15761026084
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 574,
+        "errors": 0,
+        "elapsed_ns": 7480691576,
+        "manifest_calls": 574,
+        "manifest_errors": 0,
+        "manifest_ns": 15761026084
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 574,
+        "errors": 0,
+        "elapsed_ns": 91721187,
+        "manifest_calls": 574,
+        "manifest_errors": 0,
+        "manifest_ns": 15761026084
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 574,
+        "errors": 0,
+        "elapsed_ns": 8174026507,
+        "manifest_calls": 574,
+        "manifest_errors": 0,
+        "manifest_ns": 15761026084
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 592,
+        "errors": 0,
+        "elapsed_ns": 11128814,
+        "manifest_calls": 592,
+        "manifest_errors": 0,
+        "manifest_ns": 17235782519
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 592,
+        "errors": 0,
+        "elapsed_ns": 3332834,
+        "manifest_calls": 592,
+        "manifest_errors": 0,
+        "manifest_ns": 17235782519
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 592,
+        "errors": 0,
+        "elapsed_ns": 7910053087,
+        "manifest_calls": 592,
+        "manifest_errors": 0,
+        "manifest_ns": 17235782519
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 592,
+        "errors": 0,
+        "elapsed_ns": 125335225,
+        "manifest_calls": 592,
+        "manifest_errors": 0,
+        "manifest_ns": 17235782519
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 592,
+        "errors": 0,
+        "elapsed_ns": 9184541844,
+        "manifest_calls": 592,
+        "manifest_errors": 0,
+        "manifest_ns": 17235782519
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 1644,
+        "io_append_ns": 8938856,
+        "sync_calls": 1644,
+        "sync_ns": 22120411169,
+        "publish_calls": 1644,
+        "publish_ns": 42308759243,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 574,
+        "io_append_ns": 3526676,
+        "sync_calls": 574,
+        "sync_ns": 9215750275,
+        "publish_calls": 574,
+        "publish_ns": 15761026084,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 592,
+        "io_append_ns": 3637261,
+        "sync_calls": 592,
+        "sync_ns": 9479183686,
+        "publish_calls": 592,
+        "publish_ns": 17235782519,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial1-quic-q32",
+    "protocol": "quic",
+    "q": 32,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 386.172,
+    "elapsed_s": 38.84277,
+    "p99_ms": 369.474789,
+    "max_ms": 620.207812,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 32,
+        "visits": 468,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 17223566,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25260357533
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 5304038,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25260357533
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 12461008207,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25260357533
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 175137747,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25260357533
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 12599586565,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25260357533
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 480,
+        "errors": 0,
+        "elapsed_ns": 9033478,
+        "manifest_calls": 480,
+        "manifest_errors": 0,
+        "manifest_ns": 14147113294
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 480,
+        "errors": 0,
+        "elapsed_ns": 2626755,
+        "manifest_calls": 480,
+        "manifest_errors": 0,
+        "manifest_ns": 14147113294
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 480,
+        "errors": 0,
+        "elapsed_ns": 7017283347,
+        "manifest_calls": 480,
+        "manifest_errors": 0,
+        "manifest_ns": 14147113294
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 480,
+        "errors": 0,
+        "elapsed_ns": 118085937,
+        "manifest_calls": 480,
+        "manifest_errors": 0,
+        "manifest_ns": 14147113294
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 480,
+        "errors": 0,
+        "elapsed_ns": 6998933365,
+        "manifest_calls": 480,
+        "manifest_errors": 0,
+        "manifest_ns": 14147113294
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 455,
+        "errors": 0,
+        "elapsed_ns": 8772250,
+        "manifest_calls": 455,
+        "manifest_errors": 0,
+        "manifest_ns": 13478335563
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 455,
+        "errors": 0,
+        "elapsed_ns": 2544254,
+        "manifest_calls": 455,
+        "manifest_errors": 0,
+        "manifest_ns": 13478335563
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 455,
+        "errors": 0,
+        "elapsed_ns": 6267298211,
+        "manifest_calls": 455,
+        "manifest_errors": 0,
+        "manifest_ns": 13478335563
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 455,
+        "errors": 0,
+        "elapsed_ns": 117432508,
+        "manifest_calls": 455,
+        "manifest_errors": 0,
+        "manifest_ns": 13478335563
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 455,
+        "errors": 0,
+        "elapsed_ns": 7081243261,
+        "manifest_calls": 455,
+        "manifest_errors": 0,
+        "manifest_ns": 13478335563
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 938,
+        "io_append_ns": 5257110,
+        "sync_calls": 938,
+        "sync_ns": 11886522537,
+        "publish_calls": 938,
+        "publish_ns": 25260357533,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 480,
+        "io_append_ns": 3197257,
+        "sync_calls": 480,
+        "sync_ns": 6909791773,
+        "publish_calls": 480,
+        "publish_ns": 14147113294,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 455,
+        "io_append_ns": 2909197,
+        "sync_calls": 455,
+        "sync_ns": 6683447907,
+        "publish_calls": 455,
+        "publish_ns": 13478335563,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial1-quic-q64",
+    "protocol": "quic",
+    "q": 64,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 470.879,
+    "elapsed_s": 31.85535,
+    "p99_ms": 643.719423,
+    "max_ms": 886.03924,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 64,
+        "visits": 234,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 8559000,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12236066579
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2602464,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12236066579
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5884164001,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12236066579
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 72792756,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12236066579
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 6266941086,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12236066579
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 8960297,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 12850666618
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 2226385,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 12850666618
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 6122107071,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 12850666618
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 94426137,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 12850666618
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 6622002646,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 12850666618
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 7270493,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 13633661827
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 2236818,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 13633661827
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 6472951919,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 13633661827
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 93533338,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 13633661827
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 7056739106,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 13633661827
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 470,
+        "io_append_ns": 2953498,
+        "sync_calls": 470,
+        "sync_ns": 7965512457,
+        "publish_calls": 470,
+        "publish_ns": 12236066579,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 412,
+        "io_append_ns": 2524136,
+        "sync_calls": 412,
+        "sync_ns": 6737693025,
+        "publish_calls": 412,
+        "publish_ns": 12850666618,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 414,
+        "io_append_ns": 2574024,
+        "sync_calls": 414,
+        "sync_ns": 6779433414,
+        "publish_calls": 414,
+        "publish_ns": 13633661827,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial2-quic-q32",
+    "protocol": "quic",
+    "q": 32,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 384.727,
+    "elapsed_s": 38.988673,
+    "p99_ms": 385.523788,
+    "max_ms": 499.64243,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 32,
+        "visits": 468,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 24526966,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25340027924
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 5042015,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25340027924
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 12287114257,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25340027924
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 173874490,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25340027924
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 12847514992,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 25340027924
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 8185890,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 13775181182
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 2523235,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 13775181182
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 6673910159,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 13775181182
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 99885884,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 13775181182
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 6989650213,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 13775181182
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 461,
+        "errors": 0,
+        "elapsed_ns": 7945916,
+        "manifest_calls": 461,
+        "manifest_errors": 0,
+        "manifest_ns": 13356937013
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 461,
+        "errors": 0,
+        "elapsed_ns": 2436859,
+        "manifest_calls": 461,
+        "manifest_errors": 0,
+        "manifest_ns": 13356937013
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 461,
+        "errors": 0,
+        "elapsed_ns": 6309944222,
+        "manifest_calls": 461,
+        "manifest_errors": 0,
+        "manifest_ns": 13356937013
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 461,
+        "errors": 0,
+        "elapsed_ns": 93986300,
+        "manifest_calls": 461,
+        "manifest_errors": 0,
+        "manifest_ns": 13356937013
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 461,
+        "errors": 0,
+        "elapsed_ns": 6941591045,
+        "manifest_calls": 461,
+        "manifest_errors": 0,
+        "manifest_ns": 13356937013
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 938,
+        "io_append_ns": 4875074,
+        "sync_calls": 938,
+        "sync_ns": 11923350148,
+        "publish_calls": 938,
+        "publish_ns": 25340027924,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 476,
+        "io_append_ns": 2889227,
+        "sync_calls": 476,
+        "sync_ns": 6946385417,
+        "publish_calls": 476,
+        "publish_ns": 13775181182,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 461,
+        "io_append_ns": 2828193,
+        "sync_calls": 461,
+        "sync_ns": 6623527164,
+        "publish_calls": 461,
+        "publish_ns": 13356937013,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial2-quic-q64",
+    "protocol": "quic",
+    "q": 64,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 505.19,
+    "elapsed_s": 29.691816,
+    "p99_ms": 424.193559,
+    "max_ms": 545.592337,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 64,
+        "visits": 234,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 10715904,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12032436997
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2755060,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12032436997
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5877920654,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12032436997
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 67337977,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12032436997
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 6072564816,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 12032436997
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 8292705,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 12365103515
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 2331354,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 12365103515
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 5837436801,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 12365103515
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 86918371,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 12365103515
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 414,
+        "errors": 0,
+        "elapsed_ns": 6429104675,
+        "manifest_calls": 414,
+        "manifest_errors": 0,
+        "manifest_ns": 12365103515
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 7880063,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 12305915788
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 2291519,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 12305915788
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 5997955832,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 12305915788
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 116574956,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 12305915788
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 6180212709,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 12305915788
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 470,
+        "io_append_ns": 3198853,
+        "sync_calls": 470,
+        "sync_ns": 6605203950,
+        "publish_calls": 470,
+        "publish_ns": 12032436997,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 414,
+        "io_append_ns": 2644945,
+        "sync_calls": 414,
+        "sync_ns": 6298004454,
+        "publish_calls": 414,
+        "publish_ns": 12365103515,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 406,
+        "io_append_ns": 2597180,
+        "sync_calls": 406,
+        "sync_ns": 5990419934,
+        "publish_calls": 406,
+        "publish_ns": 12305915788,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial2-quic-q16",
+    "protocol": "quic",
+    "q": 16,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 249.519,
+    "elapsed_s": 60.115681,
+    "p99_ms": 574.590415,
+    "max_ms": 715.200983,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 8,
+        "visits": 1,
+        "original_proposals": 8
+      },
+      {
+        "replica": "1",
+        "width": 16,
+        "visits": 937,
+        "original_proposals": 14992
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 1649,
+        "errors": 0,
+        "elapsed_ns": 44493100,
+        "manifest_calls": 1649,
+        "manifest_errors": 0,
+        "manifest_ns": 38834732519
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 1649,
+        "errors": 0,
+        "elapsed_ns": 8955272,
+        "manifest_calls": 1649,
+        "manifest_errors": 0,
+        "manifest_ns": 38834732519
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 1649,
+        "errors": 0,
+        "elapsed_ns": 18852391097,
+        "manifest_calls": 1649,
+        "manifest_errors": 0,
+        "manifest_ns": 38834732519
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 1649,
+        "errors": 0,
+        "elapsed_ns": 231908569,
+        "manifest_calls": 1649,
+        "manifest_errors": 0,
+        "manifest_ns": 38834732519
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 1649,
+        "errors": 0,
+        "elapsed_ns": 19693543195,
+        "manifest_calls": 1649,
+        "manifest_errors": 0,
+        "manifest_ns": 38834732519
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 646,
+        "errors": 0,
+        "elapsed_ns": 11282856,
+        "manifest_calls": 646,
+        "manifest_errors": 0,
+        "manifest_ns": 17595139650
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 646,
+        "errors": 0,
+        "elapsed_ns": 3439057,
+        "manifest_calls": 646,
+        "manifest_errors": 0,
+        "manifest_ns": 17595139650
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 646,
+        "errors": 0,
+        "elapsed_ns": 8230323233,
+        "manifest_calls": 646,
+        "manifest_errors": 0,
+        "manifest_ns": 17595139650
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 646,
+        "errors": 0,
+        "elapsed_ns": 102397943,
+        "manifest_calls": 646,
+        "manifest_errors": 0,
+        "manifest_ns": 17595139650
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 646,
+        "errors": 0,
+        "elapsed_ns": 9246198937,
+        "manifest_calls": 646,
+        "manifest_errors": 0,
+        "manifest_ns": 17595139650
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 519,
+        "errors": 0,
+        "elapsed_ns": 17498502,
+        "manifest_calls": 519,
+        "manifest_errors": 0,
+        "manifest_ns": 12860473274
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 519,
+        "errors": 0,
+        "elapsed_ns": 2835170,
+        "manifest_calls": 519,
+        "manifest_errors": 0,
+        "manifest_ns": 12860473274
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 519,
+        "errors": 0,
+        "elapsed_ns": 6194907966,
+        "manifest_calls": 519,
+        "manifest_errors": 0,
+        "manifest_ns": 12860473274
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 519,
+        "errors": 0,
+        "elapsed_ns": 92203090,
+        "manifest_calls": 519,
+        "manifest_errors": 0,
+        "manifest_ns": 12860473274
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 519,
+        "errors": 0,
+        "elapsed_ns": 6551818319,
+        "manifest_calls": 519,
+        "manifest_errors": 0,
+        "manifest_ns": 12860473274
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 1649,
+        "io_append_ns": 8673608,
+        "sync_calls": 1649,
+        "sync_ns": 20574956752,
+        "publish_calls": 1649,
+        "publish_ns": 38834732519,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 646,
+        "io_append_ns": 3828877,
+        "sync_calls": 646,
+        "sync_ns": 9577371102,
+        "publish_calls": 646,
+        "publish_ns": 17595139650,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 519,
+        "io_append_ns": 3340685,
+        "sync_calls": 519,
+        "sync_ns": 8088949536,
+        "publish_calls": 519,
+        "publish_ns": 12860473274,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial2-tcp-q32",
+    "protocol": "tcp",
+    "q": 32,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 308.582,
+    "elapsed_s": 48.609478,
+    "p99_ms": 840.64062,
+    "max_ms": 1520.225655,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 32,
+        "visits": 468,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 15229884,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 31004583942
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 5006310,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 31004583942
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 15063959469,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 31004583942
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 280670335,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 31004583942
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 15637858836,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 31004583942
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 460,
+        "errors": 0,
+        "elapsed_ns": 8008230,
+        "manifest_calls": 460,
+        "manifest_errors": 0,
+        "manifest_ns": 15827063949
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 460,
+        "errors": 0,
+        "elapsed_ns": 2406301,
+        "manifest_calls": 460,
+        "manifest_errors": 0,
+        "manifest_ns": 15827063949
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 460,
+        "errors": 0,
+        "elapsed_ns": 7654300736,
+        "manifest_calls": 460,
+        "manifest_errors": 0,
+        "manifest_ns": 15827063949
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 460,
+        "errors": 0,
+        "elapsed_ns": 136958602,
+        "manifest_calls": 460,
+        "manifest_errors": 0,
+        "manifest_ns": 15827063949
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 460,
+        "errors": 0,
+        "elapsed_ns": 8024422627,
+        "manifest_calls": 460,
+        "manifest_errors": 0,
+        "manifest_ns": 15827063949
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 8716514,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 17419542776
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 2545590,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 17419542776
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 8531442839,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 17419542776
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 160158502,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 17419542776
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 476,
+        "errors": 0,
+        "elapsed_ns": 8715645467,
+        "manifest_calls": 476,
+        "manifest_errors": 0,
+        "manifest_ns": 17419542776
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 938,
+        "io_append_ns": 5015504,
+        "sync_calls": 938,
+        "sync_ns": 15827254497,
+        "publish_calls": 938,
+        "publish_ns": 31004583942,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 460,
+        "io_append_ns": 2811114,
+        "sync_calls": 460,
+        "sync_ns": 7982637748,
+        "publish_calls": 460,
+        "publish_ns": 15827063949,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 476,
+        "io_append_ns": 2881507,
+        "sync_calls": 476,
+        "sync_ns": 9138616777,
+        "publish_calls": 476,
+        "publish_ns": 17419542776,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial2-tcp-q64",
+    "protocol": "tcp",
+    "q": 64,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 572.176,
+    "elapsed_s": 26.215724,
+    "p99_ms": 297.316283,
+    "max_ms": 586.810452,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 64,
+        "visits": 234,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 8936465,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10350845805
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2732609,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10350845805
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 4960262658,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10350845805
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 63393422,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10350845805
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5314481038,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10350845805
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 7226631,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 10348163538
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 2298570,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 10348163538
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 4702250405,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 10348163538
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 77148423,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 10348163538
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 399,
+        "errors": 0,
+        "elapsed_ns": 5558318307,
+        "manifest_calls": 399,
+        "manifest_errors": 0,
+        "manifest_ns": 10348163538
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 404,
+        "errors": 0,
+        "elapsed_ns": 7572317,
+        "manifest_calls": 404,
+        "manifest_errors": 0,
+        "manifest_ns": 10711226243
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 404,
+        "errors": 0,
+        "elapsed_ns": 2219235,
+        "manifest_calls": 404,
+        "manifest_errors": 0,
+        "manifest_ns": 10711226243
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 404,
+        "errors": 0,
+        "elapsed_ns": 4949751006,
+        "manifest_calls": 404,
+        "manifest_errors": 0,
+        "manifest_ns": 10711226243
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 404,
+        "errors": 0,
+        "elapsed_ns": 78856729,
+        "manifest_calls": 404,
+        "manifest_errors": 0,
+        "manifest_ns": 10711226243
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 404,
+        "errors": 0,
+        "elapsed_ns": 5671859961,
+        "manifest_calls": 404,
+        "manifest_errors": 0,
+        "manifest_ns": 10711226243
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 470,
+        "io_append_ns": 3308241,
+        "sync_calls": 470,
+        "sync_ns": 6101947630,
+        "publish_calls": 470,
+        "publish_ns": 10350845805,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 399,
+        "io_append_ns": 2686263,
+        "sync_calls": 399,
+        "sync_ns": 5104511758,
+        "publish_calls": 399,
+        "publish_ns": 10348163538,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 404,
+        "io_append_ns": 2616213,
+        "sync_calls": 404,
+        "sync_ns": 5362188591,
+        "publish_calls": 404,
+        "publish_ns": 10711226243,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial2-tcp-q16",
+    "protocol": "tcp",
+    "q": 16,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 246.93,
+    "elapsed_s": 60.746017,
+    "p99_ms": 714.749532,
+    "max_ms": 910.450356,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 8,
+        "visits": 1,
+        "original_proposals": 8
+      },
+      {
+        "replica": "1",
+        "width": 16,
+        "visits": 937,
+        "original_proposals": 14992
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 1639,
+        "errors": 0,
+        "elapsed_ns": 27692678,
+        "manifest_calls": 1639,
+        "manifest_errors": 0,
+        "manifest_ns": 39303187751
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 1639,
+        "errors": 0,
+        "elapsed_ns": 8943795,
+        "manifest_calls": 1639,
+        "manifest_errors": 0,
+        "manifest_ns": 39303187751
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 1639,
+        "errors": 0,
+        "elapsed_ns": 18871363369,
+        "manifest_calls": 1639,
+        "manifest_errors": 0,
+        "manifest_ns": 39303187751
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 1639,
+        "errors": 0,
+        "elapsed_ns": 285941059,
+        "manifest_calls": 1639,
+        "manifest_errors": 0,
+        "manifest_ns": 39303187751
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 1639,
+        "errors": 0,
+        "elapsed_ns": 20106007010,
+        "manifest_calls": 1639,
+        "manifest_errors": 0,
+        "manifest_ns": 39303187751
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 585,
+        "errors": 0,
+        "elapsed_ns": 10329705,
+        "manifest_calls": 585,
+        "manifest_errors": 0,
+        "manifest_ns": 15716351079
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 585,
+        "errors": 0,
+        "elapsed_ns": 3186682,
+        "manifest_calls": 585,
+        "manifest_errors": 0,
+        "manifest_ns": 15716351079
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 585,
+        "errors": 0,
+        "elapsed_ns": 7319770022,
+        "manifest_calls": 585,
+        "manifest_errors": 0,
+        "manifest_ns": 15716351079
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 585,
+        "errors": 0,
+        "elapsed_ns": 124417147,
+        "manifest_calls": 585,
+        "manifest_errors": 0,
+        "manifest_ns": 15716351079
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 585,
+        "errors": 0,
+        "elapsed_ns": 8257374482,
+        "manifest_calls": 585,
+        "manifest_errors": 0,
+        "manifest_ns": 15716351079
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 580,
+        "errors": 0,
+        "elapsed_ns": 10733659,
+        "manifest_calls": 580,
+        "manifest_errors": 0,
+        "manifest_ns": 15196271761
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 580,
+        "errors": 0,
+        "elapsed_ns": 3087688,
+        "manifest_calls": 580,
+        "manifest_errors": 0,
+        "manifest_ns": 15196271761
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 580,
+        "errors": 0,
+        "elapsed_ns": 6954253518,
+        "manifest_calls": 580,
+        "manifest_errors": 0,
+        "manifest_ns": 15196271761
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 580,
+        "errors": 0,
+        "elapsed_ns": 124988255,
+        "manifest_calls": 580,
+        "manifest_errors": 0,
+        "manifest_ns": 15196271761
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 580,
+        "errors": 0,
+        "elapsed_ns": 8101902097,
+        "manifest_calls": 580,
+        "manifest_errors": 0,
+        "manifest_ns": 15196271761
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 1639,
+        "io_append_ns": 8594042,
+        "sync_calls": 1639,
+        "sync_ns": 20715992257,
+        "publish_calls": 1639,
+        "publish_ns": 39303187751,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 585,
+        "io_append_ns": 3650571,
+        "sync_calls": 585,
+        "sync_ns": 8618812915,
+        "publish_calls": 585,
+        "publish_ns": 15716351079,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 580,
+        "io_append_ns": 3543653,
+        "sync_calls": 580,
+        "sync_ns": 8778863465,
+        "publish_calls": 580,
+        "publish_ns": 15196271761,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial3-tcp-q64",
+    "protocol": "tcp",
+    "q": 64,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 591.8,
+    "elapsed_s": 25.346394,
+    "p99_ms": 237.62410200000002,
+    "max_ms": 424.47062900000003,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 64,
+        "visits": 234,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 8001300,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10221301123
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2682165,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10221301123
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 4875222959,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10221301123
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 73016957,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10221301123
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5261472643,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 10221301123
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 419,
+        "errors": 0,
+        "elapsed_ns": 15068992,
+        "manifest_calls": 419,
+        "manifest_errors": 0,
+        "manifest_ns": 10556651628
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 419,
+        "errors": 0,
+        "elapsed_ns": 2195806,
+        "manifest_calls": 419,
+        "manifest_errors": 0,
+        "manifest_ns": 10556651628
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 419,
+        "errors": 0,
+        "elapsed_ns": 5187934072,
+        "manifest_calls": 419,
+        "manifest_errors": 0,
+        "manifest_ns": 10556651628
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 419,
+        "errors": 0,
+        "elapsed_ns": 70613684,
+        "manifest_calls": 419,
+        "manifest_errors": 0,
+        "manifest_ns": 10556651628
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 419,
+        "errors": 0,
+        "elapsed_ns": 5280006993,
+        "manifest_calls": 419,
+        "manifest_errors": 0,
+        "manifest_ns": 10556651628
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 395,
+        "errors": 0,
+        "elapsed_ns": 6683086,
+        "manifest_calls": 395,
+        "manifest_errors": 0,
+        "manifest_ns": 10455417412
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 395,
+        "errors": 0,
+        "elapsed_ns": 2021700,
+        "manifest_calls": 395,
+        "manifest_errors": 0,
+        "manifest_ns": 10455417412
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 395,
+        "errors": 0,
+        "elapsed_ns": 4880757293,
+        "manifest_calls": 395,
+        "manifest_errors": 0,
+        "manifest_ns": 10455417412
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 395,
+        "errors": 0,
+        "elapsed_ns": 73504513,
+        "manifest_calls": 395,
+        "manifest_errors": 0,
+        "manifest_ns": 10455417412
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 395,
+        "errors": 0,
+        "elapsed_ns": 5491634255,
+        "manifest_calls": 395,
+        "manifest_errors": 0,
+        "manifest_ns": 10455417412
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 470,
+        "io_append_ns": 2843589,
+        "sync_calls": 470,
+        "sync_ns": 5701439603,
+        "publish_calls": 470,
+        "publish_ns": 10221301123,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 419,
+        "io_append_ns": 2453924,
+        "sync_calls": 419,
+        "sync_ns": 5104996321,
+        "publish_calls": 419,
+        "publish_ns": 10556651628,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 395,
+        "io_append_ns": 2371004,
+        "sync_calls": 395,
+        "sync_ns": 5161976395,
+        "publish_calls": 395,
+        "publish_ns": 10455417412,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial3-tcp-q16",
+    "protocol": "tcp",
+    "q": 16,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 247.827,
+    "elapsed_s": 60.526178,
+    "p99_ms": 736.414771,
+    "max_ms": 1098.5252930000001,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 8,
+        "visits": 1,
+        "original_proposals": 8
+      },
+      {
+        "replica": "1",
+        "width": 16,
+        "visits": 937,
+        "original_proposals": 14992
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 1646,
+        "errors": 0,
+        "elapsed_ns": 28548136,
+        "manifest_calls": 1646,
+        "manifest_errors": 0,
+        "manifest_ns": 39754101539
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 1646,
+        "errors": 0,
+        "elapsed_ns": 9027769,
+        "manifest_calls": 1646,
+        "manifest_errors": 0,
+        "manifest_ns": 39754101539
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 1646,
+        "errors": 0,
+        "elapsed_ns": 18604080416,
+        "manifest_calls": 1646,
+        "manifest_errors": 0,
+        "manifest_ns": 39754101539
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 1646,
+        "errors": 0,
+        "elapsed_ns": 235219801,
+        "manifest_calls": 1646,
+        "manifest_errors": 0,
+        "manifest_ns": 39754101539
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 1646,
+        "errors": 0,
+        "elapsed_ns": 20873858213,
+        "manifest_calls": 1646,
+        "manifest_errors": 0,
+        "manifest_ns": 39754101539
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 587,
+        "errors": 0,
+        "elapsed_ns": 10506917,
+        "manifest_calls": 587,
+        "manifest_errors": 0,
+        "manifest_ns": 14623782730
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 587,
+        "errors": 0,
+        "elapsed_ns": 3291612,
+        "manifest_calls": 587,
+        "manifest_errors": 0,
+        "manifest_ns": 14623782730
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 587,
+        "errors": 0,
+        "elapsed_ns": 6556877335,
+        "manifest_calls": 587,
+        "manifest_errors": 0,
+        "manifest_ns": 14623782730
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 587,
+        "errors": 0,
+        "elapsed_ns": 83924161,
+        "manifest_calls": 587,
+        "manifest_errors": 0,
+        "manifest_ns": 14623782730
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 587,
+        "errors": 0,
+        "elapsed_ns": 7967886895,
+        "manifest_calls": 587,
+        "manifest_errors": 0,
+        "manifest_ns": 14623782730
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 581,
+        "errors": 0,
+        "elapsed_ns": 10247667,
+        "manifest_calls": 581,
+        "manifest_errors": 0,
+        "manifest_ns": 15544902329
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 581,
+        "errors": 0,
+        "elapsed_ns": 3113085,
+        "manifest_calls": 581,
+        "manifest_errors": 0,
+        "manifest_ns": 15544902329
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 581,
+        "errors": 0,
+        "elapsed_ns": 7364503648,
+        "manifest_calls": 581,
+        "manifest_errors": 0,
+        "manifest_ns": 15544902329
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 581,
+        "errors": 0,
+        "elapsed_ns": 124818299,
+        "manifest_calls": 581,
+        "manifest_errors": 0,
+        "manifest_ns": 15544902329
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 581,
+        "errors": 0,
+        "elapsed_ns": 8040921657,
+        "manifest_calls": 581,
+        "manifest_errors": 0,
+        "manifest_ns": 15544902329
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 1646,
+        "io_append_ns": 8697102,
+        "sync_calls": 1646,
+        "sync_ns": 20059791357,
+        "publish_calls": 1646,
+        "publish_ns": 39754101539,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 587,
+        "io_append_ns": 3694714,
+        "sync_calls": 587,
+        "sync_ns": 8369141668,
+        "publish_calls": 587,
+        "publish_ns": 14623782730,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 581,
+        "io_append_ns": 3576336,
+        "sync_calls": 581,
+        "sync_ns": 8969787950,
+        "publish_calls": 581,
+        "publish_ns": 15544902329,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial3-tcp-q32",
+    "protocol": "tcp",
+    "q": 32,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 359.402,
+    "elapsed_s": 41.735992,
+    "p99_ms": 529.897618,
+    "max_ms": 559.2933850000001,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 32,
+        "visits": 468,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 34080704,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 26939099271
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 5271911,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 26939099271
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 13210144609,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 26939099271
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 204465754,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 26939099271
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 13483155038,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 26939099271
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 8736606,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 14231230043
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2693405,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 14231230043
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 6870577170,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 14231230043
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 117026703,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 14231230043
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 7231126965,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 14231230043
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 466,
+        "errors": 0,
+        "elapsed_ns": 8793492,
+        "manifest_calls": 466,
+        "manifest_errors": 0,
+        "manifest_ns": 14105436526
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 466,
+        "errors": 0,
+        "elapsed_ns": 2583567,
+        "manifest_calls": 466,
+        "manifest_errors": 0,
+        "manifest_ns": 14105436526
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 466,
+        "errors": 0,
+        "elapsed_ns": 6706696467,
+        "manifest_calls": 466,
+        "manifest_errors": 0,
+        "manifest_ns": 14105436526
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 466,
+        "errors": 0,
+        "elapsed_ns": 104821947,
+        "manifest_calls": 466,
+        "manifest_errors": 0,
+        "manifest_ns": 14105436526
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 466,
+        "errors": 0,
+        "elapsed_ns": 7281426677,
+        "manifest_calls": 466,
+        "manifest_errors": 0,
+        "manifest_ns": 14105436526
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 938,
+        "io_append_ns": 5325508,
+        "sync_calls": 938,
+        "sync_ns": 12967614424,
+        "publish_calls": 938,
+        "publish_ns": 26939099271,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 470,
+        "io_append_ns": 2951826,
+        "sync_calls": 470,
+        "sync_ns": 7253106930,
+        "publish_calls": 470,
+        "publish_ns": 14231230043,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 466,
+        "io_append_ns": 2918978,
+        "sync_calls": 466,
+        "sync_ns": 7441316873,
+        "publish_calls": 466,
+        "publish_ns": 14105436526,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial3-quic-q64",
+    "protocol": "quic",
+    "q": 64,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 521.572,
+    "elapsed_s": 28.759201,
+    "p99_ms": 306.991359,
+    "max_ms": 556.5084889999999,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 64,
+        "visits": 234,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 8358884,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11466910245
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 2520522,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11466910245
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5482857460,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11466910245
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 65844722,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11466910245
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 470,
+        "errors": 0,
+        "elapsed_ns": 5906358017,
+        "manifest_calls": 470,
+        "manifest_errors": 0,
+        "manifest_ns": 11466910245
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 7097276,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 11897058851
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 2150318,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 11897058851
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 5635024806,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 11897058851
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 172841926,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 11897058851
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 406,
+        "errors": 0,
+        "elapsed_ns": 6079037542,
+        "manifest_calls": 406,
+        "manifest_errors": 0,
+        "manifest_ns": 11897058851
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 7471041,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11566834781
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 2147039,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11566834781
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 5605870185,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11566834781
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 75168819,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11566834781
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 412,
+        "errors": 0,
+        "elapsed_ns": 5875303595,
+        "manifest_calls": 412,
+        "manifest_errors": 0,
+        "manifest_ns": 11566834781
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 470,
+        "io_append_ns": 2887925,
+        "sync_calls": 470,
+        "sync_ns": 6793794174,
+        "publish_calls": 470,
+        "publish_ns": 11466910245,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 406,
+        "io_append_ns": 2538451,
+        "sync_calls": 406,
+        "sync_ns": 5823667328,
+        "publish_calls": 406,
+        "publish_ns": 11897058851,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 412,
+        "io_append_ns": 2463328,
+        "sync_calls": 412,
+        "sync_ns": 5601130493,
+        "publish_calls": 412,
+        "publish_ns": 11566834781,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial3-quic-q16",
+    "protocol": "quic",
+    "q": 16,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 297.319,
+    "elapsed_s": 50.450861,
+    "p99_ms": 917.797565,
+    "max_ms": 1285.5716129999998,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 8,
+        "visits": 1,
+        "original_proposals": 8
+      },
+      {
+        "replica": "1",
+        "width": 16,
+        "visits": 937,
+        "original_proposals": 14992
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 1605,
+        "errors": 0,
+        "elapsed_ns": 25794672,
+        "manifest_calls": 1605,
+        "manifest_errors": 0,
+        "manifest_ns": 32781902852
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 1605,
+        "errors": 0,
+        "elapsed_ns": 8266256,
+        "manifest_calls": 1605,
+        "manifest_errors": 0,
+        "manifest_ns": 32781902852
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 1605,
+        "errors": 0,
+        "elapsed_ns": 15831960554,
+        "manifest_calls": 1605,
+        "manifest_errors": 0,
+        "manifest_ns": 32781902852
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 1605,
+        "errors": 0,
+        "elapsed_ns": 236962361,
+        "manifest_calls": 1605,
+        "manifest_errors": 0,
+        "manifest_ns": 32781902852
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 1605,
+        "errors": 0,
+        "elapsed_ns": 16675708386,
+        "manifest_calls": 1605,
+        "manifest_errors": 0,
+        "manifest_ns": 32781902852
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 547,
+        "errors": 0,
+        "elapsed_ns": 9403346,
+        "manifest_calls": 547,
+        "manifest_errors": 0,
+        "manifest_ns": 11966826561
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 547,
+        "errors": 0,
+        "elapsed_ns": 2806640,
+        "manifest_calls": 547,
+        "manifest_errors": 0,
+        "manifest_ns": 11966826561
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 547,
+        "errors": 0,
+        "elapsed_ns": 5443422421,
+        "manifest_calls": 547,
+        "manifest_errors": 0,
+        "manifest_ns": 11966826561
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 547,
+        "errors": 0,
+        "elapsed_ns": 99181099,
+        "manifest_calls": 547,
+        "manifest_errors": 0,
+        "manifest_ns": 11966826561
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 547,
+        "errors": 0,
+        "elapsed_ns": 6410850191,
+        "manifest_calls": 547,
+        "manifest_errors": 0,
+        "manifest_ns": 11966826561
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 576,
+        "errors": 0,
+        "elapsed_ns": 10411099,
+        "manifest_calls": 576,
+        "manifest_errors": 0,
+        "manifest_ns": 14139456076
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 576,
+        "errors": 0,
+        "elapsed_ns": 3089657,
+        "manifest_calls": 576,
+        "manifest_errors": 0,
+        "manifest_ns": 14139456076
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 576,
+        "errors": 0,
+        "elapsed_ns": 6966729304,
+        "manifest_calls": 576,
+        "manifest_errors": 0,
+        "manifest_ns": 14139456076
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 576,
+        "errors": 0,
+        "elapsed_ns": 115181523,
+        "manifest_calls": 576,
+        "manifest_errors": 0,
+        "manifest_ns": 14139456076
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 576,
+        "errors": 0,
+        "elapsed_ns": 7042765570,
+        "manifest_calls": 576,
+        "manifest_errors": 0,
+        "manifest_ns": 14139456076
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 1605,
+        "io_append_ns": 7880620,
+        "sync_calls": 1605,
+        "sync_ns": 17019237691,
+        "publish_calls": 1605,
+        "publish_ns": 32781902852,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 547,
+        "io_append_ns": 3030058,
+        "sync_calls": 547,
+        "sync_ns": 6935201457,
+        "publish_calls": 547,
+        "publish_ns": 11966826561,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 576,
+        "io_append_ns": 3301257,
+        "sync_calls": 576,
+        "sync_ns": 7745286462,
+        "publish_calls": 576,
+        "publish_ns": 14139456076,
+        "errors": 0
+      }
+    ]
+  },
+  {
+    "name": "trial3-quic-q32",
+    "protocol": "quic",
+    "q": 32,
+    "exit": 0,
+    "checks": [
+      {
+        "name": "receipts",
+        "exit": 0
+      },
+      {
+        "name": "publication",
+        "exit": 0
+      }
+    ],
+    "originals": 15000,
+    "warmup": 64,
+    "recovered_value": 15064,
+    "retry": "true",
+    "joined": "true",
+    "puts": 3277.813,
+    "elapsed_s": 4.576223,
+    "p99_ms": 60.642393,
+    "max_ms": 150.7821,
+    "widths": [
+      {
+        "replica": "1",
+        "width": 24,
+        "visits": 1,
+        "original_proposals": 24
+      },
+      {
+        "replica": "1",
+        "width": 32,
+        "visits": 468,
+        "original_proposals": 14976
+      }
+    ],
+    "proposal_originals": 15000,
+    "widthbound": true,
+    "complete": true,
+    "physical_publication_deltas": [
+      {
+        "replica": "1",
+        "step": "open",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 15139560,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 2514737012
+      },
+      {
+        "replica": "1",
+        "step": "write",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 3857691,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 2514737012
+      },
+      {
+        "replica": "1",
+        "step": "file_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 1261512342,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 2514737012
+      },
+      {
+        "replica": "1",
+        "step": "rename",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 55755913,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 2514737012
+      },
+      {
+        "replica": "1",
+        "step": "directory_sync",
+        "calls": 938,
+        "errors": 0,
+        "elapsed_ns": 1177074665,
+        "manifest_calls": 938,
+        "manifest_errors": 0,
+        "manifest_ns": 2514737012
+      },
+      {
+        "replica": "2",
+        "step": "open",
+        "calls": 429,
+        "errors": 0,
+        "elapsed_ns": 7172299,
+        "manifest_calls": 429,
+        "manifest_errors": 0,
+        "manifest_ns": 1466237897
+      },
+      {
+        "replica": "2",
+        "step": "write",
+        "calls": 429,
+        "errors": 0,
+        "elapsed_ns": 1728282,
+        "manifest_calls": 429,
+        "manifest_errors": 0,
+        "manifest_ns": 1466237897
+      },
+      {
+        "replica": "2",
+        "step": "file_sync",
+        "calls": 429,
+        "errors": 0,
+        "elapsed_ns": 766222708,
+        "manifest_calls": 429,
+        "manifest_errors": 0,
+        "manifest_ns": 1466237897
+      },
+      {
+        "replica": "2",
+        "step": "rename",
+        "calls": 429,
+        "errors": 0,
+        "elapsed_ns": 28775754,
+        "manifest_calls": 429,
+        "manifest_errors": 0,
+        "manifest_ns": 1466237897
+      },
+      {
+        "replica": "2",
+        "step": "directory_sync",
+        "calls": 429,
+        "errors": 0,
+        "elapsed_ns": 661697799,
+        "manifest_calls": 429,
+        "manifest_errors": 0,
+        "manifest_ns": 1466237897
+      },
+      {
+        "replica": "3",
+        "step": "open",
+        "calls": 430,
+        "errors": 0,
+        "elapsed_ns": 6796936,
+        "manifest_calls": 430,
+        "manifest_errors": 0,
+        "manifest_ns": 1459666229
+      },
+      {
+        "replica": "3",
+        "step": "write",
+        "calls": 430,
+        "errors": 0,
+        "elapsed_ns": 1712182,
+        "manifest_calls": 430,
+        "manifest_errors": 0,
+        "manifest_ns": 1459666229
+      },
+      {
+        "replica": "3",
+        "step": "file_sync",
+        "calls": 430,
+        "errors": 0,
+        "elapsed_ns": 758813503,
+        "manifest_calls": 430,
+        "manifest_errors": 0,
+        "manifest_ns": 1459666229
+      },
+      {
+        "replica": "3",
+        "step": "rename",
+        "calls": 430,
+        "errors": 0,
+        "elapsed_ns": 33213536,
+        "manifest_calls": 430,
+        "manifest_errors": 0,
+        "manifest_ns": 1459666229
+      },
+      {
+        "replica": "3",
+        "step": "directory_sync",
+        "calls": 430,
+        "errors": 0,
+        "elapsed_ns": 658499691,
+        "manifest_calls": 430,
+        "manifest_errors": 0,
+        "manifest_ns": 1459666229
+      }
+    ],
+    "journal_deltas": [
+      {
+        "replica": "1",
+        "io_append_calls": 938,
+        "io_append_ns": 3554143,
+        "sync_calls": 938,
+        "sync_ns": 1220016791,
+        "publish_calls": 938,
+        "publish_ns": 2514737012,
+        "errors": 0
+      },
+      {
+        "replica": "2",
+        "io_append_calls": 429,
+        "io_append_ns": 1776580,
+        "sync_calls": 429,
+        "sync_ns": 670383298,
+        "publish_calls": 429,
+        "publish_ns": 1466237897,
+        "errors": 0
+      },
+      {
+        "replica": "3",
+        "io_append_calls": 430,
+        "io_append_ns": 1811914,
+        "sync_calls": 430,
+        "sync_ns": 686731164,
+        "publish_calls": 430,
+        "publish_ns": 1459666229,
+        "errors": 0
+      }
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+CASE_START=off-c1-b1-t1
+CASE_END=off-c1-b1-t1 exit=0
+CASE_START=on-c1-b1-t1
+CASE_END=on-c1-b1-t1 exit=0
+CASE_START=openraft-c1-b1-t1
+CASE_END=openraft-c1-b1-t1 exit=0
+CASE_START=openraft-c1-b1-t2
+CASE_END=openraft-c1-b1-t2 exit=0
+CASE_START=off-c1-b1-t2
+CASE_END=off-c1-b1-t2 exit=0
+CASE_START=on-c1-b1-t2
+CASE_END=on-c1-b1-t2 exit=0
+CASE_START=on-c1-b1-t3
+CASE_END=on-c1-b1-t3 exit=0
+CASE_START=openraft-c1-b1-t3
+CASE_END=openraft-c1-b1-t3 exit=0
+CASE_START=off-c1-b1-t3

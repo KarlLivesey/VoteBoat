@@ -1,0 +1,3489 @@
+{
+  "scope": "Native445 finite15000-original quorum-durable Counter diagnostic,64warmups/window64; same frozen Macdebug0 assertednativeartifact; no sustained20M/framework/headroom/fairness/defaultchange claim",
+  "case_count": 18,
+  "original_capture_exit": 0,
+  "result_checkers": 18,
+  "publication_checkers": 18,
+  "completed_originals_per_case": 15000,
+  "recovered_value_per_case": 15064,
+  "max_inflight": [
+    64
+  ],
+  "recovery_retries": [
+    0
+  ],
+  "all_retry_verified": true,
+  "all_joined": true,
+  "guards": {
+    "sourceUnchanged": true,
+    "artifactsUnchanged": true,
+    "sameArtifactAllQuantums": true
+  },
+  "groups": [
+    {
+      "protocol": "tcp",
+      "quantum": 16,
+      "rates_originals_s": [
+        351.765,
+        350.789,
+        351.898
+      ],
+      "p99_ms": [
+        272.27775,
+        497.39579200000003,
+        241.820083
+      ],
+      "rate_median_originals_s": 351.765,
+      "p99_median_ms": 272.27775,
+      "rate_trial_ratios_to_q16": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "p99_trial_ratios_to_q16": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "max_latency_max_ms": 916.403541,
+      "leader_width_histograms": [
+        {
+          "8": 1,
+          "16": 937
+        },
+        {
+          "8": 1,
+          "16": 937
+        },
+        {
+          "8": 1,
+          "16": 937
+        }
+      ],
+      "leader_sync_calls": [
+        1698,
+        1706,
+        1703
+      ],
+      "leader_publish_calls": [
+        1698,
+        1706,
+        1703
+      ],
+      "leader_sync_median_ms": 12319.158575,
+      "leader_publish_median_ms": 29032.751952,
+      "leader_file_sync_median_ms": 13583.69727,
+      "leader_directory_sync_median_ms": 13840.066023
+    },
+    {
+      "protocol": "tcp",
+      "quantum": 32,
+      "rates_originals_s": [
+        544.076,
+        556.872,
+        488.154
+      ],
+      "p99_ms": [
+        314.788292,
+        133.227,
+        437.147041
+      ],
+      "rate_median_originals_s": 544.076,
+      "p99_median_ms": 314.788292,
+      "rate_trial_ratios_to_q16": [
+        1.546703,
+        1.587484,
+        1.387203
+      ],
+      "p99_trial_ratios_to_q16": [
+        1.156129,
+        0.267849,
+        1.807737
+      ],
+      "max_latency_max_ms": 1101.8060830000002,
+      "leader_width_histograms": [
+        {
+          "24": 1,
+          "32": 468
+        },
+        {
+          "24": 1,
+          "32": 468
+        },
+        {
+          "24": 1,
+          "32": 468
+        }
+      ],
+      "leader_sync_calls": [
+        938,
+        938,
+        938
+      ],
+      "leader_publish_calls": [
+        938,
+        938,
+        938
+      ],
+      "leader_sync_median_ms": 5640.459591,
+      "leader_publish_median_ms": 18457.149009,
+      "leader_file_sync_median_ms": 8451.596183,
+      "leader_directory_sync_median_ms": 8586.206703
+    },
+    {
+      "protocol": "tcp",
+      "quantum": 64,
+      "rates_originals_s": [
+        838.738,
+        605.968,
+        690.381
+      ],
+      "p99_ms": [
+        93.819667,
+        393.807709,
+        279.568875
+      ],
+      "rate_median_originals_s": 690.381,
+      "p99_median_ms": 279.568875,
+      "rate_trial_ratios_to_q16": [
+        2.38437,
+        1.727443,
+        1.961878
+      ],
+      "p99_trial_ratios_to_q16": [
+        0.344573,
+        0.791739,
+        1.156103
+      ],
+      "max_latency_max_ms": 735.102292,
+      "leader_width_histograms": [
+        {
+          "24": 1,
+          "64": 234
+        },
+        {
+          "24": 1,
+          "64": 234
+        },
+        {
+          "24": 1,
+          "64": 234
+        }
+      ],
+      "leader_sync_calls": [
+        470,
+        470,
+        470
+      ],
+      "leader_publish_calls": [
+        470,
+        470,
+        470
+      ],
+      "leader_sync_median_ms": 2693.394775,
+      "leader_publish_median_ms": 9613.102415,
+      "leader_file_sync_median_ms": 4562.654486,
+      "leader_directory_sync_median_ms": 4613.171803
+    },
+    {
+      "protocol": "quic",
+      "quantum": 16,
+      "rates_originals_s": [
+        346.365,
+        345.266,
+        348.017
+      ],
+      "p99_ms": [
+        653.901083,
+        842.623834,
+        764.7641659999999
+      ],
+      "rate_median_originals_s": 346.365,
+      "p99_median_ms": 764.7641659999999,
+      "rate_trial_ratios_to_q16": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "p99_trial_ratios_to_q16": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "max_latency_max_ms": 911.571583,
+      "leader_width_histograms": [
+        {
+          "8": 1,
+          "16": 937
+        },
+        {
+          "8": 1,
+          "16": 937
+        },
+        {
+          "8": 1,
+          "16": 937
+        }
+      ],
+      "leader_sync_calls": [
+        1707,
+        1702,
+        1703
+      ],
+      "leader_publish_calls": [
+        1707,
+        1702,
+        1703
+      ],
+      "leader_sync_median_ms": 12548.242246,
+      "leader_publish_median_ms": 29487.692475,
+      "leader_file_sync_median_ms": 13707.299863,
+      "leader_directory_sync_median_ms": 14021.527338
+    },
+    {
+      "protocol": "quic",
+      "quantum": 32,
+      "rates_originals_s": [
+        549.684,
+        554.342,
+        553.43
+      ],
+      "p99_ms": [
+        135.404416,
+        135.5145,
+        134.77170800000002
+      ],
+      "rate_median_originals_s": 553.43,
+      "p99_median_ms": 135.404416,
+      "rate_trial_ratios_to_q16": [
+        1.587008,
+        1.605551,
+        1.590238
+      ],
+      "p99_trial_ratios_to_q16": [
+        0.207072,
+        0.160824,
+        0.176226
+      ],
+      "max_latency_max_ms": 783.982417,
+      "leader_width_histograms": [
+        {
+          "24": 1,
+          "32": 468
+        },
+        {
+          "24": 1,
+          "32": 468
+        },
+        {
+          "24": 1,
+          "32": 468
+        }
+      ],
+      "leader_sync_calls": [
+        938,
+        938,
+        938
+      ],
+      "leader_publish_calls": [
+        938,
+        938,
+        938
+      ],
+      "leader_sync_median_ms": 5552.199499,
+      "leader_publish_median_ms": 18395.594288,
+      "leader_file_sync_median_ms": 8345.784221,
+      "leader_directory_sync_median_ms": 8588.442393
+    },
+    {
+      "protocol": "quic",
+      "quantum": 64,
+      "rates_originals_s": [
+        737.89,
+        753.943,
+        842.565
+      ],
+      "p99_ms": [
+        94.8775,
+        306.334042,
+        81.207208
+      ],
+      "rate_median_originals_s": 753.943,
+      "p99_median_ms": 94.8775,
+      "rate_trial_ratios_to_q16": [
+        2.130383,
+        2.183658,
+        2.421046
+      ],
+      "p99_trial_ratios_to_q16": [
+        0.145095,
+        0.363548,
+        0.106186
+      ],
+      "max_latency_max_ms": 903.262,
+      "leader_width_histograms": [
+        {
+          "24": 1,
+          "64": 234
+        },
+        {
+          "24": 1,
+          "64": 234
+        },
+        {
+          "24": 1,
+          "64": 234
+        }
+      ],
+      "leader_sync_calls": [
+        470,
+        470,
+        470
+      ],
+      "leader_publish_calls": [
+        470,
+        470,
+        470
+      ],
+      "leader_sync_median_ms": 2504.364954,
+      "leader_publish_median_ms": 8228.782296,
+      "leader_file_sync_median_ms": 3904.082675,
+      "leader_directory_sync_median_ms": 3972.702986
+    }
+  ],
+  "cases": [
+    {
+      "label": "native-tcp-w64-t1-q16",
+      "protocol": "tcp",
+      "quantum": 16,
+      "trial": 1,
+      "completed": 15000,
+      "rate": 351.765,
+      "p99_ms": 272.27775,
+      "max_ms": 868.904542,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 938,
+        "widths": {
+          "8": 1,
+          "16": 937
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 1698,
+          "io_append_ns": 594146275,
+          "sync_calls": 1698,
+          "sync_ns": 12319158575,
+          "publish_calls": 1698,
+          "publish_ns": 29032751952
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 583,
+          "io_append_ns": 730547302,
+          "sync_calls": 583,
+          "sync_ns": 5250595008,
+          "publish_calls": 583,
+          "publish_ns": 12385454379
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 585,
+          "io_append_ns": 861662947,
+          "sync_calls": 585,
+          "sync_ns": 5518846220,
+          "publish_calls": 585,
+          "publish_ns": 12197118860
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 1698,
+          "elapsed_ns": 586355319,
+          "manifest_calls": 1698,
+          "manifest_ns": 29032751952
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 1698,
+          "elapsed_ns": 114670940,
+          "manifest_calls": 1698,
+          "manifest_ns": 29032751952
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 1698,
+          "elapsed_ns": 13596597414,
+          "manifest_calls": 1698,
+          "manifest_ns": 29032751952
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 1698,
+          "elapsed_ns": 590372184,
+          "manifest_calls": 1698,
+          "manifest_ns": 29032751952
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 1698,
+          "elapsed_ns": 13722733527,
+          "manifest_calls": 1698,
+          "manifest_ns": 29032751952
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 583,
+          "elapsed_ns": 252377463,
+          "manifest_calls": 583,
+          "manifest_ns": 12385454379
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 583,
+          "elapsed_ns": 30314445,
+          "manifest_calls": 583,
+          "manifest_ns": 12385454379
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 583,
+          "elapsed_ns": 5731144446,
+          "manifest_calls": 583,
+          "manifest_ns": 12385454379
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 583,
+          "elapsed_ns": 401765545,
+          "manifest_calls": 583,
+          "manifest_ns": 12385454379
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 583,
+          "elapsed_ns": 5835209541,
+          "manifest_calls": 583,
+          "manifest_ns": 12385454379
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 585,
+          "elapsed_ns": 348138532,
+          "manifest_calls": 585,
+          "manifest_ns": 12197118860
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 585,
+          "elapsed_ns": 26179417,
+          "manifest_calls": 585,
+          "manifest_ns": 12197118860
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 585,
+          "elapsed_ns": 5673414372,
+          "manifest_calls": 585,
+          "manifest_ns": 12197118860
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 585,
+          "elapsed_ns": 360480648,
+          "manifest_calls": 585,
+          "manifest_ns": 12197118860
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 585,
+          "elapsed_ns": 5650300581,
+          "manifest_calls": 585,
+          "manifest_ns": 12197118860
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t1-q32",
+      "protocol": "tcp",
+      "quantum": 32,
+      "trial": 1,
+      "completed": 15000,
+      "rate": 544.076,
+      "p99_ms": 314.788292,
+      "max_ms": 746.425625,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 469,
+        "widths": {
+          "24": 1,
+          "32": 468
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 938,
+          "io_append_ns": 1532212710,
+          "sync_calls": 938,
+          "sync_ns": 5626821793,
+          "publish_calls": 938,
+          "publish_ns": 18457149009
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 477,
+          "io_append_ns": 680409395,
+          "sync_calls": 477,
+          "sync_ns": 4113720742,
+          "publish_calls": 477,
+          "publish_ns": 11063087286
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 463,
+          "io_append_ns": 604152330,
+          "sync_calls": 463,
+          "sync_ns": 3625634006,
+          "publish_calls": 463,
+          "publish_ns": 10907159385
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 938,
+          "elapsed_ns": 455621782,
+          "manifest_calls": 938,
+          "manifest_ns": 18457149009
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 938,
+          "elapsed_ns": 57709288,
+          "manifest_calls": 938,
+          "manifest_ns": 18457149009
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 938,
+          "elapsed_ns": 8451596183,
+          "manifest_calls": 938,
+          "manifest_ns": 18457149009
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 938,
+          "elapsed_ns": 683817425,
+          "manifest_calls": 938,
+          "manifest_ns": 18457149009
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 938,
+          "elapsed_ns": 8586206703,
+          "manifest_calls": 938,
+          "manifest_ns": 18457149009
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 477,
+          "elapsed_ns": 336674993,
+          "manifest_calls": 477,
+          "manifest_ns": 11063087286
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 477,
+          "elapsed_ns": 125468172,
+          "manifest_calls": 477,
+          "manifest_ns": 11063087286
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 477,
+          "elapsed_ns": 4639799213,
+          "manifest_calls": 477,
+          "manifest_ns": 11063087286
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 477,
+          "elapsed_ns": 705579869,
+          "manifest_calls": 477,
+          "manifest_ns": 11063087286
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 477,
+          "elapsed_ns": 5126397995,
+          "manifest_calls": 477,
+          "manifest_ns": 11063087286
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 463,
+          "elapsed_ns": 332744716,
+          "manifest_calls": 463,
+          "manifest_ns": 10907159385
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 463,
+          "elapsed_ns": 101273820,
+          "manifest_calls": 463,
+          "manifest_ns": 10907159385
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 463,
+          "elapsed_ns": 4653869531,
+          "manifest_calls": 463,
+          "manifest_ns": 10907159385
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 463,
+          "elapsed_ns": 700056009,
+          "manifest_calls": 463,
+          "manifest_ns": 10907159385
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 463,
+          "elapsed_ns": 5004443340,
+          "manifest_calls": 463,
+          "manifest_ns": 10907159385
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t1-q64",
+      "protocol": "tcp",
+      "quantum": 64,
+      "trial": 1,
+      "completed": 15000,
+      "rate": 838.738,
+      "p99_ms": 93.819667,
+      "max_ms": 528.6925,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 235,
+        "widths": {
+          "24": 1,
+          "64": 234
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 470,
+          "io_append_ns": 634994465,
+          "sync_calls": 470,
+          "sync_ns": 2498414590,
+          "publish_calls": 470,
+          "publish_ns": 7556640412
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 352,
+          "io_append_ns": 342247712,
+          "sync_calls": 352,
+          "sync_ns": 2721642117,
+          "publish_calls": 352,
+          "publish_ns": 7019277702
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 353,
+          "io_append_ns": 322930503,
+          "sync_calls": 353,
+          "sync_ns": 2972621457,
+          "publish_calls": 353,
+          "publish_ns": 7250048340
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 470,
+          "elapsed_ns": 180634529,
+          "manifest_calls": 470,
+          "manifest_ns": 7556640412
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 470,
+          "elapsed_ns": 37731974,
+          "manifest_calls": 470,
+          "manifest_ns": 7556640412
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 470,
+          "elapsed_ns": 3535041161,
+          "manifest_calls": 470,
+          "manifest_ns": 7556640412
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 470,
+          "elapsed_ns": 166897493,
+          "manifest_calls": 470,
+          "manifest_ns": 7556640412
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 470,
+          "elapsed_ns": 3553456451,
+          "manifest_calls": 470,
+          "manifest_ns": 7556640412
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 352,
+          "elapsed_ns": 128389505,
+          "manifest_calls": 352,
+          "manifest_ns": 7019277702
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 352,
+          "elapsed_ns": 17055545,
+          "manifest_calls": 352,
+          "manifest_ns": 7019277702
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 352,
+          "elapsed_ns": 3307735617,
+          "manifest_calls": 352,
+          "manifest_ns": 7019277702
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 352,
+          "elapsed_ns": 156127623,
+          "manifest_calls": 352,
+          "manifest_ns": 7019277702
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 352,
+          "elapsed_ns": 3345373335,
+          "manifest_calls": 352,
+          "manifest_ns": 7019277702
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 353,
+          "elapsed_ns": 139265578,
+          "manifest_calls": 353,
+          "manifest_ns": 7250048340
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 353,
+          "elapsed_ns": 16939585,
+          "manifest_calls": 353,
+          "manifest_ns": 7250048340
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 353,
+          "elapsed_ns": 3377258672,
+          "manifest_calls": 353,
+          "manifest_ns": 7250048340
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 353,
+          "elapsed_ns": 153119386,
+          "manifest_calls": 353,
+          "manifest_ns": 7250048340
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 353,
+          "elapsed_ns": 3502088956,
+          "manifest_calls": 353,
+          "manifest_ns": 7250048340
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t2-q32",
+      "protocol": "tcp",
+      "quantum": 32,
+      "trial": 2,
+      "completed": 15000,
+      "rate": 556.872,
+      "p99_ms": 133.227,
+      "max_ms": 784.5445,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 469,
+        "widths": {
+          "24": 1,
+          "32": 468
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 938,
+          "io_append_ns": 1417438167,
+          "sync_calls": 938,
+          "sync_ns": 5640459591,
+          "publish_calls": 938,
+          "publish_ns": 18152768863
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 460,
+          "io_append_ns": 565756128,
+          "sync_calls": 460,
+          "sync_ns": 3708619716,
+          "publish_calls": 460,
+          "publish_ns": 10165490919
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 479,
+          "io_append_ns": 697107286,
+          "sync_calls": 479,
+          "sync_ns": 4013727748,
+          "publish_calls": 479,
+          "publish_ns": 10739104305
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 938,
+          "elapsed_ns": 477485883,
+          "manifest_calls": 938,
+          "manifest_ns": 18152768863
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 938,
+          "elapsed_ns": 86384944,
+          "manifest_calls": 938,
+          "manifest_ns": 18152768863
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 938,
+          "elapsed_ns": 8201344476,
+          "manifest_calls": 938,
+          "manifest_ns": 18152768863
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 938,
+          "elapsed_ns": 620315851,
+          "manifest_calls": 938,
+          "manifest_ns": 18152768863
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 938,
+          "elapsed_ns": 8553486148,
+          "manifest_calls": 938,
+          "manifest_ns": 18152768863
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 460,
+          "elapsed_ns": 331880536,
+          "manifest_calls": 460,
+          "manifest_ns": 10165490919
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 460,
+          "elapsed_ns": 89011254,
+          "manifest_calls": 460,
+          "manifest_ns": 10165490919
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 460,
+          "elapsed_ns": 4445051122,
+          "manifest_calls": 460,
+          "manifest_ns": 10165490919
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 460,
+          "elapsed_ns": 572308825,
+          "manifest_calls": 460,
+          "manifest_ns": 10165490919
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 460,
+          "elapsed_ns": 4615767468,
+          "manifest_calls": 460,
+          "manifest_ns": 10165490919
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 479,
+          "elapsed_ns": 307740615,
+          "manifest_calls": 479,
+          "manifest_ns": 10739104305
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 479,
+          "elapsed_ns": 88776674,
+          "manifest_calls": 479,
+          "manifest_ns": 10739104305
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 479,
+          "elapsed_ns": 4813477997,
+          "manifest_calls": 479,
+          "manifest_ns": 10739104305
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 479,
+          "elapsed_ns": 569123676,
+          "manifest_calls": 479,
+          "manifest_ns": 10739104305
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 479,
+          "elapsed_ns": 4847158624,
+          "manifest_calls": 479,
+          "manifest_ns": 10739104305
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t2-q64",
+      "protocol": "tcp",
+      "quantum": 64,
+      "trial": 2,
+      "completed": 15000,
+      "rate": 605.968,
+      "p99_ms": 393.807709,
+      "max_ms": 735.102292,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 235,
+        "widths": {
+          "24": 1,
+          "64": 234
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 470,
+          "io_append_ns": 772842328,
+          "sync_calls": 470,
+          "sync_ns": 3184977112,
+          "publish_calls": 470,
+          "publish_ns": 10894360716
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 457,
+          "io_append_ns": 541650510,
+          "sync_calls": 457,
+          "sync_ns": 4404968548,
+          "publish_calls": 457,
+          "publish_ns": 11168297590
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 456,
+          "io_append_ns": 302467369,
+          "sync_calls": 456,
+          "sync_ns": 4586960051,
+          "publish_calls": 456,
+          "publish_ns": 10731599117
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 470,
+          "elapsed_ns": 157391916,
+          "manifest_calls": 470,
+          "manifest_ns": 10894360716
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 470,
+          "elapsed_ns": 24959705,
+          "manifest_calls": 470,
+          "manifest_ns": 10894360716
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 470,
+          "elapsed_ns": 5116482326,
+          "manifest_calls": 470,
+          "manifest_ns": 10894360716
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 470,
+          "elapsed_ns": 217870798,
+          "manifest_calls": 470,
+          "manifest_ns": 10894360716
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 470,
+          "elapsed_ns": 5285296163,
+          "manifest_calls": 470,
+          "manifest_ns": 10894360716
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 457,
+          "elapsed_ns": 156389542,
+          "manifest_calls": 457,
+          "manifest_ns": 11168297590
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 457,
+          "elapsed_ns": 41244839,
+          "manifest_calls": 457,
+          "manifest_ns": 11168297590
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 457,
+          "elapsed_ns": 5204775828,
+          "manifest_calls": 457,
+          "manifest_ns": 11168297590
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 457,
+          "elapsed_ns": 204695836,
+          "manifest_calls": 457,
+          "manifest_ns": 11168297590
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 457,
+          "elapsed_ns": 5397178572,
+          "manifest_calls": 457,
+          "manifest_ns": 11168297590
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 456,
+          "elapsed_ns": 176715293,
+          "manifest_calls": 456,
+          "manifest_ns": 10731599117
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 456,
+          "elapsed_ns": 27493204,
+          "manifest_calls": 456,
+          "manifest_ns": 10731599117
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 456,
+          "elapsed_ns": 5067786089,
+          "manifest_calls": 456,
+          "manifest_ns": 10731599117
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 456,
+          "elapsed_ns": 229877436,
+          "manifest_calls": 456,
+          "manifest_ns": 10731599117
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 456,
+          "elapsed_ns": 5152782955,
+          "manifest_calls": 456,
+          "manifest_ns": 10731599117
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t2-q16",
+      "protocol": "tcp",
+      "quantum": 16,
+      "trial": 2,
+      "completed": 15000,
+      "rate": 350.789,
+      "p99_ms": 497.39579200000003,
+      "max_ms": 853.992042,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 938,
+        "widths": {
+          "8": 1,
+          "16": 937
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 1706,
+          "io_append_ns": 610702247,
+          "sync_calls": 1706,
+          "sync_ns": 12291319193,
+          "publish_calls": 1706,
+          "publish_ns": 29159082088
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 615,
+          "io_append_ns": 694933080,
+          "sync_calls": 615,
+          "sync_ns": 5692717912,
+          "publish_calls": 615,
+          "publish_ns": 13075886168
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 558,
+          "io_append_ns": 715402126,
+          "sync_calls": 558,
+          "sync_ns": 5099308078,
+          "publish_calls": 558,
+          "publish_ns": 11683260481
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 1706,
+          "elapsed_ns": 588409120,
+          "manifest_calls": 1706,
+          "manifest_ns": 29159082088
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 1706,
+          "elapsed_ns": 90859094,
+          "manifest_calls": 1706,
+          "manifest_ns": 29159082088
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 1706,
+          "elapsed_ns": 13583697270,
+          "manifest_calls": 1706,
+          "manifest_ns": 29159082088
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 1706,
+          "elapsed_ns": 652042601,
+          "manifest_calls": 1706,
+          "manifest_ns": 29159082088
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 1706,
+          "elapsed_ns": 13850213508,
+          "manifest_calls": 1706,
+          "manifest_ns": 29159082088
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 615,
+          "elapsed_ns": 299168867,
+          "manifest_calls": 615,
+          "manifest_ns": 13075886168
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 615,
+          "elapsed_ns": 26998873,
+          "manifest_calls": 615,
+          "manifest_ns": 13075886168
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 615,
+          "elapsed_ns": 6005817622,
+          "manifest_calls": 615,
+          "manifest_ns": 13075886168
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 615,
+          "elapsed_ns": 424245676,
+          "manifest_calls": 615,
+          "manifest_ns": 13075886168
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 615,
+          "elapsed_ns": 6177515957,
+          "manifest_calls": 615,
+          "manifest_ns": 13075886168
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 558,
+          "elapsed_ns": 372044673,
+          "manifest_calls": 558,
+          "manifest_ns": 11683260481
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 558,
+          "elapsed_ns": 26279336,
+          "manifest_calls": 558,
+          "manifest_ns": 11683260481
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 558,
+          "elapsed_ns": 5399659461,
+          "manifest_calls": 558,
+          "manifest_ns": 11683260481
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 558,
+          "elapsed_ns": 361296011,
+          "manifest_calls": 558,
+          "manifest_ns": 11683260481
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 558,
+          "elapsed_ns": 5388136831,
+          "manifest_calls": 558,
+          "manifest_ns": 11683260481
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t3-q64",
+      "protocol": "tcp",
+      "quantum": 64,
+      "trial": 3,
+      "completed": 15000,
+      "rate": 690.381,
+      "p99_ms": 279.568875,
+      "max_ms": 730.429125,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 235,
+        "widths": {
+          "24": 1,
+          "64": 234
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 470,
+          "io_append_ns": 768543937,
+          "sync_calls": 470,
+          "sync_ns": 2693394775,
+          "publish_calls": 470,
+          "publish_ns": 9613102415
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 465,
+          "io_append_ns": 360855760,
+          "sync_calls": 465,
+          "sync_ns": 3894150066,
+          "publish_calls": 465,
+          "publish_ns": 9975277916
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 464,
+          "io_append_ns": 199414052,
+          "sync_calls": 464,
+          "sync_ns": 4203520542,
+          "publish_calls": 464,
+          "publish_ns": 9544618574
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 470,
+          "elapsed_ns": 138156712,
+          "manifest_calls": 470,
+          "manifest_ns": 9613102415
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 470,
+          "elapsed_ns": 22124278,
+          "manifest_calls": 470,
+          "manifest_ns": 9613102415
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 470,
+          "elapsed_ns": 4562654486,
+          "manifest_calls": 470,
+          "manifest_ns": 9613102415
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 470,
+          "elapsed_ns": 191258133,
+          "manifest_calls": 470,
+          "manifest_ns": 9613102415
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 470,
+          "elapsed_ns": 4613171803,
+          "manifest_calls": 470,
+          "manifest_ns": 9613102415
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 465,
+          "elapsed_ns": 138584990,
+          "manifest_calls": 465,
+          "manifest_ns": 9975277916
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 465,
+          "elapsed_ns": 35674955,
+          "manifest_calls": 465,
+          "manifest_ns": 9975277916
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 465,
+          "elapsed_ns": 4621202214,
+          "manifest_calls": 465,
+          "manifest_ns": 9975277916
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 465,
+          "elapsed_ns": 171883050,
+          "manifest_calls": 465,
+          "manifest_ns": 9975277916
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 465,
+          "elapsed_ns": 4846125799,
+          "manifest_calls": 465,
+          "manifest_ns": 9975277916
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 464,
+          "elapsed_ns": 158003623,
+          "manifest_calls": 464,
+          "manifest_ns": 9544618574
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 464,
+          "elapsed_ns": 20089845,
+          "manifest_calls": 464,
+          "manifest_ns": 9544618574
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 464,
+          "elapsed_ns": 4531067998,
+          "manifest_calls": 464,
+          "manifest_ns": 9544618574
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 464,
+          "elapsed_ns": 200470037,
+          "manifest_calls": 464,
+          "manifest_ns": 9544618574
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 464,
+          "elapsed_ns": 4551286785,
+          "manifest_calls": 464,
+          "manifest_ns": 9544618574
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t3-q16",
+      "protocol": "tcp",
+      "quantum": 16,
+      "trial": 3,
+      "completed": 15000,
+      "rate": 351.898,
+      "p99_ms": 241.820083,
+      "max_ms": 916.403541,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 938,
+        "widths": {
+          "8": 1,
+          "16": 937
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 1703,
+          "io_append_ns": 530316015,
+          "sync_calls": 1703,
+          "sync_ns": 12375102664,
+          "publish_calls": 1703,
+          "publish_ns": 29020382547
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 602,
+          "io_append_ns": 677409959,
+          "sync_calls": 602,
+          "sync_ns": 5369962163,
+          "publish_calls": 602,
+          "publish_ns": 12319948032
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 569,
+          "io_append_ns": 737397354,
+          "sync_calls": 569,
+          "sync_ns": 5421367823,
+          "publish_calls": 569,
+          "publish_ns": 12357678868
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 1703,
+          "elapsed_ns": 592933361,
+          "manifest_calls": 1703,
+          "manifest_ns": 29020382547
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 1703,
+          "elapsed_ns": 87679288,
+          "manifest_calls": 1703,
+          "manifest_ns": 29020382547
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 1703,
+          "elapsed_ns": 13484814251,
+          "manifest_calls": 1703,
+          "manifest_ns": 29020382547
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 1703,
+          "elapsed_ns": 620364701,
+          "manifest_calls": 1703,
+          "manifest_ns": 29020382547
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 1703,
+          "elapsed_ns": 13840066023,
+          "manifest_calls": 1703,
+          "manifest_ns": 29020382547
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 602,
+          "elapsed_ns": 283693387,
+          "manifest_calls": 602,
+          "manifest_ns": 12319948032
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 602,
+          "elapsed_ns": 36045911,
+          "manifest_calls": 602,
+          "manifest_ns": 12319948032
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 602,
+          "elapsed_ns": 5707473196,
+          "manifest_calls": 602,
+          "manifest_ns": 12319948032
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 602,
+          "elapsed_ns": 394472662,
+          "manifest_calls": 602,
+          "manifest_ns": 12319948032
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 602,
+          "elapsed_ns": 5766277041,
+          "manifest_calls": 602,
+          "manifest_ns": 12319948032
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 569,
+          "elapsed_ns": 316662370,
+          "manifest_calls": 569,
+          "manifest_ns": 12357678868
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 569,
+          "elapsed_ns": 30108470,
+          "manifest_calls": 569,
+          "manifest_ns": 12357678868
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 569,
+          "elapsed_ns": 5694587270,
+          "manifest_calls": 569,
+          "manifest_ns": 12357678868
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 569,
+          "elapsed_ns": 366571988,
+          "manifest_calls": 569,
+          "manifest_ns": 12357678868
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 569,
+          "elapsed_ns": 5812076655,
+          "manifest_calls": 569,
+          "manifest_ns": 12357678868
+        }
+      ]
+    },
+    {
+      "label": "native-tcp-w64-t3-q32",
+      "protocol": "tcp",
+      "quantum": 32,
+      "trial": 3,
+      "completed": 15000,
+      "rate": 488.154,
+      "p99_ms": 437.147041,
+      "max_ms": 1101.8060830000002,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 469,
+        "widths": {
+          "24": 1,
+          "32": 468
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 938,
+          "io_append_ns": 1725024911,
+          "sync_calls": 938,
+          "sync_ns": 6430578508,
+          "publish_calls": 938,
+          "publish_ns": 20581815994
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 469,
+          "io_append_ns": 781276664,
+          "sync_calls": 469,
+          "sync_ns": 4487789908,
+          "publish_calls": 469,
+          "publish_ns": 11812383913
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 471,
+          "io_append_ns": 791377376,
+          "sync_calls": 471,
+          "sync_ns": 4544548499,
+          "publish_calls": 471,
+          "publish_ns": 12155192814
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 938,
+          "elapsed_ns": 449362347,
+          "manifest_calls": 938,
+          "manifest_ns": 20581815994
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 938,
+          "elapsed_ns": 46648847,
+          "manifest_calls": 938,
+          "manifest_ns": 20581815994
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 938,
+          "elapsed_ns": 9511071752,
+          "manifest_calls": 938,
+          "manifest_ns": 20581815994
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 938,
+          "elapsed_ns": 686613832,
+          "manifest_calls": 938,
+          "manifest_ns": 20581815994
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 938,
+          "elapsed_ns": 9662491457,
+          "manifest_calls": 938,
+          "manifest_ns": 20581815994
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 469,
+          "elapsed_ns": 414069850,
+          "manifest_calls": 469,
+          "manifest_ns": 11812383913
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 469,
+          "elapsed_ns": 64793927,
+          "manifest_calls": 469,
+          "manifest_ns": 11812383913
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 469,
+          "elapsed_ns": 5352164378,
+          "manifest_calls": 469,
+          "manifest_ns": 11812383913
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 469,
+          "elapsed_ns": 580978333,
+          "manifest_calls": 469,
+          "manifest_ns": 11812383913
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 469,
+          "elapsed_ns": 5284075624,
+          "manifest_calls": 469,
+          "manifest_ns": 11812383913
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 471,
+          "elapsed_ns": 470725381,
+          "manifest_calls": 471,
+          "manifest_ns": 12155192814
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 471,
+          "elapsed_ns": 89770850,
+          "manifest_calls": 471,
+          "manifest_ns": 12155192814
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 471,
+          "elapsed_ns": 5444397935,
+          "manifest_calls": 471,
+          "manifest_ns": 12155192814
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 471,
+          "elapsed_ns": 502525099,
+          "manifest_calls": 471,
+          "manifest_ns": 12155192814
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 471,
+          "elapsed_ns": 5534306827,
+          "manifest_calls": 471,
+          "manifest_ns": 12155192814
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t1-q16",
+      "protocol": "quic",
+      "quantum": 16,
+      "trial": 1,
+      "completed": 15000,
+      "rate": 346.365,
+      "p99_ms": 653.901083,
+      "max_ms": 880.816792,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 938,
+        "widths": {
+          "8": 1,
+          "16": 937
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 1707,
+          "io_append_ns": 533541411,
+          "sync_calls": 1707,
+          "sync_ns": 12683233712,
+          "publish_calls": 1707,
+          "publish_ns": 29365574940
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 576,
+          "io_append_ns": 757435466,
+          "sync_calls": 576,
+          "sync_ns": 5635588288,
+          "publish_calls": 576,
+          "publish_ns": 12881777678
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 597,
+          "io_append_ns": 910752410,
+          "sync_calls": 597,
+          "sync_ns": 5151512919,
+          "publish_calls": 597,
+          "publish_ns": 12198268818
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 1707,
+          "elapsed_ns": 617966501,
+          "manifest_calls": 1707,
+          "manifest_ns": 29365574940
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 1707,
+          "elapsed_ns": 93507205,
+          "manifest_calls": 1707,
+          "manifest_ns": 29365574940
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 1707,
+          "elapsed_ns": 13596569349,
+          "manifest_calls": 1707,
+          "manifest_ns": 29365574940
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 1707,
+          "elapsed_ns": 630478440,
+          "manifest_calls": 1707,
+          "manifest_ns": 29365574940
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 1707,
+          "elapsed_ns": 14021527338,
+          "manifest_calls": 1707,
+          "manifest_ns": 29365574940
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 576,
+          "elapsed_ns": 333263178,
+          "manifest_calls": 576,
+          "manifest_ns": 12881777678
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 576,
+          "elapsed_ns": 29154928,
+          "manifest_calls": 576,
+          "manifest_ns": 12881777678
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 576,
+          "elapsed_ns": 5941657363,
+          "manifest_calls": 576,
+          "manifest_ns": 12881777678
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 576,
+          "elapsed_ns": 385805503,
+          "manifest_calls": 576,
+          "manifest_ns": 12881777678
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 576,
+          "elapsed_ns": 6056371171,
+          "manifest_calls": 576,
+          "manifest_ns": 12881777678
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 597,
+          "elapsed_ns": 297732404,
+          "manifest_calls": 597,
+          "manifest_ns": 12198268818
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 597,
+          "elapsed_ns": 26939993,
+          "manifest_calls": 597,
+          "manifest_ns": 12198268818
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 597,
+          "elapsed_ns": 5596058130,
+          "manifest_calls": 597,
+          "manifest_ns": 12198268818
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 597,
+          "elapsed_ns": 367563546,
+          "manifest_calls": 597,
+          "manifest_ns": 12198268818
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 597,
+          "elapsed_ns": 5767798211,
+          "manifest_calls": 597,
+          "manifest_ns": 12198268818
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t1-q32",
+      "protocol": "quic",
+      "quantum": 32,
+      "trial": 1,
+      "completed": 15000,
+      "rate": 549.684,
+      "p99_ms": 135.404416,
+      "max_ms": 771.223459,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 469,
+        "widths": {
+          "24": 1,
+          "32": 468
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 938,
+          "io_append_ns": 1392800037,
+          "sync_calls": 938,
+          "sync_ns": 5625875748,
+          "publish_calls": 938,
+          "publish_ns": 18404709774
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 478,
+          "io_append_ns": 661882668,
+          "sync_calls": 478,
+          "sync_ns": 3943896670,
+          "publish_calls": 478,
+          "publish_ns": 11116719217
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 461,
+          "io_append_ns": 851890658,
+          "sync_calls": 461,
+          "sync_ns": 3659288756,
+          "publish_calls": 461,
+          "publish_ns": 10347928592
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 938,
+          "elapsed_ns": 430702631,
+          "manifest_calls": 938,
+          "manifest_ns": 18404709774
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 938,
+          "elapsed_ns": 70472642,
+          "manifest_calls": 938,
+          "manifest_ns": 18404709774
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 938,
+          "elapsed_ns": 8439021404,
+          "manifest_calls": 938,
+          "manifest_ns": 18404709774
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 938,
+          "elapsed_ns": 648790144,
+          "manifest_calls": 938,
+          "manifest_ns": 18404709774
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 938,
+          "elapsed_ns": 8588442393,
+          "manifest_calls": 938,
+          "manifest_ns": 18404709774
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 478,
+          "elapsed_ns": 370770281,
+          "manifest_calls": 478,
+          "manifest_ns": 11116719217
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 478,
+          "elapsed_ns": 65677178,
+          "manifest_calls": 478,
+          "manifest_ns": 11116719217
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 478,
+          "elapsed_ns": 4973269709,
+          "manifest_calls": 478,
+          "manifest_ns": 11116719217
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 478,
+          "elapsed_ns": 551563287,
+          "manifest_calls": 478,
+          "manifest_ns": 11116719217
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 478,
+          "elapsed_ns": 5038832447,
+          "manifest_calls": 478,
+          "manifest_ns": 11116719217
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 461,
+          "elapsed_ns": 313813429,
+          "manifest_calls": 461,
+          "manifest_ns": 10347928592
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 461,
+          "elapsed_ns": 81753964,
+          "manifest_calls": 461,
+          "manifest_ns": 10347928592
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 461,
+          "elapsed_ns": 4655051448,
+          "manifest_calls": 461,
+          "manifest_ns": 10347928592
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 461,
+          "elapsed_ns": 569387455,
+          "manifest_calls": 461,
+          "manifest_ns": 10347928592
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 461,
+          "elapsed_ns": 4607980067,
+          "manifest_calls": 461,
+          "manifest_ns": 10347928592
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t1-q64",
+      "protocol": "quic",
+      "quantum": 64,
+      "trial": 1,
+      "completed": 15000,
+      "rate": 737.89,
+      "p99_ms": 94.8775,
+      "max_ms": 702.226084,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 235,
+        "widths": {
+          "24": 1,
+          "64": 234
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 470,
+          "io_append_ns": 684481878,
+          "sync_calls": 470,
+          "sync_ns": 2504364954,
+          "publish_calls": 470,
+          "publish_ns": 8790902739
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 439,
+          "io_append_ns": 104874668,
+          "sync_calls": 439,
+          "sync_ns": 3800138534,
+          "publish_calls": 439,
+          "publish_ns": 9058269219
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 440,
+          "io_append_ns": 699237953,
+          "sync_calls": 440,
+          "sync_ns": 3111971940,
+          "publish_calls": 440,
+          "publish_ns": 9089051665
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 470,
+          "elapsed_ns": 127461313,
+          "manifest_calls": 470,
+          "manifest_ns": 8790902739
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 470,
+          "elapsed_ns": 24456285,
+          "manifest_calls": 470,
+          "manifest_ns": 8790902739
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 470,
+          "elapsed_ns": 4173946161,
+          "manifest_calls": 470,
+          "manifest_ns": 8790902739
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 470,
+          "elapsed_ns": 186667661,
+          "manifest_calls": 470,
+          "manifest_ns": 8790902739
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 470,
+          "elapsed_ns": 4185206611,
+          "manifest_calls": 470,
+          "manifest_ns": 8790902739
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 439,
+          "elapsed_ns": 157136100,
+          "manifest_calls": 439,
+          "manifest_ns": 9058269219
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 439,
+          "elapsed_ns": 20704836,
+          "manifest_calls": 439,
+          "manifest_ns": 9058269219
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 439,
+          "elapsed_ns": 4296776121,
+          "manifest_calls": 439,
+          "manifest_ns": 9058269219
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 439,
+          "elapsed_ns": 193012003,
+          "manifest_calls": 439,
+          "manifest_ns": 9058269219
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 439,
+          "elapsed_ns": 4331489151,
+          "manifest_calls": 439,
+          "manifest_ns": 9058269219
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 440,
+          "elapsed_ns": 132594236,
+          "manifest_calls": 440,
+          "manifest_ns": 9089051665
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 440,
+          "elapsed_ns": 35939714,
+          "manifest_calls": 440,
+          "manifest_ns": 9089051665
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 440,
+          "elapsed_ns": 4255957506,
+          "manifest_calls": 440,
+          "manifest_ns": 9089051665
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 440,
+          "elapsed_ns": 171951885,
+          "manifest_calls": 440,
+          "manifest_ns": 9089051665
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 440,
+          "elapsed_ns": 4347418325,
+          "manifest_calls": 440,
+          "manifest_ns": 9089051665
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t2-q32",
+      "protocol": "quic",
+      "quantum": 32,
+      "trial": 2,
+      "completed": 15000,
+      "rate": 554.342,
+      "p99_ms": 135.5145,
+      "max_ms": 783.982417,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 469,
+        "widths": {
+          "24": 1,
+          "32": 468
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 938,
+          "io_append_ns": 1536769923,
+          "sync_calls": 938,
+          "sync_ns": 5552199499,
+          "publish_calls": 938,
+          "publish_ns": 18154887507
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 482,
+          "io_append_ns": 674369876,
+          "sync_calls": 482,
+          "sync_ns": 4021929305,
+          "publish_calls": 482,
+          "publish_ns": 10996340244
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 456,
+          "io_append_ns": 820842840,
+          "sync_calls": 456,
+          "sync_ns": 3471617115,
+          "publish_calls": 456,
+          "publish_ns": 10427342330
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 938,
+          "elapsed_ns": 419945566,
+          "manifest_calls": 938,
+          "manifest_ns": 18154887507
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 938,
+          "elapsed_ns": 57356568,
+          "manifest_calls": 938,
+          "manifest_ns": 18154887507
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 938,
+          "elapsed_ns": 8289413511,
+          "manifest_calls": 938,
+          "manifest_ns": 18154887507
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 938,
+          "elapsed_ns": 607648204,
+          "manifest_calls": 938,
+          "manifest_ns": 18154887507
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 938,
+          "elapsed_ns": 8564405710,
+          "manifest_calls": 938,
+          "manifest_ns": 18154887507
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 482,
+          "elapsed_ns": 441075658,
+          "manifest_calls": 482,
+          "manifest_ns": 10996340244
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 482,
+          "elapsed_ns": 84694203,
+          "manifest_calls": 482,
+          "manifest_ns": 10996340244
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 482,
+          "elapsed_ns": 4854980960,
+          "manifest_calls": 482,
+          "manifest_ns": 10996340244
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 482,
+          "elapsed_ns": 555892451,
+          "manifest_calls": 482,
+          "manifest_ns": 10996340244
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 482,
+          "elapsed_ns": 4952104783,
+          "manifest_calls": 482,
+          "manifest_ns": 10996340244
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 456,
+          "elapsed_ns": 403469722,
+          "manifest_calls": 456,
+          "manifest_ns": 10427342330
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 456,
+          "elapsed_ns": 66250054,
+          "manifest_calls": 456,
+          "manifest_ns": 10427342330
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 456,
+          "elapsed_ns": 4683924913,
+          "manifest_calls": 456,
+          "manifest_ns": 10427342330
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 456,
+          "elapsed_ns": 620134450,
+          "manifest_calls": 456,
+          "manifest_ns": 10427342330
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 456,
+          "elapsed_ns": 4547198925,
+          "manifest_calls": 456,
+          "manifest_ns": 10427342330
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t2-q64",
+      "protocol": "quic",
+      "quantum": 64,
+      "trial": 2,
+      "completed": 15000,
+      "rate": 753.943,
+      "p99_ms": 306.334042,
+      "max_ms": 903.262,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 235,
+        "widths": {
+          "24": 1,
+          "64": 234
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 470,
+          "io_append_ns": 813611667,
+          "sync_calls": 470,
+          "sync_ns": 2516478378,
+          "publish_calls": 470,
+          "publish_ns": 8228782296
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 356,
+          "io_append_ns": 450751997,
+          "sync_calls": 356,
+          "sync_ns": 3200607745,
+          "publish_calls": 356,
+          "publish_ns": 8138503008
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 356,
+          "io_append_ns": 541292549,
+          "sync_calls": 356,
+          "sync_ns": 3173149917,
+          "publish_calls": 356,
+          "publish_ns": 8330309882
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 470,
+          "elapsed_ns": 88091428,
+          "manifest_calls": 470,
+          "manifest_ns": 8228782296
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 470,
+          "elapsed_ns": 34601217,
+          "manifest_calls": 470,
+          "manifest_ns": 8228782296
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 470,
+          "elapsed_ns": 3904082675,
+          "manifest_calls": 470,
+          "manifest_ns": 8228782296
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 470,
+          "elapsed_ns": 145684205,
+          "manifest_calls": 470,
+          "manifest_ns": 8228782296
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 470,
+          "elapsed_ns": 3972702986,
+          "manifest_calls": 470,
+          "manifest_ns": 8228782296
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 356,
+          "elapsed_ns": 117566921,
+          "manifest_calls": 356,
+          "manifest_ns": 8138503008
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 356,
+          "elapsed_ns": 16140962,
+          "manifest_calls": 356,
+          "manifest_ns": 8138503008
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 356,
+          "elapsed_ns": 3977780421,
+          "manifest_calls": 356,
+          "manifest_ns": 8138503008
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 356,
+          "elapsed_ns": 152250111,
+          "manifest_calls": 356,
+          "manifest_ns": 8138503008
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 356,
+          "elapsed_ns": 3823581199,
+          "manifest_calls": 356,
+          "manifest_ns": 8138503008
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 356,
+          "elapsed_ns": 112394380,
+          "manifest_calls": 356,
+          "manifest_ns": 8330309882
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 356,
+          "elapsed_ns": 17323081,
+          "manifest_calls": 356,
+          "manifest_ns": 8330309882
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 356,
+          "elapsed_ns": 4050952121,
+          "manifest_calls": 356,
+          "manifest_ns": 8330309882
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 356,
+          "elapsed_ns": 151438547,
+          "manifest_calls": 356,
+          "manifest_ns": 8330309882
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 356,
+          "elapsed_ns": 3940951252,
+          "manifest_calls": 356,
+          "manifest_ns": 8330309882
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t2-q16",
+      "protocol": "quic",
+      "quantum": 16,
+      "trial": 2,
+      "completed": 15000,
+      "rate": 345.266,
+      "p99_ms": 842.623834,
+      "max_ms": 911.571583,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 938,
+        "widths": {
+          "8": 1,
+          "16": 937
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 1702,
+          "io_append_ns": 656408755,
+          "sync_calls": 1702,
+          "sync_ns": 12548242246,
+          "publish_calls": 1702,
+          "publish_ns": 29487692475
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 591,
+          "io_append_ns": 755589244,
+          "sync_calls": 591,
+          "sync_ns": 5654947709,
+          "publish_calls": 591,
+          "publish_ns": 12700845171
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 581,
+          "io_append_ns": 880025255,
+          "sync_calls": 581,
+          "sync_ns": 5327661925,
+          "publish_calls": 581,
+          "publish_ns": 12257515578
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 1702,
+          "elapsed_ns": 585196517,
+          "manifest_calls": 1702,
+          "manifest_ns": 29487692475
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 1702,
+          "elapsed_ns": 92694224,
+          "manifest_calls": 1702,
+          "manifest_ns": 29487692475
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 1702,
+          "elapsed_ns": 13775651171,
+          "manifest_calls": 1702,
+          "manifest_ns": 29487692475
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 1702,
+          "elapsed_ns": 628500407,
+          "manifest_calls": 1702,
+          "manifest_ns": 29487692475
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 1702,
+          "elapsed_ns": 14001315698,
+          "manifest_calls": 1702,
+          "manifest_ns": 29487692475
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 591,
+          "elapsed_ns": 310458113,
+          "manifest_calls": 591,
+          "manifest_ns": 12700845171
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 591,
+          "elapsed_ns": 26356356,
+          "manifest_calls": 591,
+          "manifest_ns": 12700845171
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 591,
+          "elapsed_ns": 5846375755,
+          "manifest_calls": 591,
+          "manifest_ns": 12700845171
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 591,
+          "elapsed_ns": 357400502,
+          "manifest_calls": 591,
+          "manifest_ns": 12700845171
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 591,
+          "elapsed_ns": 6024712495,
+          "manifest_calls": 591,
+          "manifest_ns": 12700845171
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 581,
+          "elapsed_ns": 277197453,
+          "manifest_calls": 581,
+          "manifest_ns": 12257515578
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 581,
+          "elapsed_ns": 25606802,
+          "manifest_calls": 581,
+          "manifest_ns": 12257515578
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 581,
+          "elapsed_ns": 5729437421,
+          "manifest_calls": 581,
+          "manifest_ns": 12257515578
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 581,
+          "elapsed_ns": 401415087,
+          "manifest_calls": 581,
+          "manifest_ns": 12257515578
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 581,
+          "elapsed_ns": 5692202757,
+          "manifest_calls": 581,
+          "manifest_ns": 12257515578
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t3-q64",
+      "protocol": "quic",
+      "quantum": 64,
+      "trial": 3,
+      "completed": 15000,
+      "rate": 842.565,
+      "p99_ms": 81.207208,
+      "max_ms": 688.9075,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 235,
+        "widths": {
+          "24": 1,
+          "64": 234
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 470,
+          "io_append_ns": 702468800,
+          "sync_calls": 470,
+          "sync_ns": 2283296419,
+          "publish_calls": 470,
+          "publish_ns": 7194296543
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 352,
+          "io_append_ns": 501749669,
+          "sync_calls": 352,
+          "sync_ns": 2702158498,
+          "publish_calls": 352,
+          "publish_ns": 7261207710
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 353,
+          "io_append_ns": 438580580,
+          "sync_calls": 353,
+          "sync_ns": 2764718494,
+          "publish_calls": 353,
+          "publish_ns": 7446921129
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 470,
+          "elapsed_ns": 86764327,
+          "manifest_calls": 470,
+          "manifest_ns": 7194296543
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 470,
+          "elapsed_ns": 41126832,
+          "manifest_calls": 470,
+          "manifest_ns": 7194296543
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 470,
+          "elapsed_ns": 3293020501,
+          "manifest_calls": 470,
+          "manifest_ns": 7194296543
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 470,
+          "elapsed_ns": 153334299,
+          "manifest_calls": 470,
+          "manifest_ns": 7194296543
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 470,
+          "elapsed_ns": 3532066453,
+          "manifest_calls": 470,
+          "manifest_ns": 7194296543
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 352,
+          "elapsed_ns": 126406704,
+          "manifest_calls": 352,
+          "manifest_ns": 7261207710
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 352,
+          "elapsed_ns": 16219616,
+          "manifest_calls": 352,
+          "manifest_ns": 7261207710
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 352,
+          "elapsed_ns": 3484157497,
+          "manifest_calls": 352,
+          "manifest_ns": 7261207710
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 352,
+          "elapsed_ns": 147209295,
+          "manifest_calls": 352,
+          "manifest_ns": 7261207710
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 352,
+          "elapsed_ns": 3436153754,
+          "manifest_calls": 352,
+          "manifest_ns": 7261207710
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 353,
+          "elapsed_ns": 129020709,
+          "manifest_calls": 353,
+          "manifest_ns": 7446921129
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 353,
+          "elapsed_ns": 22931037,
+          "manifest_calls": 353,
+          "manifest_ns": 7446921129
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 353,
+          "elapsed_ns": 3562772842,
+          "manifest_calls": 353,
+          "manifest_ns": 7446921129
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 353,
+          "elapsed_ns": 156597167,
+          "manifest_calls": 353,
+          "manifest_ns": 7446921129
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 353,
+          "elapsed_ns": 3522427084,
+          "manifest_calls": 353,
+          "manifest_ns": 7446921129
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t3-q16",
+      "protocol": "quic",
+      "quantum": 16,
+      "trial": 3,
+      "completed": 15000,
+      "rate": 348.017,
+      "p99_ms": 764.7641659999999,
+      "max_ms": 869.793167,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 938,
+        "widths": {
+          "8": 1,
+          "16": 937
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 1703,
+          "io_append_ns": 813523015,
+          "sync_calls": 1703,
+          "sync_ns": 12002603526,
+          "publish_calls": 1703,
+          "publish_ns": 29551995133
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 591,
+          "io_append_ns": 759325615,
+          "sync_calls": 591,
+          "sync_ns": 5425480031,
+          "publish_calls": 591,
+          "publish_ns": 12413516215
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 582,
+          "io_append_ns": 806660028,
+          "sync_calls": 582,
+          "sync_ns": 5184092643,
+          "publish_calls": 582,
+          "publish_ns": 12448591798
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 1703,
+          "elapsed_ns": 589668948,
+          "manifest_calls": 1703,
+          "manifest_ns": 29551995133
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 1703,
+          "elapsed_ns": 98570651,
+          "manifest_calls": 1703,
+          "manifest_ns": 29551995133
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 1703,
+          "elapsed_ns": 13707299863,
+          "manifest_calls": 1703,
+          "manifest_ns": 29551995133
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 1703,
+          "elapsed_ns": 642101035,
+          "manifest_calls": 1703,
+          "manifest_ns": 29551995133
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 1703,
+          "elapsed_ns": 14111639175,
+          "manifest_calls": 1703,
+          "manifest_ns": 29551995133
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 591,
+          "elapsed_ns": 334160115,
+          "manifest_calls": 591,
+          "manifest_ns": 12413516215
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 591,
+          "elapsed_ns": 30604579,
+          "manifest_calls": 591,
+          "manifest_ns": 12413516215
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 591,
+          "elapsed_ns": 5660780165,
+          "manifest_calls": 591,
+          "manifest_ns": 12413516215
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 591,
+          "elapsed_ns": 385853457,
+          "manifest_calls": 591,
+          "manifest_ns": 12413516215
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 591,
+          "elapsed_ns": 5873102672,
+          "manifest_calls": 591,
+          "manifest_ns": 12413516215
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 582,
+          "elapsed_ns": 296347131,
+          "manifest_calls": 582,
+          "manifest_ns": 12448591798
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 582,
+          "elapsed_ns": 26303748,
+          "manifest_calls": 582,
+          "manifest_ns": 12448591798
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 582,
+          "elapsed_ns": 5757211589,
+          "manifest_calls": 582,
+          "manifest_ns": 12448591798
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 582,
+          "elapsed_ns": 386499104,
+          "manifest_calls": 582,
+          "manifest_ns": 12448591798
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 582,
+          "elapsed_ns": 5839825253,
+          "manifest_calls": 582,
+          "manifest_ns": 12448591798
+        }
+      ]
+    },
+    {
+      "label": "native-quic-w64-t3-q32",
+      "protocol": "quic",
+      "quantum": 32,
+      "trial": 3,
+      "completed": 15000,
+      "rate": 553.43,
+      "p99_ms": 134.77170800000002,
+      "max_ms": 762.0902090000001,
+      "recovered_value": 15064,
+      "recovery_retries": 0,
+      "joins": "true",
+      "retry_verified": "true",
+      "max_inflight": 64,
+      "measurement_widths": {
+        "weightedOriginals": 15000,
+        "visits": 469,
+        "widths": {
+          "24": 1,
+          "32": 468
+        }
+      },
+      "journal": [
+        {
+          "replica": 1,
+          "io_append_calls": 938,
+          "io_append_ns": 1523667806,
+          "sync_calls": 938,
+          "sync_ns": 5397127326,
+          "publish_calls": 938,
+          "publish_ns": 18395594288
+        },
+        {
+          "replica": 2,
+          "io_append_calls": 466,
+          "io_append_ns": 711540597,
+          "sync_calls": 466,
+          "sync_ns": 3726316540,
+          "publish_calls": 466,
+          "publish_ns": 10561086541
+        },
+        {
+          "replica": 3,
+          "io_append_calls": 472,
+          "io_append_ns": 776077415,
+          "sync_calls": 472,
+          "sync_ns": 3653701458,
+          "publish_calls": 472,
+          "publish_ns": 10917731044
+        }
+      ],
+      "publication": [
+        {
+          "replica": 1,
+          "step": "open",
+          "calls": 938,
+          "elapsed_ns": 461294829,
+          "manifest_calls": 938,
+          "manifest_ns": 18395594288
+        },
+        {
+          "replica": 1,
+          "step": "write",
+          "calls": 938,
+          "elapsed_ns": 51248872,
+          "manifest_calls": 938,
+          "manifest_ns": 18395594288
+        },
+        {
+          "replica": 1,
+          "step": "file_sync",
+          "calls": 938,
+          "elapsed_ns": 8345784221,
+          "manifest_calls": 938,
+          "manifest_ns": 18395594288
+        },
+        {
+          "replica": 1,
+          "step": "rename",
+          "calls": 938,
+          "elapsed_ns": 694561475,
+          "manifest_calls": 938,
+          "manifest_ns": 18395594288
+        },
+        {
+          "replica": 1,
+          "step": "directory_sync",
+          "calls": 938,
+          "elapsed_ns": 8629505698,
+          "manifest_calls": 938,
+          "manifest_ns": 18395594288
+        },
+        {
+          "replica": 2,
+          "step": "open",
+          "calls": 466,
+          "elapsed_ns": 329070319,
+          "manifest_calls": 466,
+          "manifest_ns": 10561086541
+        },
+        {
+          "replica": 2,
+          "step": "write",
+          "calls": 466,
+          "elapsed_ns": 59997840,
+          "manifest_calls": 466,
+          "manifest_ns": 10561086541
+        },
+        {
+          "replica": 2,
+          "step": "file_sync",
+          "calls": 466,
+          "elapsed_ns": 4804066712,
+          "manifest_calls": 466,
+          "manifest_ns": 10561086541
+        },
+        {
+          "replica": 2,
+          "step": "rename",
+          "calls": 466,
+          "elapsed_ns": 564480660,
+          "manifest_calls": 466,
+          "manifest_ns": 10561086541
+        },
+        {
+          "replica": 2,
+          "step": "directory_sync",
+          "calls": 466,
+          "elapsed_ns": 4704953169,
+          "manifest_calls": 466,
+          "manifest_ns": 10561086541
+        },
+        {
+          "replica": 3,
+          "step": "open",
+          "calls": 472,
+          "elapsed_ns": 355197091,
+          "manifest_calls": 472,
+          "manifest_ns": 10917731044
+        },
+        {
+          "replica": 3,
+          "step": "write",
+          "calls": 472,
+          "elapsed_ns": 60362250,
+          "manifest_calls": 472,
+          "manifest_ns": 10917731044
+        },
+        {
+          "replica": 3,
+          "step": "file_sync",
+          "calls": 472,
+          "elapsed_ns": 4875759783,
+          "manifest_calls": 472,
+          "manifest_ns": 10917731044
+        },
+        {
+          "replica": 3,
+          "step": "rename",
+          "calls": 472,
+          "elapsed_ns": 656415046,
+          "manifest_calls": 472,
+          "manifest_ns": 10917731044
+        },
+        {
+          "replica": 3,
+          "step": "directory_sync",
+          "calls": 472,
+          "elapsed_ns": 4867510750,
+          "manifest_calls": 472,
+          "manifest_ns": 10917731044
+        }
+      ]
+    }
+  ],
+  "limits": "Per-case active measurement rates; original raw outputs and slowtails retained. Publication/journal times are inclusive elapsed intervals, may overlap/nest; do not sum as CPU or clientcriticalpath. No offered-load/refusal/headroom/physicalRSS/debt claim. Existing LMStudio/backgrounduserapps leftunchanged."
+}

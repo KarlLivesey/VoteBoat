@@ -1,0 +1,11 @@
+temp=46.2'C
+throttled=0x0
+frequency(48)=700207040
+ondemand
+               total        used        free      shared  buff/cache   available
+Mem:           3.7Gi       239Mi       1.5Gi       9.0Mi       2.0Gi       3.5Gi
+Swap:          2.0Gi          0B       2.0Gi
+ 11:59:57 up  2:44,  2 users,  load average: 0.04, 1.16, 1.84
+active
+active
+active

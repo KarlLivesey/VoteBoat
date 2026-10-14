@@ -1,0 +1,22 @@
+{
+  "original_ssh_handle": 22892,
+  "actual_terminal_tool": "c06d6c",
+  "actual_exit": 0,
+  "post_validation_handle": 49739,
+  "post_validation_terminal_tool": "6b4c48",
+  "post_validation_exit": 0,
+  "summary_handle": 40110,
+  "summary_terminal_tool": "c6266f",
+  "summary_exit": 0,
+  "remote_pack_handle": 98682,
+  "remote_pack_terminal_tool": "c4ebc1",
+  "remote_pack_exit": 0,
+  "copy_handle": 25748,
+  "copy_terminal_tool": "e78cc3",
+  "copy_exit": 0,
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "validator_commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "archive_tar_sha256": "9e717e1cabcd4552c2a55c23682daf06bb478cf8285f662b50752b8c23aaa72b",
+  "no_timed_reruns": true,
+  "collection_after_linux_quiet_release": true
+}

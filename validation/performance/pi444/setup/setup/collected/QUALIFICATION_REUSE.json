@@ -1,0 +1,17 @@
+{
+  "baseline_commit": "6be136ae6c33e07e8358b7a6141030a573efd920",
+  "candidate_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "selected_inputs": 1434,
+  "compiled_inputs": 1428,
+  "changed_paths": [
+    "benchmarks/matched/src/voteboat_engine.rs",
+    "benchmarks/matched/src/voteboat_engine/actor.rs",
+    "benchmarks/matched/src/voteboat_engine/actor/tests.rs"
+  ],
+  "unchanged_inputs": 1431,
+  "same_physical_modes": true,
+  "Pi_original_scope": "63pass+1fail full64",
+  "final_scope": "Pi2212 twofocused/snapshotOFFON+pause-resume+fmtstrictpinned0",
+  "patch_final_source_matches": true,
+  "no_test_repeat": true
+}

@@ -1,0 +1,7 @@
+ProductName:		macOS
+ProductVersion:		27.0
+BuildVersion:		26A428
+Apple M2 Max
+Mac14,5
+12
+103079215104

@@ -1,0 +1,8 @@
+{
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "validator_commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "artifacts_unchanged": true,
+  "input_before_validator_metadata_sha256": "1bcd45e67ea5afe49196700a6f5f86e0e32b7051df74ccc3a6cfbbe4f137230f",
+  "input_sha256": "dd5b9604f71ad88a093ce934b95fe5db89d03049dec8568a501bfa87eb88404e",
+  "results_absent": true
+}

@@ -1,0 +1,304 @@
+{
+  "host": "Pi4ModelBRev1.2/aarch64/4cores",
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "source_root": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source",
+  "source_inventory_sha256": "88bde1e915913dabe6b6fa7c161565a3253d71628ba1c3f8bc96472f7bb0e555",
+  "artifacts": [
+    {
+      "kind": "matched",
+      "target": "voteboat",
+      "original": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libvoteboat-3c693def2dd6fa00.rlib",
+      "copy": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/libvoteboat-3c693def2dd6fa00.rlib",
+      "sha256": "ea89c207a9cb7f690424f7fdd258284e2f39bbeaa4c55ac98abe82d18103e200",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/voteboat-p9-pi444-Froqtz/source#voteboat@0.1.0",
+        "manifest_path": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [],
+        "filenames": [
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libvoteboat-3c693def2dd6fa00.rlib",
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libvoteboat-3c693def2dd6fa00.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      },
+      "compiled_source_sha256": "b15e256c65fb95f0e83e052b0ee76bc5a03f2d4b20706ff7529959ae685d4e6a",
+      "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+    },
+    {
+      "kind": "matched",
+      "target": "voteboat-matched-framework",
+      "original": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework",
+      "copy": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/voteboat-matched-framework",
+      "sha256": "b3892b5323034c1af1550f64c5fa38815f9e69094ed1a6eadbc13a36b2ca1937",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///home/karllivesey/voteboat-p9-pi444-Froqtz/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+        "manifest_path": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source/benchmarks/matched/Cargo.toml",
+        "target": {
+          "kind": [
+            "bin"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "voteboat-matched-framework",
+          "src_path": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source/benchmarks/matched/src/main.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [],
+        "filenames": [
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework",
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework.dwp"
+        ],
+        "executable": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework",
+        "fresh": false
+      },
+      "compiled_source_sha256": "cee7b0541b84a69c06a1aafe6e8a1177d6ac37076aad89ce18d47437371e1544",
+      "manifest_sha256": "44755b3e8f1eb6614a3326dffb46405ed9aab976408ee68537a54c2298db1431"
+    },
+    {
+      "kind": "matched",
+      "target": "openraft",
+      "original": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libopenraft-85e867210af438a4.rlib",
+      "copy": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/libopenraft-85e867210af438a4.rlib",
+      "sha256": "acd5863f40baf1c3434aede8744e0402a5b7badec65ae02e10fbf4064b09f229",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "git+https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#0.10.0-alpha.37",
+        "manifest_path": "/home/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/openraft/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "openraft",
+          "src_path": "/home/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/openraft/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "clap",
+          "default",
+          "runtime-stats",
+          "serde",
+          "tokio-rt",
+          "type-alias"
+        ],
+        "filenames": [
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libopenraft-85e867210af438a4.rlib",
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libopenraft-85e867210af438a4.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      },
+      "compiled_source_sha256": "a6f394ae6998f98063de5fd9c7fc6b5364c5f798182f7511049648267cf4dcd0",
+      "manifest_sha256": "22a4f1ed59e22da5965fa58b7ead8d9025d2bee70c55b646db734cbe3a389dc7"
+    },
+    {
+      "kind": "matched",
+      "target": "bench_minimal",
+      "original": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libbench_minimal-69129446ea0f7126.rlib",
+      "copy": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/libbench_minimal-69129446ea0f7126.rlib",
+      "sha256": "2e775d30479cbe031b128d57719ef93055d3ed25a0724bc8fb2591759a14962a",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "git+https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#bench-minimal@0.1.0",
+        "manifest_path": "/home/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/benchmarks/minimal/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "bench_minimal",
+          "src_path": "/home/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/benchmarks/minimal/src/lib.rs",
+          "edition": "2024",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 2,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "runtime-stats"
+        ],
+        "filenames": [
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libbench_minimal-69129446ea0f7126.rlib",
+          "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libbench_minimal-69129446ea0f7126.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      },
+      "compiled_source_sha256": "be455b39a87f2342895b8e8f16e73e598baa2a7ea0238fed001e2ea74abaff41",
+      "manifest_sha256": "e8c7a890c1c515c6f664be818d1c8a2697884940e3d301a92ee92bff70ce4aad"
+    }
+  ],
+  "symbols": {
+    "original": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework.dwp",
+    "copy": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/voteboat-matched-framework.dwp",
+    "sha256": "a4c67f66218cc8a2e7d6680812141eeb762ca1b41d893d98811ccf0f7b597c71",
+    "bytes": 34275048,
+    "executable_sha256": "b3892b5323034c1af1550f64c5fa38815f9e69094ed1a6eadbc13a36b2ca1937",
+    "cargo_filenames": [
+      "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework",
+      "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework.dwp"
+    ]
+  },
+  "release_oracle": {
+    "build_rs_sha256": "638888cec000c444d785ea790989dffad8f8250728142132dd0a99c0f89ccc0f",
+    "build_script_record": {
+      "reason": "build-script-executed",
+      "package_id": "path+file:///home/karllivesey/voteboat-p9-pi444-Froqtz/source#voteboat@0.1.0",
+      "linked_libs": [],
+      "linked_paths": [],
+      "cfgs": [],
+      "env": [],
+      "out_dir": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/build/voteboat-c1e33f3976f21737/out"
+    },
+    "build_script_compilation": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///home/karllivesey/voteboat-p9-pi444-Froqtz/source#voteboat@0.1.0",
+      "manifest_path": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "custom-build"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "build-script-build",
+        "src_path": "/home/karllivesey/voteboat-p9-pi444-Froqtz/source/build.rs",
+        "edition": "2021",
+        "doc": false,
+        "doctest": false,
+        "test": false
+      },
+      "profile": {
+        "opt_level": "0",
+        "debuginfo": 0,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/build/voteboat-21063d36bdd538f3/build-script-build"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    "actual_PROFILE_release_invocation": "     Running `CARGO=/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/cargo CARGO_CFG_DEBUG_ASSERTIONS='' CARGO_CFG_FEATURE='' CARGO_CFG_PANIC=unwind CARGO_CFG_TARGET_ABI='' CARGO_CFG_TARGET_ARCH=aarch64 CARGO_CFG_TARGET_ENDIAN=little CARGO_CFG_TARGET_ENV=gnu CARGO_CFG_TARGET_FAMILY=unix CARGO_CFG_TARGET_FEATURE=neon CARGO_CFG_TARGET_HAS_ATOMIC=128,16,32,64,8,ptr CARGO_CFG_TARGET_HAS_ATOMIC_PRIMITIVE_ALIGNMENT=128,16,32,64,8,ptr CARGO_CFG_TARGET_OS=linux CARGO_CFG_TARGET_POINTER_WIDTH=64 CARGO_CFG_TARGET_VENDOR=unknown CARGO_CFG_UNIX='' CARGO_ENCODED_RUSTFLAGS='' CARGO_MANIFEST_DIR=/home/karllivesey/voteboat-p9-pi444-Froqtz/source CARGO_MANIFEST_PATH=/home/karllivesey/voteboat-p9-pi444-Froqtz/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README='' CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' DEBUG=true HOST=aarch64-unknown-linux-gnu LD_LIBRARY_PATH='/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release:/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps:/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/lib/rustlib/aarch64-unknown-linux-gnu/lib' NUM_JOBS=1 OPT_LEVEL=3 OUT_DIR=/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/build/voteboat-c1e33f3976f21737/out PROFILE=release RUSTC=/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/rustc RUSTDOC=rustdoc TARGET=aarch64-unknown-linux-gnu /home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/build/voteboat-21063d36bdd538f3/build-script-build`",
+    "actual_root_rustc": "     Running `CARGO=/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/cargo CARGO_CRATE_NAME=voteboat CARGO_MANIFEST_DIR=/home/karllivesey/voteboat-p9-pi444-Froqtz/source CARGO_MANIFEST_PATH=/home/karllivesey/voteboat-p9-pi444-Froqtz/source/Cargo.toml CARGO_PKG_AUTHORS='' CARGO_PKG_DESCRIPTION='Native-first composable consensus runtime, under development' CARGO_PKG_HOMEPAGE='' CARGO_PKG_LICENSE=RPL-1.5 CARGO_PKG_LICENSE_FILE='' CARGO_PKG_NAME=voteboat CARGO_PKG_README='' CARGO_PKG_REPOSITORY='https://github.com/KarlLivesey/VoteBoat' CARGO_PKG_RUST_VERSION=1.98 CARGO_PKG_VERSION=0.1.0 CARGO_PKG_VERSION_MAJOR=0 CARGO_PKG_VERSION_MINOR=1 CARGO_PKG_VERSION_PATCH=0 CARGO_PKG_VERSION_PRE='' LD_LIBRARY_PATH=/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps OUT_DIR=/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/build/voteboat-c1e33f3976f21737/out /home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/rustc --crate-name voteboat --edition=2021 /home/karllivesey/voteboat-p9-pi444-Froqtz/source/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts,future-incompat --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto -C codegen-units=1 -C debuginfo=2 -C split-debuginfo=packed '--warn=clippy::all' --forbid=unsafe_code '--deny=clippy::too_many_lines' '--deny=clippy::cognitive_complexity' -C debug-assertions=on --check-cfg 'cfg(docsrs,test)' --check-cfg 'cfg(feature, values(\"default\", \"native\", \"quic\", \"tls\"))' -C metadata=d6f0fa924a208dcf -C extra-filename=-3c693def2dd6fa00 --out-dir /home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps -L dependency=/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps --extern ring=/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/deps/libring-dfff814f408b60f9.rmeta -L native=/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/build/ring-6a8f56ef91d5dc45/out --check-cfg 'cfg(voteboat_checkpoint_debug_oracle)'`",
+    "reference_cfg_absent": true,
+    "ordinary_assertions_overflow_enabled": true,
+    "profile": "release"
+  },
+  "compiler_version": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: aarch64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8\n",
+  "cargo_version": "cargo 1.98.1 (797e8a9bc 2026-08-05)\n",
+  "protoc_version": "libprotoc 3.21.12\n",
+  "tool_binary_hashes": "2101d7104b91a013912c94275dcd31c2b41061ef7f6e8530df11cdad55b8fbc5  /home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/cargo\nd4217a981a778bfe445c0a29c408f5a25a92e9bb5222701579ad5a35bd913e8f  /home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/rustc\n3e6d9e59330ec98902f8f7a322d9e4167da678a9f369f0fbf01d5eb77e48041d  /home/karllivesey/voteboat-p9-pi443-2YkqdC/tools/protoc\n",
+  "profile": "opt3/debug2/packed/debug_assertions=true/overflow=true/thinLTO/cgu1/jobs1; flags/wrappersunset",
+  "qualification": "exactfinalPi2focused+baseline63reuse+fmtstrict1.98.1 zero; not full65rerun",
+  "schema": {
+    "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+    "cells": [
+      [
+        1,
+        1
+      ],
+      [
+        64,
+        1
+      ],
+      [
+        256,
+        1
+      ],
+      [
+        512,
+        1
+      ],
+      [
+        1024,
+        1
+      ],
+      [
+        4096,
+        1
+      ],
+      [
+        4096,
+        4
+      ]
+    ],
+    "requested_operations": 1048576,
+    "actual_originals": 1048576,
+    "warmup": 1024,
+    "variants": [
+      "off",
+      "on",
+      "openraft"
+    ],
+    "trials": 3,
+    "cases": 63,
+    "order": "variant rotation by trial for each cell",
+    "host": "Pi4 fourcores16serverworkers1clientworker",
+    "timing": "existingreadybarrier_to_allclientjoins_beforelatencyflatten_sort_followers_verify_shutdown",
+    "maintenance": "default-retention",
+    "envelopes": "upstream-default",
+    "campaign_timeout_secs": 3600,
+    "meaning": "additionalhardware diagnostic1M, not20M/fullP9healthy-marginacceptance",
+    "no_system_or_services_changes": true
+  },
+  "current_cli_checked": "CURRENT_CLI_CHECKER.json"
+}

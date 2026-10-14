@@ -1,0 +1,11 @@
+{
+  "original": "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework.dwp",
+  "copy": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/voteboat-matched-framework.dwp",
+  "sha256": "a4c67f66218cc8a2e7d6680812141eeb762ca1b41d893d98811ccf0f7b597c71",
+  "bytes": 34275048,
+  "executable_sha256": "b3892b5323034c1af1550f64c5fa38815f9e69094ed1a6eadbc13a36b2ca1937",
+  "cargo_filenames": [
+    "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework",
+    "/home/karllivesey/voteboat-p9-pi444-Froqtz/target-matched-release/release/voteboat-matched-framework.dwp"
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "sha256": {
+    "validation/check-benchmark-storage.mjs": "d03de4b3027f8468d6e7bcc2b22f1a8051aba5a5f469fedbeb8e8ce9f3409aaf",
+    "validation/check-lanes.mjs": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+    "validation/check-maintenance.mjs": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+    "validation/check-native-benchmark.mjs": "888fb80a06dd564b4d95908ca959d4ed995bebd3d61f245ee5455a2214eac5be",
+    "validation/check-offered.mjs": "bd96046dc52ab2800b235c92fe69745c2f191b89251a7f7658012e241790f805",
+    "validation/check-publication-timings.mjs": "4a4ba88136cbae48b3d822ed6b06274008f66955a15b6bba0e062e3c8715d331",
+    "validation/check-rounded-rate.mjs": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+    "validation/check-rounded-rate.test.mjs": "9666e6616d1d53a53859bcaca660a91622b44c9ac094930d91d1b6adf345d7bc"
+  },
+  "archive_sha256": "2d4b48d1bc156c5fc94e7a1de0ab3a43959acb61baa5280fed9c8815b6bef026",
+  "scope": "separate published validators, frozen native source ab091ea unchanged"
+}

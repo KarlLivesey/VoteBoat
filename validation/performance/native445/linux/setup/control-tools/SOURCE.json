@@ -1,0 +1,53 @@
+{
+  "commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "artifact_source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "compiled_source_unchanged": true,
+  "files": {
+    "check-native-benchmark.mjs": {
+      "git_path": "validation/check-native-benchmark.mjs",
+      "sha256": "888fb80a06dd564b4d95908ca959d4ed995bebd3d61f245ee5455a2214eac5be",
+      "mode": "0o444"
+    },
+    "check-rounded-rate.mjs": {
+      "git_path": "validation/check-rounded-rate.mjs",
+      "sha256": "262f06cfb0e878bfa7ce02741f51d7cd6e7e8df6b07b8973df4a7d89502c662d",
+      "mode": "0o444"
+    },
+    "check-rounded-rate.test.mjs": {
+      "git_path": "validation/check-rounded-rate.test.mjs",
+      "sha256": "9666e6616d1d53a53859bcaca660a91622b44c9ac094930d91d1b6adf345d7bc",
+      "mode": "0o444"
+    },
+    "check-benchmark-storage.mjs": {
+      "git_path": "validation/check-benchmark-storage.mjs",
+      "sha256": "d03de4b3027f8468d6e7bcc2b22f1a8051aba5a5f469fedbeb8e8ce9f3409aaf",
+      "mode": "0o444"
+    },
+    "check-lanes.mjs": {
+      "git_path": "validation/check-lanes.mjs",
+      "sha256": "cb49a5d3cee377cf3154d9a9f092ea90e9af64b87ba98272cae50765c51dc920",
+      "mode": "0o444"
+    },
+    "check-offered.mjs": {
+      "git_path": "validation/check-offered.mjs",
+      "sha256": "bd96046dc52ab2800b235c92fe69745c2f191b89251a7f7658012e241790f805",
+      "mode": "0o444"
+    },
+    "check-maintenance.mjs": {
+      "git_path": "validation/check-maintenance.mjs",
+      "sha256": "99fd718641c95a0412ef2e98e33b23da717470613bdc496d6313c8b58d0ce658",
+      "mode": "0o444"
+    },
+    "check-publication-timings.mjs": {
+      "git_path": "validation/check-publication-timings.mjs",
+      "sha256": "4a4ba88136cbae48b3d822ed6b06274008f66955a15b6bba0e062e3c8715d331",
+      "mode": "0o444"
+    }
+  },
+  "import_closure": "native checker local five imports plus standalone publication checker; node builtins only",
+  "corrected_receipt_check_reused": {
+    "exit": 0,
+    "log": "validation/performance/native445/rate-fix/readiness.log",
+    "log_sha256": "ba9d41373f6614b0580ba67852546dc0a666ed751220c41cb787f25d82b328b8"
+  }
+}

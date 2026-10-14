@@ -1,0 +1,19 @@
+STAGE=source_before
+COMMAND_END=source-before exit=0
+STAGE=metadata
+COMMAND_END=cargo-version exit=0
+COMMAND_END=rustc-version exit=0
+COMMAND_END=protoc-version exit=0
+COMMAND_END=tool-binaries exit=0
+COMMAND_END=os exit=0
+COMMAND_END=cpu exit=0
+COMMAND_END=memory-before exit=0
+COMMAND_END=storage-before exit=0
+COMMAND_END=temperature-before exit=0
+COMMAND_END=throttled-before exit=0
+COMMAND_END=frequency-before exit=0
+STAGE=qualification_reuse
+COMMAND_END=qualification-reuse exit=0
+STAGE=matched_release
+STAGE=artifact_guards
+COMMAND_END=artifacts exit=1

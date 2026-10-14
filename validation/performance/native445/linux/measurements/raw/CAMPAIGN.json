@@ -1,0 +1,908 @@
+{
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "binary_sha256": "227f5777eae4d852fd907e9ef6f686c25e2f2faa5e1b5342e4c4ccbb138ad1fd",
+  "profile": "native acceptance opt3/debug0/assertions/overflow/default LTO and codegen",
+  "scope": "18once serialnativeCounter/window64 configuredpolicy diagnostics; notsustainedacceptance/defaultgain",
+  "cases": [
+    {
+      "name": "trial1-tcp-q16",
+      "trial": 1,
+      "protocol": "tcp",
+      "ready_items": 16,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-tcp-q16",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-tcp-q16",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "16",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973713.5196402,
+      "end_unix": 1791973719.948746,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 8,
+          "visits": 1,
+          "original_proposals": 8
+        },
+        {
+          "replica": "1",
+          "width": 16,
+          "visits": 937,
+          "original_proposals": 14992
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial1-tcp-q32",
+      "trial": 1,
+      "protocol": "tcp",
+      "ready_items": 32,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-tcp-q32",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-tcp-q32",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "32",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973719.9489038,
+      "end_unix": 1791973743.0688477,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 32,
+          "visits": 468,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial1-tcp-q64",
+      "trial": 1,
+      "protocol": "tcp",
+      "ready_items": 64,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-tcp-q64",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-tcp-q64",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "64",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973743.0690482,
+      "end_unix": 1791973772.0804808,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 64,
+          "visits": 234,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial1-quic-q16",
+      "trial": 1,
+      "protocol": "quic",
+      "ready_items": 16,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-quic-q16",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-quic-q16",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "16",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973772.0806413,
+      "end_unix": 1791973839.973816,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 8,
+          "visits": 1,
+          "original_proposals": 8
+        },
+        {
+          "replica": "1",
+          "width": 16,
+          "visits": 937,
+          "original_proposals": 14992
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial1-quic-q32",
+      "trial": 1,
+      "protocol": "quic",
+      "ready_items": 32,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-quic-q32",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-quic-q32",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "32",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973839.9740036,
+      "end_unix": 1791973881.3683665,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 32,
+          "visits": 468,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial1-quic-q64",
+      "trial": 1,
+      "protocol": "quic",
+      "ready_items": 64,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-quic-q64",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial1-quic-q64",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "64",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973881.368684,
+      "end_unix": 1791973915.22879,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 64,
+          "visits": 234,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial2-quic-q32",
+      "trial": 2,
+      "protocol": "quic",
+      "ready_items": 32,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-quic-q32",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-quic-q32",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "32",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973915.2291403,
+      "end_unix": 1791973956.2907233,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 32,
+          "visits": 468,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial2-quic-q64",
+      "trial": 2,
+      "protocol": "quic",
+      "ready_items": 64,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-quic-q64",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-quic-q64",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "64",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973956.2910092,
+      "end_unix": 1791973987.9078343,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 64,
+          "visits": 234,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial2-quic-q16",
+      "trial": 2,
+      "protocol": "quic",
+      "ready_items": 16,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-quic-q16",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-quic-q16",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "16",
+        "--journal-timings"
+      ],
+      "start_unix": 1791973987.908146,
+      "end_unix": 1791974050.5725477,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 8,
+          "visits": 1,
+          "original_proposals": 8
+        },
+        {
+          "replica": "1",
+          "width": 16,
+          "visits": 937,
+          "original_proposals": 14992
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial2-tcp-q32",
+      "trial": 2,
+      "protocol": "tcp",
+      "ready_items": 32,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-tcp-q32",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-tcp-q32",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "32",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974050.5727885,
+      "end_unix": 1791974101.133609,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 32,
+          "visits": 468,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial2-tcp-q64",
+      "trial": 2,
+      "protocol": "tcp",
+      "ready_items": 64,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-tcp-q64",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-tcp-q64",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "64",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974101.1338513,
+      "end_unix": 1791974128.7489917,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 64,
+          "visits": 234,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial2-tcp-q16",
+      "trial": 2,
+      "protocol": "tcp",
+      "ready_items": 16,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-tcp-q16",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial2-tcp-q16",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "16",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974128.749288,
+      "end_unix": 1791974192.0781567,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 8,
+          "visits": 1,
+          "original_proposals": 8
+        },
+        {
+          "replica": "1",
+          "width": 16,
+          "visits": 937,
+          "original_proposals": 14992
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial3-tcp-q64",
+      "trial": 3,
+      "protocol": "tcp",
+      "ready_items": 64,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-tcp-q64",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-tcp-q64",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "64",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974192.0784357,
+      "end_unix": 1791974219.2667077,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 64,
+          "visits": 234,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial3-tcp-q16",
+      "trial": 3,
+      "protocol": "tcp",
+      "ready_items": 16,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-tcp-q16",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-tcp-q16",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "16",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974219.2670262,
+      "end_unix": 1791974282.2034898,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 8,
+          "visits": 1,
+          "original_proposals": 8
+        },
+        {
+          "replica": "1",
+          "width": 16,
+          "visits": 937,
+          "original_proposals": 14992
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial3-tcp-q32",
+      "trial": 3,
+      "protocol": "tcp",
+      "ready_items": 32,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-tcp-q32",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-tcp-q32",
+        "tcp",
+        "15000",
+        "64",
+        "--ready-items",
+        "32",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974282.2038023,
+      "end_unix": 1791974325.7886162,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 32,
+          "visits": 468,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial3-quic-q64",
+      "trial": 3,
+      "protocol": "quic",
+      "ready_items": 64,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-quic-q64",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-quic-q64",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "64",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974325.788933,
+      "end_unix": 1791974357.1706452,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 64,
+          "visits": 234,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial3-quic-q16",
+      "trial": 3,
+      "protocol": "quic",
+      "ready_items": 16,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-quic-q16",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-quic-q16",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "16",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974357.1709573,
+      "end_unix": 1791974409.7696369,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 8,
+          "visits": 1,
+          "original_proposals": 8
+        },
+        {
+          "replica": "1",
+          "width": 16,
+          "visits": 937,
+          "original_proposals": 14992
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    },
+    {
+      "name": "trial3-quic-q32",
+      "trial": 3,
+      "protocol": "quic",
+      "ready_items": 32,
+      "operations": 15000,
+      "warmup": 64,
+      "window": 64,
+      "wal_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-quic-q32",
+      "command": [
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/artifacts/native/native_benchmark",
+        "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/native445-linux/campaign/trial3-quic-q32",
+        "quic",
+        "15000",
+        "64",
+        "--ready-items",
+        "32",
+        "--journal-timings"
+      ],
+      "start_unix": 1791974409.770009,
+      "end_unix": 1791974415.3088133,
+      "exit": 0,
+      "checks": [
+        {
+          "name": "receipts",
+          "exit": 0
+        },
+        {
+          "name": "publication",
+          "exit": 0
+        }
+      ],
+      "observed_widths": [
+        {
+          "replica": "1",
+          "width": 24,
+          "visits": 1,
+          "original_proposals": 24
+        },
+        {
+          "replica": "1",
+          "width": 32,
+          "visits": 468,
+          "original_proposals": 14976
+        }
+      ],
+      "proposal_width_bound_ok": true,
+      "proposal_originals": 15000,
+      "proposal_complete_ok": true
+    }
+  ]
+}

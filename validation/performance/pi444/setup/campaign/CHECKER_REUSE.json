@@ -1,0 +1,11 @@
+{
+  "source": "target/p9/comparison435/phase-diagnostic-check.py",
+  "invariant_body_sha256": "2453398bca60920be0ce7ec6f8679adae1d0fece7bff6ad80bc39bc1c85ee9f7",
+  "current_body_identical": true,
+  "adaptation": "existingcase/original/envelope/observer checks unchanged; driver exposes7cells\u00d73rotatingvariants; no baselineartifactconfig required on additionalhost",
+  "prior_control_evidence": "HISTORICAL_CHECKER_CONTROLS.json",
+  "no_unchanged_negative_control_reruns": true,
+  "current_cli_validation_pending": false,
+  "prior_control_record_sha256": "e0eb8c3913e7deaebf84802b3f8ed3468f457e741b27c5010c83beff0c5e3a72",
+  "current_cli_fixture_count": 3
+}

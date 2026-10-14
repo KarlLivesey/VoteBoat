@@ -1,0 +1,1 @@
+/home/karllivesey/.rustup/toolchains/1.98.1-aarch64-unknown-linux-gnu/bin/cargo build --locked --offline --release --manifest-path /home/karllivesey/voteboat-p9-pi444-Froqtz/source/benchmarks/matched/Cargo.toml --bin voteboat-matched-framework --message-format=json -vv 

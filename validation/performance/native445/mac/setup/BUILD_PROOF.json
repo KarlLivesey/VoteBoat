@@ -1,0 +1,149 @@
+{
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "source_inputs": 1457,
+  "artifacts": [
+    {
+      "target": "voteboat",
+      "original": "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/deps/libvoteboat-31702aea823d5b18.rlib",
+      "copy": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/artifacts/native/libvoteboat-31702aea823d5b18.rlib",
+      "sha256": "2ce8ea67a12694096f0ab80a79cd02a077e94d99954e8db550fffd917192ede6",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///private/tmp/voteboat-native445-ab091ea-IT3Ufy/source#voteboat@0.1.0",
+        "manifest_path": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "lib"
+          ],
+          "crate_types": [
+            "lib"
+          ],
+          "name": "voteboat",
+          "src_path": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/source/src/lib.rs",
+          "edition": "2021",
+          "doc": true,
+          "doctest": true,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/deps/libvoteboat-31702aea823d5b18.rlib",
+          "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/deps/libvoteboat-31702aea823d5b18.rmeta"
+        ],
+        "executable": null,
+        "fresh": false
+      }
+    },
+    {
+      "target": "native_benchmark",
+      "original": "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/examples/native_benchmark",
+      "copy": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/artifacts/native/native_benchmark",
+      "sha256": "bc5439e729044b5f0f8ad8d617b43cac79c296c69a29b6b054f26ef4d840ca92",
+      "compiler_record": {
+        "reason": "compiler-artifact",
+        "package_id": "path+file:///private/tmp/voteboat-native445-ab091ea-IT3Ufy/source#voteboat@0.1.0",
+        "manifest_path": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/source/Cargo.toml",
+        "target": {
+          "kind": [
+            "example"
+          ],
+          "crate_types": [
+            "bin"
+          ],
+          "name": "native_benchmark",
+          "src_path": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/source/examples/native_benchmark.rs",
+          "edition": "2021",
+          "required-features": [
+            "tls"
+          ],
+          "doc": false,
+          "doctest": false,
+          "test": true
+        },
+        "profile": {
+          "opt_level": "3",
+          "debuginfo": 0,
+          "debug_assertions": true,
+          "overflow_checks": true,
+          "test": false
+        },
+        "features": [
+          "default",
+          "native",
+          "quic",
+          "tls"
+        ],
+        "filenames": [
+          "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/examples/native_benchmark"
+        ],
+        "executable": "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/examples/native_benchmark",
+        "fresh": false
+      }
+    }
+  ],
+  "symbols": "DEBUG0 acceptance; no debug symbols requested",
+  "UUID": "EEC48C1D-B6DA-3581-8F1F-F78AE1C180F0",
+  "root_build_script_fresh": {
+    "reason": "compiler-artifact",
+    "package_id": "path+file:///private/tmp/voteboat-native445-ab091ea-IT3Ufy/source#voteboat@0.1.0",
+    "manifest_path": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/source/Cargo.toml",
+    "target": {
+      "kind": [
+        "custom-build"
+      ],
+      "crate_types": [
+        "bin"
+      ],
+      "name": "build-script-build",
+      "src_path": "/private/tmp/voteboat-native445-ab091ea-IT3Ufy/source/build.rs",
+      "edition": "2021",
+      "doc": false,
+      "doctest": false,
+      "test": false
+    },
+    "profile": {
+      "opt_level": "0",
+      "debuginfo": 0,
+      "debug_assertions": true,
+      "overflow_checks": true,
+      "test": false
+    },
+    "features": [
+      "default",
+      "native",
+      "quic",
+      "tls"
+    ],
+    "filenames": [
+      "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/build/voteboat-22116cc996987efa/build-script-build"
+    ],
+    "executable": null,
+    "fresh": false
+  },
+  "root_build_script_executed": {
+    "reason": "build-script-executed",
+    "package_id": "path+file:///private/tmp/voteboat-native445-ab091ea-IT3Ufy/source#voteboat@0.1.0",
+    "linked_libs": [],
+    "linked_paths": [],
+    "cfgs": [],
+    "env": [],
+    "out_dir": "/tmp/voteboat-native445-ab091ea-IT3Ufy/target-native-release/release/build/voteboat-edca44d51d6e8b81/out"
+  },
+  "compiler_lines": "ROOT_NATIVE_RUSTC.txt",
+  "profile": "native defaultLTO/codegen; opt3/debug0/assertions+overflow; no framework override",
+  "source_modes": "SOURCE.json physical modes; seven existing fixture keys0600",
+  "tool_identities_equal435": true,
+  "scope": "fresh root/example native acceptance artifact; no timing yet"
+}

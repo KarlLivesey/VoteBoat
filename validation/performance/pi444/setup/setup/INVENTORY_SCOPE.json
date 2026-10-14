@@ -1,0 +1,12 @@
+{
+  "Pi_selected": 1434,
+  "compiled": 1428,
+  "root444_qualification_selected": 1437,
+  "root_only": [
+    "docs/PERFORMANCE.md",
+    "validation/check-native-benchmark.mjs",
+    "validation/check-offered.mjs"
+  ],
+  "reason": "Pi reused established framework archive1434 scope; omitted3areperformance narrative/native+offered validators, no framework build/test/config source or lock missing",
+  "shared_source_hashes_match": true
+}

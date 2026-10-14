@@ -1,0 +1,1 @@
+python3 -c import\ json\;from\ pathlib\ import\ Path\;v=json.loads\(Path\(\"QUALIFICATION_REUSE.json\"\).read_text\(\)\)\;assert\ v\[\"patch_final_source_matches\"\]\ and\ v\[\"same_physical_modes\"\]\ and\ v\[\"unchanged_inputs\"\]==1431\;print\(\"final\ published3filesexactPiqualification\;1431baselineinputs+permissionsunchanged\;\ no\ testsrepeated\"\) 

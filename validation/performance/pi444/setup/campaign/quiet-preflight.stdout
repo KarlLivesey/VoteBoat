@@ -1,0 +1,14 @@
+    PID    PPID     ELAPSED     TIME STAT COMMAND
+temp=47.7'C
+throttled=0x0
+frequency(48)=1000265600
+ondemand
+               total        used        free      shared  buff/cache   available
+Mem:           3.7Gi       236Mi       1.5Gi       9.0Mi       2.0Gi       3.5Gi
+Swap:          2.0Gi          0B       2.0Gi
+ 11:20:51 up  2:05,  2 users,  load average: 0.01, 0.41, 0.56
+active
+active
+active
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/mmcblk0p2   59G  8.5G   48G  16% /

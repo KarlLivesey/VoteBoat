@@ -1,0 +1,13 @@
+{
+  "publication_checks_actual_realpath": true,
+  "publication_same_saved_outputs": true,
+  "native_rate_checks_same_saved_outputs": true,
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "validator_commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "no_live_build_benchmark_profiler_or_campaign_node": true,
+  "existing_background_node": [
+    " 3351 /Users/karllivesey/.lmstudio/.internal/utils/node"
+  ],
+  "previous_setup_failure": "quiet inventory included existing LMStudio internalnode; no captured workload repeated",
+  "publication_symlink_noop": "preserved .symlink-noop logs/exits; directmain pathguard didnotexecute via /tmp alias"
+}

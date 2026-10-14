@@ -1,0 +1,38 @@
+{
+  "setup_ready": true,
+  "timing_authorized": false,
+  "build_original_session": 2085,
+  "build_exit": 0,
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "inputs": 1413,
+  "source_sha256": "fc103696bebee1a76b3cf97300f034376a26ea87870ea70c39856357e7921534",
+  "source_hash_modes_before_after_equal": true,
+  "artifact_original_copy_hashes_equal": true,
+  "root_example_fresh_false": true,
+  "artifact_executable_sha256": "227f5777eae4d852fd907e9ef6f686c25e2f2faa5e1b5342e4c4ccbb138ad1fd",
+  "profile": "native opt3/debug0/assertions+overflow/default LTO and codegen; framework profile excluded",
+  "control_tools_commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "control_tools_inventory_sha256": "e1963d8055f124b192fd68ea7f119c78cf02d8a1d76df6624475ee0ac2c3024d",
+  "receipt_checker_reused": "Published root precision proof validation/performance/native445/rate-fix/readiness.exit=0 on these same outputs",
+  "publication_checker_exit": {
+    "tcp": 0,
+    "quic": 0
+  },
+  "original_control_session71630_exit": 1,
+  "original_control_failure": "Only old printed-rate tolerance checker failed; TCP workload itself exit0. Raw error preserved. QUIC unstarted workload completed once separately exit0. Neither workload nor build repeated.",
+  "small_readiness": {
+    "originals_each": 128,
+    "warmup_each": 64,
+    "window_each": 64,
+    "quantum_each": 64,
+    "measured_widths_each": "64x2",
+    "recovered_value_each": 192,
+    "retry_verified_each": true,
+    "workers_joined_each": true
+  },
+  "campaign_cases": 18,
+  "campaign_config_sha256": "8db2fa325d43f2c460669f69b01f8cb176d285391d7c3f752ded0938a7d4f3d5",
+  "campaign_runner_sha256": "a5f01c4d724e1f0a3da30dfe4b397a0ac12a4762d7e6af80a8d0a6d8b9fde9ed",
+  "quiet_selected_process_inventory": [],
+  "no_campaign_launched": true
+}

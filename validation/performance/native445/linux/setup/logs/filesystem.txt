@@ -1,0 +1,5 @@
+  File: target/p9/native445-linux
+    ID: cc7f4dc26f3e9e00 Namelen: 255     Type: btrfs
+Block size: 4096       Fundamental block size: 4096
+Blocks: Total: 487329549  Free: 219989417  Available: 202566196
+Inodes: Total: 0          Free: 0

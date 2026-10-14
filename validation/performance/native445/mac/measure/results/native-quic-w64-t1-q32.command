@@ -1,0 +1,1 @@
+["/private/tmp/voteboat-native445-ab091ea-IT3Ufy/artifacts/native/native_benchmark","/tmp/voteboat-native445-ab091ea-IT3Ufy/results/native-quic-w64-t1-q32","quic","15000","64","--ready-items","32","--journal-timings"]

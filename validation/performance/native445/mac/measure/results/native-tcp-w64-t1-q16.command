@@ -1,0 +1,1 @@
+["/private/tmp/voteboat-native445-ab091ea-IT3Ufy/artifacts/native/native_benchmark","/tmp/voteboat-native445-ab091ea-IT3Ufy/results/native-tcp-w64-t1-q16","tcp","15000","64","--ready-items","16","--journal-timings"]

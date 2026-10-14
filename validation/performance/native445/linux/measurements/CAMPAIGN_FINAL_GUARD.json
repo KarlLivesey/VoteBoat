@@ -1,0 +1,26 @@
+{
+  "original_session": 32037,
+  "controller_exit": 0,
+  "campaign_status": 0,
+  "cli_pass": 18,
+  "receipt_checker_pass": 18,
+  "publication_checker_pass": 18,
+  "originals_per_case": 15000,
+  "warmup_per_case": 64,
+  "recovered_value_per_case": 15064,
+  "retries_joins_each_true": true,
+  "actual_widths": {
+    "16": "16x937+8x1",
+    "32": "32x468+24x1",
+    "64": "64x234+24x1"
+  },
+  "source1413_sha_modes_equal": true,
+  "root_example_original_copy_sha_equal": true,
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "control_tools_commit": "912cdf4ebc0380308caa77412f947cc56e3bf731",
+  "no_reruns": true,
+  "no_default_change": true,
+  "clock_boundaries": "Existing native CLI unchanged all-original measurement boundary; validators only after18 process END",
+  "interval_scope": "Inclusive elapsed I/O/manifest intervals may nest/overlap; no summation as CPU or critical path",
+  "capacity_scope": "15000 bounded diagnostics, not20M sustained acceptance/fairness/headroom; separate from minimal framework and earlierdebug2 profiling"
+}

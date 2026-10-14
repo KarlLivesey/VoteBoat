@@ -1,0 +1,19 @@
+{
+  "reason": "user explicitly requested stop Pi test; no restart or completing campaign",
+  "signal": "SIGTERM",
+  "selected": [
+    {
+      "pid": 6922,
+      "kind": "campaign",
+      "verified_script": "/home/karllivesey/voteboat-p9-pi444-Froqtz/campaign/run.sh",
+      "verified_job_argument": "/home/karllivesey/voteboat-p9-pi444-Froqtz"
+    },
+    {
+      "pid": 7142,
+      "kind": "benchmark",
+      "verified_executable": "/home/karllivesey/voteboat-p9-pi444-Froqtz/artifacts/matched/voteboat-matched-framework"
+    }
+  ],
+  "current_stage": "off-c1-b1-t3",
+  "epoch_seconds": 1791975341.9245598
+}

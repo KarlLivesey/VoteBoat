@@ -1,0 +1,14 @@
+{
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "inputs": 1413,
+  "source_sha_modes_after_controls_equal": true,
+  "artifact_original_copy_after_controls_equal": true,
+  "native_debug0_acceptance_profile": true,
+  "private0600_fixtures": 7,
+  "two_once_only_cli_successes": true,
+  "old_validator_failure_preserved": true,
+  "awaiting_parent_separate_versioned_control_tools": true,
+  "campaign_cases_prepared": 18,
+  "campaign_not_launched": true,
+  "ready_not_claimed": true
+}

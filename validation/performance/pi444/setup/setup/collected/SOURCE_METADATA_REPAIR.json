@@ -1,0 +1,12 @@
+{
+  "cause": "copying prior metadata retained old three changed GitblobIDs and prior archive SHA; actual source SHA/mode map and build guards already correct",
+  "fields_corrected": [
+    "git_blob_ids",
+    "git_modes",
+    "archive_sha256"
+  ],
+  "actual_git_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "archive_sha256": "895fab40d66c524c224a1f293b3e1ecab466f0a34a0478ce998df2afc676f02a",
+  "production_source_changed": false,
+  "guard_source_scope_changed": false
+}

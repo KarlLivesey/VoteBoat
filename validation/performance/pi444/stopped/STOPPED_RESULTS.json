@@ -1,0 +1,147 @@
+{
+  "scope": "user-stoppedPi diagnostic; onlysingleton1client/batch1, incompleteplanned63casecurve",
+  "rows": [
+    {
+      "case": "off-c1-b1-t1",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 12829.345356577423,
+      "request_p99_ms": 0.098259,
+      "seconds": 81.732619308
+    },
+    {
+      "case": "off-c1-b1-t2",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 12820.506149498613,
+      "request_p99_ms": 0.098833,
+      "seconds": 81.788970558
+    },
+    {
+      "case": "on-c1-b1-t1",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 11492.946322595608,
+      "request_p99_ms": 0.108388,
+      "seconds": 91.236482845
+    },
+    {
+      "case": "on-c1-b1-t2",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 11556.908526938185,
+      "request_p99_ms": 0.107944,
+      "seconds": 90.73153063
+    },
+    {
+      "case": "on-c1-b1-t3",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 11630.680811788177,
+      "request_p99_ms": 0.107518,
+      "seconds": 90.156029296
+    },
+    {
+      "case": "openraft-c1-b1-t1",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 2151.226346315974,
+      "request_p99_ms": 0.877678,
+      "seconds": 487.43173948
+    },
+    {
+      "case": "openraft-c1-b1-t2",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 2139.2937875356215,
+      "request_p99_ms": 0.881344,
+      "seconds": 490.150537579
+    },
+    {
+      "case": "openraft-c1-b1-t3",
+      "process_exit": 0,
+      "guard_exit": 0,
+      "completed_originals": 1048576,
+      "completed_requests": 1048576,
+      "applied_frontiers": [
+        1049601,
+        1049601,
+        1049601
+      ],
+      "originals_per_second": 2141.892912658201,
+      "request_p99_ms": 0.878641,
+      "seconds": 489.555754073
+    }
+  ],
+  "medians": {
+    "off": {
+      "completed_trials": 2,
+      "originals_per_second": 12824.925753038018,
+      "request_p99_ms": 0.098546
+    },
+    "on": {
+      "completed_trials": 3,
+      "originals_per_second": 11556.908526938185,
+      "request_p99_ms": 0.107944
+    },
+    "openraft": {
+      "completed_trials": 3,
+      "originals_per_second": 2141.892912658201,
+      "request_p99_ms": 0.878641
+    }
+  },
+  "interrupted_case": "off-c1-b1-t3",
+  "raw_STATUS": "0",
+  "raw_STATUS_is_success": false,
+  "stop": "explicituserSIGTERM verifiedrunner+benchmark; no restart",
+  "SSH_original_exit": 255
+}

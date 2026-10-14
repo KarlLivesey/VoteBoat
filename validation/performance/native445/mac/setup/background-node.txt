@@ -1,0 +1,2 @@
+  PID  PPID COMM              %CPU      TIME STAT
+ 3351  1526 /Users/karllives   0.0   4:58.67 S   

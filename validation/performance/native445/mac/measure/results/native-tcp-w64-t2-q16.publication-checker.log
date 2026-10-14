@@ -1,0 +1,95 @@
+{
+  "scope": "finite diagnostic; live snapshots may cut calls; joined totals stable; parallel times are not client critical path",
+  "measurement_deltas": [
+    {
+      "replica": "1",
+      "step": "open",
+      "calls": "1706",
+      "elapsed_ns": "588409120"
+    },
+    {
+      "replica": "1",
+      "step": "write",
+      "calls": "1706",
+      "elapsed_ns": "90859094"
+    },
+    {
+      "replica": "1",
+      "step": "file_sync",
+      "calls": "1706",
+      "elapsed_ns": "13583697270"
+    },
+    {
+      "replica": "1",
+      "step": "rename",
+      "calls": "1706",
+      "elapsed_ns": "652042601"
+    },
+    {
+      "replica": "1",
+      "step": "directory_sync",
+      "calls": "1706",
+      "elapsed_ns": "13850213508"
+    },
+    {
+      "replica": "2",
+      "step": "open",
+      "calls": "615",
+      "elapsed_ns": "299168867"
+    },
+    {
+      "replica": "2",
+      "step": "write",
+      "calls": "615",
+      "elapsed_ns": "26998873"
+    },
+    {
+      "replica": "2",
+      "step": "file_sync",
+      "calls": "615",
+      "elapsed_ns": "6005817622"
+    },
+    {
+      "replica": "2",
+      "step": "rename",
+      "calls": "615",
+      "elapsed_ns": "424245676"
+    },
+    {
+      "replica": "2",
+      "step": "directory_sync",
+      "calls": "615",
+      "elapsed_ns": "6177515957"
+    },
+    {
+      "replica": "3",
+      "step": "open",
+      "calls": "558",
+      "elapsed_ns": "372044673"
+    },
+    {
+      "replica": "3",
+      "step": "write",
+      "calls": "558",
+      "elapsed_ns": "26279336"
+    },
+    {
+      "replica": "3",
+      "step": "file_sync",
+      "calls": "558",
+      "elapsed_ns": "5399659461"
+    },
+    {
+      "replica": "3",
+      "step": "rename",
+      "calls": "558",
+      "elapsed_ns": "361296011"
+    },
+    {
+      "replica": "3",
+      "step": "directory_sync",
+      "calls": "558",
+      "elapsed_ns": "5388136831"
+    }
+  ]
+}

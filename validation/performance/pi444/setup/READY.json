@@ -1,0 +1,61 @@
+{
+  "status": "READY_NOT_STARTED",
+  "candidate_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "job": "/home/karllivesey/voteboat-p9-pi444-Froqtz",
+  "fresh_build_handle": 37214,
+  "fresh_build_exit": 0,
+  "initial_guard_exit": 1,
+  "resume_guard_cli_handle": 96819,
+  "resume_guard_cli_exit": 0,
+  "artifact_exe_sha256": "b3892b5323034c1af1550f64c5fa38815f9e69094ed1a6eadbc13a36b2ca1937",
+  "DWP_sha256": "a4c67f66218cc8a2e7d6680812141eeb762ca1b41d893d98811ccf0f7b597c71",
+  "setup_archive": "validation/performance/pi444/setup",
+  "case_count": 63,
+  "cells": [
+    [
+      1,
+      1
+    ],
+    [
+      64,
+      1
+    ],
+    [
+      256,
+      1
+    ],
+    [
+      512,
+      1
+    ],
+    [
+      1024,
+      1
+    ],
+    [
+      4096,
+      1
+    ],
+    [
+      4096,
+      4
+    ]
+  ],
+  "script_sha256": "caad5c520bc2a5e9f2270a2b491346e779940f2c1d72ac1a912b2a51284500cd",
+  "checker_sha256": "32a5872fbbe3ed28ed9999c0909ff8da9a89d36bef4454c27b8b14ad8020bb6c",
+  "current_3_cli_checks": 0,
+  "all_local_setup_end": true,
+  "selected_Pi_process_inventory": "empty",
+  "benchmark_started": false,
+  "temperature_C": 47.7,
+  "throttled": "0x0",
+  "default_services_active": [
+    "apcupsd",
+    "docker",
+    "containerd"
+  ],
+  "governor": "ondemand",
+  "available_memory": "3.5Gi",
+  "swap_used": "0B",
+  "root_quiet_authorization_pending": true
+}

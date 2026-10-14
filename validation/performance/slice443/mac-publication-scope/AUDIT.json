@@ -1,0 +1,17 @@
+{
+  "scope": "read-only audit of prior Mac443 publication checker; no workload/check/build/test rerun",
+  "old_checker_exit": 0,
+  "old_stdout_bytes": 1823,
+  "old_stdout_sha256": "34e8d00d2e246ab84b6aec54d023c846065a97d2fb9217b0a934dcf0d9151e8c",
+  "old_command": "/opt/homebrew/bin/node validation/check-publication-timings.mjs /tmp/voteboat-mac443-6be136a-8vife2/window64/publication.csv",
+  "old_stdout_actual_json": true,
+  "replica_step_deltas": 15,
+  "all_observed_calls_and_elapsed_positive": true,
+  "classification": "actual validator execution; not a symlink-noop",
+  "conditional_revalidation_not_needed": true,
+  "old_validator_source_sha256": "4a4ba88136cbae48b3d822ed6b06274008f66955a15b6bba0e062e3c8715d331",
+  "current_validator_identical": true,
+  "csv_sha256": "75aa337a421b571cd65bd2c0df16d21be6f47401c51a3719f08049d9d7fe15ca",
+  "old_archive_manifest_sha256": "f8ec84e13493f0733fd45747de73eca361d707fbc025cce7e9d7cc3b7bc62e67",
+  "all_old_archive_files_unchanged_and_verified": true
+}

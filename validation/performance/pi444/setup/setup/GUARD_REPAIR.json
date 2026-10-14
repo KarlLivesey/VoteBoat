@@ -1,0 +1,10 @@
+{
+  "cause": "oldvoteboat- substring matched everydependencyinvocation through newjobname",
+  "changed_selection": "exactCARGO_PKG_NAME=voteboat and currentrootsource/Cargo.toml manifest",
+  "build_repeated": false,
+  "guard_weakened": false,
+  "initial_handle": 37214,
+  "initial_wrapper_exit": 1,
+  "fresh_build_exit": 0,
+  "fresh_build_seconds": 906
+}

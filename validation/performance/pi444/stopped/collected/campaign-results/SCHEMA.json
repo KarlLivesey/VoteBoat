@@ -1,0 +1,51 @@
+{
+  "source_commit": "ab091ea165f6a82bf40fe80c69b0d29bc8eeb7ad",
+  "cells": [
+    [
+      1,
+      1
+    ],
+    [
+      64,
+      1
+    ],
+    [
+      256,
+      1
+    ],
+    [
+      512,
+      1
+    ],
+    [
+      1024,
+      1
+    ],
+    [
+      4096,
+      1
+    ],
+    [
+      4096,
+      4
+    ]
+  ],
+  "requested_operations": 1048576,
+  "actual_originals": 1048576,
+  "warmup": 1024,
+  "variants": [
+    "off",
+    "on",
+    "openraft"
+  ],
+  "trials": 3,
+  "cases": 63,
+  "order": "variant rotation by trial for each cell",
+  "host": "Pi4 fourcores16serverworkers1clientworker",
+  "timing": "existingreadybarrier_to_allclientjoins_beforelatencyflatten_sort_followers_verify_shutdown",
+  "maintenance": "default-retention",
+  "envelopes": "upstream-default",
+  "campaign_timeout_secs": 3600,
+  "meaning": "additionalhardware diagnostic1M, not20M/fullP9healthy-marginacceptance",
+  "no_system_or_services_changes": true
+}

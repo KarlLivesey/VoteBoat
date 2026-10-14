@@ -1,0 +1,10 @@
+phase,replica,group,incarnation,width,visits,original_proposals,pre_poll_leader_visits,pre_poll_heartbeat_due_visits,pre_poll_dependency_visits,poll_observations,heartbeat_due_observations,dependency_observations,control_persist_lease_observations,data_persist_lease_observations,queue_selection_reason_observed
+warmup,1,1,1,0,0,0,0,0,0,283,33,251,0,0,false
+warmup,1,1,1,64,1,64,1,0,0,283,33,251,0,0,false
+warmup,2,1,1,0,0,0,0,0,0,283,0,164,0,0,false
+warmup,3,1,1,0,0,0,0,0,0,283,0,190,0,0,false
+measurement,1,1,1,0,0,0,0,0,0,101615,33240,59070,0,0,false
+measurement,1,1,1,24,1,24,1,0,0,101615,33240,59070,0,0,false
+measurement,1,1,1,64,234,14976,234,62,0,101615,33240,59070,0,0,false
+measurement,2,1,1,0,0,0,0,0,0,101615,0,60039,0,0,false
+measurement,3,1,1,0,0,0,0,0,0,101615,0,61120,0,0,false

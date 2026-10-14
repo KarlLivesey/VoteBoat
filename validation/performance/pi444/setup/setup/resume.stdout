@@ -1,0 +1,12 @@
+COMMAND_END=artifacts-final exit=0
+COMMAND_END=source-after-build exit=0
+COMMAND_END=current-cli exit=0
+COMMAND_END=source-after-cli exit=0
+COMMAND_END=memory-after exit=0
+COMMAND_END=storage-after exit=0
+COMMAND_END=temperature-after exit=0
+COMMAND_END=throttled-after exit=0
+COMMAND_END=frequency-after exit=0
+COMMAND_END=governor-after exit=0
+COMMAND_END=services-after exit=0
+COMMAND_END=load-after exit=0

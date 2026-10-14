@@ -372,9 +372,8 @@ independently verifies all100 archived payloads and the four-file implementation
 [Mac qualification](../validation/performance/slice443/mac/README.md) also ends0:
 ready/lanes controls, existing JS fixtures, formatting/default+all-feature strict
 checks and the same actual64-wide TCP/TLS history/recovery/retries/joins pass.
-Root verifies all86 Mac archive payloads. Fresh native performance artifacts and
-paired configured-policy measurements remain pending; debug qualification is not
-a capacity result.
+Root verifies all86 Mac archive payloads. Debug qualification is separate from
+445's fresh native artifacts and measured policy comparisons below.
 
 The user additionally requests Raspberry Pi CPU/ISA evidence to avoid one-case
 optimization. Authorizedups.local is reachable: Pi4/fourCortex-A72/ARM64 Debian13,
@@ -392,8 +391,8 @@ and completed measurements.
 
 Pi tools/source setup is complete with Rust1.98.1 and compatible protoc3.21.12.
 The original standalone qualification ends101:63 tests pass and the actual
-lagging-follower snapshot-install test loses a client response. No performance
-build or timing has started. [444 diagnostic schema](../validation/performance/slice444/SCHEMA.md)
+lagging-follower snapshot-install test loses a client response. This original
+qualification preceded performance builds and timing. [444 diagnostic schema](../validation/performance/slice444/SCHEMA.md)
 adds test-only actor-error reporting and joins actors before failing a write,
 preserving timers, bounded queues and successful original/snapshot assertions.
 The initial Linux diagnostic passes; the first Pi diagnostic stalls and is
@@ -406,8 +405,8 @@ The selected correction is test-only: suspend the paused follower's campaign tic
 prove an overdue paused tick cannot change state and resume after unpause, then
 retain all actual12k-original snapshot checks. Linux passes both controls. Pi
 completes the writes but fails exact final-prefix verification after4.33s; the
-correction is not yet qualified. Preserve this distinct failure and trace the
-actual frontier/election sequence around resume before another change.
+tick-only correction fails qualification. Its distinct failure and the subsequent
+frontier/election trace remain preserved.
 The second trace establishes a resume race: the now-unpaused follower campaigns
 before queued contact is processed; a new leader advances all frontiers to12002,
 with one snapshot installed and successful cleanup. The selected
@@ -423,9 +422,37 @@ RUSTUP_TOOLCHAIN=1.98.1 as well as Cargo/RUSTC; default1.99 remains untouched.
 The added Pi campaign covers all seven cells with three rotating OFF/ON/upstream
 trials;1M diagnostics remain separate from sustained P9 acceptance.
 
+444 is published atab091ea1 through the full enabled hook; its final test-only
+pause/resume correction passes Linux/Pi/Mac, with production bytes unchanged.
+Fresh Pi framework setup is complete: four root/executable/upstream fresh:false
+records, asserted opt3/debug2/thinLTO/codegen1 profile, source/compiler/locks,
+ELF+DWP and actual off/on/OpenRaft controls pass. The old buildscript selector
+failure and metadata repair remain; only the failed guard resumed, without a
+build/test repeat. [Pi setup](../validation/performance/pi444/setup/README.md).
+The user stopped the Pi campaign after eight completed singleton cases; no bulk
+cell ran. Completed OFF2/ON3/OpenRaft3 medians are12824.926/11556.909/2141.893
+originals/s, p990.098546/0.107944/0.878641ms. Every completed case applies1048576
+originals/frontiers1049601×3. OFFtrial3 was interrupted without a result; the
+raw runnerSTATUS0 is not success (actualSSH255/manualSIGTERM). Preserve the
+partial campaign, do not restart it. Timed framework stores are volatile/in-process;
+SD storage affected compilation, not per-original persistence in these cells.
+
+[Native445 complete measurements](../validation/performance/native445/README.md)
+finish36/36 cases with exact originals/recovery/retries/joins. q16→q64 median
+PUTS/s: Linux TCP247.827→572.176/QUIC249.519→505.190; Mac TCP351.765→690.381/
+QUIC346.365→753.943. Actual64-wide batches reduce leader observed publications
+from variable1464–1707 to470. Native opt3/debug0/default LTO/codegen differs from
+442's debug2 profiling build; no paired comparison to442 is inferred. Mac wins
+all rate pairs but has TCP p99 regressions; Linux TCPtrial1 loses against its
+2828.653/s q16 outlier. All slow/fast trials remain; default16 stays until fairness
+and sustained headroom qualify a change. The precision checker fix is published
+at912cdf4 through the full enabled hook; it validates rounding intervals exactly,
+with actual saved outputs rechecked and no workload/build repeat. No physical
+RSS/debt/refusal,20M acceptance or framework-floor claim follows.
+
 | Deliverable | Purpose | Dependencies | Completion checks | Advances |
 | --- | --- | --- | --- | --- |
-| Current: qualify Pi comparison and measure existing64-command durable batching | Check CPU/ISA portability and put more originals behind each existing physical barrier | Actual Pi snapshot-test diagnosis; published443 and both-host64-wide controls;442 IO/width evidence | Focused Pi correction without weaker outcomes/timers, pinned tools/fresh framework artifact and seven-cell diagnostic curve; paired native-policy rates/p99/publications at matched window/build | P9.0/P9.1/P9.3 |
+| Current: select and qualify the next measured stage | Use445 batching evidence and preserve the user-stopped Pi results | Checked444 pause/resume, partial singleton Pi evidence,36 native policy trials | Publish exact native rates/tails/physical counts; retain Linux variation/TCP regressions and all Pi partial outcomes; choose from measured remaining costs without restarting the cancelled test | P9.0/P9.1/P9.3 |
 | Next: sustained mixed-load batching and headroom | Qualify batching without starving cold groups or concealing refusals | Qualified64-wide measurements and bounded hot/cold/skew workload/placement schema | Actual per-group completed rates/tails/refusals, bounded physical memory/debt, active maintenance/catch-up; fairness before changing defaults | P9.1/P9.2/P9.3 |
 | Following: bounded persistence overlap and full qualification | Reduce remaining serial waits and test all P9 requirements | Measured barrier/batching limits and typed partial-progress/durability plan | All seven framework cells on both hosts, real durable headroom/placement/shared barriers and P8 costs; original outcomes/crash/retry/fencing preserved | P9.0/P9.1/P9.2/P9.3/P9.4 |
 
