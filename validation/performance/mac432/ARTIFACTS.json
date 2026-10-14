@@ -1,0 +1,176 @@
+[
+  {
+    "target": "voteboat",
+    "original": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libvoteboat-d6b277c8fb9e5750.rlib",
+    "copy": "/private/tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/matched/libvoteboat-d6b277c8fb9e5750.rlib",
+    "sha256": "2106385c80e8e8faa0ad3b08d9fa03245540cf715838b7bd93df9cee6ec9b583",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac432-dcc14ef-6RvUdR/source#voteboat@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/source/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "voteboat",
+        "src_path": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/source/src/lib.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libvoteboat-d6b277c8fb9e5750.rlib",
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libvoteboat-d6b277c8fb9e5750.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    "compiled_source_sha256": "b15e256c65fb95f0e83e052b0ee76bc5a03f2d4b20706ff7529959ae685d4e6a",
+    "manifest_sha256": "5cbd2a32a3ebb52769c1f3c2de02c4b3ff3d09e2f84947c6cd53aad6beef9c9f"
+  },
+  {
+    "target": "voteboat-matched-framework",
+    "original": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/voteboat-matched-framework",
+    "copy": "/private/tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/matched/voteboat-matched-framework",
+    "sha256": "7d3b453018485094ce8eaa74cb5c49fda9abf20491bb3139dbf093c17ac85b6c",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "path+file:///tmp/voteboat-mac432-dcc14ef-6RvUdR/source/benchmarks/matched#voteboat-matched-framework@0.1.0",
+      "manifest_path": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/source/benchmarks/matched/Cargo.toml",
+      "target": {
+        "kind": [
+          "bin"
+        ],
+        "crate_types": [
+          "bin"
+        ],
+        "name": "voteboat-matched-framework",
+        "src_path": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/source/benchmarks/matched/src/main.rs",
+        "edition": "2021",
+        "doc": true,
+        "doctest": false,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [],
+      "filenames": [
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/voteboat-matched-framework",
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/voteboat-matched-framework.dSYM"
+      ],
+      "executable": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/voteboat-matched-framework",
+      "fresh": false
+    },
+    "compiled_source_sha256": "cee7b0541b84a69c06a1aafe6e8a1177d6ac37076aad89ce18d47437371e1544",
+    "manifest_sha256": "44755b3e8f1eb6614a3326dffb46405ed9aab976408ee68537a54c2298db1431"
+  },
+  {
+    "target": "openraft",
+    "original": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libopenraft-84eb1ae217ec5cb8.rlib",
+    "copy": "/private/tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/matched/libopenraft-84eb1ae217ec5cb8.rlib",
+    "sha256": "98d7061caf63a4f54ba9b08bd6bf701e9d33daa8b8f74c162e779e8cc25fc0dc",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "git+https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#0.10.0-alpha.37",
+      "manifest_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/openraft/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "openraft",
+        "src_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/openraft/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "clap",
+        "default",
+        "runtime-stats",
+        "serde",
+        "tokio-rt",
+        "type-alias"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libopenraft-84eb1ae217ec5cb8.rlib",
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libopenraft-84eb1ae217ec5cb8.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    "compiled_source_sha256": "a6f394ae6998f98063de5fd9c7fc6b5364c5f798182f7511049648267cf4dcd0",
+    "manifest_sha256": "22a4f1ed59e22da5965fa58b7ead8d9025d2bee70c55b646db734cbe3a389dc7"
+  },
+  {
+    "target": "bench_minimal",
+    "original": "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libbench_minimal-9267f967f5d155f0.rlib",
+    "copy": "/private/tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/matched/libbench_minimal-9267f967f5d155f0.rlib",
+    "sha256": "a8d93c6149cd4864decb43278c711a4ea50400b416a26e336874d9cf734ef161",
+    "compiler_record": {
+      "reason": "compiler-artifact",
+      "package_id": "git+https://github.com/databendlabs/openraft?rev=e88bb40707f2e511d8ecc44d31edcb1d814a11a8#bench-minimal@0.1.0",
+      "manifest_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/benchmarks/minimal/Cargo.toml",
+      "target": {
+        "kind": [
+          "lib"
+        ],
+        "crate_types": [
+          "lib"
+        ],
+        "name": "bench_minimal",
+        "src_path": "/Users/karllivesey/.cargo/git/checkouts/openraft-c9fbe90779948994/e88bb40/benchmarks/minimal/src/lib.rs",
+        "edition": "2024",
+        "doc": true,
+        "doctest": true,
+        "test": true
+      },
+      "profile": {
+        "opt_level": "3",
+        "debuginfo": 2,
+        "debug_assertions": true,
+        "overflow_checks": true,
+        "test": false
+      },
+      "features": [
+        "default",
+        "runtime-stats"
+      ],
+      "filenames": [
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libbench_minimal-9267f967f5d155f0.rlib",
+        "/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-matched-release/release/deps/libbench_minimal-9267f967f5d155f0.rmeta"
+      ],
+      "executable": null,
+      "fresh": false
+    },
+    "compiled_source_sha256": "be455b39a87f2342895b8e8f16e73e598baa2a7ea0238fed001e2ea74abaff41",
+    "manifest_sha256": "e8c7a890c1c515c6f664be818d1c8a2697884940e3d301a92ee92bff70ce4aad"
+  }
+]

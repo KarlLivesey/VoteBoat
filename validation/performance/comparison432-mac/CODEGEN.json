@@ -1,0 +1,23 @@
+{
+  "scope": "Actual static Mach-O disassembly on same compiler/profile. Call removal and code growth are facts, not performance proof. Entire original otool outputs losslessly gzip; selected exact symbol method retained. No instruction-cost inference from sampled CPU.",
+  "variants": {
+    "baseline": {
+      "text_section_bytes": 2397436,
+      "entry_to_vec_disassembly_lines_including_label": 62,
+      "entry_to_vec_first_instruction": "000000010007fda8\tsub\tsp, sp, #0xa0",
+      "entry_to_vec_contains_out_of_line_LogEntry_clone_call": true,
+      "separate_LogEntry_clone_symbol_present": true,
+      "actual_uuid_output": "UUID: DC3E912F-6F96-3C10-AFD4-78542A3D1CF3 (arm64) /tmp/voteboat-mac431-ebcacbb-9qhZ59/artifacts/matched/voteboat-matched-framework\nUUID: DC3E912F-6F96-3C10-AFD4-78542A3D1CF3 (arm64) /tmp/voteboat-mac431-ebcacbb-9qhZ59/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-bf6953d6aaa30527\n",
+      "executable_sha256_receipt": "a211af458233d4d719298436ba4bb138af4230eddb1ef7b26615332307ccf400  /tmp/voteboat-mac431-ebcacbb-9qhZ59/artifacts/matched/voteboat-matched-framework\n"
+    },
+    "candidate": {
+      "text_section_bytes": 2398608,
+      "entry_to_vec_disassembly_lines_including_label": 174,
+      "entry_to_vec_first_instruction": "000000010007ff44\tsub\tsp, sp, #0x150",
+      "entry_to_vec_contains_out_of_line_LogEntry_clone_call": false,
+      "separate_LogEntry_clone_symbol_present": false,
+      "actual_uuid_output": "UUID: FE00534B-0778-3E32-9E25-2D5EBEE82EFF (arm64) /tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/matched/voteboat-matched-framework\nUUID: FE00534B-0778-3E32-9E25-2D5EBEE82EFF (arm64) /tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/symbols/voteboat-matched-framework.dSYM/Contents/Resources/DWARF/voteboat_matched_framework-762e879293a64d7e\n",
+      "executable_sha256_receipt": "7d3b453018485094ce8eaa74cb5c49fda9abf20491bb3139dbf093c17ac85b6c  /tmp/voteboat-mac432-dcc14ef-6RvUdR/artifacts/matched/voteboat-matched-framework\n"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+__RINvXNvMNtCs6KVRSXc8uZF_5alloc5sliceSp9to_vec_inNtNtCs2hJVJBdSiJa_8voteboat3log8LogEntryNtB3_10ConvertVec6to_vecNtNtB8_5alloc6GlobalEBO_:
+000000010007fda8	sub	sp, sp, #0xa0
+000000010007fdac	stp	x24, x23, [sp, #0x60]
+000000010007fdb0	stp	x22, x21, [sp, #0x70]
+000000010007fdb4	stp	x20, x19, [sp, #0x80]
+000000010007fdb8	stp	x29, x30, [sp, #0x90]
+000000010007fdbc	add	x29, sp, #0x90
+000000010007fdc0	mov	x19, x2
+000000010007fdc4	mov	x20, x0
+000000010007fdc8	cbz	x2, 0x10007fe24
+000000010007fdcc	mov	x22, x1
+000000010007fdd0	lsl	x21, x19, #6
+000000010007fdd4	mov	x0, x21
+000000010007fdd8	bl	0x10024a084 ; symbol stub for: _malloc
+000000010007fddc	cbz	x0, 0x10007fe50
+000000010007fde0	mov	x23, x0
+000000010007fde4	mov	x24, #0x0
+000000010007fde8	stp	x19, x0, [sp, #0x8]
+000000010007fdec	cbz	x21, 0x10007fe2c
+000000010007fdf0	add	x0, sp, #0x20
+000000010007fdf4	mov	x1, x22
+000000010007fdf8	bl	__RNvXs8_NtCs2hJVJBdSiJa_8voteboat3logNtB5_8LogEntryNtNtCslWxY2MhVcag_4core5clone5Clone5clone
+000000010007fdfc	add	x24, x24, #0x1
+000000010007fe00	add	x22, x22, #0x40
+000000010007fe04	ldp	q0, q1, [sp, #0x20]
+000000010007fe08	stp	q0, q1, [x23]
+000000010007fe0c	ldp	q0, q1, [sp, #0x40]
+000000010007fe10	stp	q0, q1, [x23, #0x20]
+000000010007fe14	add	x23, x23, #0x40
+000000010007fe18	subs	x21, x21, #0x40
+000000010007fe1c	b.ne	0x10007fdec
+000000010007fe20	b	0x10007fe2c
+000000010007fe24	mov	w8, #0x10
+000000010007fe28	stp	xzr, x8, [sp, #0x8]
+000000010007fe2c	ldur	q0, [sp, #0x8]
+000000010007fe30	str	q0, [x20]
+000000010007fe34	str	x19, [x20, #0x10]
+000000010007fe38	ldp	x29, x30, [sp, #0x90]
+000000010007fe3c	ldp	x20, x19, [sp, #0x80]
+000000010007fe40	ldp	x22, x21, [sp, #0x70]
+000000010007fe44	ldp	x24, x23, [sp, #0x60]
+000000010007fe48	add	sp, sp, #0xa0
+000000010007fe4c	ret
+000000010007fe50	mov	w0, #0x10
+000000010007fe54	mov	x1, x21
+000000010007fe58	bl	__RNvNtCs6KVRSXc8uZF_5alloc7raw_vec12handle_error
+000000010007fe5c	cmp	x24, x19
+000000010007fe60	b.hi	0x10007fe7c
+000000010007fe64	mov	x20, x0
+000000010007fe68	str	x24, [sp, #0x18]
+000000010007fe6c	add	x0, sp, #0x8
+000000010007fe70	bl	__RINvNtCslWxY2MhVcag_4core3ptr9drop_glueINtNtCs6KVRSXc8uZF_5alloc3vec3VecNtNtCs2hJVJBdSiJa_8voteboat3log8LogEntryEEB1c_
+000000010007fe74	mov	x0, x20
+000000010007fe78	bl	0x100249f1c ; symbol stub for: __Unwind_Resume
+000000010007fe7c	adrp	x0, 541 ; 0x10029c000
+000000010007fe80	add	x0, x0, #0x76c
+000000010007fe84	adrp	x3, 653 ; 0x10030c000
+000000010007fe88	add	x3, x3, #0xc80
+000000010007fe8c	mov	w1, #0x18d
+000000010007fe90	mov	w2, #0x0
+000000010007fe94	bl	__RNvNtCslWxY2MhVcag_4core9panicking18panic_nounwind_fmt
+000000010007fe98	bl	__RNvNtCslWxY2MhVcag_4core9panicking16panic_in_cleanup

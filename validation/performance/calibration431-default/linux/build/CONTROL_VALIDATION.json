@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "operations": 16384,
+  "samples": 4096,
+  "warmup": 1024,
+  "default_controls": true,
+  "artifacts_after_control_unchanged": true
+}

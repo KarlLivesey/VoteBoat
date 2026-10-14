@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.05s
+     Running tests/effect_owner.rs (/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-checks/debug/deps/effect_owner-7188fdee191be7ca)
+
+running 1 test
+test snapshot_routes::accepted_snapshot_failure_keeps_other_leases_until_explicit_failed_discard ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 202 filtered out; finished in 0.00s
+

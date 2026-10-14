@@ -1,0 +1,9 @@
+   Compiling voteboat v0.1.0 (/private/tmp/voteboat-mac432-dcc14ef-6RvUdR/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.81s
+     Running tests/effect_owner.rs (/tmp/voteboat-mac432-dcc14ef-6RvUdR/target-checks/debug/deps/effect_owner-afc7d1c4ba5370ec)
+
+running 1 test
+test held_effect_stops_its_group_while_other_group_commits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 194 filtered out; finished in 0.01s
+

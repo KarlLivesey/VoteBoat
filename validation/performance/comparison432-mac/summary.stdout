@@ -1,0 +1,5 @@
+{
+  "scope": "intentional bulk-only platform diagnostic after Linux432 rejection; all twelve expected cases required; not sustained/minimum qualification",
+  "cases": 12,
+  "failures": []
+}

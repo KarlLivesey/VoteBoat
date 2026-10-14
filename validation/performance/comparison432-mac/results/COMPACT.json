@@ -1,0 +1,138 @@
+{
+  "scope": "Intentional bulk-only12 platform diagnostics after Linux rejection; no singleton campaign or qualification weakening; candidate432 globally rejected. Short volatile inprocess not sustained acceptance.",
+  "cases": 12,
+  "failures": [],
+  "variants": {
+    "baseline": {
+      "rates": [
+        5264049.163147632,
+        4075796.800654835,
+        4092373.2141681076
+      ],
+      "p50_ms": [
+        3.212333,
+        4.106458,
+        4.071708
+      ],
+      "p99_ms": [
+        3.678375,
+        4.657334,
+        4.731125
+      ],
+      "median_rates": 4092373.2141681076,
+      "median_p50_ms": 4.071708,
+      "median_p99_ms": 4.657334
+    },
+    "candidate": {
+      "rates": [
+        5448934.877995706,
+        4225648.440312361,
+        4202696.7854806045
+      ],
+      "p50_ms": [
+        3.112083,
+        3.954709,
+        3.972208
+      ],
+      "p99_ms": [
+        3.49075,
+        4.51375,
+        4.635667
+      ],
+      "median_rates": 4225648.440312361,
+      "median_p50_ms": 3.954709,
+      "median_p99_ms": 4.51375
+    },
+    "on": {
+      "rates": [
+        5119453.183406314,
+        4261300.888467028,
+        4368508.462295778
+      ],
+      "p50_ms": [
+        3.304209,
+        4.01525,
+        3.913917
+      ],
+      "p99_ms": [
+        3.931542,
+        4.61325,
+        5.059333
+      ],
+      "median_rates": 4368508.462295778,
+      "median_p50_ms": 3.913917,
+      "median_p99_ms": 4.61325
+    },
+    "openraft": {
+      "rates": [
+        2269247.5791404466,
+        2101451.7425843705,
+        2074172.0733686942
+      ],
+      "p50_ms": [
+        7.218208,
+        7.664708,
+        7.789625
+      ],
+      "p99_ms": [
+        9.447666,
+        9.695,
+        9.901959
+      ],
+      "median_rates": 2101451.7425843705,
+      "median_p50_ms": 7.664708,
+      "median_p99_ms": 9.695
+    }
+  },
+  "paired_comparisons": [
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 1,
+      "throughput_ratio": 1.0351223381693346,
+      "p50_ratio": 0.9687921519966952,
+      "p99_ratio": 0.9489924219254425
+    },
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 2,
+      "throughput_ratio": 1.0367662194625233,
+      "p50_ratio": 0.9630462554347323,
+      "p99_ratio": 0.9691703450944253
+    },
+    {
+      "variant": "candidate",
+      "baseline": "baseline",
+      "trial": 3,
+      "throughput_ratio": 1.0269583357965857,
+      "p50_ratio": 0.9755630806531314,
+      "p99_ratio": 0.9798234035245317
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 1,
+      "throughput_ratio": 0.9395328257784967,
+      "p50_ratio": 1.0617354999850583,
+      "p99_ratio": 1.1262742963546517
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 2,
+      "throughput_ratio": 1.0084371543582624,
+      "p50_ratio": 1.0153085852840247,
+      "p99_ratio": 1.0220437551924675
+    },
+    {
+      "variant": "on",
+      "baseline": "candidate",
+      "trial": 3,
+      "throughput_ratio": 1.039453637813705,
+      "p50_ratio": 0.985325290115724,
+      "p99_ratio": 1.0913926733736483
+    }
+  ],
+  "all_case_exits_zero_and_stderr_empty": true
+}

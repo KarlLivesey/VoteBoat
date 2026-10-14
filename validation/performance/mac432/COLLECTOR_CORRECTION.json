@@ -1,0 +1,11 @@
+{
+  "original_remote_pid": 94378,
+  "original_runner_exit": 1,
+  "original_collector_exit": 1,
+  "initial_failure_log": "logs/artifact_guards.log",
+  "initial_source": "collect.initial.py",
+  "focused_retry_exit": 0,
+  "focused_retry_log": "logs/artifact_guards_retry.log",
+  "source_hash_mode_retry": "logs/source-retry.log",
+  "scope": "Final collector metadata tuple-key introduced by script adaptation corrected; existing symbol bundle inventory/hashes validated for idempotent collector. No source change or repeat of already passed tests/checks/build/CLI."
+}

@@ -156,7 +156,23 @@ input matches431, and only src/log.rs differs from432. No broad unchanged suite
 rerun is needed. [Fresh Linux432 artifacts](../validation/performance/matched432-linux/README.md)
 and [all24 paired raw cases](../validation/performance/comparison432/linux/README.md)
 preserve the rejected candidate and every rate/tail regression. The actual enabled
-full push hook remains the publication gate.
+full push hook passed on original92151 exit0: formatting/four strict/standalone
+zero, published02889a2 and GitHub main verified. [Publication receipt](../validation/performance/slice433-publication/README.md).
+
+Mac432's reduced12-case bulk diagnostic ends0 with all exact originals/guards:
+431OFF/432OFF/ON/OpenRaft medians4,092,373/4,225,648/4,368,508/2,101,452
+completed originals/s, p99 4.657334/4.513750/4.613250/9.695ms. Every OFF pair
+improves (ratios1.035122/1.036766/1.026958) and p99 improves. Observer trial1
+rate and all three ON p99 regressions remain. This does not overturn the global
+hint's Linux rejection; no further hint tuning, singleton campaign or sustained
+acceptance claim. The retained431 production profiles guide the next work reduction.
+[Mac432 qualification](../validation/performance/mac432/README.md) records all/core
+392/19/37/79/27 and312/0/22/29/12, selected8 owner controls/services2/matched43,
+fmt/four strict and fresh4 compiler records/dSYM. Original94378 ends1 only at
+the final collector tuple-key adaptation error; collector-only43128 ends0 without
+repeating checks/build/CLI stages. Original failure and focused correction stay
+separate. [Bulk12 raw records/codegen](../validation/performance/comparison432-mac/README.md)
+retain every regression and the corrected stale-baseline preparation refusal.
 
 ### Slice432 schema — inline exact clone construction
 
@@ -209,7 +225,11 @@ overflow false with actual fresh:false engine/library/driver, unchanged source a
 full guards. These separately timed profiles do not establish a paired flags cause
 or match qualified asserted framework acceptance. All strict configurations stay
 zero, required framework flags stay true; published floors and full P9 unchanged.
-Linux default-release setup is ready, timing still pending after432 local work.
+Linux default-release original58917 ends0 with all six20M cases and source1357/
+mode/artifact/compiler guards. OFF5,269,990/6,135,026/5,598,492 originals/s,
+median5,598,492; ON5,484,193/5,305,599/5,357,265, median5,357,265 and p994.558ms.
+Trial1 ON is faster, so median latency overhead is not a uniform causal effect.
+These separate unchanged-driver defaults do not replace matched acceptance.
 
 ### Slice431 schema — reuse owned ordinary append input
 

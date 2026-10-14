@@ -1,0 +1,67 @@
+{
+  "scope": "separate published-default upstream calibration, not matched P9 acceptance",
+  "both_hosts_ready": true,
+  "source_count_per_host": 1357,
+  "independent_lock_packages": 196,
+  "original_build_sessions": {
+    "linux": 3888,
+    "mac": 88878
+  },
+  "build_exits": {
+    "linux": 0,
+    "mac": 0
+  },
+  "fresh_false_per_host": [
+    "openraft",
+    "bench_minimal",
+    "bench"
+  ],
+  "profile": {
+    "opt_level": 3,
+    "debug": 2,
+    "split_debuginfo": "packed",
+    "lto": "thin",
+    "codegen_units": 1,
+    "debug_assertions": false,
+    "overflow_checks": false
+  },
+  "control_per_host": {
+    "completed_originals": 16384,
+    "samples": 4096,
+    "warmup": 1024,
+    "exit": 0
+  },
+  "hosts": {
+    "linux": {
+      "executable": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/calibration431-default/linux/artifacts/bench",
+      "sha256": "85b2d33972bba834cf4a64c0e957a7a48ec46b83d7e8f1f17e638e9e54984d9e",
+      "guard_passed": true,
+      "build_original_copy_modes_hashes": true,
+      "preserved_old_asserted_executable_hashes": true,
+      "exact_cases": 6,
+      "order": "OFF/ON ON/OFF OFF/ON",
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup": 1024,
+      "on_latency_samples": 4997120,
+      "compiler": "rustc 1.98.1 (48a229cea 2026-09-01)\nbinary: rustc\ncommit-hash: 48a229ceaefd4985c50990b14116b6d856af0985\ncommit-date: 2026-09-01\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.1\nLLVM version: 22.1.8"
+    },
+    "mac": {
+      "executable": "/private/tmp/voteboat-upstream-default431-XxW0Du/mac/artifacts/bench",
+      "sha256": "7cf31d415412b1bae19130a6126448afc93c89cddca7a76f50003088fa7a7a5f",
+      "guard_passed": true,
+      "build_original_copy_modes_hashes": true,
+      "preserved_old_asserted_executable_hashes": true,
+      "exact_cases": 6,
+      "order": "OFF/ON ON/OFF OFF/ON",
+      "requested_originals": 20000000,
+      "completed_originals": 19988480,
+      "warmup": 1024,
+      "on_latency_samples": 4997120,
+      "compiler": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: aarch64-apple-darwin\nrelease: 1.98.0\nLLVM version: 22.1.8"
+    }
+  },
+  "20Mtiming_started": false,
+  "requires": "root per-host READYreview then QUIET_START",
+  "remote_job": "/tmp/voteboat-upstream-default431-XxW0Du"
+}
