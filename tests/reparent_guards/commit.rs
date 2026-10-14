@@ -959,7 +959,7 @@ fn check_recovered_publication(
     else {
         unreachable!()
     };
-    let receipt = commit(&mut app, if g == 1 { 400 } else { 401 }, bytes.clone());
+    let receipt = commit(&mut app, if g == 1 { 400 } else { 401 }, bytes.to_vec());
     assert_eq!(receipt.duplicate, published);
 }
 

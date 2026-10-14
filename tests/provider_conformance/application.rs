@@ -45,7 +45,7 @@ impl Scenario for CounterCase {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(operation).unwrap(),
-                bytes: value.to_le_bytes().to_vec(),
+                bytes: value.to_le_bytes().to_vec().into(),
             },
         }
     }

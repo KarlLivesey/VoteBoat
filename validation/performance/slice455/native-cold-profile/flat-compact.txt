@@ -1,0 +1,11 @@
+24.18% [.] <i32 as core::iter::range::Step>::forward_unchecked - -
+21.12% [.] <core::ops::range::Range<i32> as core::iter::range::RangeIteratorImpl>::spec_next - -
+14.72% [.] voteboat::format_crc::crc32c_extend - -
+7.78% [.] <core::ops::range::Range<i32> as core::iter::traits::iterator::Iterator>::next - -
+2.49% [.] <core::slice::iter::Iter<u8> as core::iter::traits::iterator::Iterator>::next - -
+1.98% [.] <core::ops::range::Range<i32> as core::iter::traits::collect::IntoIterator>::into_iter - -
+1.27% [.] 0x00000000001b7ad3 - -
+0.97% [.] <voteboat::logical_voter::codec::atoms::Decoder>::take - -
+0.73% [.] 0x00000000001b7b5b - -
+0.66% [.] <u128 as core::cmp::PartialEq>::eq - -
+0.51% [.] <[u8; 4] as core::convert::TryFrom<&[u8]>>::try_from - -

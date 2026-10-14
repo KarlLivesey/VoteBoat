@@ -45,7 +45,7 @@ fn image(g: u128) -> Snapshot {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: 7i64.to_le_bytes().to_vec().into(),
         },
     }])
     .unwrap();
@@ -235,7 +235,7 @@ fn checkpoint_source() -> (Raft, HostLogStore, Counter) {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(1).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: 7i64.to_le_bytes().to_vec().into(),
         },
     };
     let mutation = update(
@@ -710,7 +710,7 @@ mod native {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                bytes: 7i64.to_le_bytes().to_vec().into(),
             },
         };
         let state = log.state(group(1)).unwrap();
@@ -1108,7 +1108,7 @@ mod native {
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(i as u128 + 1).unwrap(),
-                    bytes: delta.to_le_bytes().to_vec(),
+                    bytes: delta.to_le_bytes().to_vec().into(),
                 },
             })
             .collect::<Vec<_>>()
@@ -1334,7 +1334,7 @@ mod native {
                         term: 2,
                         payload: EntryPayload::Command {
                             operation: OperationId::new(1).unwrap(),
-                            bytes: 7i64.to_le_bytes().to_vec(),
+                            bytes: 7i64.to_le_bytes().to_vec().into(),
                         },
                     }])
                     .unwrap();

@@ -1,0 +1,6 @@
+{
+  "inputs": 1444,
+  "exact_hashes_and_modes": true,
+  "terminal": 101,
+  "reason": "strict-default retained_insertion fixture type error; separate nested cold failure remains"
+}

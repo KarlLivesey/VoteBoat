@@ -8,7 +8,7 @@ fn owned_input_moves_new_payload_after_whole_batch_admission() {
     let LogMutation::Update(mut change) = update(owned.get(group).unwrap()) else {
         unreachable!()
     };
-    let bytes = vec![7; 8];
+    let bytes: CommandBytes = vec![7; 8].into();
     let pointer = bytes.as_ptr();
     change.suffix = Some(Suffix {
         from: 1,
@@ -47,7 +47,7 @@ fn invalid_later_owned_unit_never_installs_an_earlier_moved_append() {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(1).unwrap(),
-                bytes: vec![7; 8],
+                bytes: vec![7; 8].into(),
             },
         }],
     });

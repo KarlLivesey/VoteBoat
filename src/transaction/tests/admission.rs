@@ -89,7 +89,7 @@ fn missing_account_and_incorrect_outer_operation_refuse_before_binding() {
         term: 1,
         payload: EntryPayload::Command {
             operation: s.phases().coordinator()[1],
-            bytes: TransferApplication::start(s).unwrap(),
+            bytes: TransferApplication::start(s).unwrap().into(),
         },
     };
     assert_eq!(

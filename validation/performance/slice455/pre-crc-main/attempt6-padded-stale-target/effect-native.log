@@ -1,0 +1,13 @@
+
+running 8 tests
+test native::automatic_elections_and_partition_replacement_preserve_hundred_group_history ... ok
+test native::automatic_hundred_group_checkpoints_reclaim_and_reopen ... ok
+test native::driven_discovery::owning_node_drives_discovery_renews_reconnects_and_reopens_original_data ... ok
+test native::driven_discovery::owning_node_repairs_closed_discovery_source_without_stopping_healthy_quorum ... ok
+test native::hundred_compacted_groups_catch_up_over_workers_and_authenticated_transport ... ok
+test native::hundred_groups_run_through_reserved_owner_native_wal_and_secure_transport ... ok
+test native::native_shared_peer_quota_pressure_reconnect_restart_and_retry ... ok
+test native::owning_native_facade_checkpoints_restarts_and_retries_hundred_groups ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 195 filtered out; finished in 35.69s
+

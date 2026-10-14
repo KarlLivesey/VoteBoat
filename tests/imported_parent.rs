@@ -643,8 +643,8 @@ fn repeated_parent_chain_and_retirement_bind_the_final_grant() {
     let cp = t.checkpoint(1000000).unwrap();
     let record = cp.len() - bytes.len() - 60;
     for (operation, index, command) in [
-        (op(200), 5, bytes.clone()),
         (op(801), 3, bytes.clone()),
+        (op(801), 3, bytes.to_vec()),
         (op(801), 5, first.clone()),
     ] {
         let mut body = Vec::new();
@@ -724,13 +724,16 @@ fn check_moved_targets(
         let EntryPayload::Command { bytes: boot, .. } = &original_entries[0].payload else {
             unreachable!()
         };
-        assert_eq!(&t.bootstrap_command(200000).unwrap(), boot);
+        assert_eq!(
+            t.bootstrap_command(200000).unwrap().as_slice(),
+            boot.as_slice()
+        );
         for e in &original_entries {
             let EntryPayload::Command { bytes, .. } = &e.payload else {
                 unreachable!()
             };
             assert!(matches!(
-                tracked(t, &mut logs[j], 200, bytes.clone()).outcome,
+                tracked(t, &mut logs[j], 200, bytes.to_vec()).outcome,
                 TargetOutcome::Staged { .. }
                     | TargetOutcome::Imported { .. }
                     | TargetOutcome::Activated(_)

@@ -53,7 +53,7 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
             term: 7,
             payload: EntryPayload::Command {
                 operation: OperationId::new(index as u128).unwrap(),
-                bytes: 1i64.to_le_bytes().to_vec(),
+                bytes: 1i64.to_le_bytes().to_vec().into(),
             },
         })
         .collect::<Vec<_>>();
@@ -158,7 +158,7 @@ fn messages(required: &ConfigurationWireRequirements<'_>) -> [Message; 3] {
     if let Rpc::Append { entries, .. } = &mut command.rpc {
         entries[0].payload = EntryPayload::Command {
             operation: required.record.operation,
-            bytes: vec![0; required.application.command_bytes],
+            bytes: vec![0; required.application.command_bytes].into(),
         };
     }
     let mut snapshot = append.clone();

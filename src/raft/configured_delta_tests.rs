@@ -50,7 +50,7 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
                         term: 1,
                         payload: EntryPayload::Command {
                             operation: operation(555),
-                            bytes: vec![7],
+                            bytes: vec![7].into(),
                         },
                     }],
                 }),

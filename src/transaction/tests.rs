@@ -72,7 +72,7 @@ fn apply(app: &mut TransferApplication, command: Command) -> TransferReceipt {
         term: 1,
         payload: EntryPayload::Command {
             operation,
-            bytes: codec::encode(command).unwrap(),
+            bytes: codec::encode(command).unwrap().into(),
         },
     };
     app.apply_batch(&[entry]).unwrap().remove(0)

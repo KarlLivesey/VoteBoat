@@ -103,7 +103,7 @@ pub(super) fn entry(index: u64, term: u64) -> LogEntry {
         term,
         payload: EntryPayload::Command {
             operation: OperationId::new(u128::from(index)).unwrap(),
-            bytes: vec![term as u8; 32],
+            bytes: vec![term as u8; 32].into(),
         },
     }
 }

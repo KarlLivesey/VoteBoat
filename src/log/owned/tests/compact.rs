@@ -17,7 +17,7 @@ fn compaction_batch_is_atomic_and_retains_surviving_payload_allocation() {
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(u128::from(index)).unwrap(),
-                    bytes: vec![7; 8],
+                    bytes: vec![7; 8].into(),
                 },
             })
             .collect(),

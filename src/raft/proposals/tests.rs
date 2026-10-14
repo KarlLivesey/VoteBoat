@@ -212,7 +212,7 @@ fn four_original_commands_share_one_uncommitted_transition() {
             entry.payload,
             EntryPayload::Command {
                 operation: original.operation,
-                bytes: original.bytes
+                bytes: original.bytes.into()
             }
         );
     }
@@ -358,6 +358,7 @@ fn legacy_singletons_keep_custom_small_limits_and_spare_payload_capacity() {
             vec![7; 256]
         };
         let original_capacity = bytes.capacity();
+        let original_len = bytes.len();
         let result = single
             .step(Event::Propose {
                 operation: OperationId::new(7).unwrap(),
@@ -372,7 +373,13 @@ fn legacy_singletons_keep_custom_small_limits_and_spare_payload_capacity() {
         else {
             panic!("expected original command");
         };
-        assert_eq!(bytes.capacity(), original_capacity);
+        assert_eq!(bytes.len(), original_len);
+        assert_eq!(
+            bytes.retained_bytes(),
+            (original_len + 2 * std::mem::size_of::<std::sync::atomic::AtomicUsize>())
+                .next_multiple_of(std::mem::align_of::<std::sync::atomic::AtomicUsize>().max(2))
+        );
+        assert!(original_capacity >= bytes.len());
     }
     let mut batched = leader();
     batched.limits.max_batch_bytes = 256;
@@ -461,4 +468,29 @@ fn each_existing_checkpoint_install_and_readiness_dependency_stays_closed() {
         assert_eq!(core.propose_batch(vec![proposal(1)]), Err(RaftError::Busy));
         assert!(core.pending.is_none());
     }
+}
+
+#[test]
+fn shared_conversion_peak_refuses_after_raw_checks_without_pending_or_log_changes() {
+    let mut core = leader();
+    let mut proposed = proposal(100);
+    proposed.bytes = vec![7; 130];
+    let input = vec![proposed];
+    let raw = size_of::<Vec<Proposal>>()
+        + input.capacity() * size_of::<Proposal>()
+        + input.len() * size_of::<LogEntry>()
+        + input.iter().map(|p| p.bytes.capacity()).sum::<usize>();
+    core.limits.max_batch_bytes = raw.max(256);
+    core.limits.max_command_bytes = 130;
+    core.limits.validate().unwrap();
+    assert!(core
+        .validate_proposal_batch(&input, input.capacity())
+        .is_ok());
+    let before = core.state().clone();
+    assert_eq!(
+        core.propose_batch(input),
+        Err(StorageError::Rejected("proposal shared conversion peak budget").into())
+    );
+    assert!(core.pending.is_none());
+    assert_eq!(core.state(), &before);
 }

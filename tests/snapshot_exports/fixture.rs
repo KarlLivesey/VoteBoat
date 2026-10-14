@@ -30,7 +30,7 @@ pub(super) fn committed(id: u128) -> (HostLogStore, Raft, Counter) {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(9).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: 7i64.to_le_bytes().to_vec().into(),
         },
     };
     let mutation = update(
@@ -76,7 +76,7 @@ impl Fixture {
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(19).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    bytes: 7i64.to_le_bytes().to_vec().into(),
                 },
             };
             let mutation = update(
@@ -173,7 +173,7 @@ fn append_suffix(
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(10).unwrap(),
-            bytes: 1_i64.to_le_bytes().to_vec(),
+            bytes: 1_i64.to_le_bytes().to_vec().into(),
         },
     };
     let mutation = update(

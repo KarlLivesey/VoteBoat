@@ -1,0 +1,47 @@
+{
+  "scope": "Raw captures and full reports remain losslessly in ignored target, referenced by exact hash/size; no binary/build/WAL transfer",
+  "files": [
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/perf.data",
+      "bytes": 491108420,
+      "sha256": "914fde892f81def061e5c1af829a53a7cc58a1f92d04419b6e3d7aac4902129c",
+      "archived_payload": false
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/perf.data.old",
+      "bytes": 65700,
+      "sha256": "1991d9ee2e844566d9c13976cdd88eb95df044c5ce4b5542dadb5a0f5e6de982",
+      "archived_payload": false
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/probe.data",
+      "bytes": 68500,
+      "sha256": "782ef24dc280b6841303a0ec43cc182d93490dccfb03cd36b4b42a9114a88b05",
+      "archived_payload": false
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/flat.txt",
+      "bytes": 229211,
+      "sha256": "89ecd5b4e4b6734a988752783a5b4d1189e4fb8f5ce73f302e42211e6c270826",
+      "archived_payload": false
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/inclusive.txt",
+      "bytes": 172335,
+      "sha256": "ddbaf15e6ab6c9194927a51bacf3d5aec7f0656b9981a9791e1c53decdc6b58d",
+      "archived_payload": false
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/attempt1-missing-time/perf.data",
+      "bytes": 65700,
+      "sha256": "1991d9ee2e844566d9c13976cdd88eb95df044c5ce4b5542dadb5a0f5e6de982",
+      "archived_payload": false
+    },
+    {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/attempt1-missing-time/probe.data",
+      "bytes": 68500,
+      "sha256": "782ef24dc280b6841303a0ec43cc182d93490dccfb03cd36b4b42a9114a88b05",
+      "archived_payload": false
+    }
+  ]
+}

@@ -124,7 +124,7 @@ fn persist(cluster: &mut Cluster, bytes: &[u8]) -> LogEntry {
         cluster.poll_with_budget(partition_budget());
         let node = &cluster.nodes[0];
         let core = node.local().owner.core(setup::bottom(3).group).unwrap();
-        let entry=core.state().entries.iter().find(|e|matches!(&e.payload,EntryPayload::Command{operation,bytes:b} if operation.get()==356200 && b==bytes));
+        let entry=core.state().entries.iter().find(|e|matches!(&e.payload,EntryPayload::Command{operation,bytes:b} if operation.get()==356200 && b.as_slice()==bytes));
         if let Some(entry) = entry
             .filter(|_| !core.has_pending_dependency() && node.local().persistence.is_drained())
         {

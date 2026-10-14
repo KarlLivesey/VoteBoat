@@ -122,12 +122,14 @@ fn compaction_preserves_surviving_payloads_origin_and_exact_charge() {
     }
 }
 #[test]
-fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
+fn immutable_command_shape_compacts_and_overflow_charge_recomputes_remaining_slice() {
     let mut state = committed();
     let EntryPayload::Command { bytes, .. } = &mut state.entries[1].payload else {
         unreachable!()
     };
-    bytes.reserve(10000);
+    let mut raw = bytes.to_vec();
+    raw.reserve(10000);
+    *bytes = raw.into();
     let change = compact(&state, 1);
     let plan = NextLog::plan(
         &LogView::new(&state),
@@ -136,7 +138,7 @@ fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
         LogLimits::default(),
     )
     .unwrap();
-    assert!(plan.full().is_some());
+    assert!(plan.full().is_none());
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let summary = plan.install(&mut state, change).unwrap();
     assert_eq!(state, expected);

@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.02s
+     Running tests/log_owned.rs (target/debug/deps/log_owned-68da3ce5b08d3625)
+     Running tests/log_reclaim.rs (target/debug/deps/log_reclaim-eb4bc1beb28c3148)
+     Running tests/log_staging.rs (target/debug/deps/log_staging-1cf7b5650274aa47)
+     Running tests/log_store.rs (target/debug/deps/log_store-7ebe8448ce0d9035)
+     Running tests/logical_configuration_history.rs (target/debug/deps/logical_configuration_history-d9515705a4587278)
+     Running tests/logical_formats.rs (target/debug/deps/logical_formats-a596cdbe5973446e)
+     Running tests/logical_nested_native.rs (target/debug/deps/logical_nested_native-595603f697d5c950)
+error: test failed, to rerun pass `--test logical_nested_native`

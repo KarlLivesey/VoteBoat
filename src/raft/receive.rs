@@ -363,10 +363,7 @@ impl Raft {
                     }
                     tight_payloads = false;
                 }
-                EntryPayload::Command { bytes, .. } => {
-                    tight_payloads &= bytes.capacity() == bytes.len();
-                }
-                EntryPayload::Noop => {}
+                EntryPayload::Command { .. } | EntryPayload::Noop => {}
             }
             if previous_index.checked_add(i as u64 + 1) != Some(e.index)
                 || e.term == 0

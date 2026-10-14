@@ -172,7 +172,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                         term,
                         payload: EntryPayload::Command {
                             operation: c.operation,
-                            bytes,
+                            bytes: bytes.into(),
                         },
                     },
                 )

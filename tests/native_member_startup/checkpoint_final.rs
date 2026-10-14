@@ -50,7 +50,7 @@ fn seed_checkpoint(path: &Path, local: u64, joint_checkpoint: bool) {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(901).unwrap(),
-                bytes: 11i64.to_le_bytes().to_vec(),
+                bytes: 11i64.to_le_bytes().to_vec().into(),
             },
         },
     );

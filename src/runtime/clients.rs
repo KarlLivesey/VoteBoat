@@ -638,7 +638,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
                 let same = if let Some(entry) = state.entry_at(position.index) {
                     entry.term == position.term
                         && matches!(&entry.payload, EntryPayload::Command { operation, bytes }
-                        if *operation == p.ticket.operation && bytes == &p.bytes)
+                        if *operation == p.ticket.operation && bytes.as_slice() == p.bytes.as_slice())
                 } else {
                     position.index <= state.base_index()
                 };

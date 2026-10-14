@@ -351,7 +351,7 @@ where
                             if next.ready.is_none() || next.routed().fence().is_none() {
                                 projected.payload = EntryPayload::Command {
                                     operation: *operation,
-                                    bytes: next.inner_bootstrap.clone(),
+                                    bytes: next.inner_bootstrap.as_slice().into(),
                                 };
                             }
                             if next.ready.is_none() {
@@ -436,7 +436,7 @@ where
                         data += 1;
                         p.payload = EntryPayload::Command {
                             operation: *operation,
-                            bytes: payload.to_vec(),
+                            bytes: payload.into(),
                         };
                     }
                 }

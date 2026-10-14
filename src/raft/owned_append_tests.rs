@@ -9,7 +9,7 @@ fn command(index: u64, term: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
         term,
         payload: EntryPayload::Command {
             operation: operation(id),
-            bytes,
+            bytes: bytes.into(),
         },
     }
 }
@@ -71,7 +71,7 @@ fn suffix(effects: &[Effect]) -> &Suffix {
     update(effects).suffix.as_ref().unwrap()
 }
 
-fn bytes(entry: &LogEntry) -> &Vec<u8> {
+fn bytes(entry: &LogEntry) -> &CommandBytes {
     let EntryPayload::Command { bytes, .. } = &entry.payload else {
         panic!("expected command")
     };
@@ -124,7 +124,7 @@ fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
     let raw = original.suffix.as_ref().unwrap();
     let owned = pending.suffix.as_ref().unwrap();
     assert_ne!(raw.entries.as_ptr(), owned.entries.as_ptr());
-    assert_ne!(
+    assert_eq!(
         bytes(&raw.entries[1]).as_ptr(),
         bytes(&owned.entries[1]).as_ptr()
     );
@@ -138,7 +138,9 @@ fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
         if change_id {
             *operation = super::operation(1 << 126);
         } else {
-            bytes[0] ^= 1;
+            let mut replacement = bytes.to_vec();
+            replacement[0] ^= 1;
+            *bytes = replacement.into();
         }
         assert_eq!(
             receiver.validate_persist_effect(&wrong),
@@ -187,7 +189,7 @@ fn tight_owned_append_matches_forced_clone_with_independent_delayed_completion()
 }
 
 #[test]
-fn spare_outer_or_command_allocations_keep_normalized_clone_fallback() {
+fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() {
     for shape in 0..3 {
         let mut receiver = follower(core(), 1);
         let mut entries = plain_entries();
@@ -197,12 +199,16 @@ fn spare_outer_or_command_allocations_keep_normalized_clone_fallback() {
             let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
                 unreachable!()
             };
-            bytes.reserve(64);
+            let mut raw = bytes.to_vec();
+            raw.reserve(64);
+            *bytes = raw.into();
         } else {
             let EntryPayload::Command { bytes, .. } = &mut entries[1].payload else {
                 unreachable!()
             };
-            bytes.reserve(64);
+            let mut raw = bytes.to_vec();
+            raw.reserve(64);
+            *bytes = raw.into();
         }
         let input_pointer = entries.as_ptr();
         let payload_pointer = bytes(&entries[1]).as_ptr();
@@ -212,11 +218,19 @@ fn spare_outer_or_command_allocations_keep_normalized_clone_fallback() {
             .unwrap();
         let retained = &suffix(&effects).entries;
         assert_eq!(retained, &expected);
-        assert_ne!(retained.as_ptr(), input_pointer);
-        assert_ne!(bytes(&retained[1]).as_ptr(), payload_pointer);
+        if shape == 0 {
+            assert_ne!(retained.as_ptr(), input_pointer);
+        } else {
+            assert_eq!(retained.as_ptr(), input_pointer);
+        }
+        assert_eq!(bytes(&retained[1]).as_ptr(), payload_pointer);
         assert_eq!(retained.capacity(), retained.len());
-        assert_eq!(bytes(&retained[0]).capacity(), 0);
-        assert_eq!(bytes(&retained[1]).capacity(), bytes(&retained[1]).len());
+        assert_eq!(bytes(&retained[0]).retained_bytes(), 0);
+        assert_eq!(
+            bytes(&retained[1]).retained_bytes(),
+            (bytes(&retained[1]).len() + 2 * std::mem::size_of::<std::sync::atomic::AtomicUsize>())
+                .next_multiple_of(std::mem::align_of::<std::sync::atomic::AtomicUsize>().max(2))
+        );
         delayed_completion(&mut receiver, &effects);
         assert_eq!(receiver.state().commit_index, 5);
     }
@@ -281,7 +295,7 @@ fn matching_prefix_clones_only_the_unmatched_suffix_and_replay_has_no_persist() 
     assert_eq!(suffix(&effects).from, 2);
     assert_eq!(suffix(&effects).entries, [tail]);
     assert_eq!(suffix(&effects).entries.capacity(), 1);
-    assert_ne!(
+    assert_eq!(
         bytes(&suffix(&effects).entries[0]).as_ptr(),
         payload_pointer
     );

@@ -468,7 +468,7 @@ fn imported_metadata_profiles_refuse_stale_partial_and_cross_profile_state() {
             let EntryPayload::Command { bytes, .. } = &e.payload else {
                 unreachable!()
             };
-            commit(&mut m.child, 200, bytes.clone());
+            commit(&mut m.child, 200, bytes.to_vec());
             assert_eq!(m.child.grant(), &a.after());
         }
     }
@@ -641,13 +641,13 @@ fn imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history()
                 let EntryPayload::Command { operation, bytes } = &entry.payload else {
                     unreachable!()
                 };
-                let outcome = commit(&mut guard, operation.get(), bytes.clone()).outcome;
+                let outcome = commit(&mut guard, operation.get(), bytes.to_vec()).outcome;
                 let cp = guard.checkpoint(1000000).unwrap();
                 let mut next = RetirementGuard::new(selected(&first, partial))
                     .unwrap_or_else(|_| panic!("guard"));
                 next.restore_checkpoint(RETIREMENT_GUARD_SCHEMA, guard.applied_index(), &cp)
                     .unwrap();
-                let retry = commit(&mut next, operation.get(), bytes.clone()).outcome;
+                let retry = commit(&mut next, operation.get(), bytes.to_vec()).outcome;
                 match (outcome, retry) {
                     (RetirementOutcome::Owner(a), RetirementOutcome::Owner(b)) => {
                         assert_eq!(a.outcome, b.outcome)

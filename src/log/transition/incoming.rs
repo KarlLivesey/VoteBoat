@@ -263,12 +263,5 @@ fn normalize_append(update: &mut LogUpdate) {
                 .into_boxed_slice()
                 .into_vec();
         }
-        for entry in &mut suffix.entries {
-            if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
-                if bytes.capacity() != bytes.len() {
-                    *bytes = std::mem::take(bytes).into_boxed_slice().into_vec();
-                }
-            }
-        }
     }
 }

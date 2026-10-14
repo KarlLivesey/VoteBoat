@@ -41,7 +41,7 @@ impl LogCodec for RefusingCodec {
     }
 }
 #[test]
-fn codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_io() {
+fn codec_sees_shared_retained_charge_and_refuses_before_invalid_log_admission_or_any_io() {
     let io = fixture::Memory::default();
     let observed = Rc::new(Cell::new(0));
     let identity = bootstrap(1).voter_stores[&NodeId::new(1).unwrap()];
@@ -62,8 +62,10 @@ fn codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_
     let EntryPayload::Command { bytes, .. } = &mut input.payload else {
         unreachable!()
     };
-    bytes.reserve(10000);
-    let capacity = bytes.capacity();
+    let mut raw = bytes.to_vec();
+    raw.reserve(10000);
+    *bytes = raw.into();
+    let charge = bytes.retained_bytes();
     let LogMutation::Update(mut change) = mutation_raw(
         &before,
         0,
@@ -79,7 +81,7 @@ fn codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_
         store.append_batch(vec![LogMutation::Update(change)]),
         Err(StorageError::Rejected("selected codec refuses original"))
     );
-    assert_eq!(observed.get(), capacity);
+    assert_eq!(observed.get(), charge);
     assert_eq!(store.state(group(1)).unwrap(), before);
     assert_eq!(io.0.borrow().bytes, written);
     assert!(store.pending.is_empty());

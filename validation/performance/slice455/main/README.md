@@ -1,0 +1,9 @@
+# Slice455 CRC and immutable-command qualification
+
+Original runner72030 ended0/DONE; all-feature library414, core library334, CRC controls3 and matched70 passed. Actual format integrations passed parser_campaign19, wire50, log_store8, striped_log_store27, snapshot9 and native_member_startup18. Root formatting/four strict profiles, standalone formatting/strict and provider metadata checker exited0. Initial formatter failure is retained under `attempt1-format`; no check or lint configuration was weakened.
+
+The original exact QUIC two-level cold-recovery control passed1 in141.67s. Separate original runner26233 passed all remaining14 deep histories in139.76s; these actual outcomes supersede the earlier failed debug attempts without deleting them. [Pre-CRC evidence](../pre-crc-main/README.md) retains prior passed subscopes, failures and the stale-normal-rlib source/target reuse mistake with its isolated padded-target correction. The [unchanged454 cold control](../baseline454-cold/README.md) and [pre-change profile](../native-cold-profile/README.md) remain separate.
+
+`FINAL_SOURCE_GUARD.json` confirms1445 frozen selected hashes/modes after both runners. `SOURCE.json`, delta, PATCH and all134 changed/new source snapshots are preserved and independently checked against the frozen hashes. This is selected functional evidence; no fresh asserted release artifact, paired performance, physical-memory bound or completed P9 acceptance is claimed. Full export/build proof and Mac qualification follow separately.
+
+All original commands/logs/statuses/failures are retained. `ORIGINAL_SOURCE.json` records original-to-archive hashes/sizes/modes. No original exceeds1MiB, so the lossless gzip mapping is empty. No binary, build tree, WAL state or full source export is copied. `SHA256SUMS` seals the archived regular files.

@@ -133,7 +133,7 @@ fn command(index: u64, delta: i64) -> LogEntry {
         term: 7,
         payload: EntryPayload::Command {
             operation: OperationId::new(8000 + u128::from(index)).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            bytes: delta.to_le_bytes().to_vec().into(),
         },
     }
 }

@@ -62,7 +62,7 @@ impl LogSummary {
                     .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_))),
             retained,
             clone_stable: state.entries.iter().all(|entry| match &entry.payload {
-                EntryPayload::Command { bytes, .. } => bytes.capacity() == bytes.len(),
+                EntryPayload::Command { .. } => true,
                 EntryPayload::Noop => true,
                 EntryPayload::Configuration(_) => false,
             }),

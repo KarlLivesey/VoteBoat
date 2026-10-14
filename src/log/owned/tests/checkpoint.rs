@@ -153,7 +153,7 @@ fn failed_owner_changes_lineage_and_arbitrary_same_revision_mutations_remain_vis
     let mut arbitrary = core.state().clone();
     arbitrary.entries[0].payload = EntryPayload::Command {
         operation: OperationId::new(u128::MAX).unwrap(),
-        bytes: Vec::new(),
+        bytes: Vec::new().into(),
     };
     assert_eq!(arbitrary.revision, core.state().revision);
     assert_ne!(arbitrary, *owned.get(first).unwrap());

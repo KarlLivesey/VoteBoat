@@ -34,7 +34,7 @@ fn frame(f: &Fixture, peer: u64, class: MessageClass) -> ReceivedBatch {
                         term: 1,
                         payload: EntryPayload::Command {
                             operation: OperationId::new(u128::from(peer * 10 + offset)).unwrap(),
-                            bytes: 1i64.to_le_bytes().to_vec(),
+                            bytes: 1i64.to_le_bytes().to_vec().into(),
                         },
                     }],
                 },

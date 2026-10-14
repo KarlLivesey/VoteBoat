@@ -91,7 +91,7 @@ impl WriteProgress {
             assert_eq!(core.membership().id(), attempt.configurations[slot]);
             let exact = core.state().entry_at(result.position.index).is_some_and(|entry| {
                 entry.term == result.position.term && matches!(&entry.payload,
-                EntryPayload::Command { operation, bytes } if *operation == self.operation && bytes == &self.bytes)
+                EntryPayload::Command { operation, bytes } if *operation == self.operation && bytes.as_slice() == self.bytes.as_slice())
             });
             exact && core.state().commit_index >= result.position.index
                 && local.applications[&result.ticket.group].applied_index() >= result.position.index

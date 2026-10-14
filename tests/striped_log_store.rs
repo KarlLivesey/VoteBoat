@@ -49,7 +49,7 @@ fn add(store: &mut impl LogStore, value: u8, commit: bool) -> Vec<LogTicket> {
     let index = s.last_index() + 1;
     let mut e = entry(index, 1, value);
     if let EntryPayload::Command { bytes, .. } = &mut e.payload {
-        *bytes = vec![value; 1300];
+        *bytes = vec![value; 1300].into();
     }
     store
         .append_batch(vec![update(

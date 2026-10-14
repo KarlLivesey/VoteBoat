@@ -2702,7 +2702,7 @@ mod native {
                                 term: 1,
                                 payload: EntryPayload::Command {
                                     operation: OperationId::new(1).unwrap(),
-                                    bytes: 7i64.to_le_bytes().to_vec(),
+                                    bytes: 7i64.to_le_bytes().to_vec().into(),
                                 },
                             }],
                         }),
@@ -3213,7 +3213,7 @@ mod snapshot_routes {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(1).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                bytes: 7i64.to_le_bytes().to_vec().into(),
             },
         }])
         .unwrap();
@@ -3720,7 +3720,7 @@ mod ingress {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(g).unwrap(),
-                        bytes: 1i64.to_le_bytes().to_vec(),
+                        bytes: 1i64.to_le_bytes().to_vec().into(),
                     },
                 }],
             },

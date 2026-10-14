@@ -17,7 +17,7 @@ fn mutation(store: &impl LogStore) -> Vec<LogMutation> {
     let s = store.state(group(1)).unwrap();
     let mut e = entry(1, 1, 17);
     if let EntryPayload::Command { bytes, .. } = &mut e.payload {
-        *bytes = vec![17; 1300];
+        *bytes = vec![17; 1300].into();
     }
     vec![update(
         &s,

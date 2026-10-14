@@ -1168,7 +1168,7 @@ mod configuration_snapshots {
             term,
             payload: EntryPayload::Command {
                 operation: OperationId::new(1000).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                bytes: 7i64.to_le_bytes().to_vec().into(),
             },
         }
     }

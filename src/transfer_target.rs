@@ -992,7 +992,7 @@ where
                     term: entry.term,
                     payload: EntryPayload::Command {
                         operation: *operation,
-                        bytes: payload.to_vec(),
+                        bytes: payload.into(),
                     },
                 };
                 let mut result = self.inner.apply_batch(&[projected])?.into_iter();
@@ -1308,7 +1308,7 @@ where
                             term: entry.term,
                             payload: EntryPayload::Command {
                                 operation: *operation,
-                                bytes: payload.to_vec(),
+                                bytes: payload.into(),
                             },
                         };
                         nested = next
@@ -1359,7 +1359,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 },
             }])?;
         }
@@ -1401,7 +1401,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 },
             }])?
             .remove(0);

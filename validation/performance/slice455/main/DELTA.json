@@ -1,0 +1,12 @@
+{
+  "previous_scope_inputs": 1444,
+  "current_inputs": 1445,
+  "changed": [
+    "src/format_crc.rs"
+  ],
+  "new": [
+    "src/format_crc/tests.rs"
+  ],
+  "unchanged": 1443,
+  "reuse_limitation": "Exact inputs unchanged outside CRC source and new CRC oracle module; prior passed scopes remain recorded, affected CRC callers are checked again. Prior failures remain unresolved, not reused as passes."
+}

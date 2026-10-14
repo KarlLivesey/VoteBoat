@@ -52,7 +52,7 @@ impl Record {
 fn strip(entries: &mut [LogEntry]) {
     for entry in entries {
         if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
-            bytes.clear();
+            *bytes = Default::default();
         }
     }
 }

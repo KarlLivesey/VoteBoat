@@ -534,7 +534,7 @@ impl<'a> Encoder<'a> {
                 if bytes.len() > self.limits.max_command_bytes {
                     return Err(WireError::TooLarge);
                 }
-                self.budget.charge(bytes.len())?;
+                self.budget.charge(bytes.retained_bytes())?;
                 self.u8(1)?;
                 self.u128(operation.get())?;
                 self.u32(bytes.len() as u32)?;
@@ -1071,10 +1071,12 @@ impl<'a> Decoder<'a> {
                     return Err(WireError::TooLarge);
                 }
                 let bytes = self.take(len)?;
-                budget.charge(len)?;
+                let charge =
+                    CommandBytes::retained_bytes_for_len(len).ok_or(WireError::TooLarge)?;
+                budget.charge(charge)?;
                 EntryPayload::Command {
                     operation,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 }
             }
             2 if version >= 2 => {

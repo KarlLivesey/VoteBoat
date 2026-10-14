@@ -40,7 +40,7 @@ pub(super) fn entry(index: usize, operation: u128) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(operation).unwrap(),
-            bytes: operation.to_le_bytes()[..8].to_vec(),
+            bytes: operation.to_le_bytes()[..8].to_vec().into(),
         },
     }
 }

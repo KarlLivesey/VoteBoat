@@ -1,0 +1,96 @@
+{
+  "source": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/baseline454-cold",
+  "scope": "Existing completed source evidence, not a current/live source inventory",
+  "files": [
+    {
+      "source": "PID",
+      "source_sha256": "cc0ca2e230ae6876d3d44f300eb3f882b58da7aa158a0a3f7d28d5a0530ad66a",
+      "source_bytes": 8,
+      "source_mode": "0o644",
+      "archive": "PID",
+      "archive_sha256": "cc0ca2e230ae6876d3d44f300eb3f882b58da7aa158a0a3f7d28d5a0530ad66a",
+      "archive_bytes": 8,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "SOURCE_AFTER.json",
+      "source_sha256": "d558817980721f490663467ae65bc5fb4c21b4187d8411dc243509dd4cb6f4dc",
+      "source_bytes": 309,
+      "source_mode": "0o644",
+      "archive": "SOURCE_AFTER.json",
+      "archive_sha256": "d558817980721f490663467ae65bc5fb4c21b4187d8411dc243509dd4cb6f4dc",
+      "archive_bytes": 309,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "SOURCE_BEFORE.json",
+      "source_sha256": "f1bb7bdb2300d468b83cc106991537096963f568c5a9bc572513918d55f71ddd",
+      "source_bytes": 424,
+      "source_mode": "0o644",
+      "archive": "SOURCE_BEFORE.json",
+      "archive_sha256": "f1bb7bdb2300d468b83cc106991537096963f568c5a9bc572513918d55f71ddd",
+      "archive_bytes": 424,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "STATUS",
+      "source_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "source_bytes": 4,
+      "source_mode": "0o644",
+      "archive": "STATUS",
+      "archive_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "archive_bytes": 4,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "cargo-version.txt",
+      "source_sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503",
+      "source_bytes": 36,
+      "source_mode": "0o644",
+      "archive": "cargo-version.txt",
+      "archive_sha256": "9950bbb2d5c3417b1a068f0e81f6d3cac991a363193bdf2a22d447f5acf8b503",
+      "archive_bytes": 36,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "command",
+      "source_sha256": "6dde4e9126f1839154bdf1c68b35ea8efbe469937407df1c50d7ce362834673e",
+      "source_bytes": 272,
+      "source_mode": "0o644",
+      "archive": "command",
+      "archive_sha256": "6dde4e9126f1839154bdf1c68b35ea8efbe469937407df1c50d7ce362834673e",
+      "archive_bytes": 272,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "run.log",
+      "source_sha256": "7760e273644dff2315f6f3231810eae363a6b194421f73cf5d339e6ad3b29522",
+      "source_bytes": 122921,
+      "source_mode": "0o644",
+      "archive": "run.log",
+      "archive_sha256": "7760e273644dff2315f6f3231810eae363a6b194421f73cf5d339e6ad3b29522",
+      "archive_bytes": 122921,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "run.stderr",
+      "source_sha256": "946c02287085dd60fc143dcbd387c1fa33000c5f9c0b8ffbd0747b26beda46dc",
+      "source_bytes": 397,
+      "source_mode": "0o644",
+      "archive": "run.stderr",
+      "archive_sha256": "946c02287085dd60fc143dcbd387c1fa33000c5f9c0b8ffbd0747b26beda46dc",
+      "archive_bytes": 397,
+      "gzip_losslessly_verified": false
+    },
+    {
+      "source": "rustc-version.txt",
+      "source_sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37",
+      "source_bytes": 196,
+      "source_mode": "0o644",
+      "archive": "rustc-version.txt",
+      "archive_sha256": "778fbc643a806f0dd123c056e66201d7e8a56a61928ec0a33171be8d6c2d5a37",
+      "archive_bytes": 196,
+      "gzip_losslessly_verified": false
+    }
+  ]
+}

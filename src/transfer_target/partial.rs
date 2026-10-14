@@ -383,7 +383,7 @@ where
             .as_ref()
             .ok_or(ApplicationError::UnsupportedSchema)?;
         if let Some(old) = p.events.iter().find(|e| e.operation == *op) {
-            return if old.bytes == *bytes {
+            return if old.bytes.as_slice() == bytes.as_slice() {
                 Ok((old.outcome.receipt(), false))
             } else {
                 Err(ApplicationError::InvalidCommand)
@@ -436,7 +436,7 @@ where
         p.events.push(Event {
             operation: *op,
             index: entry.index,
-            bytes: bytes.clone(),
+            bytes: bytes.to_vec(),
             image,
             outcome,
         });
@@ -525,7 +525,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 },
             };
             self.apply_partial::<()>(&entry, image, true)?;

@@ -638,7 +638,7 @@ impl MetadataAuthoritySource {
             }
             MetadataSourceOutcome::Conflict
         } else if let Some(f) = &self.frozen {
-            if f.status.operation == *operation && f.command == *bytes {
+            if f.status.operation == *operation && f.command.as_slice() == bytes.as_slice() {
                 MetadataSourceOutcome::Frozen(f.status)
             } else {
                 MetadataSourceOutcome::Fenced
@@ -658,7 +658,7 @@ impl MetadataAuthoritySource {
                 self.frozen = Some(Frozen {
                     status,
                     plan,
-                    command: bytes.clone(),
+                    command: bytes.to_vec(),
                 });
                 MetadataSourceOutcome::Frozen(status)
             } else {
@@ -672,7 +672,11 @@ impl MetadataAuthoritySource {
             }
         } else {
             let raw = if bytes.starts_with(b"VBMASB01") {
-                if *bytes != self.bootstrap_command(self.readiness_requirements().command_bytes)? {
+                if bytes.as_slice()
+                    != self
+                        .bootstrap_command(self.readiness_requirements().command_bytes)?
+                        .as_slice()
+                {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 self.initial
@@ -681,7 +685,7 @@ impl MetadataAuthoritySource {
                 if self.bootstrap.is_none() {
                     return Err(ApplicationError::NotApplied);
                 }
-                bytes.clone()
+                bytes.to_vec()
             };
             let receipt = self
                 .directory
@@ -690,7 +694,7 @@ impl MetadataAuthoritySource {
                     term: entry.term,
                     payload: EntryPayload::Command {
                         operation: *operation,
-                        bytes: raw,
+                        bytes: raw.into(),
                     },
                 }])?
                 .remove(0);
@@ -783,7 +787,7 @@ impl ProposalAdmission for MetadataAuthoritySource {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: op,
-                        bytes: bytes.to_vec(),
+                        bytes: bytes.into(),
                     },
                 })?
                 .unwrap();

@@ -203,7 +203,7 @@ impl Scenario for HostCase {
         LogEntry {
             payload: EntryPayload::Command {
                 operation: OperationId::new(operation).unwrap(),
-                bytes: format!("set:{value}").into_bytes(),
+                bytes: format!("set:{value}").into_bytes().into(),
             },
             index,
             term: 1,

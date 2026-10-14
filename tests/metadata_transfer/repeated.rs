@@ -237,7 +237,7 @@ fn repeated_move_preserves_all_authority_domains_creations_and_retries() {
         panic!()
     };
     assert_eq!(
-        apply(&mut reopened_source, 8, bytes, &mut vec![]),
+        apply(&mut reopened_source, 8, bytes.to_vec(), &mut vec![]),
         MetadataPublishingOutcome::Source(MetadataSourceOutcome::Frozen(status))
     );
     assert_eq!(
@@ -293,11 +293,8 @@ fn repeated_profiles_refuse_wrong_bindings_stale_views_and_partial_restore() {
         .is_err());
     let pristine = checkpoint(&p.target_template);
     let import = p.target_entries[1].clone();
-    if let EntryPayload::Command {
-        mut bytes,
-        operation,
-    } = import.payload
-    {
+    if let EntryPayload::Command { bytes, operation } = import.payload {
+        let mut bytes = bytes.to_vec();
         for at in [40, 48, 88, 120, 220, bytes.len() - 1] {
             bytes[at] ^= 1;
             let mut staged = p.target_template.clone();

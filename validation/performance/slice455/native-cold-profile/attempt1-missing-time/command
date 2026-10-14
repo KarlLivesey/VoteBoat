@@ -1,0 +1,1 @@
+perf record -e cycles:u -F99 --call-graph dwarf,8192 -m128 -- env -u LD_LIBRARY_PATH /usr/bin/time -v <isolated-debug-test> --exact cold_recovery::quic_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores --test-threads=1

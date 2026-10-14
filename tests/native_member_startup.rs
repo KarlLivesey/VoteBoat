@@ -226,7 +226,7 @@ fn seed(path: &Path, local: u64, phase: u64, commit: u64, compact: bool) {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(900).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                bytes: 7i64.to_le_bytes().to_vec().into(),
             },
         });
     }
@@ -522,7 +522,7 @@ fn member_histories(protocol: NativePeerProtocol) {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(900).unwrap(),
-                        bytes: 7i64.to_le_bytes().to_vec(),
+                        bytes: 7i64.to_le_bytes().to_vec().into(),
                     },
                 }])
                 .unwrap();
@@ -572,7 +572,7 @@ fn enrollment_history(protocol: NativePeerProtocol) {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(900).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: 7i64.to_le_bytes().to_vec().into(),
         },
     });
     let mut source = Counter::new(100).unwrap();
@@ -2002,7 +2002,7 @@ fn repair_entries(
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(901).unwrap(),
-                bytes: 11i64.to_le_bytes().to_vec(),
+                bytes: 11i64.to_le_bytes().to_vec().into(),
             },
         });
     }
@@ -2049,7 +2049,7 @@ fn seed_repair_nodes(
                     term: 2,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(6000 + u128::from(index)).unwrap(),
-                        bytes: 99i64.to_le_bytes().to_vec(),
+                        bytes: 99i64.to_le_bytes().to_vec().into(),
                     },
                 });
             }

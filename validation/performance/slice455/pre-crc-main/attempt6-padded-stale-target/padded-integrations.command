@@ -1,0 +1,1 @@
+cargo +stable test --locked --offline --all-features --test outbound --test provider_conformance --test wire --test log_store --test log_staging --test log_owned --test log_reclaim --test parser_campaign --test configuration_capacity --test snapshot --test effect_owner -- --test-threads=1 

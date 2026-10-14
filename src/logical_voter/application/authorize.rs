@@ -69,7 +69,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
                     && (p.entry_at(position.index).is_some_and(|e| {
                         e.term == position.term
                             && matches!(&e.payload,
-       EntryPayload::Command{operation,bytes} if *operation==ticket.operation&&bytes==command)
+       EntryPayload::Command{operation,bytes} if *operation==ticket.operation&&bytes.as_slice()==command.as_slice())
                     }) || position.index <= p.base_index())
             }
             (

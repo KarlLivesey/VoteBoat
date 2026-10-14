@@ -1,0 +1,7 @@
+{
+  "original_handle": 8671,
+  "actual_terminal_exit": 101,
+  "tool": "e9be96",
+  "scope": "all-lib410selected:405pass5fixturefailures; remainingstagesunstarted",
+  "final_source_freeze": "SOURCE.json/PATCH.diff exactattempt1"
+}

@@ -66,7 +66,7 @@ fn generated_entries_match_independent_tuple_equality_in_both_directions() {
                 bytes.reserve(19);
                 payloads.push(EntryPayload::Command {
                     operation: OperationId::new(id).unwrap(),
-                    bytes,
+                    bytes: bytes.into(),
                 });
             }
         }
@@ -92,23 +92,27 @@ fn generated_entries_match_independent_tuple_equality_in_both_directions() {
 }
 
 #[test]
-fn allocation_capacity_and_every_command_field_follow_content_equality() {
+fn converted_spare_capacity_and_every_command_field_follow_content_equality() {
     for length in [0, 1, 17, 1024] {
         let original = LogEntry {
             index: u64::MAX,
             term: u64::MAX,
             payload: EntryPayload::Command {
                 operation: OperationId::new((1 << 127) | 7).unwrap(),
-                bytes: vec![9; length],
+                bytes: vec![9; length].into(),
             },
         };
         let mut capacity = original.clone();
         let EntryPayload::Command { bytes, .. } = &mut capacity.payload else {
             unreachable!()
         };
-        let before = bytes.capacity();
-        bytes.reserve(before + 31);
-        assert!(bytes.capacity() > before);
+        let charge = bytes.retained_bytes();
+        let mut replacement = bytes.to_vec();
+        let before = replacement.capacity();
+        replacement.reserve(before + 31);
+        assert!(replacement.capacity() > before);
+        *bytes = replacement.into();
+        assert_eq!(bytes.retained_bytes(), charge);
         assert_eq!(capacity, original);
         assert!(oracle(&capacity, &original));
         let changes: &[fn(&mut LogEntry)] = &[
@@ -125,7 +129,9 @@ fn allocation_capacity_and_every_command_field_follow_content_equality() {
                 let EntryPayload::Command { bytes, .. } = &mut e.payload else {
                     unreachable!()
                 };
-                bytes.push(9);
+                let mut replacement = bytes.to_vec();
+                replacement.push(9);
+                *bytes = replacement.into();
             },
         ];
         for change in changes {
@@ -139,7 +145,9 @@ fn allocation_capacity_and_every_command_field_follow_content_equality() {
             let EntryPayload::Command { bytes, .. } = &mut different.payload else {
                 unreachable!()
             };
-            bytes[length - 1] ^= 1;
+            let mut replacement = bytes.to_vec();
+            replacement[length - 1] ^= 1;
+            *bytes = replacement.into();
             assert!(!oracle(&different, &original));
             assert_ne!(different, original);
         }
@@ -157,7 +165,7 @@ fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries() 
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(u128::MAX).unwrap(),
-                bytes: Vec::new(),
+                bytes: Vec::new().into(),
             },
         },
         entry(2, 1, 7),
@@ -179,7 +187,9 @@ fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries() 
             let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload else {
                 unreachable!()
             };
-            bytes.push(7);
+            let mut replacement = bytes.to_vec();
+            replacement.push(7);
+            *bytes = replacement.into();
         },
         |s| s.entries.swap(0, 1),
         |s| s.entries[2].payload = EntryPayload::Noop,

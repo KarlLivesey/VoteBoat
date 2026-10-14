@@ -1,0 +1,6 @@
+
+running 1 test
+test raft::membership_tests::joint_repair_tail_respects_byte_budget_and_omits_oversized_joint ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 409 filtered out; finished in 0.00s
+

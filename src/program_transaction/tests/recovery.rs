@@ -100,7 +100,9 @@ fn whole_batch_failure_and_failed_restore_preserve_original_state() {
     let before = app.clone();
     let mut bad = entry(2, app.group, &c);
     if let EntryPayload::Command { bytes, .. } = &mut bad.payload {
-        bytes.push(0);
+        let mut replacement = bytes.to_vec();
+        replacement.push(0);
+        *bytes = replacement.into();
     }
     assert!(app.apply_batch(&[entry(1, app.group, &c), bad]).is_err());
     assert_eq!(app, before);

@@ -121,7 +121,7 @@ fn accepted_state_growth_cannot_exceed_the_checked_response_envelope() {
             term: 1,
             payload: EntryPayload::Command {
                 operation: c.operation,
-                bytes
+                bytes: bytes.into()
             }
         }])
         .is_err());
@@ -151,7 +151,7 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
         term: 1,
         payload: EntryPayload::Command {
             operation: claim.operation,
-            bytes,
+            bytes: bytes.into(),
         },
     }])
     .unwrap();
@@ -216,7 +216,7 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
             term: 1,
             payload: EntryPayload::Command {
                 operation: command.operation,
-                bytes
+                bytes: bytes.into()
             }
         }])
         .is_err());

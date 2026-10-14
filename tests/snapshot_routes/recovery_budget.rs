@@ -282,7 +282,7 @@ fn append(owner: &mut Owner, wal: &mut HostWorker, app: &mut Counter) {
                         term: 1,
                         payload: EntryPayload::Command {
                             operation: OperationId::new(50).unwrap(),
-                            bytes: 9i64.to_le_bytes().to_vec(),
+                            bytes: 9i64.to_le_bytes().to_vec().into(),
                         },
                     }],
                 },

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: RPL-1.5
 // Copyright (c) 2026 Karl Livesey
-//! Independent derived top-level clone oracle; the payload derive is unchanged.
+//! Independent derived clone oracle with immutable content and replacement ownership.
 use super::*;
 use voteboat::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
 
@@ -31,7 +31,8 @@ fn assert_oracle(entry: &LogEntry, derived: &DerivedEntry) {
         },
     ) = (&entry.payload, &derived.payload)
     {
-        assert_eq!(bytes.capacity(), expected.capacity());
+        assert_eq!(bytes.as_slice(), expected.as_slice());
+        assert_eq!(bytes.retained_bytes(), expected.retained_bytes());
     }
 }
 
@@ -68,7 +69,7 @@ fn payloads() -> Vec<EntryPayload> {
                 bytes.extend((0..length).map(|n| n as u8));
                 payloads.push(EntryPayload::Command {
                     operation: OperationId::new(id).unwrap(),
-                    bytes,
+                    bytes: bytes.into(),
                 });
             }
         }
@@ -96,12 +97,16 @@ fn fieldwise_clone_matches_independent_derived_top_level_for_every_payload() {
 fn assert_independent(source: &LogEntry, mut copied: LogEntry) {
     match (&source.payload, &mut copied.payload) {
         (EntryPayload::Command { bytes, .. }, EntryPayload::Command { bytes: copy, .. }) => {
+            let mut replacement = copy.to_vec();
             if !bytes.is_empty() {
-                assert_ne!(bytes.as_ptr(), copy.as_ptr());
-                copy[0] ^= 255;
+                assert_eq!(bytes.as_ptr(), copy.as_ptr());
+                replacement[0] ^= 255;
+                *copy = replacement.into();
                 assert_ne!(bytes[0], copy[0]);
             }
-            copy.push(19);
+            let mut replacement = copy.to_vec();
+            replacement.push(19);
+            *copy = replacement.into();
             assert_eq!(copy.len(), bytes.len() + 1);
         }
         (EntryPayload::Configuration(record), EntryPayload::Configuration(copy)) => {

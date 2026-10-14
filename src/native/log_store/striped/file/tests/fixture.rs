@@ -100,7 +100,7 @@ pub(super) fn command(state: &GroupLog, value: u8) -> LogMutation {
                 term,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(index.into()).unwrap(),
-                    bytes: vec![value; 1300],
+                    bytes: vec![value; 1300].into(),
                 },
             }],
         }),

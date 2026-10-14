@@ -1,0 +1,161 @@
+
+running 19 tests
+test batch_limits::aggregate::aggregate16384_model_power_loss_keeps_exact_frontiers_and_original_retry_once ... ok
+test batch_limits::large_batch_and_commit_publication_cuts_recover_without_premature_original_results ... ok
+test batch_limits::ready_items::every_ready_quantum_preserves_exact_power_loss_frontier_for_proposal_and_commit ... ok
+test codec_roundtrips_rejects_every_single_bit_mutation_and_unbounded_lengths ... ok
+test compact::compaction_uncertainty_and_power_loss_preserve_exact_sync_frontier ... ok
+test compacted_log_ranges_and_committed_prefix_protection_with_native_and_host ... ok
+test configured::configured_delta_power_loss_respects_each_durability_phase_and_old_session_refusal ... ok
+test every_interrupted_replacement_is_atomic_and_never_loses_committed_prefix ... ok
+test failed_sync_or_publication_fences_without_acknowledging_the_transition ... ok
+test matches::borrowed_equality_reads_durable_not_pending_and_survives_subset_barrier_reopen ... ok
+test matches::equality_fencing_precedes_missing_and_recovery_retains_exact_crash_state ... ok
+test public_store_conformance_runs_against_native_and_host ... ok
+test restart_recovers_policy_identity_hard_state_suffix_and_commit ... ok
+test staging::replacement_invalidates_only_its_own_generation_and_keeps_other_group_tickets ... ok
+test staging::subset_barrier_promotes_all_written_groups_and_returns_only_requested_tickets ... ok
+test staging::uncertain_multi_group_append_or_barrier_fences_and_recovers_atomic_batch ... ok
+test suffix_fence_invalidates_uncompleted_old_generation ... ok
+test user_commands_leave_control_reserve_and_admission_is_bounded ... ok
+test valid_checksums_cannot_hide_unbounded_policy_or_command_lengths ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.47s
+
+
+running 50 tests
+test authorized_native_promotion_lost_receipt_resumption_and_file_recovery_quic ... ok
+test authorized_native_promotion_lost_receipt_resumption_and_file_recovery_tcp ... ok
+test checkpoint_final::quic_final_head_recovers_from_committed_final_checkpoint_after_lost_reply ... ok
+test checkpoint_final::quic_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply ... ok
+test checkpoint_final::tcp_final_head_recovers_from_committed_final_checkpoint_after_lost_reply ... ok
+test checkpoint_final::tcp_final_head_recovers_from_committed_joint_checkpoint_after_lost_reply ... ok
+test committed_retirement_releases_old_peer_requirements_without_weakening_static_startup ... ok
+test create_and_static_wire_are_rejected_before_filesystem_changes ... ok
+test missing_checkpoint_data_prevents_member_exposure ... ok
+test native_promotion_refuses_restarted_learner_readiness_quic ... ok
+test native_promotion_refuses_restarted_learner_readiness_tcp ... ok
+test native_snapshot_enrollment_retries_and_reopens_quic_learner ... ok
+test native_snapshot_enrollment_retries_and_reopens_tcp_learner ... ok
+test quic_member_late_failure_joins_workers_and_releases_resources ... ok
+test quic_member_startup_recovers_learner_joint_final_and_checkpoint ... ok
+test quic_native_joint_repair_catches_up_multiple_batches ... ok
+test quic_native_joint_repair_catches_up_retained_learner_prefix ... ok
+test quic_native_joint_repair_elects_and_commits_after_old_leader_loss ... ok
+test quic_native_snapshot_repair_catches_up_then_installs_joint ... ok
+test quic_native_snapshot_repair_recovers_compacted_joint ... ok
+test quic_promoted_leader_loss_refuses_compacted_witness ... ok
+test quic_promoted_leader_loss_requires_retained_restored_witness ... ok
+test quic_promoted_leader_witness_installs_compacted_final_snapshot ... ok
+test quic_promoted_leader_witness_repairs_old_view_after_canceled_grant ... ok
+test quic_recursive_repair_catches_up_old_voter_and_candidate_tail ... ok
+test quic_recursive_retained_repair_replaces_divergent_learner_tail ... ok
+test quic_retained_repair_replaces_divergent_uncommitted_learner_tail ... ok
+test recovery_requires_committed_local_assignment_and_all_rollback_peer_credentials ... ok
+test recursive::quic_recursive_partial_final_recovers_compacted_joint_voter ... ok
+test recursive::quic_recursive_partial_final_restarts_candidate_and_joint_voter ... ok
+test recursive::quic_recursive_partial_joint_restarts_after_divergent_tail_repair ... ok
+test recursive::quic_recursive_partial_joint_restarts_after_native_learner_repair ... ok
+test recursive::tcp_recursive_partial_final_recovers_compacted_joint_voter ... ok
+test recursive::tcp_recursive_partial_final_restarts_candidate_and_joint_voter ... ok
+test recursive::tcp_recursive_partial_joint_restarts_after_divergent_tail_repair ... ok
+test recursive::tcp_recursive_partial_joint_restarts_after_native_learner_repair ... ok
+test tcp_member_late_failure_joins_workers_and_releases_resources ... ok
+test tcp_member_startup_recovers_learner_joint_final_and_checkpoint ... ok
+test tcp_native_joint_repair_catches_up_multiple_batches ... ok
+test tcp_native_joint_repair_catches_up_retained_learner_prefix ... ok
+test tcp_native_joint_repair_elects_and_commits_after_old_leader_loss ... ok
+test tcp_native_snapshot_repair_catches_up_then_installs_joint ... ok
+test tcp_native_snapshot_repair_recovers_compacted_joint ... ok
+test tcp_promoted_leader_loss_refuses_compacted_witness ... ok
+test tcp_promoted_leader_loss_requires_retained_restored_witness ... ok
+test tcp_promoted_leader_witness_installs_compacted_final_snapshot ... ok
+test tcp_promoted_leader_witness_repairs_old_view_after_canceled_grant ... ok
+test tcp_recursive_repair_catches_up_old_voter_and_candidate_tail ... ok
+test tcp_recursive_retained_repair_replaces_divergent_learner_tail ... ok
+test tcp_retained_repair_replaces_divergent_uncommitted_learner_tail ... ok
+
+test result: ok. 50 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 39.80s
+
+
+running 8 tests
+test generator::independent_crc_has_the_standard_castagnoli_vector ... ok
+test routing::generated_routing_publication_mutations_preserve_checked_bucket_coverage ... ok
+test snapshot::generated_published_snapshot_manifest_mutations_cannot_select_wrong_or_partial_data ... ok
+test snapshot::generated_snapshot_image_mutations_validate_metadata_application_bounds_and_integrity ... ok
+test wal::generated_acknowledged_wal_and_manifest_corruption_never_recovers_a_partial_prefix ... ok
+test wal::generated_interrupted_unacknowledged_suffixes_recover_only_the_original_prefix ... ok
+test wal::generated_native_batch_mutations_reach_bounded_inner_decoders ... ok
+test wire::generated_rpc_mutations_enforce_framing_scope_and_public_reencoding ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+
+running 27 tests
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test buffered_compaction_schedules_survive_native_file_reopen_and_original_retry ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test durable_pin_switch_conformance_with_host_provider ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test log_match::binding_precedes_comparison_and_comparison_errors_precede_snapshot_work ... ok
+test log_match::snapshot_install_verification_keeps_the_full_arbitrary_state_method ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test native::bounded_codec_rejects_oversize_lengths_even_with_valid_checksums ... ok
+test native::codec::changed_or_truncated_decode_fences_before_sync_and_preserves_pinned_retry_checkpoint ... ok
+test native::codec::substituted_file_decode_preserves_previous_root_after_fenced_close_and_reopen ... ok
+test native::codec::transparent_host_codec_reopens_real_checkpoint_and_preserves_retry_and_pin ... ok
+test native::corruption_truncation_missing_data_and_identity_mismatch_fail_closed ... ok
+test native::downstream_snapshot_codec_is_used_and_incompatible_version_is_rejected ... ok
+test native::interrupted_chunks_seals_and_publication_recover_old_or_complete_new ... ok
+test native::native_files_restore_checkpoint_plus_tail_and_exclude_concurrent_writers ... ok
+test native::native_snapshot_catchup_history_and_actual_files ... ok
+test native::native_snapshot_conformance_and_restart_session_fencing ... ok
+test native::native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries ... ok
+test native::pins_survive_restart_and_legacy_manifest_upgrade ... ok
+test native::snapshot_log_failure_and_lost_application_completion_recover_without_false_ack ... ok
+test native::staged_corruption_is_detected_against_submitted_bytes_before_sealing ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.18s
+
+
+running 9 tests
+test faults::catalog_budget_refuses_before_payload_side_effect_and_keeps_previous_control_selection ... ok
+test faults::every_append_sync_and_catalog_failure_fences_and_recovers_a_complete_original_batch ... ok
+test faults::every_reclaim_primitive_recovers_exact_state_and_safe_next_slot_reuse ... ok
+test files::native_file_stripes_reclaim_recover_and_preserve_exclusive_fixed_layout ... ok
+test files::native_lost_device_keeps_diagnostic_control_and_refuses_payload_recovery ... ok
+test histories::corrupted_controls_and_selected_payload_never_fall_back_to_older_bytes ... ok
+test histories::mirrored_control_survives_either_device_loss_but_payload_loss_quarantines_recovery ... ok
+test histories::one_group_stripes_original_bytes_and_reopens_exact_suffix_snapshot_and_sessions ... ok
+test membership::mirrored_membership_ballot_origin_and_snapshot_configuration_survive_reclaim_and_device_loss ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+
+running 18 tests
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+test leadership::targeted_handoff_requires_wire8_and_roundtrips_u128_operation_and_exact_scope ... ok
+test native::authority_format_is_explicit_bounded_and_preserves_membership_payloads ... ok
+test native::every_single_bit_truncation_trailing_data_and_unknown_version_fail_closed ... ok
+test native::explicit_wire_two_roundtrips_all_configuration_phases_and_joint_final_snapshots ... ok
+test native::frame_command_entry_count_and_decoded_memory_limits_are_symmetric ... ok
+test native::native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip ... ok
+test native::readiness_format_checks_envelope_capabilities_and_explicit_version ... ok
+test native::snapshot_policy_shape_weights_membership_and_payload_budgets_are_checked ... ok
+test native::valid_checksums_cannot_hide_unbounded_lengths_or_invalid_identity_and_entries ... ok
+test native::wire_two_integrity_truncation_and_valid_crc_hostile_configuration_fields_fail_closed ... ok
+test native::wire_two_maximum_checkpoint_operation_set_remains_bounded_and_lossless ... ok
+test native::wire_two_membership_base_rejects_invalid_history_and_operation_sets ... ok
+test native::wire_two_recursive_weighted_policy_survives_without_changing_bootstrap ... ok
+test native::wire_two_resource_limits_include_configurations_and_checkpoint_operation_history ... ok
+test shared_contract::mutants::shared_assertions_detect_altered_supplied_bytes ... ok
+test shared_contract::mutants::shared_assertions_detect_false_encoded_size ... ok
+test shared_contract::mutants::shared_assertions_detect_scope_blind_encoding ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+

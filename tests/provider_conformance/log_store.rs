@@ -3,6 +3,8 @@
 //! Reusable cases: providers are supplied by callers through the public seam.
 use super::support::*;
 use voteboat::{identity::*, log::*};
+#[path = "log_store/command_bytes.rs"]
+mod command_bytes;
 #[path = "log_store/default_errors.rs"]
 mod default_errors;
 #[path = "log_store/entry_clone.rs"]
@@ -170,7 +172,7 @@ fn refusal_and_reclamation(store: &mut impl LogStore) {
     let EntryPayload::Command { bytes, .. } = &mut oversized.payload else {
         unreachable!()
     };
-    *bytes = vec![1; store.limits().max_command_bytes + 1];
+    *bytes = vec![1; store.limits().max_command_bytes + 1].into();
     assert!(store
         .append_batch(vec![update(
             &before,

@@ -28,7 +28,7 @@ fn entry(index: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: voteboat::identity::OperationId::new(id).unwrap(),
-            bytes,
+            bytes: bytes.into(),
         },
     }
 }

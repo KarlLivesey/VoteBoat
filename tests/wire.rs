@@ -488,7 +488,9 @@ mod native {
         let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
             panic!()
         };
-        bytes.extend([1, 2, 3]);
+        let mut replacement = bytes.to_vec();
+        replacement.extend([1, 2, 3]);
+        *bytes = replacement.into();
         assert_eq!(
             short_command.encode_batch(scope(), &[larger.clone()]),
             Err(WireError::TooLarge)

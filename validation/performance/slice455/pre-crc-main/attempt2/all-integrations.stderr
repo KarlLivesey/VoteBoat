@@ -1,0 +1,48 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0308]: mismatched types
+   --> tests/metadata_transfer/repeated.rs:240:40
+    |
+240 |         apply(&mut reopened_source, 8, bytes, &mut vec![]),
+    |         -----                          ^^^^^ expected `Vec<u8>`, found `CommandBytes`
+    |         |
+    |         arguments to this function are incorrect
+    |
+    = note: expected struct `Vec<u8>`
+               found struct `CommandBytes`
+note: function defined here
+   --> tests/metadata_transfer/repeated.rs:23:4
+    |
+ 23 | fn apply(
+    |    ^^^^^
+...
+ 26 |     bytes: Vec<u8>,
+    |     --------------
+help: try using a conversion method
+    |
+240 |         apply(&mut reopened_source, 8, bytes.to_vec(), &mut vec![]),
+    |                                             +++++++++
+
+error[E0308]: mismatched types
+   --> tests/metadata_transfer/repeated.rs:307:58
+    |
+307 |                 .apply_batch(&[entry(2, operation.get(), bytes.clone())])
+    |                                -----                     ^^^^^^^^^^^^^ expected `Vec<u8>`, found `CommandBytes`
+    |                                |
+    |                                arguments to this function are incorrect
+    |
+    = note: expected struct `Vec<u8>`
+               found struct `CommandBytes`
+note: function defined here
+   --> tests/transfer_source/fixtures.rs:137:8
+    |
+137 | pub fn entry(index: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
+    |        ^^^^^                       --------------
+help: try using a conversion method
+    |
+307 -                 .apply_batch(&[entry(2, operation.get(), bytes.clone())])
+307 +                 .apply_batch(&[entry(2, operation.get(), bytes.to_vec())])
+    |
+
+For more information about this error, try `rustc --explain E0308`.
+error: could not compile `voteboat` (test "metadata_transfer") due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...

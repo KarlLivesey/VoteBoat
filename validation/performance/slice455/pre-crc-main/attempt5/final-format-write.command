@@ -1,0 +1,1 @@
+cargo +stable fmt --all 

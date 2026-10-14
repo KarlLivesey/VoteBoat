@@ -18,7 +18,7 @@ fn unknown(nodes: &mut [Node<Owner>], clock: &Instant, bytes: &[u8]) -> bool {
         !core.has_pending_dependency()
             && core.state().entries.iter().any(|entry| {
                 matches!(&entry.payload, EntryPayload::Command { operation: id, bytes: payload }
-                if *id == operation && payload == bytes && entry.index > core.state().commit_index)
+                if *id == operation && payload.as_slice() == bytes && entry.index > core.state().commit_index)
             })
     });
     nodes[0].control(group(20), NodeControl::Campaign).unwrap();

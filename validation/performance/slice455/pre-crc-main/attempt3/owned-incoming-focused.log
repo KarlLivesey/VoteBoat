@@ -1,0 +1,7 @@
+
+running 2 tests
+test log::owned::tests::incoming::invalid_later_owned_unit_never_installs_an_earlier_moved_append ... ok
+test log::owned::tests::incoming::owned_input_moves_new_payload_after_whole_batch_admission ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 408 filtered out; finished in 0.00s
+

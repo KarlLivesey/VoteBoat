@@ -51,7 +51,7 @@ fn command(log: &mut impl LogStore, operation: u128, delta: i64) {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        bytes: delta.to_le_bytes().to_vec().into(),
                     },
                 }],
             }),
@@ -314,7 +314,7 @@ fn retry(app: &mut Counter) {
                 term: 3,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(operation).unwrap(),
-                    bytes: delta.to_le_bytes().to_vec(),
+                    bytes: delta.to_le_bytes().to_vec().into(),
                 },
             }])
             .unwrap();

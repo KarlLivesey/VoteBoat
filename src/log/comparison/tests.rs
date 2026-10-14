@@ -20,7 +20,7 @@ fn entry(index: u64) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new((1 << 127) | u128::from(index)).unwrap(),
-            bytes: vec![7; usize::try_from(index % 3).unwrap()],
+            bytes: vec![7; usize::try_from(index % 3).unwrap()].into(),
         },
     }
 }

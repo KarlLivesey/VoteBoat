@@ -106,7 +106,7 @@ fn incoming() -> Snapshot {
         term: 2,
         payload: EntryPayload::Command {
             operation: OperationId::new(91).unwrap(),
-            bytes: 7i64.to_le_bytes().to_vec(),
+            bytes: 7i64.to_le_bytes().to_vec().into(),
         },
     };
     let entries = vec![assignment, command];
@@ -151,7 +151,7 @@ fn conformance<L: LogStore>(log: &mut L) {
             term: 2,
             payload: EntryPayload::Command {
                 operation: OperationId::new(91).unwrap(),
-                bytes: 7i64.to_le_bytes().to_vec(),
+                bytes: 7i64.to_le_bytes().to_vec().into(),
             },
         }])
         .unwrap();

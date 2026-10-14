@@ -19,7 +19,7 @@ fn command(index: u64, id: u128, delta: i64) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(id).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            bytes: delta.to_le_bytes().to_vec().into(),
         },
     }
 }
@@ -165,7 +165,7 @@ fn invalid_batches_and_capacity_do_not_partly_advance_state() {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(2).unwrap(),
-            bytes: vec![1],
+            bytes: vec![1].into(),
         },
     };
     assert_eq!(
@@ -249,7 +249,7 @@ fn late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(130).unwrap(),
-            bytes: vec![1],
+            bytes: vec![1].into(),
         },
     };
     let failed = [

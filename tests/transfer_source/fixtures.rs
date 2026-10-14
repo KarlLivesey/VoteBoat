@@ -140,7 +140,7 @@ pub fn entry(index: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: op(id),
-            bytes,
+            bytes: bytes.into(),
         },
     }
 }

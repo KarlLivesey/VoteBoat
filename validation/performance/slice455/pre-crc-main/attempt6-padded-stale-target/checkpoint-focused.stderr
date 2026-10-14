@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.00s
+     Running unittests src/lib.rs (target/debug/deps/voteboat-ebeb84c4129d638f)
+
+thread 'log::command_bytes::tests::historical_checkpoint_command_at_batch_limit_decodes_and_recovers_unchanged' (300) panicked at src/log/command_bytes/tests.rs:98:73:
+called `Result::unwrap()` on an `Err` value: Rejected("invalid log limits")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: test failed, to rerun pass `--lib`

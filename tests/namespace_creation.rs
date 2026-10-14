@@ -86,7 +86,7 @@ fn entry(index: u64, op: u128, bytes: Vec<u8>) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(op).unwrap(),
-            bytes,
+            bytes: bytes.into(),
         },
     }
 }

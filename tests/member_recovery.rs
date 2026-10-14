@@ -321,7 +321,7 @@ fn checkpoint<L: LogStore, S: SnapshotRetention>(log: &mut L, snapshots: &mut S)
                     term: 2,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(900).unwrap(),
-                        bytes: 7i64.to_le_bytes().to_vec(),
+                        bytes: 7i64.to_le_bytes().to_vec().into(),
                     },
                 }],
             }),
@@ -563,7 +563,7 @@ mod native {
                 term: 3,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(900).unwrap(),
-                    bytes: 7i64.to_le_bytes().to_vec(),
+                    bytes: 7i64.to_le_bytes().to_vec().into(),
                 },
             }])
             .unwrap();
@@ -1998,7 +1998,7 @@ mod joint_repair {
                 term: 2,
                 payload: EntryPayload::Command {
                     operation: OperationId::new(6000 + u128::from(index)).unwrap(),
-                    bytes: 99i64.to_le_bytes().to_vec(),
+                    bytes: 99i64.to_le_bytes().to_vec().into(),
                 },
             })
             .collect::<Vec<_>>();

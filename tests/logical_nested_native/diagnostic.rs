@@ -70,11 +70,17 @@ pub fn retained(host: &Host<'_, '_>) -> String {
         host.phase,host.drained(),host.lower.now(),top(host),host.last_step,
         host.writes.iter().map(super::convergence::WriteProgress::diagnostic).collect::<Vec<_>>(),host.transport(),
         actions(host),
-        host.upper.iter().map(|b| b.usage()).collect::<Vec<_>>(),
+        host.upper.iter().map(|b| (b.usage(), b.inspect_work(|work| work.map(|w| (
+            w.phase(), w.operation(), w.attempt(), w.retained_output(),
+            w.command_bytes().map(<[u8]>::len),
+        ))))).collect::<Vec<_>>(),
         host.lower
             .bridges
             .iter()
-            .map(|b| b.usage())
+            .map(|b| (b.usage(), b.inspect_work(|work| work.map(|w| (
+                w.phase(), w.operation(), w.attempt(), w.retained_output(),
+                w.command_bytes().map(<[u8]>::len),
+            )))))
             .collect::<Vec<_>>()
     )
 }

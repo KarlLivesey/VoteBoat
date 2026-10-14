@@ -222,8 +222,19 @@ fn rejection_and_background(mut queue: impl OutboundQueue) {
         let voteboat::log::EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
             panic!()
         };
-        *bytes = Vec::with_capacity(8192);
-        bytes.push(7);
+        let mut spare = Vec::with_capacity(8192);
+        spare.push(7);
+        *bytes = spare.into();
+        assert_eq!(bytes.as_slice(), &[7]);
+        let alignment = std::mem::align_of::<std::sync::atomic::AtomicUsize>().max(2);
+        let header = 2 * std::mem::size_of::<std::sync::atomic::AtomicUsize>();
+        assert_eq!(
+            bytes.retained_bytes(),
+            (header + 1).div_ceil(alignment) * alignment
+        );
+        // Mutable source spare capacity is not retained. Actual immutable
+        // content still exceeds the same outbound byte budget atomically.
+        *bytes = vec![7; 8192].into();
     }
     assert_eq!(
         queue.submit(vec![payload]).unwrap_err().reason,

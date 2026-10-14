@@ -431,7 +431,7 @@ fn activated_import_delegates_twice_keeps_retries_and_recovers_mixed_history() {
                 &mut t,
                 200,
                 match &e.payload {
-                    voteboat::log::EntryPayload::Command { bytes, .. } => bytes.clone(),
+                    voteboat::log::EntryPayload::Command { bytes, .. } => bytes.to_vec(),
                     _ => unreachable!(),
                 }
             )
@@ -726,7 +726,7 @@ fn partial_freeze_and_grant_frames_recover_exact_images_and_retained_service() {
                 unreachable!()
             };
             assert!(matches!(
-                commit(&mut app, 2000, bytes.clone()).outcome,
+                commit(&mut app, 2000, bytes.to_vec()).outcome,
                 TargetOutcome::ScopeFenced(_)
             ));
             assert!(matches!(

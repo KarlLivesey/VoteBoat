@@ -305,7 +305,7 @@ impl MetadataServingTarget {
             if *operation != self.target.status().operation {
                 outcome = MetadataServingOutcome::Conflict;
             } else if let Some(a) = &self.active {
-                outcome = if a.command == *bytes {
+                outcome = if a.command.as_slice() == bytes.as_slice() {
                     MetadataServingOutcome::Activated(a.status)
                 } else {
                     MetadataServingOutcome::Conflict
@@ -319,12 +319,12 @@ impl MetadataServingTarget {
         } else if bytes.starts_with(b"VBMTAB02") || bytes.starts_with(b"VBMATI01") {
             let mut forwarded = entry.clone();
             if bytes.starts_with(b"VBMTAB02") {
-                if *bytes != self.bootstrap_command(40)? {
+                if bytes.as_slice() != self.bootstrap_command(40)?.as_slice() {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 forwarded.payload = EntryPayload::Command {
                     operation: *operation,
-                    bytes: self.target.bootstrap_command(40)?,
+                    bytes: self.target.bootstrap_command(40)?.into(),
                 };
             }
             outcome = MetadataServingOutcome::Target(
@@ -520,7 +520,7 @@ impl ProposalAdmission for MetadataServingTarget {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: op,
-                        bytes: b.to_vec(),
+                        bytes: b.into(),
                     },
                 })?
                 .unwrap();
@@ -603,7 +603,7 @@ impl CheckpointStateMachine for MetadataServingTarget {
                 b.extend(e.index.to_le_bytes());
                 b.extend(operation.get().to_le_bytes());
                 b.extend((bytes.len() as u32).to_le_bytes());
-                b.extend(bytes);
+                b.extend(bytes.as_slice());
             }
         }
         Ok(b)
@@ -674,7 +674,10 @@ impl CheckpointStateMachine for MetadataServingTarget {
                 let e = LogEntry {
                     index: at,
                     term: 1,
-                    payload: EntryPayload::Command { operation, bytes },
+                    payload: EntryPayload::Command {
+                        operation,
+                        bytes: bytes.into(),
+                    },
                 };
                 active.directory.apply_batch(std::slice::from_ref(&e))?;
                 active.tail.insert(operation, e);

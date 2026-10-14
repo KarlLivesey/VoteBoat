@@ -1,0 +1,2 @@
+[ perf record: Woken up 1 times to write data ]
+[ perf record: Captured and wrote 0.048 MB target/p9/slice455/native-cold-profile/probe.data (5 samples) ]

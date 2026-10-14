@@ -21,9 +21,11 @@ use crate::{
 };
 use std::collections::BTreeMap;
 
+mod command_bytes;
 mod comparison;
 mod owned;
 pub(crate) mod transition;
+pub use command_bytes::CommandBytes;
 pub(crate) use comparison::CheckpointComparison;
 pub use comparison::{CheckpointLineage, CheckpointLog};
 pub use owned::OwnedLogState;
@@ -35,7 +37,7 @@ pub enum EntryPayload {
     Configuration(Box<crate::membership::ConfigurationRecord>),
     Command {
         operation: OperationId,
-        bytes: Vec<u8>,
+        bytes: CommandBytes,
     },
 }
 #[derive(Clone, Debug, Eq)]
@@ -101,11 +103,12 @@ impl PartialEq for LogEntry {
     }
 }
 impl LogEntry {
-    /// Owned payload allocation accounting, excluding the inline LogEntry.
+    /// Conservative per-owner payload charge, excluding the inline LogEntry.
+    /// Shared commands are charged in full for each retained clone.
     pub fn retained_payload_bytes(&self) -> usize {
         match &self.payload {
             EntryPayload::Noop => 0,
-            EntryPayload::Command { bytes, .. } => bytes.capacity(),
+            EntryPayload::Command { bytes, .. } => bytes.retained_bytes(),
             EntryPayload::Configuration(record) => record.retained_bytes(),
         }
     }

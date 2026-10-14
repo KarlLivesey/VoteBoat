@@ -1,0 +1,56 @@
+{
+  "status": 0,
+  "original_runner_handle": 72030,
+  "remaining_runner_handle": 26233,
+  "test_counts": {
+    "all-lib": [
+      414
+    ],
+    "candidate-cold": [
+      1
+    ],
+    "core-lib": [
+      334
+    ],
+    "crc-focused": [
+      3
+    ],
+    "format-integrations": [
+      19,
+      50,
+      8,
+      27,
+      9,
+      18
+    ],
+    "matched-tests": [
+      70
+    ],
+    "remaining-cold": [
+      14
+    ]
+  },
+  "top_level_command_exits": {
+    "all-lib": 0,
+    "candidate-cold": 0,
+    "core-lib": 0,
+    "crc-focused": 0,
+    "format-integrations": 0,
+    "format": 0,
+    "matched-format": 0,
+    "matched-strict": 0,
+    "matched-tests": 0,
+    "metadata": 0,
+    "remaining-cold": 0,
+    "source-guard": 0,
+    "strict-all": 0,
+    "strict-core": 0,
+    "strict-default": 0,
+    "strict-native": 0
+  },
+  "selected_frozen_source_inputs": 1445,
+  "changed_new_snapshots_verified": 134,
+  "final_source_guard": "FINAL_SOURCE_GUARD.json",
+  "history": "attempt1-format failure preserved, corrected original runner DONE and remaining14 histories passed; earlier functional attempts remain separately linked",
+  "performance_claim": false
+}

@@ -368,7 +368,7 @@ fn native_framed_transport_retains_original_credits_until_exact_send_completion(
                 term: 2,
                 payload: voteboat::log::EntryPayload::Command {
                     operation: OperationId::new(1).unwrap(),
-                    bytes: vec![7; 4096],
+                    bytes: vec![7; 4096].into(),
                 },
             }],
         },

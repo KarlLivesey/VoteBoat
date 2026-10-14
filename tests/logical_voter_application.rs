@@ -197,7 +197,7 @@ fn malformed_batches_and_untrusted_business_intake_leave_state_intact() {
         term: 1,
         payload: EntryPayload::Command {
             operation,
-            bytes: b"ready".to_vec(),
+            bytes: b"ready".to_vec().into(),
         },
     };
     let entries = [

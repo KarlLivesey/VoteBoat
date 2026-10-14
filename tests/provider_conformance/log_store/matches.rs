@@ -10,7 +10,11 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
     capacity.entries.reserve(100);
     for entry in &mut capacity.entries {
         if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
-            bytes.reserve(100);
+            let charge = bytes.retained_bytes();
+            let mut replacement = bytes.to_vec();
+            replacement.reserve(100);
+            *bytes = replacement.into();
+            assert_eq!(bytes.retained_bytes(), charge);
         }
     }
     assert_eq!(store.matches_state(actual_group, &capacity), Ok(true));
@@ -49,7 +53,9 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
         },
         |s| {
             if let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload {
-                bytes[0] ^= 1;
+                let mut replacement = bytes.to_vec();
+                replacement[0] ^= 1;
+                *bytes = replacement.into();
             }
         },
         |s| s.entries.swap(0, 1),

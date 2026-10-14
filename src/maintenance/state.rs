@@ -73,7 +73,7 @@ impl<A: StateMachine> Maintenance<A> {
             mapped.payload = match decode(bytes)? {
                 Envelope::Data(data) => EntryPayload::Command {
                     operation: *operation,
-                    bytes: data.to_vec(),
+                    bytes: data.into(),
                 },
                 Envelope::Control(command) if command.intent().request.operation == *operation => {
                     EntryPayload::Noop

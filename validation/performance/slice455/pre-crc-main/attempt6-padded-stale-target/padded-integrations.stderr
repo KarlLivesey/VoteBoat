@@ -1,0 +1,153 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+error[E0599]: no method named `retained_bytes` found for mutable reference `&mut Vec<u8>` in the current scope
+   --> tests/outbound.rs:232:19
+    |
+232 |             bytes.retained_bytes(),
+    |                   ^^^^^^^^^^^^^^
+    |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+error[E0425]: cannot find type `CommandBytes` in this scope
+ --> tests/provider_conformance/log_store/command_bytes.rs:9:21
+  |
+9 |     public_traits::<CommandBytes>();
+  |                     ^^^^^^^^^^^^ not found in this scope
+  |
+help: you might be missing a type parameter
+  |
+7 | fn construction_reads_and_default_expose_exact_content<CommandBytes>() {
+  |                                                       ++++++++++++++
+
+error[E0425]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:39:19
+   |
+39 |     let replaced: CommandBytes = mutable.into();
+   |                   ^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `CommandBytes` in this scope
+   --> tests/provider_conformance/log_store/command_bytes.rs:101:16
+    |
+101 |     let bytes: CommandBytes = input.into();
+    |                ^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find type `CommandBytes` in this scope
+   --> tests/provider_conformance/log_store/command_bytes.rs:126:20
+    |
+126 |         let bytes: CommandBytes = vec![7; length].into();
+    |                    ^^^^^^^^^^^^ not found in this scope
+
+For more information about this error, try `rustc --explain E0599`.
+error: could not compile `voteboat` (test "outbound") due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:11:19
+   |
+11 |     for bytes in [CommandBytes::from(input.as_slice()), input.to_vec().into()] {
+   |                   ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:19:9
+   |
+19 |         CommandBytes::default(),
+   |         ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:24:27
+   |
+24 |         assert_eq!(empty, CommandBytes::default());
+   |                           ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:31:20
+   |
+31 |     let original = CommandBytes::from(vec![1, 2, 3]);
+   |                    ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:50:16
+   |
+50 |     let left = CommandBytes::from(vec![1, 2, 255]);
+   |                ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:51:17
+   |
+51 |     let equal = CommandBytes::from([1, 2, 255].as_slice());
+   |                 ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+  --> tests/provider_conformance/log_store/command_bytes.rs:55:26
+   |
+55 |         assert_ne!(left, CommandBytes::from(different));
+   |                          ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+   --> tests/provider_conformance/log_store/command_bytes.rs:110:18
+    |
+110 |             .map(CommandBytes::retained_bytes)
+    |                  ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0433]: cannot find type `CommandBytes` in this scope
+   --> tests/provider_conformance/log_store/command_bytes.rs:115:16
+    |
+115 |     assert_eq!(CommandBytes::default().clone().retained_bytes(), 0);
+    |                ^^^^^^^^^^^^ use of undeclared type `CommandBytes`
+
+error[E0599]: no method named `retained_bytes` found for reference `&Vec<u8>` in the current scope
+  --> tests/provider_conformance/log_store/entry_clone.rs:35:26
+   |
+35 |         assert_eq!(bytes.retained_bytes(), expected.retained_bytes());
+   |                          ^^^^^^^^^^^^^^
+   |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+  --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+error[E0599]: no method named `retained_bytes` found for reference `&Vec<u8>` in the current scope
+  --> tests/provider_conformance/log_store/entry_clone.rs:35:53
+   |
+35 |         assert_eq!(bytes.retained_bytes(), expected.retained_bytes());
+   |                                                     ^^^^^^^^^^^^^^
+   |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+  --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+error[E0599]: no method named `retained_bytes` found for mutable reference `&mut Vec<u8>` in the current scope
+   --> tests/provider_conformance/log_store/entry_equality.rs:109:28
+    |
+109 |         let charge = bytes.retained_bytes();
+    |                            ^^^^^^^^^^^^^^
+    |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+error[E0599]: no method named `retained_bytes` found for mutable reference `&mut Vec<u8>` in the current scope
+   --> tests/provider_conformance/log_store/entry_equality.rs:115:26
+    |
+115 |         assert_eq!(bytes.retained_bytes(), charge);
+    |                          ^^^^^^^^^^^^^^
+    |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+   --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+error[E0599]: no method named `retained_bytes` found for mutable reference `&mut Vec<u8>` in the current scope
+  --> tests/provider_conformance/log_store/matches.rs:13:32
+   |
+13 |             let charge = bytes.retained_bytes();
+   |                                ^^^^^^^^^^^^^^
+   |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+  --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+error[E0599]: no method named `retained_bytes` found for mutable reference `&mut Vec<u8>` in the current scope
+  --> tests/provider_conformance/log_store/matches.rs:17:30
+   |
+17 |             assert_eq!(bytes.retained_bytes(), charge);
+   |                              ^^^^^^^^^^^^^^
+   |
+help: there is a method `retain_mut` with a similar name, but with different arguments
+  --> /rustc/48a229ceaefd4985c50990b14116b6d856af0985/library/alloc/src/vec/mod.rs:2514:4
+
+Some errors have detailed explanations: E0425, E0433, E0599.
+For more information about an error, try `rustc --explain E0425`.
+error: could not compile `voteboat` (test "provider_conformance") due to 19 previous errors

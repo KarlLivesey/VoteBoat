@@ -1,0 +1,5 @@
+{
+  "threshold_bytes": 1048576,
+  "algorithm": "gzip mtime0, decompression/hash checked independently",
+  "files": []
+}

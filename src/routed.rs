@@ -540,7 +540,7 @@ where
                             }
                             projected.payload = EntryPayload::Command {
                                 operation: *operation,
-                                bytes: payload.to_vec(),
+                                bytes: payload.into(),
                             };
                             // Only the selected application's checked receipt supplies success.
                             None
@@ -617,7 +617,7 @@ where
                         data += 1;
                         EntryPayload::Command {
                             operation: *operation,
-                            bytes: payload.to_vec(),
+                            bytes: payload.into(),
                         }
                     }
                     _ => EntryPayload::Noop,

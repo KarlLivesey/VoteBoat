@@ -12,7 +12,7 @@ fn command(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(operation).unwrap(),
-            bytes,
+            bytes: bytes.into(),
         },
     }
 }
@@ -167,8 +167,10 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
     let EntryPayload::Command { bytes, .. } = &mut materialized[0].payload else {
         unreachable!()
     };
-    assert_ne!(bytes.as_ptr(), canonical_bytes);
-    bytes[0] = 255;
+    assert_eq!(bytes.as_ptr(), canonical_bytes);
+    let mut replacement = bytes.to_vec();
+    replacement[0] = 255;
+    *bytes = replacement.into();
     assert_ne!(materialized, core.state().entries[1..]);
     core.persist(core.state().hard_state, 3, None, After::Reply, None)
         .unwrap();
@@ -510,7 +512,9 @@ fn borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_
                 else {
                     unreachable!()
                 };
-                bytes[0] = 8;
+                let mut replacement = bytes.to_vec();
+                replacement[0] = 8;
+                *bytes = replacement.into();
             }
             2 => store.fail_barrier = true,
             3 => core.request_sequence = u64::MAX,

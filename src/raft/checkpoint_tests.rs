@@ -53,7 +53,7 @@ fn same_core_suffix_replacement_and_replayed_higher_term_replace_lineage() {
                     term: 2,
                     payload: EntryPayload::Command {
                         operation: OperationId::new((1 << 127) | 7).unwrap(),
-                        bytes: vec![9],
+                        bytes: vec![9].into(),
                     },
                 },
                 LogEntry {

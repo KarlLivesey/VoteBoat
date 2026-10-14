@@ -125,7 +125,7 @@ fn start(index: u64, request: TransferSpec) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: request.phases().coordinator()[0],
-            bytes: TransferApplication::start(request).unwrap(),
+            bytes: TransferApplication::start(request).unwrap().into(),
         },
     }
 }
@@ -289,7 +289,9 @@ fn public_failed_batches_and_restores_preserve_original_application() {
     let EntryPayload::Command { bytes, .. } = &mut malformed.payload else {
         unreachable!();
     };
-    bytes.push(0);
+    let mut replacement = bytes.to_vec();
+    replacement.push(0);
+    *bytes = replacement.into();
     assert!(app
         .apply_batch(&[start(1, spec(1, 5, false)), malformed])
         .is_err());

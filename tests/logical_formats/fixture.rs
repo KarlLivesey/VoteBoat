@@ -37,7 +37,7 @@ pub fn entries() -> Vec<LogEntry> {
             term: 3,
             payload: EntryPayload::Command {
                 operation: OperationId::new(index.into()).unwrap(),
-                bytes: vec![88 + index as u8, 0, 7],
+                bytes: vec![88 + index as u8, 0, 7].into(),
             },
         })
         .collect()

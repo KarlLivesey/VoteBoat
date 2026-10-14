@@ -1,0 +1,596 @@
+
+running 2 tests
+test history::quic_actual_relay_physical_cell_logical_facade_checkpoint_wal_recovery ... ok
+test history::tcp_actual_relay_physical_cell_logical_facade_checkpoint_wal_recovery ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.55s
+
+
+running 8 tests
+test candidate::candidate_checkpoint_plan_and_legacy_schema_mismatch_refuse_atomically ... ok
+test candidate::candidate_constructor_refuses_aliases_schema_zero_and_short_control_reserve ... ok
+test candidate::candidate_public_configuration_is_nonserving_and_bound_to_explicit_schema ... ok
+test checkpoints_require_original_configuration_and_restore_atomically ... ok
+test inspection_reads_are_pure_and_bounds_are_stable_before_initialization ... ok
+test malformed_batches_and_untrusted_business_intake_leave_state_intact ... ok
+test public_bindings_and_lifetime_deployment_envelopes ... ok
+test selected_actual_activation_profile_pins_configuration_and_refuses_rebinding ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 42 tests
+test authority::accepted_capsule_retains_original_parent_credits_until_actual_failed_cleanup_observation ... ok
+test authority::actual_verified_child_authority_blocks_raw_transfer_and_physical_router_construction ... ok
+test authority::already_admitted_append_cannot_overtake_retained_original_vote_capsule ... ok
+test authority::snapshot_ack::original_duplicate_snapshot_ack_above_and_below_base_quic ... ok
+test authority::snapshot_ack::original_duplicate_snapshot_ack_above_and_below_base_tcp ... ok
+test authority::vote_window::original_accepted_votes_refresh_and_invalidate_queued_election_after_refusal ... ok
+test authority::vote_window::original_granted_reply_acceptance_preserves_full_follower_window ... ok
+test authority::vote_window::postaccept_timer_exhaustion_fences_but_keeps_original_queue_proof ... ok
+test backing::generic_backing_consumes_original_quic_outputs_and_preserves_errors ... ok
+test backing::generic_backing_consumes_original_tcp_outputs_and_preserves_errors ... ok
+test checkpoint::quic_original_parent_checkpoint_publication_compaction_and_reconcile_recover_full_bytes ... ok
+test checkpoint::tcp_original_parent_checkpoint_publication_compaction_and_reconcile_recover_full_bytes ... ok
+test endpoint::quic_endpoint_uses_selected_original_representative_and_refuses_aliases ... ok
+test endpoint::tcp_endpoint_uses_selected_original_representative_and_refuses_aliases ... ok
+test facade::abort::logical_facade_abort_retains_original_child_attempt_and_resolves_unknown_quic ... ok
+test facade::abort::logical_facade_abort_retains_original_child_attempt_and_resolves_unknown_tcp ... ok
+test facade::administration::logical_facade_configuration_original_observer_quic ... ok
+test facade::administration::logical_facade_configuration_original_observer_tcp ... ok
+test facade::cancel::logical_facade_cancelled_waits_retain_actual_child_work_quic ... ok
+test facade::cancel::logical_facade_cancelled_waits_retain_actual_child_work_tcp ... ok
+test facade::exports::logical_facade_export_survives_abort_and_original_recovery_transfer_quic ... ok
+test facade::exports::logical_facade_export_survives_abort_and_original_recovery_transfer_tcp ... ok
+test facade::exports::logical_facade_live_export_original_credits_cancel_and_close_quic ... ok
+test facade::exports::logical_facade_live_export_original_credits_cancel_and_close_tcp ... ok
+test facade::logical_facade_original_provider_ownership_and_result_gates_quic ... ok
+test facade::logical_facade_original_provider_ownership_and_result_gates_tcp ... ok
+test facade::restart::logical_facade_checkpoint_suffix_cold_backing_recovery_quic ... ok
+test facade::restart::logical_facade_checkpoint_suffix_cold_backing_recovery_tcp ... ok
+test facade::shutdown::logical_facade_close_drives_original_held_checkpoint_quic ... ok
+test facade::shutdown::logical_facade_close_drives_original_held_checkpoint_tcp ... ok
+test facade::shutdown_service::logical_facade_shutdown_held_service_client_first_quic ... ok
+test facade::shutdown_service::logical_facade_shutdown_held_service_client_first_tcp ... ok
+test facade::shutdown_service::logical_facade_shutdown_held_service_read_first_quic ... ok
+test facade::shutdown_service::logical_facade_shutdown_held_service_read_first_tcp ... ok
+test history::incompatible_mapping_refuses_without_consuming_child_ownership ... ok
+test history::quic_child_claim_checkpoint_suffix_and_cold_reopen ... ok
+test history::tcp_child_claim_checkpoint_suffix_and_cold_reopen ... ok
+test persistence::quic_original_parent_promise_and_payload_survive_child_checkpoint_suffix_restart ... ok
+test persistence::tcp_original_parent_promise_and_payload_survive_child_checkpoint_suffix_restart ... ok
+test results::defective_bounded_read_codec_fences_once_and_preserves_original_nonpositive_completion ... ok
+test results::quic_original_client_and_read_results_wait_for_consumed_child_capsules ... ok
+test results::tcp_original_client_and_read_results_wait_for_consumed_child_capsules ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 10.40s
+
+
+running 4 tests
+test held_read::quic_original_read_inspection_retains_and_resumes_real_nine_child_quorum ... ok
+test held_read::tcp_original_read_inspection_retains_and_resumes_real_nine_child_quorum ... ok
+test history::quic_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results ... ok
+test history::tcp_three_logical_voters_use_nine_native_child_owners_and_real_quorum_results ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 34.48s
+
+
+running 5 tests
+test control::early_anchor_counterexample_and_safe_pin_progress ... ok
+test control::holes_stale_suffix_original_binding_and_unavailable_recovery_refuse ... ok
+test control::missing_body_counterexample_and_safe_dependency_progress ... ok
+test control::missing_own_prefix_and_inner_quorum_refuse_then_catchup_recovers ... ok
+test search::finite_payload_checkpoint_graph ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 35.50s
+
+
+running 42 tests
+test activation::activation_bindings_early_attempts_and_partial_batches_refuse_atomically ... ok
+test activation::checkpoints_refuse_truncation_profile_changes_and_replay_history_collisions ... ok
+test activation::creation_read_bound_survives_larger_future_records_within_the_directory_capacity ... ok
+test activation::inherited_creation_reservations_survive_and_new_namespace_publication_works ... ok
+test activation::native_publication_and_activation_cuts_preserve_single_authority ... ok
+test activation::publication_activation_and_new_writes_preserve_original_history_and_indices ... ok
+test adoption::adopted_full_source_performs_later_data_split_without_old_metadata ... ok
+test adoption::adoption_provenance_profiles_capacity_and_atomic_recovery_are_checked ... ok
+test adoption::full_owner_adopts_activated_metadata_with_original_data_and_control_retries ... ok
+test adoption::native_cache_accepts_only_checked_metadata_shape_and_refuses_partial_paths ... ok
+test adoption::native_metadata_owner_adoption_cuts_preserve_data_and_resume_exact_control ... ok
+test adoption::ordered_local_parent_metadata_and_later_parent_changes_recover_together ... ok
+test checkpoints_bind_profile_fence_digest_and_original_bootstrap ... ok
+test interrupted_native_metadata_fence_recovers_old_or_complete_image ... ok
+test locators::complete_oversized_move_is_refused_instead_of_truncating_its_plan ... ok
+test locators::foreign_parent_and_child_commit_reserved_updates_with_original_status_and_replay ... ok
+test locators::locator_provenance_bounds_stale_views_and_atomic_profiles_are_checked ... ok
+test locators::locator_updates_wait_for_open_creation_without_spending_its_completion_reserve ... ok
+test locators::native_cache_requires_complete_foreign_boundary_refreshes ... ok
+test locators::native_locator_journal_cuts_recover_old_or_complete_foreign_manifest ... ok
+test locators::one_foreign_manifest_refreshes_both_boundaries_atomically ... ok
+test metadata_wrappers_retain_receipts_within_declared_capacity ... ok
+test owner_locators::imported_full_and_partial_locators_preserve_import_and_retire_exact_later_merge ... ok
+test owner_locators::locator_observation_profiles_pending_and_checkpoint_corruption_refuse_atomically ... ok
+test owner_locators::native_locator_adoption_cuts_preserve_all_owner_families_and_exact_retries ... ok
+test owner_locators::original_owner_adopts_real_locator_then_splits_without_changing_data_lineage ... ok
+test owner_locators::retained_owner_keeps_exports_and_adopts_a_later_retained_transfer ... ok
+test pending_changes_stale_plans_and_open_lifecycles_cannot_freeze ... ok
+test plans_validate_closure_and_preserve_data_ownership ... ok
+test rejected_control_ids_survive_recovery_and_do_not_exhaust_the_success_reserve ... ok
+test repeated::another_move_preserves_three_origins_and_rejects_old_control_ids ... ok
+test repeated::nested_construction_is_bounded_before_ownership_transfer ... ok
+test repeated::repeated_move_native_journal_cuts_keep_fence_publication_activation_and_retries ... ok
+test repeated::repeated_move_preserves_all_authority_domains_creations_and_retries ... ok
+test repeated::repeated_profiles_refuse_wrong_bindings_stale_views_and_partial_restore ... ok
+test source_fence_exports_exact_old_authority_and_keeps_original_history ... ok
+test source_selection_bootstrap_and_failed_batches_preserve_atomicity ... ok
+test target::interrupted_native_metadata_import_recovers_only_stage_or_complete_history ... ok
+test target::metadata_import_preserves_source_indices_and_never_serves_as_active_authority ... ok
+test target::rehashed_rejection_records_and_command_shaped_fence_boundaries_refuse ... ok
+test target::target_construction_pending_order_and_changed_imports_refuse ... ok
+test target::target_import_and_checkpoint_bind_all_provenance_and_recover_local_phase_indices ... ok
+
+test result: ok. 42 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 15.24s
+
+
+running 3 tests
+test checked_program_canonical_footprints_and_phase_ids_are_immutable ... ok
+test participant_public_reads_charge_original_box_and_preserve_opening_configuration ... ok
+test public_start_dedup_admission_read_bounds_and_checkpoint_roundtrip ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 41 tests
+test admission_cases::host_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::host_admission_generated_ownership_and_refusal_history ... ok
+test admission_cases::native_admission_final_credit_release_crosses_threads_and_view_close ... ok
+test admission_cases::native_admission_generated_ownership_and_refusal_history ... ok
+test admission_cases::opaque_lease_destroys_its_provider_token_once_after_all_thread_owners ... ok
+test admission_cases::shared_history_detects_a_provider_releasing_accepted_credits_early - should panic ... ok
+test application_cases::counter_satisfies_shared_application_read_and_checkpoint_obligations ... ok
+test application_cases::independent_host_set_application_satisfies_same_public_obligations ... ok
+test application_cases::shared_application_checker_rejects_bad_receipts_partial_failure_and_future_reads ... ok
+test buffer_cases::host_buffer_generated_owner_class_and_byte_lifetimes ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_early_credit_release ... ok
+test buffer_cases::mutants::shared_buffer_checker_detects_nonzero_growth ... ok
+test buffer_cases::native_buffer_generated_owner_class_and_byte_lifetimes ... ok
+test cases::command_bytes::construction_reads_and_default_expose_exact_content ... ok
+test cases::command_bytes::every_retained_clone_is_charged_without_source_spare_capacity ... ok
+test cases::command_bytes::independent_content_and_complete_entry_fields_determine_equality ... ok
+test cases::command_bytes::shared_clone_survives_source_drop_and_replacement_is_independent ... ok
+test cases::default_errors::checkpoint_default_is_object_safe_and_preserves_raw_provider_error_outcomes ... ok
+test cases::default_errors::default_comparison_never_turns_provider_errors_into_a_mismatch ... ok
+test cases::entry_clone::clone_from_matches_derived_replacement_and_independent_ownership ... ok
+test cases::entry_clone::fieldwise_clone_matches_independent_derived_top_level_for_every_payload ... ok
+test cases::entry_equality::converted_spare_capacity_and_every_command_field_follow_content_equality ... ok
+test cases::entry_equality::full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries ... ok
+test cases::entry_equality::generated_entries_match_independent_tuple_equality_in_both_directions ... ok
+test cases::matches::default_is_object_safe_and_preserves_complete_snapshot_and_configuration_equality ... ok
+test credential_cases::host_credential_journal_satisfies_shared_publication_contract_without_native ... ok
+test credential_native::certain_and_uncertain_replacements_preserve_their_distinct_recovery_contracts ... ok
+test credential_native::failed_construction_returns_the_same_io_owner_without_replacement ... ok
+test credential_native::file_journal_satisfies_shared_contract_and_independent_reopen ... ok
+test credential_native::host_and_file_record_io_preserve_exact_bounded_replacement ... ok
+test credential_native::native_host_io_journal_satisfies_shared_contract_and_exact_retry_is_not_rewritten ... ok
+test host_log_store_satisfies_scoped_ticket_and_range_obligations_without_native ... ok
+test host_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test host_snapshots_preserve_stages_exact_references_and_two_log_anchors ... ok
+test native::file_log_store_satisfies_same_obligations_and_rejects_prior_session_tickets ... ok
+test native::model_log_store_satisfies_same_obligations_and_recovers_original_history ... ok
+test snapshot_native::file_reopen_discards_each_unpublished_stage_and_rejects_old_admissions ... ok
+test snapshot_native::file_snapshot_bindings_cannot_publish_or_pin_each_others_images ... ok
+test snapshot_native::file_snapshots_preserve_same_contract_and_both_anchors_after_reopen ... ok
+test snapshot_worker_native::shared_worker_close_and_queries_survive_native_file_reopen ... ok
+test snapshot_worker_native::shared_worker_close_and_queries_use_host_snapshot_contracts ... ok
+
+test result: ok. 41 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+
+running 79 tests
+test campaigning::pause_also_blocks_a_valid_timeout_now_invitation ... ok
+test campaigning::pause_blocks_explicit_campaign_without_changing_durable_vote ... ok
+test campaigning::paused_candidate_ignores_its_late_ballots_and_still_votes_and_replicates ... ok
+test campaigning::paused_leader_can_handoff_and_cannot_campaign_again ... ok
+test campaigning::pending_self_vote_finishes_before_pause_discards_candidacy ... ok
+test campaigning::recovery_requires_the_host_to_reapply_volatile_pause ... ok
+test counter_read_waits_for_application_and_cannot_reuse_or_move_barrier ... ok
+test delayed_read_acknowledgements_cannot_authorize_a_later_read_after_leader_change ... ok
+test drain_coordinator::bounded_fair_dispatch_rejects_stale_completion_and_rechecks_original_intent ... ok
+test drain_coordinator::missing_and_wrong_group_views_do_not_discard_independent_dispatches ... ok
+test duplicate_reordered_messages_cannot_commit_different_entries ... ok
+test election_ballot_and_commit_effects_wait_for_exact_persistence ... ok
+test failed_election_persistence_fences_core_without_network_effects ... ok
+test fault_schedule::codec::all_actions_round_trip_with_original_ids_and_bytes ... ok
+test fault_schedule::codec::malformed_and_oversized_traces_are_rejected_before_execution ... ok
+test fault_schedule::crash::composed_process_crashes_and_failed_syncs_replay_exactly ... ok
+test fault_schedule::crash::failed_sync_fences_actual_store_and_core_without_escaping_vote_effects ... ok
+test fault_schedule::crash::process_crash_and_power_loss_distinguish_complete_unsynced_vote_frames ... ok
+test fault_schedule::crash::uncertain_counter_write_recovers_and_original_id_applies_once ... ok
+test fault_schedule::delayed::admitted_and_synced_votes_wait_for_actual_completion_delivery ... ok
+test fault_schedule::delayed::delayed_completion_schedules_replay_with_bounded_pending_ownership ... ok
+test fault_schedule::delayed::independently_completed_follower_is_required_for_a_real_durable_quorum ... ok
+test fault_schedule::delayed::power_loss_distinguishes_written_and_synced_unobserved_votes ... ok
+test fault_schedule::publication::ambiguous_commit_publication_recovers_counter_and_original_retry_once ... ok
+test fault_schedule::publication::manifest_failure_before_or_after_replacement_never_releases_votes ... ok
+test fault_schedule::publication::short_vote_tails_and_complete_error_frames_have_distinct_recovery ... ok
+test fault_schedule::publication::short_write_and_manifest_failures_share_exact_composed_replay ... ok
+test fault_schedule::reads::cached_leadership_cannot_replace_fresh_read_quorum_or_one_use ... ok
+test fault_schedule::reads::cancelled_pending_and_ready_reads_reject_old_replies_and_request_reuse ... ok
+test fault_schedule::reads::lagging_application_restart_and_fencing_cannot_reuse_read_authority ... ok
+test fault_schedule::reads::read_cancel_crash_and_partition_schedule_replays_exact_authority ... ok
+test fault_schedule::recorded_seeded_schedules_replay_the_same_actual_core_states ... ok
+test fault_schedule::reduce::actual_false_sync_prefix_loss_is_replayed_and_minimized ... ok
+test fault_schedule::reduce::exhausted_reduction_budget_preserves_the_same_failure_without_claiming_minimality ... ok
+test fault_schedule::snapshots::histories::a_replaced_snapshot_retains_the_old_log_anchor_through_every_new_phase_cut ... ok
+test fault_schedule::snapshots::histories::aborted_replacement_stage_preserves_actual_published_log_anchor ... ok
+test fault_schedule::snapshots::histories::compacted_snapshot_composes_with_delayed_wal_completion_and_uncertain_original_retry ... ok
+test fault_schedule::snapshots::histories::every_snapshot_phase_survives_process_and_power_loss_with_original_retry ... ok
+test fault_schedule::snapshots::histories::failed_seal_and_lost_root_completions_recover_actual_published_state ... ok
+test fault_schedule::snapshots::histories::false_snapshot_seal_sync_is_replayed_reduced_and_rejected_before_voting ... ok
+test fault_schedule::snapshots::histories::lagging_actual_follower_installs_pinned_snapshot_and_recovers_original_operations ... ok
+test fault_schedule::snapshots::histories::seeded_snapshot_network_and_restart_histories_replay_exactly_without_vacuous_phases ... ok
+test fault_schedule::snapshots::histories::snapshot_trace_version_and_malformed_phases_are_rejected_before_execution ... ok
+test leadership::an_uncommitted_source_tail_cannot_emit_a_handoff_signal ... ok
+test leadership::lagging_target_waits_for_durable_prefix_and_exact_cancel_releases_quiescence ... ok
+test leadership::recursive_quorum_policy_still_decides_the_target_election ... ok
+test leadership::signal_without_election_quorum_is_not_transfer_success ... ok
+test leadership::source_restart_discards_volatile_attempt_and_does_not_infer_completion ... ok
+test leadership::target_catch_up_must_complete_persistence_before_it_can_trigger_handoff ... ok
+test leadership::target_restart_before_ballot_persistence_requires_fresh_leader_contact ... ok
+test leadership::timeout_signal_cannot_send_votes_until_target_term_and_ballot_are_durable ... ok
+test leadership::transfer_rejects_self_unknown_and_stale_target_identity_without_mutation ... ok
+test leadership::transfer_uses_ordinary_quorum_election_and_preserves_committed_commands ... ok
+test leadership::wrong_signal_origin_config_tail_and_unobserved_leader_are_rejected ... ok
+test native_disk_histories_survive_recovery_on_every_replica ... ok
+test native_restart_and_failed_read_term_sync_never_release_old_authority ... ok
+test no_quorum_means_no_committed_application_effects ... ok
+test persistence_driver_rejects_a_different_body_with_identical_ticket_metadata ... ok
+test read_ack_rejects_foreign_scope_old_term_and_previous_store_session ... ok
+test read_authority_and_applied_prefix_history_with_host_storage ... ok
+test read_authority_and_applied_prefix_history_with_native_storage ... ok
+test read_probe_higher_term_waits_for_its_exact_durability_ticket ... ok
+test read_requires_current_term_commit_and_ready_tokens_are_bounded_and_cancelable ... ok
+test recursive_policy_is_used_for_both_election_and_commit ... ok
+test recursive_reads_require_fresh_distinct_voters_for_the_exact_context ... ok
+test reference::histories::differential_trace_rejects_unknown_versions_ids_truncation_and_unbounded_actions ... ok
+test reference::histories::known_majority_reference_matches_original_commands_retries_partition_repair_and_reads ... ok
+test reference::histories::reference_host_application_corruption_is_detected_and_reduced_after_real_commit ... ok
+test reference::persistence::accepted_written_and_synced_original_commands_match_after_process_and_power_cuts ... ok
+test reference::persistence::acknowledged_completed_original_ids_survive_restart_and_stale_callbacks ... ok
+test reference::persistence::falsely_reported_reference_sync_loses_original_ack_and_reduces_with_actual_power_cut ... ok
+test reference::persistence::original_follower_acknowledgements_wait_for_explicit_durability_completion ... ok
+test reference::persistence::persistence_opcodes_are_versioned_and_invalid_phase_order_is_refused ... ok
+test seeded_fault_schedules_preserve_committed_prefixes_and_acknowledged_recovery ... ok
+test single_voter_commits_only_after_local_persistence ... ok
+test single_voter_read_and_restart_reject_prior_session_authority ... ok
+test stale_incarnations_configuration_and_old_session_responses_are_rejected ... ok
+test three_node_commit_partition_election_and_conflict_repair_native_and_host ... ok
+test three_node_history_with_only_host_components ... ok
+
+test result: ok. 79 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.05s
+
+
+running 7 tests
+test activated_sources_retire_after_merge_preserving_original_activation_lineage_and_target_data ... ok
+test host::host_provider_lifetime_ends_only_on_successful_retirement_and_stays_absent_on_restore ... ok
+test initial_source_retirement_drops_data_but_retains_original_fence_and_exact_retry ... ok
+test retirement_codecs_checkpoint_truncations_replay_and_binding_are_atomic ... ok
+test retirement_requires_complete_matching_activation_and_scoped_retention_release ... ok
+test storage::activated_source_retirement_survives_interrupted_publication_and_native_reclamation ... ok
+test storage::original_source_retirement_survives_interrupted_publication_and_native_reclamation ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+
+running 192 tests
+test admission_and_apply_recheck_context_and_bind_retries_to_key_and_payload ... ok
+test bootstrap_binds_owner_namespace_policy_and_initial_application_before_service ... ok
+test checkpoint_preserves_semantic_bindings_and_rejects_every_truncation_atomically ... ok
+test durable_local_fence_rejects_previously_admitted_data_and_reads_without_thaw ... ok
+test host::control_read_view_charges_host_nested_capacity_and_preserves_admission ... ok
+test host::host_application_nested_capacity_bounds_and_group_constraints_are_preserved ... ok
+test host::scoped_profile_preserves_host_receipt_and_read_capacity_contracts ... ok
+test malformed_commands_and_failed_batches_leave_the_application_unchanged ... ok
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_quic ... ok
+test native::automatic_lookup::automatic_manifest_cache_miss_and_late_cancel_tcp ... ok
+test native::automatic_lookup::automatic_routed_service_quic_reopens_wal_and_checkpoint ... ok
+test native::automatic_lookup::automatic_routed_service_tcp_reopens_wal_and_checkpoint ... ok
+test native::automatic_lookup::fixed_manifest_source_recovers_quic_after_another_voter_wins ... ok
+test native::automatic_lookup::fixed_manifest_source_recovers_tcp_after_another_voter_wins ... ok
+test native::automatic_lookup::metadata_requests_recover_exact_not_leader_admission ... ok
+test native::automatic_lookup::remote_manifest::quic_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::automatic_lookup::remote_manifest::remote_lookup_recovers_quic_after_original_source_loses_authority ... ok
+test native::automatic_lookup::remote_manifest::remote_lookup_recovers_tcp_after_original_source_loses_authority ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::quic_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_checkpoints_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::restart::tcp_child_reopens_wal_twice_while_all_metadata_is_offline ... ok
+test native::automatic_lookup::remote_manifest::tcp_remote_manifest_route_uses_original_quorum_reads_and_child_fencing ... ok
+test native::creation::quic_created_group_resumes_partial_assignment_and_runs_with_metadata_offline ... ok
+test native::creation::quic_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+test native::creation::quic_namespace_partial_publication_activation_unread_receipts_owner_abort ... ok
+test native::creation::quic_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+test native::creation::quic_namespace_ready_publish_activate_survives_reopen_and_metadata_outage ... ok
+test native::creation::tcp_created_group_resumes_partial_assignment_and_runs_with_metadata_offline ... ok
+test native::creation::tcp_namespace_cancellation_unread_receipt_and_late_readiness ... ok
+test native::creation::tcp_namespace_partial_publication_activation_unread_receipts_owner_abort ... ok
+test native::creation::tcp_namespace_race_recorded_owner_loss_and_recovery_schedules ... ok
+test native::creation::tcp_namespace_ready_publish_activate_survives_reopen_and_metadata_outage ... ok
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_checkpoint ... ok
+test native::creation_source::quic_created_namespace_split_recovers_unread_phases_from_wal ... ok
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_checkpoint ... ok
+test native::creation_source::tcp_created_namespace_split_recovers_unread_phases_from_wal ... ok
+test native::delegation::cancellation::quic_cancelled_delegation_replans_and_recovers_from_checkpoints ... ok
+test native::delegation::cancellation::tcp_cancelled_delegation_replans_and_recovers_from_wal ... ok
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_checkpoint ... ok
+test native::delegation::cross_authority::quic_cross_authority_insertion_unread_phases_wal ... ok
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_checkpoint ... ok
+test native::delegation::cross_authority::tcp_cross_authority_insertion_unread_phases_wal ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::quic_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_checkpoint ... ok
+test native::delegation::deletion::tcp_recursive_deletion_recovers_unread_phases_from_wal ... ok
+test native::delegation::imported_partial::quic_partial_import_checkpoint ... ok
+test native::delegation::imported_partial::quic_partial_import_wal ... ok
+test native::delegation::imported_partial::recovery::restart_expectation_includes_actual_campaign_noop_after_capture ... ok
+test native::delegation::imported_partial::recovery::restart_expectation_preserves_actual_committed_tail_and_original_retry ... ok
+test native::delegation::imported_partial::tcp_partial_import_checkpoint ... ok
+test native::delegation::imported_partial::tcp_partial_import_wal ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_quic_after_moves_and_reopen ... ok
+test native::delegation::metadata_moves::automatic_metadata::automatic_metadata_reads_tcp_after_moves_and_reopen ... ok
+test native::delegation::metadata_moves::automatic_metadata::recovery::admitted_lookup_leadership_change_drains_before_fresh_authority ... ok
+test native::delegation::metadata_moves::automatic_metadata::recovery::wrong_ticket_preserves_original_leadership_change_and_cleanup ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_quic_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_checkpoint ... ok
+test native::delegation::metadata_moves::endpoint_discovery::moved_metadata_endpoint_refresh_tcp_wal ... ok
+test native::delegation::metadata_moves::endpoint_discovery::recovery::quic_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+test native::delegation::metadata_moves::endpoint_discovery::recovery::tcp_known_unknown_preserves_original_duplicate_and_cold_retry ... ok
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::imported_retirement::quic_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_checkpoint ... ok
+test native::delegation::metadata_moves::families::imported_retirement::tcp_imported_retirement_wal ... ok
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::families::quic_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::quic_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_checkpoint ... ok
+test native::delegation::metadata_moves::families::retained_handoff::tcp_later_retained_handoff_wal ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_checkpoint ... ok
+test native::delegation::metadata_moves::families::tcp_retained_and_imported_metadata_move_wal ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_checkpoints_and_original_observations ... ok
+test native::delegation::metadata_moves::quic_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_checkpoints_and_original_observations ... ok
+test native::delegation::metadata_moves::tcp_metadata_moves_recover_wal_and_serve_without_ancestors ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_checkpoints ... ok
+test native::delegation::quic_delegated_split_recovers_every_phase_from_wal ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok
+test native::delegation::reparenting::quic_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_checkpoints_and_original_observations ... ok
+test native::delegation::reparenting::tcp_cross_authority_reparent_resumes_wal_and_serves_without_metadata ... ok
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_checkpoints ... ok
+test native::delegation::repeat::quic_delegated_repeated_moves_recover_from_wal ... ok
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_checkpoints ... ok
+test native::delegation::repeat::tcp_delegated_repeated_moves_recover_from_wal ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::quic_imported_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::quic_retained_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_imported_parent_move_wal ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_checkpoint ... ok
+test native::delegation::retained::parent_moves::tcp_retained_parent_move_wal ... ok
+test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::quic_foreign_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::quic_root_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::tcp_foreign_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_checkpoint ... ok
+test native::delegation::retained::tcp_root_retained_scopes_recover_unread_phases_from_wal ... ok
+test native::delegation::retained_failed_store_does_not_poison_the_next_history ... ok
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_checkpoints ... ok
+test native::delegation::tcp_delegated_split_recovers_every_phase_from_wal ... ok
+test native::delegation::unread_phase::accepted_unknown_must_not_be_an_applied_unread_cut ... ok
+test native::delegation::unread_phase::unknown_completion_waits_for_actual_native_reservation_release ... ok
+test native::insertion::nested::moves::quic_nested_later_moves_recover_unread_phases_from_checkpoint ... ok
+test native::insertion::nested::moves::quic_nested_later_moves_recover_unread_phases_from_wal ... ok
+test native::insertion::nested::moves::retirement::merge::quic_nested_merge_retirement_recovers_partial_cleanup_from_wal ... ok
+test native::insertion::nested::moves::retirement::merge::quic_nested_merge_retirement_recovers_partial_cleanup_then_reclaims ... ok
+test native::insertion::nested::moves::retirement::merge::tcp_nested_merge_retirement_recovers_partial_cleanup_from_wal ... ok
+test native::insertion::nested::moves::retirement::merge::tcp_nested_merge_retirement_recovers_partial_cleanup_then_reclaims ... ok
+test native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_then_reclaims_checkpoint ... ok
+test native::insertion::nested::moves::retirement::quic_assigned_nested_retirement_recovers_unread_result_from_wal ... ok
+test native::insertion::nested::moves::retirement::tcp_assigned_nested_retirement_recovers_then_reclaims_checkpoint ... ok
+test native::insertion::nested::moves::retirement::tcp_assigned_nested_retirement_recovers_unread_result_from_wal ... ok
+test native::insertion::nested::moves::tcp_nested_later_moves_recover_unread_phases_from_checkpoint ... ok
+test native::insertion::nested::moves::tcp_nested_later_moves_recover_unread_phases_from_wal ... ok
+test native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_checkpoint ... ok
+test native::insertion::nested::quic_guarded_nested_insertion_recovers_unread_phases_from_wal ... ok
+test native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_checkpoint ... ok
+test native::insertion::nested::quic_nested_insertion_recovers_unread_phases_from_wal ... ok
+test native::insertion::nested::tcp_guarded_nested_insertion_recovers_unread_phases_from_checkpoint ... ok
+test native::insertion::nested::tcp_guarded_nested_insertion_recovers_unread_phases_from_wal ... ok
+test native::insertion::nested::tcp_nested_insertion_recovers_unread_phases_from_checkpoint ... ok
+test native::insertion::nested::tcp_nested_insertion_recovers_unread_phases_from_wal ... ok
+test native::insertion::quic_insertion_recovers_unread_phases_from_checkpoint ... ok
+test native::insertion::quic_insertion_recovers_unread_phases_from_wal ... ok
+test native::insertion::tcp_insertion_recovers_unread_phases_from_checkpoint ... ok
+test native::insertion::tcp_insertion_recovers_unread_phases_from_wal ... ok
+test native::merge::quic_merge_collision_keeps_sources_fenced_and_target_inactive_after_reopen ... ok
+test native::merge::quic_merge_resumes_partial_fences_and_every_phase_from_checkpoint_status ... ok
+test native::merge::quic_merge_resumes_partial_fences_and_every_phase_from_wal_status ... ok
+test native::merge::tcp_merge_collision_keeps_sources_fenced_and_target_inactive_after_reopen ... ok
+test native::merge::tcp_merge_resumes_partial_fences_and_every_phase_from_checkpoint_status ... ok
+test native::merge::tcp_merge_resumes_partial_fences_and_every_phase_from_wal_status ... ok
+test native::quic_child_writes_checkpoint_and_restart_without_parent_commits ... ok
+test native::quic_target_activation_preserves_retries_through_checkpoint_reopen ... ok
+test native::quic_target_activation_serves_without_metadata_and_survives_wal_reopen ... ok
+test native::quic_target_staging_and_inline_import_survive_checkpoint_reopen ... ok
+test native::quic_target_staging_and_inline_import_survive_wal_reopen ... ok
+test native::quic_transfer_publication_survives_checkpoint_and_lost_observation ... ok
+test native::quic_transfer_publication_survives_full_history_and_wal_reopen ... ok
+test native::quic_transfer_source_freeze_survives_checkpoint_and_later_log_progress ... ok
+test native::quic_transfer_source_freeze_survives_wal_reopen_and_lost_observation ... ok
+test native::retirement::quic_retirement_recovers_after_checkpoint_and_reclamation ... ok
+test native::retirement::quic_retirement_recovers_from_wal_after_lost_receipt ... ok
+test native::retirement::tcp_retirement_recovers_after_checkpoint_and_reclamation ... ok
+test native::retirement::tcp_retirement_recovers_from_wal_after_lost_receipt ... ok
+test native::shutdown::long_rtt::actual_native_long_rtt_close_retains_original_timer_past_fixture_cutoff ... ok
+test native::split::membership::quic_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+test native::split::membership::quic_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::quic_split_import_preserves_joint_fence_after_final_wal_recovery ... ok
+test native::split::membership::quic_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... ok
+test native::split::membership::tcp_split_fence_survives_joint_checkpoint_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_fence_survives_joint_membership_and_unread_source_abort ... ok
+test native::split::membership::tcp_split_import_preserves_joint_fence_after_final_wal_recovery ... ok
+test native::split::membership::tcp_split_import_recovers_final_suffix_over_retained_joint_checkpoint ... ok
+test native::split::quic_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+test native::split::quic_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+test native::split::repeat::quic_repeated_transfer_preserves_activated_sources_through_checkpoint_reopen ... ok
+test native::split::repeat::quic_repeated_transfer_preserves_activated_sources_through_wal_reopen ... ok
+test native::split::repeat::tcp_repeated_transfer_preserves_activated_sources_through_checkpoint_reopen ... ok
+test native::split::repeat::tcp_repeated_transfer_preserves_activated_sources_through_wal_reopen ... ok
+test native::split::tcp_split_resumes_every_phase_from_checkpoint_status_without_dual_owners ... ok
+test native::split::tcp_split_resumes_every_phase_from_wal_status_without_dual_owners ... ok
+test native::tcp_child_writes_checkpoint_and_restart_without_parent_commits ... ok
+test native::tcp_target_activation_preserves_retries_through_checkpoint_reopen ... ok
+test native::tcp_target_activation_serves_without_metadata_and_survives_wal_reopen ... ok
+test native::tcp_target_staging_and_inline_import_survive_checkpoint_reopen ... ok
+test native::tcp_target_staging_and_inline_import_survive_wal_reopen ... ok
+test native::tcp_transfer_publication_survives_checkpoint_and_lost_observation ... ok
+test native::tcp_transfer_publication_survives_full_history_and_wal_reopen ... ok
+test native::tcp_transfer_source_freeze_survives_checkpoint_and_later_log_progress ... ok
+test native::tcp_transfer_source_freeze_survives_wal_reopen_and_lost_observation ... ok
+test native::wrong_group_rejected_before_native_startup_creates_files ... ok
+test protocol_close::contract::accepted_original_work_and_unsupported_protocol_detail_cannot_enter_cleanup ... ok
+test protocol_close::contract::caller_time_cannot_regress_within_an_original_protocol_window ... ok
+test protocol_close::contract::captured_future_close_timer_pins_the_original_cutoff_and_never_renews ... ok
+test protocol_close::contract::fresh_connection_unread_input_and_nonclosing_identity_refuse_cleanup ... ok
+test protocol_close::contract::retired_peer_cannot_reappear_even_with_its_original_binding_and_deadline ... ok
+test protocol_close::contract::settled_close_window_keeps_the_maximum_original_timer_after_another_owner_retires ... ok
+test scoped::native_scoped_fence_frame_cuts_recover_old_or_exact_fence_with_retained_service ... ok
+test scoped::profile_binding_and_malformed_checkpoints_cannot_erase_scoped_fences ... ok
+test scoped::retained_data_continues_while_transferred_scope_stays_fenced_after_replay ... ok
+test scoped::scoped_fence_requires_one_exact_local_owned_range_and_valid_data_context ... ok
+test scoped::scoped_pending_order_control_capacity_and_conflicts_are_atomic ... ok
+test semantic_and_inner_capacity_reservations_preserve_control_space ... ok
+
+test result: ok. 192 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1838.82s
+
+
+running 5 tests
+test bounded_export_reservations_and_pending_conflicts_reject_without_fencing ... ok
+test checkpoint_images_profiles_and_contradictory_reservations_refuse_atomically ... ok
+test host_provider_padded_images_have_stable_reservations_and_bad_boundary_never_fences ... ok
+test immutable_export_stays_at_original_f_while_retained_data_and_retries_advance ... ok
+test native_frame_cuts_keep_fence_and_original_image_together_with_retained_service ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+
+running 27 tests
+test buffered_append_can_catch_up_across_compaction_without_snapshot_install ... ok
+test buffered_compaction_schedules_survive_native_file_reopen_and_original_retry ... ok
+test checkpoint_plus_tail_preserves_dedup_and_host_application_schema ... ok
+test compacted_three_node_snapshot_catchup_and_election_with_host_providers ... ok
+test durable_pin_switch_conformance_with_host_provider ... ok
+test invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores ... ok
+test log_match::binding_precedes_comparison_and_comparison_errors_precede_snapshot_work ... ok
+test log_match::snapshot_install_verification_keeps_the_full_arbitrary_state_method ... ok
+test missing_anchor_refuses_recovery_and_swapped_stage_cannot_install ... ok
+test native::bounded_codec_rejects_oversize_lengths_even_with_valid_checksums ... ok
+test native::codec::changed_or_truncated_decode_fences_before_sync_and_preserves_pinned_retry_checkpoint ... ok
+test native::codec::substituted_file_decode_preserves_previous_root_after_fenced_close_and_reopen ... ok
+test native::codec::transparent_host_codec_reopens_real_checkpoint_and_preserves_retry_and_pin ... ok
+test native::corruption_truncation_missing_data_and_identity_mismatch_fail_closed ... ok
+test native::downstream_snapshot_codec_is_used_and_incompatible_version_is_rejected ... ok
+test native::interrupted_chunks_seals_and_publication_recover_old_or_complete_new ... ok
+test native::native_files_restore_checkpoint_plus_tail_and_exclude_concurrent_writers ... ok
+test native::native_snapshot_catchup_history_and_actual_files ... ok
+test native::native_snapshot_conformance_and_restart_session_fencing ... ok
+test native::native_wal_and_checkpoint_crashes_recover_acknowledged_state_and_retries ... ok
+test native::pins_survive_restart_and_legacy_manifest_upgrade ... ok
+test native::snapshot_log_failure_and_lost_application_completion_recover_without_false_ack ... ok
+test native::staged_corruption_is_detected_against_submitted_bytes_before_sealing ... ok
+test public_snapshot_conformance_with_host_provider ... ok
+test recursive_snapshot_catchup_keeps_the_persisted_policy ... ok
+test restore_refuses_altered_membership_even_with_same_reference_configuration_id ... ok
+test snapshot_refusal::delayed_snapshot_refusal_persists_higher_term_without_replication_credit ... ok
+
+test result: ok. 27 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+
+running 9 tests
+test faults::catalog_budget_refuses_before_payload_side_effect_and_keeps_previous_control_selection ... ok
+test faults::every_append_sync_and_catalog_failure_fences_and_recovers_a_complete_original_batch ... ok
+test faults::every_reclaim_primitive_recovers_exact_state_and_safe_next_slot_reuse ... ok
+test files::native_file_stripes_reclaim_recover_and_preserve_exclusive_fixed_layout ... ok
+test files::native_lost_device_keeps_diagnostic_control_and_refuses_payload_recovery ... ok
+test histories::corrupted_controls_and_selected_payload_never_fall_back_to_older_bytes ... ok
+test histories::mirrored_control_survives_either_device_loss_but_payload_loss_quarantines_recovery ... ok
+test histories::one_group_stripes_original_bytes_and_reopens_exact_suffix_snapshot_and_sessions ... ok
+test membership::mirrored_membership_ballot_origin_and_snapshot_configuration_survive_reclaim_and_device_loss ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+
+
+running 6 tests
+test invalid_profile_direction_amount_and_limits_refuse_before_application ... ok
+test pending_start_capacity_and_all_destination_phase_ids_are_reserved ... ok
+test public_application_receipts_reads_and_checkpoint_use_existing_contracts ... ok
+test public_failed_batches_and_restores_preserve_original_application ... ok
+test public_role_incarnation_and_opening_account_configuration_are_enforced ... ok
+test public_transfer_identity_and_phase_namespaces_preserve_exact_binding ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
+running 7 tests
+test all_truncations_changed_intent_and_checkpoint_bindings_refuse_atomically ... ok
+test checkpoint_and_wal_replay_preserve_fence_intent_and_original_export ... ok
+test constructor_returns_original_application_and_provider_bound_covers_full_lifetime ... ok
+test export_budget_binding_refuses_before_fence_and_pending_data_is_checked ... ok
+test rejects_key_mismatch_unbound_fence_and_partial_batch_without_mutation ... ok
+test same_batch_freeze_retains_exact_boundary_while_outer_prefix_advances ... ok
+test status_query_is_prefix_checked_and_charges_fixed_and_nested_capacity ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.39s
+
+
+running 9 tests
+test admission_and_failed_batches_refuse_missing_stage_bad_data_and_provider_capacity ... ok
+test canonical_import_codec_and_hash_bind_content_and_return_original_inputs ... ok
+test checkpoint_and_wal_replay_restore_original_import_status_and_content ... ok
+test conflicting_import_content_and_ids_cannot_replace_original_data ... ok
+test constructor_and_binding_refuse_wrong_target_scope_limits_and_keep_provider ... ok
+test expected_source_commitment_refuses_altered_image_content_or_metadata ... ok
+test multi_source_import_requires_ordered_complete_coverage_and_refuses_id_collisions ... ok
+test stage_import_and_retries_keep_target_nonserving_and_source_lineage ... ok
+test target_status_reads_are_prefix_checked_and_charge_spare_source_capacity ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+
+running 18 tests
+test host_fixture_uses_only_public_wire_contract_without_native_features ... ok
+test leadership::targeted_handoff_requires_wire8_and_roundtrips_u128_operation_and_exact_scope ... ok
+test native::authority_format_is_explicit_bounded_and_preserves_membership_payloads ... ok
+test native::every_single_bit_truncation_trailing_data_and_unknown_version_fail_closed ... ok
+test native::explicit_wire_two_roundtrips_all_configuration_phases_and_joint_final_snapshots ... ok
+test native::frame_command_entry_count_and_decoded_memory_limits_are_symmetric ... ok
+test native::native_all_rpc_multiplexing_snapshot_policy_and_canonical_frame_roundtrip ... ok
+test native::readiness_format_checks_envelope_capabilities_and_explicit_version ... ok
+test native::snapshot_policy_shape_weights_membership_and_payload_budgets_are_checked ... ok
+test native::valid_checksums_cannot_hide_unbounded_lengths_or_invalid_identity_and_entries ... ok
+test native::wire_two_integrity_truncation_and_valid_crc_hostile_configuration_fields_fail_closed ... ok
+test native::wire_two_maximum_checkpoint_operation_set_remains_bounded_and_lossless ... ok
+test native::wire_two_membership_base_rejects_invalid_history_and_operation_sets ... ok
+test native::wire_two_recursive_weighted_policy_survives_without_changing_bootstrap ... ok
+test native::wire_two_resource_limits_include_configurations_and_checkpoint_operation_history ... ok
+test shared_contract::mutants::shared_assertions_detect_altered_supplied_bytes ... ok
+test shared_contract::mutants::shared_assertions_detect_false_encoded_size ... ok
+test shared_contract::mutants::shared_assertions_detect_scope_blind_encoding ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.54s
+

@@ -160,7 +160,7 @@ fn refusing_or_nonfaithful_selected_log_codecs_cannot_encode_image() {
             term: 1,
             payload: EntryPayload::Command {
                 operation: c.operation,
-                bytes,
+                bytes: bytes.into(),
             },
         }])
         .unwrap();

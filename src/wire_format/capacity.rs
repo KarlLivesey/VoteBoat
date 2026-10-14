@@ -84,7 +84,7 @@ pub(super) fn check(
     if let Rpc::Append { entries, .. } = &mut message.rpc {
         entries[0].payload = EntryPayload::Command {
             operation: required.record.operation,
-            bytes: vec![0],
+            bytes: vec![0].into(),
         };
     }
     let command = footprint(codec, scope, &message, app.command_bytes - 1)?;

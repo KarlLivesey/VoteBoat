@@ -278,7 +278,7 @@ fn accepted_unknown_must_not_be_an_applied_unread_cut() {
     let logs = creation::abandon(nodes, 1);
     assert!(logs.values().all(|log| log.entries.iter().any(|e| matches!(
         &e.payload, EntryPayload::Command { operation: id, bytes: payload }
-            if *id == operation && payload == &bytes && e.index <= log.commit_index
+            if *id == operation && payload.as_slice() == bytes.as_slice() && e.index <= log.commit_index
     ))));
     let mut nodes = open(
         configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),

@@ -323,7 +323,7 @@ fn complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds() {
                         term: 1,
                         payload: EntryPayload::Command {
                             operation: OperationId::new(u128::from(index)).unwrap(),
-                            bytes: vec![0; limits.parent_log.max_command_bytes],
+                            bytes: vec![0; limits.parent_log.max_command_bytes].into(),
                         },
                     }],
                 }),

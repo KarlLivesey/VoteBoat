@@ -29,7 +29,7 @@ fn command(index: u64, operation: u128, term: u64) -> LogEntry {
         term,
         payload: EntryPayload::Command {
             operation: OperationId::new(operation).unwrap(),
-            bytes: 1i64.to_le_bytes().to_vec(),
+            bytes: 1i64.to_le_bytes().to_vec().into(),
         },
     }
 }

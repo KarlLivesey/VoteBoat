@@ -1,0 +1,2 @@
+[ perf record: Woken up 1868 times to write data ]
+[ perf record: Captured and wrote 468.341 MB /home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/perf.data (58240 samples) ]

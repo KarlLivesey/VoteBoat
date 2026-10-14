@@ -1,0 +1,8 @@
+{
+  "commit": "8da7192125eee780752935d8e608b8379ec8a757",
+  "inputs": 1440,
+  "source_root": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched454-linux/source",
+  "exact_selected_hashes": true,
+  "cold_test": "cold_recovery::quic_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores",
+  "scope": "Functional baseline control only; not throughput qualification. No build or test started."
+}

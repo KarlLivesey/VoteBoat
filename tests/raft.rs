@@ -163,7 +163,7 @@ impl<S: LogStore> Cluster<S> {
         self.applied[&id]
             .iter()
             .filter_map(|e| match &e.payload {
-                EntryPayload::Command { bytes, .. } => Some(bytes.clone()),
+                EntryPayload::Command { bytes, .. } => Some(bytes.to_vec()),
                 _ => None,
             })
             .collect()
@@ -646,7 +646,7 @@ fn persistence_driver_rejects_a_different_body_with_identical_ticket_metadata() 
     else {
         unreachable!()
     };
-    *bytes = vec![2];
+    *bytes = vec![2].into();
     let before = io.0.borrow().log.clone();
     assert_eq!(
         persist_effect(&mut replica.core, &mut replica.store, update),

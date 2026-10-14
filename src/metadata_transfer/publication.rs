@@ -171,13 +171,13 @@ impl MetadataPublishingSource {
             let outcome = if *operation != proposed.imported.source.operation {
                 MetadataPublishingOutcome::Conflict
             } else if let Some((status, command)) = &self.publication {
-                if command == bytes {
+                if command.as_slice() == bytes.as_slice() {
                     MetadataPublishingOutcome::Published(*status)
                 } else {
                     MetadataPublishingOutcome::Conflict
                 }
             } else {
-                self.publication = Some((proposed, bytes.clone()));
+                self.publication = Some((proposed, bytes.to_vec()));
                 MetadataPublishingOutcome::Published(proposed)
             };
             self.inner.apply_batch(&[LogEntry {
@@ -192,14 +192,15 @@ impl MetadataPublishingSource {
             }
             let mut forwarded = entry.clone();
             if bytes.starts_with(b"VBMPSB02") {
-                if *bytes != self.bootstrap_command(40)? {
+                if bytes.as_slice() != self.bootstrap_command(40)?.as_slice() {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 forwarded.payload = EntryPayload::Command {
                     operation: *operation,
                     bytes: self
                         .inner
-                        .bootstrap_command(self.inner.readiness_requirements().command_bytes)?,
+                        .bootstrap_command(self.inner.readiness_requirements().command_bytes)?
+                        .into(),
                 };
             }
             let receipt = self.inner.apply_batch(&[forwarded])?.remove(0);
@@ -283,7 +284,7 @@ impl ProposalAdmission for MetadataPublishingSource {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: op,
-                        bytes: b.to_vec(),
+                        bytes: b.into(),
                     },
                 })?
                 .unwrap();

@@ -83,7 +83,7 @@ fn malformed_batch_and_every_checkpoint_truncation_preserve_original_state() {
         term: 1,
         payload: EntryPayload::Command {
             operation: s.phases().coordinator()[0],
-            bytes: TransferApplication::start(s).unwrap(),
+            bytes: TransferApplication::start(s).unwrap().into(),
         },
     };
     let bad = LogEntry {
@@ -91,7 +91,7 @@ fn malformed_batch_and_every_checkpoint_truncation_preserve_original_state() {
         term: 1,
         payload: EntryPayload::Command {
             operation: s.phases().coordinator()[1],
-            bytes: vec![0],
+            bytes: vec![0].into(),
         },
     };
     assert_eq!(

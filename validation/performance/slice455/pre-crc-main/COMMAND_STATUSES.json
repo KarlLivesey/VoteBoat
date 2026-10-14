@@ -1,0 +1,663 @@
+{
+  "main_final_status": 101,
+  "main_final_stage": "candidate_cold_focused",
+  "commands": [
+    {
+      "path": "all-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt1/all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt1/final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt1/final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/all-integrations.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/checkpoint-focused.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/checkpoint-focused2.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/conversion-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/joint-budget-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/metadata-library-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/owned-append-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/owned-incoming-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/production-check1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/production-check2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/production-check3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/root-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/singleton-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/unit-compile1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/unit-compile2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt2/unit-compile3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt2/wrapper-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/all-integrations.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/checkpoint-focused.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/checkpoint-focused2.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/conversion-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/joint-budget-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/metadata-library-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/owned-append-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/owned-incoming-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/production-check1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/production-check2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/production-check3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/root-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/singleton-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/unit-compile1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/unit-compile2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt3/unit-compile3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt3/wrapper-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/all-integrations.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/checkpoint-focused.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/checkpoint-focused2.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/conversion-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/effect-native.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/joint-budget-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/metadata-library-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/owned-append-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/owned-incoming-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/production-check1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/production-check2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/production-check3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/root-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/singleton-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/unit-compile1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/unit-compile2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt4/unit-compile3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt4/wrapper-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/all-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/checkpoint-focused.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/checkpoint-focused2.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/conversion-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/core-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/core-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/effect-native.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/joint-budget-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/matched-tests.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/metadata-library-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/owned-append-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/owned-incoming-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/production-check1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/production-check2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/production-check3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/root-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/root-format.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/singleton-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/strict-default.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/three-services.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/unit-compile1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/unit-compile2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt5/unit-compile3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt5/wrapper-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/all-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/all-lib.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/checkpoint-focused.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/checkpoint-focused2.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/conversion-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/core-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/core-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/effect-native.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/joint-budget-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/matched-tests.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/metadata-library-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/owned-append-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/owned-incoming-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/padded-all-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/padded-core-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/padded-integrations.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/production-check1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/production-check2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/production-check3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/root-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/root-format.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/singleton-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/strict-default.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/three-services.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/unit-compile1.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/unit-compile2.status",
+      "exit": 101
+    },
+    {
+      "path": "attempt6-padded-stale-target/unit-compile3.status",
+      "exit": 0
+    },
+    {
+      "path": "attempt6-padded-stale-target/wrapper-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "candidate-cold.status",
+      "exit": 101
+    },
+    {
+      "path": "checkpoint-focused.status",
+      "exit": 101
+    },
+    {
+      "path": "checkpoint-focused2.status",
+      "exit": 0
+    },
+    {
+      "path": "conversion-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "core-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "core-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "effect-native.status",
+      "exit": 0
+    },
+    {
+      "path": "final-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "final-matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "joint-budget-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "matched-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "matched-format.status",
+      "exit": 0
+    },
+    {
+      "path": "matched-strict.status",
+      "exit": 0
+    },
+    {
+      "path": "matched-tests.status",
+      "exit": 0
+    },
+    {
+      "path": "metadata-library-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "owned-append-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "owned-incoming-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "padded-all-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "padded-core-lib.status",
+      "exit": 0
+    },
+    {
+      "path": "padded-integrations.status",
+      "exit": 0
+    },
+    {
+      "path": "padded-matched.status",
+      "exit": 0
+    },
+    {
+      "path": "production-check1.status",
+      "exit": 101
+    },
+    {
+      "path": "production-check2.status",
+      "exit": 101
+    },
+    {
+      "path": "production-check3.status",
+      "exit": 0
+    },
+    {
+      "path": "root-format-write.status",
+      "exit": 0
+    },
+    {
+      "path": "root-format.status",
+      "exit": 0
+    },
+    {
+      "path": "singleton-focused.status",
+      "exit": 0
+    },
+    {
+      "path": "strict-all.status",
+      "exit": 0
+    },
+    {
+      "path": "strict-core.status",
+      "exit": 0
+    },
+    {
+      "path": "strict-default.status",
+      "exit": 0
+    },
+    {
+      "path": "strict-native.status",
+      "exit": 0
+    },
+    {
+      "path": "three-services.status",
+      "exit": 0
+    },
+    {
+      "path": "unit-compile1.status",
+      "exit": 101
+    },
+    {
+      "path": "unit-compile2.status",
+      "exit": 101
+    },
+    {
+      "path": "unit-compile3.status",
+      "exit": 0
+    },
+    {
+      "path": "wrapper-focused.status",
+      "exit": 0
+    }
+  ],
+  "scope": "Historical attempts remain distinct. Exit0 commands are passed subscopes, not full qualification; final source is preCRC."
+}

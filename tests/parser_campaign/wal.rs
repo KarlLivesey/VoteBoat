@@ -103,7 +103,7 @@ fn generated_native_batch_mutations_reach_bounded_inner_decoders() {
     let EntryPayload::Command { bytes, .. } = &mut command.payload else {
         unreachable!()
     };
-    *bytes = vec![0x91; 16];
+    *bytes = vec![0x91; 16].into();
     batch_corpus(
         vec![update(
             &state,

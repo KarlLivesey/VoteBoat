@@ -3,6 +3,101 @@
   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
   "reviews": [
     {
+      "public_contract": "CommandBytes",
+      "status": "partial",
+      "runners": [
+        {
+          "file": "tests/provider_conformance/log_store/command_bytes.rs",
+          "symbol": "construction_reads_and_default_expose_exact_content"
+        },
+        {
+          "file": "tests/provider_conformance/log_store/command_bytes.rs",
+          "symbol": "shared_clone_survives_source_drop_and_replacement_is_independent"
+        },
+        {
+          "file": "tests/provider_conformance/log_store/command_bytes.rs",
+          "symbol": "independent_content_and_complete_entry_fields_determine_equality"
+        },
+        {
+          "file": "tests/provider_conformance/log_store/command_bytes.rs",
+          "symbol": "every_retained_clone_is_charged_without_source_spare_capacity"
+        }
+      ],
+      "operations": [
+        {
+          "names": [
+            "from_vec",
+            "from_slice",
+            "default",
+            "as_slice",
+            "as_ref",
+            "deref",
+            "debug"
+          ],
+          "obligation": "Capture exact immutable content from owned and borrowed inputs; empty/default has no content. Read/format traits expose the same bytes without mutable or Arc access. Construction drops no accepted work and creates no runtime/provider.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/log_store/command_bytes.rs",
+              "symbol": "construction_reads_and_default_expose_exact_content"
+            }
+          ],
+          "remaining": [
+            "Selected finite content values do not certify every allocation failure or arbitrary host provider; source/private cleanup and layout controls are separately executed."
+          ]
+        },
+        {
+          "names": [
+            "clone",
+            "to_vec"
+          ],
+          "obligation": "A nonempty clone retains original immutable backing across source drop. Independent mutable export and explicit replacement cannot mutate an earlier value or clone; reference sharing is not durability authority.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/log_store/command_bytes.rs",
+              "symbol": "shared_clone_survives_source_drop_and_replacement_is_independent"
+            }
+          ],
+          "remaining": [
+            "General concurrent queue/application/provider lifetimes, all shutdown combinations and physical memory/debt qualification remain separate."
+          ]
+        },
+        {
+          "names": [
+            "eq"
+          ],
+          "obligation": "Independent equal buffers compare byte-exactly; a changed byte or full128-bit operation/header context differs. Immutable same-backing shortcut cannot conceal mutable data. Altered persistence effects use replacement and remain subject to exact preflight.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/log_store/command_bytes.rs",
+              "symbol": "independent_content_and_complete_entry_fields_determine_equality"
+            },
+            {
+              "file": "tests/provider_conformance/log_store/entry_clone.rs",
+              "symbol": "fieldwise_clone_matches_independent_derived_top_level_for_every_payload"
+            }
+          ],
+          "remaining": [
+            "Generated arbitrary buffers and malformed provider combinations require their own conformance; pointer identity grants no commit/fencing authority."
+          ]
+        },
+        {
+          "names": [
+            "retained_bytes"
+          ],
+          "obligation": "Charge empty0 and nonempty checked, padded allocation layout for two atomic reference-count words plus content separately for every retained clone; no physical-sharing discount. Source Vec spare capacity is a pre-capture input property, not a mutable log-value capacity.",
+          "assertions": [
+            {
+              "file": "tests/provider_conformance/log_store/command_bytes.rs",
+              "symbol": "every_retained_clone_is_charged_without_source_spare_capacity"
+            }
+          ],
+          "remaining": [
+            "Conversion-peak/decode/error-order/private canonical accounting and native crash checks are executed separately; these anchors are not a physical RSS/refusal or allocator-cause proof."
+          ]
+        }
+      ]
+    },
+    {
       "public_contract": "LogicalActivationApplication over StateMachine, ProposalAdmission, BoundedStateMachine, BoundedReadableStateMachine, CheckpointStateMachine and LogicalResponseCodec",
       "status": "partial",
       "runners": [
@@ -2261,7 +2356,7 @@
           "names": [
             "state"
           ],
-          "obligation": "Return verified durable state for the exact group incarnation; missing is an error. Admission alone does not advance the durable view. Recovery preserves the acknowledged state.",
+          "obligation": "Return verified durable state for the exact group incarnation; missing is an error. Admission alone does not advance the durable view. Recovery preserves the acknowledged state. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
           "assertions": [
             {
               "file": "tests/provider_conformance/log_store.rs",
@@ -2288,7 +2383,7 @@
           "names": [
             "matches_state"
           ],
-          "obligation": "Compare the full exact GroupLog against the same verified durable view as state(). Default providers retain state() gates and error precedence; missing/fenced/provider errors remain errors. Native borrowing must not expose accepted pending transitions or certify durability. Allocation capacity is not equality. Snapshot helpers preserve binding-first refusal before comparison or snapshot/application work.",
+          "obligation": "Compare the full exact GroupLog against the same verified durable view as state(). Default providers retain state() gates and error precedence; missing/fenced/provider errors remain errors. Native borrowing must not expose accepted pending transitions or certify durability. Allocation capacity is not equality. Snapshot helpers preserve binding-first refusal before comparison or snapshot/application work. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
           "assertions": [
             {
               "file": "tests/provider_conformance/log_store/matches.rs",
@@ -2323,7 +2418,7 @@
           "names": [
             "matches_checkpoint_state"
           ],
-          "obligation": "Protected core-only immutable view comparison is exactly equivalent to full GroupLog equality. Default preserves raw matches_state errors and object safety. Native and owned-state caches are bounded to their exclusive canonical owners and one core lineage; append/metadata may preserve a previously equal prefix, and exact validated compaction transfers only surviving overlap despite storage-generation change. New entries and all metadata compare exactly. Full/replacing histories, new owner/reopen, false comparisons and uncertain fences cannot reuse old proof. Native accepted staging never advances durable verified entries; completed-state/binding error precedence remains unchanged. Only snapshot compaction opts into the seam.",
+          "obligation": "Protected core-only immutable view comparison is exactly equivalent to full GroupLog equality. Default preserves raw matches_state errors and object safety. Native and owned-state caches are bounded to their exclusive canonical owners and one core lineage; append/metadata may preserve a previously equal prefix, and exact validated compaction transfers only surviving overlap despite storage-generation change. New entries and all metadata compare exactly. Full/replacing histories, new owner/reopen, false comparisons and uncertain fences cannot reuse old proof. Native accepted staging never advances durable verified entries; completed-state/binding error precedence remains unchanged. Only snapshot compaction opts into the seam. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
           "assertions": [
             {
               "file": "tests/provider_conformance/log_store/default_errors.rs",
@@ -2347,7 +2442,7 @@
           "names": [
             "append_batch"
           ],
-          "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait.",
+          "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
           "assertions": [
             {
               "file": "tests/provider_conformance/log_store.rs",
@@ -2397,7 +2492,7 @@
           "names": [
             "fetch_range"
           ],
-          "obligation": "Return ordered durable entries within the selected generation and count/byte budget. Reject stale suffix generations and invalid boundaries. Refuse an oversized first entry instead of violating the budget; snapshot compaction reports its floor.",
+          "obligation": "Return ordered durable entries within the selected generation and count/byte budget. Reject stale suffix generations and invalid boundaries. Refuse an oversized first entry instead of violating the budget; snapshot compaction reports its floor. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
           "assertions": [
             {
               "file": "tests/provider_conformance/log_store.rs",

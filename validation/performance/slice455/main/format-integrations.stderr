@@ -1,0 +1,8 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.66s
+     Running tests/log_store.rs (target/p9/slice455/padded-target-checks/debug/deps/log_store-7ebe8448ce0d9035)
+     Running tests/native_member_startup.rs (target/p9/slice455/padded-target-checks/debug/deps/native_member_startup-d7185670ed0d2d2a)
+     Running tests/parser_campaign.rs (target/p9/slice455/padded-target-checks/debug/deps/parser_campaign-790772d78df73ba5)
+     Running tests/snapshot.rs (target/p9/slice455/padded-target-checks/debug/deps/snapshot-02c9fd3d90f42471)
+     Running tests/striped_log_store.rs (target/p9/slice455/padded-target-checks/debug/deps/striped_log_store-1746d1ce98ad3fb3)
+     Running tests/wire.rs (target/p9/slice455/padded-target-checks/debug/deps/wire-49e1a6acdb1d070b)

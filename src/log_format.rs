@@ -476,9 +476,15 @@ impl<'a> Decoder<'a> {
                 if len > limits.max_command_bytes {
                     return Err(StorageError::Corrupt("command budget"));
                 }
+                let bytes = self.take(len)?;
+                let charge = CommandBytes::retained_bytes_for_len(len)
+                    .ok_or(StorageError::Corrupt("command allocation budget"))?;
+                if charge > limits.max_wal_bytes {
+                    return Err(StorageError::Corrupt("command allocation budget"));
+                }
                 EntryPayload::Command {
                     operation,
-                    bytes: self.take(len)?.to_vec(),
+                    bytes: bytes.into(),
                 }
             }
             _ => return Err(StorageError::Corrupt("entry kind")),

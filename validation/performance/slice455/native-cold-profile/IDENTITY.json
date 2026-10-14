@@ -1,0 +1,25 @@
+{
+  "profiled_artifact": {
+    "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/padded-target-checks/debug/deps/logical_nested_native-595603f697d5c950",
+    "sha256_before": "eb4fa99e30cc905a870d64afdf1f99d36c60880a81941f9f1a01fc83a3ec582b",
+    "scope": "Existing debug allfeature integration test; no asserted release/framework or native capacity claim",
+    "preserved_copy": {
+      "path": "/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/slice455/native-cold-profile/artifacts/profiled-native-test",
+      "sha256": "eb4fa99e30cc905a870d64afdf1f99d36c60880a81941f9f1a01fc83a3ec582b",
+      "build_id": "564e06880493f7904c7608e74e898f8b5ac79f6c",
+      "origin": "Exact perf build-id cached ELF, independently hashed against actual pre-capture artifact; isolated after original checkout test artifact was rebuilt for CRC",
+      "bytes": 175670728,
+      "committed": false
+    }
+  },
+  "source_inventory": {
+    "path": "SOURCE_BEFORE_CRC.json",
+    "sha256": "ed8b77275015ef7da291c797e8e502bdcf5dbbb2490b98904c467d38b4f9da29",
+    "inputs": 1444,
+    "baseline_commit": "8da7192125eee780752935d8e608b8379ec8a757",
+    "pre_crc32c_extend_sha256": "1d85bed5d7d961cec714a6292a01a554e6b304ce33ade76df79431df6860086e",
+    "relation": "Existing pre-CRC-change selected functional-source inventory supplied by parent; subset excludes README/.gitignore/rust-toolchain compared with planned full Mac export. Snapshot is not independently a contemporaneous exhaustive capture-source/build guard. Exact profiled executable is identified by recorded before hash. No new CRC candidate is profiled here."
+  },
+  "recording": "cycles:u F99 dwarf8192 mmap128, no policy changes or sudo; whole debug functional test and children, terminal101",
+  "status_files": "First failed missing /usr/bin/time startup127 isolated under attempt1-missing-time; original resources.py retry terminal101 is distinct. All original failures retained."
+}

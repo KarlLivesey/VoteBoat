@@ -45,7 +45,7 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() 
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(1).unwrap(),
-                        bytes: vec![7],
+                        bytes: vec![7].into(),
                     },
                 }],
             }),
@@ -68,7 +68,9 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes() 
     let EntryPayload::Command { bytes: payload, .. } = &mut bytes.entries[0].payload else {
         unreachable!()
     };
-    payload[0] ^= 1;
+    let mut replacement = payload.to_vec();
+    replacement[0] ^= 1;
+    *payload = replacement.into();
     assert_eq!(store.matches_state(group, &bytes), Ok(false));
     assert_eq!(
         store.matches_state(missing, &actual),

@@ -282,7 +282,9 @@ fn relay_currentness_validates_pending_original_and_bounded_empty_alias_bytes() 
     let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
         unreachable!()
     };
-    bytes.push(9);
+    let mut replacement = bytes.to_vec();
+    replacement.push(9);
+    *bytes = replacement.into();
     assert!(matches!(
         core.request_window(&altered),
         OriginalScope::Retired

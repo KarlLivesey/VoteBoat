@@ -57,11 +57,11 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
     );
     let suffix = change.suffix.as_mut().unwrap();
     suffix.entries.reserve(100);
+    let raw_capacity = suffix.entries.capacity();
     let EntryPayload::Command { bytes, .. } = &mut suffix.entries[0].payload else {
         unreachable!()
     };
-    bytes.reserve(10000);
-    let raw_capacity = bytes.capacity();
+    let raw_charge = bytes.retained_bytes();
     let raw_pointer = bytes.as_ptr();
     let plan = OwnedNextLog::plan_copy(
         &LogView::new(&state),
@@ -74,15 +74,18 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
     let EntryPayload::Command { bytes, .. } = &owned.entries[0].payload else {
         unreachable!()
     };
-    assert_eq!(bytes.capacity(), bytes.len());
+    assert_eq!(bytes.retained_bytes(), raw_charge);
     assert_eq!(owned.entries.capacity(), owned.entries.len());
-    assert_ne!(bytes.as_ptr(), raw_pointer);
+    assert_eq!(bytes.as_ptr(), raw_pointer);
     assert_eq!(pointer(plan.entry_at(3).unwrap()), bytes.as_ptr());
     let EntryPayload::Command { bytes, .. } = &change.suffix.as_ref().unwrap().entries[0].payload
     else {
         unreachable!()
     };
-    assert_eq!(bytes.capacity(), raw_capacity);
+    assert_eq!(
+        change.suffix.as_ref().unwrap().entries.capacity(),
+        raw_capacity
+    );
     assert_eq!(bytes.as_ptr(), raw_pointer);
     assert!(plan.matches_update(&change));
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
@@ -108,7 +111,9 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
     else {
         unreachable!()
     };
-    bytes.reserve(10000);
+    let mut raw = bytes.to_vec();
+    raw.reserve(10000);
+    *bytes = raw.into();
     let original = change.clone();
     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
     let plan = OwnedNextLog::plan_owned(
@@ -130,7 +135,9 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
         if operation {
             *id = OperationId::new(99).unwrap();
         } else {
-            bytes[0] ^= 1;
+            let mut raw = bytes.to_vec();
+            raw[0] ^= 1;
+            *bytes = raw.into();
         }
         assert!(!plan.matches_update(&wrong));
     }

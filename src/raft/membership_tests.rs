@@ -632,7 +632,7 @@ fn retained_repair_pair(gap: u64, overlap: usize) -> (Raft, Raft) {
             term: 1,
             payload: EntryPayload::Command {
                 operation: operation(u128::from(1000 + index)),
-                bytes: vec![index as u8; 8],
+                bytes: vec![index as u8; 8].into(),
             },
         })
         .collect::<Vec<_>>();
@@ -714,7 +714,9 @@ fn joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners() {
                 let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
                     unreachable!()
                 };
-                bytes[0] ^= 1;
+                let mut replacement = bytes.to_vec();
+                replacement[0] ^= 1;
+                *bytes = replacement.into();
             }
             1 => entries[1].term = repair.term + 1,
             2 => entries[1].index += 1,
@@ -756,7 +758,9 @@ fn joint_repair_tail_respects_byte_budget_and_omits_oversized_joint() {
         .unwrap()
         .retained_payload_bytes();
     source.limits.max_command_bytes = joint_bytes;
-    source.limits.max_batch_bytes = 256 + 37 + joint_bytes + 45;
+    let tail_bytes =
+        source.state().entries[source.state().entries.len() - 2].retained_payload_bytes();
+    source.limits.max_batch_bytes = 256 + 37 + joint_bytes + 37 + tail_bytes;
     let message = emitted_repair(&mut source);
     let Rpc::Append {
         entries,
@@ -943,7 +947,9 @@ fn batched_repair_checks_authority_ranges_and_ack_context_before_progress() {
                         let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
                             unreachable!()
                         };
-                        bytes[0] ^= 1;
+                        let mut replacement = bytes.to_vec();
+                        replacement[0] ^= 1;
+                        *bytes = replacement.into();
                     }
                     8 => entries[0].payload = joint.payload.clone(),
                     9 => joint.index = 1,

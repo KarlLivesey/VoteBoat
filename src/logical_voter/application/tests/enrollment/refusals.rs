@@ -99,7 +99,7 @@ fn selected_native_codec_refuses_empty_data_and_truncated_commands_are_atomic() 
             term: 1,
             payload: EntryPayload::Command {
                 operation: c.operation,
-                bytes: bytes[..cut].to_vec(),
+                bytes: bytes[..cut].to_vec().into(),
             },
         };
         assert!(a.apply_batch(&[e]).is_err());

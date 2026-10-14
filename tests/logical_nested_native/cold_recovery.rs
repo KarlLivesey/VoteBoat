@@ -145,7 +145,7 @@ fn capture(host: &Host<'_, '_>, middle_bindings: Vec<StoreBinding>, suffix_index
             assert!(suffix.index > anchor.index);
             assert!(
                 matches!(&suffix.payload, EntryPayload::Command { operation, bytes }
-            if operation.get() == 300001 && bytes == &0i64.to_le_bytes())
+            if operation.get() == 300001 && bytes.as_slice() == 0i64.to_le_bytes())
             );
             assert_eq!(
                 local.applications[&group].applied_index(),

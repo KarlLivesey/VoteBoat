@@ -93,6 +93,9 @@ fn entry(index: u64, operation: OperationId, bytes: Vec<u8>) -> LogEntry {
     LogEntry {
         index,
         term: 1,
-        payload: EntryPayload::Command { operation, bytes },
+        payload: EntryPayload::Command {
+            operation,
+            bytes: bytes.into(),
+        },
     }
 }

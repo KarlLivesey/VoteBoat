@@ -1,0 +1,202 @@
+// SPDX-License-Identifier: RPL-1.5
+// Copyright (c) 2026 Karl Livesey
+//! An independent derived payload oracle, including the zero-byte command path.
+use super::*;
+use voteboat::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
+
+fn oracle(left: &LogEntry, right: &LogEntry) -> bool {
+    (left.index, left.term, &left.payload) == (right.index, right.term, &right.payload)
+}
+
+fn configured(change: ConfigurationChange) -> EntryPayload {
+    EntryPayload::Configuration(Box::new(ConfigurationRecord {
+        operation: OperationId::new(u128::MAX).unwrap(),
+        expected: ConfigurationId::new(1).unwrap(),
+        change,
+    }))
+}
+
+fn configurations() -> Vec<EntryPayload> {
+    let boot = bootstrap(1, 3);
+    let next = Configuration::new(
+        ConfigurationId::new(2).unwrap(),
+        boot.policy,
+        boot.voter_stores,
+        Default::default(),
+    )
+    .unwrap();
+    let mut different_operation = configured(ConfigurationChange::Final {
+        id: ConfigurationId::new(2).unwrap(),
+    });
+    let EntryPayload::Configuration(record) = &mut different_operation else {
+        unreachable!()
+    };
+    record.operation = OperationId::new(1).unwrap();
+    let mut different_expected = different_operation.clone();
+    let EntryPayload::Configuration(record) = &mut different_expected else {
+        unreachable!()
+    };
+    record.expected = ConfigurationId::new(2).unwrap();
+    let different_change = configured(ConfigurationChange::Final {
+        id: ConfigurationId::new(3).unwrap(),
+    });
+    vec![
+        different_change,
+        different_operation,
+        different_expected,
+        configured(ConfigurationChange::Learners(next.clone())),
+        configured(ConfigurationChange::Joint {
+            id: ConfigurationId::new(2).unwrap(),
+            next,
+        }),
+        configured(ConfigurationChange::Final {
+            id: ConfigurationId::new(2).unwrap(),
+        }),
+    ]
+}
+
+#[test]
+fn generated_entries_match_independent_tuple_equality_in_both_directions() {
+    let mut payloads = vec![EntryPayload::Noop];
+    payloads.extend(configurations());
+    for id in [1, (1 << 64) | 1, (1 << 127) | 1, u128::MAX] {
+        for length in [0, 1, 2, 7, 16, 31, 257] {
+            for fill in [0, 255] {
+                let mut bytes = vec![fill; length];
+                bytes.reserve(19);
+                payloads.push(EntryPayload::Command {
+                    operation: OperationId::new(id).unwrap(),
+                    bytes: bytes.into(),
+                });
+            }
+        }
+    }
+    let entries: Vec<_> = [(0, 0), (1, 7), (u64::MAX, u64::MAX)]
+        .into_iter()
+        .flat_map(|(index, term)| {
+            payloads.iter().cloned().map(move |payload| LogEntry {
+                index,
+                term,
+                payload,
+            })
+        })
+        .collect();
+    for (i, left) in entries.iter().enumerate() {
+        for (j, right) in entries.iter().enumerate() {
+            let equal = oracle(left, right);
+            assert_eq!(left == right, equal, "pair {i}/{j}");
+            assert_eq!(right == left, equal, "reverse pair {i}/{j}");
+            assert_eq!(left != right, !equal, "inequality pair {i}/{j}");
+        }
+    }
+}
+
+#[test]
+fn converted_spare_capacity_and_every_command_field_follow_content_equality() {
+    for length in [0, 1, 17, 1024] {
+        let original = LogEntry {
+            index: u64::MAX,
+            term: u64::MAX,
+            payload: EntryPayload::Command {
+                operation: OperationId::new((1 << 127) | 7).unwrap(),
+                bytes: vec![9; length].into(),
+            },
+        };
+        let mut capacity = original.clone();
+        let EntryPayload::Command { bytes, .. } = &mut capacity.payload else {
+            unreachable!()
+        };
+        let charge = bytes.retained_bytes();
+        let mut replacement = bytes.to_vec();
+        let before = replacement.capacity();
+        replacement.reserve(before + 31);
+        assert!(replacement.capacity() > before);
+        *bytes = replacement.into();
+        assert_eq!(bytes.retained_bytes(), charge);
+        assert_eq!(capacity, original);
+        assert!(oracle(&capacity, &original));
+        let changes: &[fn(&mut LogEntry)] = &[
+            |e| e.index = 0,
+            |e| e.term = 0,
+            |e| e.payload = EntryPayload::Noop,
+            |e| {
+                let EntryPayload::Command { operation, .. } = &mut e.payload else {
+                    unreachable!()
+                };
+                *operation = OperationId::new(7).unwrap();
+            },
+            |e| {
+                let EntryPayload::Command { bytes, .. } = &mut e.payload else {
+                    unreachable!()
+                };
+                let mut replacement = bytes.to_vec();
+                replacement.push(9);
+                *bytes = replacement.into();
+            },
+        ];
+        for change in changes {
+            let mut different = original.clone();
+            change(&mut different);
+            assert!(!oracle(&different, &original));
+            assert_ne!(different, original);
+        }
+        if length > 0 {
+            let mut different = original.clone();
+            let EntryPayload::Command { bytes, .. } = &mut different.payload else {
+                unreachable!()
+            };
+            let mut replacement = bytes.to_vec();
+            replacement[length - 1] ^= 1;
+            *bytes = replacement.into();
+            assert!(!oracle(&different, &original));
+            assert_ne!(different, original);
+        }
+    }
+}
+
+#[test]
+fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries() {
+    let mut store = HostLogStore::new(1);
+    append(&mut store, vec![LogMutation::Create(bootstrap(1, 3))]);
+    let mut state = store.state(group(1)).unwrap();
+    state.entries = vec![
+        LogEntry {
+            index: 1,
+            term: 1,
+            payload: EntryPayload::Command {
+                operation: OperationId::new(u128::MAX).unwrap(),
+                bytes: Vec::new().into(),
+            },
+        },
+        entry(2, 1, 7),
+        LogEntry {
+            index: 3,
+            term: 1,
+            payload: configurations().pop().unwrap(),
+        },
+    ];
+    store.durable.insert(group(1), state.clone());
+    let object: &dyn LogStore = &store;
+    assert_eq!(object.matches_state(group(1), &state), Ok(true));
+    let changes: &[fn(&mut GroupLog)] = &[
+        |s| s.revision = LogRevision::new(99).unwrap(),
+        |s| s.entries[0].index += 1,
+        |s| s.entries[0].term += 1,
+        |s| s.entries[0].payload = EntryPayload::Noop,
+        |s| {
+            let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload else {
+                unreachable!()
+            };
+            let mut replacement = bytes.to_vec();
+            replacement.push(7);
+            *bytes = replacement.into();
+        },
+        |s| s.entries.swap(0, 1),
+        |s| s.entries[2].payload = EntryPayload::Noop,
+    ];
+    for change in changes {
+        let mut different = state.clone();
+        change(&mut different);
+        assert_eq!(object.matches_state(group(1), &different), Ok(false));
+    }
+}

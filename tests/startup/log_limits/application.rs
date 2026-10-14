@@ -31,7 +31,7 @@ fn entries(input: &[LogEntry]) -> Result<Vec<LogEntry>, ApplicationError> {
         .map(|original| {
             let mut entry = original.clone();
             if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
-                *bytes = canonical(bytes)?.to_vec();
+                *bytes = canonical(bytes)?.into();
             }
             Ok(entry)
         })

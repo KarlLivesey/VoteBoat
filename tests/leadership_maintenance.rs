@@ -32,7 +32,7 @@ fn command(index: u64, term: u64, c: LeadershipCommand) -> LogEntry {
         term,
         payload: EntryPayload::Command {
             operation: c.intent().request.operation,
-            bytes: c.encode().unwrap(),
+            bytes: c.encode().unwrap().into(),
         },
     }
 }
@@ -42,7 +42,9 @@ fn data(index: u64, op: u128, value: i64) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(op).unwrap(),
-            bytes: Maintenance::<Counter>::data(&value.to_le_bytes(), 100).unwrap(),
+            bytes: Maintenance::<Counter>::data(&value.to_le_bytes(), 100)
+                .unwrap()
+                .into(),
         },
     }
 }
@@ -232,7 +234,7 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
         let e = LogEntry {
             payload: EntryPayload::Command {
                 operation,
-                bytes: bytes[..end].to_vec(),
+                bytes: bytes[..end].to_vec().into(),
             },
             ..c.clone()
         };

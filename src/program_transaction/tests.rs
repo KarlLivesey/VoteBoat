@@ -87,7 +87,7 @@ fn entry(index: u64, group: GroupIdentity, c: &Command) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: c.operation(group).unwrap(),
-            bytes: codec::encode(c).unwrap(),
+            bytes: codec::encode(c).unwrap().into(),
         },
     }
 }

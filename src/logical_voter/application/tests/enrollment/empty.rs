@@ -107,7 +107,10 @@ fn host_empty_checkpoint_codec_imports_and_restores_the_actual_zero_byte_applica
         term: 1,
         payload: EntryPayload::Command {
             operation: c.operation,
-            bytes: a.encode_command(&c, a.limits.max_command_bytes).unwrap(),
+            bytes: a
+                .encode_command(&c, a.limits.max_command_bytes)
+                .unwrap()
+                .into(),
         },
     };
     assert_eq!(

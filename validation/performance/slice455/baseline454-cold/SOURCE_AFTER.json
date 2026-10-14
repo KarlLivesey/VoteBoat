@@ -1,0 +1,10 @@
+{
+  "commit": "8da7192125eee780752935d8e608b8379ec8a757",
+  "inputs": 1440,
+  "exact_selected_hashes_and_modes": true,
+  "terminal": 101,
+  "selected": 1,
+  "failed": 1,
+  "seconds": 133.5,
+  "failure": "phase=close; host.rs197 progress timeout; differs from candidate upper_retry timeout; no causal claim"
+}

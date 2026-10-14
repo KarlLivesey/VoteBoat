@@ -912,7 +912,7 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
                     term: state.hard_state.term,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(operation).unwrap(),
-                        bytes: delta.to_le_bytes().to_vec(),
+                        bytes: delta.to_le_bytes().to_vec().into(),
                     },
                 }],
             }),
@@ -1022,7 +1022,7 @@ fn recovered_state_for(
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(retry_command.0).unwrap(),
-                bytes: retry_command.1.to_le_bytes().to_vec(),
+                bytes: retry_command.1.to_le_bytes().to_vec().into(),
             },
         }])
         .unwrap();

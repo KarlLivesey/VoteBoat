@@ -153,7 +153,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: id,
-                    bytes: pending_bytes.to_vec(),
+                    bytes: pending_bytes.into(),
                 },
             };
             next.apply_batch(&[entry])?;
@@ -166,7 +166,7 @@ where
             term: 1,
             payload: EntryPayload::Command {
                 operation,
-                bytes: bytes.to_vec(),
+                bytes: bytes.into(),
             },
         };
         if let Command::Data { hint, key, payload } = next.request(bytes)? {

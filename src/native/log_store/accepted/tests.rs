@@ -33,7 +33,9 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
     let EntryPayload::Command { bytes, .. } = &mut input.payload else {
         unreachable!()
     };
-    bytes.reserve(4096);
+    let mut raw = bytes.to_vec();
+    raw.reserve(4096);
+    *bytes = raw.into();
     let first_update = mutation(
         &store,
         1,
@@ -48,7 +50,10 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
     let EntryPayload::Command { bytes, .. } = &tail(&store)[0].payload else {
         unreachable!()
     };
-    assert_eq!(bytes.capacity(), bytes.len());
+    assert_eq!(
+        bytes.retained_bytes(),
+        bytes.len() + 2 * std::mem::size_of::<usize>()
+    );
     let middle_update = mutation(&store, 1, 129, None);
     let middle = store.append_batch(vec![middle_update]).unwrap();
     let second_update = mutation(

@@ -1,0 +1,4 @@
+   Compiling voteboat v0.1.0 (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/p9/matched454-linux/source)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 20.08s
+     Running tests/logical_nested_native.rs (/home/karllivesey/Documents/ChatGPT/VoteBoat/target/debug/deps/logical_nested_native-595603f697d5c950)
+error: test failed, to rerun pass `--test logical_nested_native`

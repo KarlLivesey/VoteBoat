@@ -486,7 +486,8 @@ where
             }
             if let EntryPayload::Command { operation, bytes } = &entry.payload {
                 if let Some(record) = &next.retired {
-                    let outcome = if *operation == record.status.operation && *bytes == record.bytes
+                    let outcome = if *operation == record.status.operation
+                        && bytes.as_slice() == record.bytes.as_slice()
                     {
                         RetirementOutcome::Retired(record.status)
                     } else {
@@ -519,7 +520,7 @@ where
                     let status = Self::status_for(entry.index, bytes, &proof);
                     next.retired = Some(RetiredRecord {
                         status,
-                        bytes: bytes.clone(),
+                        bytes: bytes.to_vec(),
                         proof,
                         lineage,
                     });
@@ -617,7 +618,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 },
             }])?;
         }
@@ -640,7 +641,7 @@ where
             term: 1,
             payload: EntryPayload::Command {
                 operation,
-                bytes: bytes.to_vec(),
+                bytes: bytes.into(),
             },
         };
         next.receipt_bytes_bound(&[entry])

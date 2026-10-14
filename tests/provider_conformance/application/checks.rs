@@ -90,7 +90,7 @@ fn invalid_batches<S: Scenario>(app: &mut S::App) {
     let malformed = LogEntry {
         payload: EntryPayload::Command {
             operation: OperationId::new(4).unwrap(),
-            bytes: vec![0],
+            bytes: vec![0].into(),
         },
         ..S::command(5, 4, 1)
     };

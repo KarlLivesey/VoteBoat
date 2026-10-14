@@ -1,0 +1,7 @@
+# Slice455 pre-CRC functional evidence
+
+The final original main status is101 at `candidate_cold_focused`. Every prior compile/test failure, focused correction, command/log/status and changed/new source snapshot is retained by attempt. Passed subscopes do not constitute a fully qualified455 candidate. `SOURCE.json` freezes1444 selected pre-CRC inputs and excludes newly added `src/format_crc/tests.rs`; the live CRC work is outside this archive.
+
+Attempt6 records a source/target reuse mistake: ordinary target normal-rlib artifacts were reused for a padded-source candidate. That attempt is preserved as stale-target evidence rather than a source failure. The subsequent isolated `padded-target-checks` correction and original candidate cold-recovery failure remain separate. The independent unchanged454 cold baseline also failed, at close rather than candidate upper-retry; neither failure establishes a causal explanation.
+
+This archive contains functional/debug evidence, source hashes/modes/PATCH and changed/new source snapshots only. No binary/build tree or full source export is copied. `ORIGINAL_SOURCE.json` maps every original file to archived bytes; files above1MiB are losslessly gzip-compressed with independent verification. This input set has no files above that threshold. `COMMAND_STATUSES.json` inventories passes and failures without merging attempts. `SHA256SUMS` seals current archived regular files.

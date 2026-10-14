@@ -121,7 +121,7 @@ fn claim(a: &mut LogicalApplication) -> LogicalReceipt {
         term: 1,
         payload: EntryPayload::Command {
             operation: command.operation,
-            bytes,
+            bytes: bytes.into(),
         },
     }])
     .unwrap()

@@ -94,7 +94,7 @@ where
                                 term: entry.term,
                                 payload: EntryPayload::Command {
                                     operation: *operation,
-                                    bytes: raw.to_vec(),
+                                    bytes: raw.into(),
                                 },
                             };
                             let mut receipts = next.inner.apply_batch(&[inner])?;
@@ -176,7 +176,7 @@ where
                             match codec::decode(bytes, self.limits.command_bytes)? {
                                 Envelope::Business(raw) => EntryPayload::Command {
                                     operation: *operation,
-                                    bytes: raw.to_vec(),
+                                    bytes: raw.into(),
                                 },
                                 Envelope::Control(_) => EntryPayload::Noop,
                             }

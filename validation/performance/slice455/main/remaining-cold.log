@@ -1,0 +1,19 @@
+
+running 14 tests
+test cold_recovery::tcp_two_levels_recover_actual_checkpoint_suffix_and_retry_from_closed_stores ... ok
+test handoff_control::tcp_observation_handoff_retains_original_child_checkpoint_until_actual_drain ... ok
+test history::quic_two_logical_levels_use_twenty_seven_native_owners ... ok
+test history::tcp_two_logical_levels_use_twenty_seven_native_owners ... ok
+test maintenance_controls::original_backing_checkpoint_admission_preserves_scope_and_waits_for_durability ... ok
+test maintenance_controls::recovered_backing_checkpoint_covers_new_original_claim_before_join ... ok
+test protocol_close::contract::accepted_original_work_and_unsupported_protocol_detail_cannot_enter_cleanup ... ok
+test protocol_close::contract::caller_time_cannot_regress_within_an_original_protocol_window ... ok
+test protocol_close::contract::captured_future_close_timer_pins_the_original_cutoff_and_never_renews ... ok
+test protocol_close::contract::fresh_connection_unread_input_and_nonclosing_identity_refuse_cleanup ... ok
+test protocol_close::contract::retired_peer_cannot_reappear_even_with_its_original_binding_and_deadline ... ok
+test protocol_close::contract::settled_close_window_keeps_the_maximum_original_timer_after_another_owner_retires ... ok
+test setup::profile::complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds ... ok
+test setup::profile::whole_static_history_and_cross_layer_capabilities_are_declared_before_activation ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 139.76s
+

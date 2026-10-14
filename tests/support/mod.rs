@@ -76,7 +76,7 @@ pub fn entry(index: u64, term: u64, value: u8) -> LogEntry {
         term,
         payload: EntryPayload::Command {
             operation: OperationId::new(index as u128 + 100).unwrap(),
-            bytes: vec![value],
+            bytes: vec![value].into(),
         },
     }
 }

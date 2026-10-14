@@ -1,0 +1,3657 @@
+diff --git a/benchmarks/matched/src/store/tests.rs b/benchmarks/matched/src/store/tests.rs
+index 46aa01c2..0b4a5172 100644
+--- a/benchmarks/matched/src/store/tests.rs
++++ b/benchmarks/matched/src/store/tests.rs
+@@ -45,7 +45,7 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes()
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(1).unwrap(),
+-                        bytes: vec![7],
++                        bytes: vec![7].into(),
+                     },
+                 }],
+             }),
+@@ -68,7 +68,9 @@ fn completed_predicate_keeps_pending_before_missing_errors_and_exact_outcomes()
+     let EntryPayload::Command { bytes: payload, .. } = &mut bytes.entries[0].payload else {
+         unreachable!()
+     };
+-    payload[0] ^= 1;
++    let mut replacement = payload.to_vec();
++    replacement[0] ^= 1;
++    *payload = replacement.into();
+     assert_eq!(store.matches_state(group, &bytes), Ok(false));
+     assert_eq!(
+         store.matches_state(missing, &actual),
+diff --git a/docs/component-contracts.json b/docs/component-contracts.json
+index e498db6a..5af4384c 100644
+--- a/docs/component-contracts.json
++++ b/docs/component-contracts.json
+@@ -10,6 +10,31 @@
+     "transitive versions pinned in Cargo.lock"
+   ],
+   "contracts": [
++    {
++      "design_id": "C01/C08/C14",
++      "public_contract": "CommandBytes",
++      "operations": [
++        "from_vec",
++        "from_slice",
++        "default",
++        "clone",
++        "as_slice",
++        "as_ref",
++        "deref",
++        "to_vec",
++        "retained_bytes",
++        "eq",
++        "debug"
++      ],
++      "native": "Common immutable log value used by native and host providers; no additional provider or runtime instance.",
++      "conformance": [
++        "src/log/command_bytes/tests.rs",
++        "tests/provider_conformance/log_store/command_bytes.rs",
++        "tests/provider_conformance/log_store/entry_clone.rs",
++        "tests/log_store/matches.rs"
++      ],
++      "scope": "Slice455 replaces mutable command Vec fields with an opaque immutable shared value. Empty content owns no allocation; nonempty clones share backing, with no mutable slice or Arc escape. Owned Vec and borrowed slice capture, read traits, independent to_vec/replacement and byte-exact equality retain full original content. Same-allocation equality is safe only under immutable ownership; independent buffers compare all bytes. Each retained clone charges the full length plus two usize control words; no sharing discount. All operation IDs, log metadata, configurations, snapshots, tickets and durability gates remain separate. Proposal input remains Vec and preserves raw shape/budget validation before bounded conversion. Native/wire representations remain tag/ID/length/content; memory charging and encoded byte length are separate. See docs/COMMAND_BYTES.md and slice455 schema for conversion peaks, lifetime, replacement and compatibility; executed qualification/performance evidence is separate."
++    },
+     {
+       "design_id": "C01/C03/C10",
+       "public_contract": "Raft completion effects / CompletionEffects",
+@@ -51,7 +76,7 @@
+         "tests/log_store/batch_limits.rs",
+         "benchmarks/matched/src/voteboat_engine.rs"
+       ],
+-      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate."
++      "scope": "Startup-only per-Core proposal/outbound ceilings, defaults64/64, hard maxima16384/1024. Count is independent of allocated staging and retained-history byte/entry limits; native defaults remain unchanged. First event locks settings; verified recovery starts at defaults and host reapplies its configuration. Fixed ordinary receive cap1024 permits asymmetric outbound batching; existing byte, identity, term, configuration and exact ticket checks remain. Repair RPCs retain64 independently. Every original retains its ordered position/result; larger-than-outbound proposal batches use durable chunked replication rather than early Written sends. Runtime visit/control/byte/output limits remain authoritative. Linux exact-original, short-tail, bounded-input, stale-completion, low-limit repair and actual modeled WAL publication cuts pass; paired capacity and Mac qualification remain separate. Slice455 retains raw Proposal Vec role/count/capacity/index/length/staging checks, then bounds source-plus-shared conversion peak before capture. The additional peak refusal is pre-admission; legacy singleton has no new batch ceiling. Original count envelopes, ordered outcomes and existing defaults remain."
+     },
+     {
+       "design_id": "C10/C15",
+@@ -380,7 +405,7 @@
+         "tests/log_owned.rs",
+         "examples/framework_benchmark/tests/owned_store.rs"
+       ],
+-      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; direct committed-voter witness queries now authorize exact promoted-store replication, while public configuration activation remains gated. General retention policies remain pending. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token. Slice201a adds shared host/core-only, native model and native file cases for all ticket domain fields, cross-store refusal, accepted suffix replacement, bounded ranges and optional reclamation. docs/provider-conformance.json links all eight operations to selected assertions and explicit remaining scope; metadata validation is not runtime certification. Slice412 adds public OwnedLogState, an opaque exclusive canonical-log validation helper for host stores. Empty validated-limit construction, atomic owned batch application, immutable group lookup and consuming export reuse private versioned delta/full validation; there are no mutable cache/state getters, unchecked imports or durability tokens. Every unit plans and correlates before any installation. The framework modeled volatile store uses this helper while preserving its pending visibility and exact-ticket barrier; native durability and configured-history validation remain unchanged. Slice426 adds object-safe matches_state with default full owned-state equality and borrowed native durable equality. Missing/fenced/provider errors match state; pending accepted data cannot replace the durable view. Snapshot verification preserves binding-first short-circuit and uses full equality, never a summary or durability token. Matched volatile comparison retains its completed-state gate and separately named observer scope. Slice428 adds optional object-safe protected checkpoint comparison with full exact default fallback. Only Raft constructs the immutable borrowed view and opaque volatile lineage; arbitrary-state matches_state remains exact. Native durable owners and OwnedLogState preserve bounded verified intervals only through privately classified append/metadata and exact surviving-prefix compaction. Full/unclassified rewrites reset; pending admission never advances durable verification. All current metadata and new entries remain exact, and compaction generation changes require explicit survivor transfer. Only compact_replica selects this seam with binding-first refusal. Full equality remains the unit/dev-profile oracle; asserted release retains ordinary assertions without rescanning the oracle. Matched observer uses a separately named inclusive verification phase with logical equal-state items, not actual traversal counts."
++      "scope": "Atomic entries/hard-state/commit and suffix fencing with pinned snapshots. Learner/joint/final configuration records and validated snapshot membership bases replay through shared host/native transitions; matching compaction requires exact local configuration/operation history, nonmatching installs cannot regress committed membership, and full-image reclaim preserves base plus suffix. All data is bounded and uncertain maintenance fences. Native wire format 2 carries membership state. Core quorum sites use the accepted-log membership view. Explicit learner-only recovery retains its bootstrap-electorate contract. Explicit recover_member/recover_member_replica additionally verify committed/accepted exact-store assignments and restore dynamic voter/learner state with verified application data; online configuration ingress remains gated on promoted-leader authorization, readiness, retirement, routes and distributed protocol validation. Historical ballots retain configuration and exact candidate store across rollback/removal/compaction; new ballots use predecessor accepted voters. Mandatory structural origin checks also validate host recovery output. Retained-voter replication bridges differing accepted heads with request-scoped replies and exact outstanding scope/context checks; direct committed-voter witness queries now authorize exact promoted-store replication, while public configuration activation remains gated. General retention policies remain pending. Slice 102 uses transparent benchmark-owned LogStore/JournalIo wrappers in actual shared three-replica TCP/QUIC runs, preserving original tickets/results/capabilities while reporting bounded per-WAL append/barrier/unit/histogram and primitive timing totals. A real-file observer test checks no early durable state and exact stale-barrier rejection/reopen; joined raw checks reconcile counts. This adds neither a production provider/API nor a durability token. Slice201a adds shared host/core-only, native model and native file cases for all ticket domain fields, cross-store refusal, accepted suffix replacement, bounded ranges and optional reclamation. docs/provider-conformance.json links all eight operations to selected assertions and explicit remaining scope; metadata validation is not runtime certification. Slice412 adds public OwnedLogState, an opaque exclusive canonical-log validation helper for host stores. Empty validated-limit construction, atomic owned batch application, immutable group lookup and consuming export reuse private versioned delta/full validation; there are no mutable cache/state getters, unchecked imports or durability tokens. Every unit plans and correlates before any installation. The framework modeled volatile store uses this helper while preserving its pending visibility and exact-ticket barrier; native durability and configured-history validation remain unchanged. Slice426 adds object-safe matches_state with default full owned-state equality and borrowed native durable equality. Missing/fenced/provider errors match state; pending accepted data cannot replace the durable view. Snapshot verification preserves binding-first short-circuit and uses full equality, never a summary or durability token. Matched volatile comparison retains its completed-state gate and separately named observer scope. Slice428 adds optional object-safe protected checkpoint comparison with full exact default fallback. Only Raft constructs the immutable borrowed view and opaque volatile lineage; arbitrary-state matches_state remains exact. Native durable owners and OwnedLogState preserve bounded verified intervals only through privately classified append/metadata and exact surviving-prefix compaction. Full/unclassified rewrites reset; pending admission never advances durable verification. All current metadata and new entries remain exact, and compaction generation changes require explicit survivor transfer. Only compact_replica selects this seam with binding-first refusal. Full equality remains the unit/dev-profile oracle; asserted release retains ordinary assertions without rescanning the oracle. Matched observer uses a separately named inclusive verification phase with logical equal-state items, not actual traversal counts. Slice455 command content is the immutable CommandBytes value; returned state and entry clones may share content while keeping independently owned mutable headers/configuration. Editing replaces a byte value and exact comparison/preflight still checks full content. Retained-payload accounting charges each owner conservatively including the shared control header. No provider method, durability authority, wire/WAL version or ticket changes."
+     },
+     {
+       "design_id": "C04",
+@@ -426,7 +451,7 @@
+         "tests/membership.rs",
+         "tests/log_reclaim/codec.rs"
+       ],
+-      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. VBLCPT01 preserves bootstrap-representable ballots; VBLCPT02 adds historical configuration/store ballot origin. Both full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records. A supplied codec owns bounded checkpoint recognition through is_checkpoint (at most 32 bytes); recovery retains mandatory state validation and reclamation refuses unrecognized images before replacement. The default preserves native markers. Downstream model and real-file tests cover exact state, sessions, tickets, trailing batches, repeated reclamation and wrong-codec refusal. Recognition is not validation or migration."
++      "scope": "Bounded version-2 entry/bootstrap/transition framing, configuration-journal entry tag 2, and snapshot mutation tag 3 with membership-checkpoint subformat 1. VBLCPT01 preserves bootstrap-representable ballots; VBLCPT02 adds historical configuration/store ballot origin. Both full live-state images preserve configuration bases, suffixes and exact counters. CRC/length/count and mandatory logical invariants validate recovery. Legacy static data remains readable; older binaries reject new mandatory records. A supplied codec owns bounded checkpoint recognition through is_checkpoint (at most 32 bytes); recovery retains mandatory state validation and reclamation refuses unrecognized images before replacement. The default preserves native markers. Downstream model and real-file tests cover exact state, sessions, tickets, trailing batches, repeated reclamation and wrong-codec refusal. Recognition is not validation or migration. Slice455 immutable command bytes preserve encoded tags/IDs/length/content. Decoder and configuration/counting footprints include the shared allocation header before allocation; malformed-input validation order and applicable batch/checkpoint bounds remain explicit. Encoded bytes and retained-memory charges are distinct."
+     },
+     {
+       "design_id": "C05",
+@@ -1037,7 +1062,7 @@
+         "tests/wire/shared_contract.rs",
+         "tests/wire/shared_contract/mutants.rs"
+       ],
+-      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1\u20135; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1\u20136 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets. Direct encoded_length/encode_into provision caller-owned frame slices; native sizing is allocation-free and encoding preserves canonical bytes. Host compatibility defaults use separately bounded temporary Vec encoding. Slice170 roundtrips the actual core older-term SnapshotAck { index: 0 } refusal through sizing, provided-buffer encoding and decoding in every wire format 1\u20137. This is not durable replication credit: exact boundary matching and higher-term persistence remain in the core, and the deterministic history verifies unchanged commit/application state and restart. Slice196a adds explicitly selected format8 TimeoutNow with a full u128 operation, exact envelope/context and current-term log boundary. Versions1\u20137 refuse this RPC. Native TLS/QUIC authenticate exact version8; NativeStartup selects matching codec and roster. This does not expose a durable maintenance command. New RPC encoding and session/native startup recovery are tested separately; a complete native leadership-transfer history remains196b. Slice293 uses the same provisioning/scope assertions with the existing independent single-fixture host defaults and native direct methods: exact sizing/canonical supplied bytes, undersized/oversized refusal, original borrowed-input reuse and wrong-scope refusal. Three defective providers trip these shared assertions. This is selected reusable C07 evidence, not full alternative-codec certification, allocation/performance proof or new wire semantics."
++      "scope": "Explicit independent wire format selection: default format 1 for current static-configuration RPCs, opt-in format 2 for learner/joint/final records and snapshot membership bases including operation retention. Strict session-version matching, same-peer multiplexing, fixed validated prefix, bounded lengths/counts/decoded retention and trusted peer-scope consistency. Codec capability does not enable live membership changes. Native worker and recursive snapshot histories traverse frames. A host-only single-fixture provider tests the public seam, not full alternative codec conformance. No socket/authentication or wire snapshot chunk protocol. Explicit format 3 adds bounded direct membership-witness query/reply while retaining format 2 payloads. Native TLS/QUIC sessions default to format 1 and explicitly select supported versions 2/3 through NativeTlsConfig. Explicit format 4 adds fixed-size boxed learner readiness requests/replies, charged symmetrically to decoded/output budgets. Older versions reject the tags and native TLS/QUIC authenticate exact selection. Optional synchronous configuration envelope admission defaults to unsupported. Native counting checks proposed append, declared command and prospective checkpoint with retained membership operation IDs. Footprints name the selected wire version and encoded/decoded sizes; no work, durability evidence or application-sized counting buffers. Node rechecks actual factory and roster version/budgets before persistence. Declared capacity does not enforce future application growth or arbitrary multi-message batches; service integration remains pending. Explicit format 5 adds bounded LearnerRepair/LearnerRepaired with boxed joint metadata and range retention charged symmetrically. Native TLS/QUIC support exact versions 1\u20135; old formats refuse repair tags. Configuration capacity counting remains available in format 5. Explicit format 6 adds bounded LearnerRepairSnapshot through existing snapshot encoding/budgets. Exact versions 1\u20136 are supported; old formats refuse tag 16. Snapshot repair tests cover truncation and constrained payload budgets. Direct encoded_length/encode_into provision caller-owned frame slices; native sizing is allocation-free and encoding preserves canonical bytes. Host compatibility defaults use separately bounded temporary Vec encoding. Slice170 roundtrips the actual core older-term SnapshotAck { index: 0 } refusal through sizing, provided-buffer encoding and decoding in every wire format 1\u20137. This is not durable replication credit: exact boundary matching and higher-term persistence remain in the core, and the deterministic history verifies unchanged commit/application state and restart. Slice196a adds explicitly selected format8 TimeoutNow with a full u128 operation, exact envelope/context and current-term log boundary. Versions1\u20137 refuse this RPC. Native TLS/QUIC authenticate exact version8; NativeStartup selects matching codec and roster. This does not expose a durable maintenance command. New RPC encoding and session/native startup recovery are tested separately; a complete native leadership-transfer history remains196b. Slice293 uses the same provisioning/scope assertions with the existing independent single-fixture host defaults and native direct methods: exact sizing/canonical supplied bytes, undersized/oversized refusal, original borrowed-input reuse and wrong-scope refusal. Three defective providers trip these shared assertions. This is selected reusable C07 evidence, not full alternative-codec certification, allocation/performance proof or new wire semantics. Slice455 immutable command bytes preserve encoded tags/IDs/length/content. Decoder and configuration/counting footprints include the shared allocation header before allocation; malformed-input validation order and applicable batch/checkpoint bounds remain explicit. Encoded bytes and retained-memory charges are distinct."
+     },
+     {
+       "design_id": "C09/C21",
+diff --git a/docs/provider-conformance.json b/docs/provider-conformance.json
+index 61e39c32..4d712963 100644
+--- a/docs/provider-conformance.json
++++ b/docs/provider-conformance.json
+@@ -2,6 +2,101 @@
+   "version": 1,
+   "meaning": "Reviewed operation obligations and selected assertions, not a completion certificate or replacement-provider certification.",
+   "reviews": [
++    {
++      "public_contract": "CommandBytes",
++      "status": "partial",
++      "runners": [
++        {
++          "file": "tests/provider_conformance/log_store/command_bytes.rs",
++          "symbol": "construction_reads_and_default_expose_exact_content"
++        },
++        {
++          "file": "tests/provider_conformance/log_store/command_bytes.rs",
++          "symbol": "shared_clone_survives_source_drop_and_replacement_is_independent"
++        },
++        {
++          "file": "tests/provider_conformance/log_store/command_bytes.rs",
++          "symbol": "independent_content_and_complete_entry_fields_determine_equality"
++        },
++        {
++          "file": "tests/provider_conformance/log_store/command_bytes.rs",
++          "symbol": "every_retained_clone_is_charged_without_source_spare_capacity"
++        }
++      ],
++      "operations": [
++        {
++          "names": [
++            "from_vec",
++            "from_slice",
++            "default",
++            "as_slice",
++            "as_ref",
++            "deref",
++            "debug"
++          ],
++          "obligation": "Capture exact immutable content from owned and borrowed inputs; empty/default has no content. Read/format traits expose the same bytes without mutable or Arc access. Construction drops no accepted work and creates no runtime/provider.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/log_store/command_bytes.rs",
++              "symbol": "construction_reads_and_default_expose_exact_content"
++            }
++          ],
++          "remaining": [
++            "Selected finite content values do not certify every allocation failure or arbitrary host provider; source/private cleanup and layout controls are separately executed."
++          ]
++        },
++        {
++          "names": [
++            "clone",
++            "to_vec"
++          ],
++          "obligation": "A nonempty clone retains original immutable backing across source drop. Independent mutable export and explicit replacement cannot mutate an earlier value or clone; reference sharing is not durability authority.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/log_store/command_bytes.rs",
++              "symbol": "shared_clone_survives_source_drop_and_replacement_is_independent"
++            }
++          ],
++          "remaining": [
++            "General concurrent queue/application/provider lifetimes, all shutdown combinations and physical memory/debt qualification remain separate."
++          ]
++        },
++        {
++          "names": [
++            "eq"
++          ],
++          "obligation": "Independent equal buffers compare byte-exactly; a changed byte or full128-bit operation/header context differs. Immutable same-backing shortcut cannot conceal mutable data. Altered persistence effects use replacement and remain subject to exact preflight.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/log_store/command_bytes.rs",
++              "symbol": "independent_content_and_complete_entry_fields_determine_equality"
++            },
++            {
++              "file": "tests/provider_conformance/log_store/entry_clone.rs",
++              "symbol": "fieldwise_clone_matches_independent_derived_top_level_for_every_payload"
++            }
++          ],
++          "remaining": [
++            "Generated arbitrary buffers and malformed provider combinations require their own conformance; pointer identity grants no commit/fencing authority."
++          ]
++        },
++        {
++          "names": [
++            "retained_bytes"
++          ],
++          "obligation": "Charge empty0 and nonempty length plus two usize words separately for every retained clone; no physical-sharing discount. Source Vec spare capacity is a pre-capture input property, not a mutable log-value capacity.",
++          "assertions": [
++            {
++              "file": "tests/provider_conformance/log_store/command_bytes.rs",
++              "symbol": "every_retained_clone_is_charged_without_source_spare_capacity"
++            }
++          ],
++          "remaining": [
++            "Conversion-peak/decode/error-order/private canonical accounting and native crash checks are executed separately; these anchors are not a physical RSS/refusal or allocator-cause proof."
++          ]
++        }
++      ]
++    },
+     {
+       "public_contract": "LogicalActivationApplication over StateMachine, ProposalAdmission, BoundedStateMachine, BoundedReadableStateMachine, CheckpointStateMachine and LogicalResponseCodec",
+       "status": "partial",
+@@ -2261,7 +2356,7 @@
+           "names": [
+             "state"
+           ],
+-          "obligation": "Return verified durable state for the exact group incarnation; missing is an error. Admission alone does not advance the durable view. Recovery preserves the acknowledged state.",
++          "obligation": "Return verified durable state for the exact group incarnation; missing is an error. Admission alone does not advance the durable view. Recovery preserves the acknowledged state. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
+           "assertions": [
+             {
+               "file": "tests/provider_conformance/log_store.rs",
+@@ -2288,7 +2383,7 @@
+           "names": [
+             "matches_state"
+           ],
+-          "obligation": "Compare the full exact GroupLog against the same verified durable view as state(). Default providers retain state() gates and error precedence; missing/fenced/provider errors remain errors. Native borrowing must not expose accepted pending transitions or certify durability. Allocation capacity is not equality. Snapshot helpers preserve binding-first refusal before comparison or snapshot/application work.",
++          "obligation": "Compare the full exact GroupLog against the same verified durable view as state(). Default providers retain state() gates and error precedence; missing/fenced/provider errors remain errors. Native borrowing must not expose accepted pending transitions or certify durability. Allocation capacity is not equality. Snapshot helpers preserve binding-first refusal before comparison or snapshot/application work. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
+           "assertions": [
+             {
+               "file": "tests/provider_conformance/log_store/matches.rs",
+@@ -2323,7 +2418,7 @@
+           "names": [
+             "matches_checkpoint_state"
+           ],
+-          "obligation": "Protected core-only immutable view comparison is exactly equivalent to full GroupLog equality. Default preserves raw matches_state errors and object safety. Native and owned-state caches are bounded to their exclusive canonical owners and one core lineage; append/metadata may preserve a previously equal prefix, and exact validated compaction transfers only surviving overlap despite storage-generation change. New entries and all metadata compare exactly. Full/replacing histories, new owner/reopen, false comparisons and uncertain fences cannot reuse old proof. Native accepted staging never advances durable verified entries; completed-state/binding error precedence remains unchanged. Only snapshot compaction opts into the seam.",
++          "obligation": "Protected core-only immutable view comparison is exactly equivalent to full GroupLog equality. Default preserves raw matches_state errors and object safety. Native and owned-state caches are bounded to their exclusive canonical owners and one core lineage; append/metadata may preserve a previously equal prefix, and exact validated compaction transfers only surviving overlap despite storage-generation change. New entries and all metadata compare exactly. Full/replacing histories, new owner/reopen, false comparisons and uncertain fences cannot reuse old proof. Native accepted staging never advances durable verified entries; completed-state/binding error precedence remains unchanged. Only snapshot compaction opts into the seam. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
+           "assertions": [
+             {
+               "file": "tests/provider_conformance/log_store/default_errors.rs",
+@@ -2347,7 +2442,7 @@
+           "names": [
+             "append_batch"
+           ],
+-          "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait.",
++          "obligation": "Consume the caller-owned mutation batch and return exact per-group admission tickets, not durability evidence. Each group transition preserves committed history and binds dependent hard state; deterministic rejection leaves the durable state unchanged. Accepted writes are not undone by dropping a wait. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
+           "assertions": [
+             {
+               "file": "tests/provider_conformance/log_store.rs",
+@@ -2397,7 +2492,7 @@
+           "names": [
+             "fetch_range"
+           ],
+-          "obligation": "Return ordered durable entries within the selected generation and count/byte budget. Reject stale suffix generations and invalid boundaries. Refuse an oversized first entry instead of violating the budget; snapshot compaction reports its floor.",
++          "obligation": "Return ordered durable entries within the selected generation and count/byte budget. Reject stale suffix generations and invalid boundaries. Refuse an oversized first entry instead of violating the budget; snapshot compaction reports its floor. CommandBytes may share only immutable backing; mutable entry/effect changes replace the byte value and retain exact content/header/operation checks. Per-owner accounting remains conservative and no shared reference certifies durability.",
+           "assertions": [
+             {
+               "file": "tests/provider_conformance/log_store.rs",
+diff --git a/examples/journal_attribution/tests.rs b/examples/journal_attribution/tests.rs
+index 574e6a21..e427dd46 100644
+--- a/examples/journal_attribution/tests.rs
++++ b/examples/journal_attribution/tests.rs
+@@ -29,7 +29,7 @@ fn command(index: u64, operation: u128, term: u64) -> LogEntry {
+         term,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes: 1i64.to_le_bytes().to_vec(),
++            bytes: 1i64.to_le_bytes().to_vec().into(),
+         },
+     }
+ }
+diff --git a/examples/log_staging_benchmark/workload.rs b/examples/log_staging_benchmark/workload.rs
+index fe0ede96..370e9afc 100644
+--- a/examples/log_staging_benchmark/workload.rs
++++ b/examples/log_staging_benchmark/workload.rs
+@@ -40,7 +40,7 @@ pub(super) fn entry(index: usize, operation: u128) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes: operation.to_le_bytes()[..8].to_vec(),
++            bytes: operation.to_le_bytes()[..8].to_vec().into(),
+         },
+     }
+ }
+diff --git a/examples/wal_benchmark.rs b/examples/wal_benchmark.rs
+index 552453e7..ba06652a 100644
+--- a/examples/wal_benchmark.rs
++++ b/examples/wal_benchmark.rs
+@@ -218,7 +218,7 @@ fn measure_batches(
+                         term: 1,
+                         payload: EntryPayload::Command {
+                             operation: OperationId::new(index as u128).unwrap(),
+-                            bytes: 1i64.to_le_bytes().to_vec(),
++                            bytes: 1i64.to_le_bytes().to_vec().into(),
+                         },
+                     })
+                     .collect(),
+@@ -274,7 +274,7 @@ fn verify_recovery(root: &Path, expected: GroupLog, count: usize) -> Result<(),
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(index as u128).unwrap(),
+-                bytes: 1i64.to_le_bytes().to_vec(),
++                bytes: 1i64.to_le_bytes().to_vec().into(),
+             },
+         };
+         let r = checked(app.apply_batch(&[duplicate]))?.remove(0);
+diff --git a/src/log.rs b/src/log.rs
+index afcc5268..4ff49998 100644
+--- a/src/log.rs
++++ b/src/log.rs
+@@ -21,9 +21,11 @@ use crate::{
+ };
+ use std::collections::BTreeMap;
+ 
++mod command_bytes;
+ mod comparison;
+ mod owned;
+ pub(crate) mod transition;
++pub use command_bytes::CommandBytes;
+ pub(crate) use comparison::CheckpointComparison;
+ pub use comparison::{CheckpointLineage, CheckpointLog};
+ pub use owned::OwnedLogState;
+@@ -35,7 +37,7 @@ pub enum EntryPayload {
+     Configuration(Box<crate::membership::ConfigurationRecord>),
+     Command {
+         operation: OperationId,
+-        bytes: Vec<u8>,
++        bytes: CommandBytes,
+     },
+ }
+ #[derive(Clone, Debug, Eq)]
+@@ -101,11 +103,12 @@ impl PartialEq for LogEntry {
+     }
+ }
+ impl LogEntry {
+-    /// Owned payload allocation accounting, excluding the inline LogEntry.
++    /// Conservative per-owner payload charge, excluding the inline LogEntry.
++    /// Shared commands are charged in full for each retained clone.
+     pub fn retained_payload_bytes(&self) -> usize {
+         match &self.payload {
+             EntryPayload::Noop => 0,
+-            EntryPayload::Command { bytes, .. } => bytes.capacity(),
++            EntryPayload::Command { bytes, .. } => bytes.retained_bytes(),
+             EntryPayload::Configuration(record) => record.retained_bytes(),
+         }
+     }
+diff --git a/src/log/comparison/tests.rs b/src/log/comparison/tests.rs
+index b607de63..c329e6c6 100644
+--- a/src/log/comparison/tests.rs
++++ b/src/log/comparison/tests.rs
+@@ -20,7 +20,7 @@ fn entry(index: u64) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new((1 << 127) | u128::from(index)).unwrap(),
+-            bytes: vec![7; usize::try_from(index % 3).unwrap()],
++            bytes: vec![7; usize::try_from(index % 3).unwrap()].into(),
+         },
+     }
+ }
+diff --git a/src/log/owned/tests/checkpoint.rs b/src/log/owned/tests/checkpoint.rs
+index dee21c30..8fa97658 100644
+--- a/src/log/owned/tests/checkpoint.rs
++++ b/src/log/owned/tests/checkpoint.rs
+@@ -153,7 +153,7 @@ fn failed_owner_changes_lineage_and_arbitrary_same_revision_mutations_remain_vis
+     let mut arbitrary = core.state().clone();
+     arbitrary.entries[0].payload = EntryPayload::Command {
+         operation: OperationId::new(u128::MAX).unwrap(),
+-        bytes: Vec::new(),
++        bytes: Vec::new().into(),
+     };
+     assert_eq!(arbitrary.revision, core.state().revision);
+     assert_ne!(arbitrary, *owned.get(first).unwrap());
+diff --git a/src/log/owned/tests/compact.rs b/src/log/owned/tests/compact.rs
+index 0d9145b4..982382c2 100644
+--- a/src/log/owned/tests/compact.rs
++++ b/src/log/owned/tests/compact.rs
+@@ -17,7 +17,7 @@ fn compaction_batch_is_atomic_and_retains_surviving_payload_allocation() {
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(u128::from(index)).unwrap(),
+-                    bytes: vec![7; 8],
++                    bytes: vec![7; 8].into(),
+                 },
+             })
+             .collect(),
+diff --git a/src/log/owned/tests/incoming.rs b/src/log/owned/tests/incoming.rs
+index 7d0ddd05..f427200d 100644
+--- a/src/log/owned/tests/incoming.rs
++++ b/src/log/owned/tests/incoming.rs
+@@ -17,7 +17,7 @@ fn owned_input_moves_new_payload_after_whole_batch_admission() {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(1).unwrap(),
+-                bytes,
++                bytes: bytes.into(),
+             },
+         }],
+     });
+@@ -47,7 +47,7 @@ fn invalid_later_owned_unit_never_installs_an_earlier_moved_append() {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(1).unwrap(),
+-                bytes: vec![7; 8],
++                bytes: vec![7; 8].into(),
+             },
+         }],
+     });
+diff --git a/src/log/transition.rs b/src/log/transition.rs
+index 061ed56c..cdf5f47f 100644
+--- a/src/log/transition.rs
++++ b/src/log/transition.rs
+@@ -62,7 +62,7 @@ impl LogSummary {
+                     .any(|entry| matches!(entry.payload, EntryPayload::Configuration(_))),
+             retained,
+             clone_stable: state.entries.iter().all(|entry| match &entry.payload {
+-                EntryPayload::Command { bytes, .. } => bytes.capacity() == bytes.len(),
++                EntryPayload::Command { .. } => true,
+                 EntryPayload::Noop => true,
+                 EntryPayload::Configuration(_) => false,
+             }),
+diff --git a/src/log/transition/incoming.rs b/src/log/transition/incoming.rs
+index 41c1284d..09703c5e 100644
+--- a/src/log/transition/incoming.rs
++++ b/src/log/transition/incoming.rs
+@@ -263,12 +263,5 @@ fn normalize_append(update: &mut LogUpdate) {
+                 .into_boxed_slice()
+                 .into_vec();
+         }
+-        for entry in &mut suffix.entries {
+-            if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
+-                if bytes.capacity() != bytes.len() {
+-                    *bytes = std::mem::take(bytes).into_boxed_slice().into_vec();
+-                }
+-            }
+-        }
+     }
+ }
+diff --git a/src/log/transition/tests.rs b/src/log/transition/tests.rs
+index 8aae7d81..a7f7aa7f 100644
+--- a/src/log/transition/tests.rs
++++ b/src/log/transition/tests.rs
+@@ -43,7 +43,7 @@ fn entry(index: u64, term: u64) -> LogEntry {
+         term,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(index as u128).unwrap(),
+-            bytes: vec![7; 8],
++            bytes: vec![7; 8].into(),
+         },
+     }
+ }
+@@ -135,7 +135,9 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
+         .collect();
+     let mut new = entry(3, 1);
+     if let EntryPayload::Command { bytes, .. } = &mut new.payload {
+-        bytes.reserve(10000);
++        let mut raw = bytes.to_vec();
++        raw.reserve(10000);
++        *bytes = raw.into();
+     }
+     let append = update(
+         &state,
+@@ -164,7 +166,7 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
+     let EntryPayload::Command { bytes, .. } = &state.entries[2].payload else {
+         unreachable!()
+     };
+-    assert_eq!(bytes.capacity(), bytes.len());
++    assert_eq!(bytes.retained_bytes(), bytes.len() + 2 * size_of::<usize>());
+     assert_eq!(summary, LogSummary::from_validated(&state));
+     let commit = update(&state, 1, 3, None);
+     let before = state.entries.as_ptr();
+diff --git a/src/log/transition/tests/compact.rs b/src/log/transition/tests/compact.rs
+index ffea6374..30ae3aef 100644
+--- a/src/log/transition/tests/compact.rs
++++ b/src/log/transition/tests/compact.rs
+@@ -122,12 +122,14 @@ fn compaction_preserves_surviving_payloads_origin_and_exact_charge() {
+     }
+ }
+ #[test]
+-fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
++fn immutable_command_shape_compacts_and_overflow_charge_recomputes_remaining_slice() {
+     let mut state = committed();
+     let EntryPayload::Command { bytes, .. } = &mut state.entries[1].payload else {
+         unreachable!()
+     };
+-    bytes.reserve(10000);
++    let mut raw = bytes.to_vec();
++    raw.reserve(10000);
++    *bytes = raw.into();
+     let change = compact(&state, 1);
+     let plan = NextLog::plan(
+         &LogView::new(&state),
+@@ -136,7 +138,7 @@ fn slack_capacity_falls_back_and_overflow_charge_recomputes_remaining_slice() {
+         LogLimits::default(),
+     )
+     .unwrap();
+-    assert!(plan.full().is_some());
++    assert!(plan.full().is_none());
+     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
+     let summary = plan.install(&mut state, change).unwrap();
+     assert_eq!(state, expected);
+diff --git a/src/log/transition/tests/incoming.rs b/src/log/transition/tests/incoming.rs
+index c8730454..efa23914 100644
+--- a/src/log/transition/tests/incoming.rs
++++ b/src/log/transition/tests/incoming.rs
+@@ -57,11 +57,11 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
+     );
+     let suffix = change.suffix.as_mut().unwrap();
+     suffix.entries.reserve(100);
++    let raw_capacity = suffix.entries.capacity();
+     let EntryPayload::Command { bytes, .. } = &mut suffix.entries[0].payload else {
+         unreachable!()
+     };
+-    bytes.reserve(10000);
+-    let raw_capacity = bytes.capacity();
++    let raw_charge = bytes.retained_bytes();
+     let raw_pointer = bytes.as_ptr();
+     let plan = OwnedNextLog::plan_copy(
+         &LogView::new(&state),
+@@ -74,15 +74,18 @@ fn copy_keeps_raw_external_capacity_and_seals_one_normalized_allocation() {
+     let EntryPayload::Command { bytes, .. } = &owned.entries[0].payload else {
+         unreachable!()
+     };
+-    assert_eq!(bytes.capacity(), bytes.len());
++    assert_eq!(bytes.retained_bytes(), raw_charge);
+     assert_eq!(owned.entries.capacity(), owned.entries.len());
+-    assert_ne!(bytes.as_ptr(), raw_pointer);
++    assert_eq!(bytes.as_ptr(), raw_pointer);
+     assert_eq!(pointer(plan.entry_at(3).unwrap()), bytes.as_ptr());
+     let EntryPayload::Command { bytes, .. } = &change.suffix.as_ref().unwrap().entries[0].payload
+     else {
+         unreachable!()
+     };
+-    assert_eq!(bytes.capacity(), raw_capacity);
++    assert_eq!(
++        change.suffix.as_ref().unwrap().entries.capacity(),
++        raw_capacity
++    );
+     assert_eq!(bytes.as_ptr(), raw_pointer);
+     assert!(plan.matches_update(&change));
+     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
+@@ -108,7 +111,9 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
+     else {
+         unreachable!()
+     };
+-    bytes.reserve(10000);
++    let mut raw = bytes.to_vec();
++    raw.reserve(10000);
++    *bytes = raw.into();
+     let original = change.clone();
+     let expected = stage_update(&state, &change, LogLimits::default()).unwrap();
+     let plan = OwnedNextLog::plan_owned(
+@@ -130,7 +135,9 @@ fn owned_normalization_matches_old_clone_and_identical_headers_do_not_hide_paylo
+         if operation {
+             *id = OperationId::new(99).unwrap();
+         } else {
+-            bytes[0] ^= 1;
++            let mut raw = bytes.to_vec();
++            raw[0] ^= 1;
++            *bytes = raw.into();
+         }
+         assert!(!plan.matches_update(&wrong));
+     }
+diff --git a/src/log_format.rs b/src/log_format.rs
+index 9b8373da..b28f657a 100644
+--- a/src/log_format.rs
++++ b/src/log_format.rs
+@@ -476,9 +476,15 @@ impl<'a> Decoder<'a> {
+                 if len > limits.max_command_bytes {
+                     return Err(StorageError::Corrupt("command budget"));
+                 }
++                let bytes = self.take(len)?;
++                let charge = CommandBytes::retained_bytes_for_len(len)
++                    .ok_or(StorageError::Corrupt("command allocation budget"))?;
++                if charge > limits.max_wal_bytes {
++                    return Err(StorageError::Corrupt("command allocation budget"));
++                }
+                 EntryPayload::Command {
+                     operation,
+-                    bytes: self.take(len)?.to_vec(),
++                    bytes: bytes.into(),
+                 }
+             }
+             _ => return Err(StorageError::Corrupt("entry kind")),
+diff --git a/src/logical_voter/activation/tests.rs b/src/logical_voter/activation/tests.rs
+index 1cbf0d7f..f2756ff4 100644
+--- a/src/logical_voter/activation/tests.rs
++++ b/src/logical_voter/activation/tests.rs
+@@ -100,7 +100,10 @@ fn entry(index: u64, operation: OperationId, bytes: Vec<u8>) -> LogEntry {
+     LogEntry {
+         index,
+         term: 4,
+-        payload: EntryPayload::Command { operation, bytes },
++        payload: EntryPayload::Command {
++            operation,
++            bytes: bytes.into(),
++        },
+     }
+ }
+ fn apply(
+diff --git a/src/logical_voter/activation/traits.rs b/src/logical_voter/activation/traits.rs
+index 22361d24..735c9cee 100644
+--- a/src/logical_voter/activation/traits.rs
++++ b/src/logical_voter/activation/traits.rs
+@@ -94,7 +94,7 @@ where
+                                 term: entry.term,
+                                 payload: EntryPayload::Command {
+                                     operation: *operation,
+-                                    bytes: raw.to_vec(),
++                                    bytes: raw.into(),
+                                 },
+                             };
+                             let mut receipts = next.inner.apply_batch(&[inner])?;
+@@ -176,7 +176,7 @@ where
+                             match codec::decode(bytes, self.limits.command_bytes)? {
+                                 Envelope::Business(raw) => EntryPayload::Command {
+                                     operation: *operation,
+-                                    bytes: raw.to_vec(),
++                                    bytes: raw.into(),
+                                 },
+                                 Envelope::Control(_) => EntryPayload::Noop,
+                             }
+diff --git a/src/logical_voter/application/authorize.rs b/src/logical_voter/application/authorize.rs
+index 6ec8e429..f72db652 100644
+--- a/src/logical_voter/application/authorize.rs
++++ b/src/logical_voter/application/authorize.rs
+@@ -69,7 +69,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
+                     && (p.entry_at(position.index).is_some_and(|e| {
+                         e.term == position.term
+                             && matches!(&e.payload,
+-       EntryPayload::Command{operation,bytes} if *operation==ticket.operation&&bytes==command)
++       EntryPayload::Command{operation,bytes} if *operation==ticket.operation&&bytes.as_slice()==command.as_slice())
+                     }) || position.index <= p.base_index())
+             }
+             (
+diff --git a/src/logical_voter/application/tests.rs b/src/logical_voter/application/tests.rs
+index 5f9dc67f..18493fcd 100644
+--- a/src/logical_voter/application/tests.rs
++++ b/src/logical_voter/application/tests.rs
+@@ -82,7 +82,10 @@ fn entry(app: &LogicalApplication, c: &Command, index: u64) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: c.operation,
+-            bytes: app.encode_command(c, app.limits.max_command_bytes).unwrap(),
++            bytes: app
++                .encode_command(c, app.limits.max_command_bytes)
++                .unwrap()
++                .into(),
+         },
+     }
+ }
+@@ -209,7 +212,7 @@ fn batch_conflict_and_malformed_suffix_are_atomic() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(3).unwrap(),
+-            bytes: vec![0],
++            bytes: vec![0].into(),
+         },
+     };
+     assert_eq!(
+@@ -307,7 +310,7 @@ fn control_reserve_and_pending_content_are_enforced() {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(101).unwrap(),
+-                        bytes: vec![1],
++                        bytes: vec![1].into(),
+                     },
+                 }],
+             }),
+@@ -332,7 +335,7 @@ fn control_reserve_and_pending_content_are_enforced() {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(102).unwrap(),
+-                        bytes: vec![2],
++                        bytes: vec![2].into(),
+                     },
+                 }],
+             }),
+diff --git a/src/logical_voter/application/tests/control_profile.rs b/src/logical_voter/application/tests/control_profile.rs
+index 655b5072..29f6887f 100644
+--- a/src/logical_voter/application/tests/control_profile.rs
++++ b/src/logical_voter/application/tests/control_profile.rs
+@@ -79,7 +79,7 @@ fn parent_entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/src/logical_voter/application/tests/enrollment/empty.rs b/src/logical_voter/application/tests/enrollment/empty.rs
+index 17cef5b8..561f7893 100644
+--- a/src/logical_voter/application/tests/enrollment/empty.rs
++++ b/src/logical_voter/application/tests/enrollment/empty.rs
+@@ -107,7 +107,10 @@ fn host_empty_checkpoint_codec_imports_and_restores_the_actual_zero_byte_applica
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: c.operation,
+-            bytes: a.encode_command(&c, a.limits.max_command_bytes).unwrap(),
++            bytes: a
++                .encode_command(&c, a.limits.max_command_bytes)
++                .unwrap()
++                .into(),
+         },
+     };
+     assert_eq!(
+diff --git a/src/logical_voter/application/tests/enrollment/refusals.rs b/src/logical_voter/application/tests/enrollment/refusals.rs
+index daa1f4b5..99a114d4 100644
+--- a/src/logical_voter/application/tests/enrollment/refusals.rs
++++ b/src/logical_voter/application/tests/enrollment/refusals.rs
+@@ -99,7 +99,7 @@ fn selected_native_codec_refuses_empty_data_and_truncated_commands_are_atomic()
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: c.operation,
+-                bytes: bytes[..cut].to_vec(),
++                bytes: bytes[..cut].to_vec().into(),
+             },
+         };
+         assert!(a.apply_batch(&[e]).is_err());
+diff --git a/src/logical_voter/application/tests/reads.rs b/src/logical_voter/application/tests/reads.rs
+index 4653f558..f57ac5f2 100644
+--- a/src/logical_voter/application/tests/reads.rs
++++ b/src/logical_voter/application/tests/reads.rs
+@@ -33,7 +33,7 @@ fn read_bound_is_stable_across_growth_and_actual_allocations_are_charged() {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(101).unwrap(),
+-                        bytes: vec![1; 1024],
++                        bytes: vec![1; 1024].into(),
+                     },
+                 }],
+             }),
+diff --git a/src/logical_voter/checkpoint.rs b/src/logical_voter/checkpoint.rs
+index fdc460f5..36eda683 100644
+--- a/src/logical_voter/checkpoint.rs
++++ b/src/logical_voter/checkpoint.rs
+@@ -172,7 +172,7 @@ impl<C: LogCodec + Clone, S: SnapshotCodec + Clone, W: WireCodec + Clone>
+                         term,
+                         payload: EntryPayload::Command {
+                             operation: c.operation,
+-                            bytes,
++                            bytes: bytes.into(),
+                         },
+                     },
+                 )
+diff --git a/src/logical_voter/response/tests.rs b/src/logical_voter/response/tests.rs
+index 3892be4d..0ccce781 100644
+--- a/src/logical_voter/response/tests.rs
++++ b/src/logical_voter/response/tests.rs
+@@ -121,7 +121,7 @@ fn claim(a: &mut LogicalApplication) -> LogicalReceipt {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: command.operation,
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }])
+     .unwrap()
+diff --git a/src/logical_voter/response/tests/limits.rs b/src/logical_voter/response/tests/limits.rs
+index 59ac0260..e73c1d95 100644
+--- a/src/logical_voter/response/tests/limits.rs
++++ b/src/logical_voter/response/tests/limits.rs
+@@ -121,7 +121,7 @@ fn accepted_state_growth_cannot_exceed_the_checked_response_envelope() {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: c.operation,
+-                bytes
++                bytes: bytes.into()
+             }
+         }])
+         .is_err());
+@@ -151,7 +151,7 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: claim.operation,
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }])
+     .unwrap();
+@@ -216,7 +216,7 @@ fn full_image_framing_refuses_growth_even_when_parent_codec_fits() {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: command.operation,
+-                bytes
++                bytes: bytes.into()
+             }
+         }])
+         .is_err());
+diff --git a/src/logical_voter/response/tests/providers.rs b/src/logical_voter/response/tests/providers.rs
+index 4feaf189..03f0dee4 100644
+--- a/src/logical_voter/response/tests/providers.rs
++++ b/src/logical_voter/response/tests/providers.rs
+@@ -160,7 +160,7 @@ fn refusing_or_nonfaithful_selected_log_codecs_cannot_encode_image() {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: c.operation,
+-                bytes,
++                bytes: bytes.into(),
+             },
+         }])
+         .unwrap();
+diff --git a/src/logical_voter/response/tests/reads.rs b/src/logical_voter/response/tests/reads.rs
+index 1960f495..0ea7d7bf 100644
+--- a/src/logical_voter/response/tests/reads.rs
++++ b/src/logical_voter/response/tests/reads.rs
+@@ -136,7 +136,7 @@ fn complete_image_membership_parent_and_pin_fields_are_retained() {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(99).unwrap(),
+-                        bytes: vec![9, 8, 7],
++                        bytes: vec![9, 8, 7].into(),
+                     },
+                 }],
+             }),
+diff --git a/src/logical_voter/types/capacity.rs b/src/logical_voter/types/capacity.rs
+index f8a1ce85..ac50f4dd 100644
+--- a/src/logical_voter/types/capacity.rs
++++ b/src/logical_voter/types/capacity.rs
+@@ -116,7 +116,7 @@ fn coherent_checkpoint_restores_the_original_command_and_duplicate_receipt() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: command.operation,
+-            bytes: bytes.clone(),
++            bytes: bytes.clone().into(),
+         },
+     };
+     let first = app.apply_batch(&[entry(1)]).unwrap().remove(0);
+diff --git a/src/maintenance/state.rs b/src/maintenance/state.rs
+index 37ebef23..45f02fe2 100644
+--- a/src/maintenance/state.rs
++++ b/src/maintenance/state.rs
+@@ -73,7 +73,7 @@ impl<A: StateMachine> Maintenance<A> {
+             mapped.payload = match decode(bytes)? {
+                 Envelope::Data(data) => EntryPayload::Command {
+                     operation: *operation,
+-                    bytes: data.to_vec(),
++                    bytes: data.into(),
+                 },
+                 Envelope::Control(command) if command.intent().request.operation == *operation => {
+                     EntryPayload::Noop
+diff --git a/src/metadata_transfer.rs b/src/metadata_transfer.rs
+index 60328a83..99bca80c 100644
+--- a/src/metadata_transfer.rs
++++ b/src/metadata_transfer.rs
+@@ -638,7 +638,7 @@ impl MetadataAuthoritySource {
+             }
+             MetadataSourceOutcome::Conflict
+         } else if let Some(f) = &self.frozen {
+-            if f.status.operation == *operation && f.command == *bytes {
++            if f.status.operation == *operation && f.command.as_slice() == bytes.as_slice() {
+                 MetadataSourceOutcome::Frozen(f.status)
+             } else {
+                 MetadataSourceOutcome::Fenced
+@@ -658,7 +658,7 @@ impl MetadataAuthoritySource {
+                 self.frozen = Some(Frozen {
+                     status,
+                     plan,
+-                    command: bytes.clone(),
++                    command: bytes.to_vec(),
+                 });
+                 MetadataSourceOutcome::Frozen(status)
+             } else {
+@@ -672,7 +672,11 @@ impl MetadataAuthoritySource {
+             }
+         } else {
+             let raw = if bytes.starts_with(b"VBMASB01") {
+-                if *bytes != self.bootstrap_command(self.readiness_requirements().command_bytes)? {
++                if *bytes
++                    != self
++                        .bootstrap_command(self.readiness_requirements().command_bytes)?
++                        .into()
++                {
+                     return Err(ApplicationError::InvalidCommand);
+                 }
+                 self.initial
+@@ -681,7 +685,7 @@ impl MetadataAuthoritySource {
+                 if self.bootstrap.is_none() {
+                     return Err(ApplicationError::NotApplied);
+                 }
+-                bytes.clone()
++                bytes.to_vec()
+             };
+             let receipt = self
+                 .directory
+@@ -690,7 +694,7 @@ impl MetadataAuthoritySource {
+                     term: entry.term,
+                     payload: EntryPayload::Command {
+                         operation: *operation,
+-                        bytes: raw,
++                        bytes: raw.into(),
+                     },
+                 }])?
+                 .remove(0);
+@@ -783,7 +787,7 @@ impl ProposalAdmission for MetadataAuthoritySource {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: op,
+-                        bytes: bytes.to_vec(),
++                        bytes: bytes.into(),
+                     },
+                 })?
+                 .unwrap();
+diff --git a/src/metadata_transfer/publication.rs b/src/metadata_transfer/publication.rs
+index 39630daf..48662456 100644
+--- a/src/metadata_transfer/publication.rs
++++ b/src/metadata_transfer/publication.rs
+@@ -171,13 +171,13 @@ impl MetadataPublishingSource {
+             let outcome = if *operation != proposed.imported.source.operation {
+                 MetadataPublishingOutcome::Conflict
+             } else if let Some((status, command)) = &self.publication {
+-                if command == bytes {
++                if command.as_slice() == bytes.as_slice() {
+                     MetadataPublishingOutcome::Published(*status)
+                 } else {
+                     MetadataPublishingOutcome::Conflict
+                 }
+             } else {
+-                self.publication = Some((proposed, bytes.clone()));
++                self.publication = Some((proposed, bytes.to_vec()));
+                 MetadataPublishingOutcome::Published(proposed)
+             };
+             self.inner.apply_batch(&[LogEntry {
+@@ -192,14 +192,15 @@ impl MetadataPublishingSource {
+             }
+             let mut forwarded = entry.clone();
+             if bytes.starts_with(b"VBMPSB02") {
+-                if *bytes != self.bootstrap_command(40)? {
++                if *bytes != self.bootstrap_command(40)?.into() {
+                     return Err(ApplicationError::InvalidCommand);
+                 }
+                 forwarded.payload = EntryPayload::Command {
+                     operation: *operation,
+                     bytes: self
+                         .inner
+-                        .bootstrap_command(self.inner.readiness_requirements().command_bytes)?,
++                        .bootstrap_command(self.inner.readiness_requirements().command_bytes)?
++                        .into(),
+                 };
+             }
+             let receipt = self.inner.apply_batch(&[forwarded])?.remove(0);
+@@ -283,7 +284,7 @@ impl ProposalAdmission for MetadataPublishingSource {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: op,
+-                        bytes: b.to_vec(),
++                        bytes: b.into(),
+                     },
+                 })?
+                 .unwrap();
+diff --git a/src/metadata_transfer/serving.rs b/src/metadata_transfer/serving.rs
+index 3993149f..cfb5b1f4 100644
+--- a/src/metadata_transfer/serving.rs
++++ b/src/metadata_transfer/serving.rs
+@@ -305,7 +305,7 @@ impl MetadataServingTarget {
+             if *operation != self.target.status().operation {
+                 outcome = MetadataServingOutcome::Conflict;
+             } else if let Some(a) = &self.active {
+-                outcome = if a.command == *bytes {
++                outcome = if a.command.as_slice() == bytes.as_slice() {
+                     MetadataServingOutcome::Activated(a.status)
+                 } else {
+                     MetadataServingOutcome::Conflict
+@@ -319,12 +319,12 @@ impl MetadataServingTarget {
+         } else if bytes.starts_with(b"VBMTAB02") || bytes.starts_with(b"VBMATI01") {
+             let mut forwarded = entry.clone();
+             if bytes.starts_with(b"VBMTAB02") {
+-                if *bytes != self.bootstrap_command(40)? {
++                if *bytes != self.bootstrap_command(40)?.into() {
+                     return Err(ApplicationError::InvalidCommand);
+                 }
+                 forwarded.payload = EntryPayload::Command {
+                     operation: *operation,
+-                    bytes: self.target.bootstrap_command(40)?,
++                    bytes: self.target.bootstrap_command(40)?.into(),
+                 };
+             }
+             outcome = MetadataServingOutcome::Target(
+@@ -520,7 +520,7 @@ impl ProposalAdmission for MetadataServingTarget {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: op,
+-                        bytes: b.to_vec(),
++                        bytes: b.into(),
+                     },
+                 })?
+                 .unwrap();
+@@ -603,7 +603,7 @@ impl CheckpointStateMachine for MetadataServingTarget {
+                 b.extend(e.index.to_le_bytes());
+                 b.extend(operation.get().to_le_bytes());
+                 b.extend((bytes.len() as u32).to_le_bytes());
+-                b.extend(bytes);
++                b.extend(bytes.as_slice());
+             }
+         }
+         Ok(b)
+@@ -674,7 +674,10 @@ impl CheckpointStateMachine for MetadataServingTarget {
+                 let e = LogEntry {
+                     index: at,
+                     term: 1,
+-                    payload: EntryPayload::Command { operation, bytes },
++                    payload: EntryPayload::Command {
++                        operation,
++                        bytes: bytes.into(),
++                    },
+                 };
+                 active.directory.apply_batch(std::slice::from_ref(&e))?;
+                 active.tail.insert(operation, e);
+diff --git a/src/metadata_transfer/target.rs b/src/metadata_transfer/target.rs
+index 283b1b62..2067339e 100644
+--- a/src/metadata_transfer/target.rs
++++ b/src/metadata_transfer/target.rs
+@@ -309,7 +309,7 @@ impl MetadataAuthorityTarget {
+         let outcome = if *operation != self.operation {
+             MetadataTargetOutcome::Conflict
+         } else if bytes.starts_with(b"VBMATB01") {
+-            if *bytes != self.bootstrap_command(40)? {
++            if *bytes != self.bootstrap_command(40)?.into() {
+                 return Err(ApplicationError::InvalidCommand);
+             }
+             let index = *self.staged.get_or_insert(entry.index);
+@@ -318,7 +318,7 @@ impl MetadataAuthorityTarget {
+             if self.staged.is_none() {
+                 MetadataTargetOutcome::NotActive
+             } else if let Some(i) = &self.imported {
+-                if i.command == *bytes {
++                if i.command.as_slice() == bytes.as_slice() {
+                     MetadataTargetOutcome::Imported(i.status)
+                 } else {
+                     MetadataTargetOutcome::Conflict
+@@ -334,7 +334,7 @@ impl MetadataAuthorityTarget {
+                     status,
+                     image,
+                     history,
+-                    command: bytes.clone(),
++                    command: bytes.to_vec(),
+                 });
+                 MetadataTargetOutcome::Imported(status)
+             }
+@@ -444,7 +444,7 @@ impl ProposalAdmission for MetadataAuthorityTarget {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: op,
+-                        bytes: bytes.to_vec(),
++                        bytes: bytes.into(),
+                     },
+                 })?
+                 .unwrap();
+@@ -538,7 +538,7 @@ impl CheckpointStateMachine for MetadataAuthorityTarget {
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: next.operation,
+-                    bytes: next.bootstrap_command(40)?,
++                    bytes: next.bootstrap_command(40)?.into(),
+                 },
+             })?;
+         }
+@@ -550,7 +550,7 @@ impl CheckpointStateMachine for MetadataAuthorityTarget {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: next.operation,
+-                        bytes: command.to_vec(),
++                        bytes: command.into(),
+                     },
+                 })?
+                 .unwrap();
+diff --git a/src/namespace_creation/application.rs b/src/namespace_creation/application.rs
+index 9f5faa39..c241f819 100644
+--- a/src/namespace_creation/application.rs
++++ b/src/namespace_creation/application.rs
+@@ -351,7 +351,7 @@ where
+                             if next.ready.is_none() || next.routed().fence().is_none() {
+                                 projected.payload = EntryPayload::Command {
+                                     operation: *operation,
+-                                    bytes: next.inner_bootstrap.clone(),
++                                    bytes: next.inner_bootstrap.as_slice().into(),
+                                 };
+                             }
+                             if next.ready.is_none() {
+@@ -436,7 +436,7 @@ where
+                         data += 1;
+                         p.payload = EntryPayload::Command {
+                             operation: *operation,
+-                            bytes: payload.to_vec(),
++                            bytes: payload.into(),
+                         };
+                     }
+                 }
+diff --git a/src/native/log_store/accepted/tests.rs b/src/native/log_store/accepted/tests.rs
+index 6e972e1d..ec85eca2 100644
+--- a/src/native/log_store/accepted/tests.rs
++++ b/src/native/log_store/accepted/tests.rs
+@@ -33,7 +33,9 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
+     let EntryPayload::Command { bytes, .. } = &mut input.payload else {
+         unreachable!()
+     };
+-    bytes.reserve(4096);
++    let mut raw = bytes.to_vec();
++    raw.reserve(4096);
++    *bytes = raw.into();
+     let first_update = mutation(
+         &store,
+         1,
+@@ -48,7 +50,10 @@ fn original_prefix_and_accepted_tail_allocations_survive_appends_and_subset_barr
+     let EntryPayload::Command { bytes, .. } = &tail(&store)[0].payload else {
+         unreachable!()
+     };
+-    assert_eq!(bytes.capacity(), bytes.len());
++    assert_eq!(
++        bytes.retained_bytes(),
++        bytes.len() + 2 * std::mem::size_of::<usize>()
++    );
+     let middle_update = mutation(&store, 1, 129, None);
+     let middle = store.append_batch(vec![middle_update]).unwrap();
+     let second_update = mutation(
+diff --git a/src/native/log_store/accepted/tests/fixture.rs b/src/native/log_store/accepted/tests/fixture.rs
+index a85a2ae1..22046a7b 100644
+--- a/src/native/log_store/accepted/tests/fixture.rs
++++ b/src/native/log_store/accepted/tests/fixture.rs
+@@ -103,7 +103,7 @@ pub(super) fn entry(index: u64, term: u64) -> LogEntry {
+         term,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(u128::from(index)).unwrap(),
+-            bytes: vec![term as u8; 32],
++            bytes: vec![term as u8; 32].into(),
+         },
+     }
+ }
+diff --git a/src/native/log_store/accepted/tests/incoming_codec.rs b/src/native/log_store/accepted/tests/incoming_codec.rs
+index 52ed5db6..3e15db32 100644
+--- a/src/native/log_store/accepted/tests/incoming_codec.rs
++++ b/src/native/log_store/accepted/tests/incoming_codec.rs
+@@ -41,7 +41,7 @@ impl LogCodec for RefusingCodec {
+     }
+ }
+ #[test]
+-fn codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_io() {
++fn codec_sees_shared_retained_charge_and_refuses_before_invalid_log_admission_or_any_io() {
+     let io = fixture::Memory::default();
+     let observed = Rc::new(Cell::new(0));
+     let identity = bootstrap(1).voter_stores[&NodeId::new(1).unwrap()];
+@@ -62,8 +62,10 @@ fn codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_
+     let EntryPayload::Command { bytes, .. } = &mut input.payload else {
+         unreachable!()
+     };
+-    bytes.reserve(10000);
+-    let capacity = bytes.capacity();
++    let mut raw = bytes.to_vec();
++    raw.reserve(10000);
++    *bytes = raw.into();
++    let charge = bytes.retained_bytes();
+     let LogMutation::Update(mut change) = mutation_raw(
+         &before,
+         0,
+@@ -79,7 +81,7 @@ fn codec_sees_original_capacity_and_refuses_before_invalid_log_admission_or_any_
+         store.append_batch(vec![LogMutation::Update(change)]),
+         Err(StorageError::Rejected("selected codec refuses original"))
+     );
+-    assert_eq!(observed.get(), capacity);
++    assert_eq!(observed.get(), charge);
+     assert_eq!(store.state(group(1)).unwrap(), before);
+     assert_eq!(io.0.borrow().bytes, written);
+     assert!(store.pending.is_empty());
+diff --git a/src/native/log_store/striped/file/tests/fixture.rs b/src/native/log_store/striped/file/tests/fixture.rs
+index dcf2553d..0a7bffc3 100644
+--- a/src/native/log_store/striped/file/tests/fixture.rs
++++ b/src/native/log_store/striped/file/tests/fixture.rs
+@@ -100,7 +100,7 @@ pub(super) fn command(state: &GroupLog, value: u8) -> LogMutation {
+                 term,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(index.into()).unwrap(),
+-                    bytes: vec![value; 1300],
++                    bytes: vec![value; 1300].into(),
+                 },
+             }],
+         }),
+diff --git a/src/native/log_store/striped/record.rs b/src/native/log_store/striped/record.rs
+index f4d14667..d7ff4c96 100644
+--- a/src/native/log_store/striped/record.rs
++++ b/src/native/log_store/striped/record.rs
+@@ -52,7 +52,7 @@ impl Record {
+ fn strip(entries: &mut [LogEntry]) {
+     for entry in entries {
+         if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
+-            bytes.clear();
++            *bytes = Default::default();
+         }
+     }
+ }
+diff --git a/src/program_transaction/tests.rs b/src/program_transaction/tests.rs
+index 5b4d5875..9225288e 100644
+--- a/src/program_transaction/tests.rs
++++ b/src/program_transaction/tests.rs
+@@ -87,7 +87,7 @@ fn entry(index: u64, group: GroupIdentity, c: &Command) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: c.operation(group).unwrap(),
+-            bytes: codec::encode(c).unwrap(),
++            bytes: codec::encode(c).unwrap().into(),
+         },
+     }
+ }
+diff --git a/src/program_transaction/tests/recovery.rs b/src/program_transaction/tests/recovery.rs
+index 41ee916b..5fd2ea65 100644
+--- a/src/program_transaction/tests/recovery.rs
++++ b/src/program_transaction/tests/recovery.rs
+@@ -100,7 +100,9 @@ fn whole_batch_failure_and_failed_restore_preserve_original_state() {
+     let before = app.clone();
+     let mut bad = entry(2, app.group, &c);
+     if let EntryPayload::Command { bytes, .. } = &mut bad.payload {
+-        bytes.push(0);
++        let mut replacement = bytes.to_vec();
++        replacement.push(0);
++        *bytes = replacement.into();
+     }
+     assert!(app.apply_batch(&[entry(1, app.group, &c), bad]).is_err());
+     assert_eq!(app, before);
+diff --git a/src/raft/admitted_replication/tests.rs b/src/raft/admitted_replication/tests.rs
+index 56cf8b6e..c9436da5 100644
+--- a/src/raft/admitted_replication/tests.rs
++++ b/src/raft/admitted_replication/tests.rs
+@@ -282,7 +282,9 @@ fn relay_currentness_validates_pending_original_and_bounded_empty_alias_bytes()
+     let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+         unreachable!()
+     };
+-    bytes.push(9);
++    let mut replacement = bytes.to_vec();
++    replacement.push(9);
++    *bytes = replacement.into();
+     assert!(matches!(
+         core.request_window(&altered),
+         OriginalScope::Retired
+diff --git a/src/raft/append_prefix_tests.rs b/src/raft/append_prefix_tests.rs
+index 854a3c49..b98f5728 100644
+--- a/src/raft/append_prefix_tests.rs
++++ b/src/raft/append_prefix_tests.rs
+@@ -149,7 +149,7 @@ fn command_byte_prefix_keeps_full_ids_and_first_oversize_error_before_context()
+         .into_iter()
+         .map(|id| EntryPayload::Command {
+             operation: OperationId::new(id).unwrap(),
+-            bytes: vec![0, 255, 7],
++            bytes: vec![0, 255, 7].into(),
+         })
+         .collect::<Vec<_>>();
+     for count in [1, 64, 1024] {
+@@ -190,11 +190,11 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
+         vec![
+             EntryPayload::Command {
+                 operation: OperationId::new(u128::MAX).unwrap(),
+-                bytes: Vec::new(),
++                bytes: Vec::new().into(),
+             },
+             EntryPayload::Command {
+                 operation: OperationId::new((1 << 127) | 9).unwrap(),
+-                bytes: vec![1, 2, 3],
++                bytes: vec![1, 2, 3].into(),
+             },
+             EntryPayload::Configuration(Box::new(ConfigurationRecord {
+                 operation: OperationId::new(17).unwrap(),
+@@ -207,7 +207,9 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
+         LogLimits::default().max_batch_bytes,
+     );
+     if let EntryPayload::Command { bytes, .. } = &mut core.durable.entries[2].payload {
+-        bytes.reserve(257);
++        let mut raw = bytes.to_vec();
++        raw.reserve(257);
++        *bytes = raw.into();
+     }
+     let state = core.state().clone();
+     let mut entries = differential(&mut core);
+@@ -221,10 +223,11 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
+     else {
+         unreachable!()
+     };
+-    assert_ne!(bytes.as_ptr(), original.as_ptr());
+-    assert_eq!(bytes.capacity(), bytes.len());
+-    assert!(original.capacity() > bytes.capacity());
+-    bytes[0] = 99;
++    assert_eq!(bytes.as_ptr(), original.as_ptr());
++    assert_eq!(bytes.retained_bytes(), original.retained_bytes());
++    let mut replacement = bytes.to_vec();
++    replacement[0] = 99;
++    *bytes = replacement.into();
+     let EntryPayload::Configuration(copy) = &mut entries[2].payload else {
+         unreachable!()
+     };
+diff --git a/src/raft/checkpoint_tests.rs b/src/raft/checkpoint_tests.rs
+index a9785d3b..4f4a8b66 100644
+--- a/src/raft/checkpoint_tests.rs
++++ b/src/raft/checkpoint_tests.rs
+@@ -53,7 +53,7 @@ fn same_core_suffix_replacement_and_replayed_higher_term_replace_lineage() {
+                     term: 2,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new((1 << 127) | 7).unwrap(),
+-                        bytes: vec![9],
++                        bytes: vec![9].into(),
+                     },
+                 },
+                 LogEntry {
+diff --git a/src/raft/completion_tests.rs b/src/raft/completion_tests.rs
+index 613a42ab..3c2e9ecb 100644
+--- a/src/raft/completion_tests.rs
++++ b/src/raft/completion_tests.rs
+@@ -12,7 +12,7 @@ fn command(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+@@ -167,8 +167,10 @@ fn borrowed_commit_only_interval_is_canonical_and_owned_materialization_is_indep
+     let EntryPayload::Command { bytes, .. } = &mut materialized[0].payload else {
+         unreachable!()
+     };
+-    assert_ne!(bytes.as_ptr(), canonical_bytes);
+-    bytes[0] = 255;
++    assert_eq!(bytes.as_ptr(), canonical_bytes);
++    let mut replacement = bytes.to_vec();
++    replacement[0] = 255;
++    *bytes = replacement.into();
+     assert_ne!(materialized, core.state().entries[1..]);
+     core.persist(core.state().hard_state, 3, None, After::Reply, None)
+         .unwrap();
+@@ -510,7 +512,9 @@ fn borrowed_persistence_helper_keeps_preflight_exactness_barrier_and_late_error_
+                 else {
+                     unreachable!()
+                 };
+-                bytes[0] = 8;
++                let mut replacement = bytes.to_vec();
++                replacement[0] = 8;
++                *bytes = replacement.into();
+             }
+             2 => store.fail_barrier = true,
+             3 => core.request_sequence = u64::MAX,
+diff --git a/src/raft/configured_delta_tests.rs b/src/raft/configured_delta_tests.rs
+index 5f92cc58..20c29def 100644
+--- a/src/raft/configured_delta_tests.rs
++++ b/src/raft/configured_delta_tests.rs
+@@ -50,7 +50,7 @@ fn configured_pending_append_and_compacted_joint_commit_keep_connections_and_mem
+                         term: 1,
+                         payload: EntryPayload::Command {
+                             operation: operation(555),
+-                            bytes: vec![7],
++                            bytes: vec![7].into(),
+                         },
+                     }],
+                 }),
+diff --git a/src/raft/membership_tests.rs b/src/raft/membership_tests.rs
+index 6c2a4973..f418c49a 100644
+--- a/src/raft/membership_tests.rs
++++ b/src/raft/membership_tests.rs
+@@ -632,7 +632,7 @@ fn retained_repair_pair(gap: u64, overlap: usize) -> (Raft, Raft) {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: operation(u128::from(1000 + index)),
+-                bytes: vec![index as u8; 8],
++                bytes: vec![index as u8; 8].into(),
+             },
+         })
+         .collect::<Vec<_>>();
+@@ -714,7 +714,9 @@ fn joint_repair_refuses_forked_overlap_bad_ranges_and_out_of_window_learners() {
+                 let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                     unreachable!()
+                 };
+-                bytes[0] ^= 1;
++                let mut replacement = bytes.to_vec();
++                replacement[0] ^= 1;
++                *bytes = replacement.into();
+             }
+             1 => entries[1].term = repair.term + 1,
+             2 => entries[1].index += 1,
+@@ -943,7 +945,9 @@ fn batched_repair_checks_authority_ranges_and_ack_context_before_progress() {
+                         let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                             unreachable!()
+                         };
+-                        bytes[0] ^= 1;
++                        let mut replacement = bytes.to_vec();
++                        replacement[0] ^= 1;
++                        *bytes = replacement.into();
+                     }
+                     8 => entries[0].payload = joint.payload.clone(),
+                     9 => joint.index = 1,
+diff --git a/src/raft/owned_append_tests.rs b/src/raft/owned_append_tests.rs
+index 5402da11..bf5744ec 100644
+--- a/src/raft/owned_append_tests.rs
++++ b/src/raft/owned_append_tests.rs
+@@ -9,7 +9,7 @@ fn command(index: u64, term: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
+         term,
+         payload: EntryPayload::Command {
+             operation: operation(id),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+@@ -71,7 +71,7 @@ fn suffix(effects: &[Effect]) -> &Suffix {
+     update(effects).suffix.as_ref().unwrap()
+ }
+ 
+-fn bytes(entry: &LogEntry) -> &Vec<u8> {
++fn bytes(entry: &LogEntry) -> &CommandBytes {
+     let EntryPayload::Command { bytes, .. } = &entry.payload else {
+         panic!("expected command")
+     };
+@@ -138,7 +138,9 @@ fn check_independent_pending(receiver: &Raft, effects: &[Effect]) {
+         if change_id {
+             *operation = super::operation(1 << 126);
+         } else {
+-            bytes[0] ^= 1;
++            let mut replacement = bytes.to_vec();
++            replacement[0] ^= 1;
++            *bytes = replacement.into();
+         }
+         assert_eq!(
+             receiver.validate_persist_effect(&wrong),
+@@ -187,7 +189,7 @@ fn tight_owned_append_matches_forced_clone_with_independent_delayed_completion()
+ }
+ 
+ #[test]
+-fn spare_outer_or_command_allocations_keep_normalized_clone_fallback() {
++fn spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture() {
+     for shape in 0..3 {
+         let mut receiver = follower(core(), 1);
+         let mut entries = plain_entries();
+@@ -197,12 +199,16 @@ fn spare_outer_or_command_allocations_keep_normalized_clone_fallback() {
+             let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+                 unreachable!()
+             };
+-            bytes.reserve(64);
++            let mut raw = bytes.to_vec();
++            raw.reserve(64);
++            *bytes = raw.into();
+         } else {
+             let EntryPayload::Command { bytes, .. } = &mut entries[1].payload else {
+                 unreachable!()
+             };
+-            bytes.reserve(64);
++            let mut raw = bytes.to_vec();
++            raw.reserve(64);
++            *bytes = raw.into();
+         }
+         let input_pointer = entries.as_ptr();
+         let payload_pointer = bytes(&entries[1]).as_ptr();
+@@ -212,11 +218,18 @@ fn spare_outer_or_command_allocations_keep_normalized_clone_fallback() {
+             .unwrap();
+         let retained = &suffix(&effects).entries;
+         assert_eq!(retained, &expected);
+-        assert_ne!(retained.as_ptr(), input_pointer);
+-        assert_ne!(bytes(&retained[1]).as_ptr(), payload_pointer);
++        if shape == 0 {
++            assert_ne!(retained.as_ptr(), input_pointer);
++        } else {
++            assert_eq!(retained.as_ptr(), input_pointer);
++        }
++        assert_eq!(bytes(&retained[1]).as_ptr(), payload_pointer);
+         assert_eq!(retained.capacity(), retained.len());
+-        assert_eq!(bytes(&retained[0]).capacity(), 0);
+-        assert_eq!(bytes(&retained[1]).capacity(), bytes(&retained[1]).len());
++        assert_eq!(bytes(&retained[0]).retained_bytes(), 0);
++        assert_eq!(
++            bytes(&retained[1]).retained_bytes(),
++            bytes(&retained[1]).len() + 2 * std::mem::size_of::<usize>()
++        );
+         delayed_completion(&mut receiver, &effects);
+         assert_eq!(receiver.state().commit_index, 5);
+     }
+diff --git a/src/raft/proposals.rs b/src/raft/proposals.rs
+index 26dc9422..e638e697 100644
+--- a/src/raft/proposals.rs
++++ b/src/raft/proposals.rs
+@@ -41,6 +41,7 @@ impl Raft {
+         self.begin_step()?;
+         self.check_proposal_role()?;
+         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
++        self.validate_conversion_peak(&proposals, proposals.capacity())?;
+         let entries = proposals
+             .into_iter()
+             .enumerate()
+@@ -49,7 +50,7 @@ impl Raft {
+                 term: self.durable.hard_state.term,
+                 payload: EntryPayload::Command {
+                     operation: proposal.operation,
+-                    bytes: proposal.bytes,
++                    bytes: proposal.bytes.into(),
+                 },
+             })
+             .collect();
+@@ -94,7 +95,10 @@ impl Raft {
+         let entry = LogEntry {
+             index,
+             term: self.durable.hard_state.term,
+-            payload: EntryPayload::Command { operation, bytes },
++            payload: EntryPayload::Command {
++                operation,
++                bytes: bytes.into(),
++            },
+         };
+         self.persist_proposal_entries(index, vec![entry])
+     }
+@@ -150,6 +154,34 @@ impl Raft {
+         }
+         Ok(first)
+     }
++    fn validate_conversion_peak(
++        &self,
++        proposals: &[Proposal],
++        capacity: usize,
++    ) -> Result<(), RaftError> {
++        let staged = capacity
++            .checked_mul(size_of::<Proposal>())
++            .and_then(|n| n.checked_add(size_of::<Vec<Proposal>>()))
++            .and_then(|n| {
++                proposals
++                    .len()
++                    .checked_mul(size_of::<LogEntry>())
++                    .and_then(|entries| n.checked_add(entries))
++            })
++            .ok_or(RaftError::Exhausted)?;
++        let peak = proposals.iter().try_fold(staged, |sum, proposal| {
++            sum.checked_add(proposal.bytes.capacity())
++                .and_then(|n| {
++                    CommandBytes::retained_bytes_for_len(proposal.bytes.len())
++                        .and_then(|shared| n.checked_add(shared))
++                })
++                .ok_or(RaftError::Exhausted)
++        })?;
++        if peak > self.limits.max_batch_bytes {
++            return Err(StorageError::Rejected("proposal shared conversion peak budget").into());
++        }
++        Ok(())
++    }
+     fn persist_proposal_entries(
+         &mut self,
+         first: u64,
+diff --git a/src/raft/proposals/tests.rs b/src/raft/proposals/tests.rs
+index 512dba8c..74f29b0f 100644
+--- a/src/raft/proposals/tests.rs
++++ b/src/raft/proposals/tests.rs
+@@ -212,7 +212,7 @@ fn four_original_commands_share_one_uncommitted_transition() {
+             entry.payload,
+             EntryPayload::Command {
+                 operation: original.operation,
+-                bytes: original.bytes
++                bytes: original.bytes.into()
+             }
+         );
+     }
+@@ -372,7 +372,9 @@ fn legacy_singletons_keep_custom_small_limits_and_spare_payload_capacity() {
+         else {
+             panic!("expected original command");
+         };
+-        assert_eq!(bytes.capacity(), original_capacity);
++        assert_eq!(bytes.len(), 1);
++        assert_eq!(bytes.retained_bytes(), 1 + 2 * size_of::<usize>());
++        assert!(original_capacity >= bytes.len());
+     }
+     let mut batched = leader();
+     batched.limits.max_batch_bytes = 256;
+@@ -462,3 +464,28 @@ fn each_existing_checkpoint_install_and_readiness_dependency_stays_closed() {
+         assert!(core.pending.is_none());
+     }
+ }
++
++#[test]
++fn shared_conversion_peak_refuses_after_raw_checks_without_pending_or_log_changes() {
++    let mut core = leader();
++    let mut proposed = proposal(100);
++    proposed.bytes = vec![7; 130];
++    let input = vec![proposed];
++    let raw = size_of::<Vec<Proposal>>()
++        + input.capacity() * size_of::<Proposal>()
++        + input.len() * size_of::<LogEntry>()
++        + input.iter().map(|p| p.bytes.capacity()).sum::<usize>();
++    core.limits.max_batch_bytes = raw.max(256);
++    core.limits.max_command_bytes = 130;
++    core.limits.validate().unwrap();
++    assert!(core
++        .validate_proposal_batch(&input, input.capacity())
++        .is_ok());
++    let before = core.state().clone();
++    assert_eq!(
++        core.propose_batch(input),
++        Err(StorageError::Rejected("proposal shared conversion peak budget").into())
++    );
++    assert!(core.pending.is_none());
++    assert_eq!(core.state(), &before);
++}
+diff --git a/src/raft/proposals/tests/incoming.rs b/src/raft/proposals/tests/incoming.rs
+index 39903003..148292f7 100644
+--- a/src/raft/proposals/tests/incoming.rs
++++ b/src/raft/proposals/tests/incoming.rs
+@@ -2,12 +2,12 @@
+ // Copyright (c) 2026 Karl Livesey
+ use super::*;
+ #[test]
+-fn persist_effect_preserves_original_capacity_and_pending_has_one_exact_normalized_suffix() {
++fn persist_effect_captures_raw_proposal_once_and_pending_shares_exact_immutable_payload() {
+     let mut core = leader();
+     let mut input = proposal(100);
+     input.bytes.reserve(10000);
+     let raw_pointer = input.bytes.as_ptr();
+-    let raw_capacity = input.bytes.capacity();
++    let logical_len = input.bytes.len();
+     let effects = core.propose_batch(vec![input]).unwrap();
+     let original = effects
+         .into_iter()
+@@ -23,16 +23,17 @@ fn persist_effect_preserves_original_capacity_and_pending_has_one_exact_normaliz
+     else {
+         unreachable!()
+     };
+-    assert_eq!(bytes.as_ptr(), raw_pointer);
+-    assert_eq!(bytes.capacity(), raw_capacity);
++    assert_ne!(bytes.as_ptr(), raw_pointer);
++    let captured = bytes.as_ptr();
++    assert_eq!(bytes.retained_bytes(), logical_len + 2 * size_of::<usize>());
+     let next = &core.pending.as_ref().unwrap().next;
+     let owned = next.update().suffix.as_ref().unwrap();
+     let EntryPayload::Command { bytes, .. } = &owned.entries[0].payload else {
+         unreachable!()
+     };
+     let retained = bytes.as_ptr();
+-    assert_ne!(retained, raw_pointer);
+-    assert_eq!(bytes.capacity(), bytes.len());
++    assert_eq!(retained, captured);
++    assert_eq!(bytes.retained_bytes(), logical_len + 2 * size_of::<usize>());
+     let EntryPayload::Command { bytes, .. } = &next.entry_at(2).unwrap().payload else {
+         unreachable!()
+     };
+@@ -50,7 +51,9 @@ fn persist_effect_preserves_original_capacity_and_pending_has_one_exact_normaliz
+         if operation {
+             *id = OperationId::new(999).unwrap();
+         } else {
+-            bytes[0] ^= 1;
++            let mut raw = bytes.to_vec();
++            raw[0] ^= 1;
++            *bytes = raw.into();
+         }
+         assert_eq!(
+             core.validate_persist_effect(&wrong),
+diff --git a/src/raft/receive.rs b/src/raft/receive.rs
+index 85d0126c..cc302a26 100644
+--- a/src/raft/receive.rs
++++ b/src/raft/receive.rs
+@@ -363,10 +363,7 @@ impl Raft {
+                     }
+                     tight_payloads = false;
+                 }
+-                EntryPayload::Command { bytes, .. } => {
+-                    tight_payloads &= bytes.capacity() == bytes.len();
+-                }
+-                EntryPayload::Noop => {}
++                EntryPayload::Command { .. } | EntryPayload::Noop => {}
+             }
+             if previous_index.checked_add(i as u64 + 1) != Some(e.index)
+                 || e.term == 0
+diff --git a/src/retirement.rs b/src/retirement.rs
+index ccb07089..d8001bee 100644
+--- a/src/retirement.rs
++++ b/src/retirement.rs
+@@ -486,7 +486,8 @@ where
+             }
+             if let EntryPayload::Command { operation, bytes } = &entry.payload {
+                 if let Some(record) = &next.retired {
+-                    let outcome = if *operation == record.status.operation && *bytes == record.bytes
++                    let outcome = if *operation == record.status.operation
++                        && bytes.as_slice() == record.bytes.as_slice()
+                     {
+                         RetirementOutcome::Retired(record.status)
+                     } else {
+@@ -519,7 +520,7 @@ where
+                     let status = Self::status_for(entry.index, bytes, &proof);
+                     next.retired = Some(RetiredRecord {
+                         status,
+-                        bytes: bytes.clone(),
++                        bytes: bytes.to_vec(),
+                         proof,
+                         lineage,
+                     });
+@@ -617,7 +618,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 },
+             }])?;
+         }
+@@ -640,7 +641,7 @@ where
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation,
+-                bytes: bytes.to_vec(),
++                bytes: bytes.into(),
+             },
+         };
+         next.receipt_bytes_bound(&[entry])
+diff --git a/src/routed.rs b/src/routed.rs
+index 774dec82..f3376821 100644
+--- a/src/routed.rs
++++ b/src/routed.rs
+@@ -540,7 +540,7 @@ where
+                             }
+                             projected.payload = EntryPayload::Command {
+                                 operation: *operation,
+-                                bytes: payload.to_vec(),
++                                bytes: payload.into(),
+                             };
+                             // Only the selected application's checked receipt supplies success.
+                             None
+@@ -617,7 +617,7 @@ where
+                         data += 1;
+                         EntryPayload::Command {
+                             operation: *operation,
+-                            bytes: payload.to_vec(),
++                            bytes: payload.into(),
+                         }
+                     }
+                     _ => EntryPayload::Noop,
+diff --git a/src/routed/control_apply.rs b/src/routed/control_apply.rs
+index de81ff8b..508fb563 100644
+--- a/src/routed/control_apply.rs
++++ b/src/routed/control_apply.rs
+@@ -153,7 +153,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: id,
+-                    bytes: pending_bytes.to_vec(),
++                    bytes: pending_bytes.into(),
+                 },
+             };
+             next.apply_batch(&[entry])?;
+@@ -166,7 +166,7 @@ where
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation,
+-                bytes: bytes.to_vec(),
++                bytes: bytes.into(),
+             },
+         };
+         if let Command::Data { hint, key, payload } = next.request(bytes)? {
+diff --git a/src/runtime/applications/tests/classification.rs b/src/runtime/applications/tests/classification.rs
+index 64fb6f68..3a92caef 100644
+--- a/src/runtime/applications/tests/classification.rs
++++ b/src/runtime/applications/tests/classification.rs
+@@ -19,7 +19,7 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/src/runtime/clients.rs b/src/runtime/clients.rs
+index 2e366604..bde0c07b 100644
+--- a/src/runtime/clients.rs
++++ b/src/runtime/clients.rs
+@@ -638,7 +638,7 @@ impl<R: ApplicationReceipt> ClientRouter<R> {
+                 let same = if let Some(entry) = state.entry_at(position.index) {
+                     entry.term == position.term
+                         && matches!(&entry.payload, EntryPayload::Command { operation, bytes }
+-                        if *operation == p.ticket.operation && bytes == &p.bytes)
++                        if *operation == p.ticket.operation && bytes.as_slice() == p.bytes.as_slice())
+                 } else {
+                     position.index <= state.base_index()
+                 };
+diff --git a/src/scoped_source.rs b/src/scoped_source.rs
+index 04f10936..5db98301 100644
+--- a/src/scoped_source.rs
++++ b/src/scoped_source.rs
+@@ -426,7 +426,7 @@ where
+             }
+             let replacement = self.projected_command(operation, bytes)?;
+             if let EntryPayload::Command { bytes, .. } = &mut projected.payload {
+-                *bytes = replacement;
++                *bytes = replacement.into();
+             }
+         }
+         Ok(projected)
+@@ -1104,7 +1104,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: id,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 },
+             };
+             next.apply_batch(&[entry])?;
+@@ -1120,7 +1120,7 @@ where
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation,
+-                bytes: bytes.to_vec(),
++                bytes: bytes.into(),
+             },
+         };
+         if bytes.starts_with(b"VBSADP01") || parent_command(bytes) {
+diff --git a/src/transaction/tests.rs b/src/transaction/tests.rs
+index ffda21d6..9cab6c70 100644
+--- a/src/transaction/tests.rs
++++ b/src/transaction/tests.rs
+@@ -72,7 +72,7 @@ fn apply(app: &mut TransferApplication, command: Command) -> TransferReceipt {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation,
+-            bytes: codec::encode(command).unwrap(),
++            bytes: codec::encode(command).unwrap().into(),
+         },
+     };
+     app.apply_batch(&[entry]).unwrap().remove(0)
+diff --git a/src/transaction/tests/admission.rs b/src/transaction/tests/admission.rs
+index e8451dde..828f1fe9 100644
+--- a/src/transaction/tests/admission.rs
++++ b/src/transaction/tests/admission.rs
+@@ -89,7 +89,7 @@ fn missing_account_and_incorrect_outer_operation_refuse_before_binding() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: s.phases().coordinator()[1],
+-            bytes: TransferApplication::start(s).unwrap(),
++            bytes: TransferApplication::start(s).unwrap().into(),
+         },
+     };
+     assert_eq!(
+diff --git a/src/transaction/tests/recovery.rs b/src/transaction/tests/recovery.rs
+index 3784eae4..46e3fdad 100644
+--- a/src/transaction/tests/recovery.rs
++++ b/src/transaction/tests/recovery.rs
+@@ -83,7 +83,7 @@ fn malformed_batch_and_every_checkpoint_truncation_preserve_original_state() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: s.phases().coordinator()[0],
+-            bytes: TransferApplication::start(s).unwrap(),
++            bytes: TransferApplication::start(s).unwrap().into(),
+         },
+     };
+     let bad = LogEntry {
+@@ -91,7 +91,7 @@ fn malformed_batch_and_every_checkpoint_truncation_preserve_original_state() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: s.phases().coordinator()[1],
+-            bytes: vec![0],
++            bytes: vec![0].into(),
+         },
+     };
+     assert_eq!(
+diff --git a/src/transfer_source.rs b/src/transfer_source.rs
+index dff279f9..7a2ff3a7 100644
+--- a/src/transfer_source.rs
++++ b/src/transfer_source.rs
+@@ -238,7 +238,7 @@ where
+         let mut freeze = None;
+         if let EntryPayload::Command { operation, bytes } = &entry.payload {
+             let replacement = if bytes.starts_with(b"VBSROWN1") {
+-                if bytes != &self.bootstrap_command(bytes.len())? {
++                if bytes.as_slice() != self.bootstrap_command(bytes.len())?.as_slice() {
+                     return Err(ApplicationError::InvalidCommand);
+                 }
+                 self.routed.bootstrap_command(bytes.len())?
+@@ -262,10 +262,10 @@ where
+                     }
+                     _ => return Err(ApplicationError::InvalidCommand), // No unbound bootstrap or fence bypass.
+                 }
+-                bytes.clone()
++                bytes.to_vec()
+             };
+             if let EntryPayload::Command { bytes, .. } = &mut next.payload {
+-                *bytes = replacement;
++                *bytes = replacement.into();
+             }
+         }
+         Ok((next, freeze))
+@@ -413,7 +413,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: id,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 },
+             };
+             next.apply_batch(&[entry])?;
+@@ -426,7 +426,7 @@ where
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation,
+-                bytes: bytes.to_vec(),
++                bytes: bytes.into(),
+             },
+         };
+         let (projected, _) = next.projected(&entry)?;
+diff --git a/src/transfer_target.rs b/src/transfer_target.rs
+index c827e5ed..7d1d3d32 100644
+--- a/src/transfer_target.rs
++++ b/src/transfer_target.rs
+@@ -992,7 +992,7 @@ where
+                     term: entry.term,
+                     payload: EntryPayload::Command {
+                         operation: *operation,
+-                        bytes: payload.to_vec(),
++                        bytes: payload.into(),
+                     },
+                 };
+                 let mut result = self.inner.apply_batch(&[projected])?.into_iter();
+@@ -1308,7 +1308,7 @@ where
+                             term: entry.term,
+                             payload: EntryPayload::Command {
+                                 operation: *operation,
+-                                bytes: payload.to_vec(),
++                                bytes: payload.into(),
+                             },
+                         };
+                         nested = next
+@@ -1359,7 +1359,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 },
+             }])?;
+         }
+@@ -1401,7 +1401,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 },
+             }])?
+             .remove(0);
+diff --git a/src/transfer_target/partial.rs b/src/transfer_target/partial.rs
+index 8cc5743c..7526f26d 100644
+--- a/src/transfer_target/partial.rs
++++ b/src/transfer_target/partial.rs
+@@ -383,7 +383,7 @@ where
+             .as_ref()
+             .ok_or(ApplicationError::UnsupportedSchema)?;
+         if let Some(old) = p.events.iter().find(|e| e.operation == *op) {
+-            return if old.bytes == *bytes {
++            return if old.bytes.as_slice() == bytes.as_slice() {
+                 Ok((old.outcome.receipt(), false))
+             } else {
+                 Err(ApplicationError::InvalidCommand)
+@@ -436,7 +436,7 @@ where
+         p.events.push(Event {
+             operation: *op,
+             index: entry.index,
+-            bytes: bytes.clone(),
++            bytes: bytes.to_vec(),
+             image,
+             outcome,
+         });
+@@ -525,7 +525,7 @@ where
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 },
+             };
+             self.apply_partial::<()>(&entry, image, true)?;
+diff --git a/src/wire_format.rs b/src/wire_format.rs
+index 70ae05ac..d8640493 100644
+--- a/src/wire_format.rs
++++ b/src/wire_format.rs
+@@ -534,7 +534,7 @@ impl<'a> Encoder<'a> {
+                 if bytes.len() > self.limits.max_command_bytes {
+                     return Err(WireError::TooLarge);
+                 }
+-                self.budget.charge(bytes.len())?;
++                self.budget.charge(bytes.retained_bytes())?;
+                 self.u8(1)?;
+                 self.u128(operation.get())?;
+                 self.u32(bytes.len() as u32)?;
+@@ -1071,10 +1071,12 @@ impl<'a> Decoder<'a> {
+                     return Err(WireError::TooLarge);
+                 }
+                 let bytes = self.take(len)?;
+-                budget.charge(len)?;
++                let charge =
++                    CommandBytes::retained_bytes_for_len(len).ok_or(WireError::TooLarge)?;
++                budget.charge(charge)?;
+                 EntryPayload::Command {
+                     operation,
+-                    bytes: bytes.to_vec(),
++                    bytes: bytes.into(),
+                 }
+             }
+             2 if version >= 2 => {
+diff --git a/src/wire_format/capacity.rs b/src/wire_format/capacity.rs
+index b1c96e72..3f44a532 100644
+--- a/src/wire_format/capacity.rs
++++ b/src/wire_format/capacity.rs
+@@ -84,7 +84,7 @@ pub(super) fn check(
+     if let Rpc::Append { entries, .. } = &mut message.rpc {
+         entries[0].payload = EntryPayload::Command {
+             operation: required.record.operation,
+-            bytes: vec![0],
++            bytes: vec![0].into(),
+         };
+     }
+     let command = footprint(codec, scope, &message, app.command_bytes - 1)?;
+diff --git a/tests/application.rs b/tests/application.rs
+index 089d30b0..a8c712b0 100644
+--- a/tests/application.rs
++++ b/tests/application.rs
+@@ -19,7 +19,7 @@ fn command(index: u64, id: u128, delta: i64) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(id).unwrap(),
+-            bytes: delta.to_le_bytes().to_vec(),
++            bytes: delta.to_le_bytes().to_vec().into(),
+         },
+     }
+ }
+@@ -165,7 +165,7 @@ fn invalid_batches_and_capacity_do_not_partly_advance_state() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(2).unwrap(),
+-            bytes: vec![1],
++            bytes: vec![1].into(),
+         },
+     };
+     assert_eq!(
+@@ -249,7 +249,7 @@ fn late_batch_failures_preserve_full_history_and_leave_rejected_operations_novel
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(130).unwrap(),
+-            bytes: vec![1],
++            bytes: vec![1].into(),
+         },
+     };
+     let failed = [
+diff --git a/tests/configuration_capacity.rs b/tests/configuration_capacity.rs
+index c5b90278..ec689ca9 100644
+--- a/tests/configuration_capacity.rs
++++ b/tests/configuration_capacity.rs
+@@ -53,7 +53,7 @@ fn full_service_counter_retry_history_fits_selected_native_wire_versions() {
+             term: 7,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(index as u128).unwrap(),
+-                bytes: 1i64.to_le_bytes().to_vec(),
++                bytes: 1i64.to_le_bytes().to_vec().into(),
+             },
+         })
+         .collect::<Vec<_>>();
+@@ -158,7 +158,7 @@ fn messages(required: &ConfigurationWireRequirements<'_>) -> [Message; 3] {
+     if let Rpc::Append { entries, .. } = &mut command.rpc {
+         entries[0].payload = EntryPayload::Command {
+             operation: required.record.operation,
+-            bytes: vec![0; required.application.command_bytes],
++            bytes: vec![0; required.application.command_bytes].into(),
+         };
+     }
+     let mut snapshot = append.clone();
+diff --git a/tests/counter_service.rs b/tests/counter_service.rs
+index e6679d05..1432f872 100644
+--- a/tests/counter_service.rs
++++ b/tests/counter_service.rs
+@@ -912,7 +912,7 @@ fn checkpoint_source(root: &std::path::Path, id: u64, operation: u128, delta: i6
+                     term: state.hard_state.term,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(operation).unwrap(),
+-                        bytes: delta.to_le_bytes().to_vec(),
++                        bytes: delta.to_le_bytes().to_vec().into(),
+                     },
+                 }],
+             }),
+@@ -1022,7 +1022,7 @@ fn recovered_state_for(
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(retry_command.0).unwrap(),
+-                bytes: retry_command.1.to_le_bytes().to_vec(),
++                bytes: retry_command.1.to_le_bytes().to_vec().into(),
+             },
+         }])
+         .unwrap();
+diff --git a/tests/directory.rs b/tests/directory.rs
+index 6afb10b6..7763ba73 100644
+--- a/tests/directory.rs
++++ b/tests/directory.rs
+@@ -120,7 +120,7 @@ fn initialize(mut app: Directory) -> Directory {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(1_000_000).unwrap(),
+-                bytes,
++                bytes: bytes.into(),
+             },
+         }])
+         .unwrap()[0];
+@@ -150,7 +150,7 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+@@ -1488,7 +1488,7 @@ fn committed_initialization_binds_the_full_plan_before_any_publication() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(1_000_000).unwrap(),
+-            bytes: bootstrap,
++            bytes: bootstrap.into(),
+         },
+     };
+     assert_eq!(
+diff --git a/tests/effect_owner.rs b/tests/effect_owner.rs
+index 26ca84cc..3b1b12ed 100644
+--- a/tests/effect_owner.rs
++++ b/tests/effect_owner.rs
+@@ -2702,7 +2702,7 @@ mod native {
+                                 term: 1,
+                                 payload: EntryPayload::Command {
+                                     operation: OperationId::new(1).unwrap(),
+-                                    bytes: 7i64.to_le_bytes().to_vec(),
++                                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                                 },
+                             }],
+                         }),
+@@ -3213,7 +3213,7 @@ mod snapshot_routes {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(1).unwrap(),
+-                bytes: 7i64.to_le_bytes().to_vec(),
++                bytes: 7i64.to_le_bytes().to_vec().into(),
+             },
+         }])
+         .unwrap();
+@@ -3720,7 +3720,7 @@ mod ingress {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(g).unwrap(),
+-                        bytes: 1i64.to_le_bytes().to_vec(),
++                        bytes: 1i64.to_le_bytes().to_vec().into(),
+                     },
+                 }],
+             },
+diff --git a/tests/imported_parent.rs b/tests/imported_parent.rs
+index 783b1e5c..9d2dd8c5 100644
+--- a/tests/imported_parent.rs
++++ b/tests/imported_parent.rs
+@@ -643,8 +643,8 @@ fn repeated_parent_chain_and_retirement_bind_the_final_grant() {
+     let cp = t.checkpoint(1000000).unwrap();
+     let record = cp.len() - bytes.len() - 60;
+     for (operation, index, command) in [
+-        (op(200), 5, bytes.clone()),
+         (op(801), 3, bytes.clone()),
++        (op(801), 3, bytes.to_vec()),
+         (op(801), 5, first.clone()),
+     ] {
+         let mut body = Vec::new();
+@@ -724,13 +724,16 @@ fn check_moved_targets(
+         let EntryPayload::Command { bytes: boot, .. } = &original_entries[0].payload else {
+             unreachable!()
+         };
+-        assert_eq!(&t.bootstrap_command(200000).unwrap(), boot);
++        assert_eq!(
++            t.bootstrap_command(200000).unwrap().as_slice(),
++            boot.as_slice()
++        );
+         for e in &original_entries {
+             let EntryPayload::Command { bytes, .. } = &e.payload else {
+                 unreachable!()
+             };
+             assert!(matches!(
+-                tracked(t, &mut logs[j], 200, bytes.clone()).outcome,
++                tracked(t, &mut logs[j], 200, bytes.to_vec()).outcome,
+                 TargetOutcome::Staged { .. }
+                     | TargetOutcome::Imported { .. }
+                     | TargetOutcome::Activated(_)
+diff --git a/tests/leadership_maintenance.rs b/tests/leadership_maintenance.rs
+index 23ae12c0..01bc4ff3 100644
+--- a/tests/leadership_maintenance.rs
++++ b/tests/leadership_maintenance.rs
+@@ -32,7 +32,7 @@ fn command(index: u64, term: u64, c: LeadershipCommand) -> LogEntry {
+         term,
+         payload: EntryPayload::Command {
+             operation: c.intent().request.operation,
+-            bytes: c.encode().unwrap(),
++            bytes: c.encode().unwrap().into(),
+         },
+     }
+ }
+@@ -42,7 +42,9 @@ fn data(index: u64, op: u128, value: i64) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(op).unwrap(),
+-            bytes: Maintenance::<Counter>::data(&value.to_le_bytes(), 100).unwrap(),
++            bytes: Maintenance::<Counter>::data(&value.to_le_bytes(), 100)
++                .unwrap()
++                .into(),
+         },
+     }
+ }
+@@ -232,7 +234,7 @@ fn command_codec_rejects_truncation_and_operation_mismatch_and_old_profiles() {
+         let e = LogEntry {
+             payload: EntryPayload::Command {
+                 operation,
+-                bytes: bytes[..end].to_vec(),
++                bytes: bytes[..end].to_vec().into(),
+             },
+             ..c.clone()
+         };
+diff --git a/tests/learner_enrollment.rs b/tests/learner_enrollment.rs
+index 6acdcac1..d4db10ca 100644
+--- a/tests/learner_enrollment.rs
++++ b/tests/learner_enrollment.rs
+@@ -106,7 +106,7 @@ fn incoming() -> Snapshot {
+         term: 2,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(91).unwrap(),
+-            bytes: 7i64.to_le_bytes().to_vec(),
++            bytes: 7i64.to_le_bytes().to_vec().into(),
+         },
+     };
+     let entries = vec![assignment, command];
+@@ -151,7 +151,7 @@ fn conformance<L: LogStore>(log: &mut L) {
+             term: 2,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(91).unwrap(),
+-                bytes: 7i64.to_le_bytes().to_vec(),
++                bytes: 7i64.to_le_bytes().to_vec().into(),
+             },
+         }])
+         .unwrap();
+diff --git a/tests/learners.rs b/tests/learners.rs
+index efd96714..9155f801 100644
+--- a/tests/learners.rs
++++ b/tests/learners.rs
+@@ -87,7 +87,7 @@ fn command_message() -> Message {
+                 term: 2,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(7).unwrap(),
+-                    bytes: 7i64.to_le_bytes().to_vec(),
++                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                 },
+             }],
+             leader_commit: 2,
+diff --git a/tests/logical_activation_application.rs b/tests/logical_activation_application.rs
+index 928e2f7d..6ec16b5d 100644
+--- a/tests/logical_activation_application.rs
++++ b/tests/logical_activation_application.rs
+@@ -93,6 +93,9 @@ fn entry(index: u64, operation: OperationId, bytes: Vec<u8>) -> LogEntry {
+     LogEntry {
+         index,
+         term: 1,
+-        payload: EntryPayload::Command { operation, bytes },
++        payload: EntryPayload::Command {
++            operation,
++            bytes: bytes.into(),
++        },
+     }
+ }
+diff --git a/tests/logical_activation_nested/uncommitted_target.rs b/tests/logical_activation_nested/uncommitted_target.rs
+index 10bd059b..950c37bb 100644
+--- a/tests/logical_activation_nested/uncommitted_target.rs
++++ b/tests/logical_activation_nested/uncommitted_target.rs
+@@ -124,7 +124,7 @@ fn persist(cluster: &mut Cluster, bytes: &[u8]) -> LogEntry {
+         cluster.poll_with_budget(partition_budget());
+         let node = &cluster.nodes[0];
+         let core = node.local().owner.core(setup::bottom(3).group).unwrap();
+-        let entry=core.state().entries.iter().find(|e|matches!(&e.payload,EntryPayload::Command{operation,bytes:b} if operation.get()==356200 && b==bytes));
++        let entry=core.state().entries.iter().find(|e|matches!(&e.payload,EntryPayload::Command{operation,bytes:b} if operation.get()==356200 && b.as_slice()==bytes));
+         if let Some(entry) = entry
+             .filter(|_| !core.has_pending_dependency() && node.local().persistence.is_drained())
+         {
+diff --git a/tests/logical_formats/fixture.rs b/tests/logical_formats/fixture.rs
+index 50300150..7824ddda 100644
+--- a/tests/logical_formats/fixture.rs
++++ b/tests/logical_formats/fixture.rs
+@@ -37,7 +37,7 @@ pub fn entries() -> Vec<LogEntry> {
+             term: 3,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(index.into()).unwrap(),
+-                bytes: vec![88 + index as u8, 0, 7],
++                bytes: vec![88 + index as u8, 0, 7].into(),
+             },
+         })
+         .collect()
+diff --git a/tests/logical_nested_native/cold_recovery.rs b/tests/logical_nested_native/cold_recovery.rs
+index 27def637..73ce9a2e 100644
+--- a/tests/logical_nested_native/cold_recovery.rs
++++ b/tests/logical_nested_native/cold_recovery.rs
+@@ -145,7 +145,7 @@ fn capture(host: &Host<'_, '_>, middle_bindings: Vec<StoreBinding>, suffix_index
+             assert!(suffix.index > anchor.index);
+             assert!(
+                 matches!(&suffix.payload, EntryPayload::Command { operation, bytes }
+-            if operation.get() == 300001 && bytes == &0i64.to_le_bytes())
++            if operation.get() == 300001 && bytes.as_slice() == 0i64.to_le_bytes())
+             );
+             assert_eq!(
+                 local.applications[&group].applied_index(),
+diff --git a/tests/logical_nested_native/convergence.rs b/tests/logical_nested_native/convergence.rs
+index 6d112f54..7e353cee 100644
+--- a/tests/logical_nested_native/convergence.rs
++++ b/tests/logical_nested_native/convergence.rs
+@@ -91,7 +91,7 @@ impl WriteProgress {
+             assert_eq!(core.membership().id(), attempt.configurations[slot]);
+             let exact = core.state().entry_at(result.position.index).is_some_and(|entry| {
+                 entry.term == result.position.term && matches!(&entry.payload,
+-                EntryPayload::Command { operation, bytes } if *operation == self.operation && bytes == &self.bytes)
++                EntryPayload::Command { operation, bytes } if *operation == self.operation && bytes.as_slice() == self.bytes.as_slice())
+             });
+             exact && core.state().commit_index >= result.position.index
+                 && local.applications[&result.ticket.group].applied_index() >= result.position.index
+diff --git a/tests/logical_nested_native/setup/profile.rs b/tests/logical_nested_native/setup/profile.rs
+index dfaeb988..9252bac5 100644
+--- a/tests/logical_nested_native/setup/profile.rs
++++ b/tests/logical_nested_native/setup/profile.rs
+@@ -323,7 +323,7 @@ fn complete_declared_middle_journal_and_snapshot_framing_fit_lower_bounds() {
+                         term: 1,
+                         payload: EntryPayload::Command {
+                             operation: OperationId::new(u128::from(index)).unwrap(),
+-                            bytes: vec![0; limits.parent_log.max_command_bytes],
++                            bytes: vec![0; limits.parent_log.max_command_bytes].into(),
+                         },
+                     }],
+                 }),
+diff --git a/tests/logical_nested_native/watchdog.rs b/tests/logical_nested_native/watchdog.rs
+index d82ee5aa..0a5cdcbb 100644
+--- a/tests/logical_nested_native/watchdog.rs
++++ b/tests/logical_nested_native/watchdog.rs
+@@ -175,7 +175,7 @@ fn original_prefix(
+         let state = core.state();
+         let exact = state.entry_at(position.index).is_some_and(|entry| {
+             entry.term == position.term && matches!(&entry.payload,
+-            EntryPayload::Command { operation, bytes: original } if *operation == attempt.ticket.operation && original == bytes)
++            EntryPayload::Command { operation, bytes: original } if *operation == attempt.ticket.operation && original.as_slice() == bytes)
+         });
+         if exact {
+             mask |= 2 << (slot * 3);
+diff --git a/tests/logical_voter_application.rs b/tests/logical_voter_application.rs
+index 062fb0ac..8798c0a2 100644
+--- a/tests/logical_voter_application.rs
++++ b/tests/logical_voter_application.rs
+@@ -197,7 +197,7 @@ fn malformed_batches_and_untrusted_business_intake_leave_state_intact() {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation,
+-            bytes: b"ready".to_vec(),
++            bytes: b"ready".to_vec().into(),
+         },
+     };
+     let entries = [
+diff --git a/tests/logical_voter_native/authority.rs b/tests/logical_voter_native/authority.rs
+index b799a883..2acc4797 100644
+--- a/tests/logical_voter_native/authority.rs
++++ b/tests/logical_voter_native/authority.rs
+@@ -375,7 +375,7 @@ fn already_admitted_append_cannot_overtake_retained_original_vote_capsule() {
+         term: 7,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(8051).unwrap(),
+-            bytes: 5_i64.to_le_bytes().to_vec(),
++            bytes: 5_i64.to_le_bytes().to_vec().into(),
+         },
+     };
+     let later = tracked_input(
+diff --git a/tests/logical_voter_native/persistence.rs b/tests/logical_voter_native/persistence.rs
+index c94532aa..68ce6d48 100644
+--- a/tests/logical_voter_native/persistence.rs
++++ b/tests/logical_voter_native/persistence.rs
+@@ -133,7 +133,7 @@ fn command(index: u64, delta: i64) -> LogEntry {
+         term: 7,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(8000 + u128::from(index)).unwrap(),
+-            bytes: delta.to_le_bytes().to_vec(),
++            bytes: delta.to_le_bytes().to_vec().into(),
+         },
+     }
+ }
+diff --git a/tests/member_recovery.rs b/tests/member_recovery.rs
+index 7109c8ce..dad61644 100644
+--- a/tests/member_recovery.rs
++++ b/tests/member_recovery.rs
+@@ -321,7 +321,7 @@ fn checkpoint<L: LogStore, S: SnapshotRetention>(log: &mut L, snapshots: &mut S)
+                     term: 2,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(900).unwrap(),
+-                        bytes: 7i64.to_le_bytes().to_vec(),
++                        bytes: 7i64.to_le_bytes().to_vec().into(),
+                     },
+                 }],
+             }),
+@@ -563,7 +563,7 @@ mod native {
+                 term: 3,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(900).unwrap(),
+-                    bytes: 7i64.to_le_bytes().to_vec(),
++                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                 },
+             }])
+             .unwrap();
+@@ -1998,7 +1998,7 @@ mod joint_repair {
+                 term: 2,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(6000 + u128::from(index)).unwrap(),
+-                    bytes: 99i64.to_le_bytes().to_vec(),
++                    bytes: 99i64.to_le_bytes().to_vec().into(),
+                 },
+             })
+             .collect::<Vec<_>>();
+diff --git a/tests/member_recovery/older_checkpoint.rs b/tests/member_recovery/older_checkpoint.rs
+index ab57bf62..e45076cf 100644
+--- a/tests/member_recovery/older_checkpoint.rs
++++ b/tests/member_recovery/older_checkpoint.rs
+@@ -51,7 +51,7 @@ fn command(log: &mut impl LogStore, operation: u128, delta: i64) {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(operation).unwrap(),
+-                        bytes: delta.to_le_bytes().to_vec(),
++                        bytes: delta.to_le_bytes().to_vec().into(),
+                     },
+                 }],
+             }),
+@@ -314,7 +314,7 @@ fn retry(app: &mut Counter) {
+                 term: 3,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(operation).unwrap(),
+-                    bytes: delta.to_le_bytes().to_vec(),
++                    bytes: delta.to_le_bytes().to_vec().into(),
+                 },
+             }])
+             .unwrap();
+diff --git a/tests/membership.rs b/tests/membership.rs
+index 527f4381..c19d163b 100644
+--- a/tests/membership.rs
++++ b/tests/membership.rs
+@@ -1168,7 +1168,7 @@ mod configuration_snapshots {
+             term,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(1000).unwrap(),
+-                bytes: 7i64.to_le_bytes().to_vec(),
++                bytes: 7i64.to_le_bytes().to_vec().into(),
+             },
+         }
+     }
+diff --git a/tests/namespace_creation.rs b/tests/namespace_creation.rs
+index ae2a4bd5..eca821d6 100644
+--- a/tests/namespace_creation.rs
++++ b/tests/namespace_creation.rs
+@@ -86,7 +86,7 @@ fn entry(index: u64, op: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(op).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/tests/native_member_startup.rs b/tests/native_member_startup.rs
+index c1b6eeb2..1ca872ab 100644
+--- a/tests/native_member_startup.rs
++++ b/tests/native_member_startup.rs
+@@ -226,7 +226,7 @@ fn seed(path: &Path, local: u64, phase: u64, commit: u64, compact: bool) {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(900).unwrap(),
+-                bytes: 7i64.to_le_bytes().to_vec(),
++                bytes: 7i64.to_le_bytes().to_vec().into(),
+             },
+         });
+     }
+@@ -522,7 +522,7 @@ fn member_histories(protocol: NativePeerProtocol) {
+                     term: 1,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(900).unwrap(),
+-                        bytes: 7i64.to_le_bytes().to_vec(),
++                        bytes: 7i64.to_le_bytes().to_vec().into(),
+                     },
+                 }])
+                 .unwrap();
+@@ -572,7 +572,7 @@ fn enrollment_history(protocol: NativePeerProtocol) {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(900).unwrap(),
+-            bytes: 7i64.to_le_bytes().to_vec(),
++            bytes: 7i64.to_le_bytes().to_vec().into(),
+         },
+     });
+     let mut source = Counter::new(100).unwrap();
+@@ -2002,7 +2002,7 @@ fn repair_entries(
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(901).unwrap(),
+-                bytes: 11i64.to_le_bytes().to_vec(),
++                bytes: 11i64.to_le_bytes().to_vec().into(),
+             },
+         });
+     }
+@@ -2049,7 +2049,7 @@ fn seed_repair_nodes(
+                     term: 2,
+                     payload: EntryPayload::Command {
+                         operation: OperationId::new(6000 + u128::from(index)).unwrap(),
+-                        bytes: 99i64.to_le_bytes().to_vec(),
++                        bytes: 99i64.to_le_bytes().to_vec().into(),
+                     },
+                 });
+             }
+diff --git a/tests/native_member_startup/checkpoint_final.rs b/tests/native_member_startup/checkpoint_final.rs
+index 08ffdb68..7cea59f0 100644
+--- a/tests/native_member_startup/checkpoint_final.rs
++++ b/tests/native_member_startup/checkpoint_final.rs
+@@ -50,7 +50,7 @@ fn seed_checkpoint(path: &Path, local: u64, joint_checkpoint: bool) {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(901).unwrap(),
+-                bytes: 11i64.to_le_bytes().to_vec(),
++                bytes: 11i64.to_le_bytes().to_vec().into(),
+             },
+         },
+     );
+diff --git a/tests/outbound.rs b/tests/outbound.rs
+index f2094d40..3e108622 100644
+--- a/tests/outbound.rs
++++ b/tests/outbound.rs
+@@ -222,8 +222,14 @@ fn rejection_and_background(mut queue: impl OutboundQueue) {
+         let voteboat::log::EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+             panic!()
+         };
+-        *bytes = Vec::with_capacity(8192);
+-        bytes.push(7);
++        let mut spare = Vec::with_capacity(8192);
++        spare.push(7);
++        *bytes = spare.into();
++        assert_eq!(bytes.as_slice(), &[7]);
++        assert_eq!(bytes.retained_bytes(), 1 + 2 * std::mem::size_of::<usize>());
++        // Mutable source spare capacity is not retained. Actual immutable
++        // content still exceeds the same outbound byte budget atomically.
++        *bytes = vec![7; 8192].into();
+     }
+     assert_eq!(
+         queue.submit(vec![payload]).unwrap_err().reason,
+diff --git a/tests/parser_campaign/wal.rs b/tests/parser_campaign/wal.rs
+index 37873f79..eb7a3875 100644
+--- a/tests/parser_campaign/wal.rs
++++ b/tests/parser_campaign/wal.rs
+@@ -103,7 +103,7 @@ fn generated_native_batch_mutations_reach_bounded_inner_decoders() {
+     let EntryPayload::Command { bytes, .. } = &mut command.payload else {
+         unreachable!()
+     };
+-    *bytes = vec![0x91; 16];
++    *bytes = vec![0x91; 16].into();
+     batch_corpus(
+         vec![update(
+             &state,
+diff --git a/tests/program_transaction_application.rs b/tests/program_transaction_application.rs
+index 1254f77e..7538675d 100644
+--- a/tests/program_transaction_application.rs
++++ b/tests/program_transaction_application.rs
+@@ -55,7 +55,7 @@ fn start(index: u64, p: Program) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: p.operation(0).unwrap(),
+-            bytes: ProgramApplication::start(p).unwrap(),
++            bytes: ProgramApplication::start(p).unwrap().into(),
+         },
+     }
+ }
+diff --git a/tests/provider_conformance/application.rs b/tests/provider_conformance/application.rs
+index f563dead..3fbdc585 100644
+--- a/tests/provider_conformance/application.rs
++++ b/tests/provider_conformance/application.rs
+@@ -45,7 +45,7 @@ impl Scenario for CounterCase {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(operation).unwrap(),
+-                bytes: value.to_le_bytes().to_vec(),
++                bytes: value.to_le_bytes().to_vec().into(),
+             },
+         }
+     }
+diff --git a/tests/provider_conformance/application/checks.rs b/tests/provider_conformance/application/checks.rs
+index 832dd91c..c0c335ea 100644
+--- a/tests/provider_conformance/application/checks.rs
++++ b/tests/provider_conformance/application/checks.rs
+@@ -90,7 +90,7 @@ fn invalid_batches<S: Scenario>(app: &mut S::App) {
+     let malformed = LogEntry {
+         payload: EntryPayload::Command {
+             operation: OperationId::new(4).unwrap(),
+-            bytes: vec![0],
++            bytes: vec![0].into(),
+         },
+         ..S::command(5, 4, 1)
+     };
+diff --git a/tests/provider_conformance/application/host.rs b/tests/provider_conformance/application/host.rs
+index b00a20e2..c88933cf 100644
+--- a/tests/provider_conformance/application/host.rs
++++ b/tests/provider_conformance/application/host.rs
+@@ -203,7 +203,7 @@ impl Scenario for HostCase {
+         LogEntry {
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(operation).unwrap(),
+-                bytes: format!("set:{value}").into_bytes(),
++                bytes: format!("set:{value}").into_bytes().into(),
+             },
+             index,
+             term: 1,
+diff --git a/tests/provider_conformance/log_store.rs b/tests/provider_conformance/log_store.rs
+index b4531832..7282b1cd 100644
+--- a/tests/provider_conformance/log_store.rs
++++ b/tests/provider_conformance/log_store.rs
+@@ -3,6 +3,8 @@
+ //! Reusable cases: providers are supplied by callers through the public seam.
+ use super::support::*;
+ use voteboat::{identity::*, log::*};
++#[path = "log_store/command_bytes.rs"]
++mod command_bytes;
+ #[path = "log_store/default_errors.rs"]
+ mod default_errors;
+ #[path = "log_store/entry_clone.rs"]
+@@ -170,7 +172,7 @@ fn refusal_and_reclamation(store: &mut impl LogStore) {
+     let EntryPayload::Command { bytes, .. } = &mut oversized.payload else {
+         unreachable!()
+     };
+-    *bytes = vec![1; store.limits().max_command_bytes + 1];
++    *bytes = vec![1; store.limits().max_command_bytes + 1].into();
+     assert!(store
+         .append_batch(vec![update(
+             &before,
+diff --git a/tests/provider_conformance/log_store/entry_clone.rs b/tests/provider_conformance/log_store/entry_clone.rs
+index 2392ddd9..aebd17b5 100644
+--- a/tests/provider_conformance/log_store/entry_clone.rs
++++ b/tests/provider_conformance/log_store/entry_clone.rs
+@@ -1,6 +1,6 @@
+ // SPDX-License-Identifier: RPL-1.5
+ // Copyright (c) 2026 Karl Livesey
+-//! Independent derived top-level clone oracle; the payload derive is unchanged.
++//! Independent derived clone oracle with immutable content and replacement ownership.
+ use super::*;
+ use voteboat::membership::{Configuration, ConfigurationChange, ConfigurationRecord};
+ 
+@@ -31,7 +31,8 @@ fn assert_oracle(entry: &LogEntry, derived: &DerivedEntry) {
+         },
+     ) = (&entry.payload, &derived.payload)
+     {
+-        assert_eq!(bytes.capacity(), expected.capacity());
++        assert_eq!(bytes.as_slice(), expected.as_slice());
++        assert_eq!(bytes.retained_bytes(), expected.retained_bytes());
+     }
+ }
+ 
+@@ -68,7 +69,7 @@ fn payloads() -> Vec<EntryPayload> {
+                 bytes.extend((0..length).map(|n| n as u8));
+                 payloads.push(EntryPayload::Command {
+                     operation: OperationId::new(id).unwrap(),
+-                    bytes,
++                    bytes: bytes.into(),
+                 });
+             }
+         }
+@@ -96,12 +97,16 @@ fn fieldwise_clone_matches_independent_derived_top_level_for_every_payload() {
+ fn assert_independent(source: &LogEntry, mut copied: LogEntry) {
+     match (&source.payload, &mut copied.payload) {
+         (EntryPayload::Command { bytes, .. }, EntryPayload::Command { bytes: copy, .. }) => {
++            let mut replacement = copy.to_vec();
+             if !bytes.is_empty() {
+-                assert_ne!(bytes.as_ptr(), copy.as_ptr());
+-                copy[0] ^= 255;
++                assert_eq!(bytes.as_ptr(), copy.as_ptr());
++                replacement[0] ^= 255;
++                *copy = replacement.into();
+                 assert_ne!(bytes[0], copy[0]);
+             }
+-            copy.push(19);
++            let mut replacement = copy.to_vec();
++            replacement.push(19);
++            *copy = replacement.into();
+             assert_eq!(copy.len(), bytes.len() + 1);
+         }
+         (EntryPayload::Configuration(record), EntryPayload::Configuration(copy)) => {
+diff --git a/tests/provider_conformance/log_store/entry_equality.rs b/tests/provider_conformance/log_store/entry_equality.rs
+index 4a6a944b..34f0d8cc 100644
+--- a/tests/provider_conformance/log_store/entry_equality.rs
++++ b/tests/provider_conformance/log_store/entry_equality.rs
+@@ -66,7 +66,7 @@ fn generated_entries_match_independent_tuple_equality_in_both_directions() {
+                 bytes.reserve(19);
+                 payloads.push(EntryPayload::Command {
+                     operation: OperationId::new(id).unwrap(),
+-                    bytes,
++                    bytes: bytes.into(),
+                 });
+             }
+         }
+@@ -92,23 +92,27 @@ fn generated_entries_match_independent_tuple_equality_in_both_directions() {
+ }
+ 
+ #[test]
+-fn allocation_capacity_and_every_command_field_follow_content_equality() {
++fn converted_spare_capacity_and_every_command_field_follow_content_equality() {
+     for length in [0, 1, 17, 1024] {
+         let original = LogEntry {
+             index: u64::MAX,
+             term: u64::MAX,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new((1 << 127) | 7).unwrap(),
+-                bytes: vec![9; length],
++                bytes: vec![9; length].into(),
+             },
+         };
+         let mut capacity = original.clone();
+         let EntryPayload::Command { bytes, .. } = &mut capacity.payload else {
+             unreachable!()
+         };
+-        let before = bytes.capacity();
+-        bytes.reserve(before + 31);
+-        assert!(bytes.capacity() > before);
++        let charge = bytes.retained_bytes();
++        let mut replacement = bytes.to_vec();
++        let before = replacement.capacity();
++        replacement.reserve(before + 31);
++        assert!(replacement.capacity() > before);
++        *bytes = replacement.into();
++        assert_eq!(bytes.retained_bytes(), charge);
+         assert_eq!(capacity, original);
+         assert!(oracle(&capacity, &original));
+         let changes: &[fn(&mut LogEntry)] = &[
+@@ -125,7 +129,9 @@ fn allocation_capacity_and_every_command_field_follow_content_equality() {
+                 let EntryPayload::Command { bytes, .. } = &mut e.payload else {
+                     unreachable!()
+                 };
+-                bytes.push(9);
++                let mut replacement = bytes.to_vec();
++                replacement.push(9);
++                *bytes = replacement.into();
+             },
+         ];
+         for change in changes {
+@@ -139,7 +145,9 @@ fn allocation_capacity_and_every_command_field_follow_content_equality() {
+             let EntryPayload::Command { bytes, .. } = &mut different.payload else {
+                 unreachable!()
+             };
+-            bytes[length - 1] ^= 1;
++            let mut replacement = bytes.to_vec();
++            replacement[length - 1] ^= 1;
++            *bytes = replacement.into();
+             assert!(!oracle(&different, &original));
+             assert_ne!(different, original);
+         }
+@@ -157,7 +165,7 @@ fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries()
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(u128::MAX).unwrap(),
+-                bytes: Vec::new(),
++                bytes: Vec::new().into(),
+             },
+         },
+         entry(2, 1, 7),
+@@ -179,7 +187,9 @@ fn full_store_equality_keeps_empty_nonempty_configuration_and_ordered_entries()
+             let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload else {
+                 unreachable!()
+             };
+-            bytes.push(7);
++            let mut replacement = bytes.to_vec();
++            replacement.push(7);
++            *bytes = replacement.into();
+         },
+         |s| s.entries.swap(0, 1),
+         |s| s.entries[2].payload = EntryPayload::Noop,
+diff --git a/tests/provider_conformance/log_store/matches.rs b/tests/provider_conformance/log_store/matches.rs
+index 997a007b..a7ec4576 100644
+--- a/tests/provider_conformance/log_store/matches.rs
++++ b/tests/provider_conformance/log_store/matches.rs
+@@ -10,7 +10,11 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
+     capacity.entries.reserve(100);
+     for entry in &mut capacity.entries {
+         if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
+-            bytes.reserve(100);
++            let charge = bytes.retained_bytes();
++            let mut replacement = bytes.to_vec();
++            replacement.reserve(100);
++            *bytes = replacement.into();
++            assert_eq!(bytes.retained_bytes(), charge);
+         }
+     }
+     assert_eq!(store.matches_state(actual_group, &capacity), Ok(true));
+@@ -49,7 +53,9 @@ pub(super) fn exact(store: &impl LogStore, state: &GroupLog) {
+         },
+         |s| {
+             if let EntryPayload::Command { bytes, .. } = &mut s.entries[0].payload {
+-                bytes[0] ^= 1;
++                let mut replacement = bytes.to_vec();
++                replacement[0] ^= 1;
++                *bytes = replacement.into();
+             }
+         },
+         |s| s.entries.swap(0, 1),
+diff --git a/tests/quic.rs b/tests/quic.rs
+index 53647d76..26519a30 100644
+--- a/tests/quic.rs
++++ b/tests/quic.rs
+@@ -368,7 +368,7 @@ fn native_framed_transport_retains_original_credits_until_exact_send_completion(
+                 term: 2,
+                 payload: voteboat::log::EntryPayload::Command {
+                     operation: OperationId::new(1).unwrap(),
+-                    bytes: vec![7; 4096],
++                    bytes: vec![7; 4096].into(),
+                 },
+             }],
+         },
+diff --git a/tests/raft.rs b/tests/raft.rs
+index 50019ddc..6f8772cf 100644
+--- a/tests/raft.rs
++++ b/tests/raft.rs
+@@ -163,7 +163,7 @@ impl<S: LogStore> Cluster<S> {
+         self.applied[&id]
+             .iter()
+             .filter_map(|e| match &e.payload {
+-                EntryPayload::Command { bytes, .. } => Some(bytes.clone()),
++                EntryPayload::Command { bytes, .. } => Some(bytes.to_vec()),
+                 _ => None,
+             })
+             .collect()
+@@ -646,7 +646,7 @@ fn persistence_driver_rejects_a_different_body_with_identical_ticket_metadata()
+     else {
+         unreachable!()
+     };
+-    *bytes = vec![2];
++    *bytes = vec![2].into();
+     let before = io.0.borrow().log.clone();
+     assert_eq!(
+         persist_effect(&mut replica.core, &mut replica.store, update),
+diff --git a/tests/reparent_guards/commit.rs b/tests/reparent_guards/commit.rs
+index 8c60df41..d493c832 100644
+--- a/tests/reparent_guards/commit.rs
++++ b/tests/reparent_guards/commit.rs
+@@ -959,7 +959,7 @@ fn check_recovered_publication(
+     else {
+         unreachable!()
+     };
+-    let receipt = commit(&mut app, if g == 1 { 400 } else { 401 }, bytes.clone());
++    let receipt = commit(&mut app, if g == 1 { 400 } else { 401 }, bytes.to_vec());
+     assert_eq!(receipt.duplicate, published);
+ }
+ 
+diff --git a/tests/retained_insertion/imported_partial.rs b/tests/retained_insertion/imported_partial.rs
+index 5f5aca8c..774ae452 100644
+--- a/tests/retained_insertion/imported_partial.rs
++++ b/tests/retained_insertion/imported_partial.rs
+@@ -431,7 +431,7 @@ fn activated_import_delegates_twice_keeps_retries_and_recovers_mixed_history() {
+                 &mut t,
+                 200,
+                 match &e.payload {
+-                    voteboat::log::EntryPayload::Command { bytes, .. } => bytes.clone(),
++                    voteboat::log::EntryPayload::Command { bytes, .. } => bytes.to_vec(),
+                     _ => unreachable!(),
+                 }
+             )
+diff --git a/tests/retained_insertion/metadata/imported.rs b/tests/retained_insertion/metadata/imported.rs
+index d7976462..61416f9e 100644
+--- a/tests/retained_insertion/metadata/imported.rs
++++ b/tests/retained_insertion/metadata/imported.rs
+@@ -468,7 +468,7 @@ fn imported_metadata_profiles_refuse_stale_partial_and_cross_profile_state() {
+             let EntryPayload::Command { bytes, .. } = &e.payload else {
+                 unreachable!()
+             };
+-            commit(&mut m.child, 200, bytes.clone());
++            commit(&mut m.child, 200, bytes.to_vec());
+             assert_eq!(m.child.grant(), &a.after());
+         }
+     }
+@@ -641,13 +641,13 @@ fn imported_metadata_adoption_and_retirement_journal_cuts_resume_exact_history()
+                 let EntryPayload::Command { operation, bytes } = &entry.payload else {
+                     unreachable!()
+                 };
+-                let outcome = commit(&mut guard, operation.get(), bytes.clone()).outcome;
++                let outcome = commit(&mut guard, operation.get(), bytes.to_vec()).outcome;
+                 let cp = guard.checkpoint(1000000).unwrap();
+                 let mut next = RetirementGuard::new(selected(&first, partial))
+                     .unwrap_or_else(|_| panic!("guard"));
+                 next.restore_checkpoint(RETIREMENT_GUARD_SCHEMA, guard.applied_index(), &cp)
+                     .unwrap();
+-                let retry = commit(&mut next, operation.get(), bytes.clone()).outcome;
++                let retry = commit(&mut next, operation.get(), bytes.to_vec()).outcome;
+                 match (outcome, retry) {
+                     (RetirementOutcome::Owner(a), RetirementOutcome::Owner(b)) => {
+                         assert_eq!(a.outcome, b.outcome)
+diff --git a/tests/routed.rs b/tests/routed.rs
+index 123559c5..8097352a 100644
+--- a/tests/routed.rs
++++ b/tests/routed.rs
+@@ -115,7 +115,7 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/tests/routed/metadata_endpoint_discovery/recovery.rs b/tests/routed/metadata_endpoint_discovery/recovery.rs
+index a91b43a5..8588a054 100644
+--- a/tests/routed/metadata_endpoint_discovery/recovery.rs
++++ b/tests/routed/metadata_endpoint_discovery/recovery.rs
+@@ -18,7 +18,7 @@ fn unknown(nodes: &mut [Node<Owner>], clock: &Instant, bytes: &[u8]) -> bool {
+         !core.has_pending_dependency()
+             && core.state().entries.iter().any(|entry| {
+                 matches!(&entry.payload, EntryPayload::Command { operation: id, bytes: payload }
+-                if *id == operation && payload == bytes && entry.index > core.state().commit_index)
++                if *id == operation && payload.as_slice() == bytes && entry.index > core.state().commit_index)
+             })
+     });
+     nodes[0].control(group(20), NodeControl::Campaign).unwrap();
+diff --git a/tests/routed/unread_phase.rs b/tests/routed/unread_phase.rs
+index ef427d74..b71fdf57 100644
+--- a/tests/routed/unread_phase.rs
++++ b/tests/routed/unread_phase.rs
+@@ -278,7 +278,7 @@ fn accepted_unknown_must_not_be_an_applied_unread_cut() {
+     let logs = creation::abandon(nodes, 1);
+     assert!(logs.values().all(|log| log.entries.iter().any(|e| matches!(
+         &e.payload, EntryPayload::Command { operation: id, bytes: payload }
+-            if *id == operation && payload == &bytes && e.index <= log.commit_index
++            if *id == operation && payload.as_slice() == bytes.as_slice() && e.index <= log.commit_index
+     ))));
+     let mut nodes = open(
+         configuration(&root, 1, &[1, 2, 3], NativeOpenMode::Recover),
+diff --git a/tests/scopes.rs b/tests/scopes.rs
+index 2b079423..b61dca0d 100644
+--- a/tests/scopes.rs
++++ b/tests/scopes.rs
+@@ -56,7 +56,7 @@ fn entry(index: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: op(id),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/tests/snapshot.rs b/tests/snapshot.rs
+index 4b6f7c15..f0fff793 100644
+--- a/tests/snapshot.rs
++++ b/tests/snapshot.rs
+@@ -43,7 +43,7 @@ fn command(index: u64, operation: u128, delta: i64) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(operation).unwrap(),
+-            bytes: delta.to_le_bytes().to_vec(),
++            bytes: delta.to_le_bytes().to_vec().into(),
+         },
+     }
+ }
+@@ -214,7 +214,7 @@ fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
+     let mut invalid_state = core.state().clone();
+     invalid_state.entries[3].payload = EntryPayload::Command {
+         operation: OperationId::new(3).unwrap(),
+-        bytes: vec![0],
++        bytes: vec![0].into(),
+     };
+     let bad_tail = Raft::recover(
+         node(1),
+diff --git a/tests/snapshot_exports/fixture.rs b/tests/snapshot_exports/fixture.rs
+index f6814736..1356475c 100644
+--- a/tests/snapshot_exports/fixture.rs
++++ b/tests/snapshot_exports/fixture.rs
+@@ -30,7 +30,7 @@ pub(super) fn committed(id: u128) -> (HostLogStore, Raft, Counter) {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(9).unwrap(),
+-            bytes: 7i64.to_le_bytes().to_vec(),
++            bytes: 7i64.to_le_bytes().to_vec().into(),
+         },
+     };
+     let mutation = update(
+@@ -76,7 +76,7 @@ impl Fixture {
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(19).unwrap(),
+-                    bytes: 7i64.to_le_bytes().to_vec(),
++                    bytes: 7i64.to_le_bytes().to_vec().into(),
+                 },
+             };
+             let mutation = update(
+@@ -173,7 +173,7 @@ fn append_suffix(
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(10).unwrap(),
+-            bytes: 1_i64.to_le_bytes().to_vec(),
++            bytes: 1_i64.to_le_bytes().to_vec().into(),
+         },
+     };
+     let mutation = update(
+diff --git a/tests/snapshot_routes/recovery_budget.rs b/tests/snapshot_routes/recovery_budget.rs
+index ea08ce4e..7fad9251 100644
+--- a/tests/snapshot_routes/recovery_budget.rs
++++ b/tests/snapshot_routes/recovery_budget.rs
+@@ -282,7 +282,7 @@ fn append(owner: &mut Owner, wal: &mut HostWorker, app: &mut Counter) {
+                         term: 1,
+                         payload: EntryPayload::Command {
+                             operation: OperationId::new(50).unwrap(),
+-                            bytes: 9i64.to_le_bytes().to_vec(),
++                            bytes: 9i64.to_le_bytes().to_vec().into(),
+                         },
+                     }],
+                 },
+diff --git a/tests/snapshot_worker.rs b/tests/snapshot_worker.rs
+index 8a6d9e35..ba96c113 100644
+--- a/tests/snapshot_worker.rs
++++ b/tests/snapshot_worker.rs
+@@ -45,7 +45,7 @@ fn image(g: u128) -> Snapshot {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(1).unwrap(),
+-            bytes: 7i64.to_le_bytes().to_vec(),
++            bytes: 7i64.to_le_bytes().to_vec().into(),
+         },
+     }])
+     .unwrap();
+@@ -235,7 +235,7 @@ fn checkpoint_source() -> (Raft, HostLogStore, Counter) {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(1).unwrap(),
+-            bytes: 7i64.to_le_bytes().to_vec(),
++            bytes: 7i64.to_le_bytes().to_vec().into(),
+         },
+     };
+     let mutation = update(
+@@ -710,7 +710,7 @@ mod native {
+             term: 1,
+             payload: EntryPayload::Command {
+                 operation: OperationId::new(1).unwrap(),
+-                bytes: 7i64.to_le_bytes().to_vec(),
++                bytes: 7i64.to_le_bytes().to_vec().into(),
+             },
+         };
+         let state = log.state(group(1)).unwrap();
+@@ -1108,7 +1108,7 @@ mod native {
+                 term: 1,
+                 payload: EntryPayload::Command {
+                     operation: OperationId::new(i as u128 + 1).unwrap(),
+-                    bytes: delta.to_le_bytes().to_vec(),
++                    bytes: delta.to_le_bytes().to_vec().into(),
+                 },
+             })
+             .collect::<Vec<_>>()
+@@ -1334,7 +1334,7 @@ mod native {
+                         term: 2,
+                         payload: EntryPayload::Command {
+                             operation: OperationId::new(1).unwrap(),
+-                            bytes: 7i64.to_le_bytes().to_vec(),
++                            bytes: 7i64.to_le_bytes().to_vec().into(),
+                         },
+                     }])
+                     .unwrap();
+diff --git a/tests/startup/log_limits/application.rs b/tests/startup/log_limits/application.rs
+index f4367bf8..816464ce 100644
+--- a/tests/startup/log_limits/application.rs
++++ b/tests/startup/log_limits/application.rs
+@@ -31,7 +31,7 @@ fn entries(input: &[LogEntry]) -> Result<Vec<LogEntry>, ApplicationError> {
+         .map(|original| {
+             let mut entry = original.clone();
+             if let EntryPayload::Command { bytes, .. } = &mut entry.payload {
+-                *bytes = canonical(bytes)?.to_vec();
++                *bytes = canonical(bytes)?.into();
+             }
+             Ok(entry)
+         })
+diff --git a/tests/striped_log_store.rs b/tests/striped_log_store.rs
+index f50cc2d8..34763542 100644
+--- a/tests/striped_log_store.rs
++++ b/tests/striped_log_store.rs
+@@ -49,7 +49,7 @@ fn add(store: &mut impl LogStore, value: u8, commit: bool) -> Vec<LogTicket> {
+     let index = s.last_index() + 1;
+     let mut e = entry(index, 1, value);
+     if let EntryPayload::Command { bytes, .. } = &mut e.payload {
+-        *bytes = vec![value; 1300];
++        *bytes = vec![value; 1300].into();
+     }
+     store
+         .append_batch(vec![update(
+diff --git a/tests/striped_log_store/faults.rs b/tests/striped_log_store/faults.rs
+index cbc665a3..40f88efc 100644
+--- a/tests/striped_log_store/faults.rs
++++ b/tests/striped_log_store/faults.rs
+@@ -17,7 +17,7 @@ fn mutation(store: &impl LogStore) -> Vec<LogMutation> {
+     let s = store.state(group(1)).unwrap();
+     let mut e = entry(1, 1, 17);
+     if let EntryPayload::Command { bytes, .. } = &mut e.payload {
+-        *bytes = vec![17; 1300];
++        *bytes = vec![17; 1300].into();
+     }
+     vec![update(
+         &s,
+diff --git a/tests/support/mod.rs b/tests/support/mod.rs
+index 414ce8f6..994617e1 100644
+--- a/tests/support/mod.rs
++++ b/tests/support/mod.rs
+@@ -76,7 +76,7 @@ pub fn entry(index: u64, term: u64, value: u8) -> LogEntry {
+         term,
+         payload: EntryPayload::Command {
+             operation: OperationId::new(index as u128 + 100).unwrap(),
+-            bytes: vec![value],
++            bytes: vec![value].into(),
+         },
+     }
+ }
+diff --git a/tests/support/peer_receive_fairness.rs b/tests/support/peer_receive_fairness.rs
+index 14fc74cd..d75f4f8b 100644
+--- a/tests/support/peer_receive_fairness.rs
++++ b/tests/support/peer_receive_fairness.rs
+@@ -34,7 +34,7 @@ fn frame(f: &Fixture, peer: u64, class: MessageClass) -> ReceivedBatch {
+                         term: 1,
+                         payload: EntryPayload::Command {
+                             operation: OperationId::new(u128::from(peer * 10 + offset)).unwrap(),
+-                            bytes: 1i64.to_le_bytes().to_vec(),
++                            bytes: 1i64.to_le_bytes().to_vec().into(),
+                         },
+                     }],
+                 },
+diff --git a/tests/support/retirement_storage.rs b/tests/support/retirement_storage.rs
+index e87c7552..3c02d82b 100644
+--- a/tests/support/retirement_storage.rs
++++ b/tests/support/retirement_storage.rs
+@@ -28,7 +28,7 @@ fn entry(index: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: voteboat::identity::OperationId::new(id).unwrap(),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/tests/transaction_application.rs b/tests/transaction_application.rs
+index bdde97a8..5cecf2d8 100644
+--- a/tests/transaction_application.rs
++++ b/tests/transaction_application.rs
+@@ -125,7 +125,7 @@ fn start(index: u64, request: TransferSpec) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: request.phases().coordinator()[0],
+-            bytes: TransferApplication::start(request).unwrap(),
++            bytes: TransferApplication::start(request).unwrap().into(),
+         },
+     }
+ }
+@@ -289,7 +289,9 @@ fn public_failed_batches_and_restores_preserve_original_application() {
+     let EntryPayload::Command { bytes, .. } = &mut malformed.payload else {
+         unreachable!();
+     };
+-    bytes.push(0);
++    let mut replacement = bytes.to_vec();
++    replacement.push(0);
++    *bytes = replacement.into();
+     assert!(app
+         .apply_batch(&[start(1, spec(1, 5, false)), malformed])
+         .is_err());
+diff --git a/tests/transfer_source/fixtures.rs b/tests/transfer_source/fixtures.rs
+index 15535a78..fc9c720f 100644
+--- a/tests/transfer_source/fixtures.rs
++++ b/tests/transfer_source/fixtures.rs
+@@ -140,7 +140,7 @@ pub fn entry(index: u64, id: u128, bytes: Vec<u8>) -> LogEntry {
+         term: 1,
+         payload: EntryPayload::Command {
+             operation: op(id),
+-            bytes,
++            bytes: bytes.into(),
+         },
+     }
+ }
+diff --git a/tests/wire.rs b/tests/wire.rs
+index ba513cbf..745acdb0 100644
+--- a/tests/wire.rs
++++ b/tests/wire.rs
+@@ -488,7 +488,9 @@ mod native {
+         let EntryPayload::Command { bytes, .. } = &mut entries[0].payload else {
+             panic!()
+         };
+-        bytes.extend([1, 2, 3]);
++        let mut replacement = bytes.to_vec();
++        replacement.extend([1, 2, 3]);
++        *bytes = replacement.into();
+         assert_eq!(
+             short_command.encode_batch(scope(), &[larger.clone()]),
+             Err(WireError::TooLarge)
+diff --git a/docs/COMMAND_BYTES.md b/docs/COMMAND_BYTES.md
+new file mode 100644
+index 00000000..b5b3060c
+--- /dev/null
++++ b/docs/COMMAND_BYTES.md
+@@ -0,0 +1,58 @@
++# Immutable command bytes
++
++`log::CommandBytes` is the common owned value for `EntryPayload::Command.bytes`.
++Construct it from an owned `Vec<u8>` or a borrowed byte slice. Nonempty content
++is captured into immutable shared backing; clones retain that backing. Empty
++values own no allocation. The value exposes slice reads, `AsRef<[u8]>`, `Deref`
++and `to_vec()` for an independent mutable copy. Replace the whole value to change
++a command. No mutable slice, underlying Arc, pool or runtime is exposed.
++
++```rust
++use voteboat::log::{CommandBytes, EntryPayload};
++
++let original: CommandBytes = vec![1, 2, 3].into();
++let shared = original.clone();
++let mut edited = shared.to_vec();
++edited[0] = 9;
++let replacement: CommandBytes = edited.into();
++assert_eq!(original.as_slice(), &[1, 2, 3]);
++assert_ne!(original, replacement);
++let _payload = EntryPayload::Command {
++    operation: voteboat::identity::OperationId::new(1).unwrap(),
++    bytes: original,
++};
++```
++
++Equality remains byte-exact. Identical immutable backing can compare directly;
++independent allocations compare their full content. Operation IDs, indices,
++terms, configuration, snapshots and other effect fields retain their separate
++exact checks. Sharing content grants no durability, quorum or generation
++permission. Altered persistence effects are still rejected by exact preflight.
++
++Retained accounting charges every owner conservatively: empty content is zero;
++nonempty content is its length plus two `usize` shared-control words. The charge
++excludes the inline value already included in `size_of::<LogEntry>()`. Every
++retained clone is charged the full amount; sharing never discounts a component's
++credits. Dropping an owner releases only its reference, so queued work can retain
++content after log reclamation while staying within its own existing bounds.
++
++`Proposal.bytes` remains a raw Vec. Batch admission preserves its existing
++role/count/allocated-count/index/length/staging checks, then bounds the temporary
++source-Vec plus shared-allocation conversion peak before capture. Conversion-peak
++refusal happens before accepted work and is an explicit staging-budget refusal.
++Legacy single proposals keep their existing checks and do not acquire the batch
++ceiling; their one-command conversion allocation is bounded by command length.
++The immutable log value has no mutable spare capacity. Entry Vec capacity still
++counts and normalizes under the log contract.
++
++Wire and WAL command tags, IDs, lengths and bytes retain their formats. Decoders
++validate the existing length/truncation/error order, charge the shared allocation
++before allocating, and capture directly from the validated slice. Encoded byte
++length and retained-memory charge are different quantities. Provider counting,
++configuration footprints and decoder memory limits must agree on the latter.
++
++This changes Rust command construction and mutation syntax, not persistent or
++wire compatibility. Log stores and applications use the same domain value;
++provider selection, tickets, retry, fencing, ordered application and every
++original outcome remain controlled by their existing contracts. Actual layout,
++qualification and performance evidence are recorded separately in docs/P9.md.
+diff --git a/src/log/command_bytes.rs b/src/log/command_bytes.rs
+new file mode 100644
+index 00000000..6f277d90
+--- /dev/null
++++ b/src/log/command_bytes.rs
+@@ -0,0 +1,77 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Immutable command content with conservative per-owner retained accounting.
++use std::{fmt, ops::Deref, sync::Arc};
++
++/// Immutable replicated command bytes. Empty values own no allocation.
++///
++/// Clones share nonempty backing, without exposing its Arc or mutable contents.
++/// Replace a value to edit a command; ownership and persistence gates still
++/// validate the full operation, headers and content. Retained accounting charges
++/// the complete content and shared header independently for every retained clone.
++#[derive(Clone, Default)]
++pub struct CommandBytes(Option<Arc<[u8]>>);
++
++impl CommandBytes {
++    pub fn as_slice(&self) -> &[u8] {
++        self.0.as_deref().unwrap_or(&[])
++    }
++    /// Make an independent mutable copy; it cannot change this value or clones.
++    pub fn to_vec(&self) -> Vec<u8> {
++        self.as_slice().to_vec()
++    }
++    /// Conservative retained charge, excluding the inline command value.
++    pub fn retained_bytes(&self) -> usize {
++        Self::retained_bytes_for_len(self.len()).expect("allocated command charge fits usize")
++    }
++    pub(crate) fn retained_bytes_for_len(len: usize) -> Option<usize> {
++        if len == 0 {
++            Some(0)
++        } else {
++            len.checked_add(2 * std::mem::size_of::<usize>())
++        }
++    }
++}
++impl From<Vec<u8>> for CommandBytes {
++    fn from(bytes: Vec<u8>) -> Self {
++        Self::from(bytes.as_slice())
++    }
++}
++impl From<&[u8]> for CommandBytes {
++    fn from(bytes: &[u8]) -> Self {
++        if bytes.is_empty() {
++            Self(None)
++        } else {
++            Self(Some(Arc::from(bytes)))
++        }
++    }
++}
++impl AsRef<[u8]> for CommandBytes {
++    fn as_ref(&self) -> &[u8] {
++        self.as_slice()
++    }
++}
++impl Deref for CommandBytes {
++    type Target = [u8];
++    fn deref(&self) -> &Self::Target {
++        self.as_slice()
++    }
++}
++impl fmt::Debug for CommandBytes {
++    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
++        self.as_slice().fmt(formatter)
++    }
++}
++impl PartialEq for CommandBytes {
++    fn eq(&self, other: &Self) -> bool {
++        match (&self.0, &other.0) {
++            (None, None) => true,
++            (Some(left), Some(right)) => Arc::ptr_eq(left, right) || left == right,
++            (None, Some(_)) | (Some(_), None) => false,
++        }
++    }
++}
++impl Eq for CommandBytes {}
++
++#[cfg(test)]
++mod tests;
+diff --git a/src/log/command_bytes/tests.rs b/src/log/command_bytes/tests.rs
+new file mode 100644
+index 00000000..64767f8f
+--- /dev/null
++++ b/src/log/command_bytes/tests.rs
+@@ -0,0 +1,219 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++use super::*;
++use crate::{
++    identity::OperationId,
++    log::{EntryPayload, LogEntry},
++};
++
++#[test]
++fn empty_values_normalize_without_backing_or_charge() {
++    let mut spare = Vec::with_capacity(4096);
++    spare.clear();
++    for value in [CommandBytes::default(), spare.into(), (&[][..]).into()] {
++        assert!(value.0.is_none());
++        assert!(value.clone().0.is_none());
++        assert_eq!(value.retained_bytes(), 0);
++        assert_eq!(format!("{value:?}"), "[]");
++        assert_eq!(value.as_ref(), &[]);
++    }
++}
++#[test]
++fn shared_content_survives_other_owners_and_mutable_copies_are_independent() {
++    let value = CommandBytes::from(vec![1, 2, 3]);
++    let shared = value.clone();
++    assert_eq!(value.as_ptr(), shared.as_ptr());
++    let weak = Arc::downgrade(value.0.as_ref().unwrap());
++    let mut mutable = value.to_vec();
++    mutable[0] = 9;
++    let replacement = CommandBytes::from(mutable);
++    assert_ne!(replacement, value);
++    drop(value);
++    assert_eq!(shared.as_slice(), &[1, 2, 3]);
++    assert!(weak.upgrade().is_some());
++    drop(shared);
++    assert!(weak.upgrade().is_none());
++    assert_eq!(replacement.as_slice(), &[9, 2, 3]);
++}
++#[test]
++fn independent_buffers_compare_full_contents_and_all_original_fields() {
++    let left = CommandBytes::from(vec![1, 2, 3]);
++    let right = CommandBytes::from(&[1, 2, 3][..]);
++    assert_ne!(left.as_ptr(), right.as_ptr());
++    assert_eq!(left, right);
++    assert_ne!(left, CommandBytes::from(vec![1, 2, 4]));
++    assert_ne!(left, CommandBytes::from(vec![1, 2]));
++    let entry = LogEntry {
++        index: 37,
++        term: 19,
++        payload: EntryPayload::Command {
++            operation: OperationId::new(u128::MAX).unwrap(),
++            bytes: left,
++        },
++    };
++    let mut altered = entry.clone();
++    assert_eq!(entry, altered);
++    let EntryPayload::Command {
++        operation,
++        bytes: _,
++    } = &mut altered.payload
++    else {
++        unreachable!()
++    };
++    *operation = OperationId::new(u128::MAX ^ (1 << 96)).unwrap();
++    assert_ne!(entry, altered);
++    let EntryPayload::Command {
++        operation,
++        bytes: _,
++    } = &mut altered.payload
++    else {
++        unreachable!()
++    };
++    *operation = OperationId::new(u128::MAX).unwrap();
++    let EntryPayload::Command {
++        operation: _,
++        bytes,
++    } = &mut altered.payload
++    else {
++        unreachable!()
++    };
++    *bytes = CommandBytes::from(vec![1, 2, 4]);
++    assert_ne!(entry, altered);
++}
++#[test]
++fn every_nonempty_retained_clone_is_charged_without_sharing_discount() {
++    let value = CommandBytes::from(vec![7; 37]);
++    let charge = 37 + 2 * std::mem::size_of::<usize>();
++    assert_eq!(value.retained_bytes(), charge);
++    assert_eq!(value.clone().retained_bytes(), charge);
++    assert_eq!(CommandBytes::retained_bytes_for_len(0), Some(0));
++    assert_eq!(CommandBytes::retained_bytes_for_len(usize::MAX), None);
++    assert_eq!(
++        CommandBytes::retained_bytes_for_len(usize::MAX - 2 * std::mem::size_of::<usize>()),
++        Some(usize::MAX)
++    );
++}
++#[test]
++fn current_and_legacy_representation_layouts_are_diagnostic_only() {
++    enum LegacyPayload {
++        Noop,
++        Configuration(Box<crate::membership::ConfigurationRecord>),
++        Command {
++            operation: OperationId,
++            bytes: Vec<u8>,
++        },
++    }
++    struct LegacyEntry {
++        index: u64,
++        term: u64,
++        payload: LegacyPayload,
++    }
++    let operation = OperationId::new(1).unwrap();
++    let record = crate::membership::ConfigurationRecord {
++        operation,
++        expected: crate::identity::ConfigurationId::new(1).unwrap(),
++        change: crate::membership::ConfigurationChange::Final {
++            id: crate::identity::ConfigurationId::new(2).unwrap(),
++        },
++    };
++    let replicas = [
++        LegacyPayload::Noop,
++        LegacyPayload::Configuration(Box::new(record)),
++        LegacyPayload::Command {
++            operation,
++            bytes: vec![1],
++        },
++    ];
++    let mut diagnostic_fields = 0u128;
++    for payload in replicas {
++        let entry = LegacyEntry {
++            index: 1,
++            term: 2,
++            payload,
++        };
++        diagnostic_fields += u128::from(entry.index + entry.term)
++            + match entry.payload {
++                LegacyPayload::Noop => 0,
++                LegacyPayload::Configuration(record) => record.operation.get(),
++                LegacyPayload::Command { operation, bytes } => {
++                    operation.get() + bytes.len() as u128
++                }
++            };
++    }
++    println!("scope=dev_current_vs_literal_legacy_representation_not_published_ELF CommandBytes={} OptionArcSlice={} EntryPayload={} LogEntry={} legacyVec={} legacyPayload={} legacyEntry={} sharedHeaderCharge={} legacyFixtureFieldRead={}", std::mem::size_of::<CommandBytes>(), std::mem::size_of::<Option<Arc<[u8]>>>(), std::mem::size_of::<EntryPayload>(), std::mem::size_of::<LogEntry>(), std::mem::size_of::<Vec<u8>>(), std::mem::size_of::<LegacyPayload>(), std::mem::size_of::<LegacyEntry>(), 2 * std::mem::size_of::<usize>(), diagnostic_fields);
++}
++
++#[test]
++fn historical_checkpoint_command_at_batch_limit_decodes_and_recovers_unchanged() {
++    use crate::{
++        contracts::HardState,
++        identity::*,
++        log::*,
++        log_format::{LogCodec, NativeLogCodec},
++        quorum::{Limits, Policy, Tree},
++        raft::Raft,
++    };
++    use std::collections::BTreeMap;
++    let node = NodeId::new(1).unwrap();
++    let store = StoreIdentity {
++        id: StoreId::new(1).unwrap(),
++        incarnation: StoreIncarnation::new(1).unwrap(),
++    };
++    let group = GroupIdentity {
++        id: GroupId::new(1).unwrap(),
++        incarnation: GroupIncarnation::new(1).unwrap(),
++    };
++    let bootstrap = Bootstrap {
++        group,
++        configuration: ConfigurationId::new(1).unwrap(),
++        policy: Policy::new(Tree::Majority(vec![Tree::Voter(node)]), Limits::default()).unwrap(),
++        voter_stores: BTreeMap::from([(node, store)]),
++    };
++    let limits = LogLimits {
++        max_command_bytes: 256,
++        max_batch_bytes: 256,
++        ..LogLimits::default()
++    };
++    let mut states = BTreeMap::new();
++    apply_batch(&mut states, &[LogMutation::Create(bootstrap)], limits).unwrap();
++    let state = states.get_mut(&group).unwrap();
++    state.hard_state = HardState {
++        term: 1,
++        voted_for: None,
++    };
++    state.revision = LogRevision::new(2).unwrap();
++    state.commit_index = 1;
++    state.entries.push(LogEntry {
++        index: 1,
++        term: 1,
++        payload: EntryPayload::Command {
++            operation: OperationId::new(u128::MAX).unwrap(),
++            bytes: vec![37; 256].into(),
++        },
++    });
++    let encoded = NativeLogCodec
++        .encode_checkpoint(7, &states, limits, limits.max_wal_bytes)
++        .unwrap();
++    assert!(encoded.len() > limits.max_batch_bytes);
++    let (sequence, decoded, used) = NativeLogCodec.decode_checkpoint(&encoded, limits).unwrap();
++    assert_eq!(sequence, 7);
++    assert_eq!(used, encoded.len());
++    assert_eq!(decoded, states);
++    assert_eq!(
++        NativeLogCodec
++            .encode_checkpoint(7, &decoded, limits, limits.max_wal_bytes)
++            .unwrap(),
++        encoded
++    );
++    let recovered = Raft::recover(
++        node,
++        StoreBinding {
++            identity: store,
++            session: StoreSession::new(1).unwrap(),
++        },
++        decoded[&group].clone(),
++        limits,
++    )
++    .unwrap();
++    assert_eq!(recovered.state(), &states[&group]);
++}
+diff --git a/tests/provider_conformance/log_store/command_bytes.rs b/tests/provider_conformance/log_store/command_bytes.rs
+new file mode 100644
+index 00000000..0256acc9
+--- /dev/null
++++ b/tests/provider_conformance/log_store/command_bytes.rs
+@@ -0,0 +1,114 @@
++// SPDX-License-Identifier: RPL-1.5
++// Copyright (c) 2026 Karl Livesey
++//! Downstream immutable command ownership and complete-content contracts.
++use super::*;
++
++#[test]
++fn construction_reads_and_default_expose_exact_content() {
++    fn public_traits<T: Clone + Eq + std::fmt::Debug + Send + Sync>() {}
++    public_traits::<CommandBytes>();
++    let input = [0, 1, 127, 255];
++    for bytes in [CommandBytes::from(input.as_slice()), input.to_vec().into()] {
++        assert_eq!(bytes.as_slice(), input);
++        assert_eq!(AsRef::<[u8]>::as_ref(&bytes), input);
++        assert_eq!(&*bytes, &input);
++        assert_eq!(format!("{bytes:?}"), format!("{input:?}"));
++        assert_eq!(bytes.to_vec(), input);
++    }
++    for empty in [
++        CommandBytes::default(),
++        Vec::with_capacity(31).into(),
++        (&[][..]).into(),
++    ] {
++        assert!(empty.is_empty());
++        assert_eq!(empty, CommandBytes::default());
++        assert_eq!(empty.retained_bytes(), 0);
++    }
++}
++
++#[test]
++fn shared_clone_survives_source_drop_and_replacement_is_independent() {
++    let original = CommandBytes::from(vec![1, 2, 3]);
++    let clone = original.clone();
++    assert_eq!(original.as_ptr(), clone.as_ptr());
++    let mut mutable = clone.to_vec();
++    mutable[1] = 7;
++    mutable.push(255);
++    assert_eq!(original.as_slice(), &[1, 2, 3]);
++    assert_eq!(clone.as_slice(), &[1, 2, 3]);
++    let replaced: CommandBytes = mutable.into();
++    assert_eq!(replaced.as_slice(), &[1, 7, 3, 255]);
++    assert_ne!(replaced, clone);
++    drop(original);
++    assert_eq!(clone.as_slice(), &[1, 2, 3]);
++    drop(clone);
++    assert_eq!(replaced.as_slice(), &[1, 7, 3, 255]);
++}
++
++#[test]
++fn independent_content_and_complete_entry_fields_determine_equality() {
++    let left = CommandBytes::from(vec![1, 2, 255]);
++    let equal = CommandBytes::from([1, 2, 255].as_slice());
++    assert_ne!(left.as_ptr(), equal.as_ptr());
++    assert_eq!(left, equal);
++    for different in [&[1, 2][..], &[1, 2, 254][..], &[][..]] {
++        assert_ne!(left, CommandBytes::from(different));
++    }
++    let original = LogEntry {
++        index: u64::MAX,
++        term: 7,
++        payload: EntryPayload::Command {
++            operation: OperationId::new((1 << 127) | 7).unwrap(),
++            bytes: left,
++        },
++    };
++    let mut independent = original.clone();
++    let EntryPayload::Command { bytes, .. } = &mut independent.payload else {
++        unreachable!()
++    };
++    *bytes = equal;
++    assert_eq!(original, independent);
++    let changes: &[fn(&mut LogEntry)] = &[
++        |e| e.index -= 1,
++        |e| e.term += 1,
++        |e| {
++            let EntryPayload::Command { operation, .. } = &mut e.payload else {
++                unreachable!()
++            };
++            *operation = OperationId::new(7).unwrap();
++        },
++        |e| {
++            let EntryPayload::Command { bytes, .. } = &mut e.payload else {
++                unreachable!()
++            };
++            *bytes = vec![1, 2, 254].into();
++        },
++    ];
++    for change in changes {
++        let mut altered = independent.clone();
++        change(&mut altered);
++        assert_ne!(original, altered);
++        assert_eq!(original.index, u64::MAX);
++        assert_eq!(original.term, 7);
++    }
++}
++
++#[test]
++fn every_retained_clone_is_charged_without_source_spare_capacity() {
++    let mut input = Vec::with_capacity(257);
++    input.extend([1, 2, 3]);
++    assert!(input.capacity() > input.len());
++    let bytes: CommandBytes = input.into();
++    let charge = 3 + 2 * std::mem::size_of::<usize>();
++    assert_eq!(bytes.retained_bytes(), charge);
++    let clones = [bytes.clone(), bytes.clone(), bytes.clone()];
++    assert_eq!(
++        clones
++            .iter()
++            .map(CommandBytes::retained_bytes)
++            .sum::<usize>(),
++        3 * charge
++    );
++    assert!(clones.iter().all(|clone| clone.as_ptr() == bytes.as_ptr()));
++    assert_eq!(CommandBytes::default().clone().retained_bytes(), 0);
++}

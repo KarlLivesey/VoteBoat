@@ -1,0 +1,11 @@
+
+running 6 tests
+test raft::membership_tests::owned_appends::configuration_payload_always_clones_and_preserves_full_membership ... ok
+test raft::membership_tests::owned_appends::failed_ownership_fences_without_install_and_restart_retries_original ... ok
+test raft::membership_tests::owned_appends::matching_prefix_clones_only_the_unmatched_suffix_and_replay_has_no_persist ... ok
+test raft::membership_tests::owned_appends::spare_outer_falls_back_and_command_input_capacity_is_normalized_at_capture ... ok
+test raft::membership_tests::owned_appends::tight_owned_append_matches_forced_clone_with_independent_delayed_completion ... ok
+test raft::membership_tests::owned_appends::uncommitted_rewrite_has_the_same_atomic_term_commit_and_reply_as_clone ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 404 filtered out; finished in 0.00s
+

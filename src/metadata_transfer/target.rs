@@ -309,7 +309,7 @@ impl MetadataAuthorityTarget {
         let outcome = if *operation != self.operation {
             MetadataTargetOutcome::Conflict
         } else if bytes.starts_with(b"VBMATB01") {
-            if *bytes != self.bootstrap_command(40)? {
+            if bytes.as_slice() != self.bootstrap_command(40)?.as_slice() {
                 return Err(ApplicationError::InvalidCommand);
             }
             let index = *self.staged.get_or_insert(entry.index);
@@ -318,7 +318,7 @@ impl MetadataAuthorityTarget {
             if self.staged.is_none() {
                 MetadataTargetOutcome::NotActive
             } else if let Some(i) = &self.imported {
-                if i.command == *bytes {
+                if i.command.as_slice() == bytes.as_slice() {
                     MetadataTargetOutcome::Imported(i.status)
                 } else {
                     MetadataTargetOutcome::Conflict
@@ -334,7 +334,7 @@ impl MetadataAuthorityTarget {
                     status,
                     image,
                     history,
-                    command: bytes.clone(),
+                    command: bytes.to_vec(),
                 });
                 MetadataTargetOutcome::Imported(status)
             }
@@ -444,7 +444,7 @@ impl ProposalAdmission for MetadataAuthorityTarget {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: op,
-                        bytes: bytes.to_vec(),
+                        bytes: bytes.into(),
                     },
                 })?
                 .unwrap();
@@ -538,7 +538,7 @@ impl CheckpointStateMachine for MetadataAuthorityTarget {
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: next.operation,
-                    bytes: next.bootstrap_command(40)?,
+                    bytes: next.bootstrap_command(40)?.into(),
                 },
             })?;
         }
@@ -550,7 +550,7 @@ impl CheckpointStateMachine for MetadataAuthorityTarget {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: next.operation,
-                        bytes: command.to_vec(),
+                        bytes: command.into(),
                     },
                 })?
                 .unwrap();

@@ -1,0 +1,11 @@
+
+running 1 test
+test log::command_bytes::tests::historical_checkpoint_command_at_batch_limit_decodes_and_recovers_unchanged ... FAILED
+
+failures:
+
+failures:
+    log::command_bytes::tests::historical_checkpoint_command_at_batch_limit_decodes_and_recovers_unchanged
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 409 filtered out; finished in 0.00s
+

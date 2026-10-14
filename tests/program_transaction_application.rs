@@ -55,7 +55,7 @@ fn start(index: u64, p: Program) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: p.operation(0).unwrap(),
-            bytes: ProgramApplication::start(p).unwrap(),
+            bytes: ProgramApplication::start(p).unwrap().into(),
         },
     }
 }

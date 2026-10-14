@@ -43,7 +43,7 @@ fn command(index: u64, operation: u128, delta: i64) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(operation).unwrap(),
-            bytes: delta.to_le_bytes().to_vec(),
+            bytes: delta.to_le_bytes().to_vec().into(),
         },
     }
 }
@@ -214,7 +214,7 @@ fn invalid_snapshot_binding_boundary_schema_or_tail_never_partly_restores() {
     let mut invalid_state = core.state().clone();
     invalid_state.entries[3].payload = EntryPayload::Command {
         operation: OperationId::new(3).unwrap(),
-        bytes: vec![0],
+        bytes: vec![0].into(),
     };
     let bad_tail = Raft::recover(
         node(1),

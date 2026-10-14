@@ -238,7 +238,7 @@ where
         let mut freeze = None;
         if let EntryPayload::Command { operation, bytes } = &entry.payload {
             let replacement = if bytes.starts_with(b"VBSROWN1") {
-                if bytes != &self.bootstrap_command(bytes.len())? {
+                if bytes.as_slice() != self.bootstrap_command(bytes.len())?.as_slice() {
                     return Err(ApplicationError::InvalidCommand);
                 }
                 self.routed.bootstrap_command(bytes.len())?
@@ -262,10 +262,10 @@ where
                     }
                     _ => return Err(ApplicationError::InvalidCommand), // No unbound bootstrap or fence bypass.
                 }
-                bytes.clone()
+                bytes.to_vec()
             };
             if let EntryPayload::Command { bytes, .. } = &mut next.payload {
-                *bytes = replacement;
+                *bytes = replacement.into();
             }
         }
         Ok((next, freeze))
@@ -413,7 +413,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: id,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 },
             };
             next.apply_batch(&[entry])?;
@@ -426,7 +426,7 @@ where
             term: 1,
             payload: EntryPayload::Command {
                 operation,
-                bytes: bytes.to_vec(),
+                bytes: bytes.into(),
             },
         };
         let (projected, _) = next.projected(&entry)?;

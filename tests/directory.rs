@@ -120,7 +120,7 @@ fn initialize(mut app: Directory) -> Directory {
             term: 1,
             payload: EntryPayload::Command {
                 operation: OperationId::new(1_000_000).unwrap(),
-                bytes,
+                bytes: bytes.into(),
             },
         }])
         .unwrap()[0];
@@ -150,7 +150,7 @@ fn entry(index: u64, operation: u128, bytes: Vec<u8>) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(operation).unwrap(),
-            bytes,
+            bytes: bytes.into(),
         },
     }
 }
@@ -1488,7 +1488,7 @@ fn committed_initialization_binds_the_full_plan_before_any_publication() {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(1_000_000).unwrap(),
-            bytes: bootstrap,
+            bytes: bootstrap.into(),
         },
     };
     assert_eq!(

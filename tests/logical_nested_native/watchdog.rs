@@ -175,7 +175,7 @@ fn original_prefix(
         let state = core.state();
         let exact = state.entry_at(position.index).is_some_and(|entry| {
             entry.term == position.term && matches!(&entry.payload,
-            EntryPayload::Command { operation, bytes: original } if *operation == attempt.ticket.operation && original == bytes)
+            EntryPayload::Command { operation, bytes: original } if *operation == attempt.ticket.operation && original.as_slice() == bytes)
         });
         if exact {
             mask |= 2 << (slot * 3);

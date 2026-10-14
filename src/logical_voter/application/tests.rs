@@ -82,7 +82,10 @@ fn entry(app: &LogicalApplication, c: &Command, index: u64) -> LogEntry {
         term: 1,
         payload: EntryPayload::Command {
             operation: c.operation,
-            bytes: app.encode_command(c, app.limits.max_command_bytes).unwrap(),
+            bytes: app
+                .encode_command(c, app.limits.max_command_bytes)
+                .unwrap()
+                .into(),
         },
     }
 }
@@ -209,7 +212,7 @@ fn batch_conflict_and_malformed_suffix_are_atomic() {
         term: 1,
         payload: EntryPayload::Command {
             operation: OperationId::new(3).unwrap(),
-            bytes: vec![0],
+            bytes: vec![0].into(),
         },
     };
     assert_eq!(
@@ -307,7 +310,7 @@ fn control_reserve_and_pending_content_are_enforced() {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(101).unwrap(),
-                        bytes: vec![1],
+                        bytes: vec![1].into(),
                     },
                 }],
             }),
@@ -332,7 +335,7 @@ fn control_reserve_and_pending_content_are_enforced() {
                     term: 1,
                     payload: EntryPayload::Command {
                         operation: OperationId::new(102).unwrap(),
-                        bytes: vec![2],
+                        bytes: vec![2].into(),
                     },
                 }],
             }),

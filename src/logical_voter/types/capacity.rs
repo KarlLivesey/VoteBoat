@@ -116,7 +116,7 @@ fn coherent_checkpoint_restores_the_original_command_and_duplicate_receipt() {
         term: 1,
         payload: EntryPayload::Command {
             operation: command.operation,
-            bytes: bytes.clone(),
+            bytes: bytes.clone().into(),
         },
     };
     let first = app.apply_batch(&[entry(1)]).unwrap().remove(0);

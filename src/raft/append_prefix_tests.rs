@@ -149,7 +149,7 @@ fn command_byte_prefix_keeps_full_ids_and_first_oversize_error_before_context() 
         .into_iter()
         .map(|id| EntryPayload::Command {
             operation: OperationId::new(id).unwrap(),
-            bytes: vec![0, 255, 7],
+            bytes: vec![0, 255, 7].into(),
         })
         .collect::<Vec<_>>();
     for count in [1, 64, 1024] {
@@ -190,11 +190,11 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
         vec![
             EntryPayload::Command {
                 operation: OperationId::new(u128::MAX).unwrap(),
-                bytes: Vec::new(),
+                bytes: Vec::new().into(),
             },
             EntryPayload::Command {
                 operation: OperationId::new((1 << 127) | 9).unwrap(),
-                bytes: vec![1, 2, 3],
+                bytes: vec![1, 2, 3].into(),
             },
             EntryPayload::Configuration(Box::new(ConfigurationRecord {
                 operation: OperationId::new(17).unwrap(),
@@ -207,7 +207,9 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
         LogLimits::default().max_batch_bytes,
     );
     if let EntryPayload::Command { bytes, .. } = &mut core.durable.entries[2].payload {
-        bytes.reserve(257);
+        let mut raw = bytes.to_vec();
+        raw.reserve(257);
+        *bytes = raw.into();
     }
     let state = core.state().clone();
     let mut entries = differential(&mut core);
@@ -221,10 +223,11 @@ fn full_configuration_and_nonempty_payload_copy_owns_independent_storage() {
     else {
         unreachable!()
     };
-    assert_ne!(bytes.as_ptr(), original.as_ptr());
-    assert_eq!(bytes.capacity(), bytes.len());
-    assert!(original.capacity() > bytes.capacity());
-    bytes[0] = 99;
+    assert_eq!(bytes.as_ptr(), original.as_ptr());
+    assert_eq!(bytes.retained_bytes(), original.retained_bytes());
+    let mut replacement = bytes.to_vec();
+    replacement[0] = 99;
+    *bytes = replacement.into();
     let EntryPayload::Configuration(copy) = &mut entries[2].payload else {
         unreachable!()
     };

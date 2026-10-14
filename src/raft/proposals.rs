@@ -41,6 +41,7 @@ impl Raft {
         self.begin_step()?;
         self.check_proposal_role()?;
         let first = self.validate_proposal_batch(&proposals, proposals.capacity())?;
+        self.validate_conversion_peak(&proposals, proposals.capacity())?;
         let entries = proposals
             .into_iter()
             .enumerate()
@@ -49,7 +50,7 @@ impl Raft {
                 term: self.durable.hard_state.term,
                 payload: EntryPayload::Command {
                     operation: proposal.operation,
-                    bytes: proposal.bytes,
+                    bytes: proposal.bytes.into(),
                 },
             })
             .collect();
@@ -94,7 +95,10 @@ impl Raft {
         let entry = LogEntry {
             index,
             term: self.durable.hard_state.term,
-            payload: EntryPayload::Command { operation, bytes },
+            payload: EntryPayload::Command {
+                operation,
+                bytes: bytes.into(),
+            },
         };
         self.persist_proposal_entries(index, vec![entry])
     }
@@ -149,6 +153,34 @@ impl Raft {
             }
         }
         Ok(first)
+    }
+    fn validate_conversion_peak(
+        &self,
+        proposals: &[Proposal],
+        capacity: usize,
+    ) -> Result<(), RaftError> {
+        let staged = capacity
+            .checked_mul(size_of::<Proposal>())
+            .and_then(|n| n.checked_add(size_of::<Vec<Proposal>>()))
+            .and_then(|n| {
+                proposals
+                    .len()
+                    .checked_mul(size_of::<LogEntry>())
+                    .and_then(|entries| n.checked_add(entries))
+            })
+            .ok_or(RaftError::Exhausted)?;
+        let peak = proposals.iter().try_fold(staged, |sum, proposal| {
+            sum.checked_add(proposal.bytes.capacity())
+                .and_then(|n| {
+                    CommandBytes::retained_bytes_for_len(proposal.bytes.len())
+                        .and_then(|shared| n.checked_add(shared))
+                })
+                .ok_or(RaftError::Exhausted)
+        })?;
+        if peak > self.limits.max_batch_bytes {
+            return Err(StorageError::Rejected("proposal shared conversion peak budget").into());
+        }
+        Ok(())
     }
     fn persist_proposal_entries(
         &mut self,

@@ -19,10 +19,29 @@ pub(crate) fn crc32c(bytes: &[u8]) -> u32 {
 pub(crate) fn crc32c_extend(previous: u32, bytes: &[u8]) -> u32 {
     let mut crc = !previous;
     for byte in bytes {
-        crc ^= *byte as u32;
-        for _ in 0..8 {
-            crc = (crc >> 1) ^ (0x82f63b78 & 0u32.wrapping_sub(crc & 1));
-        }
+        let index = (crc as usize ^ usize::from(*byte)) & 0xff;
+        crc = (crc >> 8) ^ CRC32C_TABLE[index];
     }
     !crc
 }
+
+static CRC32C_TABLE: [u32; 256] = crc32c_table();
+
+const fn crc32c_table() -> [u32; 256] {
+    let mut table = [0; 256];
+    let mut index = 0;
+    while index < 256 {
+        let mut value = index as u32;
+        let mut bit = 0;
+        while bit < 8 {
+            value = (value >> 1) ^ (0x82f63b78 & 0u32.wrapping_sub(value & 1));
+            bit += 1;
+        }
+        table[index] = value;
+        index += 1;
+    }
+    table
+}
+
+#[cfg(test)]
+mod tests;

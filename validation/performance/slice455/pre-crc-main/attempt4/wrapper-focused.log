@@ -1,0 +1,11 @@
+
+running 5 tests
+test log::command_bytes::tests::current_and_legacy_representation_layouts_are_diagnostic_only ... scope=dev_current_vs_literal_legacy_representation_not_published_ELF CommandBytes=16 OptionArcSlice=16 EntryPayload=48 LogEntry=64 legacyVec=24 legacyPayload=48 legacyEntry=64 sharedHeaderCharge=16 legacyFixtureFieldRead=12
+ok
+test log::command_bytes::tests::empty_values_normalize_without_backing_or_charge ... ok
+test log::command_bytes::tests::every_nonempty_retained_clone_is_charged_without_sharing_discount ... ok
+test log::command_bytes::tests::independent_buffers_compare_full_contents_and_all_original_fields ... ok
+test log::command_bytes::tests::shared_content_survives_other_owners_and_mutable_copies_are_independent ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 403 filtered out; finished in 0.00s
+

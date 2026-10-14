@@ -426,7 +426,7 @@ where
             }
             let replacement = self.projected_command(operation, bytes)?;
             if let EntryPayload::Command { bytes, .. } = &mut projected.payload {
-                *bytes = replacement;
+                *bytes = replacement.into();
             }
         }
         Ok(projected)
@@ -1104,7 +1104,7 @@ where
                 term: 1,
                 payload: EntryPayload::Command {
                     operation: id,
-                    bytes: bytes.to_vec(),
+                    bytes: bytes.into(),
                 },
             };
             next.apply_batch(&[entry])?;
@@ -1120,7 +1120,7 @@ where
             term: 1,
             payload: EntryPayload::Command {
                 operation,
-                bytes: bytes.to_vec(),
+                bytes: bytes.into(),
             },
         };
         if bytes.starts_with(b"VBSADP01") || parent_command(bytes) {

@@ -43,7 +43,7 @@ fn entry(index: u64, term: u64) -> LogEntry {
         term,
         payload: EntryPayload::Command {
             operation: OperationId::new(index as u128).unwrap(),
-            bytes: vec![7; 8],
+            bytes: vec![7; 8].into(),
         },
     }
 }
@@ -135,7 +135,9 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
         .collect();
     let mut new = entry(3, 1);
     if let EntryPayload::Command { bytes, .. } = &mut new.payload {
-        bytes.reserve(10000);
+        let mut raw = bytes.to_vec();
+        raw.reserve(10000);
+        *bytes = raw.into();
     }
     let append = update(
         &state,
@@ -164,7 +166,11 @@ fn plain_install_keeps_old_payloads_and_normalizes_only_new_allocations() {
     let EntryPayload::Command { bytes, .. } = &state.entries[2].payload else {
         unreachable!()
     };
-    assert_eq!(bytes.capacity(), bytes.len());
+    assert_eq!(
+        bytes.retained_bytes(),
+        (bytes.len() + 2 * std::mem::size_of::<std::sync::atomic::AtomicUsize>())
+            .next_multiple_of(std::mem::align_of::<std::sync::atomic::AtomicUsize>().max(2))
+    );
     assert_eq!(summary, LogSummary::from_validated(&state));
     let commit = update(&state, 1, 3, None);
     let before = state.entries.as_ptr();

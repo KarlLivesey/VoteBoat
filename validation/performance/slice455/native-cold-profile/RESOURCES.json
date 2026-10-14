@@ -1,0 +1,13 @@
+{
+  "pid": 3657918,
+  "exit": 101,
+  "elapsed_seconds": 598.8308107859921,
+  "user_seconds": 556.520141,
+  "system_seconds": 5.327093,
+  "max_rss_kib_linux": 126512,
+  "voluntary_context_switches": 85040,
+  "involuntary_context_switches": 131920,
+  "block_inputs": 0,
+  "block_outputs": 488,
+  "scope": "Profiled debug functional test and its children; not native capacity qualification"
+}
